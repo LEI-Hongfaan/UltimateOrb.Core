@@ -1,0 +1,32 @@
+﻿<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ include file="../T4Includes/SourceLists.ttinclude" once="true" #>
+using System;
+
+namespace UltimateOrb {
+<# for (var i = 0; i <= 16; ++i) { #>
+
+    public readonly partial struct StandardFuncWrapperCatch<<# if (i > 0) { #><#= TypeParamList(i) #>, <# } #>TResult, TException>
+        : IFunc<<# if (i > 0) { #><#= TypeParamList(i) #>, <# } #>Exceptional<TResult, TException>>
+        where TException : Exception {
+
+        readonly StandardFuncWrapper<<# if (i > 0) { #><#= TypeParamList(i) #>, <# } #>TResult> funcWrapper;
+
+        public StandardFuncWrapperCatch(StandardFuncWrapper<<# if (i > 0) { #><#= TypeParamList(i) #>, <# } #>TResult> funcWrapper) => this.funcWrapper = funcWrapper;
+
+        public Exceptional<TResult, TException> Invoke(<#= ParamList(i) #>) {
+            try {
+                return funcWrapper.Invoke(<#= ArgList(i) #>);
+            } catch (TException ex) {
+                return ex;
+            }
+        }
+
+        public static implicit operator Func<<# if (i > 0) { #><#= TypeParamList(i) #>, <# } #>Exceptional<TResult, TException>>(StandardFuncWrapperCatch<<# if (i > 0) { #><#= TypeParamList(i) #>, <# } #>TResult, TException> value) => value.Invoke;
+
+        public TResult UncatchedInvoke(<#= ParamList(i) #>) => funcWrapper.Invoke(<#= ArgList(i) #>);
+
+        public static explicit operator Func<<# if (i > 0) { #><#= TypeParamList(i) #>, <# } #>TResult>(StandardFuncWrapperCatch<<# if (i > 0) { #><#= TypeParamList(i) #>, <# } #>TResult, TException> value) => value.UncatchedInvoke;
+    }
+<# } #>
+}

@@ -1,0 +1,123 @@
+﻿using FsCheck.Xunit;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+<#
+var sdf = new [] { "UInt64", "Int64?", "string", };
+for (int i = 0; i < sdf.Length; i++) {
+	var ty = sdf[i];
+#>
+
+namespace UltimateOrb.Core.Tests {
+    using static UltimateOrb.ConstructorTags;
+    using UltimateOrb.Typed_RefReturn_Wrapped_Huge.Collections.Generic;
+
+    public static partial class TestModule {
+
+        public static partial class ListTests_T<#= i #> {
+
+            [Property(MaxTest = 2, QuietOnSuccess = true)]
+            public static bool Null() {
+                List<<#= ty #>> list = default(List<<#= ty #>>);
+                try {
+                    var r = list.Capacity;
+                    // Performance requirement
+                    if (0 != r) {
+                        return false;
+                    }
+                } catch (NullReferenceException) {
+                }
+                try {
+                    var r = list.Count;
+                    if (0 != r) {
+                        return false;
+                    }
+                } catch (NullReferenceException) {
+                }
+                return true;
+            }
+
+            [Property(MaxTest = 2, QuietOnSuccess = true)]
+            public static bool Constructor_Default() {
+                List<<#= ty #>> list = new List<<#= ty #>>(_);
+                if (0 > list.Capacity) {
+                    return false;
+                }
+                if (0 != list.Count) {
+                    return false;
+                }
+                if (false != list.IsReadOnly) {
+                    return false;
+                }
+                return true;
+            }
+
+            [Property(MaxTest = 1000, QuietOnSuccess = true)]
+            public static bool Constructor_Capacity(uint a) {
+                var capacity = unchecked((int)(a % 30));
+                List<<#= ty #>> list = new List<<#= ty #>>(capacity);
+                if (0 > list.Capacity) {
+                    return false;
+                }
+                if (0 != list.Count) {
+                    return false;
+                }
+                if (false != list.IsReadOnly) {
+                    return false;
+                }
+                return true;
+            }
+
+
+            [Property(MaxTest = 1000, QuietOnSuccess = true)]
+            public static bool Constructor_NegativeCapacity_ThrowsArgumentOutOfRangeException(int a) {
+                var capacity = a % 10;
+                if (capacity >= 0) {
+                    capacity += int.MinValue;
+                }
+                try {
+                    var _ = new List<<#= ty #>>(capacity);
+                } catch (ArgumentException) {
+                    return true;
+                }
+                return false;
+            }
+
+            [Property(MaxTest = 1000, QuietOnSuccess = true)]
+            public static bool Constructor_IEnumerable(<#= ty #>[] enumerableD) {
+                if (null == enumerableD) {
+                    return true;
+                }
+                var enumerableLength = enumerableD.Length;
+                IEnumerable<<#= ty #>> enumerable = enumerableD;
+                List<<#= ty #>> list = new List<<#= ty #>>(enumerable);
+                var expected = enumerable.ToList();
+                if (enumerableLength != list.Count) {
+                    return false;
+                }
+                for (int i = 0; i < enumerableLength; i++) {
+                    if (0 != Microsoft.FSharp.Core.Operators.Compare(expected[i], list[i])) {
+                        return false;
+                    }
+                }
+                if (false != list.IsReadOnly) {
+                    return false;
+                }
+                return true;
+            }
+
+            [Property(MaxTest = 2, QuietOnSuccess = true)]
+            public static bool Constructo_NullIEnumerable_ThrowsArgumentNullException() {
+                try {
+                    var _ = new List<<#= ty #>>((IEnumerable<<#= ty #>>)null);
+                } catch (ArgumentNullException) {
+                    return true;
+                }
+                return false;
+            }
+        }
+    }
+}
+<#
+}
+#>

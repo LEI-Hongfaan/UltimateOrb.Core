@@ -1,0 +1,810 @@
+﻿
+using System;
+using System.Runtime.CompilerServices;
+
+<#
+var TS = new [] { "IntPtr", "UIntPtr" };
+
+foreach (var T in TS) {
+#>
+namespace UltimateOrb.Utilities {
+
+    public static partial class CilVerifiable {
+
+        #region Native Integer
+<#
+    if (T.ToUpperInvariant().StartsWith("U")) {
+#>
+        [CLSCompliantAttribute(false)]
+<#
+    }
+#>
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        [ILMethodBodyAttribute(@"
+            ldarg.0
+            ldarg.1
+            ceq
+            ret
+        ")]
+        public static bool Equals(<#= T #> first, <#= T #> second) {
+            throw null!;
+        }
+
+<#
+    if (T.ToUpperInvariant().StartsWith("U")) {
+#>
+        [CLSCompliantAttribute(false)]
+<#
+    }
+#>
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        [ILMethodBodyAttribute(@"
+            ldarg.0
+            ldarg.1
+            clt.un
+            ret
+        ")]
+        public static bool LessThanUnsigned(<#= T #> first, <#= T #> second) {
+            throw null!;
+        }
+
+<#
+    if (T.ToUpperInvariant().StartsWith("U")) {
+#>
+        [CLSCompliantAttribute(false)]
+<#
+    }
+#>
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        [ILMethodBodyAttribute(@"
+            ldarg.0
+            ldarg.1
+            clt
+            ret
+        ")]
+        public static bool LessThanSigned(<#= T #> first, <#= T #> second) {
+            throw null!;
+        }
+
+<#
+    if (T.ToUpperInvariant().StartsWith("U")) {
+#>
+        [CLSCompliantAttribute(false)]
+<#
+    }
+#>
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        [ILMethodBodyAttribute(@"
+            ldarg.0
+            ldarg.1
+            cgt.un
+            ldc.i4.0
+            ceq
+            ret
+        ")]
+        public static bool LessThanOrEqualUnsigned(<#= T #> first, <#= T #> second) {
+            throw null!;
+        }
+
+<#
+    if (T.ToUpperInvariant().StartsWith("U")) {
+#>
+        [CLSCompliantAttribute(false)]
+<#
+    }
+#>
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        [ILMethodBodyAttribute(@"
+            ldarg.0
+            ldarg.1
+            cgt
+            ldc.i4.0
+            ceq
+            ret
+        ")]
+        public static bool LessThanOrEqualSigned(<#= T #> first, <#= T #> second) {
+            throw null!;
+        }
+
+<#
+    if (T.ToUpperInvariant().StartsWith("U")) {
+#>
+        [CLSCompliantAttribute(false)]
+<#
+    }
+#>
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        [ILMethodBodyAttribute(@"
+            ldarg.0
+            ldarg.1
+            cgt.un
+            ret
+        ")]
+        public static bool GreaterThanUnsigned(<#= T #> first, <#= T #> second) {
+            throw null!;
+        }
+
+<#
+    if (T.ToUpperInvariant().StartsWith("U")) {
+#>
+        [CLSCompliantAttribute(false)]
+<#
+    }
+#>
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        [ILMethodBodyAttribute(@"
+            ldarg.0
+            ldarg.1
+            cgt
+            ret
+        ")]
+        public static bool GreaterThanSigned(<#= T #> first, <#= T #> second) {
+            throw null!;
+        }
+
+<#
+    if (T.ToUpperInvariant().StartsWith("U")) {
+#>
+        [CLSCompliantAttribute(false)]
+<#
+    }
+#>
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        [ILMethodBodyAttribute(@"
+            ldarg.0
+            ldarg.1
+            clt.un
+            ldc.i4.0
+            ceq
+            ret
+        ")]
+        public static bool GreaterThanOrEqualUnsinged(<#= T #> first, <#= T #> second) {
+            throw null!;
+        }
+
+<#
+    if (T.ToUpperInvariant().StartsWith("U")) {
+#>
+        [CLSCompliantAttribute(false)]
+<#
+    }
+#>
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        [ILMethodBodyAttribute(@"
+            ldarg.0
+            ldarg.1
+            clt
+            ldc.i4.0
+            ceq
+            ret
+        ")]
+        public static bool GreaterThanOrEqualSinged(<#= T #> first, <#= T #> second) {
+            throw null!;
+        }
+
+<#
+    if (T.ToUpperInvariant().StartsWith("U")) {
+#>
+        [CLSCompliantAttribute(false)]
+<#
+    }
+#>
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        [ILMethodBodyAttribute(@"
+            ldarg.0
+            neg
+            ret
+        ")]
+        public static <#= T #> NegateUnchecked(<#= T #> value) {
+            throw null!;
+        }
+
+<#
+    if (T.ToUpperInvariant().StartsWith("U")) {
+#>
+        [CLSCompliantAttribute(false)]
+<#
+    }
+#>
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        [ILMethodBodyAttribute(@"
+            ldc.i4.0
+            conv.i
+            ldarg.0
+            sub.ovf
+            ret
+        ")]
+        public static <#= T #> NegateSigned(<#= T #> value) {
+            throw null!;
+        }
+
+<#
+    if (T.ToUpperInvariant().StartsWith("U")) {
+#>
+        [CLSCompliantAttribute(false)]
+<#
+    }
+#>
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        [ILMethodBodyAttribute(@"
+            ldc.i4.0
+            conv.i
+            ldarg.0
+            sub.ovf.un
+            ret
+        ")]
+        public static <#= T #> NegateUnsigned(<#= T #> value) {
+            throw null!;
+        }
+
+<#
+    if (T.ToUpperInvariant().StartsWith("U")) {
+#>
+        [CLSCompliantAttribute(false)]
+<#
+    }
+#>
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        [ILMethodBodyAttribute(@"
+            ldarg.0
+            ldarg.1
+            add
+            ret
+        ")]
+        public static <#= T #> AddUnchecked(<#= T #> first, <#= T #> second) {
+            throw null!;
+        }
+
+<#
+    if (T.ToUpperInvariant().StartsWith("U")) {
+#>
+        [CLSCompliantAttribute(false)]
+<#
+    }
+#>
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        [ILMethodBodyAttribute(@"
+            ldarg.0
+            ldarg.1
+            add.ovf
+            ret
+        ")]
+        public static <#= T #> AddSigned(<#= T #> first, <#= T #> second) {
+            throw null!;
+        }
+
+<#
+    if (T.ToUpperInvariant().StartsWith("U")) {
+#>
+        [CLSCompliantAttribute(false)]
+<#
+    }
+#>
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        [ILMethodBodyAttribute(@"
+            ldarg.0
+            ldarg.1
+            add.ovf.un
+            ret
+        ")]
+        public static <#= T #> AddUnsigned(<#= T #> first, <#= T #> second) {
+            throw null!;
+        }
+
+<#
+    if (T.ToUpperInvariant().StartsWith("U")) {
+#>
+        [CLSCompliantAttribute(false)]
+<#
+    }
+#>
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        [ILMethodBodyAttribute(@"
+            ldarg.0
+            ldarg.1
+            sub
+            ret
+        ")]
+        public static <#= T #> SubtractUnchecked(<#= T #> first, <#= T #> second) {
+            throw null!;
+        }
+
+<#
+    if (T.ToUpperInvariant().StartsWith("U")) {
+#>
+        [CLSCompliantAttribute(false)]
+<#
+    }
+#>
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        [ILMethodBodyAttribute(@"
+            ldarg.0
+            ldarg.1
+            sub.ovf
+            ret
+        ")]
+        public static <#= T #> SubtractSigned(<#= T #> first, <#= T #> second) {
+            throw null!;
+        }
+
+<#
+    if (T.ToUpperInvariant().StartsWith("U")) {
+#>
+        [CLSCompliantAttribute(false)]
+<#
+    }
+#>
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        [ILMethodBodyAttribute(@"
+            ldarg.0
+            ldarg.1
+            sub.ovf.un
+            ret
+        ")]
+        public static <#= T #> SubtractUnsigned(<#= T #> first, <#= T #> second) {
+            throw null!;
+        }
+
+<#
+    if (T.ToUpperInvariant().StartsWith("U")) {
+#>
+        [CLSCompliantAttribute(false)]
+<#
+    }
+#>
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        [ILMethodBodyAttribute(@"
+            ldarg.0
+            ldarg.1
+            mul
+            ret
+        ")]
+        public static <#= T #> MultiplyUnchecked(<#= T #> first, <#= T #> second) {
+            throw null!;
+        }
+
+<#
+    if (T.ToUpperInvariant().StartsWith("U")) {
+#>
+        [CLSCompliantAttribute(false)]
+<#
+    }
+#>
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        [ILMethodBodyAttribute(@"
+            ldarg.0
+            ldarg.1
+            mul.ovf
+            ret
+        ")]
+        public static <#= T #> MultiplySigned(<#= T #> first, <#= T #> second) {
+            throw null!;
+        }
+
+<#
+    if (T.ToUpperInvariant().StartsWith("U")) {
+#>
+        [CLSCompliantAttribute(false)]
+<#
+    }
+#>
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        [ILMethodBodyAttribute(@"
+            ldarg.0
+            ldarg.1
+            mul.ovf.un
+            ret
+        ")]
+        public static <#= T #> MultiplyUnsigned(<#= T #> first, <#= T #> second) {
+            throw null!;
+        }
+
+<#
+    if (T.ToUpperInvariant().StartsWith("U")) {
+#>
+        [CLSCompliantAttribute(false)]
+<#
+    }
+#>
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        [ILMethodBodyAttribute(@"
+            ldarg.0
+            ldarg.1
+            div
+            ret
+        ")]
+        public static <#= T #> DivideSigned(<#= T #> first, <#= T #> second) {
+            throw null!;
+        }
+
+<#
+    if (T.ToUpperInvariant().StartsWith("U")) {
+#>
+        [CLSCompliantAttribute(false)]
+<#
+    }
+#>
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        [ILMethodBodyAttribute(@"
+            ldarg.0
+            ldarg.1
+            div.un
+            ret
+        ")]
+        public static <#= T #> DivideUnsigned(<#= T #> first, <#= T #> second) {
+            throw null!;
+        }
+
+<#
+    if (T.ToUpperInvariant().StartsWith("U")) {
+#>
+        [CLSCompliantAttribute(false)]
+<#
+    }
+#>
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        [ILMethodBodyAttribute(@"
+            ldarg.0
+            ldarg.1
+            rem
+            ret
+        ")]
+        public static <#= T #> RemainderSigned(<#= T #> first, <#= T #> second) {
+            throw null!;
+        }
+
+<#
+    if (T.ToUpperInvariant().StartsWith("U")) {
+#>
+        [CLSCompliantAttribute(false)]
+<#
+    }
+#>
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        [ILMethodBodyAttribute(@"
+            ldarg.0
+            ldarg.1
+            rem.un
+            ret
+        ")]
+        public static <#= T #> RemainderUnsigned(<#= T #> first, <#= T #> second) {
+            throw null!;
+        }
+
+<#
+    if (T.ToUpperInvariant().StartsWith("U")) {
+#>
+        [CLSCompliantAttribute(false)]
+<#
+    }
+#>
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        [ILMethodBodyAttribute(@"
+            ldarg.0
+            ldarg.1
+            shl
+            ret
+        ")]
+        public static <#= T #> ShiftLeft(<#= T #> value, IntPtr count) {
+            throw null!;
+        }
+
+<#
+    if (T.ToUpperInvariant().StartsWith("U")) {
+#>
+        [CLSCompliantAttribute(false)]
+<#
+    }
+#>
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        [ILMethodBodyAttribute(@"
+            ldarg.0
+            ldarg.1
+            shr
+            ret
+        ")]
+        public static <#= T #> ShiftRightSigned(<#= T #> value, IntPtr count) {
+            throw null!;
+        }
+
+<#
+    if (T.ToUpperInvariant().StartsWith("U")) {
+#>
+        [CLSCompliantAttribute(false)]
+<#
+    }
+#>
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        [ILMethodBodyAttribute(@"
+            ldarg.0
+            ldarg.1
+            shr.un
+            ret
+        ")]
+        public static <#= T #> ShiftRightUnsigned(<#= T #> value, IntPtr count) {
+            throw null!;
+        }
+
+<#
+    if (T.ToUpperInvariant().StartsWith("U")) {
+#>
+        [CLSCompliantAttribute(false)]
+<#
+    }
+#>
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        [ILMethodBodyAttribute(@"
+            ldarg.0
+            ldarg.1
+            shl
+            ret
+        ")]
+        public static <#= T #> ShiftLeft(<#= T #> value, int count) {
+            throw null!;
+        }
+
+<#
+    if (T.ToUpperInvariant().StartsWith("U")) {
+#>
+        [CLSCompliantAttribute(false)]
+<#
+    }
+#>
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        [ILMethodBodyAttribute(@"
+            ldarg.0
+            ldarg.1
+            shr
+            ret
+        ")]
+        public static <#= T #> ShiftRightSigned(<#= T #> value, int count) {
+            throw null!;
+        }
+
+<#
+    if (T.ToUpperInvariant().StartsWith("U")) {
+#>
+        [CLSCompliantAttribute(false)]
+<#
+    }
+#>
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        [ILMethodBodyAttribute(@"
+            ldarg.0
+            ldarg.1
+            shr.un
+            ret
+        ")]
+        public static <#= T #> ShiftRightUnsigned(<#= T #> value, int count) {
+            throw null!;
+        }
+
+<#
+    if (T.ToUpperInvariant().StartsWith("U")) {
+#>
+        [CLSCompliantAttribute(false)]
+<#
+    }
+#>
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        [ILMethodBodyAttribute(@"
+            ldarg.0
+            not
+            ret
+        ")]
+        public static <#= T #> Not(<#= T #> value) {
+            throw null!;
+        }
+
+<#
+    if (T.ToUpperInvariant().StartsWith("U")) {
+#>
+        [CLSCompliantAttribute(false)]
+<#
+    }
+#>
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        [ILMethodBodyAttribute(@"
+            ldarg.0
+            ldarg.1
+            and
+            ret
+        ")]
+        public static <#= T #> And(<#= T #> first, <#= T #> second) {
+            throw null!;
+        }
+
+<#
+    if (T.ToUpperInvariant().StartsWith("U")) {
+#>
+        [CLSCompliantAttribute(false)]
+<#
+    }
+#>
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        [ILMethodBodyAttribute(@"
+            ldarg.0
+            ldarg.1
+            or
+            ret
+        ")]
+        public static <#= T #> Or(<#= T #> first, <#= T #> second) {
+            throw null!;
+        }
+
+<#
+    if (T.ToUpperInvariant().StartsWith("U")) {
+#>
+        [CLSCompliantAttribute(false)]
+<#
+    }
+#>
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        [ILMethodBodyAttribute(@"
+            ldarg.0
+            ldarg.1
+            xor
+            ret
+        ")]
+        public static <#= T #> Xor(<#= T #> first, <#= T #> second) {
+            throw null!;
+        }
+        #endregion
+    }
+}
+<#
+}
+#>
+
+namespace UltimateOrb.Utilities {
+
+    public static partial class CilVerifiable {
+<#
+var ITS = new [] { "Int32", "UInt32", "Int64", "UInt64", "IntPtr", "UIntPtr" };
+foreach (var IT in ITS) {
+#>
+
+<#
+    if (IT.ToUpperInvariant().StartsWith("U")) {
+#>
+        [CLSCompliantAttribute(false)]
+<#
+    }
+#>
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        [ILMethodBodyAttribute(@"
+            ldarg.0
+            conv.i
+            ret
+        ")]
+        public static IntPtr ToIntPtrSignedUnchecked(<#= IT #> value) {
+            throw null!;
+        }
+
+        [CLSCompliantAttribute(false)]
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        [ILMethodBodyAttribute(@"
+            ldarg.0
+            conv.i
+            ret
+        ")]
+        public static UIntPtr ToUIntPtrSignedUnchecked(<#= IT #> value) {
+            throw null!;
+        }
+
+<#
+    if (IT.ToUpperInvariant().StartsWith("U")) {
+#>
+        [CLSCompliantAttribute(false)]
+<#
+    }
+#>
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        [ILMethodBodyAttribute(@"
+            ldarg.0
+            conv.u
+            ret
+        ")]
+        public static IntPtr ToIntPtrUnsignedUnchecked(<#= IT #> value) {
+            throw null!;
+        }
+
+        [CLSCompliantAttribute(false)]
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        [ILMethodBodyAttribute(@"
+            ldarg.0
+            conv.u
+            ret
+        ")]
+        public static UIntPtr ToUIntPtrUnsignedUnchecked(<#= IT #> value) {
+            throw null!;
+        }
+
+<#
+    if (IT.ToUpperInvariant().StartsWith("U")) {
+#>
+        [CLSCompliantAttribute(false)]
+<#
+    }
+#>
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        [ILMethodBodyAttribute(@"
+            ldarg.0
+            conv<#= IT.ToUpperInvariant().StartsWith("U") ? ".u" : ".i" #>
+            ret
+        ")]
+        public static IntPtr ToIntPtrUnchecked(<#= IT #> value) {
+            throw null!;
+        }
+
+        [CLSCompliantAttribute(false)]
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        [ILMethodBodyAttribute(@"
+            ldarg.0
+            conv<#= IT.ToUpperInvariant().StartsWith("U") ? ".u" : ".i" #>
+            ret
+        ")]
+        public static UIntPtr ToUIntPtrUnchecked(<#= IT #> value) {
+            throw null!;
+        }
+
+<#
+    if (IT.ToUpperInvariant().StartsWith("U")) {
+#>
+        [CLSCompliantAttribute(false)]
+<#
+    }
+#>
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        [ILMethodBodyAttribute(@"
+            ldarg.0
+            conv.ovf.i
+            ret
+        ")]
+        public static IntPtr ToIntPtrSigned(<#= IT #> value) {
+            throw null!;
+        }
+
+        [CLSCompliantAttribute(false)]
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        [ILMethodBodyAttribute(@"
+            ldarg.0
+            conv.ovf.u
+            ret
+        ")]
+        public static UIntPtr ToUIntPtrSigned(<#= IT #> value) {
+            throw null!;
+        }
+
+<#
+    if (IT.ToUpperInvariant().StartsWith("U")) {
+#>
+        [CLSCompliantAttribute(false)]
+<#
+    }
+#>
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        [ILMethodBodyAttribute(@"
+            ldarg.0
+            conv.ovf.i.un
+            ret
+        ")]
+        public static IntPtr ToIntPtrUnsigned(<#= IT #> value) {
+            throw null!;
+        }
+
+        [CLSCompliantAttribute(false)]
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        [ILMethodBodyAttribute(@"
+            ldarg.0
+            conv.ovf.u.un
+            ret
+        ")]
+        public static UIntPtr ToUIntPtrUnsigned(<#= IT #> value) {
+            throw null!;
+        }
+<#
+}
+#>
+    }
+}

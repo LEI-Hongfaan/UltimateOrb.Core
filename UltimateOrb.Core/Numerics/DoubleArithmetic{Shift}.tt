@@ -1,0 +1,184 @@
+﻿using System;
+<#
+var Ti = 32;
+var Di = checked(Ti * 2);
+var Si = checked((Ti + 1) / 2);
+
+var T = 64;
+var LS = new string[] { "U", "U", "", "" };
+var HS = new string[] { "U", "", "U", "" };
+var CS = new string[] { "false", "false", "false", "true" };
+
+var CP = new string[] { ", int count", "" };
+var CQ = new string[] { "count &= 2 * sizeof(IntT) - 1;", "const int count = 1;" };
+#>
+
+namespace UltimateOrb.Numerics {
+	using UInt = UInt<#= Ti #>;
+	using ULong = UInt<#= Di #>;
+	using Int = Int<#= Ti #>;
+	using Long = Int<#= Di #>;
+
+	using Math = global::Internal.System.Math;
+
+	using IntT = Int<#= T #>;
+	using UIntT = UInt<#= T #>;
+
+	public static partial class DoubleArithmetic {
+		
+		[System.CLSCompliantAttribute(false)]
+		[System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+		public static UIntT ShiftRight(UIntT low, IntT high, int count, out IntT highResult) {
+			return ShiftRightSigned(low, high, count, out highResult);
+		}
+
+		[System.CLSCompliantAttribute(false)]
+		[System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+		public static UIntT ShiftRight(UIntT low, UIntT high, int count, out UIntT highResult) {
+			return ShiftRightUnsigned(low, high, count, out highResult);
+		}
+
+		[System.CLSCompliantAttribute(false)]
+		[System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+		public static UIntT ShiftRight(UIntT low, IntT high, out IntT highResult) {
+			return ShiftRightSigned(low, high, out highResult);
+		}
+
+		[System.CLSCompliantAttribute(false)]
+		[System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+		public static UIntT ShiftRight(UIntT low, UIntT high, out UIntT highResult) {
+			return ShiftRightUnsigned(low, high, out highResult);
+		}
+	}
+}
+<#
+for (var i = 0; i < LS.Length; ++i) {
+	var L = LS[i];
+	var H = HS[i];
+	var C = CS[i];
+#>
+
+namespace UltimateOrb.Numerics {
+	using UInt = UInt<#= Ti #>;
+	using ULong = UInt<#= Di #>;
+	using Int = Int<#= Ti #>;
+	using Long = Int<#= Di #>;
+
+	using Math = global::Internal.System.Math;
+
+	using IntT = Int<#= T #>;
+	using UIntT = UInt<#= T #>;
+	
+	using LIntT = <#= L #>Int<#= T #>;
+	using HIntT = <#= H #>Int<#= T #>;
+
+	public static partial class DoubleArithmetic {
+
+		[System.CLSCompliantAttribute(<#= C #>)]
+		[System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+		public static HIntT ShiftLeft(LIntT low, HIntT high, int count) {
+			return unchecked((HIntT)(((UIntT)high << count) | ((UIntT)low >> (-count/* sizeof(IntT) - count */))));
+		}
+
+		[System.CLSCompliantAttribute(<#= C #>)]
+		[System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+		public static LIntT ShiftRight(LIntT low, HIntT high, int count) {
+			return unchecked((LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* sizeof(IntT) - count */))));
+		}
+<#
+for (var j = 0; j < CP.Length; ++j) {
+	var P = CP[j];
+	var Q = CQ[j];
+#>
+
+#pragma warning disable 162
+		[System.CLSCompliantAttribute(<#= C #>)]
+		[System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+		public static LIntT ShiftLeft(LIntT low, HIntT high<#= P #>, out HIntT highResult) {
+			unchecked {
+				<#= Q #>
+				if (count < sizeof(IntT)) {
+					/*
+					if (count == 0) {
+						highResult = high;
+						return low;
+					}
+					*/
+					highResult = (HIntT)(((UIntT)high << count) | ((UIntT)low >> (-count/* sizeof(IntT) - count */)));
+					return (LIntT)(low << count);
+				} else if (count > sizeof(IntT)) {
+					highResult = (HIntT)(low << (count/* - sizeof(IntT)*/));
+				} else {
+					highResult = (HIntT)low;
+				}
+				return (LIntT)0;
+			}
+		}
+
+		[System.CLSCompliantAttribute(<#= C #>)]
+		[System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+		public static LIntT ShiftRightSigned(LIntT low, HIntT high<#= P #>, out HIntT highResult) {
+			unchecked {
+				<#= Q #>
+				if (count < sizeof(IntT)) {
+					/*
+					if (count == 0) {
+						highResult = high;
+						return low;
+					}
+					*/
+					highResult = (HIntT)((IntT)high >> count);
+					return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* sizeof(IntT) - count */)));
+				} else {
+					var mask = (UIntT)(-((IntT)high >> (sizeof(IntT) - 1)));
+					highResult = (HIntT)mask;
+					if (count > sizeof(IntT)) {
+						// if (0 > (IntT)high) {
+						//     highResult = (HIntT)(IntT)(-1);
+						//     return (LIntT)(((UIntT)high >> (count/* - sizeof(IntT)*/)) | (UIntT.MaxValue << (-count/* sizeof(IntT) + sizeof(IntT) - count */)));
+						// } else {
+						//     highResult = (HIntT)0;
+						//     return (LIntT)((UIntT)high >> (count/* - sizeof(IntT)*/));
+						// }
+						return (LIntT)(((UIntT)high >> (count/* - sizeof(IntT)*/)) | (mask << (-count/* sizeof(IntT) + sizeof(IntT) - count */)));
+					} else {
+						// highResult = (0 > (IntT)high) ? (HIntT)(IntT)(-1) : (HIntT)0;
+						return (LIntT)high;
+					}
+				}
+			}
+		}
+
+		[System.CLSCompliantAttribute(<#= C #>)]
+		[System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+		public static LIntT ShiftRightUnsigned(LIntT low, HIntT high<#= P #>, out HIntT highResult) {
+			unchecked {
+				<#= Q #>
+				if (count < sizeof(IntT)) {
+					/*
+					if (count == 0) {
+						highResult = high;
+						return low;
+					}
+					*/
+					highResult = (HIntT)((UIntT)high >> count);
+					return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* sizeof(IntT) - count */)));
+				} else {
+					highResult = (HIntT)0;
+					if (count > sizeof(IntT)) {
+						return (LIntT)((UIntT)high >> (count/* - sizeof(IntT)*/));
+					} else {
+						return (LIntT)high;
+					}
+				}
+			}
+		}
+#pragma warning restore 162
+<#
+}
+#>
+	}
+}
+<#
+}
+#>

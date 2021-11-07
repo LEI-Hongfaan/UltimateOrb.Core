@@ -1,0 +1,32 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+
+namespace UltimateOrb {
+<#
+	for (var n = 0; n <= 16; ++n) {
+#>
+
+	public partial interface IInitializable<# if (n > 0) { #><<# for (var i = 1; i <= n; ++i) { #><# if (i > 1) { #>, <# } #>in T<# if (n > 1) { #><#= i #><# } #><# } #>><# } #> {
+
+        void Initialize(<# for (var i = 1; i <= n; ++i) { #><# if (i > 1) { #>, <# } #>T<# if (n > 1) { #><#= i #><# } #> arg<# if (n > 1) { #><#= i #><# } #><# } #>);
+	
+        bool TryInitialize(<# for (var i = 1; i <= n; ++i) { #><# if (i > 1) { #>, <# } #>T<# if (n > 1) { #><#= i #><# } #> arg<# if (n > 1) { #><#= i #><# } #><# } #>);
+	}
+	
+	public static partial class TInitializable<# if (n > 0) { #><<# for (var i = 1; i <= n; ++i) { #><# if (i > 1) { #>, <# } #>T<# if (n > 1) { #><#= i #><# } #><# } #>><# } #> {
+		
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        public static void Initialize<TInitializable>(ref TInitializable @this<# for (var i = 1; i <= n; ++i) { #>, T<# if (n > 1) { #><#= i #><# } #> arg<# if (n > 1) { #><#= i #><# } #><# } #>) where TInitializable : struct, IInitializable<# if (n > 0) { #><<# for (var i = 1; i <= n; ++i) { #><# if (i > 1) { #>, <# } #>T<# if (n > 1) { #><#= i #><# } #><# } #>><# } #> {
+			@this.Initialize(<# for (var i = 1; i <= n; ++i) { #><# if (i > 1) { #>, <# } #>arg<# if (n > 1) { #><#= i #><# } #><# } #>);
+        }
+
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        public static bool TryInitialize<TInitializable>(ref TInitializable @this<# for (var i = 1; i <= n; ++i) { #>, T<# if (n > 1) { #><#= i #><# } #> arg<# if (n > 1) { #><#= i #><# } #><# } #>) where TInitializable : struct, IInitializable<# if (n > 0) { #><<# for (var i = 1; i <= n; ++i) { #><# if (i > 1) { #>, <# } #>T<# if (n > 1) { #><#= i #><# } #><# } #>><# } #> {
+			return @this.TryInitialize(<# for (var i = 1; i <= n; ++i) { #><# if (i > 1) { #>, <# } #>arg<# if (n > 1) { #><#= i #><# } #><# } #>);
+        }
+	}
+<#
+	}
+#>
+}

@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "UltimateOrb.Core.BuildTools": {
+      "commandName": "Project",
+      "commandLineArgs": "C:\\Projects\\UltimateOrb3\\UltimateOrb.Core\\bin\\Debug\\net6.0\\UltimateOrb.Core.dll"
+    }
+  }
+}

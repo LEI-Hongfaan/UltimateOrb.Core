@@ -1,0 +1,13 @@
+﻿<#
+static string TypeParamList(int i, string name = "T", bool s = true) {
+    return ArgList(i, name, s);
+}
+
+static string ParamList(int i, string typeName = "T", string name = "arg", bool h = false, bool s = true) {
+    return s && 1 == i ? $"{typeName} {name}" : string.Join(", ", Enumerable.Range(1, i).Select(k => h ? $"{typeName} {name}{k}" : $"{typeName}{k} {name}{k}"));
+}
+
+static string ArgList(int i, string name = "arg", bool s = true) {
+    return s && 1 == i ? name : string.Join(", ", Enumerable.Range(1, i).Select(k => $"{name}{k}"));
+}
+#>

@@ -1,0 +1,33 @@
+﻿<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ include file="../T4Includes/SourceLists.ttinclude" once="true" #>
+using System;
+using UltimateOrb.Runtime.CompilerServices.Interfaces.Typed_Wrapped_Huge;
+
+namespace UltimateOrb {
+<# for (var i = 0; i <= 16; ++i) { #>
+
+    public readonly partial struct StandardFuncWrapper<<# if (i > 0) { #><#= TypeParamList(i) #>, <# } #>TResult>
+        : IReadOnlyStrongBox<Func<<# if (i > 0) { #><#= TypeParamList(i) #>, <# } #>TResult>>
+       , IFunc<<# if (i > 0) { #><#= TypeParamList(i) #>, <# } #>TResult> {
+
+        public readonly Func<<# if (i > 0) { #><#= TypeParamList(i) #>, <# } #>TResult> Value;
+
+        Func<<# if (i > 0) { #><#= TypeParamList(i) #>, <# } #>TResult> Runtime.CompilerServices.Interfaces.Core.IReadOnlyStrongBox<Func<<# if (i > 0) { #><#= TypeParamList(i) #>, <# } #>TResult>>.Value {
+
+            get => Value;
+        }
+
+        public StandardFuncWrapper(Func<<# if (i > 0) { #><#= TypeParamList(i) #>, <# } #>TResult> value) => Value = value;
+
+        public static implicit operator StandardFuncWrapper<<# if (i > 0) { #><#= TypeParamList(i) #>, <# } #>TResult>(Func<<# if (i > 0) { #><#= TypeParamList(i) #>, <# } #>TResult> value) => new StandardFuncWrapper<<# if (i > 0) { #><#= TypeParamList(i) #>, <# } #>TResult>(value);
+
+        public static implicit operator Func<<# if (i > 0) { #><#= TypeParamList(i) #>, <# } #>TResult>(StandardFuncWrapper<<# if (i > 0) { #><#= TypeParamList(i) #>, <# } #>TResult> value) => value.Value;
+
+        public TResult Invoke(<#= ParamList(i) #>) => Value.Invoke(<#= ArgList(i) #>);
+
+        public StandardFuncWrapperCatch<<# if (i > 0) { #><#= TypeParamList(i) #>, <# } #>TResult, TException> Catch<TException>()
+            where TException : Exception => new StandardFuncWrapperCatch<<# if (i > 0) { #><#= TypeParamList(i) #>, <# } #>TResult, TException>(this);
+    }
+<# } #>
+}

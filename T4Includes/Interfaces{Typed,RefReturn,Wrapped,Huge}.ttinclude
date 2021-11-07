@@ -1,0 +1,129 @@
+﻿
+namespace <#= NameSpace #>.Core {
+
+    public partial interface <#= InterfaceName #><in T>
+        : <#= InterfaceBase #> {
+    }
+}
+
+namespace <#= NameSpace #>.Huge {
+
+    public partial interface <#= InterfaceName #><in T>
+        : Core.<#= InterfaceName #><T> {
+    }
+}
+
+namespace <#= NameSpace #>.Wrapped {
+
+    public partial interface <#= InterfaceName #><in T>
+        : Core.<#= InterfaceName #><T> {
+    }
+}
+
+namespace <#= NameSpace #>.Wrapped_Huge {
+
+    public partial interface <#= InterfaceName #><in T>
+        : Huge.<#= InterfaceName #><T>
+        , Wrapped.<#= InterfaceName #><T> {
+    }
+}
+
+namespace <#= NameSpace #>.RefReturn {
+
+    public partial interface <#= InterfaceName #><in T>
+        : Core.<#= InterfaceName #><T> {
+    }
+}
+
+namespace <#= NameSpace #>.RefReturn_Huge {
+
+    public partial interface <#= InterfaceName #><in T>
+        : Huge.<#= InterfaceName #><T>
+        , RefReturn.<#= InterfaceName #><T> {
+    }
+}
+
+namespace <#= NameSpace #>.RefReturn_Wrapped {
+
+    public partial interface <#= InterfaceName #><in T>
+        : Wrapped.<#= InterfaceName #><T>
+        , RefReturn.<#= InterfaceName #><T> {
+    }
+}
+
+namespace <#= NameSpace #>.RefReturn_Wrapped_Huge {
+
+    public partial interface <#= InterfaceName #><in T>
+        : Wrapped_Huge.<#= InterfaceName #><T>
+        , RefReturn_Huge.<#= InterfaceName #><T>
+        , RefReturn_Wrapped.<#= InterfaceName #><T> {
+    }
+}
+
+namespace <#= NameSpace #>.Typed {
+
+    public partial interface <#= InterfaceName #><in T>
+        : Core.<#= InterfaceName #><T> {
+    }
+}
+
+namespace <#= NameSpace #>.Typed_Huge {
+
+    public partial interface <#= InterfaceName #><in T>
+        : Huge.<#= InterfaceName #><T>
+        , Typed.<#= InterfaceName #><T> {
+    }
+}
+
+namespace <#= NameSpace #>.Typed_Wrapped {
+
+    public partial interface <#= InterfaceName #><in T>
+        : Wrapped.<#= InterfaceName #><T>
+        , Typed.<#= InterfaceName #><T> {
+    }
+}
+
+namespace <#= NameSpace #>.Typed_Wrapped_Huge {
+
+    public partial interface <#= InterfaceName #><in T>
+        : Wrapped_Huge.<#= InterfaceName #><T>
+        , Typed_Huge.<#= InterfaceName #><T>
+        , Typed_Wrapped.<#= InterfaceName #><T> {
+    }
+}
+
+namespace <#= NameSpace #>.Typed_RefReturn {
+
+    public partial interface <#= InterfaceName #><in T>
+        : RefReturn.<#= InterfaceName #><T>
+        , Typed.<#= InterfaceName #><T> {
+    }
+}
+
+namespace <#= NameSpace #>.Typed_RefReturn_Huge {
+
+    public partial interface <#= InterfaceName #><in T>
+        : RefReturn_Huge.<#= InterfaceName #><T>
+        , Typed_Huge.<#= InterfaceName #><T>
+        , Typed_RefReturn.<#= InterfaceName #><T> {
+    }
+}
+
+namespace <#= NameSpace #>.Typed_RefReturn_Wrapped {
+
+    public partial interface <#= InterfaceName #><in T>
+        : RefReturn_Wrapped.<#= InterfaceName #><T>
+        , Typed_Wrapped.<#= InterfaceName #><T>
+        , Typed_RefReturn.<#= InterfaceName #><T> {
+    }
+}
+
+namespace <#= NameSpace #>.Typed_RefReturn_Wrapped_Huge {
+
+    public partial interface <#= InterfaceName #><in T>
+        : RefReturn_Wrapped_Huge.<#= InterfaceName #><T>
+        , Typed_Wrapped_Huge.<#= InterfaceName #><T>
+        , Typed_RefReturn_Huge.<#= InterfaceName #><T>
+        , Typed_RefReturn_Wrapped.<#= InterfaceName #><T> {
+    }
+}

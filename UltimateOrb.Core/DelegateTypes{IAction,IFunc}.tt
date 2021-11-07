@@ -1,0 +1,41 @@
+﻿using System;
+using System.Collections.Generic;
+
+namespace UltimateOrb {
+<#
+	for (var n = 0; n <= 16; ++n) {
+#>
+
+	public partial interface IFunc<<# for (var i = 1; i <= n; ++i) { #><# if (i > 1) { #>, <# } #>in T<# if (n > 1) { #><#= i #><# } #><# } #><# if (n > 0) { #>, <# } #>out TResult> {
+		
+		TResult Invoke(<# for (var i = 1; i <= n; ++i) { #><# if (i > 1) { #>, <# } #>T<# if (n > 1) { #><#= i #><# } #> arg<# if (n > 1) { #><#= i #><# } #><# } #>);
+	}
+	
+	public static partial class TFunc<<# for (var i = 1; i <= n; ++i) { #><# if (i > 1) { #>, <# } #>T<# if (n > 1) { #><#= i #><# } #><# } #><# if (n > 0) { #>, <# } #>TResult> {
+		
+		public static TResult Invoke<TFunc>(TFunc @this<# for (var i = 1; i <= n; ++i) { #>, T<# if (n > 1) { #><#= i #><# } #> arg<# if (n > 1) { #><#= i #><# } #><# } #>) where TFunc : IFunc<<# for (var i = 1; i <= n; ++i) { #><# if (i > 1) { #>, <# } #>T<# if (n > 1) { #><#= i #><# } #><# } #><# if (n > 0) { #>, <# } #>TResult> {
+			return @this.Invoke(<# for (var i = 1; i <= n; ++i) { #><# if (i > 1) { #>, <# } #>arg<# if (n > 1) { #><#= i #><# } #><# } #>);
+		}
+	}
+<#
+	}
+#>
+<#
+	for (var n = 0; n <= 16; ++n) {
+#>
+
+	public partial interface IAction<# if (n > 0) { #><<# for (var i = 1; i <= n; ++i) { #><# if (i > 1) { #>, <# } #>in T<# if (n > 1) { #><#= i #><# } #><# } #>><# } #> {
+
+		void Invoke(<# for (var i = 1; i <= n; ++i) { #><# if (i > 1) { #>, <# } #>T<# if (n > 1) { #><#= i #><# } #> arg<# if (n > 1) { #><#= i #><# } #><# } #>);
+	}
+	
+	public static partial class TAction<# if (n > 0) { #><<# for (var i = 1; i <= n; ++i) { #><# if (i > 1) { #>, <# } #>T<# if (n > 1) { #><#= i #><# } #><# } #>><# } #> {
+		
+		public static void Invoke<TAction>(TAction @this<# for (var i = 1; i <= n; ++i) { #>, T<# if (n > 1) { #><#= i #><# } #> arg<# if (n > 1) { #><#= i #><# } #><# } #>) where TAction : IAction<# if (n > 0) { #><<# for (var i = 1; i <= n; ++i) { #><# if (i > 1) { #>, <# } #>T<# if (n > 1) { #><#= i #><# } #><# } #>><# } #> {
+			@this.Invoke(<# for (var i = 1; i <= n; ++i) { #><# if (i > 1) { #>, <# } #>arg<# if (n > 1) { #><#= i #><# } #><# } #>);
+		}
+	}
+<#
+	}
+#>
+}

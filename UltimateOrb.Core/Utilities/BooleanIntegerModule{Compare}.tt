@@ -1,0 +1,117 @@
+﻿using System;
+<#
+
+var TS = new string[] { "uint", "int", "ulong", "long", "float", "double", "UIntPtr", "IntPtr" };
+
+for (var i = 0; i < TS.Length; ++i) {
+	var T = TS[i];
+#>
+
+namespace UltimateOrb.Utilities {
+
+    public static partial class BooleanIntegerModule {
+        
+#pragma warning disable IDE0060 // Remove unused parameter
+        /// <summary>
+        ///     <para>
+        ///         Returns <c>1</c> if <paramref name="first"/> is equal to <paramref name="second"/>. Otherwise, <c>0</c>.
+        ///     </para>
+        ///     <para>
+        ///         For floating-point numbers, this function will return 0 if the numbers are unordered (either or both are NaN). The infinite values are equal to themselves.
+        ///     </para>
+        /// </summary>
+<# if (T.StartsWith("U") || T.StartsWith("u")) { #>
+		[System.CLSCompliantAttribute(false)]
+<# } #>
+        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [ILMethodBodyAttribute(@"
+            LdArg.0
+            LdArg.1
+            CEq
+            Ret
+        ")]
+        public static int Equals(<#= T #> first, <#= T #> second) {
+            throw null!;
+        }
+
+<# if (T.StartsWith("U") || T.StartsWith("u")) { #>
+		[System.CLSCompliantAttribute(false)]
+<# } #>
+        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [ILMethodBodyAttribute(@"
+            LdArg.0
+            LdArg.1
+<# if (T.ToUpperInvariant().StartsWith("U")) { #>
+            CLT.Un
+<# } else { #>
+            CLT
+<# } #>
+            Ret
+        ")]
+        public static int LessThan(<#= T #> first, <#= T #> second) {
+            throw null!;
+        }
+
+<# if (T.StartsWith("U") || T.StartsWith("u")) { #>
+		[System.CLSCompliantAttribute(false)]
+<# } #>
+        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [ILMethodBodyAttribute(@"
+            LdArg.0
+            LdArg.1
+<# if (T.ToUpperInvariant().StartsWith("U") || T == "Single" || T == "Double") { #>
+            CGT.Un
+<# } else { #>
+            CGT
+<# } #>
+            LdC.I4.0
+            CEq
+            Ret
+        ")]
+        public static int LessThanOrEqual(<#= T #> first, <#= T #> second) {
+            throw null!;
+        }
+
+<# if (T.StartsWith("U") || T.StartsWith("u")) { #>
+		[System.CLSCompliantAttribute(false)]
+<# } #>
+        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [ILMethodBodyAttribute(@"
+            LdArg.0
+            LdArg.1
+<# if (T.ToUpperInvariant().StartsWith("U")) { #>
+            CGT.Un
+<# } else { #>
+            CGT
+<# } #>
+            Ret
+        ")]
+        public static int GreaterThan(<#= T #> first, <#= T #> second) {
+            throw null!;
+        }
+
+<# if (T.StartsWith("U") || T.StartsWith("u")) { #>
+		[System.CLSCompliantAttribute(false)]
+<# } #>
+        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [ILMethodBodyAttribute(@"
+            LdArg.0
+            LdArg.1
+<# if (T.ToUpperInvariant().StartsWith("U") || T == "Single" || T == "Double") { #>
+            CLT.Un
+<# } else { #>
+            CLT
+<# } #>
+            LdC.I4.0
+            CEq
+            Ret
+        ")]
+        public static int GreaterThanOrEqual(<#= T #> first, <#= T #> second) {
+            throw null!;
+        }
+#pragma warning restore IDE0060 // Remove unused parameter
+    }
+}
+<#
+}
+#>

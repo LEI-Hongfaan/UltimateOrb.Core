@@ -1,0 +1,66 @@
+﻿using System;
+using BooleanIntegerModule = UltimateOrb.Utilities.BooleanIntegerModule;
+<#
+
+var TS = new string[] { "uint", "int", "ulong", "long", "float", "double", "UIntPtr", "IntPtr" };
+
+for (var i = 0; i < TS.Length; ++i) {
+	var T = TS[i];
+#>
+
+namespace UltimateOrb {
+
+    public static partial class CanonicalIntegerBooleanModule {
+        
+        /// <summary>
+        ///     <para>
+        ///         Returns <c>(<see cref="CanonicalIntegerBoolean"/>)true</c> if <paramref name="first"/> is equal to <paramref name="second"/>. Otherwise, <c>(<see cref="CanonicalIntegerBoolean"/>)false</c>.
+        ///     </para>
+        ///     <para>
+        ///         For floating-point numbers, this function will return 0 if the numbers are unordered (either or both are NaN). The infinite values are equal to themselves.
+        ///     </para>
+        /// </summary>
+<# if (T.StartsWith("U") || T.StartsWith("u")) { #>
+		[System.CLSCompliantAttribute(false)]
+<# } #>
+        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        public static CanonicalIntegerBoolean Equals(<#= T #> first, <#= T #> second) {
+            return new CanonicalIntegerBoolean(BooleanIntegerModule.Equals(first, second));
+        }
+
+<# if (T.StartsWith("U") || T.StartsWith("u")) { #>
+		[System.CLSCompliantAttribute(false)]
+<# } #>
+        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        public static CanonicalIntegerBoolean LessThan(<#= T #> first, <#= T #> second) {
+            return new CanonicalIntegerBoolean(BooleanIntegerModule.LessThan(first, second));
+        }
+
+<# if (T.StartsWith("U") || T.StartsWith("u")) { #>
+		[System.CLSCompliantAttribute(false)]
+<# } #>
+        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        public static CanonicalIntegerBoolean LessThanOrEqual(<#= T #> first, <#= T #> second) {
+            return new CanonicalIntegerBoolean(BooleanIntegerModule.LessThanOrEqual(first, second));
+        }
+
+<# if (T.StartsWith("U") || T.StartsWith("u")) { #>
+		[System.CLSCompliantAttribute(false)]
+<# } #>
+        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        public static CanonicalIntegerBoolean GreaterThan(<#= T #> first, <#= T #> second) {
+            return new CanonicalIntegerBoolean(BooleanIntegerModule.GreaterThan(first, second));
+        }
+
+<# if (T.StartsWith("U") || T.StartsWith("u")) { #>
+		[System.CLSCompliantAttribute(false)]
+<# } #>
+        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        public static CanonicalIntegerBoolean GreaterThanOrEqual(<#= T #> first, <#= T #> second) {
+            return new CanonicalIntegerBoolean(BooleanIntegerModule.GreaterThanOrEqual(first, second));
+        }
+    }
+}
+<#
+}
+#>
