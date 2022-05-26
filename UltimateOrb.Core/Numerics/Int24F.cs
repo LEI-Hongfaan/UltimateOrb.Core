@@ -46,10 +46,17 @@ namespace UltimateOrb.Numerics {
             get => unchecked((Int32)_Value);
         }
 
+        public static Int24F operator -(Int24F value) {
+            return new Int24F(-value._Value, default(Checked));
+        }
+
+        public static Int24F operator +(Int24F value) {
+            return new Int24F(+value._Value, default(Checked));
+        }
+
         public static Int24F operator +(Int24F first, Int24F second) {
             return new Int24F(first._Value + second._Value, default(Checked));
         }
-
 
         public static Int24F operator -(Int24F first, Int24F second) {
             return new Int24F(first._Value - second._Value, default(Checked));

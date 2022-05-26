@@ -273,6 +273,45 @@ namespace UltimateOrb.Mathematics.Elementary {
         [TargetedPatchingOptOutAttribute("")]
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         [PureAttribute()]
+        public static uint Floor(uint value, uint divisor) {
+            unchecked {
+                if (divisor > 1u) {
+                    var t = value % divisor;
+                    return value - t;
+                }
+                return value;
+            }
+        }
+
+        [CLSCompliantAttribute(false)]
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
+        [TargetedPatchingOptOutAttribute("")]
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        [PureAttribute()]
+        public static int Ceiling(int value, int divisor) {
+            unchecked {
+                var d = AbsAsUnsigned(divisor);
+                return 0 > value ? -(int)Floor((uint)(-value), d) : (int)Ceiling((uint)value, d);
+            }
+        }
+
+        [CLSCompliantAttribute(false)]
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
+        [TargetedPatchingOptOutAttribute("")]
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        [PureAttribute()]
+        public static int Floor(int value, int divisor) {
+            unchecked {
+                var d = AbsAsUnsigned(divisor);
+                return 0 > value ? -(int)Ceiling((uint)(-value), d) : (int)Floor((uint)value, d);
+            }
+        }
+
+        [CLSCompliantAttribute(false)]
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
+        [TargetedPatchingOptOutAttribute("")]
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        [PureAttribute()]
         public static ulong Ceiling(ulong value, ulong divisor) {
             unchecked {
                 if (divisor > 1u) {
@@ -280,6 +319,45 @@ namespace UltimateOrb.Mathematics.Elementary {
                     return (t == 0u ? value : checked(unchecked(divisor - t) + value));
                 }
                 return value;
+            }
+        }
+
+        [CLSCompliantAttribute(false)]
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
+        [TargetedPatchingOptOutAttribute("")]
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        [PureAttribute()]
+        public static ulong Floor(ulong value, ulong divisor) {
+            unchecked {
+                if (divisor > 1u) {
+                    var t = value % divisor;
+                    return value - t;
+                }
+                return value;
+            }
+        }
+
+        [CLSCompliantAttribute(false)]
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
+        [TargetedPatchingOptOutAttribute("")]
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        [PureAttribute()]
+        public static long Ceiling(long value, long divisor) {
+            unchecked {
+                var d = AbsAsUnsigned(divisor);
+                return 0 > value ? -(long)Floor((ulong)(-value), d) : (long)Ceiling((ulong)value, d);
+            }
+        }
+
+        [CLSCompliantAttribute(false)]
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
+        [TargetedPatchingOptOutAttribute("")]
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        [PureAttribute()]
+        public static long Floor(long value, long divisor) {
+            unchecked {
+                var d = AbsAsUnsigned(divisor);
+                return 0 > value ? -(long)Ceiling((ulong)(-value), d) : (long)Floor((ulong)value, d);
             }
         }
 
@@ -301,7 +379,12 @@ namespace UltimateOrb.Mathematics.Elementary {
         [PureAttribute()]
         public static ulong DivideCeiling(ulong dividend, ulong divisor) {
             unchecked {
-                return (dividend / divisor) + (0u == (dividend % divisor) ? 0u : 1u);
+#if NET6_0_OR_GREATER
+                var (q, r) = System.Math.DivRem(dividend, divisor);
+#else
+                var q = global::Internal.System.Math.DivRem(dividend, divisor, out var r);
+#endif
+                return q + unchecked((uint)(0 < r).AsIntegerUnsafe());
             }
         }
 
@@ -326,8 +409,12 @@ namespace UltimateOrb.Mathematics.Elementary {
         public static ulong DivideCeilingNoThrow(ulong dividend, ulong divisor) {
             unchecked {
                 if (divisor > 0u) {
-                    var t = global::Internal.System.Math.DivRem(dividend, divisor, out var remainder);
-                    return t + unchecked((uint)(0 < remainder).AsIntegerUnsafe());
+#if NET6_0_OR_GREATER
+                    var (q, r) = System.Math.DivRem(dividend, divisor);
+#else
+                    var q = global::Internal.System.Math.DivRem(dividend, divisor, out var r);
+#endif
+                    return q + unchecked((uint)(0 < r).AsIntegerUnsafe());
                 }
                 return 0u;
             }

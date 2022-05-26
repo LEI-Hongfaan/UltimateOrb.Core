@@ -49,9 +49,9 @@ namespace ThisAssembly {
                     {
                         var OpCodes_fields = typeof(OpCodes).GetFields(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
                         var asmmap = OpCodes_fields.ToDictionary(x => x.Name.ToUpperInvariant());
-                        asmmap.Add("Ldelem".ToUpperInvariant(), typeof(OpCodes).GetField(nameof(OpCodes.Ldelem_Any), System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static));
-                        asmmap.Add("Stelem".ToUpperInvariant(), typeof(OpCodes).GetField(nameof(OpCodes.Stelem_Any), System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static));
-                        asmmap.Add("Unaligned_".ToUpperInvariant(), typeof(OpCodes).GetField(nameof(OpCodes.Unaligned), System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static));
+                        asmmap.Add("Ldelem".ToUpperInvariant(), typeof(OpCodes).GetField(nameof(OpCodes.Ldelem_Any), System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static)!);
+                        asmmap.Add("Stelem".ToUpperInvariant(), typeof(OpCodes).GetField(nameof(OpCodes.Stelem_Any), System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static)!);
+                        asmmap.Add("Unaligned_".ToUpperInvariant(), typeof(OpCodes).GetField(nameof(OpCodes.Unaligned), System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static)!);
                         var int32Converter = new System.ComponentModel.Int32Converter();
 
                         var ilAttrName = "ILMethodBodyAttribute";
@@ -70,113 +70,109 @@ namespace ThisAssembly {
                                     Console.Out.Write($@"Assembling {method.FullName}... ");
                                     var ilSource = ilAttr.ConstructorArguments[0].Value as string;
 
-                                    using (var ilSourceReader = new StringReader(ilSource!)) {
-                                        var tts = type.GenericParameters;
-                                        var ts = method.GenericParameters;
-                                        if (!method.HasBody) {
-                                            Console.Out.WriteLine($@"No stub body found. Skipped.");
-                                            continue;
+                                    using var ilSourceReader = new StringReader(ilSource!);
+                                    var tts = type.GenericParameters;
+                                    var ts = method.GenericParameters;
+                                    if (!method.HasBody) {
+                                        Console.Out.WriteLine($@"No stub body found. Skipped.");
+                                        continue;
+                                    }
+                                    {
+                                        var bd = method.Body;
+                                        var ins = bd.Instructions;
+                                        var ilg = (ILProcessor?)null;
+                                        ilg = bd.GetILProcessor();
+                                        ilg.Clear();
+                                        /*
+                                        var insa = ins.ToArray();
+                                        for (var i = 0; insa.Length > i; ++i) {
+                                            var inn = insa[i];
+                                            if (null != inn) {
+                                                ilg.Remove(inn);
+                                            }
                                         }
+                                        */
                                         {
-                                            var bd = method.Body;
-                                            var ins = bd.Instructions;
-                                            var ilg = (ILProcessor)null;
-                                            ilg = bd.GetILProcessor();
-                                            ilg.Clear();
-                                            /*
-                                            var insa = ins.ToArray();
-                                            for (var i = 0; insa.Length > i; ++i) {
-                                                var inn = insa[i];
-                                                if (null != inn) {
-                                                    ilg.Remove(inn);
+                                            string? ilasmLine;
+                                            for (; null != (ilasmLine = ilSourceReader.ReadLine());) {
+                                                var sdfasd = ilasmLine.Split(new[] { ' ', '\t', }, StringSplitOptions.RemoveEmptyEntries);
+                                                var sdfas = sdfasd.FirstOrDefault();
+                                                if (null == sdfas) {
+                                                    continue;
                                                 }
-                                            }
-                                            */
-                                            {
-                                                string ilasmLine;
-                                                for (; null != (ilasmLine = ilSourceReader.ReadLine());) {
-                                                    var sdfasd = ilasmLine.Split(new[] { ' ', '\t', }, StringSplitOptions.RemoveEmptyEntries);
-                                                    var sdfas = sdfasd.FirstOrDefault();
-                                                    if (null == sdfas) {
-                                                        continue;
-                                                    }
-                                                    var sdfa = sdfas.Replace('.', '_').ToUpperInvariant();
-                                                    var safsad = asmmap[sdfa];
-                                                    var sdfsaf = (safsad.GetValue(null) as OpCode?);
-                                                    if (null == sdfsaf) {
-                                                        throw new Exception("gfghgh");
-                                                    }
-                                                    var sdfdsa = sdfsaf.Value;
-                                                    switch (sdfdsa.OperandType) {
-                                                    case OperandType.InlineBrTarget:
-                                                        throw new NotImplementedException();
-                                                    case OperandType.InlineField:
-                                                        throw new NotImplementedException();
-                                                    case OperandType.InlineI:
-                                                        throw new NotImplementedException();
-                                                    case OperandType.InlineI8:
-                                                        ilg.Append(ilg.Create(sdfdsa, int.Parse(sdfasd[1])));
-                                                        break;
-                                                    case OperandType.InlineMethod:
-                                                        throw new NotImplementedException();
-                                                    case OperandType.InlineNone:
-                                                        ilg.Append(ilg.Create(sdfdsa));
-                                                        break;
-                                                    case OperandType.InlinePhi:
-                                                        throw new NotImplementedException();
-                                                    case OperandType.InlineR:
-                                                        throw new NotImplementedException();
-                                                    case OperandType.InlineSig:
-                                                        throw new NotImplementedException();
-                                                    case OperandType.InlineString:
-                                                        throw new NotImplementedException();
-                                                    case OperandType.InlineSwitch:
-                                                        throw new NotImplementedException();
-                                                    case OperandType.InlineTok:
-                                                        throw new NotImplementedException();
-                                                    case OperandType.InlineType:
-                                                        if (sdfasd[1].StartsWith("!!")) {
-                                                            ilg.Append(ilg.Create(sdfdsa, ts[int.Parse(sdfasd[1].Substring(2))]));
-                                                        } else {
-                                                            ilg.Append(ilg.Create(sdfdsa, tts[int.Parse(sdfasd[1].Substring(1))]));
-                                                        }
-                                                        break;
-                                                    case OperandType.InlineVar:
-                                                        throw new NotImplementedException();
-                                                    case OperandType.InlineArg:
-                                                        throw new NotImplementedException();
-                                                    case OperandType.ShortInlineBrTarget:
-                                                        throw new NotImplementedException();
-                                                    case OperandType.ShortInlineI:
-                                                        var a = (int)int32Converter.ConvertFromString(sdfasd[1]);
-                                                        ilg.Append(ilg.Create(sdfdsa, checked((byte)a)));
-                                                        break;
-                                                    case OperandType.ShortInlineR:
-                                                        throw new NotImplementedException();
-                                                    case OperandType.ShortInlineVar:
-                                                        throw new NotImplementedException();
-                                                    case OperandType.ShortInlineArg:
-                                                        throw new NotImplementedException();
-                                                    default:
-                                                        throw new Exception("il opcode arg");
-                                                    }
-
-
-
+                                                var sdfa = sdfas.Replace('.', '_').ToUpperInvariant();
+                                                var safsad = asmmap[sdfa];
+                                                var sdfsaf = (safsad.GetValue(null) as OpCode?);
+                                                if (null == sdfsaf) {
+                                                    throw new Exception("gfghgh");
                                                 }
-                                            }
-                                            method.CustomAttributes.Remove(ilAttr);
+                                                var sdfdsa = sdfsaf.Value;
+                                                switch (sdfdsa.OperandType) {
+                                                case OperandType.InlineBrTarget:
+                                                    throw new NotImplementedException();
+                                                case OperandType.InlineField:
+                                                    throw new NotImplementedException();
+                                                case OperandType.InlineI:
+                                                    throw new NotImplementedException();
+                                                case OperandType.InlineI8:
+                                                    ilg.Append(ilg.Create(sdfdsa, int.Parse(sdfasd[1])));
+                                                    break;
+                                                case OperandType.InlineMethod:
+                                                    throw new NotImplementedException();
+                                                case OperandType.InlineNone:
+                                                    ilg.Append(ilg.Create(sdfdsa));
+                                                    break;
+                                                case OperandType.InlinePhi:
+                                                    throw new NotImplementedException();
+                                                case OperandType.InlineR:
+                                                    throw new NotImplementedException();
+                                                case OperandType.InlineSig:
+                                                    throw new NotImplementedException();
+                                                case OperandType.InlineString:
+                                                    throw new NotImplementedException();
+                                                case OperandType.InlineSwitch:
+                                                    throw new NotImplementedException();
+                                                case OperandType.InlineTok:
+                                                    throw new NotImplementedException();
+                                                case OperandType.InlineType:
+                                                    if (sdfasd[1].StartsWith("!!")) {
+                                                        ilg.Append(ilg.Create(sdfdsa, ts[int.Parse(sdfasd[1][2..])]));
+                                                    } else {
+                                                        ilg.Append(ilg.Create(sdfdsa, tts[int.Parse(sdfasd[1][1..])]));
+                                                    }
+                                                    break;
+                                                case OperandType.InlineVar:
+                                                    throw new NotImplementedException();
+                                                case OperandType.InlineArg:
+                                                    throw new NotImplementedException();
+                                                case OperandType.ShortInlineBrTarget:
+                                                    throw new NotImplementedException();
+                                                case OperandType.ShortInlineI:
+                                                    var a = (int)int32Converter.ConvertFromString(sdfasd[1])!;
+                                                    ilg.Append(ilg.Create(sdfdsa, checked((byte)a)));
+                                                    break;
+                                                case OperandType.ShortInlineR:
+                                                    throw new NotImplementedException();
+                                                case OperandType.ShortInlineVar:
+                                                    throw new NotImplementedException();
+                                                case OperandType.ShortInlineArg:
+                                                    throw new NotImplementedException();
+                                                default:
+                                                    throw new Exception("il opcode arg");
+                                                }
 
-                                            ++modified;
-                                            Console.Out.WriteLine($@"Done.");
 
-                                            if (null != ilg) {
-                                                var ignored = 0;
+
                                             }
                                         }
+                                        method.CustomAttributes.Remove(ilAttr);
 
+                                        ++modified;
+                                        Console.Out.WriteLine($@"Done.");
 
-
+                                        if (null != ilg) {
+                                            var ignored = 0;
+                                        }
                                     }
 
                                 }
@@ -275,7 +271,7 @@ namespace ThisAssembly {
                         return (int)ExitStatus.RequestFailed;
                     }
                     Console.Out.WriteLine($@"Modified: {modified}.");
-                    var sss = (System.Reflection.StrongNameKeyPair)null;
+                    var sss = (System.Reflection.StrongNameKeyPair?)null;
                     try {
                         var keyfile = args?[1];
                         if (null != keyfile) {

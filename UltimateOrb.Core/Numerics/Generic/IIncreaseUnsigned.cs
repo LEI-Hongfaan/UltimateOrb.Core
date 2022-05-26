@@ -10,20 +10,16 @@ using UltimateOrb.Utilities;
 using IL = InlineIL.IL;
 using static InlineIL.IL.Emit;
 using static UltimateOrb.Utilities.Extensions.CanonicalIntegerBooleanExtensions;
+using System.Diagnostics;
+using UltimateOrb.Functional.DataTypes;
 
 namespace UltimateOrb.Numerics.Generic {
 
-    public struct TIntegerArithmaticPrimtive : IIntegerArithmatic<ulong> {
+    public struct TIntegerArithmaticPrimtive : IIntegerArithmatic<Void, ulong> {
+
 
         public CanonicalIntegerBoolean AddUnsignedNoThrow(CanonicalIntegerBoolean carry, in ulong first, in ulong second, out ulong result) {
-            var result_ = unchecked(first + second);
-            var c= CanonicalIntegerBooleanModule.LessThan(result_, first);
-            if (carry) {
-                c |= IncreaseUnsignedNoThrow(in result_, out result_);
-            }
-
-            result = result_;
-            return c;
+            return MathWithCarrying.AddUnsigned(carry, first, second, out result);
         }
 
         public void BigMul(in ulong first, in ulong second, out ulong result_lo, out ulong result_hi) {
@@ -31,7 +27,8 @@ namespace UltimateOrb.Numerics.Generic {
         }
 
         public void ExtendedShiftRightUnsigned(in ulong value, uint value_ex, out ulong result, out uint result_ex) {
-            throw new NotImplementedException();
+            result = DoubleArithmetic.ShiftRightUnsigned(value, value_ex, out var result_ex_);
+            result_ex = unchecked((uint)result_ex_);
         }
 
         public void SubtractUnchecked(in ulong first, in ulong second, out ulong result) {
@@ -39,19 +36,17 @@ namespace UltimateOrb.Numerics.Generic {
         }
 
         public CanonicalIntegerBoolean SubtractUnsignedNoThrow(CanonicalIntegerBoolean carry, in ulong first, in ulong second, out ulong result) {
-            return NewMethod(carry, first, second, out result);
+            return MathWithCarrying.SubtractUnsigned(carry, first, second, out result);
         }
-
-        
 
         public void ToIntegerUnchecked(uint value, out ulong result) {
             result = value;
         }
-
-
     }
-    public interface IIntegerArithmatic<T> {
 
+    public interface IIntegerArithmatic<TT, T> {
+
+        public long BitSize { get => SizeOfModule.BitSizeOf<T>(); }
 
         public void BigMul(in T first, in T second, out T result_lo, out T result_hi);
         public void SubtractUnchecked(in T first, in T second, out T result);
@@ -107,13 +102,13 @@ namespace UltimateOrb.Numerics.Generic {
         }
 
         public CanonicalIntegerBoolean AddUnsignedNoThrow(CanonicalIntegerBoolean carry, in T first, in T second, out T result);
-        
+
         public CanonicalIntegerBoolean AddUnsignedNoThrow(in T first, in T second, out T result) {
             return AddUnsignedNoThrow(false, in first, in second, out result);
         }
 
         public CanonicalIntegerBoolean SubtractUnsignedNoThrow(CanonicalIntegerBoolean carry, in T first, in T second, out T result);
-        
+
         public CanonicalIntegerBoolean SubtractUnsignedNoThrow(in T first, in T second, out T result) {
             return SubtractUnsignedNoThrow(false, in first, in second, out result);
         }
@@ -212,7 +207,7 @@ namespace UltimateOrb.Numerics.Generic {
             ExtendedSubtractUnchecked(in first_result, first_result_ex, in second, default(ZeroT), out first_result, out first_result_ex);
         }
 
-        public bool IsOverlapped(in T first, in T second) {
+        public bool IsOverlappedWith(in T first, in T second) {
             return Unsafe.AreSame(ref Unsafe.AsRef(in first), ref Unsafe.AsRef(in second));
         }
 
@@ -220,7 +215,7 @@ namespace UltimateOrb.Numerics.Generic {
             return !Unsafe.AreSame(ref Unsafe.AsRef(in first), ref Unsafe.AsRef(in second)); ;
         }
 
-        public bool IsSameAsOrNotOverlapped(in T first, in T second) {
+        public bool IsSameAsOrNotOverlappedWith(in T first, in T second) {
             return true;
         }
     }
@@ -228,29 +223,246 @@ namespace UltimateOrb.Numerics.Generic {
     public readonly struct ZeroT {
     }
 
-    public interface IDoubleArithmatic<T> : IIntegerArithmatic<T> {
+    public struct DoubleArithmaticChangeTag<TFrom, TTo, T, TStructure> : IDoubleArithmatic<TTo, T>
+        where TStructure : struct, IDoubleArithmatic<TFrom, T> {
+
+        public CanonicalIntegerBoolean AddUnsignedNoThrow(CanonicalIntegerBoolean carry, in T first, in T second, out T result) {
+            return default(TStructure).AddUnsignedNoThrow(carry, in first, in second, out result);
+        }
+
+        public void BigMul(in T first, in T second, out T result_lo, out T result_hi) {
+            default(TStructure).BigMul(first, in second, out result_lo, out result_hi);
+        }
+
+        public void ExtendedShiftRightUnsigned(in T value, uint value_ex, out T result, out uint result_ex) {
+            default(TStructure).ExtendedShiftRightUnsigned(in value, value_ex, out result, out result_ex);
+        }
+
+        public void SubtractUnchecked(in T first, in T second, out T result) {
+            default(TStructure).SubtractUnchecked(in first, in second, out result);
+        }
+
+        public CanonicalIntegerBoolean SubtractUnsignedNoThrow(CanonicalIntegerBoolean carry, in T first, in T second, out T result) {
+            return default(TStructure).SubtractUnsignedNoThrow(in first, in second, out result);
+        }
+
+        public void ToIntegerUnchecked(uint value, out T result) {
+            default(TStructure).ToIntegerUnchecked(value, out result);
+        }
+    }
+
+    public readonly struct TDoubleArithmatic<T, TDouble, TIntegerArithmaticOfT>
+        : IDoubleArithmatic<Void, T>
+        , IDoubleArithmatic<Void<Void>, TDouble>
+        where TDouble : IDouble<T>
+        where TIntegerArithmaticOfT : struct, IIntegerArithmatic<Void, T> {
+
+
+        public CanonicalIntegerBoolean AddUnsignedNoThrow(CanonicalIntegerBoolean carry, in T first, in T second, out T result) {
+            return default(TIntegerArithmaticOfT).AddUnsignedNoThrow(carry, in first, in second, out result);
+        }
+
+        public CanonicalIntegerBoolean AddUnsignedNoThrow(CanonicalIntegerBoolean carry, in TDouble first, in TDouble second, out TDouble result) {
+            // ((IDoubleArithmatic<Void, T>)this).AddUnsignedNoThrow(carry, in first.GetLoRef(), in first.GetHiRef(), in second.GetLoRef(), in second.GetHiRef(), out result);
+            throw new NotImplementedException();
+        }
+
+        public void BigMul(in T first, in T second, out T result_lo, out T result_hi) {
+            default(TIntegerArithmaticOfT).BigMul(in first, in second, out result_lo, out result_hi);
+        }
+
+        public void BigMul(in TDouble first, in TDouble second, out TDouble result_lo, out TDouble result_hi) {
+            Unsafe.SkipInit(out result_lo);
+            Unsafe.SkipInit(out result_hi);
+            ((IDoubleArithmatic<Void, T>)this).BigMul(in first.GetLoRef(), in first.GetHiRef(), in second.GetLoRef(), in second.GetHiRef(), out result_lo.GetLoRef(), out result_lo.GetHiRef(), out result_hi.GetLoRef(), out result_hi.GetHiRef());
+        }
+
+        public void ExtendedShiftRightUnsigned(in T value, uint value_ex, out T result, out uint result_ex) {
+            default(TIntegerArithmaticOfT).ExtendedShiftRightUnsigned(in value, value_ex, out result, out result_ex);
+        }
+
+        public void ExtendedShiftRightUnsigned(in TDouble value, uint value_ex, out TDouble result, out uint result_ex) {
+            Unsafe.SkipInit(out result);
+            throw new NotImplementedException();
+
+            // ((IDoubleArithmatic<Void, T>)this).ExtendedShiftRightUnsigned(in value.GetLoRef(), in value.GetHiRef(), in second.GetLoRef(), in second.GetHiRef(), out result.GetLoRef(), out result.GetHiRef());
+        }
+
+        public void SubtractUnchecked(in T first, in T second, out T result) {
+            default(TIntegerArithmaticOfT).SubtractUnchecked(in first, in second, out result);
+        }
+
+        public void SubtractUnchecked(in TDouble first, in TDouble second, out TDouble result) {
+            Unsafe.SkipInit(out result);
+            ((IDoubleArithmatic<Void, T>)this).SubtractUnchecked(in first.GetLoRef(), in first.GetHiRef(), in second.GetLoRef(), in second.GetHiRef(), out result.GetLoRef(), out result.GetHiRef());
+        }
+
+        public CanonicalIntegerBoolean SubtractUnsignedNoThrow(CanonicalIntegerBoolean borrow, in T first, in T second, out T result) {
+            return default(TIntegerArithmaticOfT).SubtractUnsignedNoThrow(in first, in second, out result);
+        }
+
+        public CanonicalIntegerBoolean SubtractUnsignedNoThrow(CanonicalIntegerBoolean borrow, in TDouble first, in TDouble second, out TDouble result) {
+            Unsafe.SkipInit(out result);
+            CanonicalIntegerBoolean b;
+            TDouble result_;
+            throw new NotImplementedException();
+            if (borrow) {
+                // b =((IDoubleArithmatic<Void, T>)this).DecreaseUnsignedNoThrow(first.GetLoRef(), in first.GetHiRef(), result.
+            }
+
+
+            // return ((IDoubleArithmatic<Void, T>)this).SubtractUnsignedNoThrow(in first.GetLoRef(), in first.GetHiRef(), in second.GetLoRef(), in second.GetHiRef(), out result.GetLoRef(), out result.GetHiRef());
+        }
+
+        public void ToIntegerUnchecked(uint value, out T result) {
+            default(TIntegerArithmaticOfT).ToIntegerUnchecked(value, out result);
+        }
+
+        public void ToIntegerUnchecked(uint value, out TDouble result) {
+            Unsafe.SkipInit(out result);
+            ToIntegerUnchecked(value, out result.GetLoRef());
+            ToIntegerUnchecked(0, out result.GetHiRef());
+        }
+    }
+
+
+
+
+    public interface IIntegerNSignUnspecifiedOperations<Tag, T> {
+
+        static abstract T Add(T first, T second);
+
+        static abstract T Subtract(T first, T second);
+
+        static abstract T Multiply(T first, T second);
+
+        static abstract T Increase(T first);
+
+        static abstract T Decrease(T first);
+    }
+
+    public interface IIntegerN2<Tag, T> {
+
+        static abstract T Divide(T first, T second);
+
+    }
+
+    public interface IIntegerN3<Tag, T> {
+
+        static abstract T Remainder(T first, T second);
+    }
+
+
+    public readonly struct UncheckedTag {
+    }
+
+    public readonly struct CheckedTag {
+    }
+
+    public interface IIntegerNSignSpecifiedOperations<Tag, T>
+        : IIntegerN2<Void<Tag, UncheckedTag>, T>
+        , IIntegerN2<Void<Tag, CheckedTag>, T>
+        , IIntegerN3<Void<Tag, UncheckedTag>, T>
+        , IIntegerN3<Void<Tag, CheckedTag>, T> {
+
+        static abstract T BigMul(T first, T second, out T result_hi);
+        static abstract T ShiftRight(T value, int count);
+
+
+
+    }
+    public interface IIntegerNUncheckedOperations<in TIntegerNUncheckedOperations, Tag, T>
+        where TIntegerNUncheckedOperations : IIntegerNUncheckedOperations<TIntegerNUncheckedOperations, Tag, T> {
+
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        public static abstract int BitSize { get; }
+
+        static abstract T One { get; }
+
+        static abstract T Zero { get; }
+
+        static abstract T ShiftLeftCore(T value, int count);
+
+        static T ShiftLeft(T value) {
+            return TIntegerNUncheckedOperations.ShiftLeftCore(value, 1);
+        }
+    }
+
+    public interface ISIntegerNBase<in TSIntegerNBase, Tag, T>
+        : IIntegerNSignUnspecifiedOperations<Void<Tag, UncheckedTag>, T>
+        , IIntegerNUncheckedOperations<TSIntegerNBase, Tag, T>
+        where TSIntegerNBase : ISIntegerNBase<TSIntegerNBase, Tag, T> {
+
+
+
+
+    }
+
+
+    public interface IXIntegerN<in TXIntegerN, Tag, Signed, T>
+        : ISIntegerNBase<TXIntegerN, Tag, T>
+        , IIntegerNSignSpecifiedOperations<Void<Tag, Signed>, T>
+        where TXIntegerN : IXIntegerN<TXIntegerN, Tag, Signed, T> {
+
+
+
+
+    }
+
+    public interface IIntegerN<in TIntegerN, Tag, T>
+        : IXIntegerN<TIntegerN, Tag, TrueT, T>
+        where TIntegerN : IIntegerN<TIntegerN, Tag, T> {
+
+        static abstract T MinusOne { get; }
+
+    }
+
+    public interface IUIntegerN<in TUIntegerN, Tag, T>
+        : IXIntegerN<TUIntegerN, Tag, FalseT, T>
+        where TUIntegerN : IUIntegerN<TUIntegerN, Tag, T> {
+
+        static abstract T Two { get; }
+    }
+
+    public interface IZIntegerN<in TZIntegerN, Tag, T>
+        : IXIntegerN<TZIntegerN, Tag, TrueT, T>
+        , IXIntegerN<TZIntegerN, Tag, FalseT, T>
+        where TZIntegerN : IZIntegerN<TZIntegerN, Tag, T> {
+
+
+    }
+    public interface IDouble<T> {
+        void SetLo(in T value);
+        void GetLo(out T result);
+        void SetHi(in T value);
+        void GetHi(out T result);
+        ref T GetLoRef();
+        ref T GetHiRef();
+    }
+
+    public interface IDoubleArithmatic<TT, T> : IIntegerArithmatic<TT, T> {
 
         public bool IsOverlapped(in T first_lo, in T first_hi, in T second_lo, in T second_hi) {
-            System.Diagnostics.Debug.Assert(!IsOverlapped(in first_lo, in first_hi));
-            System.Diagnostics.Debug.Assert(!IsOverlapped(in second_lo, in second_hi));
+            System.Diagnostics.Debug.Assert(!IsOverlappedWith(in first_lo, in first_hi));
+            System.Diagnostics.Debug.Assert(!IsOverlappedWith(in second_lo, in second_hi));
             return
-                IsOverlapped(in first_lo, in second_lo) ||
-                IsOverlapped(in first_lo, in second_hi) ||
-                IsOverlapped(in first_hi, in second_lo) ||
-                IsOverlapped(in first_hi, in second_hi);
+                IsOverlappedWith(in first_lo, in second_lo) ||
+                IsOverlappedWith(in first_lo, in second_hi) ||
+                IsOverlappedWith(in first_hi, in second_lo) ||
+                IsOverlappedWith(in first_hi, in second_hi);
         }
 
         public bool IsSameAs(in T first_lo, in T first_hi, in T second_lo, in T second_hi) {
-            System.Diagnostics.Debug.Assert(!IsOverlapped(in first_lo, in first_hi));
-            System.Diagnostics.Debug.Assert(!IsOverlapped(in second_lo, in second_hi));
+            System.Diagnostics.Debug.Assert(!IsOverlappedWith(in first_lo, in first_hi));
+            System.Diagnostics.Debug.Assert(!IsOverlappedWith(in second_lo, in second_hi));
             return
                 IsSameAs(in first_lo, in second_lo) &&
                 IsSameAs(in first_hi, in second_hi);
         }
 
         public bool IsSameAsOrNotOverlapped(in T first_lo, in T first_hi, in T second_lo, in T second_hi) {
-            System.Diagnostics.Debug.Assert(!IsOverlapped(in first_lo, in first_hi));
-            System.Diagnostics.Debug.Assert(!IsOverlapped(in second_lo, in second_hi));
+            System.Diagnostics.Debug.Assert(!IsOverlappedWith(in first_lo, in first_hi));
+            System.Diagnostics.Debug.Assert(!IsOverlappedWith(in second_lo, in second_hi));
             return
                 IsSameAs(in first_lo, in first_hi, in second_lo, in second_hi) ||
                 !IsOverlapped(in first_lo, in first_hi, in second_lo, in second_hi);
@@ -263,7 +475,7 @@ namespace UltimateOrb.Numerics.Generic {
 
 
         public CanonicalIntegerBoolean IncreaseUnchecked(ref T value_result_lo, ref T value_result_hi) {
-            System.Diagnostics.Debug.Assert(!IsOverlapped(in value_result_lo, in value_result_hi));
+            System.Diagnostics.Debug.Assert(!IsOverlappedWith(in value_result_lo, in value_result_hi));
             return ConditionalIncreaseUnsignedNoThrow(IncreaseUnsignedNoThrow(ref value_result_lo), ref value_result_hi);
         }
 
@@ -287,15 +499,15 @@ namespace UltimateOrb.Numerics.Generic {
         }
 
         public void SubtractUnchecked(in T first_lo, in T first_hi, in T second_lo, ZeroT second_hi, out T result_lo, out T result_hi) {
-            var carry = SubtractUnsignedNoThrow(in first_lo, in second_lo, out result_lo);
-            ConditionalDecreaseUnchecked(carry, in first_hi, out result_hi);
+            var borrow = SubtractUnsignedNoThrow(in first_lo, in second_lo, out result_lo);
+            ConditionalDecreaseUnchecked(borrow, in first_hi, out result_hi);
         }
 
         public void SubtractUnchecked(ref T first_result_lo, ref T first_result_hi, in T second_lo, in T second_hi) {
             SubtractUnchecked(in first_result_lo, in first_result_hi, in second_lo, in second_hi, out first_result_lo, out first_result_hi);
         }
 
-        
+
 
         public void BigMul(in T first_lo, in T first_hi, in T second_lo, in T second_hi, out T result_lo_lo, out T result_lo_hi, out T result_hi_lo, out T result_hi_hi) {
             var fl = first_lo;

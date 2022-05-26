@@ -37,6 +37,8 @@ namespace UltimateOrb.Linq.Try {
 
     public static class TryExtenstions {
 
+        public static StandardFuncWrapper<TResult> Wrap<TResult>(this Func<TResult> value) => value;
+    
         public static StandardFuncWrapper<T, TResult> Wrap<T, TResult>(this Func<T, TResult> value) => value;
     
         public static StandardFuncWrapper<T1, T2, TResult> Wrap<T1, T2, TResult>(this Func<T1, T2, TResult> value) => value;

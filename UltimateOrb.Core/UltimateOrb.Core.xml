@@ -20,6 +20,430 @@
                 </para>
             </summary>
         </member>
+        <member name="T:UltimateOrb.Boolean8">
+            <summary>
+            <para>
+            Represents a Boolean (true or false) value. Internally, this type uses 8-bit representations.
+            </para>
+            <para>
+            This type can handle non-canonical representations (values other than 0 or 1).<br />
+            </para>
+            </summary>
+            <remarks>
+            This type is blittable.<br />
+            The size of a value of this type is the same as sizeof(byte).
+            </remarks>
+        </member>
+        <member name="T:UltimateOrb.Boolean32">
+            <summary>
+            <para>
+            Represents a Boolean (true or false) value. Internally, this type uses an integer (<c><see cref="T:System.Int32" /></c>/<c><see cref="T:System.UInt32" /></c>).
+            </para>
+            <para>
+            This type can handle non-canonical representations (values other than 0 or 1).<br />
+            See <see cref="T:UltimateOrb.CanonicalIntegerBoolean" /> for a boolean type that handles canonical representations only but may have better performance.
+            </para>
+            </summary>
+            <remarks>
+            This type is blittable.<br />
+            The size of a value of this type is the same as sizeof(int).
+            </remarks>
+        </member>
+        <member name="T:UltimateOrb.CanonicalIntegerBoolean">
+            <summary>
+            <para>
+            Represents a Boolean (true or false) value. Internally, this type uses an integer (<c><see cref="T:System.Int32" /></c>/<c><see cref="T:System.UInt32" /></c>).
+            </para>
+            <para>
+            The internal representation of this boolean type is assumed to be canonical (0 for false and 1 for true) and remains so. Breaking this invariant may cause undefined behavior.<br />
+            See <see cref="!:Bool" /> for a boolean type that handles non-canonical representations.
+            </para>
+            </summary>
+            <remarks>
+            This type is blittable.<br />
+            The size of a value of this type is the same as sizeof(int).
+            </remarks>
+        </member>
+        <member name="P:UltimateOrb.CanonicalIntegerBoolean.StandardValue">
+            <summary>
+            A standard <see cref="T:System.Boolean"/> value to represent the current <see cref="T:UltimateOrb.CanonicalIntegerBoolean"/>.
+            </summary>
+        </member>
+        <member name="P:UltimateOrb.CanonicalIntegerBoolean.IntegerValue">
+            <summary>
+            The internal representation of the current <see cref="T:UltimateOrb.CanonicalIntegerBoolean"/>.
+            </summary>
+        </member>
+        <member name="F:UltimateOrb.CanonicalIntegerBoolean.TrueString">
+            <summary>
+            Represents the <see cref="T:UltimateOrb.CanonicalIntegerBoolean"/> value true as a string. This field is read-only.
+            </summary>
+        </member>
+        <member name="F:UltimateOrb.CanonicalIntegerBoolean.FalseString">
+            <summary>
+            Represents the <see cref="T:UltimateOrb.CanonicalIntegerBoolean"/> value false as a string. This field is read-only.
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.CanonicalIntegerBoolean.op_Explicit(UltimateOrb.CanonicalIntegerBoolean)~System.Int32">
+            <summary>
+            Retrieves the internal representation of the <see cref="T:UltimateOrb.CanonicalIntegerBoolean"/> value.
+            </summary>
+            <param name="value">The value to retrieve internal representation.</param>
+        </member>
+        <member name="M:UltimateOrb.CanonicalIntegerBoolean.op_Explicit(System.Int32)~UltimateOrb.CanonicalIntegerBoolean">
+            <summary>
+            <para>
+            Converts the value of the specified integer to a <see cref="T:UltimateOrb.CanonicalIntegerBoolean"/> value.
+            </para>
+            <para>
+            <c>(<see cref="T:UltimateOrb.CanonicalIntegerBoolean"/>)true</c> if the integer is 0; otherwise, <c>(<see cref="T:UltimateOrb.CanonicalIntegerBoolean"/>)false</c>.
+            </para>
+            </summary>
+            <param name="value">The specified integer.</param>
+        </member>
+        <member name="M:UltimateOrb.CanonicalIntegerBoolean.op_Explicit(UltimateOrb.CanonicalIntegerBoolean)~System.UInt32">
+            <summary>
+            Retrive the internal representation of the <see cref="T:UltimateOrb.CanonicalIntegerBoolean"/> value.
+            </summary>
+            <param name="value">The value.</param>
+        </member>
+        <member name="M:UltimateOrb.CanonicalIntegerBoolean.op_Explicit(System.UInt32)~UltimateOrb.CanonicalIntegerBoolean">
+            <summary>
+            <para>
+            Converts the value of the specified integer to a <see cref="T:UltimateOrb.CanonicalIntegerBoolean"/> value.
+            </para>
+            <para>
+            <c>(<see cref="T:UltimateOrb.CanonicalIntegerBoolean"/>)true</c> if the integer is 0; otherwise, <c>(<see cref="T:UltimateOrb.CanonicalIntegerBoolean"/>)false</c>.
+            </para>
+            </summary>
+            <param name="value">The specified integer.</param>
+        </member>
+        <member name="M:UltimateOrb.CanonicalIntegerBoolean.op_Implicit(UltimateOrb.CanonicalIntegerBoolean)~System.Boolean">
+            <summary>
+            <para>
+            Converts the <see cref="T:UltimateOrb.CanonicalIntegerBoolean"/> value to a standard <see cref="T:System.Boolean"/> value.
+            </para>
+            <para>
+            No checks will be performed in release mode.
+            </para>
+            </summary>
+            <param name="value">The specified integer.</param>
+        </member>
+        <member name="M:UltimateOrb.CanonicalIntegerBoolean.op_Implicit(System.Boolean)~UltimateOrb.CanonicalIntegerBoolean">
+            <summary>
+            <para>
+            Converts the standard <see cref="T:System.Boolean"/> value to a <see cref="T:UltimateOrb.CanonicalIntegerBoolean"/> value .
+            </para>
+            <para>
+            This operation is safe on non-canonical inputs.
+            </para>
+            </summary>
+            <param name="value">The specified integer.</param>
+        </member>
+        <member name="M:UltimateOrb.CanonicalIntegerBoolean.op_LogicalNot(UltimateOrb.CanonicalIntegerBoolean)">
+            <summary>
+            Computes the logical negation (NOT) of the <paramref name="value"/>.
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.CanonicalIntegerBoolean.op_BitwiseAnd(UltimateOrb.CanonicalIntegerBoolean,UltimateOrb.CanonicalIntegerBoolean)">
+            <summary>
+            Computes the logical conjunction (AND) of the <paramref name="first"/> and <paramref name="second"/> values.
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.CanonicalIntegerBoolean.op_BitwiseOr(UltimateOrb.CanonicalIntegerBoolean,UltimateOrb.CanonicalIntegerBoolean)">
+            <summary>
+            Computes the logical disjunction (OR) of the <paramref name="first"/> and <paramref name="second"/> values.
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.CanonicalIntegerBoolean.op_ExclusiveOr(UltimateOrb.CanonicalIntegerBoolean,UltimateOrb.CanonicalIntegerBoolean)">
+            <summary>
+            Computes the logical exclusive disjunction (XOR) of the <paramref name="first"/> and <paramref name="second"/> values.
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.CanonicalIntegerBoolean.op_True(UltimateOrb.CanonicalIntegerBoolean)">
+            <summary>
+            Determines whether the <see cref="T:UltimateOrb.CanonicalIntegerBoolean"/> value is true.
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.CanonicalIntegerBoolean.op_False(UltimateOrb.CanonicalIntegerBoolean)">
+            <summary>
+            Determines whether the <see cref="T:UltimateOrb.CanonicalIntegerBoolean"/> value is false.
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.CanonicalIntegerBoolean.ToString">
+            <summary>
+            Converts the current <see cref="T:UltimateOrb.CanonicalIntegerBoolean"/> value to a <see cref="T:System.String"/> representation.
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.CanonicalIntegerBoolean.GetTypeCode">
+            <summary>
+            Gets the <see cref="T:System.TypeCode"/> of <see cref="T:UltimateOrb.CanonicalIntegerBoolean"/>.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:UltimateOrb.CanonicalIntegerBoolean.ToString(System.IFormatProvider)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.CanonicalIntegerBoolean.TryFormat(System.Span{System.Char},System.Int32@)">
+            <summary>
+            Formats the current <see cref="T:UltimateOrb.CanonicalIntegerBoolean"/> value.
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.CanonicalIntegerBoolean.Equals(System.Object)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.CanonicalIntegerBoolean.Equals(UltimateOrb.CanonicalIntegerBoolean)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.CanonicalIntegerBoolean.CompareTo(System.Object)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.CanonicalIntegerBoolean.CompareTo(UltimateOrb.CanonicalIntegerBoolean)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.CanonicalIntegerBoolean.Parse(System.String)">
+            <summary>
+            Determines whether a String represents true or false.
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.CanonicalIntegerBoolean.Parse(System.ReadOnlySpan{System.Char})">
+            <summary>
+            Determines whether a String represents true or false.
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.CanonicalIntegerBoolean.TryParse(System.String,UltimateOrb.CanonicalIntegerBoolean@)">
+            <summary>
+            Determines whether a String represents true or false.
+            </summary>
+        </member>
+        <member name="F:UltimateOrb.CanonicalIntegerBoolean.TrueValue">
+            <summary>
+            Represents internal integer value of <see cref="P:UltimateOrb.CanonicalIntegerBoolean.True"/>.
+            </summary>
+        </member>
+        <member name="P:UltimateOrb.CanonicalIntegerBoolean.True">
+            <summary>
+            Represents <c>(<see cref="T:UltimateOrb.CanonicalIntegerBoolean"/>)true</c>.
+            </summary>
+        </member>
+        <member name="F:UltimateOrb.CanonicalIntegerBoolean.FalseValue">
+            <summary>
+            Represents internal integer value of <see cref="P:UltimateOrb.CanonicalIntegerBoolean.False"/>.
+            </summary>
+        </member>
+        <member name="P:UltimateOrb.CanonicalIntegerBoolean.False">
+            <summary>
+            Represents <c>(<see cref="T:UltimateOrb.CanonicalIntegerBoolean"/>)false</c>.
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.CanonicalIntegerBoolean.TryParse(System.ReadOnlySpan{System.Char},UltimateOrb.CanonicalIntegerBoolean@)">
+            <summary>
+            Determines whether a String represents true or false.
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.CanonicalIntegerBoolean.GetHashCode">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.CanonicalIntegerBoolean.op_Equality(UltimateOrb.CanonicalIntegerBoolean,UltimateOrb.CanonicalIntegerBoolean)">
+            <summary>
+            Compares two <see cref="T:UltimateOrb.CanonicalIntegerBoolean"/> values.
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.CanonicalIntegerBoolean.op_Inequality(UltimateOrb.CanonicalIntegerBoolean,UltimateOrb.CanonicalIntegerBoolean)">
+            <summary>
+            Compares two <see cref="T:UltimateOrb.CanonicalIntegerBoolean"/> values.
+            </summary>
+        </member>
+        <member name="T:UltimateOrb.CanonicalIntegerBooleanModule">
+            <summary>
+            Provides helper functions related to <see cref="T:UltimateOrb.CanonicalIntegerBoolean"/>.
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.CanonicalIntegerBooleanModule.ToCanonicalIntegerBooleanUnsafe(System.Int32)">
+            <summary>
+            Converts an integer to a <see cref="T:UltimateOrb.CanonicalIntegerBoolean"/> value. No checks will be performed in release mode.
+            </summary>
+            <param name="value">The integer to convert.</param>
+            <returns>A <see cref="T:UltimateOrb.CanonicalIntegerBoolean"/> value. The internal representation of the <see cref="T:UltimateOrb.CanonicalIntegerBoolean"/> value is specified by the integer.</returns>
+        </member>
+        <member name="M:UltimateOrb.CanonicalIntegerBooleanModule.ToCanonicalIntegerBooleanUnsafe(System.UInt32)">
+            <summary>
+            Converts an integer to a <see cref="T:UltimateOrb.CanonicalIntegerBoolean"/> value. No checks will be performed in release mode.
+            </summary>
+            <param name="value">The integer to convert.</param>
+            <returns>A <see cref="T:UltimateOrb.CanonicalIntegerBoolean"/> value. The internal representation of the <see cref="T:UltimateOrb.CanonicalIntegerBoolean"/> value is specified by the integer.</returns>
+        </member>
+        <member name="M:UltimateOrb.CanonicalIntegerBooleanModule.ToCanonicalIntegerBooleanUnsafe(System.Boolean)">
+            <summary>
+            Converts a <see cref="T:System.Boolean"/> to a <see cref="T:UltimateOrb.CanonicalIntegerBoolean"/> value. No checks will be performed in release mode.
+            </summary>
+            <param name="value">The <see cref="T:System.Boolean"/> to convert.</param>
+            <returns>A <see cref="T:UltimateOrb.CanonicalIntegerBoolean"/> value. The internal representation of the <see cref="T:UltimateOrb.CanonicalIntegerBoolean"/> value is specified by the <see cref="T:System.Boolean"/>.</returns>
+        </member>
+        <member name="M:UltimateOrb.CanonicalIntegerBooleanModule.IsMinusOne(System.Int32)">
+            <summary>
+            Compares <paramref name="value"/> to -1 (bitwise complement of 0).
+            </summary>
+            <param name="value">The value to compare.</param>
+            <returns><c>(<see cref="T:UltimateOrb.CanonicalIntegerBoolean"/>)true</c> if the value is equal to -1 (bitwise complement of 0); otherwise, <c>(<see cref="T:UltimateOrb.CanonicalIntegerBoolean"/>)false</c>.</returns>
+        </member>
+        <member name="M:UltimateOrb.CanonicalIntegerBooleanModule.IsMinusOne(System.UInt32)">
+            <summary>
+            Compares <paramref name="value"/> to -1 (bitwise complement of 0).
+            </summary>
+            <param name="value">The value to compare.</param>
+            <returns><c>(<see cref="T:UltimateOrb.CanonicalIntegerBoolean"/>)true</c> if the value is equal to -1 (bitwise complement of 0); otherwise, <c>(<see cref="T:UltimateOrb.CanonicalIntegerBoolean"/>)false</c>.</returns>
+        </member>
+        <member name="M:UltimateOrb.CanonicalIntegerBooleanModule.IsMinusOne(System.Int64)">
+            <summary>
+            Compares <paramref name="value"/> to -1 (bitwise complement of 0).
+            </summary>
+            <param name="value">The value to compare.</param>
+            <returns><c>(<see cref="T:UltimateOrb.CanonicalIntegerBoolean"/>)true</c> if the value is equal to -1 (bitwise complement of 0); otherwise, <c>(<see cref="T:UltimateOrb.CanonicalIntegerBoolean"/>)false</c>.</returns>
+        </member>
+        <member name="M:UltimateOrb.CanonicalIntegerBooleanModule.IsMinusOne(System.UInt64)">
+            <summary>
+            Compares <paramref name="value"/> to -1 (bitwise complement of 0).
+            </summary>
+            <param name="value">The value to compare.</param>
+            <returns><c>(<see cref="T:UltimateOrb.CanonicalIntegerBoolean"/>)true</c> if the value is equal to -1 (bitwise complement of 0); otherwise, <c>(<see cref="T:UltimateOrb.CanonicalIntegerBoolean"/>)false</c>.</returns>
+        </member>
+        <member name="M:UltimateOrb.CanonicalIntegerBooleanModule.IsMinusOne(System.IntPtr)">
+            <summary>
+            Compares <paramref name="value"/> to -1 (bitwise complement of 0).
+            </summary>
+            <param name="value">The value to compare.</param>
+            <returns><c>(<see cref="T:UltimateOrb.CanonicalIntegerBoolean"/>)true</c> if the value is equal to -1 (bitwise complement of 0); otherwise, <c>(<see cref="T:UltimateOrb.CanonicalIntegerBoolean"/>)false</c>.</returns>
+        </member>
+        <member name="M:UltimateOrb.CanonicalIntegerBooleanModule.IsMinusOne(System.UIntPtr)">
+            <summary>
+            Compares <paramref name="value"/> to -1 (bitwise complement of 0).
+            </summary>
+            <param name="value">The value to compare.</param>
+            <returns><c>(<see cref="T:UltimateOrb.CanonicalIntegerBoolean"/>)true</c> if the value is equal to -1 (bitwise complement of 0); otherwise, <c>(<see cref="T:UltimateOrb.CanonicalIntegerBoolean"/>)false</c>.</returns>
+        </member>
+        <member name="M:UltimateOrb.CanonicalIntegerBooleanModule.IsZero(System.Int32)">
+            <summary>
+            Compares <paramref name="value"/> to -1 (bitwise complement of 0).
+            </summary>
+            <param name="value">The value to compare.</param>
+            <returns><c>(<see cref="T:UltimateOrb.CanonicalIntegerBoolean"/>)true</c> if the value is equal to -1 (bitwise complement of 0); otherwise, <c>(<see cref="T:UltimateOrb.CanonicalIntegerBoolean"/>)false</c>.</returns>
+        </member>
+        <member name="M:UltimateOrb.CanonicalIntegerBooleanModule.IsZero(System.UInt32)">
+            <summary>
+            Compares <paramref name="value"/> to -1 (bitwise complement of 0).
+            </summary>
+            <param name="value">The value to compare.</param>
+            <returns><c>(<see cref="T:UltimateOrb.CanonicalIntegerBoolean"/>)true</c> if the value is equal to -1 (bitwise complement of 0); otherwise, <c>(<see cref="T:UltimateOrb.CanonicalIntegerBoolean"/>)false</c>.</returns>
+        </member>
+        <member name="M:UltimateOrb.CanonicalIntegerBooleanModule.IsZero(System.Int64)">
+            <summary>
+            Compares <paramref name="value"/> to -1 (bitwise complement of 0).
+            </summary>
+            <param name="value">The value to compare.</param>
+            <returns><c>(<see cref="T:UltimateOrb.CanonicalIntegerBoolean"/>)true</c> if the value is equal to -1 (bitwise complement of 0); otherwise, <c>(<see cref="T:UltimateOrb.CanonicalIntegerBoolean"/>)false</c>.</returns>
+        </member>
+        <member name="M:UltimateOrb.CanonicalIntegerBooleanModule.IsZero(System.UInt64)">
+            <summary>
+            Compares <paramref name="value"/> to -1 (bitwise complement of 0).
+            </summary>
+            <param name="value">The value to compare.</param>
+            <returns><c>(<see cref="T:UltimateOrb.CanonicalIntegerBoolean"/>)true</c> if the value is equal to -1 (bitwise complement of 0); otherwise, <c>(<see cref="T:UltimateOrb.CanonicalIntegerBoolean"/>)false</c>.</returns>
+        </member>
+        <member name="M:UltimateOrb.CanonicalIntegerBooleanModule.IsZero(System.IntPtr)">
+            <summary>
+            Compares <paramref name="value"/> to -1 (bitwise complement of 0).
+            </summary>
+            <param name="value">The value to compare.</param>
+            <returns><c>(<see cref="T:UltimateOrb.CanonicalIntegerBoolean"/>)true</c> if the value is equal to -1 (bitwise complement of 0); otherwise, <c>(<see cref="T:UltimateOrb.CanonicalIntegerBoolean"/>)false</c>.</returns>
+        </member>
+        <member name="M:UltimateOrb.CanonicalIntegerBooleanModule.IsZero(System.UIntPtr)">
+            <summary>
+            Compares <paramref name="value"/> to -1 (bitwise complement of 0).
+            </summary>
+            <param name="value">The value to compare.</param>
+            <returns><c>(<see cref="T:UltimateOrb.CanonicalIntegerBoolean"/>)true</c> if the value is equal to -1 (bitwise complement of 0); otherwise, <c>(<see cref="T:UltimateOrb.CanonicalIntegerBoolean"/>)false</c>.</returns>
+        </member>
+        <member name="M:UltimateOrb.CanonicalIntegerBooleanModule.Equals(System.UInt32,System.UInt32)">
+            <summary>
+                <para>
+                    Returns <c>(<see cref="T:UltimateOrb.CanonicalIntegerBoolean"/>)true</c> if <paramref name="first"/> is equal to <paramref name="second"/>. Otherwise, <c>(<see cref="T:UltimateOrb.CanonicalIntegerBoolean"/>)false</c>.
+                </para>
+                <para>
+                    For floating-point numbers, this function will return 0 if the numbers are unordered (either or both are NaN). The infinite values are equal to themselves.
+                </para>
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.CanonicalIntegerBooleanModule.Equals(System.Int32,System.Int32)">
+            <summary>
+                <para>
+                    Returns <c>(<see cref="T:UltimateOrb.CanonicalIntegerBoolean"/>)true</c> if <paramref name="first"/> is equal to <paramref name="second"/>. Otherwise, <c>(<see cref="T:UltimateOrb.CanonicalIntegerBoolean"/>)false</c>.
+                </para>
+                <para>
+                    For floating-point numbers, this function will return 0 if the numbers are unordered (either or both are NaN). The infinite values are equal to themselves.
+                </para>
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.CanonicalIntegerBooleanModule.Equals(System.UInt64,System.UInt64)">
+            <summary>
+                <para>
+                    Returns <c>(<see cref="T:UltimateOrb.CanonicalIntegerBoolean"/>)true</c> if <paramref name="first"/> is equal to <paramref name="second"/>. Otherwise, <c>(<see cref="T:UltimateOrb.CanonicalIntegerBoolean"/>)false</c>.
+                </para>
+                <para>
+                    For floating-point numbers, this function will return 0 if the numbers are unordered (either or both are NaN). The infinite values are equal to themselves.
+                </para>
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.CanonicalIntegerBooleanModule.Equals(System.Int64,System.Int64)">
+            <summary>
+                <para>
+                    Returns <c>(<see cref="T:UltimateOrb.CanonicalIntegerBoolean"/>)true</c> if <paramref name="first"/> is equal to <paramref name="second"/>. Otherwise, <c>(<see cref="T:UltimateOrb.CanonicalIntegerBoolean"/>)false</c>.
+                </para>
+                <para>
+                    For floating-point numbers, this function will return 0 if the numbers are unordered (either or both are NaN). The infinite values are equal to themselves.
+                </para>
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.CanonicalIntegerBooleanModule.Equals(System.Single,System.Single)">
+            <summary>
+                <para>
+                    Returns <c>(<see cref="T:UltimateOrb.CanonicalIntegerBoolean"/>)true</c> if <paramref name="first"/> is equal to <paramref name="second"/>. Otherwise, <c>(<see cref="T:UltimateOrb.CanonicalIntegerBoolean"/>)false</c>.
+                </para>
+                <para>
+                    For floating-point numbers, this function will return 0 if the numbers are unordered (either or both are NaN). The infinite values are equal to themselves.
+                </para>
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.CanonicalIntegerBooleanModule.Equals(System.Double,System.Double)">
+            <summary>
+                <para>
+                    Returns <c>(<see cref="T:UltimateOrb.CanonicalIntegerBoolean"/>)true</c> if <paramref name="first"/> is equal to <paramref name="second"/>. Otherwise, <c>(<see cref="T:UltimateOrb.CanonicalIntegerBoolean"/>)false</c>.
+                </para>
+                <para>
+                    For floating-point numbers, this function will return 0 if the numbers are unordered (either or both are NaN). The infinite values are equal to themselves.
+                </para>
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.CanonicalIntegerBooleanModule.Equals(System.UIntPtr,System.UIntPtr)">
+            <summary>
+                <para>
+                    Returns <c>(<see cref="T:UltimateOrb.CanonicalIntegerBoolean"/>)true</c> if <paramref name="first"/> is equal to <paramref name="second"/>. Otherwise, <c>(<see cref="T:UltimateOrb.CanonicalIntegerBoolean"/>)false</c>.
+                </para>
+                <para>
+                    For floating-point numbers, this function will return 0 if the numbers are unordered (either or both are NaN). The infinite values are equal to themselves.
+                </para>
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.CanonicalIntegerBooleanModule.Equals(System.IntPtr,System.IntPtr)">
+            <summary>
+                <para>
+                    Returns <c>(<see cref="T:UltimateOrb.CanonicalIntegerBoolean"/>)true</c> if <paramref name="first"/> is equal to <paramref name="second"/>. Otherwise, <c>(<see cref="T:UltimateOrb.CanonicalIntegerBoolean"/>)false</c>.
+                </para>
+                <para>
+                    For floating-point numbers, this function will return 0 if the numbers are unordered (either or both are NaN). The infinite values are equal to themselves.
+                </para>
+            </summary>
+        </member>
         <member name="T:UltimateOrb.Collections.Plain.ValueTypes.Stack`1">
             <summary>
                 <para>Represents a variable size last-in-first-out (LIFO) collection of instances of the same specified type. This type is a value type.</para>
@@ -235,6 +659,16 @@
             An empty IDisposable will do nothing when disposing or finalizing.
             </summary>
         </member>
+        <member name="T:UltimateOrb.AsyncDisposable">
+            <summary>
+            Supports <see cref="T:System.IDisposable"/> interface.
+            </summary>
+        </member>
+        <member name="F:UltimateOrb.AsyncDisposable.Empty">
+            <summary>
+            An empty IDisposable will do nothing when disposing or finalizing.
+            </summary>
+        </member>
         <member name="T:UltimateOrb.Dummy`1">
             <summary>
                 <para>Provides a dummy value of the specified type.</para>
@@ -393,6 +827,53 @@
             <remarks>
                 <para>The Number must be in format <c>[1-9][0-9]*</c>.</para>
             </remarks>
+        </member>
+        <member name="T:UltimateOrb.Linq.EnumerableExtenstions">
+            <inheritdoc cref="T:System.Linq.Enumerable"/>
+        </member>
+        <member name="M:UltimateOrb.Linq.EnumerableExtenstions.Skip``1(System.Collections.Generic.IEnumerable{``0},System.Int64)">
+            <inheritdoc cref="M:System.Linq.Enumerable.Skip``1(System.Collections.Generic.IEnumerable{``0},System.Int32)"/>
+        </member>
+        <member name="M:UltimateOrb.Linq.EnumerableExtenstions.Skip_A``1(System.Collections.Generic.IEnumerable{``0},System.Int64)">
+            <inheritdoc cref="M:System.Linq.Enumerable.Skip``1(System.Collections.Generic.IEnumerable{``0},System.Int32)"/>
+        </member>
+        <member name="T:UltimateOrb.Miscellaneous">
+            <summary>
+            Provides miscellaneous functions.
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.Miscellaneous.Likely(System.Boolean)">
+            <summary>
+            Hints that a boolean value is probably true.
+            </summary>
+            <param name="value">The boolean value.</param>
+        </member>
+        <member name="M:UltimateOrb.Miscellaneous.Unlikely(System.Boolean)">
+            <summary>
+            Hints that a boolean value is probably false.
+            </summary>
+            <param name="value">The boolean value.</param>
+        </member>
+        <member name="M:UltimateOrb.Miscellaneous.IgnoreOutParameter``1(``0@)">
+            <summary>
+            Specifies a parameter that is intentionally ignored.
+            </summary>
+            <typeparam name="T">The type of the parameter.</typeparam>
+            <param name="value">The parameter to be ignored.</param>
+        </member>
+        <member name="M:UltimateOrb.Miscellaneous.IgnoreInParameter``1(``0@)">
+            <summary>
+            Specifies a parameter that is intentionally ignored.
+            </summary>
+            <typeparam name="T">The type of the parameter.</typeparam>
+            <param name="value">The parameter to be ignored.</param>
+        </member>
+        <member name="M:UltimateOrb.Miscellaneous.IgnoreParameter``1(``0)">
+            <summary>
+            Specifies a parameter that is intentionally ignored.
+            </summary>
+            <typeparam name="T">The type of the parameter.</typeparam>
+            <param name="value">The parameter to be ignored.</param>
         </member>
         <member name="M:UltimateOrb.Numerics.BigIntegerWrappers.BigIntegerExtensions.GetBitLength(System.Numerics.BigInteger)">
             <summary>
@@ -1944,6 +2425,101 @@
                 <para>The Number must be in format <c>[1-9][0-9]*</c>.</para>
             </remarks>
         </member>
+        <member name="T:UltimateOrb.UndefinedT">
+            <summary>
+            Represents the type of the undefined value witch can be used with <see cref="T:UltimateOrb.UndefinableNullable`1"/>.
+            </summary>
+        </member>
+        <member name="F:UltimateOrb.UndefinedT.Undefined">
+            <summary>
+            The undefined value.
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.UndefinedT.ToString">
+            <summary>
+            Returns a string that represents the undefined value.
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.Utilities.BooleanIntegerModule.Equals(System.UInt32,System.UInt32)">
+            <summary>
+                <para>
+                    Returns <c>1</c> if <paramref name="first"/> is equal to <paramref name="second"/>. Otherwise, <c>0</c>.
+                </para>
+                <para>
+                    For floating-point numbers, this function will return 0 if the numbers are unordered (either or both are NaN). The infinite values are equal to themselves.
+                </para>
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.Utilities.BooleanIntegerModule.Equals(System.Int32,System.Int32)">
+            <summary>
+                <para>
+                    Returns <c>1</c> if <paramref name="first"/> is equal to <paramref name="second"/>. Otherwise, <c>0</c>.
+                </para>
+                <para>
+                    For floating-point numbers, this function will return 0 if the numbers are unordered (either or both are NaN). The infinite values are equal to themselves.
+                </para>
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.Utilities.BooleanIntegerModule.Equals(System.UInt64,System.UInt64)">
+            <summary>
+                <para>
+                    Returns <c>1</c> if <paramref name="first"/> is equal to <paramref name="second"/>. Otherwise, <c>0</c>.
+                </para>
+                <para>
+                    For floating-point numbers, this function will return 0 if the numbers are unordered (either or both are NaN). The infinite values are equal to themselves.
+                </para>
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.Utilities.BooleanIntegerModule.Equals(System.Int64,System.Int64)">
+            <summary>
+                <para>
+                    Returns <c>1</c> if <paramref name="first"/> is equal to <paramref name="second"/>. Otherwise, <c>0</c>.
+                </para>
+                <para>
+                    For floating-point numbers, this function will return 0 if the numbers are unordered (either or both are NaN). The infinite values are equal to themselves.
+                </para>
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.Utilities.BooleanIntegerModule.Equals(System.Single,System.Single)">
+            <summary>
+                <para>
+                    Returns <c>1</c> if <paramref name="first"/> is equal to <paramref name="second"/>. Otherwise, <c>0</c>.
+                </para>
+                <para>
+                    For floating-point numbers, this function will return 0 if the numbers are unordered (either or both are NaN). The infinite values are equal to themselves.
+                </para>
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.Utilities.BooleanIntegerModule.Equals(System.Double,System.Double)">
+            <summary>
+                <para>
+                    Returns <c>1</c> if <paramref name="first"/> is equal to <paramref name="second"/>. Otherwise, <c>0</c>.
+                </para>
+                <para>
+                    For floating-point numbers, this function will return 0 if the numbers are unordered (either or both are NaN). The infinite values are equal to themselves.
+                </para>
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.Utilities.BooleanIntegerModule.Equals(System.UIntPtr,System.UIntPtr)">
+            <summary>
+                <para>
+                    Returns <c>1</c> if <paramref name="first"/> is equal to <paramref name="second"/>. Otherwise, <c>0</c>.
+                </para>
+                <para>
+                    For floating-point numbers, this function will return 0 if the numbers are unordered (either or both are NaN). The infinite values are equal to themselves.
+                </para>
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.Utilities.BooleanIntegerModule.Equals(System.IntPtr,System.IntPtr)">
+            <summary>
+                <para>
+                    Returns <c>1</c> if <paramref name="first"/> is equal to <paramref name="second"/>. Otherwise, <c>0</c>.
+                </para>
+                <para>
+                    For floating-point numbers, this function will return 0 if the numbers are unordered (either or both are NaN). The infinite values are equal to themselves.
+                </para>
+            </summary>
+        </member>
         <member name="M:UltimateOrb.Utilities.Extensions.BooleanIntegerExtensions.AsIntegerUnsafe(System.Boolean)">
             <devdoc>
                 <para>
@@ -1972,9 +2548,6 @@
                     ECMA-335: (III.1.1.1 Numeric data types - Short integers)
                     <c>bool</c> or <see cref="T:System.Boolean"/> (8-bit) is zero-extended.
                 </para>
-                <para>
-                    The body of this method will be modified by the build tools.
-                </para>
             </devdoc>
         </member>
         <member name="M:UltimateOrb.Utilities.Extensions.CanonicalIntegerBooleanExtensions.AsUIntegerUnsafe(UltimateOrb.CanonicalIntegerBoolean)">
@@ -1982,9 +2555,6 @@
                 <para>
                     ECMA-335: (III.1.1.1 Numeric data types - Short integers)
                     <c>bool</c> or <see cref="T:System.Boolean"/> (8-bit) is zero-extended.
-                </para>
-                <para>
-                    The body of this method will be modified by the build tools.
                 </para>
             </devdoc>
         </member>
@@ -2179,6 +2749,13 @@
             <summary>
             Compares discriminated unions.<br />
             Two discriminated unions are not equal if their case tags are different.<br />
+            </summary>
+        </member>
+        <member name="T:UltimateOrb.Void">
+            <summary>
+                <para>
+                    Provides a placeholder type.
+                </para>
             </summary>
         </member>
         <member name="T:UltimateOrb.Void`1">

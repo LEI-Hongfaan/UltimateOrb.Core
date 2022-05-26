@@ -1,5 +1,5 @@
-﻿using Xunit;
-using FsCheck.Xunit;
+﻿using NUnit;
+using FsCheck.NUnit;
 using System;
 using System.Collections.Generic;
 using System.Text;

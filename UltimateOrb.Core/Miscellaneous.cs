@@ -34,7 +34,6 @@ namespace UltimateOrb {
         /// <param name="value">The parameter to be ignored.</param>
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         [ILMethodBodyAttribute(@"
-            pop
             ret
         ")]
         public static void IgnoreOutParameter<T>(out T value) {

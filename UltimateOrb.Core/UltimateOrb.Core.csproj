@@ -1,9 +1,17 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <Nullable>enable</Nullable>
     <LangVersion>preview</LangVersion>
+    <!--<EnablePreviewFeatures>true</EnablePreviewFeatures>-->
+    <FileVersion>1.2.1.0</FileVersion>
+    <AssemblyVersion>1.2.1.0</AssemblyVersion>
+    <Version>3.1.0-alpha9</Version>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Authors>LEI Hongfaan</Authors>
+    <Product>UltimateOrb Libraries</Product>
+    <RootNamespace>UltimateOrb</RootNamespace>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -21,11 +29,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Fody" Version="6.5.1">
+    <PackageReference Include="Fody" Version="6.6.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="InlineIL.Fody" Version="1.7.0">
+    <PackageReference Include="InlineIL.Fody" Version="1.7.1">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
   </ItemGroup>
@@ -35,6 +43,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="Boolean{Core}.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Boolean{Core}.tt</DependentUpon>
+    </Compile>
     <Compile Update="CanonicalIntegerBooleanModule{Compare}.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -44,6 +57,11 @@
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>DelegateTypes{IAction,IFunc}.tt</DependentUpon>
+    </Compile>
+    <Compile Update="Functional\CommonDelegates\CommonDelegates.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>CommonDelegates.tt</DependentUpon>
     </Compile>
     <Compile Update="IInitializable.cs">
       <DesignTime>True</DesignTime>
@@ -98,9 +116,17 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="Boolean{Core}.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>Boolean{Core}.cs</LastGenOutput>
+    </None>
     <None Update="DelegateTypes{IAction,IFunc}.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>DelegateTypes{IAction,IFunc}.cs</LastGenOutput>
+    </None>
+    <None Update="Functional\CommonDelegates\CommonDelegates.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>CommonDelegates.cs</LastGenOutput>
     </None>
     <None Update="IInitializable.tt">
       <Generator>TextTemplatingFileGenerator</Generator>

@@ -14,7 +14,7 @@ using System.Runtime.InteropServices;
 using UltimateOrb.Buffers;
 using UltimateOrb.Functional.CommonDelegates;
 using UltimateOrb.Utilities;
-using Xunit.Sdk;
+using NUnit.Sdk;
 
 namespace UltimateOrb {
 

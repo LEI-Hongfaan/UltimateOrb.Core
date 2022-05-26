@@ -8,6 +8,16 @@ using System.Runtime.CompilerServices;
 using UltimateOrb.Utilities;
 
 namespace UltimateOrb {
+
+    public static partial class StandardExtensions {
+
+        public static nint GetNativeLength<T>(this T[] array) {
+            return unchecked((nint)CilVerifiable.GetLength(array));
+        }
+    }
+}
+
+namespace UltimateOrb {
     using Local = UltimateOrb.Collections.Generic.Interfaces.Typed_RefReturn_Wrapped_Huge;
     using UltimateOrb.Runtime.CompilerServices;
     using global::Internal.System.Collections.Generic;

@@ -154,8 +154,8 @@ namespace {namespaceFullName} {{
                                 ParameterSyntax d = Parameter(default, TokenList(Token(SyntaxKind.ThisKeyword)), default, Identifier("@this"), null);
 
                                 method.WithParameterList(PrependParameter(method.ParameterList, d));
-                                var aaa = InvocationExpression(d.Identifier, ArgumentList(method.ParameterList.Parameters.Select(x => )));
-                                method.WithExpressionBody(ArrowExpressionClause(aaa));
+                                // var aaa = InvocationExpression(d.Identifier, ArgumentList(method.ParameterList.Parameters.Select(x => )));
+                                // method.WithExpressionBody(ArrowExpressionClause(aaa));
                             } else if (member is PropertyDeclarationSyntax property) {
 
                             } else if (member is IndexerDeclarationSyntax indexer) {

@@ -9,7 +9,7 @@ namespace UltimateOrb {
 
     public readonly partial struct StandardFuncWrapper<<# if (i > 0) { #><#= TypeParamList(i) #>, <# } #>TResult>
         : IReadOnlyStrongBox<Func<<# if (i > 0) { #><#= TypeParamList(i) #>, <# } #>TResult>>
-       , IFunc<<# if (i > 0) { #><#= TypeParamList(i) #>, <# } #>TResult> {
+        , IFunc<<# if (i > 0) { #><#= TypeParamList(i) #>, <# } #>TResult> {
 
         public readonly Func<<# if (i > 0) { #><#= TypeParamList(i) #>, <# } #>TResult> Value;
 

@@ -1,4 +1,4 @@
-﻿using FsCheck.Xunit;
+﻿using FsCheck.NUnit;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -1251,7 +1251,7 @@ namespace UltimateOrb.Core.Tests {
                             var s1 = deque1.ToArray();
                             var ss = s0.SequenceEqual(s1);
                             if (!ss) {
-                                Xunit.Assert.True(false);
+                                NUnit.Assert.True(false);
                             }
                         }
                         {
@@ -1259,7 +1259,7 @@ namespace UltimateOrb.Core.Tests {
                             var s1 = deque1.Min;
                             var ss = s0 == s1;
                             if (!ss) {
-                                Xunit.Assert.True(false);
+                                NUnit.Assert.True(false);
                             }
                         }
                         {
@@ -1267,7 +1267,7 @@ namespace UltimateOrb.Core.Tests {
                             var s1a = deque1.AsEnumerable().ToArray();
                             var ssa = s1.SequenceEqual(s1a);
                             if (!ssa) {
-                                Xunit.Assert.True(false);
+                                NUnit.Assert.True(false);
                             }
                         }
                     }
@@ -2147,7 +2147,7 @@ namespace UltimateOrb.Core.Tests {
         private const ulong euler_5_11 = 0x007BCEF5BDAF73DE;
 
         [System.Runtime.ConstrainedExecution.ReliabilityContractAttribute(System.Runtime.ConstrainedExecution.Consistency.WillNotCorruptState, System.Runtime.ConstrainedExecution.Cer.MayFail)]
-        [System.Runtime.TargetedPatchingOptOutAttribute(null)]
+        [System.Runtime.TargetedPatchingOptOutAttribute("")]
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         [System.Diagnostics.Contracts.PureAttribute()]
         private static bool IsProbablePrimeTrialDivision(uint primes, ulong euler_lo, ulong euler_hi, UInt32 value) {
@@ -2160,7 +2160,7 @@ namespace UltimateOrb.Core.Tests {
         }
 
         [System.Runtime.ConstrainedExecution.ReliabilityContractAttribute(System.Runtime.ConstrainedExecution.Consistency.WillNotCorruptState, System.Runtime.ConstrainedExecution.Cer.MayFail)]
-        [System.Runtime.TargetedPatchingOptOutAttribute(null)]
+        [System.Runtime.TargetedPatchingOptOutAttribute("")]
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         [System.Diagnostics.Contracts.PureAttribute()]
         private static bool IsProbablePrimeTrialDivision(uint primes, ulong euler, UInt32 value) {
@@ -2172,7 +2172,7 @@ namespace UltimateOrb.Core.Tests {
         }
 
         [System.Runtime.ConstrainedExecution.ReliabilityContractAttribute(System.Runtime.ConstrainedExecution.Consistency.WillNotCorruptState, System.Runtime.ConstrainedExecution.Cer.Success)]
-        [System.Runtime.TargetedPatchingOptOutAttribute(null)]
+        [System.Runtime.TargetedPatchingOptOutAttribute("")]
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         [System.Diagnostics.Contracts.PureAttribute()]
         internal static bool IsMillerRabinPseudoprimeInternal(uint a, UInt64 n, UInt64 d, int s) {
@@ -2208,7 +2208,7 @@ namespace UltimateOrb.Core.Tests {
         /// </returns>
         [System.CLSCompliantAttribute(false)]
         [System.Runtime.ConstrainedExecution.ReliabilityContractAttribute(System.Runtime.ConstrainedExecution.Consistency.WillNotCorruptState, System.Runtime.ConstrainedExecution.Cer.Success)]
-        [System.Runtime.TargetedPatchingOptOutAttribute(null)]
+        [System.Runtime.TargetedPatchingOptOutAttribute("")]
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         [System.Diagnostics.Contracts.PureAttribute()]
         public static bool IsOddPrimePartial(UInt32 value) {
@@ -2262,7 +2262,7 @@ namespace UltimateOrb.Core.Tests {
         /// </returns>
         [System.CLSCompliantAttribute(false)]
         [System.Runtime.ConstrainedExecution.ReliabilityContractAttribute(System.Runtime.ConstrainedExecution.Consistency.WillNotCorruptState, System.Runtime.ConstrainedExecution.Cer.Success)]
-        [System.Runtime.TargetedPatchingOptOutAttribute(null)]
+        [System.Runtime.TargetedPatchingOptOutAttribute("")]
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         [System.Diagnostics.Contracts.PureAttribute()]
         public static bool IsPrime(UInt32 value) {

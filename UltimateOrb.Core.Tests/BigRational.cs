@@ -21,7 +21,7 @@ namespace UltimateOrb {
 
         public BigInteger Denominator {
 
-            [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
+            // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
             [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
             [PureAttribute()]
             get {
@@ -35,7 +35,7 @@ namespace UltimateOrb {
 
         public BigInteger SignedNumerator {
 
-            [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
+            // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
             [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
             [PureAttribute()]
             get {
@@ -67,7 +67,7 @@ namespace UltimateOrb {
 
         public int Sign {
 
-            [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
+            // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
             [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
             [PureAttribute()]
             get {
@@ -78,7 +78,7 @@ namespace UltimateOrb {
             }
         }
 
-        [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         [PureAttribute()]
         private BigRational(BigInteger denominator, BigInteger signedNumerator) {
@@ -90,7 +90,7 @@ namespace UltimateOrb {
         }
 
         [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
-        [TargetedPatchingOptOutAttribute(null)]
+        [TargetedPatchingOptOutAttribute("")]
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         [PureAttribute()]
         public static implicit operator BigRational(Rational64 value) {
@@ -102,7 +102,7 @@ namespace UltimateOrb {
         private static readonly BigInteger s_Rational64MaxNumerator = UInt32.MaxValue;
 
         [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
-        [TargetedPatchingOptOutAttribute(null)]
+        [TargetedPatchingOptOutAttribute("")]
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         [PureAttribute()]
         public static explicit operator Rational64(BigRational value) {
@@ -132,7 +132,7 @@ namespace UltimateOrb {
         private static readonly BigInteger s_BigIntegerOne = BigInteger.One;
 
         [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
-        [TargetedPatchingOptOutAttribute(null)]
+        [TargetedPatchingOptOutAttribute("")]
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         [PureAttribute()]
         public static implicit operator BigRational(BigInteger value) {
@@ -140,7 +140,7 @@ namespace UltimateOrb {
         }
 
         [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
-        [TargetedPatchingOptOutAttribute(null)]
+        [TargetedPatchingOptOutAttribute("")]
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         [PureAttribute()]
         public static explicit operator BigInteger(BigRational value) {
@@ -151,7 +151,7 @@ namespace UltimateOrb {
         }
 
         [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
-        [TargetedPatchingOptOutAttribute(null)]
+        [TargetedPatchingOptOutAttribute("")]
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         [PureAttribute()]
         public static explicit operator Double(BigRational value) {
@@ -161,8 +161,8 @@ namespace UltimateOrb {
             return (Double)value.m_SignedNumerator / (Double)value.m_Denominator;
         }
 
-        [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
-        [TargetedPatchingOptOutAttribute(null)]
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
+        [TargetedPatchingOptOutAttribute("")]
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         [PureAttribute()]
         public static BigRational operator +(BigRational value) {
@@ -170,7 +170,7 @@ namespace UltimateOrb {
         }
 
         [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
-        [TargetedPatchingOptOutAttribute(null)]
+        [TargetedPatchingOptOutAttribute("")]
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         [PureAttribute()]
         public static BigRational operator -(BigRational value) {
@@ -178,7 +178,7 @@ namespace UltimateOrb {
         }
 
         [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
-        [TargetedPatchingOptOutAttribute(null)]
+        [TargetedPatchingOptOutAttribute("")]
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         [PureAttribute()]
         public static BigRational operator +(BigRational first, BigRational second) {
@@ -198,7 +198,7 @@ namespace UltimateOrb {
         }
 
         [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
-        [TargetedPatchingOptOutAttribute(null)]
+        [TargetedPatchingOptOutAttribute("")]
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         [PureAttribute()]
         public static BigRational operator -(BigRational first, BigRational second) {
@@ -218,7 +218,7 @@ namespace UltimateOrb {
         }
 
         [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
-        [TargetedPatchingOptOutAttribute(null)]
+        [TargetedPatchingOptOutAttribute("")]
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         [PureAttribute()]
         public static BigRational operator *(BigRational first, BigRational second) {
@@ -233,7 +233,7 @@ namespace UltimateOrb {
         }
 
         [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
-        [TargetedPatchingOptOutAttribute(null)]
+        [TargetedPatchingOptOutAttribute("")]
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         [PureAttribute()]
         public static BigRational operator /(BigRational first, BigRational second) {
@@ -255,7 +255,7 @@ namespace UltimateOrb {
         }
 
         [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
-        [TargetedPatchingOptOutAttribute(null)]
+        [TargetedPatchingOptOutAttribute("")]
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         [PureAttribute()]
         public static BigRational Invert(BigRational value) {
@@ -270,7 +270,7 @@ namespace UltimateOrb {
         }
 
         [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
-        [TargetedPatchingOptOutAttribute(null)]
+        [TargetedPatchingOptOutAttribute("")]
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         [PureAttribute()]
         public static BigRational FromFraction(long numerator, long denominator) {
@@ -288,7 +288,7 @@ namespace UltimateOrb {
         }
 
         [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
-        [TargetedPatchingOptOutAttribute(null)]
+        [TargetedPatchingOptOutAttribute("")]
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         [PureAttribute()]
         public static BigRational FromFraction(BigInteger numerator, BigInteger denominator) {
@@ -306,24 +306,24 @@ namespace UltimateOrb {
             return new BigRational(denominator / g, numerator / g);
         }
 
-        [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
-        [TargetedPatchingOptOutAttribute(null)]
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
+        [TargetedPatchingOptOutAttribute("")]
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         [PureAttribute()]
         public static bool operator ==(BigRational first, BigRational second) {
             return first.m_SignedNumerator == second.m_SignedNumerator && first.m_Denominator == second.m_Denominator;
         }
 
-        [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
-        [TargetedPatchingOptOutAttribute(null)]
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
+        [TargetedPatchingOptOutAttribute("")]
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         [PureAttribute()]
         public static bool operator !=(BigRational first, BigRational second) {
             return first.m_SignedNumerator != second.m_SignedNumerator || first.m_Denominator != second.m_Denominator;
         }
 
-        [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
-        [TargetedPatchingOptOutAttribute(null)]
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
+        [TargetedPatchingOptOutAttribute("")]
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         [PureAttribute()]
         public override bool Equals(object obj) {
@@ -333,24 +333,24 @@ namespace UltimateOrb {
             return base.Equals(obj);
         }
 
-        [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
-        [TargetedPatchingOptOutAttribute(null)]
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
+        [TargetedPatchingOptOutAttribute("")]
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         [PureAttribute()]
         public override int GetHashCode() {
             return this.m_Denominator.GetHashCode() ^ this.m_SignedNumerator.GetHashCode();
         }
 
-        [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
-        [TargetedPatchingOptOutAttribute(null)]
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
+        [TargetedPatchingOptOutAttribute("")]
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         [PureAttribute()]
         public bool Equals(BigRational other) {
             return this == other;
         }
 
-        [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
-        [TargetedPatchingOptOutAttribute(null)]
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
+        [TargetedPatchingOptOutAttribute("")]
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         [PureAttribute()]
         public int CompareTo(BigRational other) {

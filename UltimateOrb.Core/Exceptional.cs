@@ -51,6 +51,10 @@ namespace UltimateOrb {
             get => _Base.Case2OrDefault;
         }
 
+        public T? GetValueOrDefault(T? @default) {
+            return HasValue ? ValueOrDefault : @default;
+        }
+
         public T Value {
 
             get => HasException ? throw _Base.Case1OrDefault! : _Base.Case2;

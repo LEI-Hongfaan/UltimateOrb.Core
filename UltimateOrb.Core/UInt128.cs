@@ -780,7 +780,7 @@ namespace UltimateOrb {
             return checked((Int64)value.lo);
         }
 
-#if (NET5_0 || NET6_0)
+#if (NET5_0 || NET6_0 || NET5_0_OR_GREATER)
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
         [System.Runtime.TargetedPatchingOptOutAttribute("")]
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -843,7 +843,7 @@ namespace UltimateOrb {
             return Zero;
         }
 
-#if (NET5_0 || NET6_0)
+#if (NET5_0 || NET6_0 || NET5_0_OR_GREATER)
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
         [System.Runtime.TargetedPatchingOptOutAttribute("")]
         [System.Diagnostics.Contracts.PureAttribute()]
@@ -1005,7 +1005,7 @@ namespace UltimateOrb {
         [System.Diagnostics.Contracts.PureAttribute()]
         public static explicit operator XInt128(global::System.Decimal value) {
             // TODO: Struct layout of global::System.Decimal may vary...
-#if (NET5_0 || NET6_0)
+#if (NET5_0 || NET6_0 || NET5_0_OR_GREATER)
             var a = (stackalloc UInt32[4]);
             global::System.Decimal.GetBits(value, MemoryMarshal.Cast<UInt32, Int32>(a));
 #else
@@ -2070,7 +2070,7 @@ namespace Internal.System {
 
     public static partial class Converter {
 
-#if (NET5_0 || NET6_0)
+#if (NET5_0 || NET6_0 || NET5_0_OR_GREATER)
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
         [global::System.Runtime.TargetedPatchingOptOutAttribute("")]
         [global::System.Runtime.CompilerServices.MethodImplAttribute(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]

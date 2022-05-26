@@ -304,7 +304,7 @@ namespace UltimateOrb.Numerics {
             System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining |
             System.Runtime.CompilerServices.MethodImplOptions.AggressiveOptimization)]
         public static ULong BigMul(ULong first, ULong second, out ULong highResult) {
-#if (NET5_0 || NET6_0)
+#if (NET5_0 || NET6_0 || NET5_0_OR_GREATER)
             highResult = global::System.Math.BigMul(first, second, out var lowResult);
             return lowResult;
 #else
@@ -357,7 +357,7 @@ namespace UltimateOrb.Numerics {
             System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining |
             System.Runtime.CompilerServices.MethodImplOptions.AggressiveOptimization)]
         public static ULong BigMul(Long first, Long second, out Long highResult) {
-#if (NET5_0 || NET6_0)
+#if (NET5_0 || NET6_0 || NET5_0_OR_GREATER) || NET5_0_OR_GREATER
             highResult = global::System.Math.BigMul(first, second, out var lowResult);
             return unchecked((ULong)lowResult);
 #else
@@ -496,7 +496,7 @@ namespace UltimateOrb.Numerics {
             System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining |
             System.Runtime.CompilerServices.MethodImplOptions.AggressiveOptimization)]
         public static UInt BigMul_M(ULong first, UInt second, out ULong lowResult) {
-#if (NET5_0 || NET6_0)
+#if (NET5_0 || NET6_0 || NET5_0_OR_GREATER)
             return unchecked((UInt)global::System.Math.BigMul(first, second, out lowResult));
 #else
             var lo = unchecked((ULong)(UInt)first * (UInt)second);
@@ -516,7 +516,7 @@ namespace UltimateOrb.Numerics {
 
         [System.CLSCompliantAttribute(false)]
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveOptimization
-#if (NET5_0 || NET6_0)
+#if (NET5_0 || NET6_0 || NET5_0_OR_GREATER)
             | System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining
 #endif
         )]
@@ -569,7 +569,7 @@ namespace UltimateOrb.Numerics {
 
         [System.CLSCompliantAttribute(false)]
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveOptimization
-#if (NET5_0 || NET6_0)
+#if (NET5_0 || NET6_0 || NET5_0_OR_GREATER)
             | System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining
 #endif
         )]
@@ -685,7 +685,7 @@ namespace UltimateOrb.Numerics {
 
         [System.CLSCompliantAttribute(false)]
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveOptimization
-#if (NET5_0 || NET6_0)
+#if (NET5_0 || NET6_0 || NET5_0_OR_GREATER)
             | System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining
 #endif
         )]
@@ -772,7 +772,7 @@ namespace UltimateOrb.Numerics {
             System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining |
             System.Runtime.CompilerServices.MethodImplOptions.AggressiveOptimization)]
         public static ULong BigSquare(ULong value, out ULong highResult) {
-#if (NET5_0 || NET6_0)
+#if (NET5_0 || NET6_0 || NET5_0_OR_GREATER)
             highResult = global::System.Math.BigMul(value, value, out var lowResult);
             return lowResult;
 #else
@@ -815,7 +815,7 @@ namespace UltimateOrb.Numerics {
 
         [System.CLSCompliantAttribute(false)]
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveOptimization
-#if (NET5_0 || NET6_0)
+#if (NET5_0 || NET6_0 || NET5_0_OR_GREATER)
             | System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining
 #endif
         )]

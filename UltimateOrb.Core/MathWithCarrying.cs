@@ -19,6 +19,11 @@ namespace UltimateOrb {
             result = unchecked(value + (TIntT)carry.ToUInteger());
         }
 
+        public static CanonicalIntegerBoolean ConditionalIncreaseUnsigned(CanonicalIntegerBoolean carry, TIntT value, out TIntT result) {
+            ConditionalIncreaseUnchecked(carry, value, out result);
+            return carry & CanonicalIntegerBooleanModule.Equals(-1, value.ToSignedUnchecked());
+        }
+
         public static void DecreaseUnchecked(TIntT value, out TIntT result) {
             result = unchecked(value - (TIntT)1);
         }
@@ -27,41 +32,64 @@ namespace UltimateOrb {
             result = unchecked(value - (TIntT)borrow.ToUInteger());
         }
 
-        private static CanonicalIntegerBoolean IncreaseUnsigned(TIntT value, out TIntT result) {
-            CanonicalIntegerBooleanModule.
+        public static CanonicalIntegerBoolean ConditionalDecreaseUnsigned(CanonicalIntegerBoolean borrow, TIntT value, out TIntT result) {
+            ConditionalDecreaseUnchecked(borrow, value, out result);
+            return borrow & CanonicalIntegerBooleanModule.Equals(0, value);
         }
 
-        private static CanonicalIntegerBoolean IncreaseUnsigned(CanonicalIntegerBoolean carry, TIntT value, out TIntT result) {
+        public static CanonicalIntegerBoolean IncreaseUnsigned(TIntT value, out TIntT result) {
+            result = 1 + value;
+            return CanonicalIntegerBooleanModule.Equals(-1, value.ToSignedUnchecked());
         }
 
-        private static CanonicalIntegerBoolean DecreaseUnsigned(TIntT value, out TIntT result) {
+        public static CanonicalIntegerBoolean IncreaseUnsigned(CanonicalIntegerBoolean carry, TIntT value, out TIntT result) {
+            var t = 1 + value;
+            return CanonicalIntegerBooleanModule.Equals(-1, value.ToSignedUnchecked()) | ConditionalIncreaseUnsigned(carry, t, out result);
         }
 
-        private static CanonicalIntegerBoolean DecreaseUnsigned(CanonicalIntegerBoolean borrow, TIntT value, out TIntT result) {
+        public static CanonicalIntegerBoolean DecreaseUnsigned(TIntT value, out TIntT result) {
+            result = value - 1;
+            return CanonicalIntegerBooleanModule.Equals(0, value);
         }
 
-        private static void AddUnchecked(TIntT first, TIntT second, out TIntT result) {
+        public static CanonicalIntegerBoolean DecreaseUnsigned(CanonicalIntegerBoolean borrow, TIntT value, out TIntT result) {
+            var t = value - 1;
+            return CanonicalIntegerBooleanModule.Equals(0, value) | ConditionalDecreaseUnsigned(borrow, t, out result);
         }
 
-        private static void AddUnchecked(CanonicalIntegerBoolean carry, TIntT first, TIntT second, out TIntT result) {
+        public static void AddUnchecked(TIntT first, TIntT second, out TIntT result) {
+            result = unchecked(first + second);
         }
 
-        private static void SubtractUnchecked(TIntT first, TIntT second, out TIntT result) {
+        public static void AddUnchecked(CanonicalIntegerBoolean carry, TIntT first, TIntT second, out TIntT result) {
+            result = unchecked((TIntT)carry + first + second);
         }
 
-        private static void SubtractUnchecked(CanonicalIntegerBoolean borrow, TIntT first, TIntT second, out TIntT result) {
+        public static void SubtractUnchecked(TIntT first, TIntT second, out TIntT result) {
+            result = unchecked(first - second);
         }
 
-        private static CanonicalIntegerBoolean AddUnsigned(TIntT first, TIntT second, out TIntT result) {
+        public static void SubtractUnchecked(CanonicalIntegerBoolean borrow, TIntT first, TIntT second, out TIntT result) {
+            result = unchecked(first - (TIntT)borrow - second);
         }
 
-        private static CanonicalIntegerBoolean AddUnsigned(CanonicalIntegerBoolean carry, TIntT first, TIntT second, out TIntT result) {
+        public static CanonicalIntegerBoolean AddUnsigned(TIntT first, TIntT second, out TIntT result) {
+            var result_ = unchecked(first + second);
+            result = result_;
+            return CanonicalIntegerBooleanModule.LessThanOrEqual(first.ToUnsignedUnchecked(), result_.ToUnsignedUnchecked());
         }
 
-        private static CanonicalIntegerBoolean SubtractUnsigned(TIntT first, TIntT second, out TIntT result) {
+        public static CanonicalIntegerBoolean AddUnsigned(CanonicalIntegerBoolean carry, TIntT first, TIntT second, out TIntT result) {
+            return ConditionalIncreaseUnsigned(carry, first, out var result_) | AddUnsigned(result_, second, out result);
         }
 
-        private static CanonicalIntegerBoolean SubtractUnsigned(CanonicalIntegerBoolean borrow, TIntT first, TIntT second, out TIntT result) {
+        public static CanonicalIntegerBoolean SubtractUnsigned(TIntT first, TIntT second, out TIntT result) {
+            result = unchecked(first - second);
+            return CanonicalIntegerBooleanModule.GreaterThanOrEqual(first.ToUnsignedUnchecked(), second.ToUnsignedUnchecked());
+        }
+
+        public static CanonicalIntegerBoolean SubtractUnsigned(CanonicalIntegerBoolean borrow, TIntT first, TIntT second, out TIntT result) {
+            return ConditionalDecreaseUnsigned(borrow, first, out var result_) | SubtractUnsigned(result_, second, out result);
         }
     }
 }

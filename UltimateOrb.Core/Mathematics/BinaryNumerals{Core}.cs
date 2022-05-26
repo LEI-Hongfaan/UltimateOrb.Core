@@ -73,7 +73,7 @@ namespace UltimateOrb.Mathematics {
         public static int CountLeadingZeros(UInt64 w) {
             System.Diagnostics.Contracts.Contract.Ensures(0 <= System.Diagnostics.Contracts.Contract.Result<int>());
             System.Diagnostics.Contracts.Contract.Ensures(System.Diagnostics.Contracts.Contract.Result<int>() <= 64);
-#if NETCOREAPP3_0 || NETCOREAPP3_1 || (NET5_0 || NET6_0)
+#if NETCOREAPP3_0 || NETCOREAPP3_1 || (NET5_0 || NET6_0 || NET5_0_OR_GREATER) || NETCOREAPP3_0_OR_GREATER || NET5_0_OR_GREATER
             return System.Numerics.BitOperations.LeadingZeroCount(w);
 #else
             if (0u == w) {
@@ -119,7 +119,7 @@ namespace UltimateOrb.Mathematics {
         public static int CountLeadingZeros(byte value) {
             System.Diagnostics.Contracts.Contract.Ensures(0 <= System.Diagnostics.Contracts.Contract.Result<int>());
             System.Diagnostics.Contracts.Contract.Ensures(System.Diagnostics.Contracts.Contract.Result<int>() <= 32);
-#if NETCOREAPP3_0 || NETCOREAPP3_1 || (NET5_0 || NET6_0) || NET5_0_OR_GREATER
+#if NETCOREAPP3_0 || NETCOREAPP3_1 || (NET5_0 || NET6_0 || NET5_0_OR_GREATER) || NETCOREAPP3_0_OR_GREATER || NET5_0_OR_GREATER
             return System.Numerics.BitOperations.LeadingZeroCount(value);
 #else
             var v = unchecked((uint)value);
@@ -151,7 +151,7 @@ namespace UltimateOrb.Mathematics {
         public static int CountLeadingZeros(UInt32 v) {
             System.Diagnostics.Contracts.Contract.Ensures(0 <= System.Diagnostics.Contracts.Contract.Result<int>());
             System.Diagnostics.Contracts.Contract.Ensures(System.Diagnostics.Contracts.Contract.Result<int>() <= 32);
-#if NETCOREAPP3_0 || NETCOREAPP3_1 || (NET5_0 || NET6_0) || NET5_0_OR_GREATER
+#if NETCOREAPP3_0 || NETCOREAPP3_1 || (NET5_0 || NET6_0 || NET5_0_OR_GREATER) || NETCOREAPP3_0_OR_GREATER || NET5_0_OR_GREATER
             return System.Numerics.BitOperations.LeadingZeroCount(v);
 #else
             if (0u == v) {
@@ -283,15 +283,15 @@ namespace UltimateOrb.Mathematics {
         [System.Diagnostics.Contracts.PureAttribute()]
         public static long CountTrailingZeros(ReadOnlySpan<UInt64> source) {
             long r = 0;
-            for (i = 0; source.Get > i; ++i) {
-                if (source[i] == 0) {
-                    r = unchecked(r + 8);
+            for (var i = source.Length - 1; 0 <= i; --i) {
+                var t = source[i];
+                if (0 == t) {
+                    r = unchecked(r + 64);
                 } else {
-                    i = source[i];
-                    i &= unchecked(-(sbyte)(byte)i);
-                    goto L_1;
+                    return unchecked(r + CountTrailingZeros(t));
                 }
             }
+            return r;
         }
 
         [System.CLSCompliantAttribute(false)]
@@ -302,7 +302,7 @@ namespace UltimateOrb.Mathematics {
         public static int CountTrailingZeros(UInt32 x) {
             System.Diagnostics.Contracts.Contract.Ensures(0 <= System.Diagnostics.Contracts.Contract.Result<int>());
             System.Diagnostics.Contracts.Contract.Ensures(System.Diagnostics.Contracts.Contract.Result<int>() <= 64);
-#if NETCOREAPP3_0 || NETCOREAPP3_1 || (NET5_0 || NET6_0) || NET5_0_OR_GREATER
+#if NETCOREAPP3_0 || NETCOREAPP3_1 || (NET5_0 || NET6_0 || NET5_0_OR_GREATER) || NETCOREAPP3_0_OR_GREATER || NET5_0_OR_GREATER
             return System.Numerics.BitOperations.TrailingZeroCount(x);
 #else
             if (x == 0) {
@@ -340,7 +340,7 @@ namespace UltimateOrb.Mathematics {
         public static int CountTrailingZeros(UInt64 x) {
             System.Diagnostics.Contracts.Contract.Ensures(0 <= System.Diagnostics.Contracts.Contract.Result<int>());
             System.Diagnostics.Contracts.Contract.Ensures(System.Diagnostics.Contracts.Contract.Result<int>() <= 64);
-#if NETCOREAPP3_0 || NETCOREAPP3_1 || (NET5_0 || NET6_0) || NET5_0_OR_GREATER
+#if NETCOREAPP3_0 || NETCOREAPP3_1 || (NET5_0 || NET6_0 || NET5_0_OR_GREATER) || NETCOREAPP3_0_OR_GREATER || NET5_0_OR_GREATER
             return System.Numerics.BitOperations.TrailingZeroCount(x);
 #else
             if (x == 0) {
@@ -501,6 +501,9 @@ namespace UltimateOrb.Mathematics {
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         [System.Diagnostics.Contracts.PureAttribute()]
         public static UInt64 MostSignificantBit(UInt64 x) {
+#if NETCOREAPP3_0 || NETCOREAPP3_1 || (NET5_0 || NET6_0 || NET5_0_OR_GREATER) || NETCOREAPP3_0_OR_GREATER || NET5_0_OR_GREATER
+            return unchecked((UInt64)Int64.MinValue) >> System.Numerics.BitOperations.LeadingZeroCount(x);
+#else
             x |= (x >> 1);
             x |= (x >> 2);
             x |= (x >> 4);
@@ -508,6 +511,7 @@ namespace UltimateOrb.Mathematics {
             x |= (x >> 16);
             x |= (x >> 32);
             return (x & ~(x >> 1));
+#endif
         }
 
         [System.CLSCompliantAttribute(false)]
@@ -516,12 +520,16 @@ namespace UltimateOrb.Mathematics {
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         [System.Diagnostics.Contracts.PureAttribute()]
         public static UInt32 MostSignificantBit(UInt32 x) {
+#if NETCOREAPP3_0 || NETCOREAPP3_1 || (NET5_0 || NET6_0 || NET5_0_OR_GREATER) || NETCOREAPP3_0_OR_GREATER || NET5_0_OR_GREATER
+            return unchecked((UInt32)UInt32.MinValue) >> System.Numerics.BitOperations.LeadingZeroCount(x);
+#else
             x |= (x >> 1);
             x |= (x >> 2);
             x |= (x >> 4);
             x |= (x >> 8);
             x |= (x >> 16);
             return (x & ~(x >> 1));
+#endif
         }
 
         [System.CLSCompliantAttribute(false)]
@@ -605,12 +613,16 @@ namespace UltimateOrb.Mathematics {
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         [System.Diagnostics.Contracts.PureAttribute()]
         public static int PopulationCount(UInt64 x) {
+#if NETCOREAPP3_0 || NETCOREAPP3_1 || (NET5_0 || NET6_0 || NET5_0_OR_GREATER) || NETCOREAPP3_0_OR_GREATER || NET5_0_OR_GREATER
+            return System.Numerics.BitOperations.PopCount(x);
+#else
             unchecked {
                 x -= (x >> 1) & 0x5555555555555555;
                 x = (x & 0x3333333333333333) + ((x >> 2) & 0x3333333333333333);
                 x = (x + (x >> 4)) & 0x0f0f0f0f0f0f0f0f;
                 return (int)((x * 0x0101010101010101) >> 56);
             }
+#endif
         }
 
         [System.CLSCompliantAttribute(false)]
@@ -619,12 +631,16 @@ namespace UltimateOrb.Mathematics {
         [System.Diagnostics.Contracts.PureAttribute()]
         // 8.38 Cyc
         public static int PopulationCount(UInt32 x) {
+#if NETCOREAPP3_0 || NETCOREAPP3_1 || (NET5_0 || NET6_0 || NET5_0_OR_GREATER) || NETCOREAPP3_0_OR_GREATER || NET5_0_OR_GREATER
+            return System.Numerics.BitOperations.PopCount(x);
+#else
             unchecked {
                 x -= (x >> 1) & 0x55555555;
                 x = (x & 0x33333333) + ((x >> 2) & 0x33333333);
                 x = (x + (x >> 4)) & 0x0f0f0f0f;
                 return (int)((x * 0x01010101) >> 24);
             }
+#endif
         }
 
         [System.CLSCompliantAttribute(false)]
@@ -665,7 +681,7 @@ namespace UltimateOrb.Mathematics {
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         [System.Diagnostics.Contracts.PureAttribute()]
         public static byte ReverseBits(byte v) {
-            return unchecked((byte)((v * 0x0202020202ul & 0x010884422010ul) % 1023));
+            return unchecked((byte)((v * 0X0202020202LU & 0X010884422010LU) % 1023));
         }
 
         [System.CLSCompliantAttribute(false)]
@@ -723,6 +739,14 @@ namespace UltimateOrb.Mathematics {
         [System.Diagnostics.Contracts.PureAttribute()]
         public static int CountSignificantBits(long value) {
             return CountSignificantBits(Elementary.Math.AbsAsUnsigned(value));
+        }
+
+        [System.CLSCompliantAttribute(false)]
+        [TargetedPatchingOptOutAttribute("")]
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        [System.Diagnostics.Contracts.PureAttribute()]
+        public static int Log2Floor(ulong value) {
+            return System.Numerics.BitOperations.Log2(value);
         }
     }
 }

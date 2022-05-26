@@ -169,12 +169,28 @@ namespace UltimateOrb.Utilities {
             throw new TException();
         }
 
-        internal static void ThrowOnInfinite(double value) {
+        public static void ThrowOnInfinite(double value) {
             CilVerifiable.CheckFinite(value);
         }
 
-        internal static void ThrowOnLessThanOrEqual(double b, double a) {
-            throw new NotImplementedException();
+        public static void ThrowOnNonZero(int value) {
+            _ = checked(0u - value.ToUnsignedUnchecked());
+        }
+
+        public static void ThrowOnNonZero(uint value) {
+            _ = checked(0u - value.ToUnsignedUnchecked());
+        }
+
+        public static void ThrowOnNonZero(long value) {
+            _ = checked(0u - value.ToUnsignedUnchecked());
+        }
+
+        public static void ThrowOnNonZero(ulong value) {
+            _ = checked(0u - value.ToUnsignedUnchecked());
+        }
+
+        public static void ThrowOnLessThanOrEqual(double first, double second) {
+            ThrowOnNonZero(BooleanIntegerModule.LessThanOrEqual(first, second));
         }
     }
 }

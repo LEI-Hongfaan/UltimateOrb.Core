@@ -6,7 +6,7 @@ namespace UltimateOrb {
 
     public readonly partial struct StandardFuncWrapper<TResult>
         : IReadOnlyStrongBox<Func<TResult>>
-       , IFunc<TResult> {
+        , IFunc<TResult> {
 
         public readonly Func<TResult> Value;
 
@@ -29,7 +29,7 @@ namespace UltimateOrb {
 
     public readonly partial struct StandardFuncWrapper<T, TResult>
         : IReadOnlyStrongBox<Func<T, TResult>>
-       , IFunc<T, TResult> {
+        , IFunc<T, TResult> {
 
         public readonly Func<T, TResult> Value;
 
@@ -52,7 +52,7 @@ namespace UltimateOrb {
 
     public readonly partial struct StandardFuncWrapper<T1, T2, TResult>
         : IReadOnlyStrongBox<Func<T1, T2, TResult>>
-       , IFunc<T1, T2, TResult> {
+        , IFunc<T1, T2, TResult> {
 
         public readonly Func<T1, T2, TResult> Value;
 
@@ -75,7 +75,7 @@ namespace UltimateOrb {
 
     public readonly partial struct StandardFuncWrapper<T1, T2, T3, TResult>
         : IReadOnlyStrongBox<Func<T1, T2, T3, TResult>>
-       , IFunc<T1, T2, T3, TResult> {
+        , IFunc<T1, T2, T3, TResult> {
 
         public readonly Func<T1, T2, T3, TResult> Value;
 
@@ -98,7 +98,7 @@ namespace UltimateOrb {
 
     public readonly partial struct StandardFuncWrapper<T1, T2, T3, T4, TResult>
         : IReadOnlyStrongBox<Func<T1, T2, T3, T4, TResult>>
-       , IFunc<T1, T2, T3, T4, TResult> {
+        , IFunc<T1, T2, T3, T4, TResult> {
 
         public readonly Func<T1, T2, T3, T4, TResult> Value;
 
@@ -121,7 +121,7 @@ namespace UltimateOrb {
 
     public readonly partial struct StandardFuncWrapper<T1, T2, T3, T4, T5, TResult>
         : IReadOnlyStrongBox<Func<T1, T2, T3, T4, T5, TResult>>
-       , IFunc<T1, T2, T3, T4, T5, TResult> {
+        , IFunc<T1, T2, T3, T4, T5, TResult> {
 
         public readonly Func<T1, T2, T3, T4, T5, TResult> Value;
 
@@ -144,7 +144,7 @@ namespace UltimateOrb {
 
     public readonly partial struct StandardFuncWrapper<T1, T2, T3, T4, T5, T6, TResult>
         : IReadOnlyStrongBox<Func<T1, T2, T3, T4, T5, T6, TResult>>
-       , IFunc<T1, T2, T3, T4, T5, T6, TResult> {
+        , IFunc<T1, T2, T3, T4, T5, T6, TResult> {
 
         public readonly Func<T1, T2, T3, T4, T5, T6, TResult> Value;
 
@@ -167,7 +167,7 @@ namespace UltimateOrb {
 
     public readonly partial struct StandardFuncWrapper<T1, T2, T3, T4, T5, T6, T7, TResult>
         : IReadOnlyStrongBox<Func<T1, T2, T3, T4, T5, T6, T7, TResult>>
-       , IFunc<T1, T2, T3, T4, T5, T6, T7, TResult> {
+        , IFunc<T1, T2, T3, T4, T5, T6, T7, TResult> {
 
         public readonly Func<T1, T2, T3, T4, T5, T6, T7, TResult> Value;
 
@@ -190,7 +190,7 @@ namespace UltimateOrb {
 
     public readonly partial struct StandardFuncWrapper<T1, T2, T3, T4, T5, T6, T7, T8, TResult>
         : IReadOnlyStrongBox<Func<T1, T2, T3, T4, T5, T6, T7, T8, TResult>>
-       , IFunc<T1, T2, T3, T4, T5, T6, T7, T8, TResult> {
+        , IFunc<T1, T2, T3, T4, T5, T6, T7, T8, TResult> {
 
         public readonly Func<T1, T2, T3, T4, T5, T6, T7, T8, TResult> Value;
 
@@ -213,7 +213,7 @@ namespace UltimateOrb {
 
     public readonly partial struct StandardFuncWrapper<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult>
         : IReadOnlyStrongBox<Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult>>
-       , IFunc<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult> {
+        , IFunc<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult> {
 
         public readonly Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult> Value;
 
@@ -236,7 +236,7 @@ namespace UltimateOrb {
 
     public readonly partial struct StandardFuncWrapper<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult>
         : IReadOnlyStrongBox<Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult>>
-       , IFunc<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult> {
+        , IFunc<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult> {
 
         public readonly Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult> Value;
 
@@ -259,7 +259,7 @@ namespace UltimateOrb {
 
     public readonly partial struct StandardFuncWrapper<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult>
         : IReadOnlyStrongBox<Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult>>
-       , IFunc<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult> {
+        , IFunc<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult> {
 
         public readonly Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult> Value;
 
@@ -282,7 +282,7 @@ namespace UltimateOrb {
 
     public readonly partial struct StandardFuncWrapper<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult>
         : IReadOnlyStrongBox<Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult>>
-       , IFunc<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult> {
+        , IFunc<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult> {
 
         public readonly Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult> Value;
 
@@ -305,7 +305,7 @@ namespace UltimateOrb {
 
     public readonly partial struct StandardFuncWrapper<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, TResult>
         : IReadOnlyStrongBox<Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, TResult>>
-       , IFunc<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, TResult> {
+        , IFunc<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, TResult> {
 
         public readonly Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, TResult> Value;
 
@@ -328,7 +328,7 @@ namespace UltimateOrb {
 
     public readonly partial struct StandardFuncWrapper<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, TResult>
         : IReadOnlyStrongBox<Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, TResult>>
-       , IFunc<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, TResult> {
+        , IFunc<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, TResult> {
 
         public readonly Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, TResult> Value;
 
@@ -351,7 +351,7 @@ namespace UltimateOrb {
 
     public readonly partial struct StandardFuncWrapper<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, TResult>
         : IReadOnlyStrongBox<Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, TResult>>
-       , IFunc<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, TResult> {
+        , IFunc<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, TResult> {
 
         public readonly Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, TResult> Value;
 
@@ -374,7 +374,7 @@ namespace UltimateOrb {
 
     public readonly partial struct StandardFuncWrapper<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, TResult>
         : IReadOnlyStrongBox<Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, TResult>>
-       , IFunc<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, TResult> {
+        , IFunc<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, TResult> {
 
         public readonly Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, TResult> Value;
 

@@ -1,44 +1,50 @@
-﻿using System;
+﻿<#@ template language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
-using UltimateOrb.Utilities.InterfaceReadOnlyExtensions.System;
+<#
+var items = new Dictionary<string, string>[] {
+   new Dictionary<string, string> {
+       { "TypeName", "Boolean8" },
+       { "ImplTypeName", "byte" },
+   },
+   new Dictionary<string, string> {
+       { "TypeName", "Boolean32" },
+       { "ImplTypeName", "uint" },
+   },
+};
+#>
 
 namespace UltimateOrb {
+<#
+foreach (var item in items) {
+    var TypeName = item["TypeName"];
+    var ImplTypeName = item["ImplTypeName"];
+#>
 
-    /// <summary>
-    /// <para>
-    /// Represents a Boolean (true or false) value. Internally, this type uses an integer (<c><see cref="int" /></c>/<c><see cref="uint" /></c>).
-    /// </para>
-    /// <para>
-    /// This type can handle non-canonical representations (values other than 0 or 1).<br />
-    /// See <see cref="CanonicalIntegerBoolean" /> for a boolean type that handles canonical representations only but may have better performance.
-    /// </para>
-    /// </summary>
-    /// <remarks>
-    /// This type is blittable.<br />
-    /// The size of a value of this type is the same as sizeof(int).
-    /// </remarks>
-    [Serializable]
-    public readonly struct Bool : IComparable, IComparable<Bool>, IConvertible, IEquatable<Bool>, ISerializable {
+    public readonly partial struct <#= TypeName #> : IComparable, IComparable<<#= TypeName #>>, IConvertible, IEquatable<<#= TypeName #>>, ISerializable {
 
         //
         // Member Variables
         //
-        private readonly int m_value; // Do not rename (binary serialization)
+        private readonly <#= ImplTypeName #> m_value; // Do not rename (binary serialization)
 
         // The true value.
         //
-        internal const int TrueValue = 1;
+        internal const <#= ImplTypeName #> TrueValue = 1;
 
         // The false value.
         //
-        internal const int FalseValue = 0;
+        internal const <#= ImplTypeName #> FalseValue = 0;
 
         //
         // Internal Constants are real consts for performance.
@@ -52,23 +58,23 @@ namespace UltimateOrb {
         //
         internal const string FalseLiteral = "False";
 
-        private Bool(int value) {
+        private <#= TypeName #>(<#= ImplTypeName #> value) {
             m_value = value;
         }
 
-        Bool(SerializationInfo info, StreamingContext context) {
+        <#= TypeName #>(SerializationInfo info, StreamingContext context) {
             m_value = (bool)info.GetValue(nameof(m_value), typeof(bool))! ? TrueValue : FalseValue;
         }
 
-        internal static readonly Bool True = new Bool(TrueValue);
+        internal static readonly <#= TypeName #> True = new <#= TypeName #>(TrueValue);
 
-        internal static readonly Bool False = new Bool(FalseValue);
+        internal static readonly <#= TypeName #> False = new <#= TypeName #>(FalseValue);
 
-        public static implicit operator Bool(bool value) {
-            return new Bool(value ? TrueValue : FalseValue);
+        public static implicit operator <#= TypeName #>(bool value) {
+            return new <#= TypeName #>(value ? TrueValue : FalseValue);
         }
 
-        public static implicit operator bool(Bool value) {
+        public static implicit operator bool(<#= TypeName #> value) {
             return value.StandardValue;
         }
 
@@ -101,7 +107,7 @@ namespace UltimateOrb {
         ==============================================================================*/
         // Provides a hash code for this instance.
         public override int GetHashCode() {
-            return StandardValue ? TrueValue : FalseValue;
+            return StandardValue ? unchecked((int)TrueValue) : unchecked((int)FalseValue);
         }
 
         /*===================================ToString===================================
@@ -150,7 +156,7 @@ namespace UltimateOrb {
         // Determines whether two Boolean objects are equal.
         public override bool Equals([NotNullWhen(true)] object? obj) {
             // If it's not a boolean, we're definitely not equal
-            if (!(obj is Bool value)) {
+            if (!(obj is <#= TypeName #> value)) {
                 return false;
             }
 
@@ -158,7 +164,7 @@ namespace UltimateOrb {
         }
 
         // [NonVersionable]
-        public bool Equals(Bool obj) {
+        public bool Equals(<#= TypeName #> obj) {
             return (0 == m_value) == (0 == obj.m_value);
         }
 
@@ -173,11 +179,11 @@ namespace UltimateOrb {
             if (obj == null) {
                 return 1;
             }
-            if (!(obj is Bool)) {
-                throw new ArgumentException("Object must be of type Bool.");
+            if (!(obj is <#= TypeName #>)) {
+                throw new ArgumentException("Object must be of type <#= TypeName #>.");
             }
 
-            if (StandardValue == ((Bool)obj).StandardValue) {
+            if (StandardValue == ((<#= TypeName #>)obj).StandardValue) {
                 return 0;
             } else if (StandardValue == false) {
                 return -1;
@@ -185,7 +191,7 @@ namespace UltimateOrb {
             return 1;
         }
 
-        public int CompareTo(Bool value) {
+        public int CompareTo(<#= TypeName #> value) {
             if (StandardValue == value.StandardValue) {
                 return 0;
             } else if (StandardValue == false) {
@@ -219,7 +225,7 @@ namespace UltimateOrb {
 
         // Determines whether a String represents true or false.
         //
-        public static Bool Parse(string value) {
+        public static <#= TypeName #> Parse(string value) {
             if (value == null) {
                 throw new ArgumentNullException(nameof(value));
             }
@@ -227,28 +233,28 @@ namespace UltimateOrb {
             return Parse(value.AsSpan());
         }
 
-        public static Bool Parse(ReadOnlySpan<char> value) =>
-            TryParse(value, out var result) ? result : throw new FormatException(string.Format("String '{0}' was not recognized as a valid Bool.", new string(value)));
+        public static <#= TypeName #> Parse(ReadOnlySpan<char> value) =>
+            TryParse(value, out var result) ? result : throw new FormatException(string.Format("String '{0}' was not recognized as a valid <#= TypeName #>.", new string(value)));
 
         // Determines whether a String represents true or false.
         //
-        public static bool TryParse([NotNullWhen(true)] string? value, out Bool result) {
+        public static bool TryParse([NotNullWhen(true)] string? value, out <#= TypeName #> result) {
             if (value == null) {
-                result = new Bool(FalseValue);
+                result = new <#= TypeName #>(FalseValue);
                 return false;
             }
 
             return TryParse(value.AsSpan(), out result);
         }
 
-        public static bool TryParse(ReadOnlySpan<char> value, out Bool result) {
+        public static bool TryParse(ReadOnlySpan<char> value, out <#= TypeName #> result) {
             if (IsTrueStringIgnoreCase(value)) {
-                result = new Bool(TrueValue);
+                result = new <#= TypeName #>(TrueValue);
                 return true;
             }
 
             if (IsFalseStringIgnoreCase(value)) {
-                result = new Bool(FalseValue);
+                result = new <#= TypeName #>(FalseValue);
                 return true;
             }
 
@@ -256,16 +262,16 @@ namespace UltimateOrb {
             value = TrimWhiteSpaceAndNull(value);
 
             if (IsTrueStringIgnoreCase(value)) {
-                result = new Bool(TrueValue);
+                result = new <#= TypeName #>(TrueValue);
                 return true;
             }
 
             if (IsFalseStringIgnoreCase(value)) {
-                result = new Bool(FalseValue);
+                result = new <#= TypeName #>(FalseValue);
                 return true;
             }
 
-            result = new Bool(FalseValue);
+            result = new <#= TypeName #>(FalseValue);
             return false;
         }
 
@@ -304,8 +310,8 @@ namespace UltimateOrb {
         }
 
         Char IConvertible.ToChar(IFormatProvider? provider) {
-            // throw new InvalidCastException(SR.Format(SR.InvalidCast_FromTo, "Bool", "Char"));
-            throw new InvalidCastException("Conversion from type 'Bool' to type 'Char' is not valid.");
+            // throw new InvalidCastException(SR.Format(SR.InvalidCast_FromTo, "<#= TypeName #>", "Char"));
+            throw new InvalidCastException("Conversion from type '<#= TypeName #>' to type 'Char' is not valid.");
         }
 
         SByte IConvertible.ToSByte(IFormatProvider? provider) {
@@ -353,25 +359,28 @@ namespace UltimateOrb {
         }
 
         DateTime IConvertible.ToDateTime(IFormatProvider? provider) {
-            // throw new InvalidCastException(SR.Format(SR.InvalidCast_FromTo, "Bool", "DateTime"));
-            throw new InvalidCastException("Conversion from type 'Bool' to type 'DateTime' is not valid.");
+            // throw new InvalidCastException(SR.Format(SR.InvalidCast_FromTo, "<#= TypeName #>", "DateTime"));
+            throw new InvalidCastException("Conversion from type '<#= TypeName #>' to type 'DateTime' is not valid.");
         }
 
         object IConvertible.ToType(Type type, IFormatProvider? provider) {
             // Convert.DefaultToType((IConvertible)this, type, provider);
-            return StandardValue.ToType(type, provider);
+            return ((IConvertible)StandardValue).ToType(type, provider);
         }
 
         void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context) {
             info.AddValue(nameof(m_value), StandardValue);
         }
 
-        public static bool operator ==(Bool left, Bool right) {
+        public static bool operator ==(<#= TypeName #> left, <#= TypeName #> right) {
             return left.Equals(right);
         }
 
-        public static bool operator !=(Bool left, Bool right) {
+        public static bool operator !=(<#= TypeName #> left, <#= TypeName #> right) {
             return !(left == right);
         }
     }
+<#
+}
+#>
 }

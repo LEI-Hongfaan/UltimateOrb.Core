@@ -26,7 +26,7 @@ namespace UltimateOrb.Numerics {
                         ULong t;
                         {
                             int cc;
-#if (NET5_0 || NET6_0)
+#if (NET5_0 || NET6_0 || NET5_0_OR_GREATER)
                             cc = BinaryNumerals.CountLeadingZeros(highDivisor);
                             t = highDivisor << cc;
 #else
@@ -100,7 +100,7 @@ namespace UltimateOrb.Numerics {
                         ULong t;
                         {
                             int cc;
-#if (NET5_0 || NET6_0)
+#if (NET5_0 || NET6_0 || NET5_0_OR_GREATER)
                             cc = BinaryNumerals.CountLeadingZeros(highDivisor);
                             t = highDivisor << cc;
 #else
@@ -210,7 +210,7 @@ namespace UltimateOrb.Numerics {
                         ULong t;
                         {
                             int cc;
-#if (NET5_0 || NET6_0)
+#if (NET5_0 || NET6_0 || NET5_0_OR_GREATER)
                             cc = BinaryNumerals.CountLeadingZeros(highDivisor);
                             t = highDivisor << cc;
 #else
