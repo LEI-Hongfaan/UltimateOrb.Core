@@ -6,7 +6,12 @@ using System.Runtime.ConstrainedExecution;
 
 namespace UltimateOrb.Utilities {
 
-    public static partial class SignConverter {
+#if INDEPENDENT_XINTN_LIBRARY
+    internal
+#else
+    public
+#endif
+        static partial class SignConverter {
 
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
         [TargetedPatchingOptOutAttribute("")]

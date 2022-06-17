@@ -7,7 +7,12 @@ namespace UltimateOrb {
     /// <summary>
     /// Provides miscellaneous functions.
     /// </summary>
-    public static partial class Miscellaneous {
+#if INDEPENDENT_XINTN_LIBRARY
+    internal
+#else
+    public
+#endif
+        static partial class Miscellaneous {
 
         /// <summary>
         /// Hints that a boolean value is probably true.

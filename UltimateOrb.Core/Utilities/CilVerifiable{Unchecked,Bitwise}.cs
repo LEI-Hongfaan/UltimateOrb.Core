@@ -4,7 +4,12 @@ using System.Runtime.CompilerServices;
 
 namespace UltimateOrb.Utilities {
 
-    public static partial class CilVerifiable {
+#if INDEPENDENT_XINTN_LIBRARY
+    internal
+#else
+    public
+#endif
+        static partial class CilVerifiable {
 
         #region Native Integer
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
@@ -404,7 +409,12 @@ namespace UltimateOrb.Utilities {
 }
 namespace UltimateOrb.Utilities {
 
-    public static partial class CilVerifiable {
+#if INDEPENDENT_XINTN_LIBRARY
+    internal
+#else
+    public
+#endif
+        static partial class CilVerifiable {
 
         #region Native Integer
         [CLSCompliantAttribute(false)]
@@ -840,7 +850,12 @@ namespace UltimateOrb.Utilities {
 
 namespace UltimateOrb.Utilities {
 
-    public static partial class CilVerifiable {
+#if INDEPENDENT_XINTN_LIBRARY
+    internal
+#else
+    public
+#endif
+        static partial class CilVerifiable {
 
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         [ILMethodBodyAttribute(@"

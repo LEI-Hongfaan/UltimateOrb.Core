@@ -1,4 +1,6 @@
-﻿using System;
+﻿#pragma warning disable IDE0090 // Use 'new(...)'
+#pragma warning disable IDE0190 // Null check can be simplified
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -29,7 +31,7 @@ namespace UltimateOrb {
             value__ = unchecked((void*)value);
         }
 
-        public static explicit operator Ptr(void* value) => new Ptr(value);
+        public static implicit operator Ptr(void* value) => new Ptr(value);
 
         public static implicit operator void*(Ptr value) => value.value__;
 
@@ -54,11 +56,11 @@ namespace UltimateOrb {
             }
 
             // TODO:
-            throw new ArgumentException(nameof(obj));
+            throw new ArgumentException("Argument should be of type Ptr.", nameof(obj));
         }
 
         public bool Equals(Ptr other) {
-            return this.value__ == this.value__;
+            return this.value__ == other.value__;
         }
 
         public override bool Equals([NotNullWhen(true)] object? obj) {
@@ -126,9 +128,11 @@ namespace UltimateOrb {
             get => ref *this.value__;
         }
 
+#pragma warning disable IDE1006 // Naming Styles
         public static ref T op_PointerDereference(Ptr<T> value) {
             return ref *value.value__;
         }
+#pragma warning restore IDE1006 // Naming Styles
 
         public int CompareTo(Ptr<T> other) {
             return unchecked((nuint)this.value__).CompareTo(unchecked((nuint)this.value__));
@@ -151,11 +155,11 @@ namespace UltimateOrb {
             }
 
             // TODO:
-            throw new ArgumentException(nameof(obj));
+            throw new ArgumentException("Argument should be of type Ptr<T>.", nameof(obj));
         }
 
         public bool Equals(Ptr<T> other) {
-            return this.value__ == this.value__;
+            return this.value__ == other.value__;
         }
 
         public ref T this[int offset] {
@@ -316,11 +320,11 @@ namespace UltimateOrb {
             }
 
             // TODO:
-            throw new ArgumentException(nameof(obj));
+            throw new ArgumentException("Argument should be of type ReadOnlyPtr.", nameof(obj));
         }
 
         public bool Equals(ReadOnlyPtr other) {
-            return this.value__ == this.value__;
+            return this.value__ == other.value__;
         }
 
         public override bool Equals([NotNullWhen(true)] object? obj) {
@@ -388,9 +392,11 @@ namespace UltimateOrb {
             get => ref *this.value__;
         }
 
+#pragma warning disable IDE1006 // Naming Styles
         public static ref readonly T op_PointerDereference(ReadOnlyPtr<T> value) {
             return ref *value.value__;
         }
+#pragma warning restore IDE1006 // Naming Styles
 
         public int CompareTo(ReadOnlyPtr<T> other) {
             return unchecked((nuint)this.value__).CompareTo(unchecked((nuint)this.value__));
@@ -413,11 +419,11 @@ namespace UltimateOrb {
             }
 
             // TODO:
-            throw new ArgumentException(nameof(obj));
+            throw new ArgumentException("Argument should be of type ReadOnlyPtr<T>.", nameof(obj));
         }
 
         public bool Equals(ReadOnlyPtr<T> other) {
-            return this.value__ == this.value__;
+            return this.value__ == other.value__;
         }
 
         public ref readonly T this[int offset] {

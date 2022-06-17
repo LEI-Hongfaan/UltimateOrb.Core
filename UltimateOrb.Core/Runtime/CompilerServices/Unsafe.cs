@@ -7,10 +7,20 @@ using System.Threading.Tasks;
 
 namespace UltimateOrb.Runtime.CompilerServices {
 
-    public static partial class Unsafe {
+#if INDEPENDENT_XINTN_LIBRARY
+    internal
+#else
+    public
+#endif
+        static partial class Unsafe {
     }
 
-    public static partial class Unsafe {
+#if INDEPENDENT_XINTN_LIBRARY
+    internal
+#else
+    public
+#endif
+        static partial class Unsafe {
 
 #pragma warning disable IDE0060 // Remove unused parameter
         [CLSCompliant(false)]

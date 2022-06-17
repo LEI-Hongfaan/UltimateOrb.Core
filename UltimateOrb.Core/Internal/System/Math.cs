@@ -9,7 +9,12 @@ namespace Internal.System {
     using SizeOfModule = UltimateOrb.Utilities.SizeOfModule;
 
     [System.Runtime.CompilerServices.DiscardableAttribute()]
-    public static partial class Math {
+#if INDEPENDENT_XINTN_LIBRARY
+    internal
+#else
+    public
+#endif
+        static partial class Math {
 
         [System.CLSCompliantAttribute(false)]
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]

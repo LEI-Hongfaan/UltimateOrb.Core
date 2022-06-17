@@ -518,6 +518,11 @@
                 <para>There is insufficient memory to satisfy the request.</para>
             </exception>
         </member>
+        <member name="M:UltimateOrb.Collections.Plain.ValueTypes.Stack`1.Clear">
+            <summary>
+                <para>Removes all objects from the <see cref="T:UltimateOrb.Collections.Plain.ValueTypes.Stack`1"/>.</para>
+            </summary>
+        </member>
         <member name="M:UltimateOrb.Collections.Plain.ValueTypes.Stack`1.Peek">
             <summary>
                 <para>Returns the object at the top of the <see cref="T:UltimateOrb.Collections.Plain.ValueTypes.Stack`1"/> without removing it.</para>

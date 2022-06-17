@@ -2,7 +2,12 @@
 
 namespace UltimateOrb.Utilities {
 
-    public static partial class BooleanIntegerModule {
+#if INDEPENDENT_XINTN_LIBRARY
+    internal
+#else
+    public
+#endif
+        static partial class BooleanIntegerModule {
 
         [ILMethodBodyAttribute(@"
             LdArg.0
@@ -72,7 +77,12 @@ namespace UltimateOrb.Utilities {
 
 namespace UltimateOrb.Utilities {
 
-    public static partial class BooleanIntegerModule {
+#if INDEPENDENT_XINTN_LIBRARY
+    internal
+#else
+    public
+#endif
+        static partial class BooleanIntegerModule {
 
         [ILMethodBodyAttribute(@"
             LdArg.0

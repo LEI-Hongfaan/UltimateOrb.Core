@@ -159,6 +159,21 @@ namespace UltimateOrb.Collections.Plain.ValueTypes {
         }
 
         /// <summary>
+        ///     <para>Removes all objects from the <see cref="Stack{T}"/>.</para>
+        /// </summary>
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        public void Clear() {
+            if (!RuntimeHelpers.IsReferenceOrContainsReferences<T>()) {
+                this.m_count = 0;
+                return;
+            }
+            var count = this.m_count;
+            this.m_count = 0;
+            this.m_buffer.AsSpan(count).Clear();
+        }
+
+        /// <summary>
         ///     <para>Returns the object at the top of the <see cref="Stack{T}"/> without removing it.</para>
         /// </summary>
         /// <returns>
@@ -363,9 +378,10 @@ namespace UltimateOrb.Collections.Plain.ValueTypes {
             this.m_buffer = null!;
             this.m_count = 0;
         }
-        //[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
-        //[MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
-        //public T[] ToArray() => this.ToArray<T, MoveFunctor>();
+
+        // [ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        public T[] ToArray() => this.m_buffer[..this.m_count];
 
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         public TResult[] ToArray<TResult, TSelector>(TSelector selector) where TSelector : IO.IFunc<T, TResult> {

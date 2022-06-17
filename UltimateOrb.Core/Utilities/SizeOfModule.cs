@@ -14,7 +14,12 @@ namespace UltimateOrb.Utilities {
     ///         Whenever you rename this type or such a member, update the build tools accordingly.
     ///     </para>
     /// </devdoc>
-    public static partial class SizeOfModule {
+#if INDEPENDENT_XINTN_LIBRARY
+    internal
+#else
+    public
+#endif
+        static partial class SizeOfModule {
 
         /// <summary>
         ///     <para>Represents the number of bits in a byte.</para>

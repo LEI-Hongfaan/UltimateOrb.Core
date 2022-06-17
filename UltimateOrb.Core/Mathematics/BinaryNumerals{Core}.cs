@@ -6,7 +6,12 @@ using System.Runtime.ConstrainedExecution;
 
 namespace UltimateOrb.Mathematics {
 
-    public static partial class BinaryNumerals {
+#if INDEPENDENT_XINTN_LIBRARY
+    internal
+#else
+    public
+#endif
+        static partial class BinaryNumerals {
 
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
         [TargetedPatchingOptOutAttribute("")]

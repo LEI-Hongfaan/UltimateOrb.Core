@@ -9,7 +9,12 @@ foreach (var T in TS) {
 #>
 namespace UltimateOrb.Utilities {
 
-    public static partial class CilVerifiable {
+#if INDEPENDENT_XINTN_LIBRARY
+    internal
+#else
+    public
+#endif
+        static partial class CilVerifiable {
 
         #region Native Integer
 <#
@@ -658,7 +663,12 @@ namespace UltimateOrb.Utilities {
 
 namespace UltimateOrb.Utilities {
 
-    public static partial class CilVerifiable {
+#if INDEPENDENT_XINTN_LIBRARY
+    internal
+#else
+    public
+#endif
+        static partial class CilVerifiable {
 <#
 var ITS = new [] { "Int32", "UInt32", "Int64", "UInt64", "IntPtr", "UIntPtr" };
 foreach (var IT in ITS) {
