@@ -31,6 +31,7 @@ Version 3.x.x is built against .NET 7.0.
 
 * Now UltimateOrb.Int128 uses exactly the same codebase as UltimateOrb.Core. 
 * The library is trimmed by ILLink.
+* More intrinsics are ultilized to accelate the computations.
 
 ## License
 
