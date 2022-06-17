@@ -33,6 +33,15 @@ Version 3.x.x is built against .NET 7.0.
 * The library is trimmed by ILLink.
 * More intrinsics are ultilized to accelate the computations.
 
+### UltimateOrb.XIntN ###
+The future name of this library.
+
+Plans:
+* It will contains other bigger integer types.
+* Special code paths to perform better on Browser (WASM).
+* Change parameter orders from "least significant bits"-to-"most significant bits" to msb-to-lsb.
+* The structure layout byte orders of fixed-size integer types will be compile-time configurable.
+
 ## License
 
 UltimateOrb.Core and UltimateOrb.Int128 are licensed under the [MIT license](LICENSE).
