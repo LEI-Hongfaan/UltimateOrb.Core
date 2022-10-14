@@ -4,7 +4,7 @@
 using System;
 
 namespace UltimateOrb {
-<# for (var i = 0; i <= 16; ++i) { #>
+<# for (var i = 0; i <= 13; ++i) { #>
 
     public readonly partial struct StandardFuncWrapperCatch<<# if (i > 0) { #><#= TypeParamList(i) #>, <# } #>TResult, TException>
         : IFunc<<# if (i > 0) { #><#= TypeParamList(i) #>, <# } #>Exceptional<TResult, TException>>

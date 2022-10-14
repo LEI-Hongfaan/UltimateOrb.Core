@@ -2,7 +2,12 @@
 
 namespace UltimateOrb.Numerics {
 
-    public static partial class DoubleArithmeticF {
+#if INDEPENDENT_XINTN_LIBRARY
+    internal
+#else
+    public
+#endif
+        static partial class DoubleArithmeticF {
 
         // Veltkamp’s splitter (= 1 + Pow(2, 27))
         const System.Double SplitterVeltkamp = 134217729;

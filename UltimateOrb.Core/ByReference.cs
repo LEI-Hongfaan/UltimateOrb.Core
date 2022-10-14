@@ -1,4 +1,7 @@
-﻿#define BYREFERENCE_USE_IMPL_SPAN
+﻿#if NET7_0_OR_GREATER
+#else
+#define BYREFERENCE_USE_IMPL_SPAN
+#endif
 using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -35,7 +38,7 @@ namespace UltimateOrb {
 #elif BYREFERENCE_USE_IMPL_SPAN
             impl = MemoryMarshal.CreateSpan(ref valueRef, 0);
 #else
-            ref impl = ref valueRef;
+            impl = ref valueRef;
 #endif
         }
     }
@@ -69,7 +72,7 @@ namespace UltimateOrb {
 #elif BYREFERENCE_USE_IMPL_SPAN
             impl = MemoryMarshal.CreateSpan(ref Unsafe.AsRef(in valueRef), 0);
 #else
-            ref impl = ref valueRef;
+            impl = ref valueRef;
 #endif
         }
     }

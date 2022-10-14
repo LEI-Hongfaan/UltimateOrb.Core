@@ -9,7 +9,12 @@ for (var i = 0; i < TS.Length; ++i) {
 
 namespace UltimateOrb.Utilities {
 
-    public static partial class BooleanIntegerModule {
+#if INDEPENDENT_XINTN_LIBRARY
+    internal
+#else
+    public
+#endif
+        static partial class BooleanIntegerModule {
         
 #pragma warning disable IDE0060 // Remove unused parameter
         /// <summary>

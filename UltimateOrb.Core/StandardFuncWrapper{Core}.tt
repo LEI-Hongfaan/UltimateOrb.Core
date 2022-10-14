@@ -5,7 +5,7 @@ using System;
 using UltimateOrb.Runtime.CompilerServices.Interfaces.Typed_Wrapped_Huge;
 
 namespace UltimateOrb {
-<# for (var i = 0; i <= 16; ++i) { #>
+<# for (var i = 0; i <= 13; ++i) { #>
 
     public readonly partial struct StandardFuncWrapper<<# if (i > 0) { #><#= TypeParamList(i) #>, <# } #>TResult>
         : IReadOnlyStrongBox<Func<<# if (i > 0) { #><#= TypeParamList(i) #>, <# } #>TResult>>

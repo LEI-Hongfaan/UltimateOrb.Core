@@ -1141,7 +1141,12 @@ namespace UltimateOrb.Numerics {
         [System.Runtime.CompilerServices.MethodImplAttribute(
             System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining |
             System.Runtime.CompilerServices.MethodImplOptions.AggressiveOptimization)]
-        public static ULong BigDivRemByInverseInternal(Void _, ULong dividend_hi, ULong divisorReciprocal, ULong divisor, out ULong remainder) {
+#if INDEPENDENT_XINTN_LIBRARY
+        internal
+#else
+        public
+#endif
+            static ULong BigDivRemByInverseInternal(Void _, ULong dividend_hi, ULong divisorReciprocal, ULong divisor, out ULong remainder) {
             unchecked {
                 var pl = BigMul(divisorReciprocal, dividend_hi, out var ph);
                 ph += 1 + dividend_hi;
@@ -1183,7 +1188,12 @@ namespace UltimateOrb.Numerics {
         [System.Runtime.CompilerServices.MethodImplAttribute(
             System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining |
             System.Runtime.CompilerServices.MethodImplOptions.AggressiveOptimization)]
-        public static ULong BigRemByInverseInternal(Void _, ULong dividend_hi, ULong divisorReciprocal, ULong divisor) {
+#if INDEPENDENT_XINTN_LIBRARY
+        internal
+#else
+        public
+#endif
+            static ULong BigRemByInverseInternal(Void _, ULong dividend_hi, ULong divisorReciprocal, ULong divisor) {
             unchecked {
                 var pl = BigMul(divisorReciprocal, dividend_hi, out var ph);
                 var r = divisor * ~(ULong)(dividend_hi + ph);

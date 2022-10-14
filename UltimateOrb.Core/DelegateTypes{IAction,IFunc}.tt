@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace UltimateOrb {
 <#
-	for (var n = 0; n <= 16; ++n) {
+	for (var n = 0; n <= 13; ++n) {
 #>
 
 	public partial interface IFunc<<# for (var i = 1; i <= n; ++i) { #><# if (i > 1) { #>, <# } #>in T<# if (n > 1) { #><#= i #><# } #><# } #><# if (n > 0) { #>, <# } #>out TResult> {
@@ -21,7 +21,7 @@ namespace UltimateOrb {
 	}
 #>
 <#
-	for (var n = 0; n <= 16; ++n) {
+	for (var n = 0; n <= 13; ++n) {
 #>
 
 	public partial interface IAction<# if (n > 0) { #><<# for (var i = 1; i <= n; ++i) { #><# if (i > 1) { #>, <# } #>in T<# if (n > 1) { #><#= i #><# } #><# } #>><# } #> {

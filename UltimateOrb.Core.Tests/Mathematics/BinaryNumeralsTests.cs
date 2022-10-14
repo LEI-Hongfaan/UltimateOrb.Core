@@ -1,15 +1,14 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using UltimateOrb.Mathematics;
+﻿using UltimateOrb.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FsCheck.NUnit;
+using Assert = NUnit.Framework.Assert;
 
 namespace UltimateOrb.Mathematics.Tests {
 
-    [TestClass()]
     public class BinaryNumeralsTests {
 
         [Property(MaxTest = 20, QuietOnSuccess = true)]

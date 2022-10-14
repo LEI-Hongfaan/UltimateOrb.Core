@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 
 namespace UltimateOrb {
 <#
-	for (var n = 0; n <= 16; ++n) {
+	for (var n = 0; n <= 13; ++n) {
 #>
 
 	public partial interface IInitializable<# if (n > 0) { #><<# for (var i = 1; i <= n; ++i) { #><# if (i > 1) { #>, <# } #>in T<# if (n > 1) { #><#= i #><# } #><# } #>><# } #> {

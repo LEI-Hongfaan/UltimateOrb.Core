@@ -1,8 +1,11 @@
-﻿using UltimateOrb.Runtime.CompilerServices.TypeTokens;
+﻿namespace UltimateOrb.Utilities.Extensions {
 
-namespace UltimateOrb.Utilities.Extensions {
-
-    public static partial class BooleanIntegerExtensions {
+#if INDEPENDENT_XINTN_LIBRARY
+    internal
+#else
+    public
+#endif
+        static partial class BooleanIntegerExtensions {
 
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
         [System.Runtime.TargetedPatchingOptOutAttribute("")]

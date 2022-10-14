@@ -4,7 +4,12 @@ using System.Runtime.CompilerServices;
 
 namespace UltimateOrb.Utilities {
 
-    public static partial class CilVerifiable {
+#if INDEPENDENT_XINTN_LIBRARY
+    internal
+#else
+    public
+#endif
+        static partial class CilVerifiable {
 
         #region Address Comparison
         #region Managed Pointer

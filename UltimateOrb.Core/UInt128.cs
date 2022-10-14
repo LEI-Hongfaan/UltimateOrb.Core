@@ -1,9 +1,14 @@
-﻿using Internal;
+﻿// WIP: Checked operators
+// #define LEGACY_OPERATOR_CHECKNESS
+using Internal;
 using System;
+using System.Buffers.Binary;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.Numerics;
 using System.Runtime.InteropServices;
+using static UltimateOrb.Utilities.SignConverter;
 
 namespace UltimateOrb {
     using static global::Internal.System.IConvertibleModule;
@@ -25,6 +30,12 @@ namespace UltimateOrb {
     [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 16)]
     public readonly partial struct UInt128
         : IEquatable<XInt128>, IComparable<XInt128>, IComparable
+#if NET7_0_OR_GREATER
+#if !LEGACY_OPERATOR_CHECKNESS
+        , INumberBase<XInt128>, IBinaryInteger<XInt128>, IUnsignedNumber<XInt128>
+#endif
+        , IMinMaxValue<XInt128>
+#endif
 #if FEATURE_STANDARD_LIBRARY_INTEROPERABILITY_FORMATTING_AND_CONVERSION
         , IConvertible, IFormattable
 #endif
@@ -99,6 +110,20 @@ namespace UltimateOrb {
             }
         }
 
+#if NET7_0_OR_GREATER && !LEGACY_OPERATOR_CHECKNESS
+        [System.Diagnostics.Contracts.PureAttribute()]
+        static XInt128 IAdditiveIdentity<XInt128, XInt128>.AdditiveIdentity {
+
+            // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
+            [System.Runtime.TargetedPatchingOptOutAttribute("")]
+            [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+            [System.Diagnostics.Contracts.PureAttribute()]
+            get {
+                return default(XInt128);
+            }
+        }
+#endif
+
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         [System.Diagnostics.Contracts.PureAttribute()]
         public bool IsZero {
@@ -123,6 +148,20 @@ namespace UltimateOrb {
                 return new XInt128(1, 0);
             }
         }
+
+#if NET7_0_OR_GREATER && !LEGACY_OPERATOR_CHECKNESS
+        [System.Diagnostics.Contracts.PureAttribute()]
+        static XInt128 IMultiplicativeIdentity<XInt128, XInt128>.MultiplicativeIdentity {
+
+            // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
+            [System.Runtime.TargetedPatchingOptOutAttribute("")]
+            [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+            [System.Diagnostics.Contracts.PureAttribute()]
+            get {
+                return new XInt128(1, 0);
+            }
+        }
+#endif
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         [System.Diagnostics.Contracts.PureAttribute()]
@@ -252,6 +291,16 @@ namespace UltimateOrb {
             }
         }
 
+#if NET7_0_OR_GREATER && !LEGACY_OPERATOR_CHECKNESS
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
+        [System.Runtime.TargetedPatchingOptOutAttribute("")]
+        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Diagnostics.Contracts.PureAttribute()]
+        static int INumber<XInt128>.Sign(XInt128 value) {
+            return value.Sign;
+        }
+#endif
+
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         [System.Diagnostics.Contracts.PureAttribute()]
         public bool CanConvertToUInt64 {
@@ -290,6 +339,8 @@ namespace UltimateOrb {
                 return CanConvertToUIntN(16);
             }
         }
+
+        static int INumberBase<XInt128>.Radix => throw new NotImplementedException();
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "n")]
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
@@ -423,6 +474,28 @@ namespace UltimateOrb {
             var lo = Numerics.DoubleArithmetic.ShiftRight(value.lo, value.hi, count, out HInt64 hi);
             return new XInt128(lo, hi);
         }
+
+#if NET7_0_OR_GREATER && !LEGACY_OPERATOR_CHECKNESS
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2225:OperatorOverloadsHaveNamedAlternates")]
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
+        [System.Runtime.TargetedPatchingOptOutAttribute("")]
+        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Diagnostics.Contracts.PureAttribute()]
+        static XInt128 IShiftOperators<XInt128, int, XInt128>.operator >>(XInt128 value, int count) {
+            var lo = Numerics.DoubleArithmetic.ShiftRightSigned(value.lo, value.hi, count, out HInt64 hi);
+            return new XInt128(lo, hi);
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2225:OperatorOverloadsHaveNamedAlternates")]
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
+        [System.Runtime.TargetedPatchingOptOutAttribute("")]
+        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Diagnostics.Contracts.PureAttribute()]
+        static XInt128 IShiftOperators<XInt128, int, XInt128>.operator >>>(XInt128 value, int count) {
+            var lo = Numerics.DoubleArithmetic.ShiftRightUnsigned(value.lo, value.hi, count, out HInt64 hi);
+            return new XInt128(lo, hi);
+        }
+#endif
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "op")]
@@ -1085,18 +1158,26 @@ namespace UltimateOrb {
         [System.Runtime.TargetedPatchingOptOutAttribute("")]
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         [System.Diagnostics.Contracts.PureAttribute()]
+#if !NET7_0_OR_GREATER || LEGACY_OPERATOR_CHECKNESS
         public static XInt128 operator -(XInt128 value) {
+#else
+        public static XInt128 operator checked -(XInt128 value) {
+#endif
             var lo = Numerics.DoubleArithmetic.NegateUnsigned(value.lo, value.hi, out HInt64 hi);
             return new XInt128(lo, hi);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "op")]
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
         [System.Runtime.TargetedPatchingOptOutAttribute("")]
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         [System.Diagnostics.Contracts.PureAttribute()]
+#if !NET7_0_OR_GREATER || LEGACY_OPERATOR_CHECKNESS
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "op")]
         public static XInt128 op_UnaryNegationUnchecked(XInt128 value) {
+#else
+        public static XInt128 operator -(XInt128 value) {
+#endif
             var lo = Numerics.DoubleArithmetic.NegateUnchecked(value.lo, value.hi, out HInt64 hi);
             return new XInt128(lo, hi);
         }
@@ -1123,18 +1204,26 @@ namespace UltimateOrb {
         [System.Runtime.TargetedPatchingOptOutAttribute("")]
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         [System.Diagnostics.Contracts.PureAttribute()]
+#if !NET7_0_OR_GREATER || LEGACY_OPERATOR_CHECKNESS
         public static XInt128 operator ++(XInt128 value) {
+#else
+        public static XInt128 operator checked ++(XInt128 value) {
+#endif
             var lo = Numerics.DoubleArithmetic.IncreaseUnsigned(value.lo, value.hi, out HInt64 hi);
             return new XInt128(lo, hi);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "op")]
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
         [System.Runtime.TargetedPatchingOptOutAttribute("")]
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         [System.Diagnostics.Contracts.PureAttribute()]
+#if !NET7_0_OR_GREATER || LEGACY_OPERATOR_CHECKNESS
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "op")]
         public static XInt128 op_IncrementUnchecked(XInt128 value) {
+#else
+        public static XInt128 operator ++(XInt128 value) {
+#endif
             var lo = Numerics.DoubleArithmetic.IncreaseUnchecked(value.lo, value.hi, out HInt64 hi);
             return new XInt128(lo, hi);
         }
@@ -1160,18 +1249,26 @@ namespace UltimateOrb {
         [System.Runtime.TargetedPatchingOptOutAttribute("")]
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         [System.Diagnostics.Contracts.PureAttribute()]
+#if !NET7_0_OR_GREATER || LEGACY_OPERATOR_CHECKNESS
         public static XInt128 operator --(XInt128 value) {
+#else
+        public static XInt128 operator checked --(XInt128 value) {
+#endif
             var lo = Numerics.DoubleArithmetic.DecreaseUnsigned(value.lo, value.hi, out HInt64 hi);
             return new XInt128(lo, hi);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "op")]
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
         [System.Runtime.TargetedPatchingOptOutAttribute("")]
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         [System.Diagnostics.Contracts.PureAttribute()]
+#if !NET7_0_OR_GREATER || LEGACY_OPERATOR_CHECKNESS
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "op")]
         public static XInt128 op_DecrementUnchecked(XInt128 value) {
+#else
+        public static XInt128 operator --(XInt128 value) {
+#endif
             var lo = Numerics.DoubleArithmetic.DecreaseUnchecked(value.lo, value.hi, out HInt64 hi);
             return new XInt128(lo, hi);
         }
@@ -1185,22 +1282,31 @@ namespace UltimateOrb {
             return new XInt128(lo, hi);
         }
 
+
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
         [System.Runtime.TargetedPatchingOptOutAttribute("")]
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         [System.Diagnostics.Contracts.PureAttribute()]
+#if !NET7_0_OR_GREATER || LEGACY_OPERATOR_CHECKNESS
         public static XInt128 operator +(XInt128 first, XInt128 second) {
+#else
+        public static XInt128 operator checked +(XInt128 first, XInt128 second) {
+#endif
             var lo = Numerics.DoubleArithmetic.AddUnsigned(first.lo, first.hi, second.lo, second.hi, out HInt64 hi);
             return new XInt128(lo, hi);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "op")]
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
         [System.Runtime.TargetedPatchingOptOutAttribute("")]
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         [System.Diagnostics.Contracts.PureAttribute()]
+#if !NET7_0_OR_GREATER || LEGACY_OPERATOR_CHECKNESS
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "op")]
         public static XInt128 op_AdditionUnchecked(XInt128 first, XInt128 second) {
+#else
+        public static XInt128 operator +(XInt128 first, XInt128 second) {
+#endif
             var lo = Numerics.DoubleArithmetic.AddUnchecked(first.lo, first.hi, second.lo, second.hi, out HInt64 hi);
             return new XInt128(lo, hi);
         }
@@ -1218,18 +1324,26 @@ namespace UltimateOrb {
         [System.Runtime.TargetedPatchingOptOutAttribute("")]
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         [System.Diagnostics.Contracts.PureAttribute()]
+#if !NET7_0_OR_GREATER || LEGACY_OPERATOR_CHECKNESS
         public static XInt128 operator -(XInt128 first, XInt128 second) {
+#else
+        public static XInt128 operator checked -(XInt128 first, XInt128 second) {
+#endif
             var lo = Numerics.DoubleArithmetic.SubtractUnsigned(first.lo, first.hi, second.lo, second.hi, out HInt64 hi);
             return new XInt128(lo, hi);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "op")]
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
         [System.Runtime.TargetedPatchingOptOutAttribute("")]
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         [System.Diagnostics.Contracts.PureAttribute()]
+#if !NET7_0_OR_GREATER || LEGACY_OPERATOR_CHECKNESS
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "op")]
         public static XInt128 op_SubtractionUnchecked(XInt128 first, XInt128 second) {
+#else
+        public static XInt128 operator -(XInt128 first, XInt128 second) {
+#endif
             var lo = Numerics.DoubleArithmetic.SubtractUnchecked(first.lo, first.hi, second.lo, second.hi, out HInt64 hi);
             return new XInt128(lo, hi);
         }
@@ -1247,18 +1361,26 @@ namespace UltimateOrb {
         [System.Runtime.TargetedPatchingOptOutAttribute("")]
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         [System.Diagnostics.Contracts.PureAttribute()]
+#if !NET7_0_OR_GREATER || LEGACY_OPERATOR_CHECKNESS
         public static XInt128 operator *(XInt128 first, XInt128 second) {
+#else
+        public static XInt128 operator checked *(XInt128 first, XInt128 second) {
+#endif
             var lo = Numerics.DoubleArithmetic.MultiplyUnsigned(first.lo, first.hi, second.lo, second.hi, out HInt64 hi);
             return new XInt128(lo, hi);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "op")]
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
         [System.Runtime.TargetedPatchingOptOutAttribute("")]
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         [System.Diagnostics.Contracts.PureAttribute()]
+#if !NET7_0_OR_GREATER || LEGACY_OPERATOR_CHECKNESS
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "op")]
         public static XInt128 op_MultiplyUnchecked(XInt128 first, XInt128 second) {
+#else
+        public static XInt128 operator *(XInt128 first, XInt128 second) {
+#endif
             var lo = Numerics.DoubleArithmetic.MultiplyUnchecked(first.lo, first.hi, second.lo, second.hi, out HInt64 hi);
             return new XInt128(lo, hi);
         }
@@ -1273,17 +1395,15 @@ namespace UltimateOrb {
             remainder = new XInt128(remainder_lo, remainder_hi);
             return new XInt128(lo, hi);
         }
-
-        /*
+        
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
         [System.Runtime.TargetedPatchingOptOutAttribute("")]
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         [System.Diagnostics.Contracts.PureAttribute()]
-        public static (XInt128 Quotient, XInt128 Remainder) DivRem(XInt128 first, XInt128 second, out XInt128 remainder) {
-            var lo = MathEx.DivRem(first.lo, first.hi, second.lo, second.hi, out UInt64 remainder_lo, out HInt64 remainder_hi, out HInt64 hi);
+        public static (XInt128 Quotient, XInt128 Remainder) DivRem(XInt128 first, XInt128 second) {
+            var lo = Numerics.DoubleArithmetic.DivRem(first.lo, first.hi, second.lo, second.hi, out UInt64 remainder_lo, out HInt64 remainder_hi, out HInt64 hi);
             return (new XInt128(lo, hi), new XInt128(remainder_lo, remainder_hi));
         }
-        */
 
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
         [System.Runtime.TargetedPatchingOptOutAttribute("")]
@@ -1338,7 +1458,262 @@ namespace UltimateOrb {
         public static double op_FloatingPointDivisionDouble(XInt128 first, XInt128 second) {            
         }
         */
+
+#if NET7_0_OR_GREATER && !LEGACY_OPERATOR_CHECKNESS
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
+        [System.Runtime.TargetedPatchingOptOutAttribute("")]
+        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Diagnostics.Contracts.PureAttribute()]
+        static XInt128 IDivisionOperators<XInt128, XInt128, XInt128>.operator checked /(XInt128 first, XInt128 second) {
+            var lo = Numerics.DoubleArithmetic.Divide(first.lo, first.hi, second.lo, second.hi, out HInt64 hi);
+            return new XInt128(lo, hi);
+        }
+
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
+        [System.Runtime.TargetedPatchingOptOutAttribute("")]
+        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Diagnostics.Contracts.PureAttribute()]
+        static XInt128 IDivisionOperators<XInt128, XInt128, XInt128>.operator /(XInt128 first, XInt128 second) {
+            var lo = Numerics.DoubleArithmetic.Divide(first.lo, first.hi, second.lo, second.hi, out HInt64 hi);
+            return new XInt128(lo, hi);
+        }
+#endif
         #endregion
+
+#if NET7_0_OR_GREATER && !LEGACY_OPERATOR_CHECKNESS
+        #region IBinaryNumber
+        int IBinaryInteger<XInt128>.GetByteCount() {
+            return 8;
+        }
+
+        static XInt128 IBinaryInteger<XInt128>.LeadingZeroCount(XInt128 value) {
+            return unchecked((XInt128)Numerics.DoubleArithmetic.CountLeadingZeros(value.lo, value.hi));
+        }
+
+        static XInt128 IBinaryInteger<XInt128>.PopCount(XInt128 value) {
+            return unchecked((XInt128)(Mathematics.BinaryNumerals.PopulationCount(value.lo) + Mathematics.BinaryNumerals.PopulationCount(value.hi)));
+        }
+
+        static XInt128 IBinaryInteger<XInt128>.RotateLeft(XInt128 value, int rotateAmount) {
+            return new XInt128(Numerics.DoubleArithmetic.RotateLeft(value.lo, value.hi, rotateAmount, out var hi), hi);
+        }
+
+        static XInt128 IBinaryInteger<XInt128>.RotateRight(XInt128 value, int rotateAmount) {
+            return new XInt128(Numerics.DoubleArithmetic.RotateRight(value.lo, value.hi, rotateAmount, out var hi), hi);
+        }
+
+        static XInt128 IBinaryInteger<XInt128>.TrailingZeroCount(XInt128 value) {
+            return unchecked((XInt128)Numerics.DoubleArithmetic.CountTrailingZeros(value.lo, value.hi));
+        }
+
+        bool IBinaryInteger<XInt128>.TryWriteLittleEndian(Span<byte> destination, out int bytesWritten) {
+            if (16 <= destination.Length) {
+                BinaryPrimitives.TryWriteUInt64LittleEndian(destination, lo);
+                BinaryPrimitives.TryWriteUInt64LittleEndian(destination[8..], hi);
+                bytesWritten = 16;
+                return true;
+            }
+            bytesWritten = default;
+            return false;
+        }
+
+        bool IBinaryInteger<XInt128>.TryWriteBigEndian(System.Span<byte> destination, out int bytesWritten) {
+            if (16 <= destination.Length) {
+                BinaryPrimitives.TryWriteUInt64BigEndian(destination, hi);
+                BinaryPrimitives.TryWriteUInt64BigEndian(destination[8..], lo);
+                bytesWritten = 16;
+                return true;
+            }
+            bytesWritten = default;
+            return false;
+        }
+
+        static bool IBinaryInteger<XInt128>.TryReadLittleEndian(ReadOnlySpan<byte> source, bool isUnsigned, out XInt128 value) {
+            if (16 <= source.Length) {
+                var v = new BigInteger(source, isUnsigned, false);
+                if (XInt128.MinValue <= v && v <= XInt128.MaxValue) {
+                    value = unchecked((XInt128)v);
+                    return true;
+                }
+                
+            }
+            value = default;
+            return false;
+        }
+
+        static bool IBinaryInteger<XInt128>.TryReadBigEndian(ReadOnlySpan<byte> source, bool isUnsigned, out XInt128 value) {
+            if (16 <= source.Length) {
+                var v = new BigInteger(source, isUnsigned, false);
+                value = unchecked((XInt128)v);
+                return true;
+            }
+            value = default;
+            return false;
+        }
+
+        static bool IBinaryNumber<XInt128>.IsPow2(XInt128 value) {
+            return Numerics.DoubleArithmetic.IsPowerOfTwo(value.lo, value.hi);
+        }
+
+        static XInt128 IBinaryNumber<XInt128>.Log2(XInt128 value) {
+            return unchecked((XInt128)(Numerics.DoubleArithmetic.Log2Floor(value.lo, value.hi)));
+        }
+
+        static XInt128 INumber<XInt128>.Clamp(XInt128 value, XInt128 min, XInt128 max) {
+            if (!(min <= max)) {
+                // TODO:
+                throw new ArgumentException();
+            }
+            if (value > max) {
+                return max;
+            } else if (min > value) {
+                return min;
+            }
+            return value;
+        }
+
+        static XInt128 INumber<XInt128>.CopySign(XInt128 value, XInt128 sign) {
+            return value;
+        }
+
+       public static XInt128 Max(XInt128 x, XInt128 y) {
+            return (x > y) ? x : y;
+        }
+
+        public static XInt128 Min(XInt128 x, XInt128 y) {
+            return (x <= y) ? x : y;
+        }
+
+        static XInt128 INumber<XInt128>.MaxNumber(XInt128 x, XInt128 y) {
+            return Max(x, y);
+        }
+
+        static XInt128 INumber<XInt128>.MinNumber(XInt128 x, XInt128 y) {
+            return Min(x, y);
+        }
+
+        static XInt128 INumberBase<XInt128>.MaxMagnitude(XInt128 x, XInt128 y) {
+            return Max(x, y);
+        }
+
+        static XInt128 INumberBase<XInt128>.MaxMagnitudeNumber(XInt128 x, XInt128 y) {
+            return Max(x, y);
+        }
+
+        static XInt128 INumberBase<XInt128>.MinMagnitude(XInt128 x, XInt128 y) {
+            return Min(x, y);
+        }
+
+        static XInt128 INumberBase<XInt128>.MinMagnitudeNumber(XInt128 x, XInt128 y) {
+            return Min(x, y);
+        }
+
+        int IBinaryInteger<XInt128>.GetShortestBitLength() {
+            return unchecked( 128 - Numerics.DoubleArithmetic.CountLeadingZeros(lo, hi));
+        }
+
+        static XInt128 IBinaryNumber<XInt128>.AllBitsSet {
+
+            get => new(~(UInt64)0, ~(HInt64)0);
+        }
+
+        static XInt128 INumberBase<XInt128>.Abs(XInt128 value) {
+            return value;
+        }
+
+        static bool INumberBase<XInt128>.IsCanonical(XInt128 value) {
+            return true;
+        }
+
+        static bool INumberBase<XInt128>.IsComplexNumber(XInt128 value) {
+            return false;
+        }
+
+        static bool INumberBase<XInt128>.IsEvenInteger(XInt128 value) {
+            return 0 == (1 & unchecked((int)value.lo));
+        }
+
+        static bool INumberBase<XInt128>.IsFinite(XInt128 value) {
+            return true;
+        }
+
+        static bool INumberBase<XInt128>.IsImaginaryNumber(XInt128 value) {
+            return false;
+        }
+
+        static bool INumberBase<XInt128>.IsInfinity(XInt128 value) {
+            return false;
+        }
+
+        static bool INumberBase<XInt128>.IsInteger(XInt128 value) {
+            return true;
+        }
+
+        static bool INumberBase<XInt128>.IsNaN(XInt128 value) {
+            return false;
+        }
+
+        static bool INumberBase<XInt128>.IsNegative(XInt128 value) {
+            return false;
+        }
+
+        static bool INumberBase<XInt128>.IsNegativeInfinity(XInt128 value) {
+            return false;
+        }
+
+        static bool INumberBase<XInt128>.IsNormal(XInt128 value) {
+            return true;
+        }
+
+        static bool INumberBase<XInt128>.IsOddInteger(XInt128 value) {
+            return (1 & unchecked((int)value.lo)).AsBooleanUnsafe();
+        }
+
+        static bool INumberBase<XInt128>.IsPositive(XInt128 value) {
+            return !value.IsZero;
+        }
+
+        static bool INumberBase<XInt128>.IsPositiveInfinity(XInt128 value) {
+            return false;
+        }
+
+        static bool INumberBase<XInt128>.IsRealNumber(XInt128 value) {
+            return true;
+        }
+
+        static bool INumberBase<XInt128>.IsSubnormal(XInt128 value) {
+            return false;
+        }
+
+        static bool INumberBase<XInt128>.IsZero(XInt128 value) {
+            return value.IsZero;
+        }
+
+        static bool INumberBase<XInt128>.TryConvertFromChecked<TOther>(TOther value, [NotNullWhen(true)] out XInt128 result) {
+            throw new NotImplementedException();
+        }
+
+        static bool INumberBase<XInt128>.TryConvertFromSaturating<TOther>(TOther value, [NotNullWhen(true)] out XInt128 result) {
+            throw new NotImplementedException();
+        }
+
+        static bool INumberBase<XInt128>.TryConvertFromTruncating<TOther>(TOther value, [NotNullWhen(true)] out XInt128 result) {
+            throw new NotImplementedException();
+        }
+
+        static bool INumberBase<XInt128>.TryConvertToChecked<TOther>(XInt128 value, [NotNullWhen(true)] out TOther? result) where TOther : default {
+            throw new NotImplementedException();
+        }
+
+        static bool INumberBase<XInt128>.TryConvertToSaturating<TOther>(XInt128 value, [NotNullWhen(true)] out TOther? result) where TOther : default {
+            throw new NotImplementedException();
+        }
+
+        static bool INumberBase<XInt128>.TryConvertToTruncating<TOther>(XInt128 value, [NotNullWhen(true)] out TOther? result) where TOther : default {
+            throw new NotImplementedException();
+        }
+        #endregion
+#endif
 
         #region IConvertible
         public TypeCode GetTypeCode() {
@@ -1456,7 +1831,7 @@ namespace UltimateOrb {
             throw new NotImplementedException();
         }
 #endif
-        #endregion
+#endregion
 
         /// <summary>
         ///     <para>Parses an unsigned integer.</para>
@@ -1600,6 +1975,74 @@ namespace UltimateOrb {
             {
                 return this.ToStringCStyleU128();
             }
+        }
+
+        public static implicit operator BigInteger(XInt128 value) {
+            // TODO: Perf
+            Span<byte> buffer = stackalloc byte[16];
+            BinaryPrimitives.WriteUInt64LittleEndian(buffer, value.lo);
+            BinaryPrimitives.WriteUInt64LittleEndian(buffer.Slice(4), value.hi);
+            return new BigInteger(buffer, isUnsigned: true, isBigEndian: false);
+        }
+
+#if NET7_0_OR_GREATER && !LEGACY_OPERATOR_CHECKNESS
+        public static explicit operator XInt128(BigInteger value) {
+            var lo = unchecked((UInt64)(value & UInt64.MaxValue));
+            var hi = unchecked((UInt64)((value >> 64) & UInt64.MaxValue));
+            return new XInt128(lo, hi);
+        }
+
+        public static explicit operator checked XInt128(BigInteger value) {
+            var lo = unchecked((UInt64)(value & UInt64.MaxValue));
+            var hi = checked((UInt64)(value >> 64));
+            return new XInt128(lo, hi);
+        }
+#else
+        public static explicit operator XInt128(BigInteger value) {
+            var lo = unchecked((UInt64)(value & UInt64.MaxValue));
+            var hi = unchecked((UInt64)((value >> 64) & UInt64.MaxValue));
+            if (value != hi) {
+                throw new OverflowException(); 
+            }
+            return new XInt128(lo, hi);
+        }
+#endif
+#endif
+#if NET7_0_OR_GREATER && !LEGACY_OPERATOR_CHECKNESS
+        public static XInt128 Parse(ReadOnlySpan<char> s, NumberStyles style, IFormatProvider? provider) {
+            throw new NotImplementedException();
+        }
+
+        public static XInt128 Parse(string s, NumberStyles style, IFormatProvider? provider) {
+            return Parse(s.AsSpan(), style, provider);
+        }
+
+        public static bool TryParse(ReadOnlySpan<char> s, NumberStyles style, IFormatProvider? provider, out XInt128 result) {
+            throw new NotImplementedException();
+        }
+
+        public static bool TryParse(string? s, NumberStyles style, IFormatProvider? provider, out XInt128 result) {
+            return TryParse(s.AsSpan(), style, provider, out result);
+        }
+
+        static XInt128 ISpanParsable<XInt128>.Parse(ReadOnlySpan<char> s, IFormatProvider? provider) {
+            return Parse(s, NumberStyles.Integer, provider);
+        }
+
+        static bool ISpanParsable<XInt128>.TryParse(ReadOnlySpan<char> s, IFormatProvider? provider, out XInt128 result) {
+            return TryParse(s, NumberStyles.Integer, provider, out result);
+        }
+
+        static XInt128 IParsable<XInt128>.Parse(string s, IFormatProvider? provider) {
+            return Parse(s, NumberStyles.Integer, provider);
+        }
+
+        static bool IParsable<XInt128>.TryParse(string? s, IFormatProvider? provider, out XInt128 result) {
+            return TryParse(s.AsSpan(), NumberStyles.Integer, provider, out result);
+        }
+
+        bool ISpanFormattable.TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider) {
+            throw new NotImplementedException();
         }
 #endif
     }

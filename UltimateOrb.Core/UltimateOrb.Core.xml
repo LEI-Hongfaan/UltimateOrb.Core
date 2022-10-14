@@ -444,6 +444,13 @@
                 </para>
             </summary>
         </member>
+        <member name="T:UltimateOrb.Collections.Generic.ReferenceTypes.LinkedTree`1.PreorderNodeModifiableEnumerator">
+            <summary>
+            modifiable:
+            any fields of current node and/or previous nodes - or -
+            any fields those refer to current node and/or previous nodes
+            </summary>
+        </member>
         <member name="T:UltimateOrb.Collections.Plain.ValueTypes.Stack`1">
             <summary>
                 <para>Represents a variable size last-in-first-out (LIFO) collection of instances of the same specified type. This type is a value type.</para>
@@ -517,6 +524,11 @@
             <exception cref="T:System.OutOfMemoryException">
                 <para>There is insufficient memory to satisfy the request.</para>
             </exception>
+        </member>
+        <member name="M:UltimateOrb.Collections.Plain.ValueTypes.Stack`1.Clear">
+            <summary>
+                <para>Removes all objects from the <see cref="T:UltimateOrb.Collections.Plain.ValueTypes.Stack`1"/>.</para>
+            </summary>
         </member>
         <member name="M:UltimateOrb.Collections.Plain.ValueTypes.Stack`1.Peek">
             <summary>
@@ -874,6 +886,559 @@
             </summary>
             <typeparam name="T">The type of the parameter.</typeparam>
             <param name="value">The parameter to be ignored.</param>
+        </member>
+        <member name="T:UltimateOrb.NaNDefaultedDouble">
+            <summary>
+            Represents a double-precision value. It's like <see cref="T:System.Double"></see> but has NaN as the default value.
+            </summary>
+        </member>
+        <member name="P:UltimateOrb.NaNDefaultedDouble.Value">
+            <summary>
+            The <see cref="T:System.Double"></see> value that this <see cref="T:UltimateOrb.NaNDefaultedDouble"></see> instance represents.
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.op_Implicit(System.Double)~UltimateOrb.NaNDefaultedDouble">
+            <summary>
+            Converts the specified <see cref="T:System.Double"></see> value to <see cref="T:UltimateOrb.NaNDefaultedDouble"></see> value.
+            </summary>
+            <param name="value">The specified value.</param>
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.op_Implicit(UltimateOrb.NaNDefaultedDouble)~System.Double">
+            <summary>
+            Converts the specified <see cref="T:UltimateOrb.NaNDefaultedDouble"></see> value to <see cref="T:System.Double"></see> value.
+            </summary>
+            <param name="value">The specified value.</param>
+        </member>
+        <member name="P:UltimateOrb.NaNDefaultedDouble.MinValue">
+            <inheritdoc cref="F:System.Double.MinValue" />
+        </member>
+        <member name="P:UltimateOrb.NaNDefaultedDouble.MaxValue">
+            <inheritdoc cref="F:System.Double.MaxValue" />
+        </member>
+        <member name="P:UltimateOrb.NaNDefaultedDouble.Epsilon">
+            <inheritdoc cref="F:System.Double.Epsilon" />
+        </member>
+        <member name="P:UltimateOrb.NaNDefaultedDouble.NegativeInfinity">
+            <inheritdoc cref="F:System.Double.NegativeInfinity" />
+        </member>
+        <member name="P:UltimateOrb.NaNDefaultedDouble.PositiveInfinity">
+            <inheritdoc cref="F:System.Double.PositiveInfinity" />
+        </member>
+        <member name="P:UltimateOrb.NaNDefaultedDouble.NaN">
+            <inheritdoc cref="F:System.Double.NaN" />
+        </member>
+        <member name="P:UltimateOrb.NaNDefaultedDouble.AdditiveIdentity">
+            <summary>Represents the additive identity (0).</summary>
+        </member>
+        <member name="P:UltimateOrb.NaNDefaultedDouble.MultiplicativeIdentity">
+            <summary>Represents the multiplicative identity (1).</summary>
+        </member>
+        <member name="P:UltimateOrb.NaNDefaultedDouble.One">
+            <summary>Represents the number one (1).</summary>
+        </member>
+        <member name="P:UltimateOrb.NaNDefaultedDouble.Zero">
+            <summary>Represents the number zero (0).</summary>
+        </member>
+        <member name="P:UltimateOrb.NaNDefaultedDouble.NegativeOne">
+            <summary>Represents the number negative one (-1).</summary>
+        </member>
+        <member name="P:UltimateOrb.NaNDefaultedDouble.NegativeZero">
+            <summary>Represents the number negative zero (-0).</summary>
+        </member>
+        <member name="P:UltimateOrb.NaNDefaultedDouble.E">
+            <summary>Represents the natural logarithmic base, specified by the constant, e.</summary>
+            <remarks>Euler's number is approximately 2.7182818284590452354.</remarks>
+        </member>
+        <member name="P:UltimateOrb.NaNDefaultedDouble.Pi">
+            <summary>Represents the ratio of the circumference of a circle to its diameter, specified by the constant, π.</summary>
+            <remarks>Pi is approximately 3.1415926535897932385.</remarks>
+        </member>
+        <member name="P:UltimateOrb.NaNDefaultedDouble.Tau">
+            <summary>Represents the number of radians in one turn, specified by the constant, τ.</summary>
+            <remarks>Tau is approximately 6.2831853071795864769.</remarks>
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.IsFinite(UltimateOrb.NaNDefaultedDouble)">
+            <summary>Determines whether the specified value is finite (zero, subnormal, or normal).</summary>
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.IsInfinity(UltimateOrb.NaNDefaultedDouble)">
+            <summary>Determines whether the specified value is infinite.</summary>
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.IsNaN(UltimateOrb.NaNDefaultedDouble)">
+            <summary>Determines whether the specified value is NaN.</summary>
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.IsNegative(UltimateOrb.NaNDefaultedDouble)">
+            <summary>Determines whether the specified value is negative.</summary>
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.IsNegativeInfinity(UltimateOrb.NaNDefaultedDouble)">
+            <summary>Determines whether the specified value is negative infinity.</summary>
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.IsNormal(UltimateOrb.NaNDefaultedDouble)">
+            <summary>Determines whether the specified value is normal.</summary>
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.IsPositiveInfinity(UltimateOrb.NaNDefaultedDouble)">
+            <summary>Determines whether the specified value is positive infinity.</summary>
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.IsSubnormal(UltimateOrb.NaNDefaultedDouble)">
+            <summary>Determines whether the specified value is subnormal.</summary>
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.CompareTo(System.Object)">
+            <inheritdoc cref="M:System.Double.CompareTo(System.Object)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.CompareTo(UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Double.CompareTo(System.Double)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.Equals(System.Object)">
+            <inheritdoc cref="M:System.Double.Equals(System.Object)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.op_Equality(UltimateOrb.NaNDefaultedDouble,UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.IEqualityOperators`3.op_Equality(`0,`1)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.op_Inequality(UltimateOrb.NaNDefaultedDouble,UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.IEqualityOperators`3.op_Inequality(`0,`1)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.op_LessThan(UltimateOrb.NaNDefaultedDouble,UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.IComparisonOperators`3.op_LessThan(`0,`1)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.op_GreaterThan(UltimateOrb.NaNDefaultedDouble,UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.IComparisonOperators`3.op_GreaterThan(`0,`1)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.op_LessThanOrEqual(UltimateOrb.NaNDefaultedDouble,UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.IComparisonOperators`3.op_LessThanOrEqual(`0,`1)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.op_GreaterThanOrEqual(UltimateOrb.NaNDefaultedDouble,UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.IComparisonOperators`3.op_GreaterThanOrEqual(`0,`1)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.Equals(UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Double.Equals(System.Double)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.GetHashCode">
+            <inheritdoc cref="M:System.Double.GetHashCode" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.ToString">
+            <inheritdoc cref="M:System.Double.ToString" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.ToString(System.String)">
+            <inheritdoc cref="M:System.Double.ToString(System.String)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.ToString(System.IFormatProvider)">
+            <inheritdoc cref="M:System.Double.ToString(System.IFormatProvider)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.ToString(System.String,System.IFormatProvider)">
+            <inheritdoc cref="M:System.Double.ToString(System.String,System.IFormatProvider)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.TryFormat(System.Span{System.Char},System.Int32@,System.ReadOnlySpan{System.Char},System.IFormatProvider)">
+            <inheritdoc cref="M:System.Double.TryFormat(System.Span{System.Char},System.Int32@,System.ReadOnlySpan{System.Char},System.IFormatProvider)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.Parse(System.String)">
+            <inheritdoc cref="M:System.Double.Parse(System.String)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.Parse(System.String,System.Globalization.NumberStyles)">
+            <inheritdoc cref="M:System.Double.Parse(System.String,System.Globalization.NumberStyles)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.Parse(System.String,System.IFormatProvider)">
+            <inheritdoc cref="M:System.Double.Parse(System.String,System.IFormatProvider)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.Parse(System.String,System.Globalization.NumberStyles,System.IFormatProvider)">
+            <inheritdoc cref="M:System.Double.Parse(System.String,System.Globalization.NumberStyles,System.IFormatProvider)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.Parse(System.ReadOnlySpan{System.Char},System.Globalization.NumberStyles,System.IFormatProvider)">
+            <inheritdoc cref="M:System.Double.Parse(System.ReadOnlySpan{System.Char},System.Globalization.NumberStyles,System.IFormatProvider)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.TryParse(System.String,UltimateOrb.NaNDefaultedDouble@)">
+            <inheritdoc cref="M:System.Double.TryParse(System.String,System.Double@)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.TryParse(System.ReadOnlySpan{System.Char},UltimateOrb.NaNDefaultedDouble@)">
+            <inheritdoc cref="M:System.Double.TryParse(System.ReadOnlySpan{System.Char},System.Double@)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.TryParse(System.String,System.Globalization.NumberStyles,System.IFormatProvider,UltimateOrb.NaNDefaultedDouble@)">
+            <inheritdoc cref="M:System.Double.TryParse(System.String,System.Globalization.NumberStyles,System.IFormatProvider,System.Double@)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.TryParse(System.ReadOnlySpan{System.Char},System.Globalization.NumberStyles,System.IFormatProvider,UltimateOrb.NaNDefaultedDouble@)">
+            <inheritdoc cref="M:System.Double.TryParse(System.ReadOnlySpan{System.Char},System.Globalization.NumberStyles,System.IFormatProvider,System.Double@)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.GetTypeCode">
+            <inheritdoc cref="M:System.Double.GetTypeCode" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.System#Numerics#IAdditionOperators{UltimateOrb#NaNDefaultedDouble,UltimateOrb#NaNDefaultedDouble,UltimateOrb#NaNDefaultedDouble}#op_Addition(UltimateOrb.NaNDefaultedDouble,UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.IAdditionOperators`3.op_Addition(`0,`1)" />
+        </member>
+        <member name="P:UltimateOrb.NaNDefaultedDouble.System#Numerics#IAdditiveIdentity{UltimateOrb#NaNDefaultedDouble,UltimateOrb#NaNDefaultedDouble}#AdditiveIdentity">
+            <inheritdoc cref="P:System.Numerics.IAdditiveIdentity`2.AdditiveIdentity" />
+        </member>
+        <member name="P:UltimateOrb.NaNDefaultedDouble.System#Numerics#IBinaryNumber{UltimateOrb#NaNDefaultedDouble}#AllBitsSet">
+            <inheritdoc cref="P:System.Numerics.IBinaryNumber`1.AllBitsSet" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.IsPow2(UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.IBinaryNumber`1.IsPow2(`0)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.Log2(UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.IBinaryNumber`1.Log2(`0)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.System#Numerics#IBitwiseOperators{UltimateOrb#NaNDefaultedDouble,UltimateOrb#NaNDefaultedDouble,UltimateOrb#NaNDefaultedDouble}#op_BitwiseAnd(UltimateOrb.NaNDefaultedDouble,UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.IBitwiseOperators`3.op_BitwiseAnd(`0,`1)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.System#Numerics#IBitwiseOperators{UltimateOrb#NaNDefaultedDouble,UltimateOrb#NaNDefaultedDouble,UltimateOrb#NaNDefaultedDouble}#op_BitwiseOr(UltimateOrb.NaNDefaultedDouble,UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.IBitwiseOperators`3.op_BitwiseOr(`0,`1)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.System#Numerics#IBitwiseOperators{UltimateOrb#NaNDefaultedDouble,UltimateOrb#NaNDefaultedDouble,UltimateOrb#NaNDefaultedDouble}#op_ExclusiveOr(UltimateOrb.NaNDefaultedDouble,UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.IBitwiseOperators`3.op_ExclusiveOr(`0,`1)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.System#Numerics#IBitwiseOperators{UltimateOrb#NaNDefaultedDouble,UltimateOrb#NaNDefaultedDouble,UltimateOrb#NaNDefaultedDouble}#op_OnesComplement(UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.IBitwiseOperators`3.op_OnesComplement(`0)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.System#Numerics#IDecrementOperators{UltimateOrb#NaNDefaultedDouble}#op_Decrement(UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.IDecrementOperators`1.op_Decrement(`0)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.System#Numerics#IDivisionOperators{UltimateOrb#NaNDefaultedDouble,UltimateOrb#NaNDefaultedDouble,UltimateOrb#NaNDefaultedDouble}#op_Division(UltimateOrb.NaNDefaultedDouble,UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.IDivisionOperators`3.op_Division(`0,`1)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.Exp(UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.IExponentialFunctions`1.Exp(`0)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.ExpM1(UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.IExponentialFunctions`1.ExpM1(`0)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.Exp2(UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.IExponentialFunctions`1.Exp2(`0)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.Exp2M1(UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.IExponentialFunctions`1.Exp2M1(`0)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.Exp10(UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.IExponentialFunctions`1.Exp10(`0)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.Exp10M1(UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.IExponentialFunctions`1.Exp10M1(`0)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.Ceiling(UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.IFloatingPoint`1.Ceiling(`0)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.Floor(UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.IFloatingPoint`1.Floor(`0)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.Round(UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.IFloatingPoint`1.Round(`0)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.Round(UltimateOrb.NaNDefaultedDouble,System.Int32)">
+            <inheritdoc cref="M:System.Numerics.IFloatingPoint`1.Round(`0,System.Int32)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.Round(UltimateOrb.NaNDefaultedDouble,System.MidpointRounding)">
+            <inheritdoc cref="M:System.Numerics.IFloatingPoint`1.Round(`0,System.MidpointRounding)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.Round(UltimateOrb.NaNDefaultedDouble,System.Int32,System.MidpointRounding)">
+            <inheritdoc cref="M:System.Numerics.IFloatingPoint`1.Round(`0,System.Int32,System.MidpointRounding)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.Truncate(UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.IFloatingPoint`1.Truncate(`0)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.System#Numerics#IFloatingPoint{UltimateOrb#NaNDefaultedDouble}#GetExponentByteCount">
+            <inheritdoc cref="M:System.Numerics.IFloatingPoint`1.GetExponentByteCount" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.System#Numerics#IFloatingPoint{UltimateOrb#NaNDefaultedDouble}#GetExponentShortestBitLength">
+            <inheritdoc cref="M:System.Numerics.IFloatingPoint`1.GetExponentShortestBitLength" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.System#Numerics#IFloatingPoint{UltimateOrb#NaNDefaultedDouble}#GetSignificandByteCount">
+            <inheritdoc cref="M:System.Numerics.IFloatingPoint`1.GetSignificandByteCount" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.System#Numerics#IFloatingPoint{UltimateOrb#NaNDefaultedDouble}#GetSignificandBitLength">
+            <inheritdoc cref="M:System.Numerics.IFloatingPoint`1.GetSignificandBitLength" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.System#Numerics#IFloatingPoint{UltimateOrb#NaNDefaultedDouble}#TryWriteExponentBigEndian(System.Span{System.Byte},System.Int32@)">
+            <inheritdoc cref="M:System.Numerics.IFloatingPoint`1.TryWriteExponentBigEndian(System.Span{System.Byte},System.Int32@)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.System#Numerics#IFloatingPoint{UltimateOrb#NaNDefaultedDouble}#TryWriteExponentLittleEndian(System.Span{System.Byte},System.Int32@)">
+            <inheritdoc cref="M:System.Numerics.IFloatingPoint`1.TryWriteExponentLittleEndian(System.Span{System.Byte},System.Int32@)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.System#Numerics#IFloatingPoint{UltimateOrb#NaNDefaultedDouble}#TryWriteSignificandBigEndian(System.Span{System.Byte},System.Int32@)">
+            <inheritdoc cref="M:System.Numerics.IFloatingPoint`1.TryWriteSignificandBigEndian(System.Span{System.Byte},System.Int32@)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.System#Numerics#IFloatingPoint{UltimateOrb#NaNDefaultedDouble}#TryWriteSignificandLittleEndian(System.Span{System.Byte},System.Int32@)">
+            <inheritdoc cref="M:System.Numerics.IFloatingPoint`1.TryWriteSignificandLittleEndian(System.Span{System.Byte},System.Int32@)" />
+        </member>
+        <member name="P:UltimateOrb.NaNDefaultedDouble.System#Numerics#IFloatingPointConstants{UltimateOrb#NaNDefaultedDouble}#E">
+            <inheritdoc cref="P:System.Numerics.IFloatingPointConstants`1.E" />
+        </member>
+        <member name="P:UltimateOrb.NaNDefaultedDouble.System#Numerics#IFloatingPointConstants{UltimateOrb#NaNDefaultedDouble}#Pi">
+            <inheritdoc cref="P:System.Numerics.IFloatingPointConstants`1.Pi" />
+        </member>
+        <member name="P:UltimateOrb.NaNDefaultedDouble.System#Numerics#IFloatingPointConstants{UltimateOrb#NaNDefaultedDouble}#Tau">
+            <inheritdoc cref="P:System.Numerics.IFloatingPointConstants`1.Tau" />
+        </member>
+        <member name="P:UltimateOrb.NaNDefaultedDouble.System#Numerics#IFloatingPointIeee754{UltimateOrb#NaNDefaultedDouble}#Epsilon">
+            <inheritdoc cref="P:System.Numerics.IFloatingPointIeee754`1.Epsilon" />
+        </member>
+        <member name="P:UltimateOrb.NaNDefaultedDouble.System#Numerics#IFloatingPointIeee754{UltimateOrb#NaNDefaultedDouble}#NaN">
+            <inheritdoc cref="P:System.Numerics.IFloatingPointIeee754`1.NaN" />
+        </member>
+        <member name="P:UltimateOrb.NaNDefaultedDouble.System#Numerics#IFloatingPointIeee754{UltimateOrb#NaNDefaultedDouble}#NegativeInfinity">
+            <inheritdoc cref="P:System.Numerics.IFloatingPointIeee754`1.NegativeInfinity" />
+        </member>
+        <member name="P:UltimateOrb.NaNDefaultedDouble.System#Numerics#IFloatingPointIeee754{UltimateOrb#NaNDefaultedDouble}#NegativeZero">
+            <inheritdoc cref="P:System.Numerics.IFloatingPointIeee754`1.NegativeZero" />
+        </member>
+        <member name="P:UltimateOrb.NaNDefaultedDouble.System#Numerics#IFloatingPointIeee754{UltimateOrb#NaNDefaultedDouble}#PositiveInfinity">
+            <inheritdoc cref="P:System.Numerics.IFloatingPointIeee754`1.PositiveInfinity" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.Atan2(UltimateOrb.NaNDefaultedDouble,UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.IFloatingPointIeee754`1.Atan2(`0,`0)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.Atan2Pi(UltimateOrb.NaNDefaultedDouble,UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.IFloatingPointIeee754`1.Atan2Pi(`0,`0)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.BitDecrement(UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.IFloatingPointIeee754`1.BitDecrement(`0)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.BitIncrement(UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.IFloatingPointIeee754`1.BitIncrement(`0)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.FusedMultiplyAdd(UltimateOrb.NaNDefaultedDouble,UltimateOrb.NaNDefaultedDouble,UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.IFloatingPointIeee754`1.FusedMultiplyAdd(`0,`0,`0)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.Ieee754Remainder(UltimateOrb.NaNDefaultedDouble,UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.IFloatingPointIeee754`1.Ieee754Remainder(`0,`0)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.ILogB(UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.IFloatingPointIeee754`1.ILogB(`0)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.ReciprocalEstimate(UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.IFloatingPointIeee754`1.ReciprocalEstimate(`0)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.ReciprocalSqrtEstimate(UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.IFloatingPointIeee754`1.ReciprocalSqrtEstimate(`0)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.ScaleB(UltimateOrb.NaNDefaultedDouble,System.Int32)">
+            <inheritdoc cref="M:System.Numerics.IFloatingPointIeee754`1.ScaleB(`0,System.Int32)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.Acosh(UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.IHyperbolicFunctions`1.Acosh(`0)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.Asinh(UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.IHyperbolicFunctions`1.Asinh(`0)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.Atanh(UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.IHyperbolicFunctions`1.Atanh(`0)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.Cosh(UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.IHyperbolicFunctions`1.Cosh(`0)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.Sinh(UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.IHyperbolicFunctions`1.Sinh(`0)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.Tanh(UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.IHyperbolicFunctions`1.Tanh(`0)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.System#Numerics#IIncrementOperators{UltimateOrb#NaNDefaultedDouble}#op_Increment(UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.IIncrementOperators`1.op_Increment(`0)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.Log(UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.ILogarithmicFunctions`1.Log(`0)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.Log(UltimateOrb.NaNDefaultedDouble,UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.ILogarithmicFunctions`1.Log(`0,`0)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.LogP1(UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.ILogarithmicFunctions`1.LogP1(`0)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.Log2P1(UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.ILogarithmicFunctions`1.Log2P1(`0)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.Log10(UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.ILogarithmicFunctions`1.Log10(`0)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.Log10P1(UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.ILogarithmicFunctions`1.Log10P1(`0)" />
+        </member>
+        <member name="P:UltimateOrb.NaNDefaultedDouble.System#Numerics#IMinMaxValue{UltimateOrb#NaNDefaultedDouble}#MinValue">
+            <inheritdoc cref="P:System.Numerics.IMinMaxValue`1.MinValue" />
+        </member>
+        <member name="P:UltimateOrb.NaNDefaultedDouble.System#Numerics#IMinMaxValue{UltimateOrb#NaNDefaultedDouble}#MaxValue">
+            <inheritdoc cref="P:System.Numerics.IMinMaxValue`1.MaxValue" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.System#Numerics#IModulusOperators{UltimateOrb#NaNDefaultedDouble,UltimateOrb#NaNDefaultedDouble,UltimateOrb#NaNDefaultedDouble}#op_Modulus(UltimateOrb.NaNDefaultedDouble,UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.IModulusOperators`3.op_Modulus(`0,`1)" />
+        </member>
+        <member name="P:UltimateOrb.NaNDefaultedDouble.System#Numerics#IMultiplicativeIdentity{UltimateOrb#NaNDefaultedDouble,UltimateOrb#NaNDefaultedDouble}#MultiplicativeIdentity">
+            <inheritdoc cref="P:System.Numerics.IMultiplicativeIdentity`2.MultiplicativeIdentity" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.System#Numerics#IMultiplyOperators{UltimateOrb#NaNDefaultedDouble,UltimateOrb#NaNDefaultedDouble,UltimateOrb#NaNDefaultedDouble}#op_Multiply(UltimateOrb.NaNDefaultedDouble,UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.IMultiplyOperators`3.op_Multiply(`0,`1)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.Clamp(UltimateOrb.NaNDefaultedDouble,UltimateOrb.NaNDefaultedDouble,UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.INumber`1.Clamp(`0,`0,`0)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.CopySign(UltimateOrb.NaNDefaultedDouble,UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.INumber`1.CopySign(`0,`0)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.Max(UltimateOrb.NaNDefaultedDouble,UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.INumber`1.Max(`0,`0)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.MaxNumber(UltimateOrb.NaNDefaultedDouble,UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.INumber`1.MaxNumber(`0,`0)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.Min(UltimateOrb.NaNDefaultedDouble,UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.INumber`1.Min(`0,`0)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.MinNumber(UltimateOrb.NaNDefaultedDouble,UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.INumber`1.MinNumber(`0,`0)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.Sign(UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.INumber`1.Sign(`0)" />
+        </member>
+        <member name="P:UltimateOrb.NaNDefaultedDouble.System#Numerics#INumberBase{UltimateOrb#NaNDefaultedDouble}#One">
+            <inheritdoc cref="P:System.Numerics.INumberBase`1.One" />
+        </member>
+        <member name="P:UltimateOrb.NaNDefaultedDouble.System#Numerics#INumberBase{UltimateOrb#NaNDefaultedDouble}#Radix">
+            <inheritdoc cref="P:System.Numerics.INumberBase`1.Radix" />
+        </member>
+        <member name="P:UltimateOrb.NaNDefaultedDouble.System#Numerics#INumberBase{UltimateOrb#NaNDefaultedDouble}#Zero">
+            <inheritdoc cref="P:System.Numerics.INumberBase`1.Zero" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.Abs(UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.INumberBase`1.Abs(`0)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.CreateChecked``1(``0)">
+            <inheritdoc cref="M:System.Numerics.INumberBase`1.CreateChecked``1(``0)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.CreateSaturating``1(``0)">
+            <inheritdoc cref="M:System.Numerics.INumberBase`1.CreateSaturating``1(``0)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.CreateTruncating``1(``0)">
+            <inheritdoc cref="M:System.Numerics.INumberBase`1.CreateTruncating``1(``0)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.System#Numerics#INumberBase{UltimateOrb#NaNDefaultedDouble}#IsCanonical(UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.INumberBase`1.IsCanonical(`0)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.System#Numerics#INumberBase{UltimateOrb#NaNDefaultedDouble}#IsComplexNumber(UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.INumberBase`1.IsComplexNumber(`0)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.IsEvenInteger(UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.INumberBase`1.IsEvenInteger(`0)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.System#Numerics#INumberBase{UltimateOrb#NaNDefaultedDouble}#IsImaginaryNumber(UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.INumberBase`1.IsImaginaryNumber(`0)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.IsInteger(UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.INumberBase`1.IsInteger(`0)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.IsOddInteger(UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.INumberBase`1.IsOddInteger(`0)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.IsPositive(UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.INumberBase`1.IsPositive(`0)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.IsRealNumber(UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.INumberBase`1.IsRealNumber(`0)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.System#Numerics#INumberBase{UltimateOrb#NaNDefaultedDouble}#IsZero(UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.INumberBase`1.IsZero(`0)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.MaxMagnitude(UltimateOrb.NaNDefaultedDouble,UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.INumberBase`1.MaxMagnitude(`0,`0)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.MaxMagnitudeNumber(UltimateOrb.NaNDefaultedDouble,UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.INumberBase`1.MaxMagnitudeNumber(`0,`0)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.MinMagnitude(UltimateOrb.NaNDefaultedDouble,UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.INumberBase`1.MinMagnitude(`0,`0)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.MinMagnitudeNumber(UltimateOrb.NaNDefaultedDouble,UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.INumberBase`1.MinMagnitudeNumber(`0,`0)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.System#Numerics#INumberBase{UltimateOrb#NaNDefaultedDouble}#TryConvertFromChecked``1(``0,UltimateOrb.NaNDefaultedDouble@)">
+            <inheritdoc cref="M:System.Numerics.INumberBase`1.TryConvertFromChecked``1(``0,`0@)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.System#Numerics#INumberBase{UltimateOrb#NaNDefaultedDouble}#TryConvertFromSaturating``1(``0,UltimateOrb.NaNDefaultedDouble@)">
+            <inheritdoc cref="M:System.Numerics.INumberBase`1.TryConvertFromSaturating``1(``0,`0@)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.System#Numerics#INumberBase{UltimateOrb#NaNDefaultedDouble}#TryConvertFromTruncating``1(``0,UltimateOrb.NaNDefaultedDouble@)">
+            <inheritdoc cref="M:System.Numerics.INumberBase`1.TryConvertFromTruncating``1(``0,`0@)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.System#Numerics#INumberBase{UltimateOrb#NaNDefaultedDouble}#TryConvertToChecked``1(UltimateOrb.NaNDefaultedDouble,``0@)">
+            <inheritdoc cref="M:System.Numerics.INumberBase`1.TryConvertToChecked``1(`0,``0@)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.System#Numerics#INumberBase{UltimateOrb#NaNDefaultedDouble}#TryConvertToSaturating``1(UltimateOrb.NaNDefaultedDouble,``0@)">
+            <inheritdoc cref="M:System.Numerics.INumberBase`1.TryConvertToSaturating``1(`0,``0@)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.System#Numerics#INumberBase{UltimateOrb#NaNDefaultedDouble}#TryConvertToTruncating``1(UltimateOrb.NaNDefaultedDouble,``0@)">
+            <inheritdoc cref="M:System.Numerics.INumberBase`1.TryConvertToTruncating``1(`0,``0@)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.TryParse(System.String,System.IFormatProvider,UltimateOrb.NaNDefaultedDouble@)">
+            <inheritdoc cref="M:System.Double.TryParse(System.String,System.IFormatProvider,System.Double@)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.Pow(UltimateOrb.NaNDefaultedDouble,UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.IPowerFunctions`1.Pow(`0,`0)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.Cbrt(UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.IRootFunctions`1.Cbrt(`0)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.Hypot(UltimateOrb.NaNDefaultedDouble,UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.IRootFunctions`1.Hypot(`0,`0)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.RootN(UltimateOrb.NaNDefaultedDouble,System.Int32)">
+            <inheritdoc cref="M:System.Numerics.IRootFunctions`1.RootN(`0,System.Int32)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.Sqrt(UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.IRootFunctions`1.Sqrt(`0)" />
+        </member>
+        <member name="P:UltimateOrb.NaNDefaultedDouble.System#Numerics#ISignedNumber{UltimateOrb#NaNDefaultedDouble}#NegativeOne">
+            <inheritdoc cref="P:System.Numerics.ISignedNumber`1.NegativeOne" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.Parse(System.ReadOnlySpan{System.Char},System.IFormatProvider)">
+            <inheritdoc cref="M:System.ISpanParsable`1.Parse(System.ReadOnlySpan{System.Char},System.IFormatProvider)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.TryParse(System.ReadOnlySpan{System.Char},System.IFormatProvider,UltimateOrb.NaNDefaultedDouble@)">
+            <inheritdoc cref="M:System.ISpanParsable`1.TryParse(System.ReadOnlySpan{System.Char},System.IFormatProvider,`0@)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.System#Numerics#ISubtractionOperators{UltimateOrb#NaNDefaultedDouble,UltimateOrb#NaNDefaultedDouble,UltimateOrb#NaNDefaultedDouble}#op_Subtraction(UltimateOrb.NaNDefaultedDouble,UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.ISubtractionOperators`3.op_Subtraction(`0,`1)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.Acos(UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.ITrigonometricFunctions`1.Acos(`0)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.AcosPi(UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.ITrigonometricFunctions`1.AcosPi(`0)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.Asin(UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.ITrigonometricFunctions`1.Asin(`0)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.AsinPi(UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.ITrigonometricFunctions`1.AsinPi(`0)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.Atan(UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.ITrigonometricFunctions`1.Atan(`0)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.AtanPi(UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.ITrigonometricFunctions`1.AtanPi(`0)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.Cos(UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.ITrigonometricFunctions`1.Cos(`0)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.CosPi(UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.ITrigonometricFunctions`1.CosPi(`0)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.Sin(UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.ITrigonometricFunctions`1.Sin(`0)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.SinCos(UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.ITrigonometricFunctions`1.SinCos(`0)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.SinCosPi(UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.ITrigonometricFunctions`1.SinCos(`0)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.SinPi(UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.ITrigonometricFunctions`1.SinPi(`0)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.Tan(UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.ITrigonometricFunctions`1.Tan(`0)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.TanPi(UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.ITrigonometricFunctions`1.TanPi(`0)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.System#Numerics#IUnaryNegationOperators{UltimateOrb#NaNDefaultedDouble,UltimateOrb#NaNDefaultedDouble}#op_UnaryNegation(UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.IUnaryNegationOperators`2.op_UnaryNegation(`0)" />
+        </member>
+        <member name="M:UltimateOrb.NaNDefaultedDouble.System#Numerics#IUnaryPlusOperators{UltimateOrb#NaNDefaultedDouble,UltimateOrb#NaNDefaultedDouble}#op_UnaryPlus(UltimateOrb.NaNDefaultedDouble)">
+            <inheritdoc cref="M:System.Numerics.IUnaryPlusOperators`2.op_UnaryPlus(`0)" />
         </member>
         <member name="M:UltimateOrb.Numerics.BigIntegerWrappers.BigIntegerExtensions.GetBitLength(System.Numerics.BigInteger)">
             <summary>
@@ -2415,6 +2980,39 @@
             <summary>
             Returns the case count of a discriminated union.
             </summary>
+        </member>
+        <member name="P:UltimateOrb.Threading.AsyncOptions.IsCancellationRequested">
+            <inheritdoc cref="P:System.Threading.CancellationToken.IsCancellationRequested"/>
+        </member>
+        <member name="P:UltimateOrb.Threading.AsyncOptions.CanBeCanceled">
+            <inheritdoc cref="P:System.Threading.CancellationToken.CanBeCanceled"/>
+        </member>
+        <member name="P:UltimateOrb.Threading.AsyncOptions.WaitHandle">
+            <inheritdoc cref="P:System.Threading.CancellationToken.WaitHandle"/>
+        </member>
+        <member name="M:UltimateOrb.Threading.AsyncOptions.Register(System.Action)">
+            <inheritdoc cref="M:System.Threading.CancellationToken.Register(System.Action)"/>
+        </member>
+        <member name="M:UltimateOrb.Threading.AsyncOptions.Register(System.Action,System.Boolean)">
+            <inheritdoc cref="M:System.Threading.CancellationToken.Register(System.Action,System.Boolean)"/>
+        </member>
+        <member name="M:UltimateOrb.Threading.AsyncOptions.Register(System.Action{System.Object},System.Object)">
+            <inheritdoc cref="M:System.Threading.CancellationToken.Register(System.Action{System.Object},System.Object)"/>
+        </member>
+        <member name="M:UltimateOrb.Threading.AsyncOptions.Register(System.Action{System.Object},System.Object,System.Boolean)">
+            <inheritdoc cref="M:System.Threading.CancellationToken.Register(System.Action{System.Object},System.Object,System.Boolean)"/>
+        </member>
+        <member name="M:UltimateOrb.Threading.AsyncOptions.Register(System.Action{System.Object,System.Threading.CancellationToken},System.Object)">
+            <inheritdoc cref="M:System.Threading.CancellationToken.Register(System.Action{System.Object,System.Threading.CancellationToken},System.Object)"/>
+        </member>
+        <member name="M:UltimateOrb.Threading.AsyncOptions.ThrowIfCancellationRequested">
+            <inheritdoc cref="M:System.Threading.CancellationToken.ThrowIfCancellationRequested"/>
+        </member>
+        <member name="M:UltimateOrb.Threading.AsyncOptions.UnsafeRegister(System.Action{System.Object,System.Threading.CancellationToken},System.Object)">
+            <inheritdoc cref="M:System.Threading.CancellationToken.UnsafeRegister(System.Action{System.Object,System.Threading.CancellationToken},System.Object)"/>
+        </member>
+        <member name="M:UltimateOrb.Threading.AsyncOptions.UnsafeRegister(System.Action{System.Object},System.Object)">
+            <inheritdoc cref="M:System.Threading.CancellationToken.UnsafeRegister(System.Action{System.Object},System.Object)"/>
         </member>
         <member name="M:UltimateOrb.UInt128.TryParseCStyleNormalizedU128(System.String,UltimateOrb.UInt128@)">
             <summary>

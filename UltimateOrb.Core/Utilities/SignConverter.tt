@@ -13,7 +13,12 @@ var check_s = new string[] { "", "un" };
 namespace UltimateOrb.Utilities {
 
     [DiscardableAttribute()]
-    public static partial class SignConverter {
+#if INDEPENDENT_XINTN_LIBRARY
+    internal
+#else
+    public
+#endif
+        static partial class SignConverter {
 <#
 for (var i = 0; i < 16; ++i) {
     var result_type_sign = result_type_sign_s[0 == (i & (1 << 0)) ? 0 : 1];

@@ -1,6 +1,5 @@
 ﻿#nullable enable
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using UltimateOrb.Mathematics.Elementary;
 using System;
 using System.Collections.Generic;
@@ -10,7 +9,7 @@ using System.Threading.Tasks;
 using FsCheck.NUnit;
 
 namespace UltimateOrb.Mathematics.Elementary.Tests {
-    [TestClass()]
+    //[TestClass()]
     public class MathTests {
 
         struct aaaaa {
@@ -66,7 +65,7 @@ namespace UltimateOrb.Mathematics.Elementary.Tests {
 
         }
 
-        [TestMethod]
+        //[TestMethod]
         [Property(MaxTest = 20000, QuietOnSuccess = true)]
         public bool FloorTest(int value, int divisor) {
             var a = aaaaa.Create(static (int value, int divisor) => {

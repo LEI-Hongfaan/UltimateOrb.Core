@@ -1,4 +1,6 @@
 ﻿using System;
+using UltimateOrb.Mathematics;
+using static UltimateOrb.Utilities.SignConverter;
 
 namespace UltimateOrb.Numerics {
 
@@ -72,6 +74,76 @@ namespace UltimateOrb.Numerics {
                     return loT | loV;
                 }
             }
+        }
+    }
+}
+
+namespace UltimateOrb.Numerics {
+
+    using UInt = UInt32;
+    using ULong = UInt64;
+    using Int = Int32;
+    using Long = Int64;
+
+    using Math = System.Math;
+    using MathEx = DoubleArithmetic;
+
+    public static partial class DoubleArithmetic {
+
+        public static int CountLeadingZeros(UInt64 lo, UInt64 hi) {
+            if (0 != hi) {
+                return BinaryNumerals.CountLeadingZeros(hi);
+            }
+            return unchecked(64 + BinaryNumerals.CountLeadingZeros(lo));
+        }
+
+        public static int CountTrailingZeros(UInt64 lo, UInt64 hi) {
+            if (0 != hi) {
+                return BinaryNumerals.CountTrailingZeros(hi);
+            }
+            return unchecked(64 + BinaryNumerals.CountTrailingZeros(lo));
+        }
+
+        public static int Log2Floor(UInt64 lo, UInt64 hi) {
+            if (0 == hi) {
+                return BinaryNumerals.Log2Floor(lo);
+            }
+            return 64 + BinaryNumerals.Log2Floor(hi);
+        }
+
+        public static int CountStorageBits(UInt64 lo, UInt64 hi) {
+            if (0 == hi) {
+                if (0 == lo) {
+                    return 0;
+                }
+                return 1 + BinaryNumerals.Log2Floor(lo);
+            }
+            return 1 + 64 + BinaryNumerals.Log2Floor(hi);
+        }
+
+        public static int CountStorageBits(UInt64 lo, Int64 hi) {
+            if (0 > hi) {
+                lo = ~lo;
+                hi = ~hi;
+            }
+            if (0 == hi) {
+                if (0 == lo) {
+                    return 0;
+                }
+                return 2 + BinaryNumerals.Log2Floor(lo);
+            }
+            return 2 + 64 + BinaryNumerals.Log2Floor(hi.ToUnsignedUnchecked());
+        }
+
+        public static bool IsPowerOfTwo(UInt64 lo, UInt64 hi) {
+            return 1 == BinaryNumerals.PopulationCount(lo) + BinaryNumerals.PopulationCount(hi);
+        }
+
+        public static bool IsPowerOfTwo(UInt64 lo, Int64 hi) {
+            if (0 > hi) {
+                return false;
+            }
+            return IsPowerOfTwo(lo, hi.ToUnsignedUnchecked());
         }
     }
 }

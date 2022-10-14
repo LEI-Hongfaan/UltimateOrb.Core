@@ -1,0 +1,115 @@
+﻿<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ include file="../../T4Includes/SourceLists.ttinclude" once="true" #>
+#pragma warning disable IDE0190 // Null check can be simplified
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace UltimateOrb.Utilities {
+<#
+for(var i = 1; i <= 13; ++i) {
+#>
+
+    public struct FinalActionDisposable<<#= TypeParamList(i) #>> : IDisposable {
+        
+        Action<<#= TypeParamList(i) #>>? action;
+<#
+    for(var j = 1; j <= i; ++j) {
+#>
+        
+        readonly T<#= i == 1 ? "" : $"{j}" #> arg<#= i == 1 ? "" : $"{j}" #>;
+<#
+    }
+#>
+        
+        public FinalActionDisposable(Action<<#= TypeParamList(i) #>> action, <#= ParamList(i) #>) {
+            this.action = action;
+<#
+    for(var j = 1; j <= i; ++j) {
+#>
+            this.arg<#= i == 1 ? "" : $"{j}" #> = arg<#= i == 1 ? "" : $"{j}" #>;
+<#
+    }
+#>
+        }
+
+        public void Dispose() {
+            var action = Interlocked.Exchange(ref this.action, null);
+            if (null != action) {
+                action.Invoke(<#= ArgList(i) #>);
+            }
+        }
+    }
+
+    public static partial class Finalization {
+
+<#
+    if (i < 16) {
+#>
+        public static FinalActionDisposable<<#= TypeParamList(i) #>> Defer<<#= TypeParamList(i) #>>(this Action<<#= TypeParamList(i) #>> action, <#= ParamList(i) #>) {
+            if (action is null) {
+                throw new ArgumentNullException(nameof(action));
+            }
+            return new FinalActionDisposable<<#= TypeParamList(i) #>>(action, <#= ArgList(i) #>);
+        }
+<#
+    }
+#>
+    }
+
+    public struct FinalAsyncActionDisposable<<#= TypeParamList(i) #>> : IAsyncDisposable {
+
+        Func<<#= TypeParamList(i) #>, Task>? action;
+<#
+    for(var j = 1; j <= i; ++j) {
+#>
+        
+        readonly T<#= i == 1 ? "" : $"{j}" #> arg<#= i == 1 ? "" : $"{j}" #>;
+<#
+    }
+#>
+        
+        public FinalAsyncActionDisposable(Func<<#= TypeParamList(i) #>, Task> action, <#= ParamList(i) #>) {
+            this.action = action;
+<#
+    for(var j = 1; j <= i; ++j) {
+#>
+            this.arg<#= i == 1 ? "" : $"{j}" #> = arg<#= i == 1 ? "" : $"{j}" #>;
+<#
+    }
+#>
+        }
+
+        public ValueTask DisposeAsync() {
+            var action = Interlocked.Exchange(ref this.action, null);
+            if (null != action) {
+               return new ValueTask(action.Invoke(<#= ArgList(i) #>));
+            }
+            return ValueTask.CompletedTask;
+        }
+    }
+
+    public static partial class Finalization {
+
+<#
+    if (i < 16) {
+#>
+        public static FinalAsyncActionDisposable<<#= TypeParamList(i) #>> Defer<<#= TypeParamList(i) #>>(this Func<<#= TypeParamList(i) #>, Task> action, <#= ParamList(i) #>) {
+            if (action is null) {
+                throw new ArgumentNullException(nameof(action));
+            }
+            return new FinalAsyncActionDisposable<<#= TypeParamList(i) #>>(action, <#= ArgList(i) #>);
+        }
+<#
+    }
+#>
+    }
+<#
+}
+#>
+}

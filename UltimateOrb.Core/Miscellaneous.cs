@@ -7,7 +7,12 @@ namespace UltimateOrb {
     /// <summary>
     /// Provides miscellaneous functions.
     /// </summary>
-    public static partial class Miscellaneous {
+#if INDEPENDENT_XINTN_LIBRARY
+    internal
+#else
+    public
+#endif
+        static partial class Miscellaneous {
 
         /// <summary>
         /// Hints that a boolean value is probably true.
@@ -37,7 +42,7 @@ namespace UltimateOrb {
             ret
         ")]
         public static void IgnoreOutParameter<T>(out T value) {
-            Helper.ValueAtReturn(out value);
+            Unsafe.SkipInit(out value!);
         }
 
         /// <summary>

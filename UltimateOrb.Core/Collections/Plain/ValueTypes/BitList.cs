@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -21,7 +22,7 @@ namespace UltimateOrb.Collections.Plain.ValueTypes {
 
         public static bool Add<TSpinWait>(this BitListCore list, bool value, ref TSpinWait spinner)
             where TSpinWait : IFunc<bool> {
-            var sdfasd = ChunkBitSize * list.Array.Value.Length;
+            var sdfasd = DigitBitSize * list.Array.Value.Length;
             throw new NotImplementedException();
         }
 
@@ -68,10 +69,16 @@ namespace UltimateOrb.Collections.Plain.ValueTypes {
 
         public BitListCore Core {
 
-            get => new BitListCore(ref Array, ref Count);
+            get {
+                unsafe {
+                    fixed (void * p = &Count) {
+                       return new BitListCore(ref Unsafe.AsRef<Int32[]>(Unsafe.AsPointer(ref Array)), ref Unsafe.AsRef<long>(p));
+                    }
+                }
+            }
         }
 
-        public const int ChunkBitSize = 32;
+        public const int DigitBitSize = 32;
 
         public const int Log2DigitBitSize = 5;
 

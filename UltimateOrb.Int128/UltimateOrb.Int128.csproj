@@ -1,0 +1,184 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <IsTrimmable>true</IsTrimmable>
+    <PublishTrimmed>true</PublishTrimmed>
+    <TrimMode>Link</TrimMode>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Product>UltimateOrb Libraries</Product>
+    <Company>$(Authors)</Company>
+    <Title></Title>
+    <RootNamespace>UltimateOrb</RootNamespace>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <AssemblyVersion>1.2.1.0</AssemblyVersion>
+    <FileVersion>1.2.1.0</FileVersion>
+    <RepositoryUrl>https://github.com/LEI-Hongfaan/UltimateOrb.Core</RepositoryUrl>
+    <PackageTags>Int128;UInt128;UltimateOrb</PackageTags>
+    <PackageProjectUrl>https://github.com/LEI-Hongfaan/UltimateOrb.Core</PackageProjectUrl>
+    <Copyright>Copyright © 2017, 2018, 2020, 2022 LEI Hongfaan. Distributed under the MIT License.</Copyright>
+    <Description>Provides Int128 and UInt128.</Description>
+    <Authors>LEI Hongfaan</Authors>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)'=='net6.0'">
+    <Version>2.1.2</Version>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetFramework)'=='net7.0'">
+    <!-- Sync with UltimateOrb.Core -->
+    <Version>3.1.0-beta1.0.2</Version>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DefineConstants>$(DefineConstants)TRACE;FEATURE_STANDARD_LIBRARY_INTEROPERABILITY_FORMATTING_AND_CONVERSION;INDEPENDENT_XINTN_LIBRARY</DefineConstants>
+    <CheckForOverflowUnderflow>True</CheckForOverflowUnderflow>
+    <LangVersion>preview</LangVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DefineConstants>$(DefineConstants)TRACE;FEATURE_STANDARD_LIBRARY_INTEROPERABILITY_FORMATTING_AND_CONVERSION;INDEPENDENT_XINTN_LIBRARY</DefineConstants>
+    <CheckForOverflowUnderflow>True</CheckForOverflowUnderflow>
+    <LangVersion>preview</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\UltimateOrb.Core\Core.cs" Link="Core.cs" />
+    <Compile Include="..\UltimateOrb.Core\Int128.cs" Link="Int128.cs" />
+    <Compile Include="..\UltimateOrb.Core\Internal\HashCodeHelpler{Internal}.cs" Link="Internal\HashCodeHelpler{Internal}.cs" />
+    <Compile Include="..\UltimateOrb.Core\Internal\System\IConvertible{Internal}.cs" Link="Internal\System\IConvertible{Internal}.cs" />
+    <Compile Include="..\UltimateOrb.Core\Internal\System\Math.cs" Link="Internal\System\Math.cs" />
+    <Compile Include="..\UltimateOrb.Core\Mathematics\BinaryNumerals{Core}.cs" Link="Mathematics\BinaryNumerals{Core}.cs" />
+    <Compile Include="..\UltimateOrb.Core\Mathematics\Elementary\Math.cs" Link="Mathematics\Elementary\Math.cs" />
+    <Compile Include="..\UltimateOrb.Core\Miscellaneous.cs" Link="Miscellaneous.cs" />
+    <Compile Include="..\UltimateOrb.Core\Numerics\DoubleArithmetic.cs" Link="Numerics\DoubleArithmetic.cs" />
+    <Compile Include="..\UltimateOrb.Core\Numerics\DoubleArithmeticF.cs" Link="Numerics\DoubleArithmeticF.cs" />
+    <Compile Include="..\UltimateOrb.Core\Numerics\DoubleArithmetic{Abs,Sign}.cs" Link="Numerics\DoubleArithmetic{Abs,Sign}.cs" />
+    <Compile Include="..\UltimateOrb.Core\Numerics\DoubleArithmetic{BigMul,BigDivRem,BigDiv,BigRem}.cs" Link="Numerics\DoubleArithmetic{BigMul,BigDivRem,BigDiv,BigRem}.cs" />
+    <Compile Include="..\UltimateOrb.Core\Numerics\DoubleArithmetic{BinaryNumerals}.cs" Link="Numerics\DoubleArithmetic{BinaryNumerals}.cs" />
+    <Compile Include="..\UltimateOrb.Core\Numerics\DoubleArithmetic{Compare}.cs" Link="Numerics\DoubleArithmetic{Compare}.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>DoubleArithmetic{Compare}.tt</DependentUpon>
+    </Compile>
+    <Compile Include="..\UltimateOrb.Core\Numerics\DoubleArithmetic{Core}.cs" Link="Numerics\DoubleArithmetic{Core}.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>DoubleArithmetic{Core}.tt</DependentUpon>
+    </Compile>
+    <Compile Include="..\UltimateOrb.Core\Numerics\DoubleArithmetic{DivRem}.cs" Link="Numerics\DoubleArithmetic{DivRem}.cs" />
+    <Compile Include="..\UltimateOrb.Core\Numerics\DoubleArithmetic{Increase,Decrease}.cs" Link="Numerics\DoubleArithmetic{Increase,Decrease}.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>DoubleArithmetic{Increase,Decrease}.tt</DependentUpon>
+    </Compile>
+    <Compile Include="..\UltimateOrb.Core\Numerics\DoubleArithmetic{Shift}.cs" Link="Numerics\DoubleArithmetic{Shift}.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>DoubleArithmetic{Shift}.tt</DependentUpon>
+    </Compile>
+    <Compile Include="..\UltimateOrb.Core\Numerics\DoubleArithmetic{Sqrt}.cs" Link="Numerics\DoubleArithmetic{Sqrt}.cs" />
+    <Compile Include="..\UltimateOrb.Core\Runtime\CompilerServices\Unsafe.cs" Link="Runtime\CompilerServices\Unsafe.cs" />
+    <Compile Include="..\UltimateOrb.Core\System\Runtime\CompilerServices\IgnoresAccessChecksToAttribute.cs" Link="System\Runtiem\CompilerServices\IgnoresAccessChecksToAttribute.cs" />
+    <Compile Include="..\UltimateOrb.Core\UInt128.cs" Link="UInt128.cs" />
+    <Compile Include="..\UltimateOrb.Core\Utilities\BooleanIntegerModule.cs" Link="Utilities\BooleanIntegerModule.cs" />
+    <Compile Include="..\UltimateOrb.Core\Utilities\BooleanIntegerModule{Compare}.cs" Link="Utilities\BooleanIntegerModule{Compare}.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>BooleanIntegerModule{Compare}.tt</DependentUpon>
+    </Compile>
+    <Compile Include="..\UltimateOrb.Core\Utilities\CilVerifiable.cs" Link="Utilities\CilVerifiable.cs" />
+    <Compile Include="..\UltimateOrb.Core\Utilities\CilVerifiable{Unchecked,Bitwise}.cs" Link="Utilities\CilVerifiable{Unchecked,Bitwise}.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>CilVerifiable{Unchecked,Bitwise}.tt</DependentUpon>
+    </Compile>
+    <Compile Include="..\UltimateOrb.Core\Utilities\Extensions\BooleanIntegerExtensions.cs" Link="Utilities\Extensions\BooleanIntegerExtensions.cs" />
+    <Compile Include="..\UltimateOrb.Core\Utilities\SignConverter.cs" Link="Utilities\SignConverter.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>SignConverter.tt</DependentUpon>
+    </Compile>
+    <Compile Include="..\UltimateOrb.Core\Utilities\SignConverter{Int128,UInt128}.cs" Link="Utilities\SignConverter{Int128,UInt128}.cs" />
+    <Compile Include="..\UltimateOrb.Core\Utilities\SignConverter{IntPtr,UIntPtr}.cs" Link="Utilities\SignConverter{IntPtr,UIntPtr}.cs" />
+    <Compile Include="..\UltimateOrb.Core\Utilities\SizeOfModule.cs" Link="Utilities\SizeOfModule.cs" />
+    <Compile Include="..\UltimateOrb.Core\Utilities\ThrowHelper.cs" Link="Utilities\ThrowHelper.cs" />
+    <Compile Include="..\UltimateOrb.Core\Void.cs" Link="Void.cs" />
+    <Compile Include="..\UltimateOrb.Core\XInt128Helpers.cs" Link="XInt128Helpers.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Internal\System\" />
+    <Folder Include="Mathematics\Elementary\" />
+    <Folder Include="Runtime\CompilerServices\" />
+    <Folder Include="System\Runtiem\CompilerServices\" />
+    <Folder Include="Utilities\Extensions\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Include="..\UltimateOrb.Core\Numerics\DoubleArithmetic{Compare}.tt" Link="Numerics\DoubleArithmetic{Compare}.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>DoubleArithmetic{Compare}.cs</LastGenOutput>
+    </None>
+    <None Include="..\UltimateOrb.Core\Numerics\DoubleArithmetic{Core}.tt" Link="Numerics\DoubleArithmetic{Core}.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>DoubleArithmetic{Core}.cs</LastGenOutput>
+    </None>
+    <None Include="..\UltimateOrb.Core\Numerics\DoubleArithmetic{Increase,Decrease}.tt" Link="Numerics\DoubleArithmetic{Increase,Decrease}.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>DoubleArithmetic{Increase,Decrease}.cs</LastGenOutput>
+    </None>
+    <None Include="..\UltimateOrb.Core\Numerics\DoubleArithmetic{Shift}.tt" Link="Numerics\DoubleArithmetic{Shift}.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>DoubleArithmetic{Shift}.cs</LastGenOutput>
+    </None>
+    <None Include="..\UltimateOrb.Core\Utilities\BooleanIntegerModule{Compare}.tt" Link="Utilities\BooleanIntegerModule{Compare}.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>BooleanIntegerModule{Compare}.cs</LastGenOutput>
+    </None>
+    <None Include="..\UltimateOrb.Core\Utilities\CilVerifiable{Unchecked,Bitwise}.tt" Link="Utilities\CilVerifiable{Unchecked,Bitwise}.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>CilVerifiable{Unchecked,Bitwise}.cs</LastGenOutput>
+    </None>
+    <None Include="..\UltimateOrb.Core\Utilities\SignConverter.tt" Link="Utilities\SignConverter.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>SignConverter.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
+  </ItemGroup>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec WorkingDirectory="$(SolutionDir)UltimateOrb.Core.BuildTools\BuildTools" Command="echo 'Invoking build tools to modify the output assembly (&quot;$(TargetPath)&quot;)...' &amp;&amp; UltimateOrb.Core.BuildTools $(TargetPath) &amp;&amp; echo 'To sign the assembly, rebuild with &quot;Sign the assembly&quot;, then use the command:' &amp;&amp; echo '    sn -Ra &quot;$(TargetPath)&quot; &quot;$(ProjectDir)test.snk&quot;' &amp;&amp; echo 'To verify the assembly, use the command:' &amp;&amp; echo '    peverify &quot;$(TargetPath)&quot;' &amp;&amp; echo 'If PEVerify can not resolve the dependent assemblies ([HRESULT 0x80070002]), edit &quot;*.dll.config&quot; files and copy them to the same directory as the output assembly.'" />
+  </Target>
+  
+  <PropertyGroup Condition="'$(TargetFramework)'=='net6.0'">
+    <AssemblyDir>C:\Program Files\dotnet\shared\Microsoft.NETCore.App\6.0.8\</AssemblyDir>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)'=='net7.0'">
+    <AssemblyDir>C:\Program Files\dotnet\shared\Microsoft.NETCore.App\7.0.0-rc.2.22472.3\</AssemblyDir>
+  </PropertyGroup>
+
+  <Target Condition="'$(TargetFramework)'=='net6.0'" Name="Trimming" AfterTargets="PostBuild">
+    <Copy SourceFiles="$(TargetPath)" DestinationFiles="tmp\UltimateOrb.Int128.dll"></Copy>
+    <ILLink AssemblyPaths="$(AssemblyDir)System.Runtime.dll;$(AssemblyDir)System.Private.CoreLib.dll;$(AssemblyDir)System.Private.Uri.dll;$(AssemblyDir)System.Diagnostics.Contracts.dll;$(AssemblyDir)System.Memory.dll;$(AssemblyDir)System.Runtime.CompilerServices.Unsafe.dll;$(AssemblyDir)System.Runtime.Numerics.dll;tmp\UltimateOrb.Int128.dll" RootAssemblyNames="" RootDescriptorFiles="linker.xml" OutputDirectory="tmp\output\" ExtraArgs="--keep-metadata parametername -t --trim-mode link" />
+    <Copy SourceFiles="tmp\output\UltimateOrb.Int128.dll" DestinationFiles="$(TargetPath)"></Copy>
+  </Target>
+  
+  <Target Condition="'$(TargetFramework)'=='net7.0'" Name="Trimming" AfterTargets="PostBuild">
+    <Copy SourceFiles="$(TargetPath)" DestinationFiles="tmp\UltimateOrb.Int128.dll"></Copy>
+    <ILLink AssemblyPaths="$(AssemblyDir)System.Runtime.dll;$(AssemblyDir)System.Private.CoreLib.dll;$(AssemblyDir)System.Private.Uri.dll;$(AssemblyDir)System.Diagnostics.Contracts.dll;$(AssemblyDir)System.Memory.dll;$(AssemblyDir)System.Runtime.Numerics.dll;tmp\UltimateOrb.Int128.dll" RootAssemblyNames="" RootDescriptorFiles="linker.xml" OutputDirectory="tmp\output\" ExtraArgs="--keep-metadata parametername -t --trim-mode link" />
+    <Copy SourceFiles="tmp\output\UltimateOrb.Int128.dll" DestinationFiles="$(TargetPath)"></Copy>
+  </Target>
+</Project>

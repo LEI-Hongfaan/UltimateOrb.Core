@@ -2,7 +2,12 @@
 
 namespace UltimateOrb.Utilities {
 
-    public static partial class BooleanIntegerModule {
+#if INDEPENDENT_XINTN_LIBRARY
+    internal
+#else
+    public
+#endif
+        static partial class BooleanIntegerModule {
         
 #pragma warning disable IDE0060 // Remove unused parameter
         /// <summary>
@@ -82,7 +87,12 @@ namespace UltimateOrb.Utilities {
 
 namespace UltimateOrb.Utilities {
 
-    public static partial class BooleanIntegerModule {
+#if INDEPENDENT_XINTN_LIBRARY
+    internal
+#else
+    public
+#endif
+        static partial class BooleanIntegerModule {
         
 #pragma warning disable IDE0060 // Remove unused parameter
         /// <summary>
@@ -157,7 +167,12 @@ namespace UltimateOrb.Utilities {
 
 namespace UltimateOrb.Utilities {
 
-    public static partial class BooleanIntegerModule {
+#if INDEPENDENT_XINTN_LIBRARY
+    internal
+#else
+    public
+#endif
+        static partial class BooleanIntegerModule {
         
 #pragma warning disable IDE0060 // Remove unused parameter
         /// <summary>
@@ -237,7 +252,12 @@ namespace UltimateOrb.Utilities {
 
 namespace UltimateOrb.Utilities {
 
-    public static partial class BooleanIntegerModule {
+#if INDEPENDENT_XINTN_LIBRARY
+    internal
+#else
+    public
+#endif
+        static partial class BooleanIntegerModule {
         
 #pragma warning disable IDE0060 // Remove unused parameter
         /// <summary>
@@ -312,7 +332,12 @@ namespace UltimateOrb.Utilities {
 
 namespace UltimateOrb.Utilities {
 
-    public static partial class BooleanIntegerModule {
+#if INDEPENDENT_XINTN_LIBRARY
+    internal
+#else
+    public
+#endif
+        static partial class BooleanIntegerModule {
         
 #pragma warning disable IDE0060 // Remove unused parameter
         /// <summary>
@@ -387,7 +412,12 @@ namespace UltimateOrb.Utilities {
 
 namespace UltimateOrb.Utilities {
 
-    public static partial class BooleanIntegerModule {
+#if INDEPENDENT_XINTN_LIBRARY
+    internal
+#else
+    public
+#endif
+        static partial class BooleanIntegerModule {
         
 #pragma warning disable IDE0060 // Remove unused parameter
         /// <summary>
@@ -462,7 +492,12 @@ namespace UltimateOrb.Utilities {
 
 namespace UltimateOrb.Utilities {
 
-    public static partial class BooleanIntegerModule {
+#if INDEPENDENT_XINTN_LIBRARY
+    internal
+#else
+    public
+#endif
+        static partial class BooleanIntegerModule {
         
 #pragma warning disable IDE0060 // Remove unused parameter
         /// <summary>
@@ -542,7 +577,12 @@ namespace UltimateOrb.Utilities {
 
 namespace UltimateOrb.Utilities {
 
-    public static partial class BooleanIntegerModule {
+#if INDEPENDENT_XINTN_LIBRARY
+    internal
+#else
+    public
+#endif
+        static partial class BooleanIntegerModule {
         
 #pragma warning disable IDE0060 // Remove unused parameter
         /// <summary>

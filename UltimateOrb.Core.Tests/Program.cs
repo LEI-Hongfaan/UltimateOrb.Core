@@ -50,8 +50,55 @@ namespace UltimateOrb.Core.Tests {
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private static int Main(string[] args) {
             {
+                for (uint i = 0; 10 > i; ++i) {
+                    Console.WriteLine($@"{i,6}: {Mathematics.BinaryNumerals.CountStorageBits(i),6}");
+                }
+                Console.WriteLine($@"======");
+                for (var i = 3; 0 <= i; --i) {
+                    var j = unchecked((uint)(int.MaxValue)) >> i;
+                    Console.WriteLine($@"{j,6:X8}: {Mathematics.BinaryNumerals.CountStorageBits(j),6}");
+                }
+                Console.WriteLine($@"======");
+                for (var i = 3; 0 <= i; --i) {
+                    var j = unchecked((uint)(int.MinValue)) >> i;
+                    Console.WriteLine($@"{j,6:X8}: {Mathematics.BinaryNumerals.CountStorageBits(j),6}");
+                }
+                Console.WriteLine($@"======");
+                for (var i = 3; 0 <= i; --i) {
+                    var j = unchecked((uint)(int.MinValue)) >>> i;
+                    Console.WriteLine($@"{j,6:X8}: {Mathematics.BinaryNumerals.CountStorageBits(j),6}");
+                }
+                Console.WriteLine($@"======");
+                for (var i = 3; 0 <= i; --i) {
+                    var j = uint.MaxValue >>> i;
+                    Console.WriteLine($@"{j,6:X8}: {Mathematics.BinaryNumerals.CountStorageBits(j),6}");
+                }
+                return 0;
 
-                
+            }
+            {
+
+
+                for (var i = 0; 10 > i; ++i) {
+                    Console.WriteLine($@"{i,6}: {Mathematics.BinaryNumerals.CountStorageBits(i),6}");
+                }
+                Console.WriteLine($@"======");
+                for (var i = 3; 0 <= i; --i) {
+                    var j = int.MaxValue >> i;
+                    Console.WriteLine($@"{j,6:X8}: {Mathematics.BinaryNumerals.CountStorageBits(j),6}");
+                }
+                Console.WriteLine($@"======");
+                for (var i = 3; 0 <= i; --i) {
+                    var j = int.MinValue >> i;
+                    Console.WriteLine($@"{j,6:X8}: {Mathematics.BinaryNumerals.CountStorageBits(j),6}");
+                }
+                Console.WriteLine($@"======");
+                for (var i = 3; 0 <= i; --i) {
+                    var j = int.MinValue >>> i;
+                    Console.WriteLine($@"{j,6:X8}: {Mathematics.BinaryNumerals.CountStorageBits(j),6}");
+                }
+                return 0;
+
 
 
 

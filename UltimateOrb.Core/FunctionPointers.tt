@@ -1,0 +1,232 @@
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+#pragma warning disable CS8909 // Do not compare function pointer values
+using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Runtime.Serialization;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Dorabot.CInterop {
+<#
+
+static string TypeParamList(int i, string name = "T", bool s = true) {
+    return ArgList(i, name, s);
+}
+
+static string ParamList(int i, string typeName = "T", string name = "arg", bool h = false, bool s = true) {
+    return s && 1 == i ? $"{typeName} {name}" : string.Join(", ", Enumerable.Range(1, i).Select(k => h ? $"{typeName} {name}{k}" : $"{typeName}{k} {name}{k}"));
+}
+
+static string ArgList(int i, string name = "arg", bool s = true) {
+    return s && 1 == i ? name : string.Join(", ", Enumerable.Range(1, i).Select(k => $"{name}{k}"));
+}
+
+for(var i = 1; i <= 13; ++i) {
+
+#>
+
+    [Serializable]
+    [StructLayout(LayoutKind.Sequential)]
+    public unsafe readonly struct ActionPtr<<#= TypeParamList(i) #>> : IComparable, IComparable<ActionPtr<<#= TypeParamList(i) #>>>, IEquatable<ActionPtr<<#= TypeParamList(i) #>>>, ISpanFormattable, IFormattable, ISerializable {
+
+        readonly delegate* managed<<#= TypeParamList(i) #>, void> value__;
+
+        public unsafe ActionPtr(delegate* managed<<#= TypeParamList(i) #>, void> value) {
+            value__ = value;
+        }
+
+        ActionPtr(SerializationInfo info, StreamingContext context) {
+            long value = info.GetInt64("value");
+            if (sizeof(nint) == sizeof(int) && (value > int.MaxValue || value < int.MinValue)) {
+                throw new ArgumentException("Serialization_InvalidPtrValue");
+            }
+            value__ = unchecked((delegate* managed<<#= TypeParamList(i) #>, void>)value);
+        }
+
+        public void Invoke(<#= ParamList(i) #>) {
+            value__(<#= ArgList(i) #>);
+        }
+
+        public static implicit operator ActionPtr<<#= TypeParamList(i) #>>(delegate* managed<<#= TypeParamList(i) #>, void> value) => new(value);
+
+        public static implicit operator delegate* managed<<#= TypeParamList(i) #>, void>(ActionPtr<<#= TypeParamList(i) #>> value) => value.value__;
+
+        public static explicit operator ActionPtr<<#= TypeParamList(i) #>>(void* value) => new((delegate* managed<<#= TypeParamList(i) #>, void>)value);
+
+        public static implicit operator void*(ActionPtr<<#= TypeParamList(i) #>> value) => value.value__;
+
+        public int CompareTo(ActionPtr<<#= TypeParamList(i) #>> other) {
+            return unchecked((nuint)this.value__).CompareTo(unchecked((nuint)this.value__));
+        }
+
+        public int CompareTo(object? obj) {
+            if (obj is null) {
+                return 1;
+            }
+            if (obj is ActionPtr<<#= TypeParamList(i) #>> value) {
+                var u = this.value__;
+                var v = value.value__;
+                if (u < v) {
+                    return -1;
+                }
+                if (u > v) {
+                    return 1;
+                }
+                return 0;
+            }
+
+            // TODO:
+            throw new ArgumentException("Argument should be of type ActionPtr<<#= TypeParamList(i) #>>.", nameof(obj));
+        }
+
+        public bool Equals(ActionPtr<<#= TypeParamList(i) #>> other) {
+            return this.value__ == other.value__;
+        }
+
+        public override bool Equals([NotNullWhen(true)] object? obj) {
+            return obj is ActionPtr<<#= TypeParamList(i) #>> other && this.value__ == other.value__;
+        }
+
+        public override int GetHashCode() {
+            return unchecked((nuint)this.value__).GetHashCode();
+        }
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context) {
+            if (info == null) {
+                throw new ArgumentNullException(nameof(info));
+            }
+            info.AddValue("value", unchecked((long)(nint)this.value__));
+        }
+
+        bool ISpanFormattable.TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider) {
+            return unchecked((UIntPtr)(nuint)this.value__).TryFormat(destination, out charsWritten, format, provider);
+        }
+
+        string IFormattable.ToString(string? format, IFormatProvider? formatProvider) {
+            return unchecked((UIntPtr)(nuint)this.value__).ToString(format, formatProvider);
+        }
+
+        public override string? ToString() {
+            // TODO:
+            return unchecked((UIntPtr)(nuint)this.value__).ToString();
+        }
+
+        public static bool operator ==(ActionPtr<<#= TypeParamList(i) #>> first, ActionPtr<<#= TypeParamList(i) #>> second) => first.value__ == second.value__;
+
+        public static bool operator !=(ActionPtr<<#= TypeParamList(i) #>> first, ActionPtr<<#= TypeParamList(i) #>> second) => first.value__ != second.value__;
+
+        public static bool operator <(ActionPtr<<#= TypeParamList(i) #>> first, ActionPtr<<#= TypeParamList(i) #>> second) => first.value__ < second.value__;
+
+        public static bool operator <=(ActionPtr<<#= TypeParamList(i) #>> first, ActionPtr<<#= TypeParamList(i) #>> second) => first.value__ <= second.value__;
+
+        public static bool operator >(ActionPtr<<#= TypeParamList(i) #>> first, ActionPtr<<#= TypeParamList(i) #>> second) => first.value__ > second.value__;
+
+        public static bool operator >=(ActionPtr<<#= TypeParamList(i) #>> first, ActionPtr<<#= TypeParamList(i) #>> second) => first.value__ >= second.value__;
+    }
+
+    [Serializable]
+    [StructLayout(LayoutKind.Sequential)]
+    public unsafe readonly struct FuncPtr<<#= TypeParamList(i) #>, TResult> : IComparable, IComparable<FuncPtr<<#= TypeParamList(i) #>, TResult>>, IEquatable<FuncPtr<<#= TypeParamList(i) #>, TResult>>, ISpanFormattable, IFormattable, ISerializable where TResult : unmanaged {
+
+        readonly delegate* managed<<#= TypeParamList(i) #>, TResult> value__;
+
+        public unsafe FuncPtr(delegate* managed<<#= TypeParamList(i) #>, TResult> value) {
+            value__ = value;
+        }
+
+        FuncPtr(SerializationInfo info, StreamingContext context) {
+            long value = info.GetInt64("value");
+            if (sizeof(nint) == sizeof(int) && (value > int.MaxValue || value < int.MinValue)) {
+                throw new ArgumentException("Serialization_InvalidPtrValue");
+            }
+            value__ = unchecked((delegate* managed<<#= TypeParamList(i) #>, TResult>)value);
+        }
+
+        public TResult Invoke(<#= ParamList(i) #>) {
+            return value__(<#= ArgList(i) #>);
+        }
+
+        public int CompareTo(FuncPtr<<#= TypeParamList(i) #>, TResult> other) {
+            return unchecked((nuint)this.value__).CompareTo(unchecked((nuint)this.value__));
+        }
+
+        public int CompareTo(object? obj) {
+            if (obj is null) {
+                return 1;
+            }
+            if (obj is FuncPtr<<#= TypeParamList(i) #>, TResult> value) {
+                var u = this.value__;
+                var v = value.value__;
+                if (u < v) {
+                    return -1;
+                }
+                if (u > v) {
+                    return 1;
+                }
+                return 0;
+            }
+
+            // TODO:
+            throw new ArgumentException("Argument should be of type ActionPtr.", nameof(obj));
+        }
+
+        public bool Equals(FuncPtr<<#= TypeParamList(i) #>, TResult> other) {
+            return this.value__ == other.value__;
+        }
+
+        public static implicit operator FuncPtr<<#= TypeParamList(i) #>, TResult>(delegate* managed<<#= TypeParamList(i) #>, TResult> value) => new(value);
+
+        public static implicit operator delegate* managed<<#= TypeParamList(i) #>, TResult>(FuncPtr<<#= TypeParamList(i) #>, TResult> value) => value.value__;
+
+        public static explicit operator FuncPtr<<#= TypeParamList(i) #>, TResult>(void* value) => new((delegate* managed<<#= TypeParamList(i) #>, TResult>)value);
+
+        public static implicit operator void*(FuncPtr<<#= TypeParamList(i) #>, TResult> value) => value.value__;
+
+        public override bool Equals([NotNullWhen(true)] object? obj) {
+            return obj is FuncPtr<<#= TypeParamList(i) #>, TResult> other && this.value__ == other.value__;
+        }
+
+        public override int GetHashCode() {
+            return unchecked((nuint)this.value__).GetHashCode();
+        }
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context) {
+            if (info == null) {
+                throw new ArgumentNullException(nameof(info));
+            }
+            info.AddValue("value", unchecked((long)(nint)this.value__));
+        }
+
+        bool ISpanFormattable.TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider) {
+            return unchecked((UIntPtr)(nuint)this.value__).TryFormat(destination, out charsWritten, format, provider);
+        }
+
+        string IFormattable.ToString(string? format, IFormatProvider? formatProvider) {
+            return unchecked((UIntPtr)(nuint)this.value__).ToString(format, formatProvider);
+        }
+
+        public override string? ToString() {
+            // TODO:
+            return unchecked((UIntPtr)(nuint)this.value__).ToString();
+        }
+
+        public static bool operator ==(FuncPtr<<#= TypeParamList(i) #>, TResult> first, FuncPtr<<#= TypeParamList(i) #>, TResult> second) => first.value__ == second.value__;
+
+        public static bool operator !=(FuncPtr<<#= TypeParamList(i) #>, TResult> first, FuncPtr<<#= TypeParamList(i) #>, TResult> second) => first.value__ != second.value__;
+
+        public static bool operator <(FuncPtr<<#= TypeParamList(i) #>, TResult> first, FuncPtr<<#= TypeParamList(i) #>, TResult> second) => first.value__ < second.value__;
+
+        public static bool operator <=(FuncPtr<<#= TypeParamList(i) #>, TResult> first, FuncPtr<<#= TypeParamList(i) #>, TResult> second) => first.value__ <= second.value__;
+
+        public static bool operator >(FuncPtr<<#= TypeParamList(i) #>, TResult> first, FuncPtr<<#= TypeParamList(i) #>, TResult> second) => first.value__ > second.value__;
+
+        public static bool operator >=(FuncPtr<<#= TypeParamList(i) #>, TResult> first, FuncPtr<<#= TypeParamList(i) #>, TResult> second) => first.value__ >= second.value__;
+    }
+<#
+}
+#>
+}

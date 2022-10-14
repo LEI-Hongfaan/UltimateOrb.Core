@@ -10,7 +10,12 @@ namespace UltimateOrb {
     /// </summary>
     [ComVisibleAttribute(true)]
     [SerializableAttribute()]
-    public readonly partial struct Void {
+#if INDEPENDENT_XINTN_LIBRARY
+    internal
+#else
+    public
+#endif
+        readonly partial struct Void {
     }
 
     /// <summary>
@@ -25,7 +30,12 @@ namespace UltimateOrb {
     /// </typeparam>
     [ComVisibleAttribute(true)]
     [SerializableAttribute()]
-    public readonly partial struct Void<T> {
+#if INDEPENDENT_XINTN_LIBRARY
+    internal
+#else
+    public
+#endif
+        readonly partial struct Void<T> {
     }
 
     /// <summary>
@@ -45,6 +55,11 @@ namespace UltimateOrb {
     /// </typeparam>
     [ComVisibleAttribute(true)]
     [SerializableAttribute()]
-    public readonly partial struct Void<T1, T2> {
+#if INDEPENDENT_XINTN_LIBRARY
+    internal
+#else
+    public
+#endif
+        readonly partial struct Void<T1, T2> {
     }
 }

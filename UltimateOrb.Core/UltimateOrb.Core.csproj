@@ -5,13 +5,20 @@
     <Nullable>enable</Nullable>
     <LangVersion>preview</LangVersion>
     <!--<EnablePreviewFeatures>true</EnablePreviewFeatures>-->
-    <FileVersion>1.2.1.0</FileVersion>
-    <AssemblyVersion>1.2.1.0</AssemblyVersion>
-    <Version>3.1.0-alpha9</Version>
+    <FileVersion>1.2.2.0</FileVersion>
+    <AssemblyVersion>1.2.2.0</AssemblyVersion>
+    <Version>3.1.0-beta1.3.1</Version>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Authors>LEI Hongfaan</Authors>
     <Product>UltimateOrb Libraries</Product>
     <RootNamespace>UltimateOrb</RootNamespace>
+    <Description>UltimateOrb Core Libraries.</Description>
+    <Copyright>Copyright © 2017, 2018, 2020, 2022 LEI Hongfaan. Distributed under the MIT License.</Copyright>
+    <PackageProjectUrl>https://github.com/LEI-Hongfaan/UltimateOrb.Core</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/LEI-Hongfaan/UltimateOrb.Core</RepositoryUrl>
+    <PackageTags>UltimateOrb;Core;BCL;Int128;UInt128;Rational;Rational64;Monad;Linq;WeakDictionary</PackageTags>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -29,11 +36,19 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Fody" Version="6.6.0">
+    <None Include="..\.editorconfig" Link=".editorconfig" />
+    <None Include="..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Fody" Version="6.6.4">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="InlineIL.Fody" Version="1.7.1">
+    <PackageReference Include="InlineIL.Fody" Version="1.7.2">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
   </ItemGroup>
@@ -62,6 +77,11 @@
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>CommonDelegates.tt</DependentUpon>
+    </Compile>
+    <Compile Update="FunctionPointers.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>FunctionPointers.tt</DependentUpon>
     </Compile>
     <Compile Update="IInitializable.cs">
       <DesignTime>True</DesignTime>
@@ -108,6 +128,11 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>CilVerifiable{Unchecked,Bitwise}.tt</DependentUpon>
     </Compile>
+    <Compile Update="Utilities\Finalization{Generated}.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Finalization{Generated}.tt</DependentUpon>
+    </Compile>
     <Compile Update="Utilities\SignConverter.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -127,6 +152,10 @@
     <None Update="Functional\CommonDelegates\CommonDelegates.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>CommonDelegates.cs</LastGenOutput>
+    </None>
+    <None Update="FunctionPointers.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>FunctionPointers.cs</LastGenOutput>
     </None>
     <None Update="IInitializable.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
@@ -168,14 +197,22 @@
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>CilVerifiable{Unchecked,Bitwise}.cs</LastGenOutput>
     </None>
+    <None Update="Utilities\Finalization{Generated}.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>Finalization{Generated}.cs</LastGenOutput>
+    </None>
     <None Update="Utilities\SignConverter.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>SignConverter.cs</LastGenOutput>
     </None>
   </ItemGroup>
 
+  <ItemGroup>
+    <TrimmerRootDescriptor Include="linker.xml" />
+  </ItemGroup>
+
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="cd /d &quot;$(SolutionDir)\$(ProjectName).BuildTools\BuildTools&quot;&#xD;&#xA;echo Invoking build tools to modify the output assembly...&#xD;&#xA;dotnet &quot;$(TargetName).BuildTools.dll&quot; &quot;$(TargetPath)&quot;&#xD;&#xA;cd /d &quot;$(ProjectDir)&quot;&#xD;&#xA;echo To sign the assembly, rebuild with 'Sign the assembly', then use the command:&#xD;&#xA;echo     sn -Ra &quot;$(TargetPath)&quot; &quot;$(ProjectDir)test.snk&quot;&#xD;&#xA;echo To verify the assembly, use the command:&#xD;&#xA;echo     peverify &quot;$(TargetPath)&quot;&#xD;&#xA;echo If PEVerify can not resolve the dependent assemblies ([HRESULT 0x80070002]), edit '*.dll.config' files and copy them to the same directory as the output assembly.&#xD;&#xA;" />
+    <Exec WorkingDirectory="$(SolutionDir)UltimateOrb.Core.BuildTools\BuildTools" Command="echo 'Invoking build tools to modify the output assembly (&quot;$(TargetPath)&quot;)...' &amp;&amp; UltimateOrb.Core.BuildTools $(TargetPath) &amp;&amp; echo 'To sign the assembly, rebuild with &quot;Sign the assembly&quot;, then use the command:' &amp;&amp; echo '    sn -Ra &quot;$(TargetPath)&quot; &quot;$(ProjectDir)test.snk&quot;' &amp;&amp; echo 'To verify the assembly, use the command:' &amp;&amp; echo '    peverify &quot;$(TargetPath)&quot;' &amp;&amp; echo 'If PEVerify can not resolve the dependent assemblies ([HRESULT 0x80070002]), edit &quot;*.dll.config&quot; files and copy them to the same directory as the output assembly.'" />
   </Target>
 
 </Project>

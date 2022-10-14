@@ -3,10 +3,16 @@ using System.Diagnostics.Contracts;
 using System.Runtime;
 using System.Runtime.CompilerServices;
 using System.Runtime.ConstrainedExecution;
+using static UltimateOrb.Utilities.SignConverter;
 
 namespace UltimateOrb.Mathematics {
 
-    public static partial class BinaryNumerals {
+#if INDEPENDENT_XINTN_LIBRARY
+    internal
+#else
+    public
+#endif
+        static partial class BinaryNumerals {
 
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
         [TargetedPatchingOptOutAttribute("")]
@@ -189,33 +195,36 @@ namespace UltimateOrb.Mathematics {
         [TargetedPatchingOptOutAttribute("")]
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         [System.Diagnostics.Contracts.PureAttribute()]
+        public static int CountStorageBits(UInt64 v) {
+            if (0 == v) {
+                return 0;
+            }
+            return 1 + Log2Floor(v.ToUnsignedUnchecked());
+        }
+
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
+        [TargetedPatchingOptOutAttribute("")]
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        [System.Diagnostics.Contracts.PureAttribute()]
+        public static int CountStorageBits(UInt32 v) {
+            if (0 == v) {
+                return 0;
+            }
+            return 1 + Log2Floor(v.ToUnsignedUnchecked());
+        }
+
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
+        [TargetedPatchingOptOutAttribute("")]
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        [System.Diagnostics.Contracts.PureAttribute()]
         public static int CountStorageBits(Int64 v) {
-            v ^= v << 1;
-            var r = 64;
-            if ((v & unchecked((Int64)0xFFFFFFFF00000000)) == 0) {
-                v <<= 32;
-                r = unchecked(r - 32);
+            if (0 > v) {
+                v = ~v;
             }
-            if ((v & unchecked((Int64)0xFFFF000000000000)) == 0) {
-                v <<= 16;
-                r = unchecked(r - 16);
+            if (0 == v) {
+                return 1;
             }
-            if ((v & unchecked((Int64)0xFF00000000000000)) == 0) {
-                v <<= 8;
-                r = unchecked(r - 8);
-            }
-            if ((v & unchecked((Int64)0xF000000000000000)) == 0) {
-                v <<= 4;
-                r = unchecked(r - 4);
-            }
-            if ((v & unchecked((Int64)0xC000000000000000)) == 0) {
-                v <<= 2;
-                r = unchecked(r - 2);
-            }
-            if ((v & unchecked((Int64)0x8000000000000000)) == 0) {
-                r = unchecked(r - 1);
-            }
-            return r;
+            return 2 + Log2Floor(v.ToUnsignedUnchecked());
         }
 
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
@@ -223,28 +232,13 @@ namespace UltimateOrb.Mathematics {
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         [System.Diagnostics.Contracts.PureAttribute()]
         public static int CountStorageBits(Int32 v) {
-            v ^= v << 1;
-            var r = 32;
-            if ((v & unchecked((Int64)0xFFFF0000)) == 0) {
-                v <<= 16;
-                r = unchecked(r - 16);
+            if (0 > v) {
+                v = ~v;
             }
-            if ((v & unchecked((Int64)0xFF000000)) == 0) {
-                v <<= 8;
-                r = unchecked(r - 8);
+            if (0 == v) {
+                return 1;
             }
-            if ((v & unchecked((Int64)0xF0000000)) == 0) {
-                v <<= 4;
-                r = unchecked(r - 4);
-            }
-            if ((v & unchecked((Int64)0xC0000000)) == 0) {
-                v <<= 2;
-                r = unchecked(r - 2);
-            }
-            if ((v & unchecked((Int64)0x80000000)) == 0) {
-                r = unchecked(r - 1);
-            }
-            return r;
+            return 2 + Log2Floor(v.ToUnsignedUnchecked());
         }
 
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]

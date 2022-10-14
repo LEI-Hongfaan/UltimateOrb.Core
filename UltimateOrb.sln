@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.31025.218
+# Visual Studio Version 17
+VisualStudioVersion = 17.3.32519.111
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UltimateOrb.Core", "UltimateOrb.Core\UltimateOrb.Core.csproj", "{0C7C3810-CA53-449F-BEA3-2FEA77AA3E37}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -17,6 +17,26 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UltimateOrb.Core.SourceGenerators", "UltimateOrb.Core.SourceGenerators\UltimateOrb.Core.SourceGenerators.csproj", "{F72E0C3D-24E5-4256-9D63-B3C6AC59B2CB}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UltimateOrb.Core.SourceGenerators.Tests", "UltimateOrb.Core.SourceGenerators.Tests\UltimateOrb.Core.SourceGenerators.Tests.csproj", "{3B708BE9-82D0-4016-9310-A6D86D5B5330}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UltimateOrb.Int128", "UltimateOrb.Int128\UltimateOrb.Int128.csproj", "{0D987335-8C4F-44D8-9516-14645B0A6B78}"
+	ProjectSection(ProjectDependencies) = postProject
+		{A170492B-1C33-4E95-A91A-5140B4758B29} = {A170492B-1C33-4E95-A91A-5140B4758B29}
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UltimateOrb.Int128.Tests", "UltimateOrb.Int128.Tests\UltimateOrb.Int128.Tests.csproj", "{24352FC6-CC71-46D7-A957-E93CE019C244}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{D9EC0904-E701-4C2C-946C-60A6BFCD3AE6}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UltimateOrb.Tests.BlazorAot.Server", "UltimateOrb.Tests.BlazorAot\Server\UltimateOrb.Tests.BlazorAot.Server.csproj", "{5102EA8C-1F7B-447D-9FAE-3B3A56815639}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UltimateOrb.Tests.BlazorAot.Client", "UltimateOrb.Tests.BlazorAot\Client\UltimateOrb.Tests.BlazorAot.Client.csproj", "{18F89E12-F10C-4DE8-961D-C67825D2221B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UltimateOrb.Tests.BlazorAot.Shared", "UltimateOrb.Tests.BlazorAot\Shared\UltimateOrb.Tests.BlazorAot.Shared.csproj", "{7E6479C5-1101-4079-8F1F-D891DAD8A4F1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UltimateOrb.Core.MonoAotReadinessChecker", "UltimateOrb.Core.MonoAotReadinessChecker\UltimateOrb.Core.MonoAotReadinessChecker.csproj", "{2F8AF4B9-E9BA-45CA-AB7B-423A574D9AC6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -48,6 +68,30 @@ Global
 		{3B708BE9-82D0-4016-9310-A6D86D5B5330}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3B708BE9-82D0-4016-9310-A6D86D5B5330}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3B708BE9-82D0-4016-9310-A6D86D5B5330}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0D987335-8C4F-44D8-9516-14645B0A6B78}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0D987335-8C4F-44D8-9516-14645B0A6B78}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0D987335-8C4F-44D8-9516-14645B0A6B78}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0D987335-8C4F-44D8-9516-14645B0A6B78}.Release|Any CPU.Build.0 = Release|Any CPU
+		{24352FC6-CC71-46D7-A957-E93CE019C244}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{24352FC6-CC71-46D7-A957-E93CE019C244}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{24352FC6-CC71-46D7-A957-E93CE019C244}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{24352FC6-CC71-46D7-A957-E93CE019C244}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5102EA8C-1F7B-447D-9FAE-3B3A56815639}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5102EA8C-1F7B-447D-9FAE-3B3A56815639}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5102EA8C-1F7B-447D-9FAE-3B3A56815639}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5102EA8C-1F7B-447D-9FAE-3B3A56815639}.Release|Any CPU.Build.0 = Release|Any CPU
+		{18F89E12-F10C-4DE8-961D-C67825D2221B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{18F89E12-F10C-4DE8-961D-C67825D2221B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{18F89E12-F10C-4DE8-961D-C67825D2221B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{18F89E12-F10C-4DE8-961D-C67825D2221B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7E6479C5-1101-4079-8F1F-D891DAD8A4F1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7E6479C5-1101-4079-8F1F-D891DAD8A4F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7E6479C5-1101-4079-8F1F-D891DAD8A4F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7E6479C5-1101-4079-8F1F-D891DAD8A4F1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2F8AF4B9-E9BA-45CA-AB7B-423A574D9AC6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2F8AF4B9-E9BA-45CA-AB7B-423A574D9AC6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2F8AF4B9-E9BA-45CA-AB7B-423A574D9AC6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2F8AF4B9-E9BA-45CA-AB7B-423A574D9AC6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
