@@ -6,7 +6,6 @@
 This repo contains the code to build the UltimateOrb Core libraries, as well as the sources to related tools and unit tests.
 
 [Old version v2](https://github.com/LEI-Hongfaan/UltimateOrb.Core.v2)
-[Old version v1](https://github.com/LEI-Hongfaan/UltimateOrb.Core.v1)
 
 ## UltimateOrb.Core
 
