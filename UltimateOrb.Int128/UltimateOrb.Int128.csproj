@@ -202,9 +202,27 @@
     <SetEnvironmentVariableTask Name="DOTNET_HOST_PATH" Value="C:\Program Files\dotnet\dotnet.exe" />
   </Target>
   
-  <Target Name="Trimming" AfterTargets="PostBuild">
+  <Target Name="Trimming" Condition="'$(TargetFramework)'=='net6.0'" AfterTargets="PostBuild">
     <Copy SourceFiles="$(TargetPath)" DestinationFiles="tmp\UltimateOrb.Int128.dll"></Copy>
     <ILLink AssemblyPaths="$(AssemblyDir)System.Runtime.dll;$(AssemblyDir)System.Private.CoreLib.dll;$(AssemblyDir)System.Private.Uri.dll;$(AssemblyDir)System.Diagnostics.Contracts.dll;$(AssemblyDir)System.Memory.dll;$(AssemblyDir)System.Runtime.Numerics.dll;tmp\UltimateOrb.Int128.dll" RootAssemblyNames="" RootDescriptorFiles="linker.xml" OutputDirectory="tmp\output\" ExtraArgs="--keep-metadata parametername -t --trim-mode link" />
     <Copy SourceFiles="tmp\output\UltimateOrb.Int128.dll" DestinationFiles="$(TargetPath)"></Copy>
   </Target>
+	
+	<Target Name="Trimming" Condition="'$(TargetFramework)'=='net7.0'" AfterTargets="PostBuild">
+		<Copy SourceFiles="$(TargetPath)" DestinationFiles="tmp\UltimateOrb.Int128.dll"></Copy>
+		<ILLink AssemblyPaths="$(AssemblyDir)System.Runtime.dll;$(AssemblyDir)System.Private.CoreLib.dll;$(AssemblyDir)System.Private.Uri.dll;$(AssemblyDir)System.Diagnostics.Contracts.dll;$(AssemblyDir)System.Memory.dll;$(AssemblyDir)System.Runtime.Numerics.dll;tmp\UltimateOrb.Int128.dll" RootAssemblyNames="" RootDescriptorFiles="linker.xml" OutputDirectory="tmp\output\" ExtraArgs="--keep-metadata parametername -t --trim-mode link" />
+		<Copy SourceFiles="tmp\output\UltimateOrb.Int128.dll" DestinationFiles="$(TargetPath)"></Copy>
+	</Target>
+	
+	<Target Name="Trimming" Condition="'$(TargetFramework)'=='net8.0'" AfterTargets="PostBuild">
+		<Copy SourceFiles="$(TargetPath)" DestinationFiles="tmp\UltimateOrb.Int128.dll"></Copy>
+		<ILLink AssemblyPaths="$(AssemblyDir)System.Runtime.dll;$(AssemblyDir)System.Private.CoreLib.dll;$(AssemblyDir)System.Private.Uri.dll;$(AssemblyDir)System.Diagnostics.Contracts.dll;$(AssemblyDir)System.Memory.dll;$(AssemblyDir)System.Runtime.Numerics.dll;tmp\UltimateOrb.Int128.dll" RootAssemblyNames="" RootDescriptorFiles="linker.xml" OutputDirectory="tmp\output\" ExtraArgs="--keep-metadata parametername --trim-mode link" />
+		<Copy SourceFiles="tmp\output\UltimateOrb.Int128.dll" DestinationFiles="$(TargetPath)"></Copy>
+	</Target>
+
+	<Target Name="Trimming" Condition="'$(TargetFramework)'=='net9.0'" AfterTargets="PostBuild">
+		<Copy SourceFiles="$(TargetPath)" DestinationFiles="tmp\UltimateOrb.Int128.dll"></Copy>
+		<ILLink AssemblyPaths="$(AssemblyDir)System.Runtime.dll;$(AssemblyDir)System.Private.CoreLib.dll;$(AssemblyDir)System.Private.Uri.dll;$(AssemblyDir)System.Diagnostics.Contracts.dll;$(AssemblyDir)System.Memory.dll;$(AssemblyDir)System.Runtime.Numerics.dll;tmp\UltimateOrb.Int128.dll" RootAssemblyNames="" RootDescriptorFiles="linker.xml" OutputDirectory="tmp\output\" ExtraArgs="--keep-metadata parametername --trim-mode link" />
+		<Copy SourceFiles="tmp\output\UltimateOrb.Int128.dll" DestinationFiles="$(TargetPath)"></Copy>
+	</Target>
 </Project>
