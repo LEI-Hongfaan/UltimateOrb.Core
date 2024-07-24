@@ -12,17 +12,17 @@
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Product>UltimateOrb Libraries</Product>
     <Company>$(Authors)</Company>
-    <Title></Title>
+    <Title>UltimateOrb Libraries</Title>
     <RootNamespace>UltimateOrb</RootNamespace>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
-    <AssemblyVersion>1.2.1.0</AssemblyVersion>
-    <FileVersion>1.2.1.0</FileVersion>
+    <AssemblyVersion>1.3.0.0</AssemblyVersion>
+    <FileVersion>1.3.0.0</FileVersion>
     <RepositoryUrl>https://github.com/LEI-Hongfaan/UltimateOrb.Core</RepositoryUrl>
     <PackageTags>Int128;UInt128;UltimateOrb</PackageTags>
     <PackageProjectUrl>https://github.com/LEI-Hongfaan/UltimateOrb.Core</PackageProjectUrl>
-    <Copyright>Copyright © 2017, 2018, 2020, 2022 LEI Hongfaan. Distributed under the MIT License.</Copyright>
+    <Copyright>Copyright © 2017, 2018, 2020, 2022, 2024 LEI Hongfaan. Distributed under the MIT License.</Copyright>
     <Description>Provides Int128 and UInt128.</Description>
     <Authors>LEI Hongfaan</Authors>
   </PropertyGroup>
@@ -30,6 +30,7 @@
   <PropertyGroup>
     <!-- Sync with UltimateOrb.Core -->
     <Version>3.2.0-beta.1</Version>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -123,6 +124,10 @@
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
+    <None Include="..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
     <None Include="..\UltimateOrb.Core\Numerics\DoubleArithmetic{Compare}.tt" Link="Numerics\DoubleArithmetic{Compare}.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>DoubleArithmetic{Compare}.cs</LastGenOutput>
@@ -161,19 +166,45 @@
     <Exec WorkingDirectory="$(SolutionDir)UltimateOrb.Core.BuildTools\BuildTools" Command="echo 'Invoking build tools to modify the output assembly (&quot;$(TargetPath)&quot;)...' &amp;&amp; UltimateOrb.Core.BuildTools $(TargetPath) &amp;&amp; echo 'To sign the assembly, rebuild with &quot;Sign the assembly&quot;, then use the command:' &amp;&amp; echo '    sn -Ra &quot;$(TargetPath)&quot; &quot;$(ProjectDir)test.snk&quot;' &amp;&amp; echo 'To verify the assembly, use the command:' &amp;&amp; echo '    peverify &quot;$(TargetPath)&quot;' &amp;&amp; echo 'If PEVerify can not resolve the dependent assemblies ([HRESULT 0x80070002]), edit &quot;*.dll.config&quot; files and copy them to the same directory as the output assembly.'" />
   </Target>
   
+  
+  <UsingTask TaskName="SetEnvironmentVariableTask" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
+    <ParameterGroup>
+      <Name ParameterType="System.String" Required="true" />
+      <Value ParameterType="System.String" Required="true" />
+    </ParameterGroup>
+    <Task>
+      <Using Namespace="System" />
+      <Code Type="Fragment" Language="cs">
+        <![CDATA[
+        Environment.SetEnvironmentVariable(Name, Value);
+        ]]>
+      </Code>
+    </Task>
+  </UsingTask>
+
   <PropertyGroup Condition="'$(TargetFramework)'=='net6.0'">
+    <AssemblyDir>C:\Program Files\dotnet\shared\Microsoft.NETCore.App\6.0.32\</AssemblyDir>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)'=='net7.0'">
+    <AssemblyDir>C:\Program Files\dotnet\shared\Microsoft.NETCore.App\7.0.20\</AssemblyDir>
   </PropertyGroup>
 
-  <Target Condition="'$(TargetFramework)'=='net6.0'" Name="Trimming" AfterTargets="PostBuild">
-    <Copy SourceFiles="$(TargetPath)" DestinationFiles="tmp\UltimateOrb.Int128.dll"></Copy>
-    <Copy SourceFiles="tmp\output\UltimateOrb.Int128.dll" DestinationFiles="$(TargetPath)"></Copy>
+  <PropertyGroup Condition="'$(TargetFramework)'=='net8.0'">
+    <AssemblyDir>C:\Program Files\dotnet\shared\Microsoft.NETCore.App\8.0.7\</AssemblyDir>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)'=='net9.0'">
+    <AssemblyDir>C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.0-preview.6.24327.7\</AssemblyDir>
+  </PropertyGroup>
+  
+  <Target Name="TrimmingEnvVar" BeforeTargets="Trimming">
+    <SetEnvironmentVariableTask Name="DOTNET_HOST_PATH" Value="C:\Program Files\dotnet\dotnet.exe" />
   </Target>
   
-  <Target Condition="'$(TargetFramework)'=='net7.0'" Name="Trimming" AfterTargets="PostBuild">
+  <Target Name="Trimming" AfterTargets="PostBuild">
     <Copy SourceFiles="$(TargetPath)" DestinationFiles="tmp\UltimateOrb.Int128.dll"></Copy>
+    <ILLink AssemblyPaths="$(AssemblyDir)System.Runtime.dll;$(AssemblyDir)System.Private.CoreLib.dll;$(AssemblyDir)System.Private.Uri.dll;$(AssemblyDir)System.Diagnostics.Contracts.dll;$(AssemblyDir)System.Memory.dll;$(AssemblyDir)System.Runtime.Numerics.dll;tmp\UltimateOrb.Int128.dll" RootAssemblyNames="" RootDescriptorFiles="linker.xml" OutputDirectory="tmp\output\" ExtraArgs="--keep-metadata parametername -t --trim-mode link" />
     <Copy SourceFiles="tmp\output\UltimateOrb.Int128.dll" DestinationFiles="$(TargetPath)"></Copy>
   </Target>
 </Project>
