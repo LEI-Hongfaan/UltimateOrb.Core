@@ -64,7 +64,7 @@ namespace UltimateOrb.Numerics {
         public static HIntT ShiftLeft(LIntT low, HIntT high, int count) {
             unsafe {
                 if (0 != count) {
-                    return unchecked((HIntT)(((UIntT)high << count) | ((UIntT)low >> (-count/* sizeof(IntT) - count */))));
+                    return unchecked((HIntT)(((UIntT)high << count) | ((UIntT)low >> (-count/* 8 * sizeof(IntT) - count */))));
                 }
                 return high;
             }
@@ -75,7 +75,7 @@ namespace UltimateOrb.Numerics {
         public static LIntT ShiftRight(LIntT low, HIntT high, int count) {
             unsafe {
                 if (0 != count) {
-                    return unchecked((LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* sizeof(IntT) - count */))));
+                    return unchecked((LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* 8 * sizeof(IntT) - count */))));
                 }
                 return low;
             }
@@ -87,15 +87,15 @@ namespace UltimateOrb.Numerics {
         public static LIntT ShiftLeft(LIntT low, HIntT high, int count, out HIntT highResult) {
             unsafe {
                 unchecked {
-                    count &= 2 * sizeof(IntT) - 1;
-                    if (count < sizeof(IntT)) {
+                    count &= 2 * (8 * sizeof(IntT)) - 1;
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
-                            highResult = (HIntT)(((UIntT)high << count) | ((UIntT)low >> (-count/* sizeof(IntT) - count */)));
+                            highResult = (HIntT)(((UIntT)high << count) | ((UIntT)low >> (-count/* 8 * sizeof(IntT) - count */)));
                             return (LIntT)(low << count);
                         } 
                     } else {
-                        // if (count > sizeof(IntT)) {
-                        //     highResult = (HIntT)(low << (count/* - sizeof(IntT)*/));
+                        // if (count > 8 * sizeof(IntT)) {
+                        //     highResult = (HIntT)(low << (count/* - 8 * sizeof(IntT)*/));
                         // } else {
                         //     highResult = (HIntT)low;
                         // }
@@ -115,24 +115,24 @@ namespace UltimateOrb.Numerics {
         public static LIntT ShiftRightSigned(LIntT low, HIntT high, int count, out HIntT highResult) {
             unsafe {
                 unchecked {
-                    count &= 2 * sizeof(IntT) - 1;
-                    if (count < sizeof(IntT)) {
+                    count &= 2 * (8 * sizeof(IntT)) - 1;
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)((IntT)high >> count);
-                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* sizeof(IntT) - count */)));
+                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* 8 * sizeof(IntT) - count */)));
                         }
                     } else {
-                        var mask = (UIntT)((IntT)high >> (sizeof(IntT) - 1));
+                        var mask = (UIntT)((IntT)high >> (8 * sizeof(IntT) - 1));
                         highResult = (HIntT)mask;
-                        if (count > sizeof(IntT)) {
+                        if (count > 8 * sizeof(IntT)) {
                             // if (0 > (IntT)high) {
                             //     highResult = (HIntT)(IntT)(-1);
-                            //     return (LIntT)(((UIntT)high >> (count/* - sizeof(IntT)*/)) | (UIntT.MaxValue << (-count/* sizeof(IntT) + sizeof(IntT) - count */)));
+                            //     return (LIntT)(((UIntT)high >> (count/* - 8 * sizeof(IntT)*/)) | (UIntT.MaxValue << (-count/* 8 * sizeof(IntT) + 8 * sizeof(IntT) - count */)));
                             // } else {
                             //     highResult = (HIntT)0;
-                            //     return (LIntT)((UIntT)high >> (count/* - sizeof(IntT)*/));
+                            //     return (LIntT)((UIntT)high >> (count/* - 8 * sizeof(IntT)*/));
                             // }
-                            return (LIntT)(((UIntT)high >> (count/* - sizeof(IntT)*/)) | (mask << (-count/* sizeof(IntT) + sizeof(IntT) - count */)));
+                            return (LIntT)(((UIntT)high >> (count/* - 8 * sizeof(IntT)*/)) | (mask << (-count/* 8 * sizeof(IntT) + 8 * sizeof(IntT) - count */)));
                         } else {
                             // highResult = (0 > (IntT)high) ? (HIntT)(IntT)(-1) : (HIntT)0;
                             return (LIntT)high;
@@ -151,16 +151,16 @@ namespace UltimateOrb.Numerics {
         public static LIntT ShiftRightUnsigned(LIntT low, HIntT high, int count, out HIntT highResult) {
             unsafe {
                 unchecked {
-                    count &= 2 * sizeof(IntT) - 1;
-                    if (count < sizeof(IntT)) {
+                    count &= 2 * (8 * sizeof(IntT)) - 1;
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)((UIntT)high >> count);
-                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* sizeof(IntT) - count */)));
+                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* 8 * sizeof(IntT) - count */)));
                         }
                     } else {
                         highResult = (HIntT)0;
-                        // if (count > sizeof(IntT)) {
-                        //    return (LIntT)((UIntT)high >> (count/* - sizeof(IntT)*/));
+                        // if (count > 8 * sizeof(IntT)) {
+                        //    return (LIntT)((UIntT)high >> (count/* - 8 * sizeof(IntT)*/));
                         // } else {
                         //     return (LIntT)high;
                         // }
@@ -180,14 +180,14 @@ namespace UltimateOrb.Numerics {
         public static LIntT RotateLeft(LIntT low, HIntT high, int count, out HIntT highResult) {
             unsafe {
                 unchecked {
-                    count &= 2 * sizeof(IntT) - 1;
-                    if (count < sizeof(IntT)) {
+                    count &= 2 * (8 * sizeof(IntT)) - 1;
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)(((UIntT)high << count) | ((UIntT)low >> -count));
                             return (LIntT)(((UIntT)low << count) | ((UIntT)high >> -count));
                         }
                     } else {
-                        if (count > sizeof(IntT)) {
+                        if (count > 8 * sizeof(IntT)) {
                             highResult = (HIntT)(((UIntT)low << count) | ((UIntT)high >> -count));
                             return (LIntT)(((UIntT)high << count) | ((UIntT)low >> -count));
                         } else {
@@ -208,14 +208,14 @@ namespace UltimateOrb.Numerics {
         public static LIntT RotateRight(LIntT low, HIntT high, int count, out HIntT highResult) {
             unsafe {
                 unchecked {
-                    count &= 2 * sizeof(IntT) - 1;
-                    if (count < sizeof(IntT)) {
+                    count &= 2 * (8 * sizeof(IntT)) - 1;
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)(((UIntT)high >> count) | ((UIntT)low << -count));
                             return (LIntT)(((UIntT)low >> count) | ((UIntT)high << -count));
                         }
                     } else {
-                        if (count > sizeof(IntT)) {
+                        if (count > 8 * sizeof(IntT)) {
                             highResult = (HIntT)(((UIntT)low >> count) | ((UIntT)high << -count));
                             return (LIntT)(((UIntT)high >> count) | ((UIntT)low << -count));
                         } else {
@@ -239,14 +239,14 @@ namespace UltimateOrb.Numerics {
             unsafe {
                 unchecked {
                     const int count = 1;
-                    if (count < sizeof(IntT)) {
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
-                            highResult = (HIntT)(((UIntT)high << count) | ((UIntT)low >> (-count/* sizeof(IntT) - count */)));
+                            highResult = (HIntT)(((UIntT)high << count) | ((UIntT)low >> (-count/* 8 * sizeof(IntT) - count */)));
                             return (LIntT)(low << count);
                         } 
                     } else {
-                        // if (count > sizeof(IntT)) {
-                        //     highResult = (HIntT)(low << (count/* - sizeof(IntT)*/));
+                        // if (count > 8 * sizeof(IntT)) {
+                        //     highResult = (HIntT)(low << (count/* - 8 * sizeof(IntT)*/));
                         // } else {
                         //     highResult = (HIntT)low;
                         // }
@@ -267,23 +267,23 @@ namespace UltimateOrb.Numerics {
             unsafe {
                 unchecked {
                     const int count = 1;
-                    if (count < sizeof(IntT)) {
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)((IntT)high >> count);
-                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* sizeof(IntT) - count */)));
+                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* 8 * sizeof(IntT) - count */)));
                         }
                     } else {
-                        var mask = (UIntT)((IntT)high >> (sizeof(IntT) - 1));
+                        var mask = (UIntT)((IntT)high >> (8 * sizeof(IntT) - 1));
                         highResult = (HIntT)mask;
-                        if (count > sizeof(IntT)) {
+                        if (count > 8 * sizeof(IntT)) {
                             // if (0 > (IntT)high) {
                             //     highResult = (HIntT)(IntT)(-1);
-                            //     return (LIntT)(((UIntT)high >> (count/* - sizeof(IntT)*/)) | (UIntT.MaxValue << (-count/* sizeof(IntT) + sizeof(IntT) - count */)));
+                            //     return (LIntT)(((UIntT)high >> (count/* - 8 * sizeof(IntT)*/)) | (UIntT.MaxValue << (-count/* 8 * sizeof(IntT) + 8 * sizeof(IntT) - count */)));
                             // } else {
                             //     highResult = (HIntT)0;
-                            //     return (LIntT)((UIntT)high >> (count/* - sizeof(IntT)*/));
+                            //     return (LIntT)((UIntT)high >> (count/* - 8 * sizeof(IntT)*/));
                             // }
-                            return (LIntT)(((UIntT)high >> (count/* - sizeof(IntT)*/)) | (mask << (-count/* sizeof(IntT) + sizeof(IntT) - count */)));
+                            return (LIntT)(((UIntT)high >> (count/* - 8 * sizeof(IntT)*/)) | (mask << (-count/* 8 * sizeof(IntT) + 8 * sizeof(IntT) - count */)));
                         } else {
                             // highResult = (0 > (IntT)high) ? (HIntT)(IntT)(-1) : (HIntT)0;
                             return (LIntT)high;
@@ -303,15 +303,15 @@ namespace UltimateOrb.Numerics {
             unsafe {
                 unchecked {
                     const int count = 1;
-                    if (count < sizeof(IntT)) {
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)((UIntT)high >> count);
-                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* sizeof(IntT) - count */)));
+                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* 8 * sizeof(IntT) - count */)));
                         }
                     } else {
                         highResult = (HIntT)0;
-                        // if (count > sizeof(IntT)) {
-                        //    return (LIntT)((UIntT)high >> (count/* - sizeof(IntT)*/));
+                        // if (count > 8 * sizeof(IntT)) {
+                        //    return (LIntT)((UIntT)high >> (count/* - 8 * sizeof(IntT)*/));
                         // } else {
                         //     return (LIntT)high;
                         // }
@@ -332,13 +332,13 @@ namespace UltimateOrb.Numerics {
             unsafe {
                 unchecked {
                     const int count = 1;
-                    if (count < sizeof(IntT)) {
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)(((UIntT)high << count) | ((UIntT)low >> -count));
                             return (LIntT)(((UIntT)low << count) | ((UIntT)high >> -count));
                         }
                     } else {
-                        if (count > sizeof(IntT)) {
+                        if (count > 8 * sizeof(IntT)) {
                             highResult = (HIntT)(((UIntT)low << count) | ((UIntT)high >> -count));
                             return (LIntT)(((UIntT)high << count) | ((UIntT)low >> -count));
                         } else {
@@ -360,13 +360,13 @@ namespace UltimateOrb.Numerics {
             unsafe {
                 unchecked {
                     const int count = 1;
-                    if (count < sizeof(IntT)) {
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)(((UIntT)high >> count) | ((UIntT)low << -count));
                             return (LIntT)(((UIntT)low >> count) | ((UIntT)high << -count));
                         }
                     } else {
-                        if (count > sizeof(IntT)) {
+                        if (count > 8 * sizeof(IntT)) {
                             highResult = (HIntT)(((UIntT)low >> count) | ((UIntT)high << -count));
                             return (LIntT)(((UIntT)high >> count) | ((UIntT)low << -count));
                         } else {
@@ -406,7 +406,7 @@ namespace UltimateOrb.Numerics {
         public static HIntT ShiftLeft(LIntT low, HIntT high, int count) {
             unsafe {
                 if (0 != count) {
-                    return unchecked((HIntT)(((UIntT)high << count) | ((UIntT)low >> (-count/* sizeof(IntT) - count */))));
+                    return unchecked((HIntT)(((UIntT)high << count) | ((UIntT)low >> (-count/* 8 * sizeof(IntT) - count */))));
                 }
                 return high;
             }
@@ -417,7 +417,7 @@ namespace UltimateOrb.Numerics {
         public static LIntT ShiftRight(LIntT low, HIntT high, int count) {
             unsafe {
                 if (0 != count) {
-                    return unchecked((LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* sizeof(IntT) - count */))));
+                    return unchecked((LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* 8 * sizeof(IntT) - count */))));
                 }
                 return low;
             }
@@ -429,15 +429,15 @@ namespace UltimateOrb.Numerics {
         public static LIntT ShiftLeft(LIntT low, HIntT high, int count, out HIntT highResult) {
             unsafe {
                 unchecked {
-                    count &= 2 * sizeof(IntT) - 1;
-                    if (count < sizeof(IntT)) {
+                    count &= 2 * (8 * sizeof(IntT)) - 1;
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
-                            highResult = (HIntT)(((UIntT)high << count) | ((UIntT)low >> (-count/* sizeof(IntT) - count */)));
+                            highResult = (HIntT)(((UIntT)high << count) | ((UIntT)low >> (-count/* 8 * sizeof(IntT) - count */)));
                             return (LIntT)(low << count);
                         } 
                     } else {
-                        // if (count > sizeof(IntT)) {
-                        //     highResult = (HIntT)(low << (count/* - sizeof(IntT)*/));
+                        // if (count > 8 * sizeof(IntT)) {
+                        //     highResult = (HIntT)(low << (count/* - 8 * sizeof(IntT)*/));
                         // } else {
                         //     highResult = (HIntT)low;
                         // }
@@ -457,24 +457,24 @@ namespace UltimateOrb.Numerics {
         public static LIntT ShiftRightSigned(LIntT low, HIntT high, int count, out HIntT highResult) {
             unsafe {
                 unchecked {
-                    count &= 2 * sizeof(IntT) - 1;
-                    if (count < sizeof(IntT)) {
+                    count &= 2 * (8 * sizeof(IntT)) - 1;
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)((IntT)high >> count);
-                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* sizeof(IntT) - count */)));
+                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* 8 * sizeof(IntT) - count */)));
                         }
                     } else {
-                        var mask = (UIntT)((IntT)high >> (sizeof(IntT) - 1));
+                        var mask = (UIntT)((IntT)high >> (8 * sizeof(IntT) - 1));
                         highResult = (HIntT)mask;
-                        if (count > sizeof(IntT)) {
+                        if (count > 8 * sizeof(IntT)) {
                             // if (0 > (IntT)high) {
                             //     highResult = (HIntT)(IntT)(-1);
-                            //     return (LIntT)(((UIntT)high >> (count/* - sizeof(IntT)*/)) | (UIntT.MaxValue << (-count/* sizeof(IntT) + sizeof(IntT) - count */)));
+                            //     return (LIntT)(((UIntT)high >> (count/* - 8 * sizeof(IntT)*/)) | (UIntT.MaxValue << (-count/* 8 * sizeof(IntT) + 8 * sizeof(IntT) - count */)));
                             // } else {
                             //     highResult = (HIntT)0;
-                            //     return (LIntT)((UIntT)high >> (count/* - sizeof(IntT)*/));
+                            //     return (LIntT)((UIntT)high >> (count/* - 8 * sizeof(IntT)*/));
                             // }
-                            return (LIntT)(((UIntT)high >> (count/* - sizeof(IntT)*/)) | (mask << (-count/* sizeof(IntT) + sizeof(IntT) - count */)));
+                            return (LIntT)(((UIntT)high >> (count/* - 8 * sizeof(IntT)*/)) | (mask << (-count/* 8 * sizeof(IntT) + 8 * sizeof(IntT) - count */)));
                         } else {
                             // highResult = (0 > (IntT)high) ? (HIntT)(IntT)(-1) : (HIntT)0;
                             return (LIntT)high;
@@ -493,16 +493,16 @@ namespace UltimateOrb.Numerics {
         public static LIntT ShiftRightUnsigned(LIntT low, HIntT high, int count, out HIntT highResult) {
             unsafe {
                 unchecked {
-                    count &= 2 * sizeof(IntT) - 1;
-                    if (count < sizeof(IntT)) {
+                    count &= 2 * (8 * sizeof(IntT)) - 1;
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)((UIntT)high >> count);
-                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* sizeof(IntT) - count */)));
+                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* 8 * sizeof(IntT) - count */)));
                         }
                     } else {
                         highResult = (HIntT)0;
-                        // if (count > sizeof(IntT)) {
-                        //    return (LIntT)((UIntT)high >> (count/* - sizeof(IntT)*/));
+                        // if (count > 8 * sizeof(IntT)) {
+                        //    return (LIntT)((UIntT)high >> (count/* - 8 * sizeof(IntT)*/));
                         // } else {
                         //     return (LIntT)high;
                         // }
@@ -522,14 +522,14 @@ namespace UltimateOrb.Numerics {
         public static LIntT RotateLeft(LIntT low, HIntT high, int count, out HIntT highResult) {
             unsafe {
                 unchecked {
-                    count &= 2 * sizeof(IntT) - 1;
-                    if (count < sizeof(IntT)) {
+                    count &= 2 * (8 * sizeof(IntT)) - 1;
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)(((UIntT)high << count) | ((UIntT)low >> -count));
                             return (LIntT)(((UIntT)low << count) | ((UIntT)high >> -count));
                         }
                     } else {
-                        if (count > sizeof(IntT)) {
+                        if (count > 8 * sizeof(IntT)) {
                             highResult = (HIntT)(((UIntT)low << count) | ((UIntT)high >> -count));
                             return (LIntT)(((UIntT)high << count) | ((UIntT)low >> -count));
                         } else {
@@ -550,14 +550,14 @@ namespace UltimateOrb.Numerics {
         public static LIntT RotateRight(LIntT low, HIntT high, int count, out HIntT highResult) {
             unsafe {
                 unchecked {
-                    count &= 2 * sizeof(IntT) - 1;
-                    if (count < sizeof(IntT)) {
+                    count &= 2 * (8 * sizeof(IntT)) - 1;
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)(((UIntT)high >> count) | ((UIntT)low << -count));
                             return (LIntT)(((UIntT)low >> count) | ((UIntT)high << -count));
                         }
                     } else {
-                        if (count > sizeof(IntT)) {
+                        if (count > 8 * sizeof(IntT)) {
                             highResult = (HIntT)(((UIntT)low >> count) | ((UIntT)high << -count));
                             return (LIntT)(((UIntT)high >> count) | ((UIntT)low << -count));
                         } else {
@@ -581,14 +581,14 @@ namespace UltimateOrb.Numerics {
             unsafe {
                 unchecked {
                     const int count = 1;
-                    if (count < sizeof(IntT)) {
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
-                            highResult = (HIntT)(((UIntT)high << count) | ((UIntT)low >> (-count/* sizeof(IntT) - count */)));
+                            highResult = (HIntT)(((UIntT)high << count) | ((UIntT)low >> (-count/* 8 * sizeof(IntT) - count */)));
                             return (LIntT)(low << count);
                         } 
                     } else {
-                        // if (count > sizeof(IntT)) {
-                        //     highResult = (HIntT)(low << (count/* - sizeof(IntT)*/));
+                        // if (count > 8 * sizeof(IntT)) {
+                        //     highResult = (HIntT)(low << (count/* - 8 * sizeof(IntT)*/));
                         // } else {
                         //     highResult = (HIntT)low;
                         // }
@@ -609,23 +609,23 @@ namespace UltimateOrb.Numerics {
             unsafe {
                 unchecked {
                     const int count = 1;
-                    if (count < sizeof(IntT)) {
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)((IntT)high >> count);
-                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* sizeof(IntT) - count */)));
+                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* 8 * sizeof(IntT) - count */)));
                         }
                     } else {
-                        var mask = (UIntT)((IntT)high >> (sizeof(IntT) - 1));
+                        var mask = (UIntT)((IntT)high >> (8 * sizeof(IntT) - 1));
                         highResult = (HIntT)mask;
-                        if (count > sizeof(IntT)) {
+                        if (count > 8 * sizeof(IntT)) {
                             // if (0 > (IntT)high) {
                             //     highResult = (HIntT)(IntT)(-1);
-                            //     return (LIntT)(((UIntT)high >> (count/* - sizeof(IntT)*/)) | (UIntT.MaxValue << (-count/* sizeof(IntT) + sizeof(IntT) - count */)));
+                            //     return (LIntT)(((UIntT)high >> (count/* - 8 * sizeof(IntT)*/)) | (UIntT.MaxValue << (-count/* 8 * sizeof(IntT) + 8 * sizeof(IntT) - count */)));
                             // } else {
                             //     highResult = (HIntT)0;
-                            //     return (LIntT)((UIntT)high >> (count/* - sizeof(IntT)*/));
+                            //     return (LIntT)((UIntT)high >> (count/* - 8 * sizeof(IntT)*/));
                             // }
-                            return (LIntT)(((UIntT)high >> (count/* - sizeof(IntT)*/)) | (mask << (-count/* sizeof(IntT) + sizeof(IntT) - count */)));
+                            return (LIntT)(((UIntT)high >> (count/* - 8 * sizeof(IntT)*/)) | (mask << (-count/* 8 * sizeof(IntT) + 8 * sizeof(IntT) - count */)));
                         } else {
                             // highResult = (0 > (IntT)high) ? (HIntT)(IntT)(-1) : (HIntT)0;
                             return (LIntT)high;
@@ -645,15 +645,15 @@ namespace UltimateOrb.Numerics {
             unsafe {
                 unchecked {
                     const int count = 1;
-                    if (count < sizeof(IntT)) {
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)((UIntT)high >> count);
-                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* sizeof(IntT) - count */)));
+                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* 8 * sizeof(IntT) - count */)));
                         }
                     } else {
                         highResult = (HIntT)0;
-                        // if (count > sizeof(IntT)) {
-                        //    return (LIntT)((UIntT)high >> (count/* - sizeof(IntT)*/));
+                        // if (count > 8 * sizeof(IntT)) {
+                        //    return (LIntT)((UIntT)high >> (count/* - 8 * sizeof(IntT)*/));
                         // } else {
                         //     return (LIntT)high;
                         // }
@@ -674,13 +674,13 @@ namespace UltimateOrb.Numerics {
             unsafe {
                 unchecked {
                     const int count = 1;
-                    if (count < sizeof(IntT)) {
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)(((UIntT)high << count) | ((UIntT)low >> -count));
                             return (LIntT)(((UIntT)low << count) | ((UIntT)high >> -count));
                         }
                     } else {
-                        if (count > sizeof(IntT)) {
+                        if (count > 8 * sizeof(IntT)) {
                             highResult = (HIntT)(((UIntT)low << count) | ((UIntT)high >> -count));
                             return (LIntT)(((UIntT)high << count) | ((UIntT)low >> -count));
                         } else {
@@ -702,13 +702,13 @@ namespace UltimateOrb.Numerics {
             unsafe {
                 unchecked {
                     const int count = 1;
-                    if (count < sizeof(IntT)) {
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)(((UIntT)high >> count) | ((UIntT)low << -count));
                             return (LIntT)(((UIntT)low >> count) | ((UIntT)high << -count));
                         }
                     } else {
-                        if (count > sizeof(IntT)) {
+                        if (count > 8 * sizeof(IntT)) {
                             highResult = (HIntT)(((UIntT)low >> count) | ((UIntT)high << -count));
                             return (LIntT)(((UIntT)high >> count) | ((UIntT)low << -count));
                         } else {
@@ -748,7 +748,7 @@ namespace UltimateOrb.Numerics {
         public static HIntT ShiftLeft(LIntT low, HIntT high, int count) {
             unsafe {
                 if (0 != count) {
-                    return unchecked((HIntT)(((UIntT)high << count) | ((UIntT)low >> (-count/* sizeof(IntT) - count */))));
+                    return unchecked((HIntT)(((UIntT)high << count) | ((UIntT)low >> (-count/* 8 * sizeof(IntT) - count */))));
                 }
                 return high;
             }
@@ -759,7 +759,7 @@ namespace UltimateOrb.Numerics {
         public static LIntT ShiftRight(LIntT low, HIntT high, int count) {
             unsafe {
                 if (0 != count) {
-                    return unchecked((LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* sizeof(IntT) - count */))));
+                    return unchecked((LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* 8 * sizeof(IntT) - count */))));
                 }
                 return low;
             }
@@ -771,15 +771,15 @@ namespace UltimateOrb.Numerics {
         public static LIntT ShiftLeft(LIntT low, HIntT high, int count, out HIntT highResult) {
             unsafe {
                 unchecked {
-                    count &= 2 * sizeof(IntT) - 1;
-                    if (count < sizeof(IntT)) {
+                    count &= 2 * (8 * sizeof(IntT)) - 1;
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
-                            highResult = (HIntT)(((UIntT)high << count) | ((UIntT)low >> (-count/* sizeof(IntT) - count */)));
+                            highResult = (HIntT)(((UIntT)high << count) | ((UIntT)low >> (-count/* 8 * sizeof(IntT) - count */)));
                             return (LIntT)(low << count);
                         } 
                     } else {
-                        // if (count > sizeof(IntT)) {
-                        //     highResult = (HIntT)(low << (count/* - sizeof(IntT)*/));
+                        // if (count > 8 * sizeof(IntT)) {
+                        //     highResult = (HIntT)(low << (count/* - 8 * sizeof(IntT)*/));
                         // } else {
                         //     highResult = (HIntT)low;
                         // }
@@ -799,24 +799,24 @@ namespace UltimateOrb.Numerics {
         public static LIntT ShiftRightSigned(LIntT low, HIntT high, int count, out HIntT highResult) {
             unsafe {
                 unchecked {
-                    count &= 2 * sizeof(IntT) - 1;
-                    if (count < sizeof(IntT)) {
+                    count &= 2 * (8 * sizeof(IntT)) - 1;
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)((IntT)high >> count);
-                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* sizeof(IntT) - count */)));
+                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* 8 * sizeof(IntT) - count */)));
                         }
                     } else {
-                        var mask = (UIntT)((IntT)high >> (sizeof(IntT) - 1));
+                        var mask = (UIntT)((IntT)high >> (8 * sizeof(IntT) - 1));
                         highResult = (HIntT)mask;
-                        if (count > sizeof(IntT)) {
+                        if (count > 8 * sizeof(IntT)) {
                             // if (0 > (IntT)high) {
                             //     highResult = (HIntT)(IntT)(-1);
-                            //     return (LIntT)(((UIntT)high >> (count/* - sizeof(IntT)*/)) | (UIntT.MaxValue << (-count/* sizeof(IntT) + sizeof(IntT) - count */)));
+                            //     return (LIntT)(((UIntT)high >> (count/* - 8 * sizeof(IntT)*/)) | (UIntT.MaxValue << (-count/* 8 * sizeof(IntT) + 8 * sizeof(IntT) - count */)));
                             // } else {
                             //     highResult = (HIntT)0;
-                            //     return (LIntT)((UIntT)high >> (count/* - sizeof(IntT)*/));
+                            //     return (LIntT)((UIntT)high >> (count/* - 8 * sizeof(IntT)*/));
                             // }
-                            return (LIntT)(((UIntT)high >> (count/* - sizeof(IntT)*/)) | (mask << (-count/* sizeof(IntT) + sizeof(IntT) - count */)));
+                            return (LIntT)(((UIntT)high >> (count/* - 8 * sizeof(IntT)*/)) | (mask << (-count/* 8 * sizeof(IntT) + 8 * sizeof(IntT) - count */)));
                         } else {
                             // highResult = (0 > (IntT)high) ? (HIntT)(IntT)(-1) : (HIntT)0;
                             return (LIntT)high;
@@ -835,16 +835,16 @@ namespace UltimateOrb.Numerics {
         public static LIntT ShiftRightUnsigned(LIntT low, HIntT high, int count, out HIntT highResult) {
             unsafe {
                 unchecked {
-                    count &= 2 * sizeof(IntT) - 1;
-                    if (count < sizeof(IntT)) {
+                    count &= 2 * (8 * sizeof(IntT)) - 1;
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)((UIntT)high >> count);
-                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* sizeof(IntT) - count */)));
+                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* 8 * sizeof(IntT) - count */)));
                         }
                     } else {
                         highResult = (HIntT)0;
-                        // if (count > sizeof(IntT)) {
-                        //    return (LIntT)((UIntT)high >> (count/* - sizeof(IntT)*/));
+                        // if (count > 8 * sizeof(IntT)) {
+                        //    return (LIntT)((UIntT)high >> (count/* - 8 * sizeof(IntT)*/));
                         // } else {
                         //     return (LIntT)high;
                         // }
@@ -864,14 +864,14 @@ namespace UltimateOrb.Numerics {
         public static LIntT RotateLeft(LIntT low, HIntT high, int count, out HIntT highResult) {
             unsafe {
                 unchecked {
-                    count &= 2 * sizeof(IntT) - 1;
-                    if (count < sizeof(IntT)) {
+                    count &= 2 * (8 * sizeof(IntT)) - 1;
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)(((UIntT)high << count) | ((UIntT)low >> -count));
                             return (LIntT)(((UIntT)low << count) | ((UIntT)high >> -count));
                         }
                     } else {
-                        if (count > sizeof(IntT)) {
+                        if (count > 8 * sizeof(IntT)) {
                             highResult = (HIntT)(((UIntT)low << count) | ((UIntT)high >> -count));
                             return (LIntT)(((UIntT)high << count) | ((UIntT)low >> -count));
                         } else {
@@ -892,14 +892,14 @@ namespace UltimateOrb.Numerics {
         public static LIntT RotateRight(LIntT low, HIntT high, int count, out HIntT highResult) {
             unsafe {
                 unchecked {
-                    count &= 2 * sizeof(IntT) - 1;
-                    if (count < sizeof(IntT)) {
+                    count &= 2 * (8 * sizeof(IntT)) - 1;
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)(((UIntT)high >> count) | ((UIntT)low << -count));
                             return (LIntT)(((UIntT)low >> count) | ((UIntT)high << -count));
                         }
                     } else {
-                        if (count > sizeof(IntT)) {
+                        if (count > 8 * sizeof(IntT)) {
                             highResult = (HIntT)(((UIntT)low >> count) | ((UIntT)high << -count));
                             return (LIntT)(((UIntT)high >> count) | ((UIntT)low << -count));
                         } else {
@@ -923,14 +923,14 @@ namespace UltimateOrb.Numerics {
             unsafe {
                 unchecked {
                     const int count = 1;
-                    if (count < sizeof(IntT)) {
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
-                            highResult = (HIntT)(((UIntT)high << count) | ((UIntT)low >> (-count/* sizeof(IntT) - count */)));
+                            highResult = (HIntT)(((UIntT)high << count) | ((UIntT)low >> (-count/* 8 * sizeof(IntT) - count */)));
                             return (LIntT)(low << count);
                         } 
                     } else {
-                        // if (count > sizeof(IntT)) {
-                        //     highResult = (HIntT)(low << (count/* - sizeof(IntT)*/));
+                        // if (count > 8 * sizeof(IntT)) {
+                        //     highResult = (HIntT)(low << (count/* - 8 * sizeof(IntT)*/));
                         // } else {
                         //     highResult = (HIntT)low;
                         // }
@@ -951,23 +951,23 @@ namespace UltimateOrb.Numerics {
             unsafe {
                 unchecked {
                     const int count = 1;
-                    if (count < sizeof(IntT)) {
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)((IntT)high >> count);
-                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* sizeof(IntT) - count */)));
+                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* 8 * sizeof(IntT) - count */)));
                         }
                     } else {
-                        var mask = (UIntT)((IntT)high >> (sizeof(IntT) - 1));
+                        var mask = (UIntT)((IntT)high >> (8 * sizeof(IntT) - 1));
                         highResult = (HIntT)mask;
-                        if (count > sizeof(IntT)) {
+                        if (count > 8 * sizeof(IntT)) {
                             // if (0 > (IntT)high) {
                             //     highResult = (HIntT)(IntT)(-1);
-                            //     return (LIntT)(((UIntT)high >> (count/* - sizeof(IntT)*/)) | (UIntT.MaxValue << (-count/* sizeof(IntT) + sizeof(IntT) - count */)));
+                            //     return (LIntT)(((UIntT)high >> (count/* - 8 * sizeof(IntT)*/)) | (UIntT.MaxValue << (-count/* 8 * sizeof(IntT) + 8 * sizeof(IntT) - count */)));
                             // } else {
                             //     highResult = (HIntT)0;
-                            //     return (LIntT)((UIntT)high >> (count/* - sizeof(IntT)*/));
+                            //     return (LIntT)((UIntT)high >> (count/* - 8 * sizeof(IntT)*/));
                             // }
-                            return (LIntT)(((UIntT)high >> (count/* - sizeof(IntT)*/)) | (mask << (-count/* sizeof(IntT) + sizeof(IntT) - count */)));
+                            return (LIntT)(((UIntT)high >> (count/* - 8 * sizeof(IntT)*/)) | (mask << (-count/* 8 * sizeof(IntT) + 8 * sizeof(IntT) - count */)));
                         } else {
                             // highResult = (0 > (IntT)high) ? (HIntT)(IntT)(-1) : (HIntT)0;
                             return (LIntT)high;
@@ -987,15 +987,15 @@ namespace UltimateOrb.Numerics {
             unsafe {
                 unchecked {
                     const int count = 1;
-                    if (count < sizeof(IntT)) {
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)((UIntT)high >> count);
-                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* sizeof(IntT) - count */)));
+                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* 8 * sizeof(IntT) - count */)));
                         }
                     } else {
                         highResult = (HIntT)0;
-                        // if (count > sizeof(IntT)) {
-                        //    return (LIntT)((UIntT)high >> (count/* - sizeof(IntT)*/));
+                        // if (count > 8 * sizeof(IntT)) {
+                        //    return (LIntT)((UIntT)high >> (count/* - 8 * sizeof(IntT)*/));
                         // } else {
                         //     return (LIntT)high;
                         // }
@@ -1016,13 +1016,13 @@ namespace UltimateOrb.Numerics {
             unsafe {
                 unchecked {
                     const int count = 1;
-                    if (count < sizeof(IntT)) {
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)(((UIntT)high << count) | ((UIntT)low >> -count));
                             return (LIntT)(((UIntT)low << count) | ((UIntT)high >> -count));
                         }
                     } else {
-                        if (count > sizeof(IntT)) {
+                        if (count > 8 * sizeof(IntT)) {
                             highResult = (HIntT)(((UIntT)low << count) | ((UIntT)high >> -count));
                             return (LIntT)(((UIntT)high << count) | ((UIntT)low >> -count));
                         } else {
@@ -1044,13 +1044,13 @@ namespace UltimateOrb.Numerics {
             unsafe {
                 unchecked {
                     const int count = 1;
-                    if (count < sizeof(IntT)) {
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)(((UIntT)high >> count) | ((UIntT)low << -count));
                             return (LIntT)(((UIntT)low >> count) | ((UIntT)high << -count));
                         }
                     } else {
-                        if (count > sizeof(IntT)) {
+                        if (count > 8 * sizeof(IntT)) {
                             highResult = (HIntT)(((UIntT)low >> count) | ((UIntT)high << -count));
                             return (LIntT)(((UIntT)high >> count) | ((UIntT)low << -count));
                         } else {
@@ -1090,7 +1090,7 @@ namespace UltimateOrb.Numerics {
         public static HIntT ShiftLeft(LIntT low, HIntT high, int count) {
             unsafe {
                 if (0 != count) {
-                    return unchecked((HIntT)(((UIntT)high << count) | ((UIntT)low >> (-count/* sizeof(IntT) - count */))));
+                    return unchecked((HIntT)(((UIntT)high << count) | ((UIntT)low >> (-count/* 8 * sizeof(IntT) - count */))));
                 }
                 return high;
             }
@@ -1101,7 +1101,7 @@ namespace UltimateOrb.Numerics {
         public static LIntT ShiftRight(LIntT low, HIntT high, int count) {
             unsafe {
                 if (0 != count) {
-                    return unchecked((LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* sizeof(IntT) - count */))));
+                    return unchecked((LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* 8 * sizeof(IntT) - count */))));
                 }
                 return low;
             }
@@ -1113,15 +1113,15 @@ namespace UltimateOrb.Numerics {
         public static LIntT ShiftLeft(LIntT low, HIntT high, int count, out HIntT highResult) {
             unsafe {
                 unchecked {
-                    count &= 2 * sizeof(IntT) - 1;
-                    if (count < sizeof(IntT)) {
+                    count &= 2 * (8 * sizeof(IntT)) - 1;
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
-                            highResult = (HIntT)(((UIntT)high << count) | ((UIntT)low >> (-count/* sizeof(IntT) - count */)));
+                            highResult = (HIntT)(((UIntT)high << count) | ((UIntT)low >> (-count/* 8 * sizeof(IntT) - count */)));
                             return (LIntT)(low << count);
                         } 
                     } else {
-                        // if (count > sizeof(IntT)) {
-                        //     highResult = (HIntT)(low << (count/* - sizeof(IntT)*/));
+                        // if (count > 8 * sizeof(IntT)) {
+                        //     highResult = (HIntT)(low << (count/* - 8 * sizeof(IntT)*/));
                         // } else {
                         //     highResult = (HIntT)low;
                         // }
@@ -1141,24 +1141,24 @@ namespace UltimateOrb.Numerics {
         public static LIntT ShiftRightSigned(LIntT low, HIntT high, int count, out HIntT highResult) {
             unsafe {
                 unchecked {
-                    count &= 2 * sizeof(IntT) - 1;
-                    if (count < sizeof(IntT)) {
+                    count &= 2 * (8 * sizeof(IntT)) - 1;
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)((IntT)high >> count);
-                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* sizeof(IntT) - count */)));
+                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* 8 * sizeof(IntT) - count */)));
                         }
                     } else {
-                        var mask = (UIntT)((IntT)high >> (sizeof(IntT) - 1));
+                        var mask = (UIntT)((IntT)high >> (8 * sizeof(IntT) - 1));
                         highResult = (HIntT)mask;
-                        if (count > sizeof(IntT)) {
+                        if (count > 8 * sizeof(IntT)) {
                             // if (0 > (IntT)high) {
                             //     highResult = (HIntT)(IntT)(-1);
-                            //     return (LIntT)(((UIntT)high >> (count/* - sizeof(IntT)*/)) | (UIntT.MaxValue << (-count/* sizeof(IntT) + sizeof(IntT) - count */)));
+                            //     return (LIntT)(((UIntT)high >> (count/* - 8 * sizeof(IntT)*/)) | (UIntT.MaxValue << (-count/* 8 * sizeof(IntT) + 8 * sizeof(IntT) - count */)));
                             // } else {
                             //     highResult = (HIntT)0;
-                            //     return (LIntT)((UIntT)high >> (count/* - sizeof(IntT)*/));
+                            //     return (LIntT)((UIntT)high >> (count/* - 8 * sizeof(IntT)*/));
                             // }
-                            return (LIntT)(((UIntT)high >> (count/* - sizeof(IntT)*/)) | (mask << (-count/* sizeof(IntT) + sizeof(IntT) - count */)));
+                            return (LIntT)(((UIntT)high >> (count/* - 8 * sizeof(IntT)*/)) | (mask << (-count/* 8 * sizeof(IntT) + 8 * sizeof(IntT) - count */)));
                         } else {
                             // highResult = (0 > (IntT)high) ? (HIntT)(IntT)(-1) : (HIntT)0;
                             return (LIntT)high;
@@ -1177,16 +1177,16 @@ namespace UltimateOrb.Numerics {
         public static LIntT ShiftRightUnsigned(LIntT low, HIntT high, int count, out HIntT highResult) {
             unsafe {
                 unchecked {
-                    count &= 2 * sizeof(IntT) - 1;
-                    if (count < sizeof(IntT)) {
+                    count &= 2 * (8 * sizeof(IntT)) - 1;
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)((UIntT)high >> count);
-                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* sizeof(IntT) - count */)));
+                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* 8 * sizeof(IntT) - count */)));
                         }
                     } else {
                         highResult = (HIntT)0;
-                        // if (count > sizeof(IntT)) {
-                        //    return (LIntT)((UIntT)high >> (count/* - sizeof(IntT)*/));
+                        // if (count > 8 * sizeof(IntT)) {
+                        //    return (LIntT)((UIntT)high >> (count/* - 8 * sizeof(IntT)*/));
                         // } else {
                         //     return (LIntT)high;
                         // }
@@ -1206,14 +1206,14 @@ namespace UltimateOrb.Numerics {
         public static LIntT RotateLeft(LIntT low, HIntT high, int count, out HIntT highResult) {
             unsafe {
                 unchecked {
-                    count &= 2 * sizeof(IntT) - 1;
-                    if (count < sizeof(IntT)) {
+                    count &= 2 * (8 * sizeof(IntT)) - 1;
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)(((UIntT)high << count) | ((UIntT)low >> -count));
                             return (LIntT)(((UIntT)low << count) | ((UIntT)high >> -count));
                         }
                     } else {
-                        if (count > sizeof(IntT)) {
+                        if (count > 8 * sizeof(IntT)) {
                             highResult = (HIntT)(((UIntT)low << count) | ((UIntT)high >> -count));
                             return (LIntT)(((UIntT)high << count) | ((UIntT)low >> -count));
                         } else {
@@ -1234,14 +1234,14 @@ namespace UltimateOrb.Numerics {
         public static LIntT RotateRight(LIntT low, HIntT high, int count, out HIntT highResult) {
             unsafe {
                 unchecked {
-                    count &= 2 * sizeof(IntT) - 1;
-                    if (count < sizeof(IntT)) {
+                    count &= 2 * (8 * sizeof(IntT)) - 1;
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)(((UIntT)high >> count) | ((UIntT)low << -count));
                             return (LIntT)(((UIntT)low >> count) | ((UIntT)high << -count));
                         }
                     } else {
-                        if (count > sizeof(IntT)) {
+                        if (count > 8 * sizeof(IntT)) {
                             highResult = (HIntT)(((UIntT)low >> count) | ((UIntT)high << -count));
                             return (LIntT)(((UIntT)high >> count) | ((UIntT)low << -count));
                         } else {
@@ -1265,14 +1265,14 @@ namespace UltimateOrb.Numerics {
             unsafe {
                 unchecked {
                     const int count = 1;
-                    if (count < sizeof(IntT)) {
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
-                            highResult = (HIntT)(((UIntT)high << count) | ((UIntT)low >> (-count/* sizeof(IntT) - count */)));
+                            highResult = (HIntT)(((UIntT)high << count) | ((UIntT)low >> (-count/* 8 * sizeof(IntT) - count */)));
                             return (LIntT)(low << count);
                         } 
                     } else {
-                        // if (count > sizeof(IntT)) {
-                        //     highResult = (HIntT)(low << (count/* - sizeof(IntT)*/));
+                        // if (count > 8 * sizeof(IntT)) {
+                        //     highResult = (HIntT)(low << (count/* - 8 * sizeof(IntT)*/));
                         // } else {
                         //     highResult = (HIntT)low;
                         // }
@@ -1293,23 +1293,23 @@ namespace UltimateOrb.Numerics {
             unsafe {
                 unchecked {
                     const int count = 1;
-                    if (count < sizeof(IntT)) {
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)((IntT)high >> count);
-                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* sizeof(IntT) - count */)));
+                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* 8 * sizeof(IntT) - count */)));
                         }
                     } else {
-                        var mask = (UIntT)((IntT)high >> (sizeof(IntT) - 1));
+                        var mask = (UIntT)((IntT)high >> (8 * sizeof(IntT) - 1));
                         highResult = (HIntT)mask;
-                        if (count > sizeof(IntT)) {
+                        if (count > 8 * sizeof(IntT)) {
                             // if (0 > (IntT)high) {
                             //     highResult = (HIntT)(IntT)(-1);
-                            //     return (LIntT)(((UIntT)high >> (count/* - sizeof(IntT)*/)) | (UIntT.MaxValue << (-count/* sizeof(IntT) + sizeof(IntT) - count */)));
+                            //     return (LIntT)(((UIntT)high >> (count/* - 8 * sizeof(IntT)*/)) | (UIntT.MaxValue << (-count/* 8 * sizeof(IntT) + 8 * sizeof(IntT) - count */)));
                             // } else {
                             //     highResult = (HIntT)0;
-                            //     return (LIntT)((UIntT)high >> (count/* - sizeof(IntT)*/));
+                            //     return (LIntT)((UIntT)high >> (count/* - 8 * sizeof(IntT)*/));
                             // }
-                            return (LIntT)(((UIntT)high >> (count/* - sizeof(IntT)*/)) | (mask << (-count/* sizeof(IntT) + sizeof(IntT) - count */)));
+                            return (LIntT)(((UIntT)high >> (count/* - 8 * sizeof(IntT)*/)) | (mask << (-count/* 8 * sizeof(IntT) + 8 * sizeof(IntT) - count */)));
                         } else {
                             // highResult = (0 > (IntT)high) ? (HIntT)(IntT)(-1) : (HIntT)0;
                             return (LIntT)high;
@@ -1329,15 +1329,15 @@ namespace UltimateOrb.Numerics {
             unsafe {
                 unchecked {
                     const int count = 1;
-                    if (count < sizeof(IntT)) {
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)((UIntT)high >> count);
-                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* sizeof(IntT) - count */)));
+                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* 8 * sizeof(IntT) - count */)));
                         }
                     } else {
                         highResult = (HIntT)0;
-                        // if (count > sizeof(IntT)) {
-                        //    return (LIntT)((UIntT)high >> (count/* - sizeof(IntT)*/));
+                        // if (count > 8 * sizeof(IntT)) {
+                        //    return (LIntT)((UIntT)high >> (count/* - 8 * sizeof(IntT)*/));
                         // } else {
                         //     return (LIntT)high;
                         // }
@@ -1358,13 +1358,13 @@ namespace UltimateOrb.Numerics {
             unsafe {
                 unchecked {
                     const int count = 1;
-                    if (count < sizeof(IntT)) {
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)(((UIntT)high << count) | ((UIntT)low >> -count));
                             return (LIntT)(((UIntT)low << count) | ((UIntT)high >> -count));
                         }
                     } else {
-                        if (count > sizeof(IntT)) {
+                        if (count > 8 * sizeof(IntT)) {
                             highResult = (HIntT)(((UIntT)low << count) | ((UIntT)high >> -count));
                             return (LIntT)(((UIntT)high << count) | ((UIntT)low >> -count));
                         } else {
@@ -1386,13 +1386,13 @@ namespace UltimateOrb.Numerics {
             unsafe {
                 unchecked {
                     const int count = 1;
-                    if (count < sizeof(IntT)) {
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)(((UIntT)high >> count) | ((UIntT)low << -count));
                             return (LIntT)(((UIntT)low >> count) | ((UIntT)high << -count));
                         }
                     } else {
-                        if (count > sizeof(IntT)) {
+                        if (count > 8 * sizeof(IntT)) {
                             highResult = (HIntT)(((UIntT)low >> count) | ((UIntT)high << -count));
                             return (LIntT)(((UIntT)high >> count) | ((UIntT)low << -count));
                         } else {
@@ -1471,7 +1471,7 @@ namespace UltimateOrb.Numerics {
         public static HIntT ShiftLeft(LIntT low, HIntT high, int count) {
             unsafe {
                 if (0 != count) {
-                    return unchecked((HIntT)(((UIntT)high << count) | ((UIntT)low >> (-count/* sizeof(IntT) - count */))));
+                    return unchecked((HIntT)(((UIntT)high << count) | ((UIntT)low >> (-count/* 8 * sizeof(IntT) - count */))));
                 }
                 return high;
             }
@@ -1482,7 +1482,7 @@ namespace UltimateOrb.Numerics {
         public static LIntT ShiftRight(LIntT low, HIntT high, int count) {
             unsafe {
                 if (0 != count) {
-                    return unchecked((LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* sizeof(IntT) - count */))));
+                    return unchecked((LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* 8 * sizeof(IntT) - count */))));
                 }
                 return low;
             }
@@ -1494,15 +1494,15 @@ namespace UltimateOrb.Numerics {
         public static LIntT ShiftLeft(LIntT low, HIntT high, int count, out HIntT highResult) {
             unsafe {
                 unchecked {
-                    count &= 2 * sizeof(IntT) - 1;
-                    if (count < sizeof(IntT)) {
+                    count &= 2 * (8 * sizeof(IntT)) - 1;
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
-                            highResult = (HIntT)(((UIntT)high << count) | ((UIntT)low >> (-count/* sizeof(IntT) - count */)));
+                            highResult = (HIntT)(((UIntT)high << count) | ((UIntT)low >> (-count/* 8 * sizeof(IntT) - count */)));
                             return (LIntT)(low << count);
                         } 
                     } else {
-                        // if (count > sizeof(IntT)) {
-                        //     highResult = (HIntT)(low << (count/* - sizeof(IntT)*/));
+                        // if (count > 8 * sizeof(IntT)) {
+                        //     highResult = (HIntT)(low << (count/* - 8 * sizeof(IntT)*/));
                         // } else {
                         //     highResult = (HIntT)low;
                         // }
@@ -1522,24 +1522,24 @@ namespace UltimateOrb.Numerics {
         public static LIntT ShiftRightSigned(LIntT low, HIntT high, int count, out HIntT highResult) {
             unsafe {
                 unchecked {
-                    count &= 2 * sizeof(IntT) - 1;
-                    if (count < sizeof(IntT)) {
+                    count &= 2 * (8 * sizeof(IntT)) - 1;
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)((IntT)high >> count);
-                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* sizeof(IntT) - count */)));
+                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* 8 * sizeof(IntT) - count */)));
                         }
                     } else {
-                        var mask = (UIntT)((IntT)high >> (sizeof(IntT) - 1));
+                        var mask = (UIntT)((IntT)high >> (8 * sizeof(IntT) - 1));
                         highResult = (HIntT)mask;
-                        if (count > sizeof(IntT)) {
+                        if (count > 8 * sizeof(IntT)) {
                             // if (0 > (IntT)high) {
                             //     highResult = (HIntT)(IntT)(-1);
-                            //     return (LIntT)(((UIntT)high >> (count/* - sizeof(IntT)*/)) | (UIntT.MaxValue << (-count/* sizeof(IntT) + sizeof(IntT) - count */)));
+                            //     return (LIntT)(((UIntT)high >> (count/* - 8 * sizeof(IntT)*/)) | (UIntT.MaxValue << (-count/* 8 * sizeof(IntT) + 8 * sizeof(IntT) - count */)));
                             // } else {
                             //     highResult = (HIntT)0;
-                            //     return (LIntT)((UIntT)high >> (count/* - sizeof(IntT)*/));
+                            //     return (LIntT)((UIntT)high >> (count/* - 8 * sizeof(IntT)*/));
                             // }
-                            return (LIntT)(((UIntT)high >> (count/* - sizeof(IntT)*/)) | (mask << (-count/* sizeof(IntT) + sizeof(IntT) - count */)));
+                            return (LIntT)(((UIntT)high >> (count/* - 8 * sizeof(IntT)*/)) | (mask << (-count/* 8 * sizeof(IntT) + 8 * sizeof(IntT) - count */)));
                         } else {
                             // highResult = (0 > (IntT)high) ? (HIntT)(IntT)(-1) : (HIntT)0;
                             return (LIntT)high;
@@ -1558,16 +1558,16 @@ namespace UltimateOrb.Numerics {
         public static LIntT ShiftRightUnsigned(LIntT low, HIntT high, int count, out HIntT highResult) {
             unsafe {
                 unchecked {
-                    count &= 2 * sizeof(IntT) - 1;
-                    if (count < sizeof(IntT)) {
+                    count &= 2 * (8 * sizeof(IntT)) - 1;
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)((UIntT)high >> count);
-                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* sizeof(IntT) - count */)));
+                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* 8 * sizeof(IntT) - count */)));
                         }
                     } else {
                         highResult = (HIntT)0;
-                        // if (count > sizeof(IntT)) {
-                        //    return (LIntT)((UIntT)high >> (count/* - sizeof(IntT)*/));
+                        // if (count > 8 * sizeof(IntT)) {
+                        //    return (LIntT)((UIntT)high >> (count/* - 8 * sizeof(IntT)*/));
                         // } else {
                         //     return (LIntT)high;
                         // }
@@ -1587,14 +1587,14 @@ namespace UltimateOrb.Numerics {
         public static LIntT RotateLeft(LIntT low, HIntT high, int count, out HIntT highResult) {
             unsafe {
                 unchecked {
-                    count &= 2 * sizeof(IntT) - 1;
-                    if (count < sizeof(IntT)) {
+                    count &= 2 * (8 * sizeof(IntT)) - 1;
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)(((UIntT)high << count) | ((UIntT)low >> -count));
                             return (LIntT)(((UIntT)low << count) | ((UIntT)high >> -count));
                         }
                     } else {
-                        if (count > sizeof(IntT)) {
+                        if (count > 8 * sizeof(IntT)) {
                             highResult = (HIntT)(((UIntT)low << count) | ((UIntT)high >> -count));
                             return (LIntT)(((UIntT)high << count) | ((UIntT)low >> -count));
                         } else {
@@ -1615,14 +1615,14 @@ namespace UltimateOrb.Numerics {
         public static LIntT RotateRight(LIntT low, HIntT high, int count, out HIntT highResult) {
             unsafe {
                 unchecked {
-                    count &= 2 * sizeof(IntT) - 1;
-                    if (count < sizeof(IntT)) {
+                    count &= 2 * (8 * sizeof(IntT)) - 1;
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)(((UIntT)high >> count) | ((UIntT)low << -count));
                             return (LIntT)(((UIntT)low >> count) | ((UIntT)high << -count));
                         }
                     } else {
-                        if (count > sizeof(IntT)) {
+                        if (count > 8 * sizeof(IntT)) {
                             highResult = (HIntT)(((UIntT)low >> count) | ((UIntT)high << -count));
                             return (LIntT)(((UIntT)high >> count) | ((UIntT)low << -count));
                         } else {
@@ -1646,14 +1646,14 @@ namespace UltimateOrb.Numerics {
             unsafe {
                 unchecked {
                     const int count = 1;
-                    if (count < sizeof(IntT)) {
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
-                            highResult = (HIntT)(((UIntT)high << count) | ((UIntT)low >> (-count/* sizeof(IntT) - count */)));
+                            highResult = (HIntT)(((UIntT)high << count) | ((UIntT)low >> (-count/* 8 * sizeof(IntT) - count */)));
                             return (LIntT)(low << count);
                         } 
                     } else {
-                        // if (count > sizeof(IntT)) {
-                        //     highResult = (HIntT)(low << (count/* - sizeof(IntT)*/));
+                        // if (count > 8 * sizeof(IntT)) {
+                        //     highResult = (HIntT)(low << (count/* - 8 * sizeof(IntT)*/));
                         // } else {
                         //     highResult = (HIntT)low;
                         // }
@@ -1674,23 +1674,23 @@ namespace UltimateOrb.Numerics {
             unsafe {
                 unchecked {
                     const int count = 1;
-                    if (count < sizeof(IntT)) {
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)((IntT)high >> count);
-                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* sizeof(IntT) - count */)));
+                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* 8 * sizeof(IntT) - count */)));
                         }
                     } else {
-                        var mask = (UIntT)((IntT)high >> (sizeof(IntT) - 1));
+                        var mask = (UIntT)((IntT)high >> (8 * sizeof(IntT) - 1));
                         highResult = (HIntT)mask;
-                        if (count > sizeof(IntT)) {
+                        if (count > 8 * sizeof(IntT)) {
                             // if (0 > (IntT)high) {
                             //     highResult = (HIntT)(IntT)(-1);
-                            //     return (LIntT)(((UIntT)high >> (count/* - sizeof(IntT)*/)) | (UIntT.MaxValue << (-count/* sizeof(IntT) + sizeof(IntT) - count */)));
+                            //     return (LIntT)(((UIntT)high >> (count/* - 8 * sizeof(IntT)*/)) | (UIntT.MaxValue << (-count/* 8 * sizeof(IntT) + 8 * sizeof(IntT) - count */)));
                             // } else {
                             //     highResult = (HIntT)0;
-                            //     return (LIntT)((UIntT)high >> (count/* - sizeof(IntT)*/));
+                            //     return (LIntT)((UIntT)high >> (count/* - 8 * sizeof(IntT)*/));
                             // }
-                            return (LIntT)(((UIntT)high >> (count/* - sizeof(IntT)*/)) | (mask << (-count/* sizeof(IntT) + sizeof(IntT) - count */)));
+                            return (LIntT)(((UIntT)high >> (count/* - 8 * sizeof(IntT)*/)) | (mask << (-count/* 8 * sizeof(IntT) + 8 * sizeof(IntT) - count */)));
                         } else {
                             // highResult = (0 > (IntT)high) ? (HIntT)(IntT)(-1) : (HIntT)0;
                             return (LIntT)high;
@@ -1710,15 +1710,15 @@ namespace UltimateOrb.Numerics {
             unsafe {
                 unchecked {
                     const int count = 1;
-                    if (count < sizeof(IntT)) {
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)((UIntT)high >> count);
-                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* sizeof(IntT) - count */)));
+                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* 8 * sizeof(IntT) - count */)));
                         }
                     } else {
                         highResult = (HIntT)0;
-                        // if (count > sizeof(IntT)) {
-                        //    return (LIntT)((UIntT)high >> (count/* - sizeof(IntT)*/));
+                        // if (count > 8 * sizeof(IntT)) {
+                        //    return (LIntT)((UIntT)high >> (count/* - 8 * sizeof(IntT)*/));
                         // } else {
                         //     return (LIntT)high;
                         // }
@@ -1739,13 +1739,13 @@ namespace UltimateOrb.Numerics {
             unsafe {
                 unchecked {
                     const int count = 1;
-                    if (count < sizeof(IntT)) {
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)(((UIntT)high << count) | ((UIntT)low >> -count));
                             return (LIntT)(((UIntT)low << count) | ((UIntT)high >> -count));
                         }
                     } else {
-                        if (count > sizeof(IntT)) {
+                        if (count > 8 * sizeof(IntT)) {
                             highResult = (HIntT)(((UIntT)low << count) | ((UIntT)high >> -count));
                             return (LIntT)(((UIntT)high << count) | ((UIntT)low >> -count));
                         } else {
@@ -1767,13 +1767,13 @@ namespace UltimateOrb.Numerics {
             unsafe {
                 unchecked {
                     const int count = 1;
-                    if (count < sizeof(IntT)) {
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)(((UIntT)high >> count) | ((UIntT)low << -count));
                             return (LIntT)(((UIntT)low >> count) | ((UIntT)high << -count));
                         }
                     } else {
-                        if (count > sizeof(IntT)) {
+                        if (count > 8 * sizeof(IntT)) {
                             highResult = (HIntT)(((UIntT)low >> count) | ((UIntT)high << -count));
                             return (LIntT)(((UIntT)high >> count) | ((UIntT)low << -count));
                         } else {
@@ -1813,7 +1813,7 @@ namespace UltimateOrb.Numerics {
         public static HIntT ShiftLeft(LIntT low, HIntT high, int count) {
             unsafe {
                 if (0 != count) {
-                    return unchecked((HIntT)(((UIntT)high << count) | ((UIntT)low >> (-count/* sizeof(IntT) - count */))));
+                    return unchecked((HIntT)(((UIntT)high << count) | ((UIntT)low >> (-count/* 8 * sizeof(IntT) - count */))));
                 }
                 return high;
             }
@@ -1824,7 +1824,7 @@ namespace UltimateOrb.Numerics {
         public static LIntT ShiftRight(LIntT low, HIntT high, int count) {
             unsafe {
                 if (0 != count) {
-                    return unchecked((LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* sizeof(IntT) - count */))));
+                    return unchecked((LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* 8 * sizeof(IntT) - count */))));
                 }
                 return low;
             }
@@ -1836,15 +1836,15 @@ namespace UltimateOrb.Numerics {
         public static LIntT ShiftLeft(LIntT low, HIntT high, int count, out HIntT highResult) {
             unsafe {
                 unchecked {
-                    count &= 2 * sizeof(IntT) - 1;
-                    if (count < sizeof(IntT)) {
+                    count &= 2 * (8 * sizeof(IntT)) - 1;
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
-                            highResult = (HIntT)(((UIntT)high << count) | ((UIntT)low >> (-count/* sizeof(IntT) - count */)));
+                            highResult = (HIntT)(((UIntT)high << count) | ((UIntT)low >> (-count/* 8 * sizeof(IntT) - count */)));
                             return (LIntT)(low << count);
                         } 
                     } else {
-                        // if (count > sizeof(IntT)) {
-                        //     highResult = (HIntT)(low << (count/* - sizeof(IntT)*/));
+                        // if (count > 8 * sizeof(IntT)) {
+                        //     highResult = (HIntT)(low << (count/* - 8 * sizeof(IntT)*/));
                         // } else {
                         //     highResult = (HIntT)low;
                         // }
@@ -1864,24 +1864,24 @@ namespace UltimateOrb.Numerics {
         public static LIntT ShiftRightSigned(LIntT low, HIntT high, int count, out HIntT highResult) {
             unsafe {
                 unchecked {
-                    count &= 2 * sizeof(IntT) - 1;
-                    if (count < sizeof(IntT)) {
+                    count &= 2 * (8 * sizeof(IntT)) - 1;
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)((IntT)high >> count);
-                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* sizeof(IntT) - count */)));
+                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* 8 * sizeof(IntT) - count */)));
                         }
                     } else {
-                        var mask = (UIntT)((IntT)high >> (sizeof(IntT) - 1));
+                        var mask = (UIntT)((IntT)high >> (8 * sizeof(IntT) - 1));
                         highResult = (HIntT)mask;
-                        if (count > sizeof(IntT)) {
+                        if (count > 8 * sizeof(IntT)) {
                             // if (0 > (IntT)high) {
                             //     highResult = (HIntT)(IntT)(-1);
-                            //     return (LIntT)(((UIntT)high >> (count/* - sizeof(IntT)*/)) | (UIntT.MaxValue << (-count/* sizeof(IntT) + sizeof(IntT) - count */)));
+                            //     return (LIntT)(((UIntT)high >> (count/* - 8 * sizeof(IntT)*/)) | (UIntT.MaxValue << (-count/* 8 * sizeof(IntT) + 8 * sizeof(IntT) - count */)));
                             // } else {
                             //     highResult = (HIntT)0;
-                            //     return (LIntT)((UIntT)high >> (count/* - sizeof(IntT)*/));
+                            //     return (LIntT)((UIntT)high >> (count/* - 8 * sizeof(IntT)*/));
                             // }
-                            return (LIntT)(((UIntT)high >> (count/* - sizeof(IntT)*/)) | (mask << (-count/* sizeof(IntT) + sizeof(IntT) - count */)));
+                            return (LIntT)(((UIntT)high >> (count/* - 8 * sizeof(IntT)*/)) | (mask << (-count/* 8 * sizeof(IntT) + 8 * sizeof(IntT) - count */)));
                         } else {
                             // highResult = (0 > (IntT)high) ? (HIntT)(IntT)(-1) : (HIntT)0;
                             return (LIntT)high;
@@ -1900,16 +1900,16 @@ namespace UltimateOrb.Numerics {
         public static LIntT ShiftRightUnsigned(LIntT low, HIntT high, int count, out HIntT highResult) {
             unsafe {
                 unchecked {
-                    count &= 2 * sizeof(IntT) - 1;
-                    if (count < sizeof(IntT)) {
+                    count &= 2 * (8 * sizeof(IntT)) - 1;
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)((UIntT)high >> count);
-                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* sizeof(IntT) - count */)));
+                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* 8 * sizeof(IntT) - count */)));
                         }
                     } else {
                         highResult = (HIntT)0;
-                        // if (count > sizeof(IntT)) {
-                        //    return (LIntT)((UIntT)high >> (count/* - sizeof(IntT)*/));
+                        // if (count > 8 * sizeof(IntT)) {
+                        //    return (LIntT)((UIntT)high >> (count/* - 8 * sizeof(IntT)*/));
                         // } else {
                         //     return (LIntT)high;
                         // }
@@ -1929,14 +1929,14 @@ namespace UltimateOrb.Numerics {
         public static LIntT RotateLeft(LIntT low, HIntT high, int count, out HIntT highResult) {
             unsafe {
                 unchecked {
-                    count &= 2 * sizeof(IntT) - 1;
-                    if (count < sizeof(IntT)) {
+                    count &= 2 * (8 * sizeof(IntT)) - 1;
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)(((UIntT)high << count) | ((UIntT)low >> -count));
                             return (LIntT)(((UIntT)low << count) | ((UIntT)high >> -count));
                         }
                     } else {
-                        if (count > sizeof(IntT)) {
+                        if (count > 8 * sizeof(IntT)) {
                             highResult = (HIntT)(((UIntT)low << count) | ((UIntT)high >> -count));
                             return (LIntT)(((UIntT)high << count) | ((UIntT)low >> -count));
                         } else {
@@ -1957,14 +1957,14 @@ namespace UltimateOrb.Numerics {
         public static LIntT RotateRight(LIntT low, HIntT high, int count, out HIntT highResult) {
             unsafe {
                 unchecked {
-                    count &= 2 * sizeof(IntT) - 1;
-                    if (count < sizeof(IntT)) {
+                    count &= 2 * (8 * sizeof(IntT)) - 1;
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)(((UIntT)high >> count) | ((UIntT)low << -count));
                             return (LIntT)(((UIntT)low >> count) | ((UIntT)high << -count));
                         }
                     } else {
-                        if (count > sizeof(IntT)) {
+                        if (count > 8 * sizeof(IntT)) {
                             highResult = (HIntT)(((UIntT)low >> count) | ((UIntT)high << -count));
                             return (LIntT)(((UIntT)high >> count) | ((UIntT)low << -count));
                         } else {
@@ -1988,14 +1988,14 @@ namespace UltimateOrb.Numerics {
             unsafe {
                 unchecked {
                     const int count = 1;
-                    if (count < sizeof(IntT)) {
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
-                            highResult = (HIntT)(((UIntT)high << count) | ((UIntT)low >> (-count/* sizeof(IntT) - count */)));
+                            highResult = (HIntT)(((UIntT)high << count) | ((UIntT)low >> (-count/* 8 * sizeof(IntT) - count */)));
                             return (LIntT)(low << count);
                         } 
                     } else {
-                        // if (count > sizeof(IntT)) {
-                        //     highResult = (HIntT)(low << (count/* - sizeof(IntT)*/));
+                        // if (count > 8 * sizeof(IntT)) {
+                        //     highResult = (HIntT)(low << (count/* - 8 * sizeof(IntT)*/));
                         // } else {
                         //     highResult = (HIntT)low;
                         // }
@@ -2016,23 +2016,23 @@ namespace UltimateOrb.Numerics {
             unsafe {
                 unchecked {
                     const int count = 1;
-                    if (count < sizeof(IntT)) {
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)((IntT)high >> count);
-                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* sizeof(IntT) - count */)));
+                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* 8 * sizeof(IntT) - count */)));
                         }
                     } else {
-                        var mask = (UIntT)((IntT)high >> (sizeof(IntT) - 1));
+                        var mask = (UIntT)((IntT)high >> (8 * sizeof(IntT) - 1));
                         highResult = (HIntT)mask;
-                        if (count > sizeof(IntT)) {
+                        if (count > 8 * sizeof(IntT)) {
                             // if (0 > (IntT)high) {
                             //     highResult = (HIntT)(IntT)(-1);
-                            //     return (LIntT)(((UIntT)high >> (count/* - sizeof(IntT)*/)) | (UIntT.MaxValue << (-count/* sizeof(IntT) + sizeof(IntT) - count */)));
+                            //     return (LIntT)(((UIntT)high >> (count/* - 8 * sizeof(IntT)*/)) | (UIntT.MaxValue << (-count/* 8 * sizeof(IntT) + 8 * sizeof(IntT) - count */)));
                             // } else {
                             //     highResult = (HIntT)0;
-                            //     return (LIntT)((UIntT)high >> (count/* - sizeof(IntT)*/));
+                            //     return (LIntT)((UIntT)high >> (count/* - 8 * sizeof(IntT)*/));
                             // }
-                            return (LIntT)(((UIntT)high >> (count/* - sizeof(IntT)*/)) | (mask << (-count/* sizeof(IntT) + sizeof(IntT) - count */)));
+                            return (LIntT)(((UIntT)high >> (count/* - 8 * sizeof(IntT)*/)) | (mask << (-count/* 8 * sizeof(IntT) + 8 * sizeof(IntT) - count */)));
                         } else {
                             // highResult = (0 > (IntT)high) ? (HIntT)(IntT)(-1) : (HIntT)0;
                             return (LIntT)high;
@@ -2052,15 +2052,15 @@ namespace UltimateOrb.Numerics {
             unsafe {
                 unchecked {
                     const int count = 1;
-                    if (count < sizeof(IntT)) {
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)((UIntT)high >> count);
-                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* sizeof(IntT) - count */)));
+                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* 8 * sizeof(IntT) - count */)));
                         }
                     } else {
                         highResult = (HIntT)0;
-                        // if (count > sizeof(IntT)) {
-                        //    return (LIntT)((UIntT)high >> (count/* - sizeof(IntT)*/));
+                        // if (count > 8 * sizeof(IntT)) {
+                        //    return (LIntT)((UIntT)high >> (count/* - 8 * sizeof(IntT)*/));
                         // } else {
                         //     return (LIntT)high;
                         // }
@@ -2081,13 +2081,13 @@ namespace UltimateOrb.Numerics {
             unsafe {
                 unchecked {
                     const int count = 1;
-                    if (count < sizeof(IntT)) {
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)(((UIntT)high << count) | ((UIntT)low >> -count));
                             return (LIntT)(((UIntT)low << count) | ((UIntT)high >> -count));
                         }
                     } else {
-                        if (count > sizeof(IntT)) {
+                        if (count > 8 * sizeof(IntT)) {
                             highResult = (HIntT)(((UIntT)low << count) | ((UIntT)high >> -count));
                             return (LIntT)(((UIntT)high << count) | ((UIntT)low >> -count));
                         } else {
@@ -2109,13 +2109,13 @@ namespace UltimateOrb.Numerics {
             unsafe {
                 unchecked {
                     const int count = 1;
-                    if (count < sizeof(IntT)) {
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)(((UIntT)high >> count) | ((UIntT)low << -count));
                             return (LIntT)(((UIntT)low >> count) | ((UIntT)high << -count));
                         }
                     } else {
-                        if (count > sizeof(IntT)) {
+                        if (count > 8 * sizeof(IntT)) {
                             highResult = (HIntT)(((UIntT)low >> count) | ((UIntT)high << -count));
                             return (LIntT)(((UIntT)high >> count) | ((UIntT)low << -count));
                         } else {
@@ -2155,7 +2155,7 @@ namespace UltimateOrb.Numerics {
         public static HIntT ShiftLeft(LIntT low, HIntT high, int count) {
             unsafe {
                 if (0 != count) {
-                    return unchecked((HIntT)(((UIntT)high << count) | ((UIntT)low >> (-count/* sizeof(IntT) - count */))));
+                    return unchecked((HIntT)(((UIntT)high << count) | ((UIntT)low >> (-count/* 8 * sizeof(IntT) - count */))));
                 }
                 return high;
             }
@@ -2166,7 +2166,7 @@ namespace UltimateOrb.Numerics {
         public static LIntT ShiftRight(LIntT low, HIntT high, int count) {
             unsafe {
                 if (0 != count) {
-                    return unchecked((LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* sizeof(IntT) - count */))));
+                    return unchecked((LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* 8 * sizeof(IntT) - count */))));
                 }
                 return low;
             }
@@ -2178,15 +2178,15 @@ namespace UltimateOrb.Numerics {
         public static LIntT ShiftLeft(LIntT low, HIntT high, int count, out HIntT highResult) {
             unsafe {
                 unchecked {
-                    count &= 2 * sizeof(IntT) - 1;
-                    if (count < sizeof(IntT)) {
+                    count &= 2 * (8 * sizeof(IntT)) - 1;
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
-                            highResult = (HIntT)(((UIntT)high << count) | ((UIntT)low >> (-count/* sizeof(IntT) - count */)));
+                            highResult = (HIntT)(((UIntT)high << count) | ((UIntT)low >> (-count/* 8 * sizeof(IntT) - count */)));
                             return (LIntT)(low << count);
                         } 
                     } else {
-                        // if (count > sizeof(IntT)) {
-                        //     highResult = (HIntT)(low << (count/* - sizeof(IntT)*/));
+                        // if (count > 8 * sizeof(IntT)) {
+                        //     highResult = (HIntT)(low << (count/* - 8 * sizeof(IntT)*/));
                         // } else {
                         //     highResult = (HIntT)low;
                         // }
@@ -2206,24 +2206,24 @@ namespace UltimateOrb.Numerics {
         public static LIntT ShiftRightSigned(LIntT low, HIntT high, int count, out HIntT highResult) {
             unsafe {
                 unchecked {
-                    count &= 2 * sizeof(IntT) - 1;
-                    if (count < sizeof(IntT)) {
+                    count &= 2 * (8 * sizeof(IntT)) - 1;
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)((IntT)high >> count);
-                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* sizeof(IntT) - count */)));
+                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* 8 * sizeof(IntT) - count */)));
                         }
                     } else {
-                        var mask = (UIntT)((IntT)high >> (sizeof(IntT) - 1));
+                        var mask = (UIntT)((IntT)high >> (8 * sizeof(IntT) - 1));
                         highResult = (HIntT)mask;
-                        if (count > sizeof(IntT)) {
+                        if (count > 8 * sizeof(IntT)) {
                             // if (0 > (IntT)high) {
                             //     highResult = (HIntT)(IntT)(-1);
-                            //     return (LIntT)(((UIntT)high >> (count/* - sizeof(IntT)*/)) | (UIntT.MaxValue << (-count/* sizeof(IntT) + sizeof(IntT) - count */)));
+                            //     return (LIntT)(((UIntT)high >> (count/* - 8 * sizeof(IntT)*/)) | (UIntT.MaxValue << (-count/* 8 * sizeof(IntT) + 8 * sizeof(IntT) - count */)));
                             // } else {
                             //     highResult = (HIntT)0;
-                            //     return (LIntT)((UIntT)high >> (count/* - sizeof(IntT)*/));
+                            //     return (LIntT)((UIntT)high >> (count/* - 8 * sizeof(IntT)*/));
                             // }
-                            return (LIntT)(((UIntT)high >> (count/* - sizeof(IntT)*/)) | (mask << (-count/* sizeof(IntT) + sizeof(IntT) - count */)));
+                            return (LIntT)(((UIntT)high >> (count/* - 8 * sizeof(IntT)*/)) | (mask << (-count/* 8 * sizeof(IntT) + 8 * sizeof(IntT) - count */)));
                         } else {
                             // highResult = (0 > (IntT)high) ? (HIntT)(IntT)(-1) : (HIntT)0;
                             return (LIntT)high;
@@ -2242,16 +2242,16 @@ namespace UltimateOrb.Numerics {
         public static LIntT ShiftRightUnsigned(LIntT low, HIntT high, int count, out HIntT highResult) {
             unsafe {
                 unchecked {
-                    count &= 2 * sizeof(IntT) - 1;
-                    if (count < sizeof(IntT)) {
+                    count &= 2 * (8 * sizeof(IntT)) - 1;
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)((UIntT)high >> count);
-                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* sizeof(IntT) - count */)));
+                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* 8 * sizeof(IntT) - count */)));
                         }
                     } else {
                         highResult = (HIntT)0;
-                        // if (count > sizeof(IntT)) {
-                        //    return (LIntT)((UIntT)high >> (count/* - sizeof(IntT)*/));
+                        // if (count > 8 * sizeof(IntT)) {
+                        //    return (LIntT)((UIntT)high >> (count/* - 8 * sizeof(IntT)*/));
                         // } else {
                         //     return (LIntT)high;
                         // }
@@ -2271,14 +2271,14 @@ namespace UltimateOrb.Numerics {
         public static LIntT RotateLeft(LIntT low, HIntT high, int count, out HIntT highResult) {
             unsafe {
                 unchecked {
-                    count &= 2 * sizeof(IntT) - 1;
-                    if (count < sizeof(IntT)) {
+                    count &= 2 * (8 * sizeof(IntT)) - 1;
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)(((UIntT)high << count) | ((UIntT)low >> -count));
                             return (LIntT)(((UIntT)low << count) | ((UIntT)high >> -count));
                         }
                     } else {
-                        if (count > sizeof(IntT)) {
+                        if (count > 8 * sizeof(IntT)) {
                             highResult = (HIntT)(((UIntT)low << count) | ((UIntT)high >> -count));
                             return (LIntT)(((UIntT)high << count) | ((UIntT)low >> -count));
                         } else {
@@ -2299,14 +2299,14 @@ namespace UltimateOrb.Numerics {
         public static LIntT RotateRight(LIntT low, HIntT high, int count, out HIntT highResult) {
             unsafe {
                 unchecked {
-                    count &= 2 * sizeof(IntT) - 1;
-                    if (count < sizeof(IntT)) {
+                    count &= 2 * (8 * sizeof(IntT)) - 1;
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)(((UIntT)high >> count) | ((UIntT)low << -count));
                             return (LIntT)(((UIntT)low >> count) | ((UIntT)high << -count));
                         }
                     } else {
-                        if (count > sizeof(IntT)) {
+                        if (count > 8 * sizeof(IntT)) {
                             highResult = (HIntT)(((UIntT)low >> count) | ((UIntT)high << -count));
                             return (LIntT)(((UIntT)high >> count) | ((UIntT)low << -count));
                         } else {
@@ -2330,14 +2330,14 @@ namespace UltimateOrb.Numerics {
             unsafe {
                 unchecked {
                     const int count = 1;
-                    if (count < sizeof(IntT)) {
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
-                            highResult = (HIntT)(((UIntT)high << count) | ((UIntT)low >> (-count/* sizeof(IntT) - count */)));
+                            highResult = (HIntT)(((UIntT)high << count) | ((UIntT)low >> (-count/* 8 * sizeof(IntT) - count */)));
                             return (LIntT)(low << count);
                         } 
                     } else {
-                        // if (count > sizeof(IntT)) {
-                        //     highResult = (HIntT)(low << (count/* - sizeof(IntT)*/));
+                        // if (count > 8 * sizeof(IntT)) {
+                        //     highResult = (HIntT)(low << (count/* - 8 * sizeof(IntT)*/));
                         // } else {
                         //     highResult = (HIntT)low;
                         // }
@@ -2358,23 +2358,23 @@ namespace UltimateOrb.Numerics {
             unsafe {
                 unchecked {
                     const int count = 1;
-                    if (count < sizeof(IntT)) {
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)((IntT)high >> count);
-                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* sizeof(IntT) - count */)));
+                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* 8 * sizeof(IntT) - count */)));
                         }
                     } else {
-                        var mask = (UIntT)((IntT)high >> (sizeof(IntT) - 1));
+                        var mask = (UIntT)((IntT)high >> (8 * sizeof(IntT) - 1));
                         highResult = (HIntT)mask;
-                        if (count > sizeof(IntT)) {
+                        if (count > 8 * sizeof(IntT)) {
                             // if (0 > (IntT)high) {
                             //     highResult = (HIntT)(IntT)(-1);
-                            //     return (LIntT)(((UIntT)high >> (count/* - sizeof(IntT)*/)) | (UIntT.MaxValue << (-count/* sizeof(IntT) + sizeof(IntT) - count */)));
+                            //     return (LIntT)(((UIntT)high >> (count/* - 8 * sizeof(IntT)*/)) | (UIntT.MaxValue << (-count/* 8 * sizeof(IntT) + 8 * sizeof(IntT) - count */)));
                             // } else {
                             //     highResult = (HIntT)0;
-                            //     return (LIntT)((UIntT)high >> (count/* - sizeof(IntT)*/));
+                            //     return (LIntT)((UIntT)high >> (count/* - 8 * sizeof(IntT)*/));
                             // }
-                            return (LIntT)(((UIntT)high >> (count/* - sizeof(IntT)*/)) | (mask << (-count/* sizeof(IntT) + sizeof(IntT) - count */)));
+                            return (LIntT)(((UIntT)high >> (count/* - 8 * sizeof(IntT)*/)) | (mask << (-count/* 8 * sizeof(IntT) + 8 * sizeof(IntT) - count */)));
                         } else {
                             // highResult = (0 > (IntT)high) ? (HIntT)(IntT)(-1) : (HIntT)0;
                             return (LIntT)high;
@@ -2394,15 +2394,15 @@ namespace UltimateOrb.Numerics {
             unsafe {
                 unchecked {
                     const int count = 1;
-                    if (count < sizeof(IntT)) {
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)((UIntT)high >> count);
-                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* sizeof(IntT) - count */)));
+                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* 8 * sizeof(IntT) - count */)));
                         }
                     } else {
                         highResult = (HIntT)0;
-                        // if (count > sizeof(IntT)) {
-                        //    return (LIntT)((UIntT)high >> (count/* - sizeof(IntT)*/));
+                        // if (count > 8 * sizeof(IntT)) {
+                        //    return (LIntT)((UIntT)high >> (count/* - 8 * sizeof(IntT)*/));
                         // } else {
                         //     return (LIntT)high;
                         // }
@@ -2423,13 +2423,13 @@ namespace UltimateOrb.Numerics {
             unsafe {
                 unchecked {
                     const int count = 1;
-                    if (count < sizeof(IntT)) {
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)(((UIntT)high << count) | ((UIntT)low >> -count));
                             return (LIntT)(((UIntT)low << count) | ((UIntT)high >> -count));
                         }
                     } else {
-                        if (count > sizeof(IntT)) {
+                        if (count > 8 * sizeof(IntT)) {
                             highResult = (HIntT)(((UIntT)low << count) | ((UIntT)high >> -count));
                             return (LIntT)(((UIntT)high << count) | ((UIntT)low >> -count));
                         } else {
@@ -2451,13 +2451,13 @@ namespace UltimateOrb.Numerics {
             unsafe {
                 unchecked {
                     const int count = 1;
-                    if (count < sizeof(IntT)) {
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)(((UIntT)high >> count) | ((UIntT)low << -count));
                             return (LIntT)(((UIntT)low >> count) | ((UIntT)high << -count));
                         }
                     } else {
-                        if (count > sizeof(IntT)) {
+                        if (count > 8 * sizeof(IntT)) {
                             highResult = (HIntT)(((UIntT)low >> count) | ((UIntT)high << -count));
                             return (LIntT)(((UIntT)high >> count) | ((UIntT)low << -count));
                         } else {
@@ -2497,7 +2497,7 @@ namespace UltimateOrb.Numerics {
         public static HIntT ShiftLeft(LIntT low, HIntT high, int count) {
             unsafe {
                 if (0 != count) {
-                    return unchecked((HIntT)(((UIntT)high << count) | ((UIntT)low >> (-count/* sizeof(IntT) - count */))));
+                    return unchecked((HIntT)(((UIntT)high << count) | ((UIntT)low >> (-count/* 8 * sizeof(IntT) - count */))));
                 }
                 return high;
             }
@@ -2508,7 +2508,7 @@ namespace UltimateOrb.Numerics {
         public static LIntT ShiftRight(LIntT low, HIntT high, int count) {
             unsafe {
                 if (0 != count) {
-                    return unchecked((LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* sizeof(IntT) - count */))));
+                    return unchecked((LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* 8 * sizeof(IntT) - count */))));
                 }
                 return low;
             }
@@ -2520,15 +2520,15 @@ namespace UltimateOrb.Numerics {
         public static LIntT ShiftLeft(LIntT low, HIntT high, int count, out HIntT highResult) {
             unsafe {
                 unchecked {
-                    count &= 2 * sizeof(IntT) - 1;
-                    if (count < sizeof(IntT)) {
+                    count &= 2 * (8 * sizeof(IntT)) - 1;
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
-                            highResult = (HIntT)(((UIntT)high << count) | ((UIntT)low >> (-count/* sizeof(IntT) - count */)));
+                            highResult = (HIntT)(((UIntT)high << count) | ((UIntT)low >> (-count/* 8 * sizeof(IntT) - count */)));
                             return (LIntT)(low << count);
                         } 
                     } else {
-                        // if (count > sizeof(IntT)) {
-                        //     highResult = (HIntT)(low << (count/* - sizeof(IntT)*/));
+                        // if (count > 8 * sizeof(IntT)) {
+                        //     highResult = (HIntT)(low << (count/* - 8 * sizeof(IntT)*/));
                         // } else {
                         //     highResult = (HIntT)low;
                         // }
@@ -2548,24 +2548,24 @@ namespace UltimateOrb.Numerics {
         public static LIntT ShiftRightSigned(LIntT low, HIntT high, int count, out HIntT highResult) {
             unsafe {
                 unchecked {
-                    count &= 2 * sizeof(IntT) - 1;
-                    if (count < sizeof(IntT)) {
+                    count &= 2 * (8 * sizeof(IntT)) - 1;
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)((IntT)high >> count);
-                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* sizeof(IntT) - count */)));
+                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* 8 * sizeof(IntT) - count */)));
                         }
                     } else {
-                        var mask = (UIntT)((IntT)high >> (sizeof(IntT) - 1));
+                        var mask = (UIntT)((IntT)high >> (8 * sizeof(IntT) - 1));
                         highResult = (HIntT)mask;
-                        if (count > sizeof(IntT)) {
+                        if (count > 8 * sizeof(IntT)) {
                             // if (0 > (IntT)high) {
                             //     highResult = (HIntT)(IntT)(-1);
-                            //     return (LIntT)(((UIntT)high >> (count/* - sizeof(IntT)*/)) | (UIntT.MaxValue << (-count/* sizeof(IntT) + sizeof(IntT) - count */)));
+                            //     return (LIntT)(((UIntT)high >> (count/* - 8 * sizeof(IntT)*/)) | (UIntT.MaxValue << (-count/* 8 * sizeof(IntT) + 8 * sizeof(IntT) - count */)));
                             // } else {
                             //     highResult = (HIntT)0;
-                            //     return (LIntT)((UIntT)high >> (count/* - sizeof(IntT)*/));
+                            //     return (LIntT)((UIntT)high >> (count/* - 8 * sizeof(IntT)*/));
                             // }
-                            return (LIntT)(((UIntT)high >> (count/* - sizeof(IntT)*/)) | (mask << (-count/* sizeof(IntT) + sizeof(IntT) - count */)));
+                            return (LIntT)(((UIntT)high >> (count/* - 8 * sizeof(IntT)*/)) | (mask << (-count/* 8 * sizeof(IntT) + 8 * sizeof(IntT) - count */)));
                         } else {
                             // highResult = (0 > (IntT)high) ? (HIntT)(IntT)(-1) : (HIntT)0;
                             return (LIntT)high;
@@ -2584,16 +2584,16 @@ namespace UltimateOrb.Numerics {
         public static LIntT ShiftRightUnsigned(LIntT low, HIntT high, int count, out HIntT highResult) {
             unsafe {
                 unchecked {
-                    count &= 2 * sizeof(IntT) - 1;
-                    if (count < sizeof(IntT)) {
+                    count &= 2 * (8 * sizeof(IntT)) - 1;
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)((UIntT)high >> count);
-                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* sizeof(IntT) - count */)));
+                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* 8 * sizeof(IntT) - count */)));
                         }
                     } else {
                         highResult = (HIntT)0;
-                        // if (count > sizeof(IntT)) {
-                        //    return (LIntT)((UIntT)high >> (count/* - sizeof(IntT)*/));
+                        // if (count > 8 * sizeof(IntT)) {
+                        //    return (LIntT)((UIntT)high >> (count/* - 8 * sizeof(IntT)*/));
                         // } else {
                         //     return (LIntT)high;
                         // }
@@ -2613,14 +2613,14 @@ namespace UltimateOrb.Numerics {
         public static LIntT RotateLeft(LIntT low, HIntT high, int count, out HIntT highResult) {
             unsafe {
                 unchecked {
-                    count &= 2 * sizeof(IntT) - 1;
-                    if (count < sizeof(IntT)) {
+                    count &= 2 * (8 * sizeof(IntT)) - 1;
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)(((UIntT)high << count) | ((UIntT)low >> -count));
                             return (LIntT)(((UIntT)low << count) | ((UIntT)high >> -count));
                         }
                     } else {
-                        if (count > sizeof(IntT)) {
+                        if (count > 8 * sizeof(IntT)) {
                             highResult = (HIntT)(((UIntT)low << count) | ((UIntT)high >> -count));
                             return (LIntT)(((UIntT)high << count) | ((UIntT)low >> -count));
                         } else {
@@ -2641,14 +2641,14 @@ namespace UltimateOrb.Numerics {
         public static LIntT RotateRight(LIntT low, HIntT high, int count, out HIntT highResult) {
             unsafe {
                 unchecked {
-                    count &= 2 * sizeof(IntT) - 1;
-                    if (count < sizeof(IntT)) {
+                    count &= 2 * (8 * sizeof(IntT)) - 1;
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)(((UIntT)high >> count) | ((UIntT)low << -count));
                             return (LIntT)(((UIntT)low >> count) | ((UIntT)high << -count));
                         }
                     } else {
-                        if (count > sizeof(IntT)) {
+                        if (count > 8 * sizeof(IntT)) {
                             highResult = (HIntT)(((UIntT)low >> count) | ((UIntT)high << -count));
                             return (LIntT)(((UIntT)high >> count) | ((UIntT)low << -count));
                         } else {
@@ -2672,14 +2672,14 @@ namespace UltimateOrb.Numerics {
             unsafe {
                 unchecked {
                     const int count = 1;
-                    if (count < sizeof(IntT)) {
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
-                            highResult = (HIntT)(((UIntT)high << count) | ((UIntT)low >> (-count/* sizeof(IntT) - count */)));
+                            highResult = (HIntT)(((UIntT)high << count) | ((UIntT)low >> (-count/* 8 * sizeof(IntT) - count */)));
                             return (LIntT)(low << count);
                         } 
                     } else {
-                        // if (count > sizeof(IntT)) {
-                        //     highResult = (HIntT)(low << (count/* - sizeof(IntT)*/));
+                        // if (count > 8 * sizeof(IntT)) {
+                        //     highResult = (HIntT)(low << (count/* - 8 * sizeof(IntT)*/));
                         // } else {
                         //     highResult = (HIntT)low;
                         // }
@@ -2700,23 +2700,23 @@ namespace UltimateOrb.Numerics {
             unsafe {
                 unchecked {
                     const int count = 1;
-                    if (count < sizeof(IntT)) {
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)((IntT)high >> count);
-                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* sizeof(IntT) - count */)));
+                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* 8 * sizeof(IntT) - count */)));
                         }
                     } else {
-                        var mask = (UIntT)((IntT)high >> (sizeof(IntT) - 1));
+                        var mask = (UIntT)((IntT)high >> (8 * sizeof(IntT) - 1));
                         highResult = (HIntT)mask;
-                        if (count > sizeof(IntT)) {
+                        if (count > 8 * sizeof(IntT)) {
                             // if (0 > (IntT)high) {
                             //     highResult = (HIntT)(IntT)(-1);
-                            //     return (LIntT)(((UIntT)high >> (count/* - sizeof(IntT)*/)) | (UIntT.MaxValue << (-count/* sizeof(IntT) + sizeof(IntT) - count */)));
+                            //     return (LIntT)(((UIntT)high >> (count/* - 8 * sizeof(IntT)*/)) | (UIntT.MaxValue << (-count/* 8 * sizeof(IntT) + 8 * sizeof(IntT) - count */)));
                             // } else {
                             //     highResult = (HIntT)0;
-                            //     return (LIntT)((UIntT)high >> (count/* - sizeof(IntT)*/));
+                            //     return (LIntT)((UIntT)high >> (count/* - 8 * sizeof(IntT)*/));
                             // }
-                            return (LIntT)(((UIntT)high >> (count/* - sizeof(IntT)*/)) | (mask << (-count/* sizeof(IntT) + sizeof(IntT) - count */)));
+                            return (LIntT)(((UIntT)high >> (count/* - 8 * sizeof(IntT)*/)) | (mask << (-count/* 8 * sizeof(IntT) + 8 * sizeof(IntT) - count */)));
                         } else {
                             // highResult = (0 > (IntT)high) ? (HIntT)(IntT)(-1) : (HIntT)0;
                             return (LIntT)high;
@@ -2736,15 +2736,15 @@ namespace UltimateOrb.Numerics {
             unsafe {
                 unchecked {
                     const int count = 1;
-                    if (count < sizeof(IntT)) {
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)((UIntT)high >> count);
-                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* sizeof(IntT) - count */)));
+                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* 8 * sizeof(IntT) - count */)));
                         }
                     } else {
                         highResult = (HIntT)0;
-                        // if (count > sizeof(IntT)) {
-                        //    return (LIntT)((UIntT)high >> (count/* - sizeof(IntT)*/));
+                        // if (count > 8 * sizeof(IntT)) {
+                        //    return (LIntT)((UIntT)high >> (count/* - 8 * sizeof(IntT)*/));
                         // } else {
                         //     return (LIntT)high;
                         // }
@@ -2765,13 +2765,13 @@ namespace UltimateOrb.Numerics {
             unsafe {
                 unchecked {
                     const int count = 1;
-                    if (count < sizeof(IntT)) {
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)(((UIntT)high << count) | ((UIntT)low >> -count));
                             return (LIntT)(((UIntT)low << count) | ((UIntT)high >> -count));
                         }
                     } else {
-                        if (count > sizeof(IntT)) {
+                        if (count > 8 * sizeof(IntT)) {
                             highResult = (HIntT)(((UIntT)low << count) | ((UIntT)high >> -count));
                             return (LIntT)(((UIntT)high << count) | ((UIntT)low >> -count));
                         } else {
@@ -2793,13 +2793,13 @@ namespace UltimateOrb.Numerics {
             unsafe {
                 unchecked {
                     const int count = 1;
-                    if (count < sizeof(IntT)) {
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)(((UIntT)high >> count) | ((UIntT)low << -count));
                             return (LIntT)(((UIntT)low >> count) | ((UIntT)high << -count));
                         }
                     } else {
-                        if (count > sizeof(IntT)) {
+                        if (count > 8 * sizeof(IntT)) {
                             highResult = (HIntT)(((UIntT)low >> count) | ((UIntT)high << -count));
                             return (LIntT)(((UIntT)high >> count) | ((UIntT)low << -count));
                         } else {
@@ -2879,7 +2879,7 @@ namespace UltimateOrb.Numerics {
         public static HIntT ShiftLeft(LIntT low, HIntT high, int count) {
             unsafe {
                 if (0 != count) {
-                    return unchecked((HIntT)(((UIntT)high << count) | ((UIntT)low >> (-count/* sizeof(IntT) - count */))));
+                    return unchecked((HIntT)(((UIntT)high << count) | ((UIntT)low >> (-count/* 8 * sizeof(IntT) - count */))));
                 }
                 return high;
             }
@@ -2890,7 +2890,7 @@ namespace UltimateOrb.Numerics {
         public static LIntT ShiftRight(LIntT low, HIntT high, int count) {
             unsafe {
                 if (0 != count) {
-                    return unchecked((LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* sizeof(IntT) - count */))));
+                    return unchecked((LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* 8 * sizeof(IntT) - count */))));
                 }
                 return low;
             }
@@ -2902,15 +2902,15 @@ namespace UltimateOrb.Numerics {
         public static LIntT ShiftLeft(LIntT low, HIntT high, int count, out HIntT highResult) {
             unsafe {
                 unchecked {
-                    count &= 2 * sizeof(IntT) - 1;
-                    if (count < sizeof(IntT)) {
+                    count &= 2 * (8 * sizeof(IntT)) - 1;
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
-                            highResult = (HIntT)(((UIntT)high << count) | ((UIntT)low >> (-count/* sizeof(IntT) - count */)));
+                            highResult = (HIntT)(((UIntT)high << count) | ((UIntT)low >> (-count/* 8 * sizeof(IntT) - count */)));
                             return (LIntT)(low << count);
                         } 
                     } else {
-                        // if (count > sizeof(IntT)) {
-                        //     highResult = (HIntT)(low << (count/* - sizeof(IntT)*/));
+                        // if (count > 8 * sizeof(IntT)) {
+                        //     highResult = (HIntT)(low << (count/* - 8 * sizeof(IntT)*/));
                         // } else {
                         //     highResult = (HIntT)low;
                         // }
@@ -2930,24 +2930,24 @@ namespace UltimateOrb.Numerics {
         public static LIntT ShiftRightSigned(LIntT low, HIntT high, int count, out HIntT highResult) {
             unsafe {
                 unchecked {
-                    count &= 2 * sizeof(IntT) - 1;
-                    if (count < sizeof(IntT)) {
+                    count &= 2 * (8 * sizeof(IntT)) - 1;
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)((IntT)high >> count);
-                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* sizeof(IntT) - count */)));
+                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* 8 * sizeof(IntT) - count */)));
                         }
                     } else {
-                        var mask = (UIntT)((IntT)high >> (sizeof(IntT) - 1));
+                        var mask = (UIntT)((IntT)high >> (8 * sizeof(IntT) - 1));
                         highResult = (HIntT)mask;
-                        if (count > sizeof(IntT)) {
+                        if (count > 8 * sizeof(IntT)) {
                             // if (0 > (IntT)high) {
                             //     highResult = (HIntT)(IntT)(-1);
-                            //     return (LIntT)(((UIntT)high >> (count/* - sizeof(IntT)*/)) | (UIntT.MaxValue << (-count/* sizeof(IntT) + sizeof(IntT) - count */)));
+                            //     return (LIntT)(((UIntT)high >> (count/* - 8 * sizeof(IntT)*/)) | (UIntT.MaxValue << (-count/* 8 * sizeof(IntT) + 8 * sizeof(IntT) - count */)));
                             // } else {
                             //     highResult = (HIntT)0;
-                            //     return (LIntT)((UIntT)high >> (count/* - sizeof(IntT)*/));
+                            //     return (LIntT)((UIntT)high >> (count/* - 8 * sizeof(IntT)*/));
                             // }
-                            return (LIntT)(((UIntT)high >> (count/* - sizeof(IntT)*/)) | (mask << (-count/* sizeof(IntT) + sizeof(IntT) - count */)));
+                            return (LIntT)(((UIntT)high >> (count/* - 8 * sizeof(IntT)*/)) | (mask << (-count/* 8 * sizeof(IntT) + 8 * sizeof(IntT) - count */)));
                         } else {
                             // highResult = (0 > (IntT)high) ? (HIntT)(IntT)(-1) : (HIntT)0;
                             return (LIntT)high;
@@ -2966,16 +2966,16 @@ namespace UltimateOrb.Numerics {
         public static LIntT ShiftRightUnsigned(LIntT low, HIntT high, int count, out HIntT highResult) {
             unsafe {
                 unchecked {
-                    count &= 2 * sizeof(IntT) - 1;
-                    if (count < sizeof(IntT)) {
+                    count &= 2 * (8 * sizeof(IntT)) - 1;
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)((UIntT)high >> count);
-                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* sizeof(IntT) - count */)));
+                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* 8 * sizeof(IntT) - count */)));
                         }
                     } else {
                         highResult = (HIntT)0;
-                        // if (count > sizeof(IntT)) {
-                        //    return (LIntT)((UIntT)high >> (count/* - sizeof(IntT)*/));
+                        // if (count > 8 * sizeof(IntT)) {
+                        //    return (LIntT)((UIntT)high >> (count/* - 8 * sizeof(IntT)*/));
                         // } else {
                         //     return (LIntT)high;
                         // }
@@ -2995,14 +2995,14 @@ namespace UltimateOrb.Numerics {
         public static LIntT RotateLeft(LIntT low, HIntT high, int count, out HIntT highResult) {
             unsafe {
                 unchecked {
-                    count &= 2 * sizeof(IntT) - 1;
-                    if (count < sizeof(IntT)) {
+                    count &= 2 * (8 * sizeof(IntT)) - 1;
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)(((UIntT)high << count) | ((UIntT)low >> -count));
                             return (LIntT)(((UIntT)low << count) | ((UIntT)high >> -count));
                         }
                     } else {
-                        if (count > sizeof(IntT)) {
+                        if (count > 8 * sizeof(IntT)) {
                             highResult = (HIntT)(((UIntT)low << count) | ((UIntT)high >> -count));
                             return (LIntT)(((UIntT)high << count) | ((UIntT)low >> -count));
                         } else {
@@ -3023,14 +3023,14 @@ namespace UltimateOrb.Numerics {
         public static LIntT RotateRight(LIntT low, HIntT high, int count, out HIntT highResult) {
             unsafe {
                 unchecked {
-                    count &= 2 * sizeof(IntT) - 1;
-                    if (count < sizeof(IntT)) {
+                    count &= 2 * (8 * sizeof(IntT)) - 1;
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)(((UIntT)high >> count) | ((UIntT)low << -count));
                             return (LIntT)(((UIntT)low >> count) | ((UIntT)high << -count));
                         }
                     } else {
-                        if (count > sizeof(IntT)) {
+                        if (count > 8 * sizeof(IntT)) {
                             highResult = (HIntT)(((UIntT)low >> count) | ((UIntT)high << -count));
                             return (LIntT)(((UIntT)high >> count) | ((UIntT)low << -count));
                         } else {
@@ -3054,14 +3054,14 @@ namespace UltimateOrb.Numerics {
             unsafe {
                 unchecked {
                     const int count = 1;
-                    if (count < sizeof(IntT)) {
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
-                            highResult = (HIntT)(((UIntT)high << count) | ((UIntT)low >> (-count/* sizeof(IntT) - count */)));
+                            highResult = (HIntT)(((UIntT)high << count) | ((UIntT)low >> (-count/* 8 * sizeof(IntT) - count */)));
                             return (LIntT)(low << count);
                         } 
                     } else {
-                        // if (count > sizeof(IntT)) {
-                        //     highResult = (HIntT)(low << (count/* - sizeof(IntT)*/));
+                        // if (count > 8 * sizeof(IntT)) {
+                        //     highResult = (HIntT)(low << (count/* - 8 * sizeof(IntT)*/));
                         // } else {
                         //     highResult = (HIntT)low;
                         // }
@@ -3082,23 +3082,23 @@ namespace UltimateOrb.Numerics {
             unsafe {
                 unchecked {
                     const int count = 1;
-                    if (count < sizeof(IntT)) {
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)((IntT)high >> count);
-                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* sizeof(IntT) - count */)));
+                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* 8 * sizeof(IntT) - count */)));
                         }
                     } else {
-                        var mask = (UIntT)((IntT)high >> (sizeof(IntT) - 1));
+                        var mask = (UIntT)((IntT)high >> (8 * sizeof(IntT) - 1));
                         highResult = (HIntT)mask;
-                        if (count > sizeof(IntT)) {
+                        if (count > 8 * sizeof(IntT)) {
                             // if (0 > (IntT)high) {
                             //     highResult = (HIntT)(IntT)(-1);
-                            //     return (LIntT)(((UIntT)high >> (count/* - sizeof(IntT)*/)) | (UIntT.MaxValue << (-count/* sizeof(IntT) + sizeof(IntT) - count */)));
+                            //     return (LIntT)(((UIntT)high >> (count/* - 8 * sizeof(IntT)*/)) | (UIntT.MaxValue << (-count/* 8 * sizeof(IntT) + 8 * sizeof(IntT) - count */)));
                             // } else {
                             //     highResult = (HIntT)0;
-                            //     return (LIntT)((UIntT)high >> (count/* - sizeof(IntT)*/));
+                            //     return (LIntT)((UIntT)high >> (count/* - 8 * sizeof(IntT)*/));
                             // }
-                            return (LIntT)(((UIntT)high >> (count/* - sizeof(IntT)*/)) | (mask << (-count/* sizeof(IntT) + sizeof(IntT) - count */)));
+                            return (LIntT)(((UIntT)high >> (count/* - 8 * sizeof(IntT)*/)) | (mask << (-count/* 8 * sizeof(IntT) + 8 * sizeof(IntT) - count */)));
                         } else {
                             // highResult = (0 > (IntT)high) ? (HIntT)(IntT)(-1) : (HIntT)0;
                             return (LIntT)high;
@@ -3118,15 +3118,15 @@ namespace UltimateOrb.Numerics {
             unsafe {
                 unchecked {
                     const int count = 1;
-                    if (count < sizeof(IntT)) {
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)((UIntT)high >> count);
-                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* sizeof(IntT) - count */)));
+                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* 8 * sizeof(IntT) - count */)));
                         }
                     } else {
                         highResult = (HIntT)0;
-                        // if (count > sizeof(IntT)) {
-                        //    return (LIntT)((UIntT)high >> (count/* - sizeof(IntT)*/));
+                        // if (count > 8 * sizeof(IntT)) {
+                        //    return (LIntT)((UIntT)high >> (count/* - 8 * sizeof(IntT)*/));
                         // } else {
                         //     return (LIntT)high;
                         // }
@@ -3147,13 +3147,13 @@ namespace UltimateOrb.Numerics {
             unsafe {
                 unchecked {
                     const int count = 1;
-                    if (count < sizeof(IntT)) {
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)(((UIntT)high << count) | ((UIntT)low >> -count));
                             return (LIntT)(((UIntT)low << count) | ((UIntT)high >> -count));
                         }
                     } else {
-                        if (count > sizeof(IntT)) {
+                        if (count > 8 * sizeof(IntT)) {
                             highResult = (HIntT)(((UIntT)low << count) | ((UIntT)high >> -count));
                             return (LIntT)(((UIntT)high << count) | ((UIntT)low >> -count));
                         } else {
@@ -3175,13 +3175,13 @@ namespace UltimateOrb.Numerics {
             unsafe {
                 unchecked {
                     const int count = 1;
-                    if (count < sizeof(IntT)) {
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)(((UIntT)high >> count) | ((UIntT)low << -count));
                             return (LIntT)(((UIntT)low >> count) | ((UIntT)high << -count));
                         }
                     } else {
-                        if (count > sizeof(IntT)) {
+                        if (count > 8 * sizeof(IntT)) {
                             highResult = (HIntT)(((UIntT)low >> count) | ((UIntT)high << -count));
                             return (LIntT)(((UIntT)high >> count) | ((UIntT)low << -count));
                         } else {
@@ -3221,7 +3221,7 @@ namespace UltimateOrb.Numerics {
         public static HIntT ShiftLeft(LIntT low, HIntT high, int count) {
             unsafe {
                 if (0 != count) {
-                    return unchecked((HIntT)(((UIntT)high << count) | ((UIntT)low >> (-count/* sizeof(IntT) - count */))));
+                    return unchecked((HIntT)(((UIntT)high << count) | ((UIntT)low >> (-count/* 8 * sizeof(IntT) - count */))));
                 }
                 return high;
             }
@@ -3232,7 +3232,7 @@ namespace UltimateOrb.Numerics {
         public static LIntT ShiftRight(LIntT low, HIntT high, int count) {
             unsafe {
                 if (0 != count) {
-                    return unchecked((LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* sizeof(IntT) - count */))));
+                    return unchecked((LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* 8 * sizeof(IntT) - count */))));
                 }
                 return low;
             }
@@ -3244,15 +3244,15 @@ namespace UltimateOrb.Numerics {
         public static LIntT ShiftLeft(LIntT low, HIntT high, int count, out HIntT highResult) {
             unsafe {
                 unchecked {
-                    count &= 2 * sizeof(IntT) - 1;
-                    if (count < sizeof(IntT)) {
+                    count &= 2 * (8 * sizeof(IntT)) - 1;
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
-                            highResult = (HIntT)(((UIntT)high << count) | ((UIntT)low >> (-count/* sizeof(IntT) - count */)));
+                            highResult = (HIntT)(((UIntT)high << count) | ((UIntT)low >> (-count/* 8 * sizeof(IntT) - count */)));
                             return (LIntT)(low << count);
                         } 
                     } else {
-                        // if (count > sizeof(IntT)) {
-                        //     highResult = (HIntT)(low << (count/* - sizeof(IntT)*/));
+                        // if (count > 8 * sizeof(IntT)) {
+                        //     highResult = (HIntT)(low << (count/* - 8 * sizeof(IntT)*/));
                         // } else {
                         //     highResult = (HIntT)low;
                         // }
@@ -3272,24 +3272,24 @@ namespace UltimateOrb.Numerics {
         public static LIntT ShiftRightSigned(LIntT low, HIntT high, int count, out HIntT highResult) {
             unsafe {
                 unchecked {
-                    count &= 2 * sizeof(IntT) - 1;
-                    if (count < sizeof(IntT)) {
+                    count &= 2 * (8 * sizeof(IntT)) - 1;
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)((IntT)high >> count);
-                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* sizeof(IntT) - count */)));
+                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* 8 * sizeof(IntT) - count */)));
                         }
                     } else {
-                        var mask = (UIntT)((IntT)high >> (sizeof(IntT) - 1));
+                        var mask = (UIntT)((IntT)high >> (8 * sizeof(IntT) - 1));
                         highResult = (HIntT)mask;
-                        if (count > sizeof(IntT)) {
+                        if (count > 8 * sizeof(IntT)) {
                             // if (0 > (IntT)high) {
                             //     highResult = (HIntT)(IntT)(-1);
-                            //     return (LIntT)(((UIntT)high >> (count/* - sizeof(IntT)*/)) | (UIntT.MaxValue << (-count/* sizeof(IntT) + sizeof(IntT) - count */)));
+                            //     return (LIntT)(((UIntT)high >> (count/* - 8 * sizeof(IntT)*/)) | (UIntT.MaxValue << (-count/* 8 * sizeof(IntT) + 8 * sizeof(IntT) - count */)));
                             // } else {
                             //     highResult = (HIntT)0;
-                            //     return (LIntT)((UIntT)high >> (count/* - sizeof(IntT)*/));
+                            //     return (LIntT)((UIntT)high >> (count/* - 8 * sizeof(IntT)*/));
                             // }
-                            return (LIntT)(((UIntT)high >> (count/* - sizeof(IntT)*/)) | (mask << (-count/* sizeof(IntT) + sizeof(IntT) - count */)));
+                            return (LIntT)(((UIntT)high >> (count/* - 8 * sizeof(IntT)*/)) | (mask << (-count/* 8 * sizeof(IntT) + 8 * sizeof(IntT) - count */)));
                         } else {
                             // highResult = (0 > (IntT)high) ? (HIntT)(IntT)(-1) : (HIntT)0;
                             return (LIntT)high;
@@ -3308,16 +3308,16 @@ namespace UltimateOrb.Numerics {
         public static LIntT ShiftRightUnsigned(LIntT low, HIntT high, int count, out HIntT highResult) {
             unsafe {
                 unchecked {
-                    count &= 2 * sizeof(IntT) - 1;
-                    if (count < sizeof(IntT)) {
+                    count &= 2 * (8 * sizeof(IntT)) - 1;
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)((UIntT)high >> count);
-                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* sizeof(IntT) - count */)));
+                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* 8 * sizeof(IntT) - count */)));
                         }
                     } else {
                         highResult = (HIntT)0;
-                        // if (count > sizeof(IntT)) {
-                        //    return (LIntT)((UIntT)high >> (count/* - sizeof(IntT)*/));
+                        // if (count > 8 * sizeof(IntT)) {
+                        //    return (LIntT)((UIntT)high >> (count/* - 8 * sizeof(IntT)*/));
                         // } else {
                         //     return (LIntT)high;
                         // }
@@ -3337,14 +3337,14 @@ namespace UltimateOrb.Numerics {
         public static LIntT RotateLeft(LIntT low, HIntT high, int count, out HIntT highResult) {
             unsafe {
                 unchecked {
-                    count &= 2 * sizeof(IntT) - 1;
-                    if (count < sizeof(IntT)) {
+                    count &= 2 * (8 * sizeof(IntT)) - 1;
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)(((UIntT)high << count) | ((UIntT)low >> -count));
                             return (LIntT)(((UIntT)low << count) | ((UIntT)high >> -count));
                         }
                     } else {
-                        if (count > sizeof(IntT)) {
+                        if (count > 8 * sizeof(IntT)) {
                             highResult = (HIntT)(((UIntT)low << count) | ((UIntT)high >> -count));
                             return (LIntT)(((UIntT)high << count) | ((UIntT)low >> -count));
                         } else {
@@ -3365,14 +3365,14 @@ namespace UltimateOrb.Numerics {
         public static LIntT RotateRight(LIntT low, HIntT high, int count, out HIntT highResult) {
             unsafe {
                 unchecked {
-                    count &= 2 * sizeof(IntT) - 1;
-                    if (count < sizeof(IntT)) {
+                    count &= 2 * (8 * sizeof(IntT)) - 1;
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)(((UIntT)high >> count) | ((UIntT)low << -count));
                             return (LIntT)(((UIntT)low >> count) | ((UIntT)high << -count));
                         }
                     } else {
-                        if (count > sizeof(IntT)) {
+                        if (count > 8 * sizeof(IntT)) {
                             highResult = (HIntT)(((UIntT)low >> count) | ((UIntT)high << -count));
                             return (LIntT)(((UIntT)high >> count) | ((UIntT)low << -count));
                         } else {
@@ -3396,14 +3396,14 @@ namespace UltimateOrb.Numerics {
             unsafe {
                 unchecked {
                     const int count = 1;
-                    if (count < sizeof(IntT)) {
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
-                            highResult = (HIntT)(((UIntT)high << count) | ((UIntT)low >> (-count/* sizeof(IntT) - count */)));
+                            highResult = (HIntT)(((UIntT)high << count) | ((UIntT)low >> (-count/* 8 * sizeof(IntT) - count */)));
                             return (LIntT)(low << count);
                         } 
                     } else {
-                        // if (count > sizeof(IntT)) {
-                        //     highResult = (HIntT)(low << (count/* - sizeof(IntT)*/));
+                        // if (count > 8 * sizeof(IntT)) {
+                        //     highResult = (HIntT)(low << (count/* - 8 * sizeof(IntT)*/));
                         // } else {
                         //     highResult = (HIntT)low;
                         // }
@@ -3424,23 +3424,23 @@ namespace UltimateOrb.Numerics {
             unsafe {
                 unchecked {
                     const int count = 1;
-                    if (count < sizeof(IntT)) {
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)((IntT)high >> count);
-                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* sizeof(IntT) - count */)));
+                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* 8 * sizeof(IntT) - count */)));
                         }
                     } else {
-                        var mask = (UIntT)((IntT)high >> (sizeof(IntT) - 1));
+                        var mask = (UIntT)((IntT)high >> (8 * sizeof(IntT) - 1));
                         highResult = (HIntT)mask;
-                        if (count > sizeof(IntT)) {
+                        if (count > 8 * sizeof(IntT)) {
                             // if (0 > (IntT)high) {
                             //     highResult = (HIntT)(IntT)(-1);
-                            //     return (LIntT)(((UIntT)high >> (count/* - sizeof(IntT)*/)) | (UIntT.MaxValue << (-count/* sizeof(IntT) + sizeof(IntT) - count */)));
+                            //     return (LIntT)(((UIntT)high >> (count/* - 8 * sizeof(IntT)*/)) | (UIntT.MaxValue << (-count/* 8 * sizeof(IntT) + 8 * sizeof(IntT) - count */)));
                             // } else {
                             //     highResult = (HIntT)0;
-                            //     return (LIntT)((UIntT)high >> (count/* - sizeof(IntT)*/));
+                            //     return (LIntT)((UIntT)high >> (count/* - 8 * sizeof(IntT)*/));
                             // }
-                            return (LIntT)(((UIntT)high >> (count/* - sizeof(IntT)*/)) | (mask << (-count/* sizeof(IntT) + sizeof(IntT) - count */)));
+                            return (LIntT)(((UIntT)high >> (count/* - 8 * sizeof(IntT)*/)) | (mask << (-count/* 8 * sizeof(IntT) + 8 * sizeof(IntT) - count */)));
                         } else {
                             // highResult = (0 > (IntT)high) ? (HIntT)(IntT)(-1) : (HIntT)0;
                             return (LIntT)high;
@@ -3460,15 +3460,15 @@ namespace UltimateOrb.Numerics {
             unsafe {
                 unchecked {
                     const int count = 1;
-                    if (count < sizeof(IntT)) {
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)((UIntT)high >> count);
-                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* sizeof(IntT) - count */)));
+                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* 8 * sizeof(IntT) - count */)));
                         }
                     } else {
                         highResult = (HIntT)0;
-                        // if (count > sizeof(IntT)) {
-                        //    return (LIntT)((UIntT)high >> (count/* - sizeof(IntT)*/));
+                        // if (count > 8 * sizeof(IntT)) {
+                        //    return (LIntT)((UIntT)high >> (count/* - 8 * sizeof(IntT)*/));
                         // } else {
                         //     return (LIntT)high;
                         // }
@@ -3489,13 +3489,13 @@ namespace UltimateOrb.Numerics {
             unsafe {
                 unchecked {
                     const int count = 1;
-                    if (count < sizeof(IntT)) {
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)(((UIntT)high << count) | ((UIntT)low >> -count));
                             return (LIntT)(((UIntT)low << count) | ((UIntT)high >> -count));
                         }
                     } else {
-                        if (count > sizeof(IntT)) {
+                        if (count > 8 * sizeof(IntT)) {
                             highResult = (HIntT)(((UIntT)low << count) | ((UIntT)high >> -count));
                             return (LIntT)(((UIntT)high << count) | ((UIntT)low >> -count));
                         } else {
@@ -3517,13 +3517,13 @@ namespace UltimateOrb.Numerics {
             unsafe {
                 unchecked {
                     const int count = 1;
-                    if (count < sizeof(IntT)) {
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)(((UIntT)high >> count) | ((UIntT)low << -count));
                             return (LIntT)(((UIntT)low >> count) | ((UIntT)high << -count));
                         }
                     } else {
-                        if (count > sizeof(IntT)) {
+                        if (count > 8 * sizeof(IntT)) {
                             highResult = (HIntT)(((UIntT)low >> count) | ((UIntT)high << -count));
                             return (LIntT)(((UIntT)high >> count) | ((UIntT)low << -count));
                         } else {
@@ -3563,7 +3563,7 @@ namespace UltimateOrb.Numerics {
         public static HIntT ShiftLeft(LIntT low, HIntT high, int count) {
             unsafe {
                 if (0 != count) {
-                    return unchecked((HIntT)(((UIntT)high << count) | ((UIntT)low >> (-count/* sizeof(IntT) - count */))));
+                    return unchecked((HIntT)(((UIntT)high << count) | ((UIntT)low >> (-count/* 8 * sizeof(IntT) - count */))));
                 }
                 return high;
             }
@@ -3574,7 +3574,7 @@ namespace UltimateOrb.Numerics {
         public static LIntT ShiftRight(LIntT low, HIntT high, int count) {
             unsafe {
                 if (0 != count) {
-                    return unchecked((LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* sizeof(IntT) - count */))));
+                    return unchecked((LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* 8 * sizeof(IntT) - count */))));
                 }
                 return low;
             }
@@ -3586,15 +3586,15 @@ namespace UltimateOrb.Numerics {
         public static LIntT ShiftLeft(LIntT low, HIntT high, int count, out HIntT highResult) {
             unsafe {
                 unchecked {
-                    count &= 2 * sizeof(IntT) - 1;
-                    if (count < sizeof(IntT)) {
+                    count &= 2 * (8 * sizeof(IntT)) - 1;
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
-                            highResult = (HIntT)(((UIntT)high << count) | ((UIntT)low >> (-count/* sizeof(IntT) - count */)));
+                            highResult = (HIntT)(((UIntT)high << count) | ((UIntT)low >> (-count/* 8 * sizeof(IntT) - count */)));
                             return (LIntT)(low << count);
                         } 
                     } else {
-                        // if (count > sizeof(IntT)) {
-                        //     highResult = (HIntT)(low << (count/* - sizeof(IntT)*/));
+                        // if (count > 8 * sizeof(IntT)) {
+                        //     highResult = (HIntT)(low << (count/* - 8 * sizeof(IntT)*/));
                         // } else {
                         //     highResult = (HIntT)low;
                         // }
@@ -3614,24 +3614,24 @@ namespace UltimateOrb.Numerics {
         public static LIntT ShiftRightSigned(LIntT low, HIntT high, int count, out HIntT highResult) {
             unsafe {
                 unchecked {
-                    count &= 2 * sizeof(IntT) - 1;
-                    if (count < sizeof(IntT)) {
+                    count &= 2 * (8 * sizeof(IntT)) - 1;
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)((IntT)high >> count);
-                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* sizeof(IntT) - count */)));
+                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* 8 * sizeof(IntT) - count */)));
                         }
                     } else {
-                        var mask = (UIntT)((IntT)high >> (sizeof(IntT) - 1));
+                        var mask = (UIntT)((IntT)high >> (8 * sizeof(IntT) - 1));
                         highResult = (HIntT)mask;
-                        if (count > sizeof(IntT)) {
+                        if (count > 8 * sizeof(IntT)) {
                             // if (0 > (IntT)high) {
                             //     highResult = (HIntT)(IntT)(-1);
-                            //     return (LIntT)(((UIntT)high >> (count/* - sizeof(IntT)*/)) | (UIntT.MaxValue << (-count/* sizeof(IntT) + sizeof(IntT) - count */)));
+                            //     return (LIntT)(((UIntT)high >> (count/* - 8 * sizeof(IntT)*/)) | (UIntT.MaxValue << (-count/* 8 * sizeof(IntT) + 8 * sizeof(IntT) - count */)));
                             // } else {
                             //     highResult = (HIntT)0;
-                            //     return (LIntT)((UIntT)high >> (count/* - sizeof(IntT)*/));
+                            //     return (LIntT)((UIntT)high >> (count/* - 8 * sizeof(IntT)*/));
                             // }
-                            return (LIntT)(((UIntT)high >> (count/* - sizeof(IntT)*/)) | (mask << (-count/* sizeof(IntT) + sizeof(IntT) - count */)));
+                            return (LIntT)(((UIntT)high >> (count/* - 8 * sizeof(IntT)*/)) | (mask << (-count/* 8 * sizeof(IntT) + 8 * sizeof(IntT) - count */)));
                         } else {
                             // highResult = (0 > (IntT)high) ? (HIntT)(IntT)(-1) : (HIntT)0;
                             return (LIntT)high;
@@ -3650,16 +3650,16 @@ namespace UltimateOrb.Numerics {
         public static LIntT ShiftRightUnsigned(LIntT low, HIntT high, int count, out HIntT highResult) {
             unsafe {
                 unchecked {
-                    count &= 2 * sizeof(IntT) - 1;
-                    if (count < sizeof(IntT)) {
+                    count &= 2 * (8 * sizeof(IntT)) - 1;
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)((UIntT)high >> count);
-                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* sizeof(IntT) - count */)));
+                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* 8 * sizeof(IntT) - count */)));
                         }
                     } else {
                         highResult = (HIntT)0;
-                        // if (count > sizeof(IntT)) {
-                        //    return (LIntT)((UIntT)high >> (count/* - sizeof(IntT)*/));
+                        // if (count > 8 * sizeof(IntT)) {
+                        //    return (LIntT)((UIntT)high >> (count/* - 8 * sizeof(IntT)*/));
                         // } else {
                         //     return (LIntT)high;
                         // }
@@ -3679,14 +3679,14 @@ namespace UltimateOrb.Numerics {
         public static LIntT RotateLeft(LIntT low, HIntT high, int count, out HIntT highResult) {
             unsafe {
                 unchecked {
-                    count &= 2 * sizeof(IntT) - 1;
-                    if (count < sizeof(IntT)) {
+                    count &= 2 * (8 * sizeof(IntT)) - 1;
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)(((UIntT)high << count) | ((UIntT)low >> -count));
                             return (LIntT)(((UIntT)low << count) | ((UIntT)high >> -count));
                         }
                     } else {
-                        if (count > sizeof(IntT)) {
+                        if (count > 8 * sizeof(IntT)) {
                             highResult = (HIntT)(((UIntT)low << count) | ((UIntT)high >> -count));
                             return (LIntT)(((UIntT)high << count) | ((UIntT)low >> -count));
                         } else {
@@ -3707,14 +3707,14 @@ namespace UltimateOrb.Numerics {
         public static LIntT RotateRight(LIntT low, HIntT high, int count, out HIntT highResult) {
             unsafe {
                 unchecked {
-                    count &= 2 * sizeof(IntT) - 1;
-                    if (count < sizeof(IntT)) {
+                    count &= 2 * (8 * sizeof(IntT)) - 1;
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)(((UIntT)high >> count) | ((UIntT)low << -count));
                             return (LIntT)(((UIntT)low >> count) | ((UIntT)high << -count));
                         }
                     } else {
-                        if (count > sizeof(IntT)) {
+                        if (count > 8 * sizeof(IntT)) {
                             highResult = (HIntT)(((UIntT)low >> count) | ((UIntT)high << -count));
                             return (LIntT)(((UIntT)high >> count) | ((UIntT)low << -count));
                         } else {
@@ -3738,14 +3738,14 @@ namespace UltimateOrb.Numerics {
             unsafe {
                 unchecked {
                     const int count = 1;
-                    if (count < sizeof(IntT)) {
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
-                            highResult = (HIntT)(((UIntT)high << count) | ((UIntT)low >> (-count/* sizeof(IntT) - count */)));
+                            highResult = (HIntT)(((UIntT)high << count) | ((UIntT)low >> (-count/* 8 * sizeof(IntT) - count */)));
                             return (LIntT)(low << count);
                         } 
                     } else {
-                        // if (count > sizeof(IntT)) {
-                        //     highResult = (HIntT)(low << (count/* - sizeof(IntT)*/));
+                        // if (count > 8 * sizeof(IntT)) {
+                        //     highResult = (HIntT)(low << (count/* - 8 * sizeof(IntT)*/));
                         // } else {
                         //     highResult = (HIntT)low;
                         // }
@@ -3766,23 +3766,23 @@ namespace UltimateOrb.Numerics {
             unsafe {
                 unchecked {
                     const int count = 1;
-                    if (count < sizeof(IntT)) {
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)((IntT)high >> count);
-                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* sizeof(IntT) - count */)));
+                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* 8 * sizeof(IntT) - count */)));
                         }
                     } else {
-                        var mask = (UIntT)((IntT)high >> (sizeof(IntT) - 1));
+                        var mask = (UIntT)((IntT)high >> (8 * sizeof(IntT) - 1));
                         highResult = (HIntT)mask;
-                        if (count > sizeof(IntT)) {
+                        if (count > 8 * sizeof(IntT)) {
                             // if (0 > (IntT)high) {
                             //     highResult = (HIntT)(IntT)(-1);
-                            //     return (LIntT)(((UIntT)high >> (count/* - sizeof(IntT)*/)) | (UIntT.MaxValue << (-count/* sizeof(IntT) + sizeof(IntT) - count */)));
+                            //     return (LIntT)(((UIntT)high >> (count/* - 8 * sizeof(IntT)*/)) | (UIntT.MaxValue << (-count/* 8 * sizeof(IntT) + 8 * sizeof(IntT) - count */)));
                             // } else {
                             //     highResult = (HIntT)0;
-                            //     return (LIntT)((UIntT)high >> (count/* - sizeof(IntT)*/));
+                            //     return (LIntT)((UIntT)high >> (count/* - 8 * sizeof(IntT)*/));
                             // }
-                            return (LIntT)(((UIntT)high >> (count/* - sizeof(IntT)*/)) | (mask << (-count/* sizeof(IntT) + sizeof(IntT) - count */)));
+                            return (LIntT)(((UIntT)high >> (count/* - 8 * sizeof(IntT)*/)) | (mask << (-count/* 8 * sizeof(IntT) + 8 * sizeof(IntT) - count */)));
                         } else {
                             // highResult = (0 > (IntT)high) ? (HIntT)(IntT)(-1) : (HIntT)0;
                             return (LIntT)high;
@@ -3802,15 +3802,15 @@ namespace UltimateOrb.Numerics {
             unsafe {
                 unchecked {
                     const int count = 1;
-                    if (count < sizeof(IntT)) {
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)((UIntT)high >> count);
-                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* sizeof(IntT) - count */)));
+                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* 8 * sizeof(IntT) - count */)));
                         }
                     } else {
                         highResult = (HIntT)0;
-                        // if (count > sizeof(IntT)) {
-                        //    return (LIntT)((UIntT)high >> (count/* - sizeof(IntT)*/));
+                        // if (count > 8 * sizeof(IntT)) {
+                        //    return (LIntT)((UIntT)high >> (count/* - 8 * sizeof(IntT)*/));
                         // } else {
                         //     return (LIntT)high;
                         // }
@@ -3831,13 +3831,13 @@ namespace UltimateOrb.Numerics {
             unsafe {
                 unchecked {
                     const int count = 1;
-                    if (count < sizeof(IntT)) {
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)(((UIntT)high << count) | ((UIntT)low >> -count));
                             return (LIntT)(((UIntT)low << count) | ((UIntT)high >> -count));
                         }
                     } else {
-                        if (count > sizeof(IntT)) {
+                        if (count > 8 * sizeof(IntT)) {
                             highResult = (HIntT)(((UIntT)low << count) | ((UIntT)high >> -count));
                             return (LIntT)(((UIntT)high << count) | ((UIntT)low >> -count));
                         } else {
@@ -3859,13 +3859,13 @@ namespace UltimateOrb.Numerics {
             unsafe {
                 unchecked {
                     const int count = 1;
-                    if (count < sizeof(IntT)) {
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)(((UIntT)high >> count) | ((UIntT)low << -count));
                             return (LIntT)(((UIntT)low >> count) | ((UIntT)high << -count));
                         }
                     } else {
-                        if (count > sizeof(IntT)) {
+                        if (count > 8 * sizeof(IntT)) {
                             highResult = (HIntT)(((UIntT)low >> count) | ((UIntT)high << -count));
                             return (LIntT)(((UIntT)high >> count) | ((UIntT)low << -count));
                         } else {
@@ -3905,7 +3905,7 @@ namespace UltimateOrb.Numerics {
         public static HIntT ShiftLeft(LIntT low, HIntT high, int count) {
             unsafe {
                 if (0 != count) {
-                    return unchecked((HIntT)(((UIntT)high << count) | ((UIntT)low >> (-count/* sizeof(IntT) - count */))));
+                    return unchecked((HIntT)(((UIntT)high << count) | ((UIntT)low >> (-count/* 8 * sizeof(IntT) - count */))));
                 }
                 return high;
             }
@@ -3916,7 +3916,7 @@ namespace UltimateOrb.Numerics {
         public static LIntT ShiftRight(LIntT low, HIntT high, int count) {
             unsafe {
                 if (0 != count) {
-                    return unchecked((LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* sizeof(IntT) - count */))));
+                    return unchecked((LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* 8 * sizeof(IntT) - count */))));
                 }
                 return low;
             }
@@ -3928,15 +3928,15 @@ namespace UltimateOrb.Numerics {
         public static LIntT ShiftLeft(LIntT low, HIntT high, int count, out HIntT highResult) {
             unsafe {
                 unchecked {
-                    count &= 2 * sizeof(IntT) - 1;
-                    if (count < sizeof(IntT)) {
+                    count &= 2 * (8 * sizeof(IntT)) - 1;
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
-                            highResult = (HIntT)(((UIntT)high << count) | ((UIntT)low >> (-count/* sizeof(IntT) - count */)));
+                            highResult = (HIntT)(((UIntT)high << count) | ((UIntT)low >> (-count/* 8 * sizeof(IntT) - count */)));
                             return (LIntT)(low << count);
                         } 
                     } else {
-                        // if (count > sizeof(IntT)) {
-                        //     highResult = (HIntT)(low << (count/* - sizeof(IntT)*/));
+                        // if (count > 8 * sizeof(IntT)) {
+                        //     highResult = (HIntT)(low << (count/* - 8 * sizeof(IntT)*/));
                         // } else {
                         //     highResult = (HIntT)low;
                         // }
@@ -3956,24 +3956,24 @@ namespace UltimateOrb.Numerics {
         public static LIntT ShiftRightSigned(LIntT low, HIntT high, int count, out HIntT highResult) {
             unsafe {
                 unchecked {
-                    count &= 2 * sizeof(IntT) - 1;
-                    if (count < sizeof(IntT)) {
+                    count &= 2 * (8 * sizeof(IntT)) - 1;
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)((IntT)high >> count);
-                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* sizeof(IntT) - count */)));
+                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* 8 * sizeof(IntT) - count */)));
                         }
                     } else {
-                        var mask = (UIntT)((IntT)high >> (sizeof(IntT) - 1));
+                        var mask = (UIntT)((IntT)high >> (8 * sizeof(IntT) - 1));
                         highResult = (HIntT)mask;
-                        if (count > sizeof(IntT)) {
+                        if (count > 8 * sizeof(IntT)) {
                             // if (0 > (IntT)high) {
                             //     highResult = (HIntT)(IntT)(-1);
-                            //     return (LIntT)(((UIntT)high >> (count/* - sizeof(IntT)*/)) | (UIntT.MaxValue << (-count/* sizeof(IntT) + sizeof(IntT) - count */)));
+                            //     return (LIntT)(((UIntT)high >> (count/* - 8 * sizeof(IntT)*/)) | (UIntT.MaxValue << (-count/* 8 * sizeof(IntT) + 8 * sizeof(IntT) - count */)));
                             // } else {
                             //     highResult = (HIntT)0;
-                            //     return (LIntT)((UIntT)high >> (count/* - sizeof(IntT)*/));
+                            //     return (LIntT)((UIntT)high >> (count/* - 8 * sizeof(IntT)*/));
                             // }
-                            return (LIntT)(((UIntT)high >> (count/* - sizeof(IntT)*/)) | (mask << (-count/* sizeof(IntT) + sizeof(IntT) - count */)));
+                            return (LIntT)(((UIntT)high >> (count/* - 8 * sizeof(IntT)*/)) | (mask << (-count/* 8 * sizeof(IntT) + 8 * sizeof(IntT) - count */)));
                         } else {
                             // highResult = (0 > (IntT)high) ? (HIntT)(IntT)(-1) : (HIntT)0;
                             return (LIntT)high;
@@ -3992,16 +3992,16 @@ namespace UltimateOrb.Numerics {
         public static LIntT ShiftRightUnsigned(LIntT low, HIntT high, int count, out HIntT highResult) {
             unsafe {
                 unchecked {
-                    count &= 2 * sizeof(IntT) - 1;
-                    if (count < sizeof(IntT)) {
+                    count &= 2 * (8 * sizeof(IntT)) - 1;
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)((UIntT)high >> count);
-                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* sizeof(IntT) - count */)));
+                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* 8 * sizeof(IntT) - count */)));
                         }
                     } else {
                         highResult = (HIntT)0;
-                        // if (count > sizeof(IntT)) {
-                        //    return (LIntT)((UIntT)high >> (count/* - sizeof(IntT)*/));
+                        // if (count > 8 * sizeof(IntT)) {
+                        //    return (LIntT)((UIntT)high >> (count/* - 8 * sizeof(IntT)*/));
                         // } else {
                         //     return (LIntT)high;
                         // }
@@ -4021,14 +4021,14 @@ namespace UltimateOrb.Numerics {
         public static LIntT RotateLeft(LIntT low, HIntT high, int count, out HIntT highResult) {
             unsafe {
                 unchecked {
-                    count &= 2 * sizeof(IntT) - 1;
-                    if (count < sizeof(IntT)) {
+                    count &= 2 * (8 * sizeof(IntT)) - 1;
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)(((UIntT)high << count) | ((UIntT)low >> -count));
                             return (LIntT)(((UIntT)low << count) | ((UIntT)high >> -count));
                         }
                     } else {
-                        if (count > sizeof(IntT)) {
+                        if (count > 8 * sizeof(IntT)) {
                             highResult = (HIntT)(((UIntT)low << count) | ((UIntT)high >> -count));
                             return (LIntT)(((UIntT)high << count) | ((UIntT)low >> -count));
                         } else {
@@ -4049,14 +4049,14 @@ namespace UltimateOrb.Numerics {
         public static LIntT RotateRight(LIntT low, HIntT high, int count, out HIntT highResult) {
             unsafe {
                 unchecked {
-                    count &= 2 * sizeof(IntT) - 1;
-                    if (count < sizeof(IntT)) {
+                    count &= 2 * (8 * sizeof(IntT)) - 1;
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)(((UIntT)high >> count) | ((UIntT)low << -count));
                             return (LIntT)(((UIntT)low >> count) | ((UIntT)high << -count));
                         }
                     } else {
-                        if (count > sizeof(IntT)) {
+                        if (count > 8 * sizeof(IntT)) {
                             highResult = (HIntT)(((UIntT)low >> count) | ((UIntT)high << -count));
                             return (LIntT)(((UIntT)high >> count) | ((UIntT)low << -count));
                         } else {
@@ -4080,14 +4080,14 @@ namespace UltimateOrb.Numerics {
             unsafe {
                 unchecked {
                     const int count = 1;
-                    if (count < sizeof(IntT)) {
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
-                            highResult = (HIntT)(((UIntT)high << count) | ((UIntT)low >> (-count/* sizeof(IntT) - count */)));
+                            highResult = (HIntT)(((UIntT)high << count) | ((UIntT)low >> (-count/* 8 * sizeof(IntT) - count */)));
                             return (LIntT)(low << count);
                         } 
                     } else {
-                        // if (count > sizeof(IntT)) {
-                        //     highResult = (HIntT)(low << (count/* - sizeof(IntT)*/));
+                        // if (count > 8 * sizeof(IntT)) {
+                        //     highResult = (HIntT)(low << (count/* - 8 * sizeof(IntT)*/));
                         // } else {
                         //     highResult = (HIntT)low;
                         // }
@@ -4108,23 +4108,23 @@ namespace UltimateOrb.Numerics {
             unsafe {
                 unchecked {
                     const int count = 1;
-                    if (count < sizeof(IntT)) {
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)((IntT)high >> count);
-                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* sizeof(IntT) - count */)));
+                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* 8 * sizeof(IntT) - count */)));
                         }
                     } else {
-                        var mask = (UIntT)((IntT)high >> (sizeof(IntT) - 1));
+                        var mask = (UIntT)((IntT)high >> (8 * sizeof(IntT) - 1));
                         highResult = (HIntT)mask;
-                        if (count > sizeof(IntT)) {
+                        if (count > 8 * sizeof(IntT)) {
                             // if (0 > (IntT)high) {
                             //     highResult = (HIntT)(IntT)(-1);
-                            //     return (LIntT)(((UIntT)high >> (count/* - sizeof(IntT)*/)) | (UIntT.MaxValue << (-count/* sizeof(IntT) + sizeof(IntT) - count */)));
+                            //     return (LIntT)(((UIntT)high >> (count/* - 8 * sizeof(IntT)*/)) | (UIntT.MaxValue << (-count/* 8 * sizeof(IntT) + 8 * sizeof(IntT) - count */)));
                             // } else {
                             //     highResult = (HIntT)0;
-                            //     return (LIntT)((UIntT)high >> (count/* - sizeof(IntT)*/));
+                            //     return (LIntT)((UIntT)high >> (count/* - 8 * sizeof(IntT)*/));
                             // }
-                            return (LIntT)(((UIntT)high >> (count/* - sizeof(IntT)*/)) | (mask << (-count/* sizeof(IntT) + sizeof(IntT) - count */)));
+                            return (LIntT)(((UIntT)high >> (count/* - 8 * sizeof(IntT)*/)) | (mask << (-count/* 8 * sizeof(IntT) + 8 * sizeof(IntT) - count */)));
                         } else {
                             // highResult = (0 > (IntT)high) ? (HIntT)(IntT)(-1) : (HIntT)0;
                             return (LIntT)high;
@@ -4144,15 +4144,15 @@ namespace UltimateOrb.Numerics {
             unsafe {
                 unchecked {
                     const int count = 1;
-                    if (count < sizeof(IntT)) {
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)((UIntT)high >> count);
-                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* sizeof(IntT) - count */)));
+                            return (LIntT)(((UIntT)low >> count) | ((UIntT)high << (-count/* 8 * sizeof(IntT) - count */)));
                         }
                     } else {
                         highResult = (HIntT)0;
-                        // if (count > sizeof(IntT)) {
-                        //    return (LIntT)((UIntT)high >> (count/* - sizeof(IntT)*/));
+                        // if (count > 8 * sizeof(IntT)) {
+                        //    return (LIntT)((UIntT)high >> (count/* - 8 * sizeof(IntT)*/));
                         // } else {
                         //     return (LIntT)high;
                         // }
@@ -4173,13 +4173,13 @@ namespace UltimateOrb.Numerics {
             unsafe {
                 unchecked {
                     const int count = 1;
-                    if (count < sizeof(IntT)) {
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)(((UIntT)high << count) | ((UIntT)low >> -count));
                             return (LIntT)(((UIntT)low << count) | ((UIntT)high >> -count));
                         }
                     } else {
-                        if (count > sizeof(IntT)) {
+                        if (count > 8 * sizeof(IntT)) {
                             highResult = (HIntT)(((UIntT)low << count) | ((UIntT)high >> -count));
                             return (LIntT)(((UIntT)high << count) | ((UIntT)low >> -count));
                         } else {
@@ -4201,13 +4201,13 @@ namespace UltimateOrb.Numerics {
             unsafe {
                 unchecked {
                     const int count = 1;
-                    if (count < sizeof(IntT)) {
+                    if (count < 8 * sizeof(IntT)) {
                         if (0 != count) {
                             highResult = (HIntT)(((UIntT)high >> count) | ((UIntT)low << -count));
                             return (LIntT)(((UIntT)low >> count) | ((UIntT)high << -count));
                         }
                     } else {
-                        if (count > sizeof(IntT)) {
+                        if (count > 8 * sizeof(IntT)) {
                             highResult = (HIntT)(((UIntT)low >> count) | ((UIntT)high << -count));
                             return (LIntT)(((UIntT)high >> count) | ((UIntT)low << -count));
                         } else {
