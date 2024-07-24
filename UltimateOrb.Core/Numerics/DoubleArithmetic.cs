@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 
 namespace UltimateOrb.Numerics {
     using UInt = UInt32;
@@ -12,6 +13,48 @@ namespace UltimateOrb.Numerics {
     ///     </para>
     /// </summary>
     public static partial class DoubleArithmetic {
+
+#if NET7_0_OR_GREATER
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static  UInt64 GetHighPart(this System.UInt128 value) {
+            return unchecked((UInt64)(value >>> 64));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static UInt64 GetLowPart(this System.UInt128 value) {
+            return unchecked((UInt64)value);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static Int64 GetHighPart(this System.Int128 value) {
+            return unchecked((Int64)(value >>> 64));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static UInt64 GetLowPart(this System.Int128 value) {
+            return unchecked((UInt64)value);
+        }
+#endif
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static UInt64 GetHighPart(this UltimateOrb.UInt128 value) {
+            return unchecked((UInt64)value.HiInt64Bits);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static UInt64 GetLowPart(this UltimateOrb.UInt128 value) {
+            return unchecked((UInt64)value.LoInt64Bits);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static Int64 GetHighPart(this UltimateOrb.Int128 value) {
+            return unchecked((Int64)value.HiInt64Bits);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static UInt64 GetLowPart(this UltimateOrb.Int128 value) {
+            return unchecked((UInt64)value.LoInt64Bits);
+        }
 
         private static partial class Misc {
 

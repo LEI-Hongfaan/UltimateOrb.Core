@@ -1,24 +1,25 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
 
     <EnablePreviewFeatures>true</EnablePreviewFeatures>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
-
-    <StartupObject>UltimateOrb.Core.Tests.Program</StartupObject>
+	<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+	<StartupObject>UltimateOrb.Core.Tests.Program</StartupObject>
+	<!--<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+	<CompilerGeneratedFilesOutputPath>generated</CompilerGeneratedFilesOutputPath>-->
   </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-  </PropertyGroup>
-
+  
+	
+	
+  <ItemGroup>
+	<!--<Compile Remove="generated/**" />
+	<None Include="generated/**" />-->
+  </ItemGroup>
+  
   <ItemGroup>
     <Compile Remove="ArrayIterator.cs" />
     <Compile Remove="Ex0001.cs" />
@@ -53,21 +54,29 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="FsCheck.NUnit" Version="3.0.0-beta2" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.5.0-preview-20221003-04" />
-    <PackageReference Include="coverlet.collector" Version="3.1.2">
+    <PackageReference Include="FsCheck.NUnit" Version="3.0.0-rc3" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.0-release-24352-06" />
+    <PackageReference Include="coverlet.collector" Version="6.0.2">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="NUnit" Version="3.13.3" />
-    <PackageReference Include="NUnit3TestAdapter" Version="4.3.0-alpha-net7.4" />
-    <PackageReference Include="NUnit.Analyzers" Version="3.3.0" />
+    <PackageReference Include="NUnit" Version="4.1.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="4.5.0" />
+    <PackageReference Include="NUnit.Analyzers" Version="4.2.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     
     <PackageReference Include="Portable.BouncyCastle" Version="1.9.0" />
   </ItemGroup>
   
   <ItemGroup>
-    <ProjectReference Include="..\UltimateOrb.Core\UltimateOrb.Core.csproj" />
+	<ProjectReference Include="..\UltimateOrb.Core.SourceGenerators\UltimateOrb.Core.SourceGenerators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+	<ProjectReference Include="..\UltimateOrb.Core\UltimateOrb.Core.csproj" />
   </ItemGroup>
+  
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+	  <!--<RemoveDir Directories="generated" />-->
+  </Target>
 
 </Project>

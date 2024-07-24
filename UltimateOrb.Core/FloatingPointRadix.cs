@@ -1,9 +1,15 @@
-﻿namespace UltimateOrb {
+﻿using System;
+using System.Diagnostics.CodeAnalysis;
 
+namespace UltimateOrb {
+
+    [Obsolete]
     public enum FloatingPointRadix {
 
-        Binary,
+        Indeterminate = 0,
 
-        Decimal,
+        Binary = 2,
+
+        Decimal = 10,
     }
 }

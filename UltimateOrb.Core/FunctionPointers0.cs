@@ -14,9 +14,9 @@ namespace UltimateOrb.CInterop {
     [StructLayout(LayoutKind.Sequential)]
     public unsafe readonly struct ActionPtr : IComparable, IComparable<ActionPtr>, IEquatable<ActionPtr>, ISpanFormattable, IFormattable, ISerializable {
         
-        readonly delegate* managed<void> value__;
+        readonly delegate* unmanaged[Cdecl]<void> value__;
 
-        public unsafe ActionPtr(delegate* managed<void> value) {
+        public unsafe ActionPtr(delegate* unmanaged[Cdecl]<void> value) {
             value__ = value;
         }
 
@@ -25,18 +25,18 @@ namespace UltimateOrb.CInterop {
             if (sizeof(nint) == sizeof(int) && (value > int.MaxValue || value < int.MinValue)) {
                 throw new ArgumentException("Serialization_InvalidPtrValue");
             }
-            value__ = unchecked((delegate* managed<void>)value);
+            value__ = unchecked((delegate* unmanaged[Cdecl]<void>)value);
         }
 
         public void Invoke() {
             value__();
         }
 
-        public static implicit operator ActionPtr(delegate* managed<void> value) => new (value);
+        public static implicit operator ActionPtr(delegate* unmanaged[Cdecl]<void> value) => new (value);
 
-        public static implicit operator delegate* managed<void>(ActionPtr value) => value.value__;
+        public static implicit operator delegate* unmanaged[Cdecl]<void>(ActionPtr value) => value.value__;
 
-        public static explicit operator ActionPtr(void* value) => new ((delegate* managed<void>)value);
+        public static explicit operator ActionPtr(void* value) => new ((delegate* unmanaged[Cdecl]<void>)value);
 
         public static implicit operator void*(ActionPtr value) => value.value__;
 
@@ -113,9 +113,9 @@ namespace UltimateOrb.CInterop {
     [StructLayout(LayoutKind.Sequential)]
     public unsafe readonly struct FuncPtr<TResult> : IComparable, IComparable<FuncPtr<TResult>>, IEquatable<FuncPtr<TResult>>, ISpanFormattable, IFormattable, ISerializable where TResult : unmanaged {
 
-        readonly delegate* managed<TResult> value__;
+        readonly delegate* unmanaged[Cdecl]<TResult> value__;
 
-        public unsafe FuncPtr(delegate* managed<TResult> value) {
+        public unsafe FuncPtr(delegate* unmanaged[Cdecl]<TResult> value) {
             value__ = value;
         }
 
@@ -124,7 +124,7 @@ namespace UltimateOrb.CInterop {
             if (sizeof(nint) == sizeof(int) && (value > int.MaxValue || value < int.MinValue)) {
                 throw new ArgumentException("Serialization_InvalidPtrValue");
             }
-            value__ = unchecked((delegate* managed<TResult>)value);
+            value__ = unchecked((delegate* unmanaged[Cdecl]<TResult>)value);
         }
 
         public TResult Invoke() {
@@ -159,11 +159,11 @@ namespace UltimateOrb.CInterop {
             return this.value__ == other.value__;
         }
 
-        public static implicit operator FuncPtr<TResult>(delegate* managed<TResult> value) => new (value);
+        public static implicit operator FuncPtr<TResult>(delegate* unmanaged[Cdecl]<TResult> value) => new (value);
 
-        public static implicit operator delegate* managed<TResult>(FuncPtr<TResult> value) => value.value__;
+        public static implicit operator delegate* unmanaged[Cdecl]<TResult>(FuncPtr<TResult> value) => value.value__;
 
-        public static explicit operator FuncPtr<TResult>(void* value) => new ((delegate* managed<TResult>)value);
+        public static explicit operator FuncPtr<TResult>(void* value) => new ((delegate* unmanaged[Cdecl]<TResult>)value);
 
         public static implicit operator void*(FuncPtr<TResult> value) => value.value__;
 

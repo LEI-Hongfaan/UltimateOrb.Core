@@ -1,14 +1,38 @@
 ﻿
 
 using System;
+/*
+namespace UltimateOrb.Numerics.Specialized {
+
+    [AttributeUsage(AttributeTargets.Struct)]
+    public class GenerateFixedDecimal32Attribute : Attribute {
+
+        public int ExponentBias { get; }
+
+        public GenerateFixedDecimal32Attribute(int exponentBias) {
+            ExponentBias = exponentBias;
+        }
+    }
+}
+*/
 
 namespace UltimateOrb.Core.Tests {
+    using System.Numerics;
     using System.Runtime.CompilerServices;
     using System.Runtime.InteropServices;
     using System.Threading;
     using UltimateOrb.Mathematics.Geometry;
     using UltimateOrb.Numerics;
     using UltimateOrb.Plain.ValueTypes;
+    // using UltimateOrb.Runtime.CompilerServices.Tests;
+
+
+
+    [UltimateOrb.Numerics.Specialized.GenerateFixedDecimal32(3)]
+    public readonly partial struct MilliDecimal {
+
+    }
+
 
     internal static class Program {
 
@@ -49,6 +73,34 @@ namespace UltimateOrb.Core.Tests {
 
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private static int Main(string[] args) {
+            {
+                var s = 0;
+                for (var i = 0L; 1_000_000_000_000 > i; ++i) {
+#pragma warning disable UoWIP_GenericMath // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+                    var sdfs = DoubleArithmetic.BigMulUnsigned<uint>(0x40000001, 0x00030002, out var aa);
+#pragma warning restore UoWIP_GenericMath // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+                    s += sdfs.GetHashCode();
+                    s ^= aa.GetHashCode();
+
+                }
+                Console.WriteLine(s);
+            }
+            
+
+            {
+                Console.WriteLine(RuntimeEnvironment.GetSystemVersion());
+
+                var netCoreVer = System.Environment.Version;
+                Console.WriteLine(netCoreVer);
+
+                var runtimeVer = System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription;
+                Console.WriteLine(runtimeVer);
+
+                Console.WriteLine(MilliDecimal.MaxValue);
+
+                // UnsafeTests.UnboxNullableTest();
+                return 0;
+            }
             {
                 for (uint i = 0; 10 > i; ++i) {
                     Console.WriteLine($@"{i,6}: {Mathematics.BinaryNumerals.CountStorageBits(i),6}");

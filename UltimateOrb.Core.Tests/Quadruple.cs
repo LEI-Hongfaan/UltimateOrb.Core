@@ -7,7 +7,9 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using UltimateOrb.Mathematics;
 using UltimateOrb.Numerics;
+#pragma warning disable UoWIP_F128 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
 using static UltimateOrb.Numerics.Binary128Arithmetic;
+#pragma warning restore UoWIP_F128 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
 using Binary128Arithmetic = UltimateOrb.Numerics.Binary128Arithmetic;
 
 namespace UltimateOrb {
@@ -742,7 +744,9 @@ namespace UltimateOrb {
             } else {
                 p <<= e;
             }
+#pragma warning disable UoWIP // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
             return BigRational.FromFraction(p, q).ToString();
+#pragma warning restore UoWIP // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
             return base.ToString();
         }
         #endregion

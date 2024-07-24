@@ -17,7 +17,6 @@ namespace UltimateOrb.Numerics.Generic {
 
     public struct TIntegerArithmaticPrimtive : IIntegerArithmatic<Void, ulong> {
 
-
         public CanonicalIntegerBoolean AddUnsignedNoThrow(CanonicalIntegerBoolean carry, in ulong first, in ulong second, out ulong result) {
             return MathWithCarrying.AddUnsigned(carry, first, second, out result);
         }

@@ -5,6 +5,9 @@ using System.Diagnostics.Contracts;
 using System.Runtime;
 using System.Runtime.CompilerServices;
 using System.Runtime.ConstrainedExecution;
+using UltimateOrb.Utilities.Extensions;
+using static UltimateOrb.Utilities.Extensions.BooleanIntegerExtensions;
+using static UltimateOrb.Utilities.Extensions.BooleanIntegerExtensions;
 
 namespace UltimateOrb.Utilities {
 
@@ -130,6 +133,14 @@ namespace UltimateOrb.Utilities {
             checked((uint)first - second).Ignore();
         }
 
+        [CLSCompliantAttribute(false)]
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
+        [TargetedPatchingOptOutAttribute("")]
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        public static void ThrowOnLessThan(this nint first, nuint second) {
+            checked((nuint)first - second).Ignore();
+        }
+
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
         [TargetedPatchingOptOutAttribute("")]
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
@@ -174,7 +185,22 @@ namespace UltimateOrb.Utilities {
             throw new TException();
         }
 
+        [Obsolete]
         public static void ThrowOnInfinite(double value) {
+            CilVerifiable.CheckFinite(value);
+        }
+
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        public static void ThrowOnTrue(bool value) {
+            _ = checked(0u - BooleanIntegerExtensions.AsUIntegerUnsafe(value));
+        }
+
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        public static void ThrowOnFalse(bool value) {
+            _ = checked(0u - BooleanIntegerExtensions.AsUIntegerUnsafe(value));
+        }
+
+        public static void ThrowOnNonFinite(double value) {
             CilVerifiable.CheckFinite(value);
         }
 
@@ -196,6 +222,79 @@ namespace UltimateOrb.Utilities {
 
         public static void ThrowOnLessThanOrEqual(double first, double second) {
             ThrowOnNonZero(BooleanIntegerModule.LessThanOrEqual(first, second));
+        }
+
+        [CLSCompliant(false)]
+        public static void ThrowOnLessThanOrEqual(nuint first, nuint second) {
+            ThrowOnNonZero(BooleanIntegerModule.LessThanOrEqual(first, second));
+        }
+
+        public static void ThrowOnLessThanOrEqual(nint first, nint second) {
+            ThrowOnNonZero(BooleanIntegerModule.LessThanOrEqual(first, second));
+        }
+
+        [CLSCompliant(false)]
+        public static void ThrowOnLessThanOrEqual(uint first, uint second) {
+            ThrowOnNonZero(BooleanIntegerModule.LessThanOrEqual(first, second));
+        }
+
+        public static void ThrowOnLessThanOrEqual(int first, int second) {
+            ThrowOnNonZero(BooleanIntegerModule.LessThanOrEqual(first, second));
+        }
+
+        [CLSCompliant(false)]
+        public static void ThrowOnLessThanOrEqual(ulong first, ulong second) {
+            ThrowOnNonZero(BooleanIntegerModule.LessThanOrEqual(first, second));
+        }
+
+        public static void ThrowOnLessThanOrEqual(long first, long second) {
+            ThrowOnNonZero(BooleanIntegerModule.LessThanOrEqual(first, second));
+        }
+
+
+        public static void ThrowOnGreaterThan(double first, double second) {
+            ThrowOnNonZero(BooleanIntegerModule.GreaterThan(first, second));
+        }
+
+        [CLSCompliant(false)]
+        public static void ThrowOnGreaterThan(nuint first, nuint second) {
+            _ = checked(second - first);
+        }
+
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        [ILMethodBodyAttribute(@"
+            LdC.I4.0
+            LdArg.0
+            LdArg.1
+            CGT
+            Sub.Ovf.Un
+            Ret
+        ")]
+        public static void ThrowOnGreaterThan(nint first, nint second) {
+            ThrowOnNonZero(BooleanIntegerModule.GreaterThan(first, second));
+        }
+
+        [CLSCompliant(false)]
+        public static void ThrowOnGreaterThan(uint first, uint second) {
+            _ = checked(second - first);
+        }
+
+        public static void ThrowOnGreaterThan(int first, int second) {
+            ThrowOnNonZero(BooleanIntegerModule.GreaterThan(first, second));
+        }
+
+        [CLSCompliant(false)]
+        public static void ThrowOnGreaterThan(ulong first, ulong second) {
+            _ = checked(second - first);
+        }
+
+        public static void ThrowOnGreaterThan(long first, long second) {
+            ThrowOnNonZero(BooleanIntegerModule.GreaterThan(first, second));
+        }
+
+        [DoesNotReturn]
+        internal static void ThrowNotSupportedException() {
+            throw new NotSupportedException();
         }
     }
 }

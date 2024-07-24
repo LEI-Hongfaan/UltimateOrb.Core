@@ -1,0 +1,119 @@
+﻿<#@ template debug="false" hostspecific="false" language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ output extension=".cs" #>
+<#
+var TS = new string[] { "UInt32", "Int32", "UInt64", "Int64", "UltimateOrb.UInt128", "UltimateOrb.Int128", "System.UInt128", "System.Int128", "UInt256", "Int256", "BigInteger" };
+var TSignedS = new string[] { "Int32", "Int32", "Int64", "Int64", "UltimateOrb.Int128", "UltimateOrb.Int128", "System.Int128", "System.Int128", "Int256", "Int256", "BigInteger" };
+var TUnsignedS = new string[] { "UInt32", "UInt32", "UInt64", "UInt64", "UltimateOrb.UInt128", "UltimateOrb.UInt128", "System.UInt128", "System.UInt128", "UInt256", "UInt256", "BigInteger" };
+
+var OpNameS = new string[] {
+    "BitwiseAnd",
+    "BitwiseOr",
+    "BitwiseXor",
+    "BitwiseAndNot",
+    "Add",
+    "Subtract",
+    "Multiply",
+};
+var OpExprS = new string[] {
+    "result = {{{(}}}first & second{{{)}}};",
+    "result = {{{(}}}first | second{{{)}}};",
+    "result = {{{(}}}first ^ second{{{)}}};",
+    "result = {{{(}}}first & ~second{{{)}}};",
+    "result = {{{(}}}first + second{{{)}}};",
+    "result = {{{(}}}first - second{{{)}}};",
+    "result = {{{(}}}first * second{{{)}}};",
+};
+
+var OpVariantSS = new string[][] {
+    new string [] { "" },
+    new string [] { "" },
+    new string [] { "" },
+    new string [] { "" },
+    new string [] { "Unchecked", "Unsigned", "Signed" },
+    new string [] { "Unchecked", "Unsigned", "Signed" },
+    new string [] { "Unchecked", "Unsigned", "Signed" },
+};
+
+#>
+#pragma warning disable IDE0049 // Simplify Names
+using System;
+using System.Numerics;
+using System.Runtime.CompilerServices;
+using static UltimateOrb.Utilities.UnsafeParameterHelpers;
+
+namespace UltimateOrb.Numerics {
+
+    public readonly partial struct BasicArithmeticForWellKnownTypesProvider
+<#
+bool ssi = true;
+for (var i = 0; TS.Length > i; ++i) {
+    var T = TS[i];
+for (var i_OpName = 0; OpNameS.Length > i_OpName; ++i_OpName) {
+    var OpName = OpNameS[i_OpName];
+    var OpExpr = OpExprS[i_OpName];
+    var OpVariantS = OpVariantSS[i_OpName];
+for (var i_OpVariant = 0; OpVariantS.Length > i_OpVariant; ++i_OpVariant) {
+    var OpVariant = OpVariantS[i_OpVariant];
+#>
+        <#= ssi ? ":" : "," #> IBinaryInteger<#= OpName #><#= OpVariant #>Provider<BasicArithmeticForWellKnownTypesProvider, <#= T #>>
+<#
+    ssi = false;
+}
+}
+}
+#>
+        {
+<#
+for (var i = 0; TS.Length > i; ++i) {
+    var T = TS[i];
+#>
+<#
+for (var i_OpName = 0; OpNameS.Length > i_OpName; ++i_OpName) {
+    var OpName = OpNameS[i_OpName];
+    var OpExpr = OpExprS[i_OpName];
+    var OpVariantS = OpVariantSS[i_OpName];
+for (var i_OpVariant = 0; OpVariantS.Length > i_OpVariant; ++i_OpVariant) {
+    var OpVariant = OpVariantS[i_OpVariant];
+    var OpExprEx = OpExpr;
+    if (T != "BigInteger") {
+        if (OpVariant == "Signed" && T != TSignedS[i]) {
+            OpExprEx = OpExprEx.Replace("first", $@"UnsafeAsForIn<{T}, {TSignedS[i]}>(in first)");
+            OpExprEx = OpExprEx.Replace("second", $@"UnsafeAsForIn<{T}, {TSignedS[i]}>(in second)");
+            OpExprEx = OpExprEx.Replace("result", $@"UnsafeAsForOut<{T}, {TSignedS[i]}>(out result)");
+            OpExprEx = OpExprEx.Replace("{{{(}}}", "checked(").Replace("{{{)}}}", ")");
+        }
+        if (OpVariant == "Unsigned" && T != TUnsignedS[i]) {
+            OpExprEx = OpExprEx.Replace("first", $@"UnsafeAsForIn<{T}, {TUnsignedS[i]}>(in first)");
+            OpExprEx = OpExprEx.Replace("second", $@"UnsafeAsForIn<{T}, {TUnsignedS[i]}>(in second)");
+            OpExprEx = OpExprEx.Replace("result", $@"UnsafeAsForOut<{T}, {TUnsignedS[i]}>(out result)");
+            OpExprEx = OpExprEx.Replace("{{{(}}}", "checked(").Replace("{{{)}}}", ")");
+        }
+        if (OpVariant == "Unchecked") {
+            OpExprEx = OpExprEx.Replace("{{{(}}}", "unchecked(").Replace("{{{)}}}", ")");
+        }
+    }
+    OpExprEx = OpExprEx.Replace("{{{(}}}", "").Replace("{{{)}}}", "");
+#>
+
+        /// <inheritdoc/>
+<# if (T == TUnsignedS[i]) { #>
+        [CLSCompliant(false)]
+<# } #>
+        <#= T == "BigInteger" ? "// " : "" #>[MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void <#= OpName #><#= OpVariant #>(out <#= T #> result, in <#= T #> first, in <#= T #> second) {
+            <#= OpExprEx #>
+        }
+<#
+}
+}
+#>
+<#
+}
+#>
+    }
+}
+#pragma warning restore IDE0049 // Simplify Names

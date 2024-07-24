@@ -3,6 +3,7 @@ using System.Diagnostics.Contracts;
 using System.Runtime;
 using System.Runtime.CompilerServices;
 using System.Runtime.ConstrainedExecution;
+using UltimateOrb.Numerics;
 
 namespace Internal {
 
@@ -39,6 +40,38 @@ namespace Internal {
         [PureAttribute()]
         public static int GetHashCode(UInt64 value) {
             return GetHashCode(unchecked((Int64)value));
+        }
+
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
+        [TargetedPatchingOptOutAttribute("")]
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        [PureAttribute()]
+        public static int GetHashCode(UltimateOrb.Int128 value) {
+            return GetHashCode(unchecked((UltimateOrb.UInt128)value));
+        }
+
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
+        [TargetedPatchingOptOutAttribute("")]
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        [PureAttribute()]
+        public static int GetHashCode(UltimateOrb.UInt128 value) {
+            return GetHashCode(value.GetLowPart() ^ value.GetHighPart());
+        }
+
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
+        [TargetedPatchingOptOutAttribute("")]
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        [PureAttribute()]
+        public static int GetHashCode(global::System.Int128 value) {
+            return GetHashCode(unchecked((global::System.UInt128)value));
+        }
+
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
+        [TargetedPatchingOptOutAttribute("")]
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        [PureAttribute()]
+        public static int GetHashCode(global::System.UInt128 value) {
+            return GetHashCode(value.GetLowPart() ^ value.GetHighPart());
         }
     }
 }

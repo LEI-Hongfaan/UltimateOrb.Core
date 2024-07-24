@@ -3,6 +3,7 @@ using System.Diagnostics.Contracts;
 using System.Runtime;
 using System.Runtime.CompilerServices;
 using System.Runtime.ConstrainedExecution;
+using UltimateOrb.Numerics;
 using static UltimateOrb.Utilities.SignConverter;
 
 namespace UltimateOrb.Mathematics {
@@ -117,6 +118,28 @@ namespace UltimateOrb.Mathematics {
             return r;
 #endif
         }
+
+        [System.CLSCompliantAttribute(false)]
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        public static int CountLeadingZeros(UltimateOrb.UInt128 w) {
+            return DoubleArithmetic.CountLeadingZeros(GetLowPart(w), GetHighPart(w));
+        }
+
+#if NET7_0_OR_GREATER
+        [System.CLSCompliantAttribute(false)]
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        public static int CountLeadingZeros(System.UInt128 w) {
+            return DoubleArithmetic.CountLeadingZeros(GetLowPart(w), GetHighPart(w));
+        }
+#endif
+
+#if !INDEPENDENT_XINTN_LIBRARY || FEATURE_XINTN_INT256
+        [System.CLSCompliantAttribute(false)]
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        public static int CountLeadingZeros(UltimateOrb.UInt256 w) {
+            return DoubleArithmetic.CountLeadingZeros(GetLowPart(w), GetHighPart(w));
+        }
+#endif
 
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
         [TargetedPatchingOptOutAttribute("")]
@@ -367,6 +390,26 @@ namespace UltimateOrb.Mathematics {
             return n;
 #endif
         }
+
+        [System.CLSCompliantAttribute(false)]
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
+        [TargetedPatchingOptOutAttribute("")]
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        [System.Diagnostics.Contracts.PureAttribute()]
+        public static int CountTrailingZeros(UInt128 x) {
+            return DoubleArithmetic.CountTrailingZeros(x.GetLowPart(), x.GetHighPart());
+        }
+
+#if NET7_0_OR_GREATER
+        [System.CLSCompliantAttribute(false)]
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
+        [TargetedPatchingOptOutAttribute("")]
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        [System.Diagnostics.Contracts.PureAttribute()]
+        public static int CountTrailingZeros(System.UInt128 x) {
+            return DoubleArithmetic.CountTrailingZeros(x.GetLowPart(), x.GetHighPart());
+        }
+#endif
 
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
         [TargetedPatchingOptOutAttribute("")]
@@ -619,6 +662,48 @@ namespace UltimateOrb.Mathematics {
 #endif
         }
 
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        static UInt64 GetHighPart(this UInt128 d) {
+            return unchecked((UInt64)d.HiInt64Bits);
+        }
+
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        static UInt64 GetLowPart(this UInt128 d) {
+            return unchecked((UInt64)d.LoInt64Bits);
+        }
+
+#if NET7_0_OR_GREATER
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        static UInt64 GetHighPart(this System.UInt128 d) {
+            return unchecked((UInt64)(d >>> 64));
+        }
+
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        static UInt64 GetLowPart(this System.UInt128 d) {
+            return unchecked((UInt64)d);
+        }
+
+#if !INDEPENDENT_XINTN_LIBRARY || FEATURE_XINTN_INT256
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        static UInt128 GetHighPart(this UInt256 d) {
+            return unchecked((UInt128)d.HiInt128Bits);
+        }
+
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        static UInt128 GetLowPart(this UInt256 d) {
+            return unchecked((UInt128)d.LoInt128Bits);
+        }
+#endif
+
+        [System.CLSCompliantAttribute(false)]
+        [TargetedPatchingOptOutAttribute("")]
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        [System.Diagnostics.Contracts.PureAttribute()]
+        public static int PopulationCount(System.UInt128 x) {
+            return System.Numerics.BitOperations.PopCount(x.GetHighPart()) + System.Numerics.BitOperations.PopCount(x.GetLowPart());
+        }
+#endif
+
         [System.CLSCompliantAttribute(false)]
         [TargetedPatchingOptOutAttribute("")]
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
@@ -741,6 +826,22 @@ namespace UltimateOrb.Mathematics {
         [System.Diagnostics.Contracts.PureAttribute()]
         public static int Log2Floor(ulong value) {
             return System.Numerics.BitOperations.Log2(value);
+        }
+
+        [System.CLSCompliantAttribute(false)]
+        [TargetedPatchingOptOutAttribute("")]
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        [System.Diagnostics.Contracts.PureAttribute()]
+        public static int Log2Floor(UltimateOrb.UInt128 value) {
+            return DoubleArithmetic.Log2Floor(value.GetLowPart(), value.GetHighPart());
+        }
+
+        [System.CLSCompliantAttribute(false)]
+        [TargetedPatchingOptOutAttribute("")]
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        [System.Diagnostics.Contracts.PureAttribute()]
+        public static int Log2Floor(System.UInt128 value) {
+            return DoubleArithmetic.Log2Floor(value.GetLowPart(), value.GetHighPart());
         }
     }
 }

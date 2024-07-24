@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Runtime.InteropServices;
+using UltimateOrb.Numerics;
 
 namespace UltimateOrb {
     using static global::Internal.System.IConvertibleModule;
@@ -711,6 +712,24 @@ namespace UltimateOrb {
             return new XInt128(value, 0);
         }
 
+#if NET7_0_OR_GREATER
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
+        [System.Runtime.TargetedPatchingOptOutAttribute("")]
+        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Diagnostics.Contracts.PureAttribute()]
+        public static implicit operator XInt128(System.Int128 value) {
+            return new XInt128(lo: value.GetLowPart(), hi: value.GetHighPart());
+        }
+
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
+        [System.Runtime.TargetedPatchingOptOutAttribute("")]
+        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Diagnostics.Contracts.PureAttribute()]
+        public static implicit operator System.Int128(XInt128 value) {
+            return new System.Int128(upper: unchecked((ulong)value.GetHighPart()), lower: value.GetLowPart());
+        }
+#endif
+
         [System.CLSCompliantAttribute(false)]
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
         [System.Runtime.TargetedPatchingOptOutAttribute("")]
@@ -831,6 +850,8 @@ namespace UltimateOrb {
             var b = BitConverter.DoubleToInt64Bits(value);
             var e = checked((int)(ExponentMask >> FractionBitSize)) & unchecked((int)(b >> FractionBitSize));
             if (e >= checked(ExponentBias - 1)) {
+                b.ThrowOnNegative();
+                checked(checked(ExponentBias - 1 + 128) - e).Ignore();
                 if (e < checked(ExponentBias - 1 + 128)) {
                     e = unchecked(e - (FractionBitSize + ExponentBias));
                     var lo = unchecked((UInt64)(((Int64)1 << FractionBitSize) | (FractionMask & b)));
@@ -910,7 +931,7 @@ namespace UltimateOrb {
         }
 #endif
 
-        // Mark the conversion explicit due to precision loss may be significant.
+        // Make the conversion explicit due to precision loss may be significant.
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
         [System.Runtime.TargetedPatchingOptOutAttribute("")]
         [System.Diagnostics.Contracts.PureAttribute()]

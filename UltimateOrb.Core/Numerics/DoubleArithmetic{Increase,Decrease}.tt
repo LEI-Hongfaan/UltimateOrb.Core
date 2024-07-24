@@ -2,11 +2,16 @@
 using static UltimateOrb.Utilities.BooleanIntegerModule;
 using static UltimateOrb.Utilities.Extensions.BooleanIntegerExtensions;
 <#
-var Ti = 32;
+var Ti_s = new int[] { 32, 64, 64 };
+var TNS = new string[] { "", "System.", "UltimateOrb." };
+for (var j = 0; j < Ti_s.Length; ++j) {
+
+var TN = TNS[j];
+var Ti = Ti_s[j];
 var Di = checked(Ti * 2);
 var Si = checked((Ti + 1) / 2);
 
-var T = 64;
+var T = checked(Ti * 2);
 var LS = new string[] { "U", "U", "", "" };
 var HS = new string[] { "U", "", "U", "" };
 var CS = new string[] { "false", "false", "false", "true" };
@@ -19,17 +24,17 @@ for (var i = 0; i < LS.Length; ++i) {
 
 namespace UltimateOrb.Numerics {
 	using UInt = UInt<#= Ti #>;
-	using ULong = UInt<#= Di #>;
+	using ULong = <#= TN #>UInt<#= Di #>;
 	using Int = Int<#= Ti #>;
-	using Long = Int<#= Di #>;
+	using Long = <#= TN #>Int<#= Di #>;
 
 	using Math = global::Internal.System.Math;
 
-	using IntT = Int<#= T #>;
-	using UIntT = UInt<#= T #>;
+	using IntT = <#= TN #>Int<#= T #>;
+	using UIntT = <#= TN #>UInt<#= T #>;
 	
-	using LIntT = <#= L #>Int<#= T #>;
-	using HIntT = <#= H #>Int<#= T #>;
+	using LIntT = <#= TN #><#= L #>Int<#= T #>;
+	using HIntT = <#= TN #><#= H #>Int<#= T #>;
 
 	public static partial class DoubleArithmetic {
 
@@ -87,7 +92,7 @@ namespace UltimateOrb.Numerics {
 			}
 			var result_hi_ = unchecked((HIntT)value_hi);
 			unchecked {
-				result_hi_ -= unchecked((HIntT)(~(LIntT)0 == value_lo).AsIntegerUnsafe());
+				result_hi_ -= unchecked((HIntT)((LIntT)0 == value_lo).AsIntegerUnsafe());
 			}
 			result_hi = unchecked((HIntT)result_hi_);
 			return result_lo_;
@@ -102,7 +107,7 @@ namespace UltimateOrb.Numerics {
 			}
 			var result_hi_ = unchecked((IntT)value_hi);
 			checked {
-				result_hi_ -= unchecked((IntT)(~(LIntT)0 == value_lo).AsIntegerUnsafe());
+				result_hi_ -= unchecked((IntT)((LIntT)0 == value_lo).AsIntegerUnsafe());
 			}
 			result_hi = unchecked((HIntT)result_hi_);
 			return result_lo_;
@@ -117,7 +122,7 @@ namespace UltimateOrb.Numerics {
 			}
 			var result_hi_ = unchecked((UIntT)value_hi);
 			checked {
-				result_hi_ -= unchecked((UIntT)(~(LIntT)0 == value_lo).AsIntegerUnsafe());
+				result_hi_ -= unchecked((UIntT)((LIntT)0 == value_lo).AsIntegerUnsafe());
 			}
 			result_hi = unchecked((HIntT)result_hi_);
 			return result_lo_;
@@ -130,14 +135,14 @@ namespace UltimateOrb.Numerics {
 
 namespace UltimateOrb.Numerics {
 	using UInt = UInt<#= Ti #>;
-	using ULong = UInt<#= Di #>;
+	using ULong = <#= TN #>UInt<#= Di #>;
 	using Int = Int<#= Ti #>;
-	using Long = Int<#= Di #>;
+	using Long = <#= TN #>Int<#= Di #>;
 
 	using Math = global::Internal.System.Math;
 
-	using IntT = Int<#= T #>;
-	using UIntT = UInt<#= T #>;
+	using IntT = <#= TN #>Int<#= T #>;
+	using UIntT = <#= TN #>UInt<#= T #>;
 
 	public static partial class DoubleArithmetic {
 
@@ -165,4 +170,113 @@ namespace UltimateOrb.Numerics {
 			return DecreaseSigned(value_lo, value_hi, out result_hi);
 		}
 	}
+}
+<#
+}
+#>
+
+namespace UltimateOrb.Numerics {
+
+    public static partial class DoubleArithmetic<IntT, UIntT>
+        where IntT : struct, System.Numerics.IBinaryInteger<IntT>, System.Numerics.ISignedNumber<IntT>
+        where UIntT : struct, System.Numerics.IBinaryInteger<UIntT>, System.Numerics.IUnsignedNumber<UIntT> {
+
+        [System.CLSCompliantAttribute(true)]
+        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        public static UIntT IncreaseUnchecked(UIntT value_lo, UIntT value_hi, out UIntT result_hi) {
+            var result_lo_ = value_lo;
+            unchecked {
+                ++result_lo_;
+            }
+            var result_hi_ = value_hi;
+            unchecked {
+                result_hi_ += UIntT.AllBitsSet == value_lo ? UIntT.One : UIntT.Zero;
+            }
+            result_hi = result_hi_;
+            return result_lo_;
+        }
+
+        [System.CLSCompliantAttribute(true)]
+        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        public static UIntT IncreaseSigned(UIntT value_lo, IntT value_hi, out IntT result_hi) {
+            var result_lo_ = value_lo;
+            unchecked {
+                ++result_lo_;
+            }
+            var result_hi_ = value_hi;
+            if (UIntT.AllBitsSet == value_lo) {
+                checked {
+                    ++result_hi_;
+                }
+            }
+            result_hi = result_hi_;
+            return result_lo_;
+        }
+
+        [System.CLSCompliantAttribute(true)]
+        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        public static UIntT IncreaseUnsigned(UIntT value_lo, UIntT value_hi, out UIntT result_hi) {
+            var result_lo_ = value_lo;
+            unchecked {
+                ++result_lo_;
+            }
+            var result_hi_ = value_hi;
+            if (UIntT.AllBitsSet == value_lo) {
+                checked {
+                    ++result_hi_;
+                }
+            }
+            result_hi = result_hi_;
+            return result_lo_;
+        }
+
+        [System.CLSCompliantAttribute(true)]
+        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        public static UIntT DecreaseUnchecked(UIntT value_lo, UIntT value_hi, out UIntT result_hi) {
+            var result_lo_ = value_lo;
+            unchecked {
+                --result_lo_;
+            }
+            var result_hi_ = value_hi;
+            unchecked {
+                result_hi_ -= UIntT.Zero == value_lo ? UIntT.One : UIntT.Zero;
+            }
+            result_hi = result_hi_;
+            return result_lo_;
+        }
+
+        [System.CLSCompliantAttribute(true)]
+        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        public static UIntT DecreaseSigned(UIntT value_lo, IntT value_hi, out IntT result_hi) {
+            var result_lo_ = value_lo;
+            unchecked {
+                --result_lo_;
+            }
+            var result_hi_ = value_hi;
+            if (UIntT.Zero == value_lo) {
+                checked {
+                    --result_hi_;
+                }
+            }
+            result_hi = result_hi_;
+            return result_lo_;
+        }
+
+        [System.CLSCompliantAttribute(true)]
+        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        public static UIntT DecreaseUnsigned(UIntT value_lo, UIntT value_hi, out UIntT result_hi) {
+            var result_lo_ = value_lo;
+            unchecked {
+                --result_lo_;
+            }
+            var result_hi_ = value_hi;
+            if (UIntT.Zero == value_lo) {
+                checked {
+                    --result_hi_;
+                }
+            }
+            result_hi = result_hi_;
+            return result_lo_;
+        }
+    }
 }

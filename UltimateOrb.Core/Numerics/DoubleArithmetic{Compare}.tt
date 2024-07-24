@@ -1,10 +1,15 @@
 ﻿using System;
 <#
-var Ti = 32;
+var Ti_s = new int[] { 32, 64, 64 };
+var TNS = new string[] { "", "System.", "UltimateOrb." };
+for (var j = 0; j < Ti_s.Length; ++j) {
+
+var TN = TNS[j];
+var Ti = Ti_s[j];
 var Di = checked(Ti * 2);
 var Si = checked((Ti + 1) / 2);
 
-var T = 64;
+var T = checked(Ti * 2);
 var LS = new string[] { "U", "U" };
 var HS = new string[] { "U", "" };
 var CS = new string[] { "false", "false" };
@@ -17,17 +22,17 @@ for (var i = 0; i < LS.Length; ++i) {
 
 namespace UltimateOrb.Numerics {
 	using UInt = UInt<#= Ti #>;
-	using ULong = UInt<#= Di #>;
+	using ULong = <#= TN #>UInt<#= Di #>;
 	using Int = Int<#= Ti #>;
-	using Long = Int<#= Di #>;
+	using Long = <#= TN #>Int<#= Di #>;
 
 	using Math = global::Internal.System.Math;
 
-	using IntT = Int<#= T #>;
-	using UIntT = UInt<#= T #>;
+	using IntT = <#= TN #>Int<#= T #>;
+	using UIntT = <#= TN #>UInt<#= T #>;
 	
-	using LIntT = <#= L #>Int<#= T #>;
-	using HIntT = <#= H #>Int<#= T #>;
+	using LIntT = <#= TN #><#= L #>Int<#= T #>;
+	using HIntT = <#= TN #><#= H #>Int<#= T #>;
 
 	public static partial class DoubleArithmetic {
 		
@@ -79,5 +84,6 @@ namespace UltimateOrb.Numerics {
 	}
 }
 <#
+}
 }
 #>

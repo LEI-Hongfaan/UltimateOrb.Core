@@ -15,27 +15,27 @@ namespace UltimateOrb.Core.Tests {
         public void Test_0001(int value) {
             var v1 = (NaNDefaultedDouble)value;
             var v0 = (double)value;
-            Assert.True(BitConverter.DoubleToInt64Bits(v0).Equals(BitConverter.DoubleToInt64Bits(v1)));
+            Assert.That(BitConverter.DoubleToInt64Bits(v0).Equals(BitConverter.DoubleToInt64Bits(v1)));
         }
 
         [Property(MaxTest = 200000, QuietOnSuccess = true)]
         public void Test_0002(double v0) {
             var v1 = (NaNDefaultedDouble)v0;
-            Assert.True(BitConverter.DoubleToInt64Bits(v0).Equals(BitConverter.DoubleToInt64Bits(v1)));
+            Assert.That(BitConverter.DoubleToInt64Bits(v0).Equals(BitConverter.DoubleToInt64Bits(v1)));
         }
 
         [Property(MaxTest = 1, QuietOnSuccess = true)]
         public void Test_0003() {
             NaNDefaultedDouble v = default;
-            Assert.True(NaNDefaultedDouble.IsNaN(v));
-            Assert.True(Double.IsNaN((double)v));
+            Assert.That(NaNDefaultedDouble.IsNaN(v));
+            Assert.That(Double.IsNaN((double)v));
         }
 
         [Property(MaxTest = 50000, QuietOnSuccess = true)]
         public void Test_Add_0001(double x0, double y0) {
             NaNDefaultedDouble x1 = x0;
             NaNDefaultedDouble y1 = y0;
-            Assert.True(BitConverter.DoubleToInt64Bits(x0 + y0).Equals(BitConverter.DoubleToInt64Bits(x1 + y1)));
+            Assert.That(BitConverter.DoubleToInt64Bits(x0 + y0).Equals(BitConverter.DoubleToInt64Bits(x1 + y1)));
         }
 
     }

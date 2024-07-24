@@ -27,7 +27,6 @@ namespace UltimateOrb.Numerics {
             }
         }
 
-
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         static bool IsFinite(System.Double value) {
 #if NETSTANDARD2_1 || (NET5_0 || NET6_0 || NET5_0_OR_GREATER) || NET5_0_OR_GREATER

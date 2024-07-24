@@ -1,13 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
+	  <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
+	  <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <LangVersion>preview</LangVersion>
     <!--<EnablePreviewFeatures>true</EnablePreviewFeatures>-->
     <FileVersion>1.2.2.0</FileVersion>
     <AssemblyVersion>1.2.2.0</AssemblyVersion>
-    <Version>3.1.0-beta1.3.1</Version>
+    <Version>3.2.0-beta.1</Version>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Authors>LEI Hongfaan</Authors>
     <Product>UltimateOrb Libraries</Product>
@@ -35,6 +36,14 @@
     <DocumentationFile>UltimateOrb.Core.xml</DocumentationFile>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net8.0|AnyCPU'">
+    <DefineConstants>$(DefineConstants);USE_UNSAFE_ACCESS_TO_STD_BIGINTEGER</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net8.0|AnyCPU'">
+    <DefineConstants>$(DefineConstants);USE_UNSAFE_ACCESS_TO_STD_BIGINTEGER</DefineConstants>
+  </PropertyGroup>
+
   <ItemGroup>
     <None Include="..\.editorconfig" Link=".editorconfig" />
     <None Include="..\LICENSE">
@@ -44,13 +53,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Fody" Version="6.6.4">
+    <PackageReference Include="Fody" Version="6.8.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="InlineIL.Fody" Version="1.7.2">
+    <PackageReference Include="InlineIL.Fody" Version="1.9.0-pre2">
       <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
+    </PackageReference>    <PackageReference Include="System.Numerics.Tensors" Version="9.0.0-preview.6.24327.7" />
   </ItemGroup>
 
   <ItemGroup>
@@ -88,6 +97,11 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>IInitializable.tt</DependentUpon>
     </Compile>
+    <Compile Update="Numerics\DoubleArithmetic{BigMul,BigDivRem,BigDiv,BigRem}.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>DoubleArithmetic{BigMul,BigDivRem,BigDiv,BigRem}.tt</DependentUpon>
+    </Compile>
     <Compile Update="Numerics\DoubleArithmetic{Compare}.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -98,6 +112,11 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>DoubleArithmetic{Core}.tt</DependentUpon>
     </Compile>
+    <Compile Update="Numerics\DoubleArithmetic{DivRem}.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>DoubleArithmetic{DivRem}.tt</DependentUpon>
+    </Compile>
     <Compile Update="Numerics\DoubleArithmetic{Increase,Decrease}.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -107,6 +126,11 @@
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>DoubleArithmetic{Shift}.tt</DependentUpon>
+    </Compile>
+    <Compile Update="Numerics\IBinaryIntegerOperationProvider{Core}.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>IBinaryIntegerOperationProvider{Core}.tt</DependentUpon>
     </Compile>
     <Compile Update="StandardFuncWrapperCatch{Core}.cs">
       <DesignTime>True</DesignTime>
@@ -161,6 +185,10 @@
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>IInitializable.cs</LastGenOutput>
     </None>
+    <None Update="Numerics\DoubleArithmetic{BigMul,BigDivRem,BigDiv,BigRem}.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>DoubleArithmetic{BigMul,BigDivRem,BigDiv,BigRem}.cs</LastGenOutput>
+    </None>
     <None Update="Numerics\DoubleArithmetic{Compare}.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>DoubleArithmetic{Compare}.cs</LastGenOutput>
@@ -169,6 +197,10 @@
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>DoubleArithmetic{Core}.cs</LastGenOutput>
     </None>
+    <None Update="Numerics\DoubleArithmetic{DivRem}.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>DoubleArithmetic{DivRem}.cs</LastGenOutput>
+    </None>
     <None Update="Numerics\DoubleArithmetic{Increase,Decrease}.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>DoubleArithmetic{Increase,Decrease}.cs</LastGenOutput>
@@ -176,6 +208,10 @@
     <None Update="Numerics\DoubleArithmetic{Shift}.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>DoubleArithmetic{Shift}.cs</LastGenOutput>
+    </None>
+    <None Update="Numerics\IBinaryIntegerOperationProvider{Core}.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>IBinaryIntegerOperationProvider{Core}.cs</LastGenOutput>
     </None>
     <None Update="StandardFuncWrapperCatch{Core}.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
@@ -209,6 +245,10 @@
 
   <ItemGroup>
     <TrimmerRootDescriptor Include="linker.xml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Numerics\Specialized\" />
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">

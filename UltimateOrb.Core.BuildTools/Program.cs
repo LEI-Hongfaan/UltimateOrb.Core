@@ -42,8 +42,8 @@ namespace ThisAssembly {
                     var assembly = AssemblyDefinition.ReadAssembly(fileName_Original, rm);
 
 
-                    var module = assembly.MainModule;
-                    // ProcessCoreLibByReference(module);
+                    var modulus = assembly.MainModule;
+                    // ProcessCoreLibByReference(modulus);
                     
                     var modified = 0;
                     {
@@ -56,7 +56,7 @@ namespace ThisAssembly {
 
                         var ilAttrName = "ILMethodBodyAttribute";
 
-                        foreach (var typeref in module.GetTypes()) {
+                        foreach (var typeref in modulus.GetTypes()) {
                             if (typeref is TypeDefinition type) {
                                 foreach (var method in type.Methods) {
                                     if (!method.HasCustomAttributes) {
@@ -183,7 +183,7 @@ namespace ThisAssembly {
                     {
                         var ilAttrName = "ForceDiscardAttribute";
                         var pending = new List<TypeDefinition>();
-                        foreach (var typeref in module.GetTypes()) {
+                        foreach (var typeref in modulus.GetTypes()) {
                             if (typeref is TypeDefinition type) {
                                 if (type.HasCustomAttributes) {
                                     CustomAttribute? ilAttr = GetCustomAttributeByName(type, ilAttrName);
@@ -198,7 +198,7 @@ namespace ThisAssembly {
                                 }
                             }
                         }
-                        foreach (var typeref in module.GetTypes().ToList()) {
+                        foreach (var typeref in modulus.GetTypes().ToList()) {
                             if (typeref is TypeDefinition type) {
                                 if (pending.Contains(type)) {
                                     continue;
@@ -262,7 +262,7 @@ namespace ThisAssembly {
                         }
                         foreach (var type in pending) {
                             Console.Out.Write($@"Removing {type.FullName}... ");
-                            module.Types.Remove(type);
+                            modulus.Types.Remove(type);
                             ++modified;
                             Console.Out.WriteLine($@"Done.");
                         }
@@ -297,26 +297,26 @@ namespace ThisAssembly {
             return (int)ExitStatus.UserCanceled;
         }
 
-        private static void ProcessCoreLibByReference(ModuleDefinition module) {
-            TypeReference MockByReferenceTypeReference = module.GetType("System", "ByReference`1");
-            var assemblyNameReference = module.AssemblyReferences
+        private static void ProcessCoreLibByReference(ModuleDefinition modulus) {
+            TypeReference MockByReferenceTypeReference = modulus.GetType("System", "ByReference`1");
+            var assemblyNameReference = modulus.AssemblyReferences
                 .Where(x => x.Name == "System.Runtime").Single();
             var CoreLibAssemblyNameReference = AssemblyNameReference.Parse("System.Private.CoreLib, Version=6.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e");
             CoreLibAssemblyNameReference.Version = (Version)assemblyNameReference.Version.Clone();
 
-            var ByReferenceTypeReference = new TypeReference("System", "ByReference`1", module, CoreLibAssemblyNameReference);
+            var ByReferenceTypeReference = new TypeReference("System", "ByReference`1", modulus, CoreLibAssemblyNameReference);
 
             var tByReference = Type.GetType("System.ByReference`1");
 
-            var ByReferenceTypeReferenceA = module.ImportReference(tByReference);
+            var ByReferenceTypeReferenceA = modulus.ImportReference(tByReference);
             var sdfddda = ByReferenceTypeReferenceA.Scope as AssemblyNameReference;
-            module.AssemblyReferences.Remove(sdfddda);
+            modulus.AssemblyReferences.Remove(sdfddda);
 
-            module.AssemblyReferences.Add(CoreLibAssemblyNameReference);
+            modulus.AssemblyReferences.Add(CoreLibAssemblyNameReference);
             ByReferenceTypeReferenceA.Scope = CoreLibAssemblyNameReference;
 
-            var WarppedByReferenceTypeDefinition = module.GetType("UltimateOrb", "ByReference`1");
-            var WarppedReadOnlyByReferenceTypeDefinition = module.GetType("UltimateOrb", "ReadOnlyByReference`1");
+            var WarppedByReferenceTypeDefinition = modulus.GetType("UltimateOrb", "ByReference`1");
+            var WarppedReadOnlyByReferenceTypeDefinition = modulus.GetType("UltimateOrb", "ReadOnlyByReference`1");
 
             {
                 var type = WarppedByReferenceTypeDefinition;

@@ -831,7 +831,21 @@
             Equivalently, it consists in returning the intermediate result when it is exactly representable, and the nearest floating-point number with an odd significand otherwise.
             </remarks>
         </member>
+        <member name="F:UltimateOrb.FloatingPointRounding.ToNearestWithMidpointToOdd">
+            <summary>
+            Similar to <see cref="F:UltimateOrb.FloatingPointRounding.ToNearestWithMidpointToEven"/> but round half to old. Only partially supported by UltimateOrb APIs.
+            </summary>
+        </member>
         <member name="M:UltimateOrb.Int128.TryParseCStyleNormalizedI128(System.String,UltimateOrb.Int128@)">
+            <summary>
+                <para>Parses a signed integer.</para>
+            </summary>
+            <returns></returns>
+            <remarks>
+                <para>The Number must be in format <c>[1-9][0-9]*</c>.</para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Int256.TryParseCStyleNormalizedI256(System.String,UltimateOrb.Int256@)">
             <summary>
                 <para>Parses a signed integer.</para>
             </summary>
@@ -1440,6 +1454,435 @@
         <member name="M:UltimateOrb.NaNDefaultedDouble.System#Numerics#IUnaryPlusOperators{UltimateOrb#NaNDefaultedDouble,UltimateOrb#NaNDefaultedDouble}#op_UnaryPlus(UltimateOrb.NaNDefaultedDouble)">
             <inheritdoc cref="M:System.Numerics.IUnaryPlusOperators`2.op_UnaryPlus(`0)" />
         </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.BitwiseAnd(System.UInt32@,System.UInt32@,System.UInt32@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.BitwiseOr(System.UInt32@,System.UInt32@,System.UInt32@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.BitwiseXor(System.UInt32@,System.UInt32@,System.UInt32@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.BitwiseAndNot(System.UInt32@,System.UInt32@,System.UInt32@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.AddUnchecked(System.UInt32@,System.UInt32@,System.UInt32@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.AddUnsigned(System.UInt32@,System.UInt32@,System.UInt32@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.AddSigned(System.UInt32@,System.UInt32@,System.UInt32@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.SubtractUnchecked(System.UInt32@,System.UInt32@,System.UInt32@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.SubtractUnsigned(System.UInt32@,System.UInt32@,System.UInt32@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.SubtractSigned(System.UInt32@,System.UInt32@,System.UInt32@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.MultiplyUnchecked(System.UInt32@,System.UInt32@,System.UInt32@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.MultiplyUnsigned(System.UInt32@,System.UInt32@,System.UInt32@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.MultiplySigned(System.UInt32@,System.UInt32@,System.UInt32@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.BitwiseAnd(System.Int32@,System.Int32@,System.Int32@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.BitwiseOr(System.Int32@,System.Int32@,System.Int32@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.BitwiseXor(System.Int32@,System.Int32@,System.Int32@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.BitwiseAndNot(System.Int32@,System.Int32@,System.Int32@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.AddUnchecked(System.Int32@,System.Int32@,System.Int32@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.AddUnsigned(System.Int32@,System.Int32@,System.Int32@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.AddSigned(System.Int32@,System.Int32@,System.Int32@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.SubtractUnchecked(System.Int32@,System.Int32@,System.Int32@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.SubtractUnsigned(System.Int32@,System.Int32@,System.Int32@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.SubtractSigned(System.Int32@,System.Int32@,System.Int32@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.MultiplyUnchecked(System.Int32@,System.Int32@,System.Int32@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.MultiplyUnsigned(System.Int32@,System.Int32@,System.Int32@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.MultiplySigned(System.Int32@,System.Int32@,System.Int32@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.BitwiseAnd(System.UInt64@,System.UInt64@,System.UInt64@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.BitwiseOr(System.UInt64@,System.UInt64@,System.UInt64@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.BitwiseXor(System.UInt64@,System.UInt64@,System.UInt64@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.BitwiseAndNot(System.UInt64@,System.UInt64@,System.UInt64@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.AddUnchecked(System.UInt64@,System.UInt64@,System.UInt64@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.AddUnsigned(System.UInt64@,System.UInt64@,System.UInt64@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.AddSigned(System.UInt64@,System.UInt64@,System.UInt64@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.SubtractUnchecked(System.UInt64@,System.UInt64@,System.UInt64@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.SubtractUnsigned(System.UInt64@,System.UInt64@,System.UInt64@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.SubtractSigned(System.UInt64@,System.UInt64@,System.UInt64@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.MultiplyUnchecked(System.UInt64@,System.UInt64@,System.UInt64@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.MultiplyUnsigned(System.UInt64@,System.UInt64@,System.UInt64@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.MultiplySigned(System.UInt64@,System.UInt64@,System.UInt64@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.BitwiseAnd(System.Int64@,System.Int64@,System.Int64@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.BitwiseOr(System.Int64@,System.Int64@,System.Int64@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.BitwiseXor(System.Int64@,System.Int64@,System.Int64@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.BitwiseAndNot(System.Int64@,System.Int64@,System.Int64@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.AddUnchecked(System.Int64@,System.Int64@,System.Int64@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.AddUnsigned(System.Int64@,System.Int64@,System.Int64@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.AddSigned(System.Int64@,System.Int64@,System.Int64@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.SubtractUnchecked(System.Int64@,System.Int64@,System.Int64@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.SubtractUnsigned(System.Int64@,System.Int64@,System.Int64@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.SubtractSigned(System.Int64@,System.Int64@,System.Int64@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.MultiplyUnchecked(System.Int64@,System.Int64@,System.Int64@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.MultiplyUnsigned(System.Int64@,System.Int64@,System.Int64@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.MultiplySigned(System.Int64@,System.Int64@,System.Int64@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.BitwiseAnd(UltimateOrb.UInt128@,UltimateOrb.UInt128@,UltimateOrb.UInt128@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.BitwiseOr(UltimateOrb.UInt128@,UltimateOrb.UInt128@,UltimateOrb.UInt128@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.BitwiseXor(UltimateOrb.UInt128@,UltimateOrb.UInt128@,UltimateOrb.UInt128@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.BitwiseAndNot(UltimateOrb.UInt128@,UltimateOrb.UInt128@,UltimateOrb.UInt128@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.AddUnchecked(UltimateOrb.UInt128@,UltimateOrb.UInt128@,UltimateOrb.UInt128@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.AddUnsigned(UltimateOrb.UInt128@,UltimateOrb.UInt128@,UltimateOrb.UInt128@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.AddSigned(UltimateOrb.UInt128@,UltimateOrb.UInt128@,UltimateOrb.UInt128@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.SubtractUnchecked(UltimateOrb.UInt128@,UltimateOrb.UInt128@,UltimateOrb.UInt128@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.SubtractUnsigned(UltimateOrb.UInt128@,UltimateOrb.UInt128@,UltimateOrb.UInt128@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.SubtractSigned(UltimateOrb.UInt128@,UltimateOrb.UInt128@,UltimateOrb.UInt128@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.MultiplyUnchecked(UltimateOrb.UInt128@,UltimateOrb.UInt128@,UltimateOrb.UInt128@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.MultiplyUnsigned(UltimateOrb.UInt128@,UltimateOrb.UInt128@,UltimateOrb.UInt128@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.MultiplySigned(UltimateOrb.UInt128@,UltimateOrb.UInt128@,UltimateOrb.UInt128@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.BitwiseAnd(UltimateOrb.Int128@,UltimateOrb.Int128@,UltimateOrb.Int128@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.BitwiseOr(UltimateOrb.Int128@,UltimateOrb.Int128@,UltimateOrb.Int128@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.BitwiseXor(UltimateOrb.Int128@,UltimateOrb.Int128@,UltimateOrb.Int128@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.BitwiseAndNot(UltimateOrb.Int128@,UltimateOrb.Int128@,UltimateOrb.Int128@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.AddUnchecked(UltimateOrb.Int128@,UltimateOrb.Int128@,UltimateOrb.Int128@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.AddUnsigned(UltimateOrb.Int128@,UltimateOrb.Int128@,UltimateOrb.Int128@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.AddSigned(UltimateOrb.Int128@,UltimateOrb.Int128@,UltimateOrb.Int128@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.SubtractUnchecked(UltimateOrb.Int128@,UltimateOrb.Int128@,UltimateOrb.Int128@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.SubtractUnsigned(UltimateOrb.Int128@,UltimateOrb.Int128@,UltimateOrb.Int128@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.SubtractSigned(UltimateOrb.Int128@,UltimateOrb.Int128@,UltimateOrb.Int128@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.MultiplyUnchecked(UltimateOrb.Int128@,UltimateOrb.Int128@,UltimateOrb.Int128@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.MultiplyUnsigned(UltimateOrb.Int128@,UltimateOrb.Int128@,UltimateOrb.Int128@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.MultiplySigned(UltimateOrb.Int128@,UltimateOrb.Int128@,UltimateOrb.Int128@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.BitwiseAnd(System.UInt128@,System.UInt128@,System.UInt128@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.BitwiseOr(System.UInt128@,System.UInt128@,System.UInt128@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.BitwiseXor(System.UInt128@,System.UInt128@,System.UInt128@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.BitwiseAndNot(System.UInt128@,System.UInt128@,System.UInt128@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.AddUnchecked(System.UInt128@,System.UInt128@,System.UInt128@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.AddUnsigned(System.UInt128@,System.UInt128@,System.UInt128@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.AddSigned(System.UInt128@,System.UInt128@,System.UInt128@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.SubtractUnchecked(System.UInt128@,System.UInt128@,System.UInt128@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.SubtractUnsigned(System.UInt128@,System.UInt128@,System.UInt128@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.SubtractSigned(System.UInt128@,System.UInt128@,System.UInt128@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.MultiplyUnchecked(System.UInt128@,System.UInt128@,System.UInt128@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.MultiplyUnsigned(System.UInt128@,System.UInt128@,System.UInt128@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.MultiplySigned(System.UInt128@,System.UInt128@,System.UInt128@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.BitwiseAnd(System.Int128@,System.Int128@,System.Int128@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.BitwiseOr(System.Int128@,System.Int128@,System.Int128@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.BitwiseXor(System.Int128@,System.Int128@,System.Int128@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.BitwiseAndNot(System.Int128@,System.Int128@,System.Int128@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.AddUnchecked(System.Int128@,System.Int128@,System.Int128@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.AddUnsigned(System.Int128@,System.Int128@,System.Int128@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.AddSigned(System.Int128@,System.Int128@,System.Int128@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.SubtractUnchecked(System.Int128@,System.Int128@,System.Int128@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.SubtractUnsigned(System.Int128@,System.Int128@,System.Int128@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.SubtractSigned(System.Int128@,System.Int128@,System.Int128@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.MultiplyUnchecked(System.Int128@,System.Int128@,System.Int128@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.MultiplyUnsigned(System.Int128@,System.Int128@,System.Int128@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.MultiplySigned(System.Int128@,System.Int128@,System.Int128@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.BitwiseAnd(UltimateOrb.UInt256@,UltimateOrb.UInt256@,UltimateOrb.UInt256@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.BitwiseOr(UltimateOrb.UInt256@,UltimateOrb.UInt256@,UltimateOrb.UInt256@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.BitwiseXor(UltimateOrb.UInt256@,UltimateOrb.UInt256@,UltimateOrb.UInt256@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.BitwiseAndNot(UltimateOrb.UInt256@,UltimateOrb.UInt256@,UltimateOrb.UInt256@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.AddUnchecked(UltimateOrb.UInt256@,UltimateOrb.UInt256@,UltimateOrb.UInt256@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.AddUnsigned(UltimateOrb.UInt256@,UltimateOrb.UInt256@,UltimateOrb.UInt256@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.AddSigned(UltimateOrb.UInt256@,UltimateOrb.UInt256@,UltimateOrb.UInt256@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.SubtractUnchecked(UltimateOrb.UInt256@,UltimateOrb.UInt256@,UltimateOrb.UInt256@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.SubtractUnsigned(UltimateOrb.UInt256@,UltimateOrb.UInt256@,UltimateOrb.UInt256@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.SubtractSigned(UltimateOrb.UInt256@,UltimateOrb.UInt256@,UltimateOrb.UInt256@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.MultiplyUnchecked(UltimateOrb.UInt256@,UltimateOrb.UInt256@,UltimateOrb.UInt256@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.MultiplyUnsigned(UltimateOrb.UInt256@,UltimateOrb.UInt256@,UltimateOrb.UInt256@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.MultiplySigned(UltimateOrb.UInt256@,UltimateOrb.UInt256@,UltimateOrb.UInt256@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.BitwiseAnd(UltimateOrb.Int256@,UltimateOrb.Int256@,UltimateOrb.Int256@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.BitwiseOr(UltimateOrb.Int256@,UltimateOrb.Int256@,UltimateOrb.Int256@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.BitwiseXor(UltimateOrb.Int256@,UltimateOrb.Int256@,UltimateOrb.Int256@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.BitwiseAndNot(UltimateOrb.Int256@,UltimateOrb.Int256@,UltimateOrb.Int256@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.AddUnchecked(UltimateOrb.Int256@,UltimateOrb.Int256@,UltimateOrb.Int256@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.AddUnsigned(UltimateOrb.Int256@,UltimateOrb.Int256@,UltimateOrb.Int256@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.AddSigned(UltimateOrb.Int256@,UltimateOrb.Int256@,UltimateOrb.Int256@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.SubtractUnchecked(UltimateOrb.Int256@,UltimateOrb.Int256@,UltimateOrb.Int256@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.SubtractUnsigned(UltimateOrb.Int256@,UltimateOrb.Int256@,UltimateOrb.Int256@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.SubtractSigned(UltimateOrb.Int256@,UltimateOrb.Int256@,UltimateOrb.Int256@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.MultiplyUnchecked(UltimateOrb.Int256@,UltimateOrb.Int256@,UltimateOrb.Int256@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.MultiplyUnsigned(UltimateOrb.Int256@,UltimateOrb.Int256@,UltimateOrb.Int256@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.MultiplySigned(UltimateOrb.Int256@,UltimateOrb.Int256@,UltimateOrb.Int256@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.BitwiseAnd(System.Numerics.BigInteger@,System.Numerics.BigInteger@,System.Numerics.BigInteger@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.BitwiseOr(System.Numerics.BigInteger@,System.Numerics.BigInteger@,System.Numerics.BigInteger@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.BitwiseXor(System.Numerics.BigInteger@,System.Numerics.BigInteger@,System.Numerics.BigInteger@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.BitwiseAndNot(System.Numerics.BigInteger@,System.Numerics.BigInteger@,System.Numerics.BigInteger@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.AddUnchecked(System.Numerics.BigInteger@,System.Numerics.BigInteger@,System.Numerics.BigInteger@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.AddUnsigned(System.Numerics.BigInteger@,System.Numerics.BigInteger@,System.Numerics.BigInteger@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.AddSigned(System.Numerics.BigInteger@,System.Numerics.BigInteger@,System.Numerics.BigInteger@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.SubtractUnchecked(System.Numerics.BigInteger@,System.Numerics.BigInteger@,System.Numerics.BigInteger@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.SubtractUnsigned(System.Numerics.BigInteger@,System.Numerics.BigInteger@,System.Numerics.BigInteger@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.SubtractSigned(System.Numerics.BigInteger@,System.Numerics.BigInteger@,System.Numerics.BigInteger@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.MultiplyUnchecked(System.Numerics.BigInteger@,System.Numerics.BigInteger@,System.Numerics.BigInteger@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.MultiplyUnsigned(System.Numerics.BigInteger@,System.Numerics.BigInteger@,System.Numerics.BigInteger@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.MultiplySigned(System.Numerics.BigInteger@,System.Numerics.BigInteger@,System.Numerics.BigInteger@)">
+            <inheritdoc/>
+        </member>
         <member name="M:UltimateOrb.Numerics.BigIntegerWrappers.BigIntegerExtensions.GetBitLength(System.Numerics.BigInteger)">
             <summary>
             Gets the number of bits required for shortest two's complement representation of the current instance without the sign bit.
@@ -1474,7 +1917,67 @@
                 <para>The <c>lo</c> bits of the double-precision data of the result.</para>
             </returns>
         </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.AbsSignedAsUnsigned(System.UInt128,System.UInt128,System.UInt128@)">
+            <summary>
+                <para>
+                    Computes the absolute value of the specified value of a signed operand with double-precision data.
+                    The result is an unsigned value with double-precision data.
+                </para>
+            </summary>
+            <param name="value_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the operand.</para>
+            </param>
+            <param name="value_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.AbsSignedAsUnsigned(UltimateOrb.UInt128,UltimateOrb.UInt128,UltimateOrb.UInt128@)">
+            <summary>
+                <para>
+                    Computes the absolute value of the specified value of a signed operand with double-precision data.
+                    The result is an unsigned value with double-precision data.
+                </para>
+            </summary>
+            <param name="value_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the operand.</para>
+            </param>
+            <param name="value_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+        </member>
         <member name="M:UltimateOrb.Numerics.DoubleArithmetic.NextPermutation(System.UInt64,System.UInt64,System.UInt64@)">
+            <summary>
+                <para>
+                    Computes the bit pattern of the next permutation in the lexicographical order.
+                    If the current permutation is already the maximum, the result will be the pattern with all bits <c>1</c>.
+                </para>
+            </summary>
+            <param name="lo">
+                <para>The <c>lo</c> part of the current bit pattern.</para>
+            </param>
+            <param name="hi">
+                <para>The <c>hi</c> part of the current bit pattern.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> part of the next bit pattern.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> part of the next bit pattern.</para>
+            </returns>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.NextPermutation``1(``0,``0,``0@)">
             <summary>
                 <para>
                     Computes the bit pattern of the next permutation in the lexicographical order.
@@ -2910,6 +3413,2838 @@
                 </para>
             </remarks>
         </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.AddUnchecked(System.UInt128,System.UInt128,System.UInt128,System.UInt128,System.UInt128@)">
+            <summary>
+                <para>
+                    Adds the specified values of two operands with double-precision data.
+                    If the result can not be represented in regard to the precision of the destination, no exception will be thrown and the result will be truncated, ignoring the bits beyond the precision.
+                </para>
+            </summary>
+            <param name="first_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="first_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="second_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="second_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    Of this operation, the sign interpretations of the operands do not matter and both signed and unsigned versions yield the same results.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.AddSigned(System.UInt128,System.UInt128,System.UInt128,System.UInt128,System.UInt128@)">
+            <summary>
+                <para>
+                    Adds the specified values of two signed operands with double-precision data.
+                    If the result can not be represented in regard to the precision of the destination, <see cref="T:System.OverflowException"/> will be thrown.
+                </para>
+            </summary>
+            <param name="first_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="first_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="second_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="second_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    The operands of this operation are interpreted as signed operands regardless of the sign interpretations implied from their signatures.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.AddUnsigned(System.UInt128,System.UInt128,System.UInt128,System.UInt128,System.UInt128@)">
+            <summary>
+                <para>
+                    Adds the specified values of two unsigned operands with double-precision data.
+                    If the result can not be represented in regard to the precision of the destination, <see cref="T:System.OverflowException"/> will be thrown.
+                </para>
+            </summary>
+            <param name="first_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="first_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="second_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="second_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    The operands of this operation are interpreted as unsigned operands regardless of the sign interpretations implied from their signatures.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.SubtractUnchecked(System.UInt128,System.UInt128,System.UInt128,System.UInt128,System.UInt128@)">
+            <summary>
+                <para>
+                    Subtracts the value of one operand with double-precision data from the value of another operand with double-precision data and returns the result.
+                    If the result can not be represented in regard to the precision of the destination, no exception will be thrown and the result will be truncated, ignoring the bits beyond the precision.
+                </para>
+            </summary>
+            <param name="first_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="first_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="second_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="second_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    Of this operation, the sign interpretations of the operands do not matter and both signed and unsigned versions yield the same results.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.SubtractSigned(System.UInt128,System.UInt128,System.UInt128,System.UInt128,System.UInt128@)">
+            <summary>
+                <para>
+                    Subtracts the value of one signed operand with double-precision data from the value of another signed operand with double-precision data and returns the result.
+                    If the result can not be represented in regard to the precision of the destination, <see cref="T:System.OverflowException"/> will be thrown.
+                </para>
+            </summary>
+            <param name="first_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="first_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="second_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="second_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    The operands of this operation are interpreted as signed operands regardless of the sign interpretations implied from their signatures.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.SubtractUnsigned(System.UInt128,System.UInt128,System.UInt128,System.UInt128,System.UInt128@)">
+            <summary>
+                <para>
+                    Subtracts the value of one unsigned operand with double-precision data from the value of another unsigned operand with double-precision data and returns the result.
+                    If the result can not be represented in regard to the precision of the destination, <see cref="T:System.OverflowException"/> will be thrown.
+                </para>
+            </summary>
+            <param name="first_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="first_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="second_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="second_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    The operands of this operation are interpreted as unsigned operands regardless of the sign interpretations implied from their signatures.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.NegateUnchecked(System.UInt128,System.UInt128,System.UInt128@)">
+            <summary>
+                <para>
+                    Negates the specified value of an operand with double-precision data.
+                    If the result can not be represented in regard to the precision of the destination, no exception will be thrown and the result will be truncated, ignoring the bits beyond the precision.
+                </para>
+            </summary>
+            <param name="value_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the operand.</para>
+            </param>
+            <param name="value_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    Of this operation, the sign interpretations of the operands do not matter and both signed and unsigned versions yield the same results.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.NegateSigned(System.UInt128,System.UInt128,System.UInt128@)">
+            <summary>
+                <para>
+                    Negates the specified value of a signed operand with double-precision data.
+                    If the result can not be represented in regard to the precision of the destination, <see cref="T:System.OverflowException"/> will be thrown.
+                </para>
+            </summary>
+            <param name="value_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the operand.</para>
+            </param>
+            <param name="value_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    The operands of this operation are interpreted as signed operands regardless of the sign interpretations implied from their signatures.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.NegateUnsigned(System.UInt128,System.UInt128,System.UInt128@)">
+            <summary>
+                <para>
+                    Negates the specified value of an unsigned operand with double-precision data.
+                    If the result can not be represented in regard to the precision of the destination, <see cref="T:System.OverflowException"/> will be thrown.
+                </para>
+            </summary>
+            <param name="value_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the operand.</para>
+            </param>
+            <param name="value_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    The operands of this operation are interpreted as unsigned operands regardless of the sign interpretations implied from their signatures.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.MultiplyUnchecked(System.UInt128,System.UInt128,System.UInt128,System.UInt128,System.UInt128@)">
+            <summary>
+                <para>
+                    Multiplies the specified values of two operands with double-precision data.
+                    If the result can not be represented in regard to the precision of the destination, no exception will be thrown and the result will be truncated, ignoring the bits beyond the precision.
+                </para>
+            </summary>
+            <param name="first_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="first_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="second_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="second_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    Of this operation, the sign interpretations of the operands do not matter and both signed and unsigned versions yield the same results.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.MultiplySigned(System.UInt128,System.UInt128,System.UInt128,System.UInt128,System.UInt128@)">
+            <summary>
+                <para>
+                    Multiplies the specified values of two signed operands with double-precision data.
+                    If the result can not be represented in regard to the precision of the destination, <see cref="T:System.OverflowException"/> will be thrown.
+                </para>
+            </summary>
+            <param name="first_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="first_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="second_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="second_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    The operands of this operation are interpreted as signed operands regardless of the sign interpretations implied from their signatures.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.MultiplyUnsigned(System.UInt128,System.UInt128,System.UInt128,System.UInt128,System.UInt128@)">
+            <summary>
+                <para>
+                    Multiplies the specified values of two unsigned operands with double-precision data.
+                    If the result can not be represented in regard to the precision of the destination, <see cref="T:System.OverflowException"/> will be thrown.
+                </para>
+            </summary>
+            <param name="first_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="first_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="second_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="second_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    The operands of this operation are interpreted as unsigned operands regardless of the sign interpretations implied from their signatures.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.AddUnchecked(System.UInt128,System.Int128,System.UInt128,System.Int128,System.Int128@)">
+            <summary>
+                <para>
+                    Adds the specified values of two operands with double-precision data.
+                    If the result can not be represented in regard to the precision of the destination, no exception will be thrown and the result will be truncated, ignoring the bits beyond the precision.
+                </para>
+            </summary>
+            <param name="first_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="first_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="second_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="second_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    Of this operation, the sign interpretations of the operands do not matter and both signed and unsigned versions yield the same results.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.AddSigned(System.UInt128,System.Int128,System.UInt128,System.Int128,System.Int128@)">
+            <summary>
+                <para>
+                    Adds the specified values of two signed operands with double-precision data.
+                    If the result can not be represented in regard to the precision of the destination, <see cref="T:System.OverflowException"/> will be thrown.
+                </para>
+            </summary>
+            <param name="first_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="first_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="second_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="second_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    The operands of this operation are interpreted as signed operands regardless of the sign interpretations implied from their signatures.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.AddUnsigned(System.UInt128,System.Int128,System.UInt128,System.Int128,System.Int128@)">
+            <summary>
+                <para>
+                    Adds the specified values of two unsigned operands with double-precision data.
+                    If the result can not be represented in regard to the precision of the destination, <see cref="T:System.OverflowException"/> will be thrown.
+                </para>
+            </summary>
+            <param name="first_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="first_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="second_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="second_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    The operands of this operation are interpreted as unsigned operands regardless of the sign interpretations implied from their signatures.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.SubtractUnchecked(System.UInt128,System.Int128,System.UInt128,System.Int128,System.Int128@)">
+            <summary>
+                <para>
+                    Subtracts the value of one operand with double-precision data from the value of another operand with double-precision data and returns the result.
+                    If the result can not be represented in regard to the precision of the destination, no exception will be thrown and the result will be truncated, ignoring the bits beyond the precision.
+                </para>
+            </summary>
+            <param name="first_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="first_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="second_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="second_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    Of this operation, the sign interpretations of the operands do not matter and both signed and unsigned versions yield the same results.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.SubtractSigned(System.UInt128,System.Int128,System.UInt128,System.Int128,System.Int128@)">
+            <summary>
+                <para>
+                    Subtracts the value of one signed operand with double-precision data from the value of another signed operand with double-precision data and returns the result.
+                    If the result can not be represented in regard to the precision of the destination, <see cref="T:System.OverflowException"/> will be thrown.
+                </para>
+            </summary>
+            <param name="first_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="first_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="second_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="second_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    The operands of this operation are interpreted as signed operands regardless of the sign interpretations implied from their signatures.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.SubtractUnsigned(System.UInt128,System.Int128,System.UInt128,System.Int128,System.Int128@)">
+            <summary>
+                <para>
+                    Subtracts the value of one unsigned operand with double-precision data from the value of another unsigned operand with double-precision data and returns the result.
+                    If the result can not be represented in regard to the precision of the destination, <see cref="T:System.OverflowException"/> will be thrown.
+                </para>
+            </summary>
+            <param name="first_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="first_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="second_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="second_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    The operands of this operation are interpreted as unsigned operands regardless of the sign interpretations implied from their signatures.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.NegateUnchecked(System.UInt128,System.Int128,System.Int128@)">
+            <summary>
+                <para>
+                    Negates the specified value of an operand with double-precision data.
+                    If the result can not be represented in regard to the precision of the destination, no exception will be thrown and the result will be truncated, ignoring the bits beyond the precision.
+                </para>
+            </summary>
+            <param name="value_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the operand.</para>
+            </param>
+            <param name="value_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    Of this operation, the sign interpretations of the operands do not matter and both signed and unsigned versions yield the same results.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.NegateSigned(System.UInt128,System.Int128,System.Int128@)">
+            <summary>
+                <para>
+                    Negates the specified value of a signed operand with double-precision data.
+                    If the result can not be represented in regard to the precision of the destination, <see cref="T:System.OverflowException"/> will be thrown.
+                </para>
+            </summary>
+            <param name="value_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the operand.</para>
+            </param>
+            <param name="value_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    The operands of this operation are interpreted as signed operands regardless of the sign interpretations implied from their signatures.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.NegateUnsigned(System.UInt128,System.Int128,System.Int128@)">
+            <summary>
+                <para>
+                    Negates the specified value of an unsigned operand with double-precision data.
+                    If the result can not be represented in regard to the precision of the destination, <see cref="T:System.OverflowException"/> will be thrown.
+                </para>
+            </summary>
+            <param name="value_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the operand.</para>
+            </param>
+            <param name="value_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    The operands of this operation are interpreted as unsigned operands regardless of the sign interpretations implied from their signatures.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.MultiplyUnchecked(System.UInt128,System.Int128,System.UInt128,System.Int128,System.Int128@)">
+            <summary>
+                <para>
+                    Multiplies the specified values of two operands with double-precision data.
+                    If the result can not be represented in regard to the precision of the destination, no exception will be thrown and the result will be truncated, ignoring the bits beyond the precision.
+                </para>
+            </summary>
+            <param name="first_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="first_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="second_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="second_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    Of this operation, the sign interpretations of the operands do not matter and both signed and unsigned versions yield the same results.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.MultiplySigned(System.UInt128,System.Int128,System.UInt128,System.Int128,System.Int128@)">
+            <summary>
+                <para>
+                    Multiplies the specified values of two signed operands with double-precision data.
+                    If the result can not be represented in regard to the precision of the destination, <see cref="T:System.OverflowException"/> will be thrown.
+                </para>
+            </summary>
+            <param name="first_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="first_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="second_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="second_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    The operands of this operation are interpreted as signed operands regardless of the sign interpretations implied from their signatures.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.MultiplyUnsigned(System.UInt128,System.Int128,System.UInt128,System.Int128,System.Int128@)">
+            <summary>
+                <para>
+                    Multiplies the specified values of two unsigned operands with double-precision data.
+                    If the result can not be represented in regard to the precision of the destination, <see cref="T:System.OverflowException"/> will be thrown.
+                </para>
+            </summary>
+            <param name="first_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="first_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="second_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="second_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    The operands of this operation are interpreted as unsigned operands regardless of the sign interpretations implied from their signatures.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.AddUnchecked(System.Int128,System.UInt128,System.Int128,System.UInt128,System.UInt128@)">
+            <summary>
+                <para>
+                    Adds the specified values of two operands with double-precision data.
+                    If the result can not be represented in regard to the precision of the destination, no exception will be thrown and the result will be truncated, ignoring the bits beyond the precision.
+                </para>
+            </summary>
+            <param name="first_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="first_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="second_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="second_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    Of this operation, the sign interpretations of the operands do not matter and both signed and unsigned versions yield the same results.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.AddSigned(System.Int128,System.UInt128,System.Int128,System.UInt128,System.UInt128@)">
+            <summary>
+                <para>
+                    Adds the specified values of two signed operands with double-precision data.
+                    If the result can not be represented in regard to the precision of the destination, <see cref="T:System.OverflowException"/> will be thrown.
+                </para>
+            </summary>
+            <param name="first_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="first_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="second_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="second_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    The operands of this operation are interpreted as signed operands regardless of the sign interpretations implied from their signatures.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.AddUnsigned(System.Int128,System.UInt128,System.Int128,System.UInt128,System.UInt128@)">
+            <summary>
+                <para>
+                    Adds the specified values of two unsigned operands with double-precision data.
+                    If the result can not be represented in regard to the precision of the destination, <see cref="T:System.OverflowException"/> will be thrown.
+                </para>
+            </summary>
+            <param name="first_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="first_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="second_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="second_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    The operands of this operation are interpreted as unsigned operands regardless of the sign interpretations implied from their signatures.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.SubtractUnchecked(System.Int128,System.UInt128,System.Int128,System.UInt128,System.UInt128@)">
+            <summary>
+                <para>
+                    Subtracts the value of one operand with double-precision data from the value of another operand with double-precision data and returns the result.
+                    If the result can not be represented in regard to the precision of the destination, no exception will be thrown and the result will be truncated, ignoring the bits beyond the precision.
+                </para>
+            </summary>
+            <param name="first_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="first_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="second_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="second_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    Of this operation, the sign interpretations of the operands do not matter and both signed and unsigned versions yield the same results.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.SubtractSigned(System.Int128,System.UInt128,System.Int128,System.UInt128,System.UInt128@)">
+            <summary>
+                <para>
+                    Subtracts the value of one signed operand with double-precision data from the value of another signed operand with double-precision data and returns the result.
+                    If the result can not be represented in regard to the precision of the destination, <see cref="T:System.OverflowException"/> will be thrown.
+                </para>
+            </summary>
+            <param name="first_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="first_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="second_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="second_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    The operands of this operation are interpreted as signed operands regardless of the sign interpretations implied from their signatures.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.SubtractUnsigned(System.Int128,System.UInt128,System.Int128,System.UInt128,System.UInt128@)">
+            <summary>
+                <para>
+                    Subtracts the value of one unsigned operand with double-precision data from the value of another unsigned operand with double-precision data and returns the result.
+                    If the result can not be represented in regard to the precision of the destination, <see cref="T:System.OverflowException"/> will be thrown.
+                </para>
+            </summary>
+            <param name="first_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="first_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="second_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="second_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    The operands of this operation are interpreted as unsigned operands regardless of the sign interpretations implied from their signatures.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.NegateUnchecked(System.Int128,System.UInt128,System.UInt128@)">
+            <summary>
+                <para>
+                    Negates the specified value of an operand with double-precision data.
+                    If the result can not be represented in regard to the precision of the destination, no exception will be thrown and the result will be truncated, ignoring the bits beyond the precision.
+                </para>
+            </summary>
+            <param name="value_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the operand.</para>
+            </param>
+            <param name="value_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    Of this operation, the sign interpretations of the operands do not matter and both signed and unsigned versions yield the same results.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.NegateSigned(System.Int128,System.UInt128,System.UInt128@)">
+            <summary>
+                <para>
+                    Negates the specified value of a signed operand with double-precision data.
+                    If the result can not be represented in regard to the precision of the destination, <see cref="T:System.OverflowException"/> will be thrown.
+                </para>
+            </summary>
+            <param name="value_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the operand.</para>
+            </param>
+            <param name="value_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    The operands of this operation are interpreted as signed operands regardless of the sign interpretations implied from their signatures.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.NegateUnsigned(System.Int128,System.UInt128,System.UInt128@)">
+            <summary>
+                <para>
+                    Negates the specified value of an unsigned operand with double-precision data.
+                    If the result can not be represented in regard to the precision of the destination, <see cref="T:System.OverflowException"/> will be thrown.
+                </para>
+            </summary>
+            <param name="value_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the operand.</para>
+            </param>
+            <param name="value_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    The operands of this operation are interpreted as unsigned operands regardless of the sign interpretations implied from their signatures.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.MultiplyUnchecked(System.Int128,System.UInt128,System.Int128,System.UInt128,System.UInt128@)">
+            <summary>
+                <para>
+                    Multiplies the specified values of two operands with double-precision data.
+                    If the result can not be represented in regard to the precision of the destination, no exception will be thrown and the result will be truncated, ignoring the bits beyond the precision.
+                </para>
+            </summary>
+            <param name="first_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="first_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="second_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="second_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    Of this operation, the sign interpretations of the operands do not matter and both signed and unsigned versions yield the same results.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.MultiplySigned(System.Int128,System.UInt128,System.Int128,System.UInt128,System.UInt128@)">
+            <summary>
+                <para>
+                    Multiplies the specified values of two signed operands with double-precision data.
+                    If the result can not be represented in regard to the precision of the destination, <see cref="T:System.OverflowException"/> will be thrown.
+                </para>
+            </summary>
+            <param name="first_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="first_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="second_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="second_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    The operands of this operation are interpreted as signed operands regardless of the sign interpretations implied from their signatures.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.MultiplyUnsigned(System.Int128,System.UInt128,System.Int128,System.UInt128,System.UInt128@)">
+            <summary>
+                <para>
+                    Multiplies the specified values of two unsigned operands with double-precision data.
+                    If the result can not be represented in regard to the precision of the destination, <see cref="T:System.OverflowException"/> will be thrown.
+                </para>
+            </summary>
+            <param name="first_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="first_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="second_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="second_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    The operands of this operation are interpreted as unsigned operands regardless of the sign interpretations implied from their signatures.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.AddUnchecked(System.Int128,System.Int128,System.Int128,System.Int128,System.Int128@)">
+            <summary>
+                <para>
+                    Adds the specified values of two operands with double-precision data.
+                    If the result can not be represented in regard to the precision of the destination, no exception will be thrown and the result will be truncated, ignoring the bits beyond the precision.
+                </para>
+            </summary>
+            <param name="first_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="first_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="second_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="second_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    Of this operation, the sign interpretations of the operands do not matter and both signed and unsigned versions yield the same results.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.AddSigned(System.Int128,System.Int128,System.Int128,System.Int128,System.Int128@)">
+            <summary>
+                <para>
+                    Adds the specified values of two signed operands with double-precision data.
+                    If the result can not be represented in regard to the precision of the destination, <see cref="T:System.OverflowException"/> will be thrown.
+                </para>
+            </summary>
+            <param name="first_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="first_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="second_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="second_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    The operands of this operation are interpreted as signed operands regardless of the sign interpretations implied from their signatures.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.AddUnsigned(System.Int128,System.Int128,System.Int128,System.Int128,System.Int128@)">
+            <summary>
+                <para>
+                    Adds the specified values of two unsigned operands with double-precision data.
+                    If the result can not be represented in regard to the precision of the destination, <see cref="T:System.OverflowException"/> will be thrown.
+                </para>
+            </summary>
+            <param name="first_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="first_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="second_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="second_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    The operands of this operation are interpreted as unsigned operands regardless of the sign interpretations implied from their signatures.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.SubtractUnchecked(System.Int128,System.Int128,System.Int128,System.Int128,System.Int128@)">
+            <summary>
+                <para>
+                    Subtracts the value of one operand with double-precision data from the value of another operand with double-precision data and returns the result.
+                    If the result can not be represented in regard to the precision of the destination, no exception will be thrown and the result will be truncated, ignoring the bits beyond the precision.
+                </para>
+            </summary>
+            <param name="first_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="first_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="second_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="second_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    Of this operation, the sign interpretations of the operands do not matter and both signed and unsigned versions yield the same results.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.SubtractSigned(System.Int128,System.Int128,System.Int128,System.Int128,System.Int128@)">
+            <summary>
+                <para>
+                    Subtracts the value of one signed operand with double-precision data from the value of another signed operand with double-precision data and returns the result.
+                    If the result can not be represented in regard to the precision of the destination, <see cref="T:System.OverflowException"/> will be thrown.
+                </para>
+            </summary>
+            <param name="first_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="first_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="second_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="second_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    The operands of this operation are interpreted as signed operands regardless of the sign interpretations implied from their signatures.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.SubtractUnsigned(System.Int128,System.Int128,System.Int128,System.Int128,System.Int128@)">
+            <summary>
+                <para>
+                    Subtracts the value of one unsigned operand with double-precision data from the value of another unsigned operand with double-precision data and returns the result.
+                    If the result can not be represented in regard to the precision of the destination, <see cref="T:System.OverflowException"/> will be thrown.
+                </para>
+            </summary>
+            <param name="first_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="first_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="second_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="second_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    The operands of this operation are interpreted as unsigned operands regardless of the sign interpretations implied from their signatures.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.NegateUnchecked(System.Int128,System.Int128,System.Int128@)">
+            <summary>
+                <para>
+                    Negates the specified value of an operand with double-precision data.
+                    If the result can not be represented in regard to the precision of the destination, no exception will be thrown and the result will be truncated, ignoring the bits beyond the precision.
+                </para>
+            </summary>
+            <param name="value_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the operand.</para>
+            </param>
+            <param name="value_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    Of this operation, the sign interpretations of the operands do not matter and both signed and unsigned versions yield the same results.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.NegateSigned(System.Int128,System.Int128,System.Int128@)">
+            <summary>
+                <para>
+                    Negates the specified value of a signed operand with double-precision data.
+                    If the result can not be represented in regard to the precision of the destination, <see cref="T:System.OverflowException"/> will be thrown.
+                </para>
+            </summary>
+            <param name="value_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the operand.</para>
+            </param>
+            <param name="value_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    The operands of this operation are interpreted as signed operands regardless of the sign interpretations implied from their signatures.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.NegateUnsigned(System.Int128,System.Int128,System.Int128@)">
+            <summary>
+                <para>
+                    Negates the specified value of an unsigned operand with double-precision data.
+                    If the result can not be represented in regard to the precision of the destination, <see cref="T:System.OverflowException"/> will be thrown.
+                </para>
+            </summary>
+            <param name="value_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the operand.</para>
+            </param>
+            <param name="value_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    The operands of this operation are interpreted as unsigned operands regardless of the sign interpretations implied from their signatures.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.MultiplyUnchecked(System.Int128,System.Int128,System.Int128,System.Int128,System.Int128@)">
+            <summary>
+                <para>
+                    Multiplies the specified values of two operands with double-precision data.
+                    If the result can not be represented in regard to the precision of the destination, no exception will be thrown and the result will be truncated, ignoring the bits beyond the precision.
+                </para>
+            </summary>
+            <param name="first_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="first_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="second_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="second_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    Of this operation, the sign interpretations of the operands do not matter and both signed and unsigned versions yield the same results.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.MultiplySigned(System.Int128,System.Int128,System.Int128,System.Int128,System.Int128@)">
+            <summary>
+                <para>
+                    Multiplies the specified values of two signed operands with double-precision data.
+                    If the result can not be represented in regard to the precision of the destination, <see cref="T:System.OverflowException"/> will be thrown.
+                </para>
+            </summary>
+            <param name="first_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="first_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="second_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="second_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    The operands of this operation are interpreted as signed operands regardless of the sign interpretations implied from their signatures.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.MultiplyUnsigned(System.Int128,System.Int128,System.Int128,System.Int128,System.Int128@)">
+            <summary>
+                <para>
+                    Multiplies the specified values of two unsigned operands with double-precision data.
+                    If the result can not be represented in regard to the precision of the destination, <see cref="T:System.OverflowException"/> will be thrown.
+                </para>
+            </summary>
+            <param name="first_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="first_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="second_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="second_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    The operands of this operation are interpreted as unsigned operands regardless of the sign interpretations implied from their signatures.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.AddUnchecked(UltimateOrb.UInt128,UltimateOrb.UInt128,UltimateOrb.UInt128,UltimateOrb.UInt128,UltimateOrb.UInt128@)">
+            <summary>
+                <para>
+                    Adds the specified values of two operands with double-precision data.
+                    If the result can not be represented in regard to the precision of the destination, no exception will be thrown and the result will be truncated, ignoring the bits beyond the precision.
+                </para>
+            </summary>
+            <param name="first_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="first_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="second_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="second_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    Of this operation, the sign interpretations of the operands do not matter and both signed and unsigned versions yield the same results.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.AddSigned(UltimateOrb.UInt128,UltimateOrb.UInt128,UltimateOrb.UInt128,UltimateOrb.UInt128,UltimateOrb.UInt128@)">
+            <summary>
+                <para>
+                    Adds the specified values of two signed operands with double-precision data.
+                    If the result can not be represented in regard to the precision of the destination, <see cref="T:System.OverflowException"/> will be thrown.
+                </para>
+            </summary>
+            <param name="first_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="first_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="second_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="second_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    The operands of this operation are interpreted as signed operands regardless of the sign interpretations implied from their signatures.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.AddUnsigned(UltimateOrb.UInt128,UltimateOrb.UInt128,UltimateOrb.UInt128,UltimateOrb.UInt128,UltimateOrb.UInt128@)">
+            <summary>
+                <para>
+                    Adds the specified values of two unsigned operands with double-precision data.
+                    If the result can not be represented in regard to the precision of the destination, <see cref="T:System.OverflowException"/> will be thrown.
+                </para>
+            </summary>
+            <param name="first_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="first_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="second_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="second_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    The operands of this operation are interpreted as unsigned operands regardless of the sign interpretations implied from their signatures.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.SubtractUnchecked(UltimateOrb.UInt128,UltimateOrb.UInt128,UltimateOrb.UInt128,UltimateOrb.UInt128,UltimateOrb.UInt128@)">
+            <summary>
+                <para>
+                    Subtracts the value of one operand with double-precision data from the value of another operand with double-precision data and returns the result.
+                    If the result can not be represented in regard to the precision of the destination, no exception will be thrown and the result will be truncated, ignoring the bits beyond the precision.
+                </para>
+            </summary>
+            <param name="first_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="first_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="second_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="second_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    Of this operation, the sign interpretations of the operands do not matter and both signed and unsigned versions yield the same results.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.SubtractSigned(UltimateOrb.UInt128,UltimateOrb.UInt128,UltimateOrb.UInt128,UltimateOrb.UInt128,UltimateOrb.UInt128@)">
+            <summary>
+                <para>
+                    Subtracts the value of one signed operand with double-precision data from the value of another signed operand with double-precision data and returns the result.
+                    If the result can not be represented in regard to the precision of the destination, <see cref="T:System.OverflowException"/> will be thrown.
+                </para>
+            </summary>
+            <param name="first_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="first_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="second_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="second_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    The operands of this operation are interpreted as signed operands regardless of the sign interpretations implied from their signatures.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.SubtractUnsigned(UltimateOrb.UInt128,UltimateOrb.UInt128,UltimateOrb.UInt128,UltimateOrb.UInt128,UltimateOrb.UInt128@)">
+            <summary>
+                <para>
+                    Subtracts the value of one unsigned operand with double-precision data from the value of another unsigned operand with double-precision data and returns the result.
+                    If the result can not be represented in regard to the precision of the destination, <see cref="T:System.OverflowException"/> will be thrown.
+                </para>
+            </summary>
+            <param name="first_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="first_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="second_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="second_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    The operands of this operation are interpreted as unsigned operands regardless of the sign interpretations implied from their signatures.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.NegateUnchecked(UltimateOrb.UInt128,UltimateOrb.UInt128,UltimateOrb.UInt128@)">
+            <summary>
+                <para>
+                    Negates the specified value of an operand with double-precision data.
+                    If the result can not be represented in regard to the precision of the destination, no exception will be thrown and the result will be truncated, ignoring the bits beyond the precision.
+                </para>
+            </summary>
+            <param name="value_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the operand.</para>
+            </param>
+            <param name="value_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    Of this operation, the sign interpretations of the operands do not matter and both signed and unsigned versions yield the same results.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.NegateSigned(UltimateOrb.UInt128,UltimateOrb.UInt128,UltimateOrb.UInt128@)">
+            <summary>
+                <para>
+                    Negates the specified value of a signed operand with double-precision data.
+                    If the result can not be represented in regard to the precision of the destination, <see cref="T:System.OverflowException"/> will be thrown.
+                </para>
+            </summary>
+            <param name="value_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the operand.</para>
+            </param>
+            <param name="value_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    The operands of this operation are interpreted as signed operands regardless of the sign interpretations implied from their signatures.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.NegateUnsigned(UltimateOrb.UInt128,UltimateOrb.UInt128,UltimateOrb.UInt128@)">
+            <summary>
+                <para>
+                    Negates the specified value of an unsigned operand with double-precision data.
+                    If the result can not be represented in regard to the precision of the destination, <see cref="T:System.OverflowException"/> will be thrown.
+                </para>
+            </summary>
+            <param name="value_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the operand.</para>
+            </param>
+            <param name="value_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    The operands of this operation are interpreted as unsigned operands regardless of the sign interpretations implied from their signatures.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.MultiplyUnchecked(UltimateOrb.UInt128,UltimateOrb.UInt128,UltimateOrb.UInt128,UltimateOrb.UInt128,UltimateOrb.UInt128@)">
+            <summary>
+                <para>
+                    Multiplies the specified values of two operands with double-precision data.
+                    If the result can not be represented in regard to the precision of the destination, no exception will be thrown and the result will be truncated, ignoring the bits beyond the precision.
+                </para>
+            </summary>
+            <param name="first_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="first_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="second_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="second_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    Of this operation, the sign interpretations of the operands do not matter and both signed and unsigned versions yield the same results.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.MultiplySigned(UltimateOrb.UInt128,UltimateOrb.UInt128,UltimateOrb.UInt128,UltimateOrb.UInt128,UltimateOrb.UInt128@)">
+            <summary>
+                <para>
+                    Multiplies the specified values of two signed operands with double-precision data.
+                    If the result can not be represented in regard to the precision of the destination, <see cref="T:System.OverflowException"/> will be thrown.
+                </para>
+            </summary>
+            <param name="first_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="first_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="second_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="second_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    The operands of this operation are interpreted as signed operands regardless of the sign interpretations implied from their signatures.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.MultiplyUnsigned(UltimateOrb.UInt128,UltimateOrb.UInt128,UltimateOrb.UInt128,UltimateOrb.UInt128,UltimateOrb.UInt128@)">
+            <summary>
+                <para>
+                    Multiplies the specified values of two unsigned operands with double-precision data.
+                    If the result can not be represented in regard to the precision of the destination, <see cref="T:System.OverflowException"/> will be thrown.
+                </para>
+            </summary>
+            <param name="first_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="first_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="second_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="second_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    The operands of this operation are interpreted as unsigned operands regardless of the sign interpretations implied from their signatures.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.AddUnchecked(UltimateOrb.UInt128,UltimateOrb.Int128,UltimateOrb.UInt128,UltimateOrb.Int128,UltimateOrb.Int128@)">
+            <summary>
+                <para>
+                    Adds the specified values of two operands with double-precision data.
+                    If the result can not be represented in regard to the precision of the destination, no exception will be thrown and the result will be truncated, ignoring the bits beyond the precision.
+                </para>
+            </summary>
+            <param name="first_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="first_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="second_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="second_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    Of this operation, the sign interpretations of the operands do not matter and both signed and unsigned versions yield the same results.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.AddSigned(UltimateOrb.UInt128,UltimateOrb.Int128,UltimateOrb.UInt128,UltimateOrb.Int128,UltimateOrb.Int128@)">
+            <summary>
+                <para>
+                    Adds the specified values of two signed operands with double-precision data.
+                    If the result can not be represented in regard to the precision of the destination, <see cref="T:System.OverflowException"/> will be thrown.
+                </para>
+            </summary>
+            <param name="first_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="first_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="second_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="second_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    The operands of this operation are interpreted as signed operands regardless of the sign interpretations implied from their signatures.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.AddUnsigned(UltimateOrb.UInt128,UltimateOrb.Int128,UltimateOrb.UInt128,UltimateOrb.Int128,UltimateOrb.Int128@)">
+            <summary>
+                <para>
+                    Adds the specified values of two unsigned operands with double-precision data.
+                    If the result can not be represented in regard to the precision of the destination, <see cref="T:System.OverflowException"/> will be thrown.
+                </para>
+            </summary>
+            <param name="first_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="first_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="second_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="second_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    The operands of this operation are interpreted as unsigned operands regardless of the sign interpretations implied from their signatures.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.SubtractUnchecked(UltimateOrb.UInt128,UltimateOrb.Int128,UltimateOrb.UInt128,UltimateOrb.Int128,UltimateOrb.Int128@)">
+            <summary>
+                <para>
+                    Subtracts the value of one operand with double-precision data from the value of another operand with double-precision data and returns the result.
+                    If the result can not be represented in regard to the precision of the destination, no exception will be thrown and the result will be truncated, ignoring the bits beyond the precision.
+                </para>
+            </summary>
+            <param name="first_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="first_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="second_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="second_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    Of this operation, the sign interpretations of the operands do not matter and both signed and unsigned versions yield the same results.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.SubtractSigned(UltimateOrb.UInt128,UltimateOrb.Int128,UltimateOrb.UInt128,UltimateOrb.Int128,UltimateOrb.Int128@)">
+            <summary>
+                <para>
+                    Subtracts the value of one signed operand with double-precision data from the value of another signed operand with double-precision data and returns the result.
+                    If the result can not be represented in regard to the precision of the destination, <see cref="T:System.OverflowException"/> will be thrown.
+                </para>
+            </summary>
+            <param name="first_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="first_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="second_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="second_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    The operands of this operation are interpreted as signed operands regardless of the sign interpretations implied from their signatures.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.SubtractUnsigned(UltimateOrb.UInt128,UltimateOrb.Int128,UltimateOrb.UInt128,UltimateOrb.Int128,UltimateOrb.Int128@)">
+            <summary>
+                <para>
+                    Subtracts the value of one unsigned operand with double-precision data from the value of another unsigned operand with double-precision data and returns the result.
+                    If the result can not be represented in regard to the precision of the destination, <see cref="T:System.OverflowException"/> will be thrown.
+                </para>
+            </summary>
+            <param name="first_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="first_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="second_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="second_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    The operands of this operation are interpreted as unsigned operands regardless of the sign interpretations implied from their signatures.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.NegateUnchecked(UltimateOrb.UInt128,UltimateOrb.Int128,UltimateOrb.Int128@)">
+            <summary>
+                <para>
+                    Negates the specified value of an operand with double-precision data.
+                    If the result can not be represented in regard to the precision of the destination, no exception will be thrown and the result will be truncated, ignoring the bits beyond the precision.
+                </para>
+            </summary>
+            <param name="value_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the operand.</para>
+            </param>
+            <param name="value_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    Of this operation, the sign interpretations of the operands do not matter and both signed and unsigned versions yield the same results.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.NegateSigned(UltimateOrb.UInt128,UltimateOrb.Int128,UltimateOrb.Int128@)">
+            <summary>
+                <para>
+                    Negates the specified value of a signed operand with double-precision data.
+                    If the result can not be represented in regard to the precision of the destination, <see cref="T:System.OverflowException"/> will be thrown.
+                </para>
+            </summary>
+            <param name="value_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the operand.</para>
+            </param>
+            <param name="value_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    The operands of this operation are interpreted as signed operands regardless of the sign interpretations implied from their signatures.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.NegateUnsigned(UltimateOrb.UInt128,UltimateOrb.Int128,UltimateOrb.Int128@)">
+            <summary>
+                <para>
+                    Negates the specified value of an unsigned operand with double-precision data.
+                    If the result can not be represented in regard to the precision of the destination, <see cref="T:System.OverflowException"/> will be thrown.
+                </para>
+            </summary>
+            <param name="value_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the operand.</para>
+            </param>
+            <param name="value_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    The operands of this operation are interpreted as unsigned operands regardless of the sign interpretations implied from their signatures.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.MultiplyUnchecked(UltimateOrb.UInt128,UltimateOrb.Int128,UltimateOrb.UInt128,UltimateOrb.Int128,UltimateOrb.Int128@)">
+            <summary>
+                <para>
+                    Multiplies the specified values of two operands with double-precision data.
+                    If the result can not be represented in regard to the precision of the destination, no exception will be thrown and the result will be truncated, ignoring the bits beyond the precision.
+                </para>
+            </summary>
+            <param name="first_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="first_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="second_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="second_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    Of this operation, the sign interpretations of the operands do not matter and both signed and unsigned versions yield the same results.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.MultiplySigned(UltimateOrb.UInt128,UltimateOrb.Int128,UltimateOrb.UInt128,UltimateOrb.Int128,UltimateOrb.Int128@)">
+            <summary>
+                <para>
+                    Multiplies the specified values of two signed operands with double-precision data.
+                    If the result can not be represented in regard to the precision of the destination, <see cref="T:System.OverflowException"/> will be thrown.
+                </para>
+            </summary>
+            <param name="first_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="first_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="second_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="second_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    The operands of this operation are interpreted as signed operands regardless of the sign interpretations implied from their signatures.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.MultiplyUnsigned(UltimateOrb.UInt128,UltimateOrb.Int128,UltimateOrb.UInt128,UltimateOrb.Int128,UltimateOrb.Int128@)">
+            <summary>
+                <para>
+                    Multiplies the specified values of two unsigned operands with double-precision data.
+                    If the result can not be represented in regard to the precision of the destination, <see cref="T:System.OverflowException"/> will be thrown.
+                </para>
+            </summary>
+            <param name="first_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="first_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="second_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="second_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    The operands of this operation are interpreted as unsigned operands regardless of the sign interpretations implied from their signatures.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.AddUnchecked(UltimateOrb.Int128,UltimateOrb.UInt128,UltimateOrb.Int128,UltimateOrb.UInt128,UltimateOrb.UInt128@)">
+            <summary>
+                <para>
+                    Adds the specified values of two operands with double-precision data.
+                    If the result can not be represented in regard to the precision of the destination, no exception will be thrown and the result will be truncated, ignoring the bits beyond the precision.
+                </para>
+            </summary>
+            <param name="first_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="first_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="second_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="second_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    Of this operation, the sign interpretations of the operands do not matter and both signed and unsigned versions yield the same results.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.AddSigned(UltimateOrb.Int128,UltimateOrb.UInt128,UltimateOrb.Int128,UltimateOrb.UInt128,UltimateOrb.UInt128@)">
+            <summary>
+                <para>
+                    Adds the specified values of two signed operands with double-precision data.
+                    If the result can not be represented in regard to the precision of the destination, <see cref="T:System.OverflowException"/> will be thrown.
+                </para>
+            </summary>
+            <param name="first_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="first_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="second_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="second_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    The operands of this operation are interpreted as signed operands regardless of the sign interpretations implied from their signatures.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.AddUnsigned(UltimateOrb.Int128,UltimateOrb.UInt128,UltimateOrb.Int128,UltimateOrb.UInt128,UltimateOrb.UInt128@)">
+            <summary>
+                <para>
+                    Adds the specified values of two unsigned operands with double-precision data.
+                    If the result can not be represented in regard to the precision of the destination, <see cref="T:System.OverflowException"/> will be thrown.
+                </para>
+            </summary>
+            <param name="first_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="first_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="second_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="second_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    The operands of this operation are interpreted as unsigned operands regardless of the sign interpretations implied from their signatures.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.SubtractUnchecked(UltimateOrb.Int128,UltimateOrb.UInt128,UltimateOrb.Int128,UltimateOrb.UInt128,UltimateOrb.UInt128@)">
+            <summary>
+                <para>
+                    Subtracts the value of one operand with double-precision data from the value of another operand with double-precision data and returns the result.
+                    If the result can not be represented in regard to the precision of the destination, no exception will be thrown and the result will be truncated, ignoring the bits beyond the precision.
+                </para>
+            </summary>
+            <param name="first_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="first_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="second_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="second_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    Of this operation, the sign interpretations of the operands do not matter and both signed and unsigned versions yield the same results.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.SubtractSigned(UltimateOrb.Int128,UltimateOrb.UInt128,UltimateOrb.Int128,UltimateOrb.UInt128,UltimateOrb.UInt128@)">
+            <summary>
+                <para>
+                    Subtracts the value of one signed operand with double-precision data from the value of another signed operand with double-precision data and returns the result.
+                    If the result can not be represented in regard to the precision of the destination, <see cref="T:System.OverflowException"/> will be thrown.
+                </para>
+            </summary>
+            <param name="first_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="first_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="second_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="second_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    The operands of this operation are interpreted as signed operands regardless of the sign interpretations implied from their signatures.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.SubtractUnsigned(UltimateOrb.Int128,UltimateOrb.UInt128,UltimateOrb.Int128,UltimateOrb.UInt128,UltimateOrb.UInt128@)">
+            <summary>
+                <para>
+                    Subtracts the value of one unsigned operand with double-precision data from the value of another unsigned operand with double-precision data and returns the result.
+                    If the result can not be represented in regard to the precision of the destination, <see cref="T:System.OverflowException"/> will be thrown.
+                </para>
+            </summary>
+            <param name="first_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="first_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="second_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="second_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    The operands of this operation are interpreted as unsigned operands regardless of the sign interpretations implied from their signatures.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.NegateUnchecked(UltimateOrb.Int128,UltimateOrb.UInt128,UltimateOrb.UInt128@)">
+            <summary>
+                <para>
+                    Negates the specified value of an operand with double-precision data.
+                    If the result can not be represented in regard to the precision of the destination, no exception will be thrown and the result will be truncated, ignoring the bits beyond the precision.
+                </para>
+            </summary>
+            <param name="value_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the operand.</para>
+            </param>
+            <param name="value_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    Of this operation, the sign interpretations of the operands do not matter and both signed and unsigned versions yield the same results.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.NegateSigned(UltimateOrb.Int128,UltimateOrb.UInt128,UltimateOrb.UInt128@)">
+            <summary>
+                <para>
+                    Negates the specified value of a signed operand with double-precision data.
+                    If the result can not be represented in regard to the precision of the destination, <see cref="T:System.OverflowException"/> will be thrown.
+                </para>
+            </summary>
+            <param name="value_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the operand.</para>
+            </param>
+            <param name="value_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    The operands of this operation are interpreted as signed operands regardless of the sign interpretations implied from their signatures.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.NegateUnsigned(UltimateOrb.Int128,UltimateOrb.UInt128,UltimateOrb.UInt128@)">
+            <summary>
+                <para>
+                    Negates the specified value of an unsigned operand with double-precision data.
+                    If the result can not be represented in regard to the precision of the destination, <see cref="T:System.OverflowException"/> will be thrown.
+                </para>
+            </summary>
+            <param name="value_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the operand.</para>
+            </param>
+            <param name="value_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    The operands of this operation are interpreted as unsigned operands regardless of the sign interpretations implied from their signatures.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.MultiplyUnchecked(UltimateOrb.Int128,UltimateOrb.UInt128,UltimateOrb.Int128,UltimateOrb.UInt128,UltimateOrb.UInt128@)">
+            <summary>
+                <para>
+                    Multiplies the specified values of two operands with double-precision data.
+                    If the result can not be represented in regard to the precision of the destination, no exception will be thrown and the result will be truncated, ignoring the bits beyond the precision.
+                </para>
+            </summary>
+            <param name="first_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="first_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="second_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="second_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    Of this operation, the sign interpretations of the operands do not matter and both signed and unsigned versions yield the same results.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.MultiplySigned(UltimateOrb.Int128,UltimateOrb.UInt128,UltimateOrb.Int128,UltimateOrb.UInt128,UltimateOrb.UInt128@)">
+            <summary>
+                <para>
+                    Multiplies the specified values of two signed operands with double-precision data.
+                    If the result can not be represented in regard to the precision of the destination, <see cref="T:System.OverflowException"/> will be thrown.
+                </para>
+            </summary>
+            <param name="first_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="first_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="second_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="second_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    The operands of this operation are interpreted as signed operands regardless of the sign interpretations implied from their signatures.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.MultiplyUnsigned(UltimateOrb.Int128,UltimateOrb.UInt128,UltimateOrb.Int128,UltimateOrb.UInt128,UltimateOrb.UInt128@)">
+            <summary>
+                <para>
+                    Multiplies the specified values of two unsigned operands with double-precision data.
+                    If the result can not be represented in regard to the precision of the destination, <see cref="T:System.OverflowException"/> will be thrown.
+                </para>
+            </summary>
+            <param name="first_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="first_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="second_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="second_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    The operands of this operation are interpreted as unsigned operands regardless of the sign interpretations implied from their signatures.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.AddUnchecked(UltimateOrb.Int128,UltimateOrb.Int128,UltimateOrb.Int128,UltimateOrb.Int128,UltimateOrb.Int128@)">
+            <summary>
+                <para>
+                    Adds the specified values of two operands with double-precision data.
+                    If the result can not be represented in regard to the precision of the destination, no exception will be thrown and the result will be truncated, ignoring the bits beyond the precision.
+                </para>
+            </summary>
+            <param name="first_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="first_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="second_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="second_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    Of this operation, the sign interpretations of the operands do not matter and both signed and unsigned versions yield the same results.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.AddSigned(UltimateOrb.Int128,UltimateOrb.Int128,UltimateOrb.Int128,UltimateOrb.Int128,UltimateOrb.Int128@)">
+            <summary>
+                <para>
+                    Adds the specified values of two signed operands with double-precision data.
+                    If the result can not be represented in regard to the precision of the destination, <see cref="T:System.OverflowException"/> will be thrown.
+                </para>
+            </summary>
+            <param name="first_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="first_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="second_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="second_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    The operands of this operation are interpreted as signed operands regardless of the sign interpretations implied from their signatures.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.AddUnsigned(UltimateOrb.Int128,UltimateOrb.Int128,UltimateOrb.Int128,UltimateOrb.Int128,UltimateOrb.Int128@)">
+            <summary>
+                <para>
+                    Adds the specified values of two unsigned operands with double-precision data.
+                    If the result can not be represented in regard to the precision of the destination, <see cref="T:System.OverflowException"/> will be thrown.
+                </para>
+            </summary>
+            <param name="first_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="first_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="second_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="second_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    The operands of this operation are interpreted as unsigned operands regardless of the sign interpretations implied from their signatures.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.SubtractUnchecked(UltimateOrb.Int128,UltimateOrb.Int128,UltimateOrb.Int128,UltimateOrb.Int128,UltimateOrb.Int128@)">
+            <summary>
+                <para>
+                    Subtracts the value of one operand with double-precision data from the value of another operand with double-precision data and returns the result.
+                    If the result can not be represented in regard to the precision of the destination, no exception will be thrown and the result will be truncated, ignoring the bits beyond the precision.
+                </para>
+            </summary>
+            <param name="first_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="first_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="second_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="second_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    Of this operation, the sign interpretations of the operands do not matter and both signed and unsigned versions yield the same results.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.SubtractSigned(UltimateOrb.Int128,UltimateOrb.Int128,UltimateOrb.Int128,UltimateOrb.Int128,UltimateOrb.Int128@)">
+            <summary>
+                <para>
+                    Subtracts the value of one signed operand with double-precision data from the value of another signed operand with double-precision data and returns the result.
+                    If the result can not be represented in regard to the precision of the destination, <see cref="T:System.OverflowException"/> will be thrown.
+                </para>
+            </summary>
+            <param name="first_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="first_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="second_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="second_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    The operands of this operation are interpreted as signed operands regardless of the sign interpretations implied from their signatures.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.SubtractUnsigned(UltimateOrb.Int128,UltimateOrb.Int128,UltimateOrb.Int128,UltimateOrb.Int128,UltimateOrb.Int128@)">
+            <summary>
+                <para>
+                    Subtracts the value of one unsigned operand with double-precision data from the value of another unsigned operand with double-precision data and returns the result.
+                    If the result can not be represented in regard to the precision of the destination, <see cref="T:System.OverflowException"/> will be thrown.
+                </para>
+            </summary>
+            <param name="first_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="first_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="second_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="second_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    The operands of this operation are interpreted as unsigned operands regardless of the sign interpretations implied from their signatures.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.NegateUnchecked(UltimateOrb.Int128,UltimateOrb.Int128,UltimateOrb.Int128@)">
+            <summary>
+                <para>
+                    Negates the specified value of an operand with double-precision data.
+                    If the result can not be represented in regard to the precision of the destination, no exception will be thrown and the result will be truncated, ignoring the bits beyond the precision.
+                </para>
+            </summary>
+            <param name="value_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the operand.</para>
+            </param>
+            <param name="value_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    Of this operation, the sign interpretations of the operands do not matter and both signed and unsigned versions yield the same results.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.NegateSigned(UltimateOrb.Int128,UltimateOrb.Int128,UltimateOrb.Int128@)">
+            <summary>
+                <para>
+                    Negates the specified value of a signed operand with double-precision data.
+                    If the result can not be represented in regard to the precision of the destination, <see cref="T:System.OverflowException"/> will be thrown.
+                </para>
+            </summary>
+            <param name="value_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the operand.</para>
+            </param>
+            <param name="value_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    The operands of this operation are interpreted as signed operands regardless of the sign interpretations implied from their signatures.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.NegateUnsigned(UltimateOrb.Int128,UltimateOrb.Int128,UltimateOrb.Int128@)">
+            <summary>
+                <para>
+                    Negates the specified value of an unsigned operand with double-precision data.
+                    If the result can not be represented in regard to the precision of the destination, <see cref="T:System.OverflowException"/> will be thrown.
+                </para>
+            </summary>
+            <param name="value_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the operand.</para>
+            </param>
+            <param name="value_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    The operands of this operation are interpreted as unsigned operands regardless of the sign interpretations implied from their signatures.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.MultiplyUnchecked(UltimateOrb.Int128,UltimateOrb.Int128,UltimateOrb.Int128,UltimateOrb.Int128,UltimateOrb.Int128@)">
+            <summary>
+                <para>
+                    Multiplies the specified values of two operands with double-precision data.
+                    If the result can not be represented in regard to the precision of the destination, no exception will be thrown and the result will be truncated, ignoring the bits beyond the precision.
+                </para>
+            </summary>
+            <param name="first_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="first_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="second_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="second_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    Of this operation, the sign interpretations of the operands do not matter and both signed and unsigned versions yield the same results.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.MultiplySigned(UltimateOrb.Int128,UltimateOrb.Int128,UltimateOrb.Int128,UltimateOrb.Int128,UltimateOrb.Int128@)">
+            <summary>
+                <para>
+                    Multiplies the specified values of two signed operands with double-precision data.
+                    If the result can not be represented in regard to the precision of the destination, <see cref="T:System.OverflowException"/> will be thrown.
+                </para>
+            </summary>
+            <param name="first_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="first_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="second_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="second_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    The operands of this operation are interpreted as signed operands regardless of the sign interpretations implied from their signatures.
+                </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.DoubleArithmetic.MultiplyUnsigned(UltimateOrb.Int128,UltimateOrb.Int128,UltimateOrb.Int128,UltimateOrb.Int128,UltimateOrb.Int128@)">
+            <summary>
+                <para>
+                    Multiplies the specified values of two unsigned operands with double-precision data.
+                    If the result can not be represented in regard to the precision of the destination, <see cref="T:System.OverflowException"/> will be thrown.
+                </para>
+            </summary>
+            <param name="first_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="first_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the first operand.</para>
+            </param>
+            <param name="second_lo">
+                <para>The <c>lo</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="second_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the second operand.</para>
+            </param>
+            <param name="result_hi">
+                <para>The <c>hi</c> bits of the double-precision data of the result.</para>
+            </param>
+            <returns>
+                <para>The <c>lo</c> bits of the double-precision data of the result.</para>
+            </returns>
+            <remarks>
+                <para>
+                    The operands of this operation are interpreted as unsigned operands regardless of the sign interpretations implied from their signatures.
+                </para>
+            </remarks>
+        </member>
         <member name="M:UltimateOrb.Numerics.DoubleArithmetic.BigSqrt(System.UInt64,System.UInt32)">
             <summary>
                 <para>
@@ -3023,6 +6358,15 @@
                 <para>The Number must be in format <c>[1-9][0-9]*</c>.</para>
             </remarks>
         </member>
+        <member name="M:UltimateOrb.UInt256.TryParseCStyleNormalizedU256(System.String,UltimateOrb.UInt256@)">
+            <summary>
+                <para>Parses an unsigned integer.</para>
+            </summary>
+            <returns></returns>
+            <remarks>
+                <para>The Number must be in format <c>[1-9][0-9]*</c>.</para>
+            </remarks>
+        </member>
         <member name="T:UltimateOrb.UndefinedT">
             <summary>
             Represents the type of the undefined value witch can be used with <see cref="T:UltimateOrb.UndefinableNullable`1"/>.
@@ -3036,6 +6380,16 @@
         <member name="M:UltimateOrb.UndefinedT.ToString">
             <summary>
             Returns a string that represents the undefined value.
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.Unmanaged.NativeArray`1.Dispose">
+            <summary>
+            WARNING: Must not invoke Dispose multiple times.
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.Unmanaged.AlignedNativeArray`1.Dispose">
+            <summary>
+            WARNING: Must not invoke Dispose multiple times.
             </summary>
         </member>
         <member name="M:UltimateOrb.Utilities.BooleanIntegerModule.Equals(System.UInt32,System.UInt32)">

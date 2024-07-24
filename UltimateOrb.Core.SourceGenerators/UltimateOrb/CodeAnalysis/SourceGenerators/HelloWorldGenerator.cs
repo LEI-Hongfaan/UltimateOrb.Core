@@ -6,12 +6,11 @@ using System.Text;
 namespace UltimateOrb.CodeAnalysis.SourceGenerators {
 
     [Generator]
-    public class HelloWorldGenerator : ISourceGenerator {
+    public class HelloWorldGenerator : IIncrementalGenerator {
 
-        public void Initialize(GeneratorInitializationContext context) { }
-
-        public void Execute(GeneratorExecutionContext context) {
-            context.AddSource("MyGeneratedFile.cs", SourceText.From(@"
+        public void Initialize(IncrementalGeneratorInitializationContext context) {
+            context.RegisterPostInitializationOutput(context => {
+                context.AddSource("MyGeneratedFile.cs", SourceText.From(@"
 namespace GeneratedNamespace {
 
     public class GeneratedClass {
@@ -20,6 +19,7 @@ namespace GeneratedNamespace {
         }
     }
 }", Encoding.UTF8));
+            });
         }
     }
 }

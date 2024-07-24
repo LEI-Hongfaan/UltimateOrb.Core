@@ -512,28 +512,28 @@ namespace UltimateOrb.Mathematics.NumberTheory {
         [System.Runtime.TargetedPatchingOptOutAttribute("")]
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         [System.Diagnostics.Contracts.PureAttribute()]
-        public static ulong GreatestCommonDivisorPartial(ulong module, ulong value, out long pseudoinverse) {
-            System.Diagnostics.Contracts.Contract.Requires(module > 0);
+        public static ulong GreatestCommonDivisorPartial(ulong modulus, ulong value, out long pseudoinverse) {
+            System.Diagnostics.Contracts.Contract.Requires(modulus > 0);
             System.Diagnostics.Contracts.Contract.Requires(value > 0);
             unchecked {
                 long v0 = 0;
                 long v1 = 1;
-                if (value > module) {
+                if (value > modulus) {
                     goto L_02;
                 }
             L_01:
                 ulong q;
-                q = Math.DivRem(module, value, out module);
-                if (0u == module) {
+                q = Math.DivRem(modulus, value, out modulus);
+                if (0u == modulus) {
                     pseudoinverse = v1;
                     return value;
                 }
                 v0 -= (long)q * v1;
             L_02:
-                q = Math.DivRem(value, module, out value);
+                q = Math.DivRem(value, modulus, out value);
                 if (0u == value) {
                     pseudoinverse = v0;
-                    return module;
+                    return modulus;
                 }
                 v1 -= (long)q * v0;
                 goto L_01;
@@ -545,24 +545,24 @@ namespace UltimateOrb.Mathematics.NumberTheory {
         [System.Runtime.TargetedPatchingOptOutAttribute("")]
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         [System.Diagnostics.Contracts.PureAttribute()]
-        public static ulong GreatestCommonDivisorPartial(ulong module, ulong value, out ulong pseudoinverse) {
-            System.Diagnostics.Contracts.Contract.Requires(module > 0);
-            System.Diagnostics.Contracts.Contract.Requires(module > value);
+        public static ulong GreatestCommonDivisorPartial(ulong modulus, ulong value, out ulong pseudoinverse) {
+            System.Diagnostics.Contracts.Contract.Requires(modulus > 0);
+            System.Diagnostics.Contracts.Contract.Requires(modulus > value);
             System.Diagnostics.Contracts.Contract.Requires(value > 0);
             unchecked {
                 long v0 = 0;
                 long v1 = 1;
-                for (var n = module; ;) {
+                for (var n = modulus; ;) {
                     ulong q;
                     q = Math.DivRem(n, value, out n);
                     if (0u == n) {
-                        pseudoinverse = ((0 > v1) ? (module + (ulong)v1) : (ulong)v1);
+                        pseudoinverse = ((0 > v1) ? (modulus + (ulong)v1) : (ulong)v1);
                         return value;
                     }
                     v0 -= (long)q * v1;
                     q = Math.DivRem(value, n, out value);
                     if (0u == value) {
-                        pseudoinverse = ((0 > v0) ? (module + (ulong)v0) : (ulong)v0);
+                        pseudoinverse = ((0 > v0) ? (modulus + (ulong)v0) : (ulong)v0);
                         return n;
                     }
                     v1 -= (long)q * v0;
@@ -575,17 +575,72 @@ namespace UltimateOrb.Mathematics.NumberTheory {
         [System.Runtime.TargetedPatchingOptOutAttribute("")]
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         [System.Diagnostics.Contracts.PureAttribute()]
-        public static ulong GreatestCommonDivisor(ulong module, ulong value, out ulong pseudoinverse) {
-            System.Diagnostics.Contracts.Contract.Requires(module > 0u);
-            System.Diagnostics.Contracts.Contract.EnsuresOnThrow<DivideByZeroException>(0u == System.Diagnostics.Contracts.Contract.OldValue(module));
+        public static ulong GreatestCommonDivisor(ulong modulus, ulong value, out ulong pseudoinverse) {
+            System.Diagnostics.Contracts.Contract.Requires(modulus > 0u);
+            System.Diagnostics.Contracts.Contract.EnsuresOnThrow<DivideByZeroException>(0u == System.Diagnostics.Contracts.Contract.OldValue(modulus));
+            return GreatestCommonDivisor_A_Binary(modulus, value, out pseudoinverse);
+        }
+        
+        public static ulong GreatestCommonDivisorNoThrow_A_Binary(ulong modulus, ulong value, out ulong pseudoinverse) {
+            ulong x0 = 1, x1 = 0, y0 = 0, y1 = 1;
+
+            while (modulus != 0 && value != 0) {
+                while ((modulus & 1) == 0) {
+                    modulus >>= 1;
+                    if ((x0 & 1) == 0 && (y0 & 1) == 0) {
+                        x0 >>= 1;
+                        y0 >>= 1;
+                    } else {
+                        x0 = (x0 + value) >> 1;
+                        y0 = (y0 - modulus) >> 1;
+                    }
+                }
+
+                while ((value & 1) == 0) {
+                    value >>= 1;
+                    if ((x1 & 1) == 0 && (y1 & 1) == 0) {
+                        x1 >>= 1;
+                        y1 >>= 1;
+                    } else {
+                        x1 = (x1 + value) >> 1;
+                        y1 = (y1 - modulus) >> 1;
+                    }
+                }
+
+                if (modulus >= value) {
+                    modulus -= value;
+                    x0 -= x1;
+                    y0 -= y1;
+                } else {
+                    value -= modulus;
+                    x1 -= x0;
+                    y1 -= y0;
+                }
+            }
+            pseudoinverse = y0;
+            return modulus == 0 ? value : modulus;
+        }
+
+        public static ulong GreatestCommonDivisor_A_Binary(ulong modulus, ulong value, out ulong pseudoinverse) {
+            System.Diagnostics.Contracts.Contract.Requires(modulus > 0u);
+            System.Diagnostics.Contracts.Contract.EnsuresOnThrow<DivideByZeroException>(0u == System.Diagnostics.Contracts.Contract.OldValue(modulus));
+            if (modulus == 0) {
+                _ = 1 / modulus; // throw
+            }
+            return GreatestCommonDivisorNoThrow_A_Binary(modulus, value, out pseudoinverse);
+        }
+
+        public static ulong GreatestCommonDivisor_A_DivRem(ulong modulus, ulong value, out ulong pseudoinverse) {
+            System.Diagnostics.Contracts.Contract.Requires(modulus > 0u);
+            System.Diagnostics.Contracts.Contract.EnsuresOnThrow<DivideByZeroException>(0u == System.Diagnostics.Contracts.Contract.OldValue(modulus));
             unchecked {
                 long v0 = 0;
                 long v1 = 1;
-                var n = module;
-                if (value > module) {
+                var n = modulus;
+                if (value > modulus) {
                     goto L_02;
                 }
-                if (0u == value && 0u != module) {
+                if (0u == value && 0u != modulus) {
                     goto L_03;
                 }
             L_01:
@@ -595,7 +650,7 @@ namespace UltimateOrb.Mathematics.NumberTheory {
                     if (0 == v1) {
                         goto L_03;
                     }
-                    pseudoinverse = ((0 > v1) ? (module + (ulong)v1) : (ulong)v1);
+                    pseudoinverse = ((0 > v1) ? (modulus + (ulong)v1) : (ulong)v1);
                     return value;
                 }
                 v0 -= (long)q * v1;
@@ -605,7 +660,7 @@ namespace UltimateOrb.Mathematics.NumberTheory {
                     if (0 == v0) {
                         goto L_03;
                     }
-                    pseudoinverse = ((0 > v0) ? (module + (ulong)v0) : (ulong)v0);
+                    pseudoinverse = ((0 > v0) ? (modulus + (ulong)v0) : (ulong)v0);
                     return n;
                 }
                 v1 -= (long)q * v0;

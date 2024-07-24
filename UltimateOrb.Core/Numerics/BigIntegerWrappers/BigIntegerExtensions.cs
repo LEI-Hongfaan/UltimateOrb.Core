@@ -25,6 +25,24 @@ namespace UltimateOrb.Numerics.BigIntegerWrappers {
             return GetFieldInfo("_sign").GetFieldOffset();
         }
 
+#if NET8_0_OR_GREATER && USE_UNSAFE_ACCESS_TO_STD_BIGINTEGER
+        /*
+        [UnsafeAccessor(UnsafeAccessorKind.Field, Name = "_sign")]
+        internal extern static ref readonly int GetSignField(this ref readonly System.Numerics.BigInteger obj);
+
+        [UnsafeAccessor(UnsafeAccessorKind.Field, Name = "_bits")]
+        internal extern static ref readonly uint[] GetBitsField(this ref readonly System.Numerics.BigInteger obj);
+        */
+
+        [UnsafeAccessor(UnsafeAccessorKind.Field, Name = "_sign")]
+        internal extern static int GetSignField(this System.Numerics.BigInteger obj);
+
+        [UnsafeAccessor(UnsafeAccessorKind.Field, Name = "_bits")]
+        internal extern static uint[] GetBitsField(this System.Numerics.BigInteger obj);
+
+        [UnsafeAccessor(UnsafeAccessorKind.Constructor)]
+        internal extern static System.Numerics.BigInteger CreateBigIntegerInternal(int sign, uint[]? bits);
+#endif
 
         private static FieldInfo GetFieldInfo(string name) {
             var r = typeof(BigInteger).GetField(name, BindingFlags.Instance | BindingFlags.NonPublic);
@@ -45,6 +63,7 @@ namespace UltimateOrb.Numerics.BigIntegerWrappers {
         /// </summary>
         /// <returns>The minimum non-negative number of bits in two's complement notation without the sign bit.</returns>
         /// <remarks>This method returns 0 iff the value of current object is equal to <see cref="Zero"/> or <see cref="MinusOne"/>. For positive integers the return value is equal to the ordinary binary representation string length.</remarks>
+        [Obsolete]
         internal static long GetBitLength(this BigInteger value) {
             uint highValue;
             int bitsArrayLength;

@@ -1,4 +1,6 @@
-﻿namespace UltimateOrb {
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace UltimateOrb {
 
     public enum FloatingPointRounding {
 
@@ -34,6 +36,12 @@
         /// In binary arithmetic, this rounding is to round the result toward zero, and set the least significant bit to 1 if the rounded result is inexact.
         /// Equivalently, it consists in returning the intermediate result when it is exactly representable, and the nearest floating-point number with an odd significand otherwise.
         /// </remarks>
-        ToOdd
+        ToOdd,
+
+        /// <summary>
+        /// Similar to <see cref="ToNearestWithMidpointToEven"/> but round half to old. Only partially supported by UltimateOrb APIs.
+        /// </summary>
+        [Experimental("UoWIP")]
+        ToNearestWithMidpointToOdd,
     }
 }

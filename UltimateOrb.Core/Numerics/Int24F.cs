@@ -17,6 +17,7 @@ namespace UltimateOrb.Numerics {
         public readonly struct Unchecked {
         }
 
+        [Obsolete]
         public readonly struct Plain {
         }
     }

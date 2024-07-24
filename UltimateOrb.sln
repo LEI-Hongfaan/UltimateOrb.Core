@@ -30,13 +30,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.editorconfig = .editorconfig
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UltimateOrb.Tests.BlazorAot.Server", "UltimateOrb.Tests.BlazorAot\Server\UltimateOrb.Tests.BlazorAot.Server.csproj", "{5102EA8C-1F7B-447D-9FAE-3B3A56815639}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UltimateOrb.Tests.BlazorAot.Server", "UltimateOrb.Tests.BlazorAot\Server\UltimateOrb.Tests.BlazorAot.Server.csproj", "{5102EA8C-1F7B-447D-9FAE-3B3A56815639}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UltimateOrb.Tests.BlazorAot.Client", "UltimateOrb.Tests.BlazorAot\Client\UltimateOrb.Tests.BlazorAot.Client.csproj", "{18F89E12-F10C-4DE8-961D-C67825D2221B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UltimateOrb.Tests.BlazorAot.Client", "UltimateOrb.Tests.BlazorAot\Client\UltimateOrb.Tests.BlazorAot.Client.csproj", "{18F89E12-F10C-4DE8-961D-C67825D2221B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UltimateOrb.Tests.BlazorAot.Shared", "UltimateOrb.Tests.BlazorAot\Shared\UltimateOrb.Tests.BlazorAot.Shared.csproj", "{7E6479C5-1101-4079-8F1F-D891DAD8A4F1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UltimateOrb.Tests.BlazorAot.Shared", "UltimateOrb.Tests.BlazorAot\Shared\UltimateOrb.Tests.BlazorAot.Shared.csproj", "{7E6479C5-1101-4079-8F1F-D891DAD8A4F1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UltimateOrb.Core.MonoAotReadinessChecker", "UltimateOrb.Core.MonoAotReadinessChecker\UltimateOrb.Core.MonoAotReadinessChecker.csproj", "{2F8AF4B9-E9BA-45CA-AB7B-423A574D9AC6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UltimateOrb.Core.MonoAotReadinessChecker", "UltimateOrb.Core.MonoAotReadinessChecker\UltimateOrb.Core.MonoAotReadinessChecker.csproj", "{2F8AF4B9-E9BA-45CA-AB7B-423A574D9AC6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UltimateOrb.Core.CodeAnalyzers", "UltimateOrb.Core.CodeAnalyzers\UltimateOrb.Core.CodeAnalyzers.csproj", "{92A71C4C-7BB2-4263-91B9-5B53064DAED6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -92,6 +94,10 @@ Global
 		{2F8AF4B9-E9BA-45CA-AB7B-423A574D9AC6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2F8AF4B9-E9BA-45CA-AB7B-423A574D9AC6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2F8AF4B9-E9BA-45CA-AB7B-423A574D9AC6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{92A71C4C-7BB2-4263-91B9-5B53064DAED6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{92A71C4C-7BB2-4263-91B9-5B53064DAED6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{92A71C4C-7BB2-4263-91B9-5B53064DAED6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{92A71C4C-7BB2-4263-91B9-5B53064DAED6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

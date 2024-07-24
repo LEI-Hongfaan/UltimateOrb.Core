@@ -34,12 +34,12 @@ namespace ThisAssembly {
                     var assembly = AssemblyDefinition.ReadAssembly(fileName_Original, rm);
 
 
-                    var module = assembly.MainModule;
-                    // ProcessCoreLibByReference(module);
+                    var modulus = assembly.MainModule;
+                    // ProcessCoreLibByReference(modulus);
                     var found = 0;
                     {
 
-                        foreach (var typeref in module.GetTypes()) {
+                        foreach (var typeref in modulus.GetTypes()) {
                             if (typeref.IsNested) {
                                 if (!(typeref.GenericParameters.Count < 16)) {
                                     ++found;

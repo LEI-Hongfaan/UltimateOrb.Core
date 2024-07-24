@@ -10,7 +10,7 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Dorabot.CInterop {
+namespace UltimateOrb.CInterop {
 <#
 
 static string TypeParamList(int i, string name = "T", bool s = true) {
@@ -33,9 +33,9 @@ for(var i = 1; i <= 13; ++i) {
     [StructLayout(LayoutKind.Sequential)]
     public unsafe readonly struct ActionPtr<<#= TypeParamList(i) #>> : IComparable, IComparable<ActionPtr<<#= TypeParamList(i) #>>>, IEquatable<ActionPtr<<#= TypeParamList(i) #>>>, ISpanFormattable, IFormattable, ISerializable {
 
-        readonly delegate* managed<<#= TypeParamList(i) #>, void> value__;
+        readonly delegate* unmanaged[Cdecl]<<#= TypeParamList(i) #>, void> value__;
 
-        public unsafe ActionPtr(delegate* managed<<#= TypeParamList(i) #>, void> value) {
+        public unsafe ActionPtr(delegate* unmanaged[Cdecl]<<#= TypeParamList(i) #>, void> value) {
             value__ = value;
         }
 
@@ -44,18 +44,18 @@ for(var i = 1; i <= 13; ++i) {
             if (sizeof(nint) == sizeof(int) && (value > int.MaxValue || value < int.MinValue)) {
                 throw new ArgumentException("Serialization_InvalidPtrValue");
             }
-            value__ = unchecked((delegate* managed<<#= TypeParamList(i) #>, void>)value);
+            value__ = unchecked((delegate* unmanaged[Cdecl]<<#= TypeParamList(i) #>, void>)value);
         }
 
         public void Invoke(<#= ParamList(i) #>) {
             value__(<#= ArgList(i) #>);
         }
 
-        public static implicit operator ActionPtr<<#= TypeParamList(i) #>>(delegate* managed<<#= TypeParamList(i) #>, void> value) => new(value);
+        public static implicit operator ActionPtr<<#= TypeParamList(i) #>>(delegate* unmanaged[Cdecl]<<#= TypeParamList(i) #>, void> value) => new(value);
 
-        public static implicit operator delegate* managed<<#= TypeParamList(i) #>, void>(ActionPtr<<#= TypeParamList(i) #>> value) => value.value__;
+        public static implicit operator delegate* unmanaged[Cdecl]<<#= TypeParamList(i) #>, void>(ActionPtr<<#= TypeParamList(i) #>> value) => value.value__;
 
-        public static explicit operator ActionPtr<<#= TypeParamList(i) #>>(void* value) => new((delegate* managed<<#= TypeParamList(i) #>, void>)value);
+        public static explicit operator ActionPtr<<#= TypeParamList(i) #>>(void* value) => new((delegate* unmanaged[Cdecl]<<#= TypeParamList(i) #>, void>)value);
 
         public static implicit operator void*(ActionPtr<<#= TypeParamList(i) #>> value) => value.value__;
 
@@ -132,9 +132,9 @@ for(var i = 1; i <= 13; ++i) {
     [StructLayout(LayoutKind.Sequential)]
     public unsafe readonly struct FuncPtr<<#= TypeParamList(i) #>, TResult> : IComparable, IComparable<FuncPtr<<#= TypeParamList(i) #>, TResult>>, IEquatable<FuncPtr<<#= TypeParamList(i) #>, TResult>>, ISpanFormattable, IFormattable, ISerializable where TResult : unmanaged {
 
-        readonly delegate* managed<<#= TypeParamList(i) #>, TResult> value__;
+        readonly delegate* unmanaged[Cdecl]<<#= TypeParamList(i) #>, TResult> value__;
 
-        public unsafe FuncPtr(delegate* managed<<#= TypeParamList(i) #>, TResult> value) {
+        public unsafe FuncPtr(delegate* unmanaged[Cdecl]<<#= TypeParamList(i) #>, TResult> value) {
             value__ = value;
         }
 
@@ -143,7 +143,7 @@ for(var i = 1; i <= 13; ++i) {
             if (sizeof(nint) == sizeof(int) && (value > int.MaxValue || value < int.MinValue)) {
                 throw new ArgumentException("Serialization_InvalidPtrValue");
             }
-            value__ = unchecked((delegate* managed<<#= TypeParamList(i) #>, TResult>)value);
+            value__ = unchecked((delegate* unmanaged[Cdecl]<<#= TypeParamList(i) #>, TResult>)value);
         }
 
         public TResult Invoke(<#= ParamList(i) #>) {
@@ -178,11 +178,11 @@ for(var i = 1; i <= 13; ++i) {
             return this.value__ == other.value__;
         }
 
-        public static implicit operator FuncPtr<<#= TypeParamList(i) #>, TResult>(delegate* managed<<#= TypeParamList(i) #>, TResult> value) => new(value);
+        public static implicit operator FuncPtr<<#= TypeParamList(i) #>, TResult>(delegate* unmanaged[Cdecl]<<#= TypeParamList(i) #>, TResult> value) => new(value);
 
-        public static implicit operator delegate* managed<<#= TypeParamList(i) #>, TResult>(FuncPtr<<#= TypeParamList(i) #>, TResult> value) => value.value__;
+        public static implicit operator delegate* unmanaged[Cdecl]<<#= TypeParamList(i) #>, TResult>(FuncPtr<<#= TypeParamList(i) #>, TResult> value) => value.value__;
 
-        public static explicit operator FuncPtr<<#= TypeParamList(i) #>, TResult>(void* value) => new((delegate* managed<<#= TypeParamList(i) #>, TResult>)value);
+        public static explicit operator FuncPtr<<#= TypeParamList(i) #>, TResult>(void* value) => new((delegate* unmanaged[Cdecl]<<#= TypeParamList(i) #>, TResult>)value);
 
         public static implicit operator void*(FuncPtr<<#= TypeParamList(i) #>, TResult> value) => value.value__;
 

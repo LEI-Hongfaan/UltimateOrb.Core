@@ -8,15 +8,15 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Dorabot.CInterop {
+namespace UltimateOrb.CInterop {
 
     [Serializable]
     [StructLayout(LayoutKind.Sequential)]
     public unsafe readonly struct ActionPtr<T> : IComparable, IComparable<ActionPtr<T>>, IEquatable<ActionPtr<T>>, ISpanFormattable, IFormattable, ISerializable {
 
-        readonly delegate* managed<T, void> value__;
+        readonly delegate* unmanaged[Cdecl]<T, void> value__;
 
-        public unsafe ActionPtr(delegate* managed<T, void> value) {
+        public unsafe ActionPtr(delegate* unmanaged[Cdecl]<T, void> value) {
             value__ = value;
         }
 
@@ -25,18 +25,18 @@ namespace Dorabot.CInterop {
             if (sizeof(nint) == sizeof(int) && (value > int.MaxValue || value < int.MinValue)) {
                 throw new ArgumentException("Serialization_InvalidPtrValue");
             }
-            value__ = unchecked((delegate* managed<T, void>)value);
+            value__ = unchecked((delegate* unmanaged[Cdecl]<T, void>)value);
         }
 
         public void Invoke(T arg) {
             value__(arg);
         }
 
-        public static implicit operator ActionPtr<T>(delegate* managed<T, void> value) => new(value);
+        public static implicit operator ActionPtr<T>(delegate* unmanaged[Cdecl]<T, void> value) => new(value);
 
-        public static implicit operator delegate* managed<T, void>(ActionPtr<T> value) => value.value__;
+        public static implicit operator delegate* unmanaged[Cdecl]<T, void>(ActionPtr<T> value) => value.value__;
 
-        public static explicit operator ActionPtr<T>(void* value) => new((delegate* managed<T, void>)value);
+        public static explicit operator ActionPtr<T>(void* value) => new((delegate* unmanaged[Cdecl]<T, void>)value);
 
         public static implicit operator void*(ActionPtr<T> value) => value.value__;
 
@@ -113,9 +113,9 @@ namespace Dorabot.CInterop {
     [StructLayout(LayoutKind.Sequential)]
     public unsafe readonly struct FuncPtr<T, TResult> : IComparable, IComparable<FuncPtr<T, TResult>>, IEquatable<FuncPtr<T, TResult>>, ISpanFormattable, IFormattable, ISerializable where TResult : unmanaged {
 
-        readonly delegate* managed<T, TResult> value__;
+        readonly delegate* unmanaged[Cdecl]<T, TResult> value__;
 
-        public unsafe FuncPtr(delegate* managed<T, TResult> value) {
+        public unsafe FuncPtr(delegate* unmanaged[Cdecl]<T, TResult> value) {
             value__ = value;
         }
 
@@ -124,7 +124,7 @@ namespace Dorabot.CInterop {
             if (sizeof(nint) == sizeof(int) && (value > int.MaxValue || value < int.MinValue)) {
                 throw new ArgumentException("Serialization_InvalidPtrValue");
             }
-            value__ = unchecked((delegate* managed<T, TResult>)value);
+            value__ = unchecked((delegate* unmanaged[Cdecl]<T, TResult>)value);
         }
 
         public TResult Invoke(T arg) {
@@ -159,11 +159,11 @@ namespace Dorabot.CInterop {
             return this.value__ == other.value__;
         }
 
-        public static implicit operator FuncPtr<T, TResult>(delegate* managed<T, TResult> value) => new(value);
+        public static implicit operator FuncPtr<T, TResult>(delegate* unmanaged[Cdecl]<T, TResult> value) => new(value);
 
-        public static implicit operator delegate* managed<T, TResult>(FuncPtr<T, TResult> value) => value.value__;
+        public static implicit operator delegate* unmanaged[Cdecl]<T, TResult>(FuncPtr<T, TResult> value) => value.value__;
 
-        public static explicit operator FuncPtr<T, TResult>(void* value) => new((delegate* managed<T, TResult>)value);
+        public static explicit operator FuncPtr<T, TResult>(void* value) => new((delegate* unmanaged[Cdecl]<T, TResult>)value);
 
         public static implicit operator void*(FuncPtr<T, TResult> value) => value.value__;
 
@@ -212,9 +212,9 @@ namespace Dorabot.CInterop {
     [StructLayout(LayoutKind.Sequential)]
     public unsafe readonly struct ActionPtr<T1, T2> : IComparable, IComparable<ActionPtr<T1, T2>>, IEquatable<ActionPtr<T1, T2>>, ISpanFormattable, IFormattable, ISerializable {
 
-        readonly delegate* managed<T1, T2, void> value__;
+        readonly delegate* unmanaged[Cdecl]<T1, T2, void> value__;
 
-        public unsafe ActionPtr(delegate* managed<T1, T2, void> value) {
+        public unsafe ActionPtr(delegate* unmanaged[Cdecl]<T1, T2, void> value) {
             value__ = value;
         }
 
@@ -223,18 +223,18 @@ namespace Dorabot.CInterop {
             if (sizeof(nint) == sizeof(int) && (value > int.MaxValue || value < int.MinValue)) {
                 throw new ArgumentException("Serialization_InvalidPtrValue");
             }
-            value__ = unchecked((delegate* managed<T1, T2, void>)value);
+            value__ = unchecked((delegate* unmanaged[Cdecl]<T1, T2, void>)value);
         }
 
         public void Invoke(T1 arg1, T2 arg2) {
             value__(arg1, arg2);
         }
 
-        public static implicit operator ActionPtr<T1, T2>(delegate* managed<T1, T2, void> value) => new(value);
+        public static implicit operator ActionPtr<T1, T2>(delegate* unmanaged[Cdecl]<T1, T2, void> value) => new(value);
 
-        public static implicit operator delegate* managed<T1, T2, void>(ActionPtr<T1, T2> value) => value.value__;
+        public static implicit operator delegate* unmanaged[Cdecl]<T1, T2, void>(ActionPtr<T1, T2> value) => value.value__;
 
-        public static explicit operator ActionPtr<T1, T2>(void* value) => new((delegate* managed<T1, T2, void>)value);
+        public static explicit operator ActionPtr<T1, T2>(void* value) => new((delegate* unmanaged[Cdecl]<T1, T2, void>)value);
 
         public static implicit operator void*(ActionPtr<T1, T2> value) => value.value__;
 
@@ -311,9 +311,9 @@ namespace Dorabot.CInterop {
     [StructLayout(LayoutKind.Sequential)]
     public unsafe readonly struct FuncPtr<T1, T2, TResult> : IComparable, IComparable<FuncPtr<T1, T2, TResult>>, IEquatable<FuncPtr<T1, T2, TResult>>, ISpanFormattable, IFormattable, ISerializable where TResult : unmanaged {
 
-        readonly delegate* managed<T1, T2, TResult> value__;
+        readonly delegate* unmanaged[Cdecl]<T1, T2, TResult> value__;
 
-        public unsafe FuncPtr(delegate* managed<T1, T2, TResult> value) {
+        public unsafe FuncPtr(delegate* unmanaged[Cdecl]<T1, T2, TResult> value) {
             value__ = value;
         }
 
@@ -322,7 +322,7 @@ namespace Dorabot.CInterop {
             if (sizeof(nint) == sizeof(int) && (value > int.MaxValue || value < int.MinValue)) {
                 throw new ArgumentException("Serialization_InvalidPtrValue");
             }
-            value__ = unchecked((delegate* managed<T1, T2, TResult>)value);
+            value__ = unchecked((delegate* unmanaged[Cdecl]<T1, T2, TResult>)value);
         }
 
         public TResult Invoke(T1 arg1, T2 arg2) {
@@ -357,11 +357,11 @@ namespace Dorabot.CInterop {
             return this.value__ == other.value__;
         }
 
-        public static implicit operator FuncPtr<T1, T2, TResult>(delegate* managed<T1, T2, TResult> value) => new(value);
+        public static implicit operator FuncPtr<T1, T2, TResult>(delegate* unmanaged[Cdecl]<T1, T2, TResult> value) => new(value);
 
-        public static implicit operator delegate* managed<T1, T2, TResult>(FuncPtr<T1, T2, TResult> value) => value.value__;
+        public static implicit operator delegate* unmanaged[Cdecl]<T1, T2, TResult>(FuncPtr<T1, T2, TResult> value) => value.value__;
 
-        public static explicit operator FuncPtr<T1, T2, TResult>(void* value) => new((delegate* managed<T1, T2, TResult>)value);
+        public static explicit operator FuncPtr<T1, T2, TResult>(void* value) => new((delegate* unmanaged[Cdecl]<T1, T2, TResult>)value);
 
         public static implicit operator void*(FuncPtr<T1, T2, TResult> value) => value.value__;
 
@@ -410,9 +410,9 @@ namespace Dorabot.CInterop {
     [StructLayout(LayoutKind.Sequential)]
     public unsafe readonly struct ActionPtr<T1, T2, T3> : IComparable, IComparable<ActionPtr<T1, T2, T3>>, IEquatable<ActionPtr<T1, T2, T3>>, ISpanFormattable, IFormattable, ISerializable {
 
-        readonly delegate* managed<T1, T2, T3, void> value__;
+        readonly delegate* unmanaged[Cdecl]<T1, T2, T3, void> value__;
 
-        public unsafe ActionPtr(delegate* managed<T1, T2, T3, void> value) {
+        public unsafe ActionPtr(delegate* unmanaged[Cdecl]<T1, T2, T3, void> value) {
             value__ = value;
         }
 
@@ -421,18 +421,18 @@ namespace Dorabot.CInterop {
             if (sizeof(nint) == sizeof(int) && (value > int.MaxValue || value < int.MinValue)) {
                 throw new ArgumentException("Serialization_InvalidPtrValue");
             }
-            value__ = unchecked((delegate* managed<T1, T2, T3, void>)value);
+            value__ = unchecked((delegate* unmanaged[Cdecl]<T1, T2, T3, void>)value);
         }
 
         public void Invoke(T1 arg1, T2 arg2, T3 arg3) {
             value__(arg1, arg2, arg3);
         }
 
-        public static implicit operator ActionPtr<T1, T2, T3>(delegate* managed<T1, T2, T3, void> value) => new(value);
+        public static implicit operator ActionPtr<T1, T2, T3>(delegate* unmanaged[Cdecl]<T1, T2, T3, void> value) => new(value);
 
-        public static implicit operator delegate* managed<T1, T2, T3, void>(ActionPtr<T1, T2, T3> value) => value.value__;
+        public static implicit operator delegate* unmanaged[Cdecl]<T1, T2, T3, void>(ActionPtr<T1, T2, T3> value) => value.value__;
 
-        public static explicit operator ActionPtr<T1, T2, T3>(void* value) => new((delegate* managed<T1, T2, T3, void>)value);
+        public static explicit operator ActionPtr<T1, T2, T3>(void* value) => new((delegate* unmanaged[Cdecl]<T1, T2, T3, void>)value);
 
         public static implicit operator void*(ActionPtr<T1, T2, T3> value) => value.value__;
 
@@ -509,9 +509,9 @@ namespace Dorabot.CInterop {
     [StructLayout(LayoutKind.Sequential)]
     public unsafe readonly struct FuncPtr<T1, T2, T3, TResult> : IComparable, IComparable<FuncPtr<T1, T2, T3, TResult>>, IEquatable<FuncPtr<T1, T2, T3, TResult>>, ISpanFormattable, IFormattable, ISerializable where TResult : unmanaged {
 
-        readonly delegate* managed<T1, T2, T3, TResult> value__;
+        readonly delegate* unmanaged[Cdecl]<T1, T2, T3, TResult> value__;
 
-        public unsafe FuncPtr(delegate* managed<T1, T2, T3, TResult> value) {
+        public unsafe FuncPtr(delegate* unmanaged[Cdecl]<T1, T2, T3, TResult> value) {
             value__ = value;
         }
 
@@ -520,7 +520,7 @@ namespace Dorabot.CInterop {
             if (sizeof(nint) == sizeof(int) && (value > int.MaxValue || value < int.MinValue)) {
                 throw new ArgumentException("Serialization_InvalidPtrValue");
             }
-            value__ = unchecked((delegate* managed<T1, T2, T3, TResult>)value);
+            value__ = unchecked((delegate* unmanaged[Cdecl]<T1, T2, T3, TResult>)value);
         }
 
         public TResult Invoke(T1 arg1, T2 arg2, T3 arg3) {
@@ -555,11 +555,11 @@ namespace Dorabot.CInterop {
             return this.value__ == other.value__;
         }
 
-        public static implicit operator FuncPtr<T1, T2, T3, TResult>(delegate* managed<T1, T2, T3, TResult> value) => new(value);
+        public static implicit operator FuncPtr<T1, T2, T3, TResult>(delegate* unmanaged[Cdecl]<T1, T2, T3, TResult> value) => new(value);
 
-        public static implicit operator delegate* managed<T1, T2, T3, TResult>(FuncPtr<T1, T2, T3, TResult> value) => value.value__;
+        public static implicit operator delegate* unmanaged[Cdecl]<T1, T2, T3, TResult>(FuncPtr<T1, T2, T3, TResult> value) => value.value__;
 
-        public static explicit operator FuncPtr<T1, T2, T3, TResult>(void* value) => new((delegate* managed<T1, T2, T3, TResult>)value);
+        public static explicit operator FuncPtr<T1, T2, T3, TResult>(void* value) => new((delegate* unmanaged[Cdecl]<T1, T2, T3, TResult>)value);
 
         public static implicit operator void*(FuncPtr<T1, T2, T3, TResult> value) => value.value__;
 
@@ -608,9 +608,9 @@ namespace Dorabot.CInterop {
     [StructLayout(LayoutKind.Sequential)]
     public unsafe readonly struct ActionPtr<T1, T2, T3, T4> : IComparable, IComparable<ActionPtr<T1, T2, T3, T4>>, IEquatable<ActionPtr<T1, T2, T3, T4>>, ISpanFormattable, IFormattable, ISerializable {
 
-        readonly delegate* managed<T1, T2, T3, T4, void> value__;
+        readonly delegate* unmanaged[Cdecl]<T1, T2, T3, T4, void> value__;
 
-        public unsafe ActionPtr(delegate* managed<T1, T2, T3, T4, void> value) {
+        public unsafe ActionPtr(delegate* unmanaged[Cdecl]<T1, T2, T3, T4, void> value) {
             value__ = value;
         }
 
@@ -619,18 +619,18 @@ namespace Dorabot.CInterop {
             if (sizeof(nint) == sizeof(int) && (value > int.MaxValue || value < int.MinValue)) {
                 throw new ArgumentException("Serialization_InvalidPtrValue");
             }
-            value__ = unchecked((delegate* managed<T1, T2, T3, T4, void>)value);
+            value__ = unchecked((delegate* unmanaged[Cdecl]<T1, T2, T3, T4, void>)value);
         }
 
         public void Invoke(T1 arg1, T2 arg2, T3 arg3, T4 arg4) {
             value__(arg1, arg2, arg3, arg4);
         }
 
-        public static implicit operator ActionPtr<T1, T2, T3, T4>(delegate* managed<T1, T2, T3, T4, void> value) => new(value);
+        public static implicit operator ActionPtr<T1, T2, T3, T4>(delegate* unmanaged[Cdecl]<T1, T2, T3, T4, void> value) => new(value);
 
-        public static implicit operator delegate* managed<T1, T2, T3, T4, void>(ActionPtr<T1, T2, T3, T4> value) => value.value__;
+        public static implicit operator delegate* unmanaged[Cdecl]<T1, T2, T3, T4, void>(ActionPtr<T1, T2, T3, T4> value) => value.value__;
 
-        public static explicit operator ActionPtr<T1, T2, T3, T4>(void* value) => new((delegate* managed<T1, T2, T3, T4, void>)value);
+        public static explicit operator ActionPtr<T1, T2, T3, T4>(void* value) => new((delegate* unmanaged[Cdecl]<T1, T2, T3, T4, void>)value);
 
         public static implicit operator void*(ActionPtr<T1, T2, T3, T4> value) => value.value__;
 
@@ -707,9 +707,9 @@ namespace Dorabot.CInterop {
     [StructLayout(LayoutKind.Sequential)]
     public unsafe readonly struct FuncPtr<T1, T2, T3, T4, TResult> : IComparable, IComparable<FuncPtr<T1, T2, T3, T4, TResult>>, IEquatable<FuncPtr<T1, T2, T3, T4, TResult>>, ISpanFormattable, IFormattable, ISerializable where TResult : unmanaged {
 
-        readonly delegate* managed<T1, T2, T3, T4, TResult> value__;
+        readonly delegate* unmanaged[Cdecl]<T1, T2, T3, T4, TResult> value__;
 
-        public unsafe FuncPtr(delegate* managed<T1, T2, T3, T4, TResult> value) {
+        public unsafe FuncPtr(delegate* unmanaged[Cdecl]<T1, T2, T3, T4, TResult> value) {
             value__ = value;
         }
 
@@ -718,7 +718,7 @@ namespace Dorabot.CInterop {
             if (sizeof(nint) == sizeof(int) && (value > int.MaxValue || value < int.MinValue)) {
                 throw new ArgumentException("Serialization_InvalidPtrValue");
             }
-            value__ = unchecked((delegate* managed<T1, T2, T3, T4, TResult>)value);
+            value__ = unchecked((delegate* unmanaged[Cdecl]<T1, T2, T3, T4, TResult>)value);
         }
 
         public TResult Invoke(T1 arg1, T2 arg2, T3 arg3, T4 arg4) {
@@ -753,11 +753,11 @@ namespace Dorabot.CInterop {
             return this.value__ == other.value__;
         }
 
-        public static implicit operator FuncPtr<T1, T2, T3, T4, TResult>(delegate* managed<T1, T2, T3, T4, TResult> value) => new(value);
+        public static implicit operator FuncPtr<T1, T2, T3, T4, TResult>(delegate* unmanaged[Cdecl]<T1, T2, T3, T4, TResult> value) => new(value);
 
-        public static implicit operator delegate* managed<T1, T2, T3, T4, TResult>(FuncPtr<T1, T2, T3, T4, TResult> value) => value.value__;
+        public static implicit operator delegate* unmanaged[Cdecl]<T1, T2, T3, T4, TResult>(FuncPtr<T1, T2, T3, T4, TResult> value) => value.value__;
 
-        public static explicit operator FuncPtr<T1, T2, T3, T4, TResult>(void* value) => new((delegate* managed<T1, T2, T3, T4, TResult>)value);
+        public static explicit operator FuncPtr<T1, T2, T3, T4, TResult>(void* value) => new((delegate* unmanaged[Cdecl]<T1, T2, T3, T4, TResult>)value);
 
         public static implicit operator void*(FuncPtr<T1, T2, T3, T4, TResult> value) => value.value__;
 
@@ -806,9 +806,9 @@ namespace Dorabot.CInterop {
     [StructLayout(LayoutKind.Sequential)]
     public unsafe readonly struct ActionPtr<T1, T2, T3, T4, T5> : IComparable, IComparable<ActionPtr<T1, T2, T3, T4, T5>>, IEquatable<ActionPtr<T1, T2, T3, T4, T5>>, ISpanFormattable, IFormattable, ISerializable {
 
-        readonly delegate* managed<T1, T2, T3, T4, T5, void> value__;
+        readonly delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, void> value__;
 
-        public unsafe ActionPtr(delegate* managed<T1, T2, T3, T4, T5, void> value) {
+        public unsafe ActionPtr(delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, void> value) {
             value__ = value;
         }
 
@@ -817,18 +817,18 @@ namespace Dorabot.CInterop {
             if (sizeof(nint) == sizeof(int) && (value > int.MaxValue || value < int.MinValue)) {
                 throw new ArgumentException("Serialization_InvalidPtrValue");
             }
-            value__ = unchecked((delegate* managed<T1, T2, T3, T4, T5, void>)value);
+            value__ = unchecked((delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, void>)value);
         }
 
         public void Invoke(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5) {
             value__(arg1, arg2, arg3, arg4, arg5);
         }
 
-        public static implicit operator ActionPtr<T1, T2, T3, T4, T5>(delegate* managed<T1, T2, T3, T4, T5, void> value) => new(value);
+        public static implicit operator ActionPtr<T1, T2, T3, T4, T5>(delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, void> value) => new(value);
 
-        public static implicit operator delegate* managed<T1, T2, T3, T4, T5, void>(ActionPtr<T1, T2, T3, T4, T5> value) => value.value__;
+        public static implicit operator delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, void>(ActionPtr<T1, T2, T3, T4, T5> value) => value.value__;
 
-        public static explicit operator ActionPtr<T1, T2, T3, T4, T5>(void* value) => new((delegate* managed<T1, T2, T3, T4, T5, void>)value);
+        public static explicit operator ActionPtr<T1, T2, T3, T4, T5>(void* value) => new((delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, void>)value);
 
         public static implicit operator void*(ActionPtr<T1, T2, T3, T4, T5> value) => value.value__;
 
@@ -905,9 +905,9 @@ namespace Dorabot.CInterop {
     [StructLayout(LayoutKind.Sequential)]
     public unsafe readonly struct FuncPtr<T1, T2, T3, T4, T5, TResult> : IComparable, IComparable<FuncPtr<T1, T2, T3, T4, T5, TResult>>, IEquatable<FuncPtr<T1, T2, T3, T4, T5, TResult>>, ISpanFormattable, IFormattable, ISerializable where TResult : unmanaged {
 
-        readonly delegate* managed<T1, T2, T3, T4, T5, TResult> value__;
+        readonly delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, TResult> value__;
 
-        public unsafe FuncPtr(delegate* managed<T1, T2, T3, T4, T5, TResult> value) {
+        public unsafe FuncPtr(delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, TResult> value) {
             value__ = value;
         }
 
@@ -916,7 +916,7 @@ namespace Dorabot.CInterop {
             if (sizeof(nint) == sizeof(int) && (value > int.MaxValue || value < int.MinValue)) {
                 throw new ArgumentException("Serialization_InvalidPtrValue");
             }
-            value__ = unchecked((delegate* managed<T1, T2, T3, T4, T5, TResult>)value);
+            value__ = unchecked((delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, TResult>)value);
         }
 
         public TResult Invoke(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5) {
@@ -951,11 +951,11 @@ namespace Dorabot.CInterop {
             return this.value__ == other.value__;
         }
 
-        public static implicit operator FuncPtr<T1, T2, T3, T4, T5, TResult>(delegate* managed<T1, T2, T3, T4, T5, TResult> value) => new(value);
+        public static implicit operator FuncPtr<T1, T2, T3, T4, T5, TResult>(delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, TResult> value) => new(value);
 
-        public static implicit operator delegate* managed<T1, T2, T3, T4, T5, TResult>(FuncPtr<T1, T2, T3, T4, T5, TResult> value) => value.value__;
+        public static implicit operator delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, TResult>(FuncPtr<T1, T2, T3, T4, T5, TResult> value) => value.value__;
 
-        public static explicit operator FuncPtr<T1, T2, T3, T4, T5, TResult>(void* value) => new((delegate* managed<T1, T2, T3, T4, T5, TResult>)value);
+        public static explicit operator FuncPtr<T1, T2, T3, T4, T5, TResult>(void* value) => new((delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, TResult>)value);
 
         public static implicit operator void*(FuncPtr<T1, T2, T3, T4, T5, TResult> value) => value.value__;
 
@@ -1004,9 +1004,9 @@ namespace Dorabot.CInterop {
     [StructLayout(LayoutKind.Sequential)]
     public unsafe readonly struct ActionPtr<T1, T2, T3, T4, T5, T6> : IComparable, IComparable<ActionPtr<T1, T2, T3, T4, T5, T6>>, IEquatable<ActionPtr<T1, T2, T3, T4, T5, T6>>, ISpanFormattable, IFormattable, ISerializable {
 
-        readonly delegate* managed<T1, T2, T3, T4, T5, T6, void> value__;
+        readonly delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, void> value__;
 
-        public unsafe ActionPtr(delegate* managed<T1, T2, T3, T4, T5, T6, void> value) {
+        public unsafe ActionPtr(delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, void> value) {
             value__ = value;
         }
 
@@ -1015,18 +1015,18 @@ namespace Dorabot.CInterop {
             if (sizeof(nint) == sizeof(int) && (value > int.MaxValue || value < int.MinValue)) {
                 throw new ArgumentException("Serialization_InvalidPtrValue");
             }
-            value__ = unchecked((delegate* managed<T1, T2, T3, T4, T5, T6, void>)value);
+            value__ = unchecked((delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, void>)value);
         }
 
         public void Invoke(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6) {
             value__(arg1, arg2, arg3, arg4, arg5, arg6);
         }
 
-        public static implicit operator ActionPtr<T1, T2, T3, T4, T5, T6>(delegate* managed<T1, T2, T3, T4, T5, T6, void> value) => new(value);
+        public static implicit operator ActionPtr<T1, T2, T3, T4, T5, T6>(delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, void> value) => new(value);
 
-        public static implicit operator delegate* managed<T1, T2, T3, T4, T5, T6, void>(ActionPtr<T1, T2, T3, T4, T5, T6> value) => value.value__;
+        public static implicit operator delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, void>(ActionPtr<T1, T2, T3, T4, T5, T6> value) => value.value__;
 
-        public static explicit operator ActionPtr<T1, T2, T3, T4, T5, T6>(void* value) => new((delegate* managed<T1, T2, T3, T4, T5, T6, void>)value);
+        public static explicit operator ActionPtr<T1, T2, T3, T4, T5, T6>(void* value) => new((delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, void>)value);
 
         public static implicit operator void*(ActionPtr<T1, T2, T3, T4, T5, T6> value) => value.value__;
 
@@ -1103,9 +1103,9 @@ namespace Dorabot.CInterop {
     [StructLayout(LayoutKind.Sequential)]
     public unsafe readonly struct FuncPtr<T1, T2, T3, T4, T5, T6, TResult> : IComparable, IComparable<FuncPtr<T1, T2, T3, T4, T5, T6, TResult>>, IEquatable<FuncPtr<T1, T2, T3, T4, T5, T6, TResult>>, ISpanFormattable, IFormattable, ISerializable where TResult : unmanaged {
 
-        readonly delegate* managed<T1, T2, T3, T4, T5, T6, TResult> value__;
+        readonly delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, TResult> value__;
 
-        public unsafe FuncPtr(delegate* managed<T1, T2, T3, T4, T5, T6, TResult> value) {
+        public unsafe FuncPtr(delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, TResult> value) {
             value__ = value;
         }
 
@@ -1114,7 +1114,7 @@ namespace Dorabot.CInterop {
             if (sizeof(nint) == sizeof(int) && (value > int.MaxValue || value < int.MinValue)) {
                 throw new ArgumentException("Serialization_InvalidPtrValue");
             }
-            value__ = unchecked((delegate* managed<T1, T2, T3, T4, T5, T6, TResult>)value);
+            value__ = unchecked((delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, TResult>)value);
         }
 
         public TResult Invoke(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6) {
@@ -1149,11 +1149,11 @@ namespace Dorabot.CInterop {
             return this.value__ == other.value__;
         }
 
-        public static implicit operator FuncPtr<T1, T2, T3, T4, T5, T6, TResult>(delegate* managed<T1, T2, T3, T4, T5, T6, TResult> value) => new(value);
+        public static implicit operator FuncPtr<T1, T2, T3, T4, T5, T6, TResult>(delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, TResult> value) => new(value);
 
-        public static implicit operator delegate* managed<T1, T2, T3, T4, T5, T6, TResult>(FuncPtr<T1, T2, T3, T4, T5, T6, TResult> value) => value.value__;
+        public static implicit operator delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, TResult>(FuncPtr<T1, T2, T3, T4, T5, T6, TResult> value) => value.value__;
 
-        public static explicit operator FuncPtr<T1, T2, T3, T4, T5, T6, TResult>(void* value) => new((delegate* managed<T1, T2, T3, T4, T5, T6, TResult>)value);
+        public static explicit operator FuncPtr<T1, T2, T3, T4, T5, T6, TResult>(void* value) => new((delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, TResult>)value);
 
         public static implicit operator void*(FuncPtr<T1, T2, T3, T4, T5, T6, TResult> value) => value.value__;
 
@@ -1202,9 +1202,9 @@ namespace Dorabot.CInterop {
     [StructLayout(LayoutKind.Sequential)]
     public unsafe readonly struct ActionPtr<T1, T2, T3, T4, T5, T6, T7> : IComparable, IComparable<ActionPtr<T1, T2, T3, T4, T5, T6, T7>>, IEquatable<ActionPtr<T1, T2, T3, T4, T5, T6, T7>>, ISpanFormattable, IFormattable, ISerializable {
 
-        readonly delegate* managed<T1, T2, T3, T4, T5, T6, T7, void> value__;
+        readonly delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, void> value__;
 
-        public unsafe ActionPtr(delegate* managed<T1, T2, T3, T4, T5, T6, T7, void> value) {
+        public unsafe ActionPtr(delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, void> value) {
             value__ = value;
         }
 
@@ -1213,18 +1213,18 @@ namespace Dorabot.CInterop {
             if (sizeof(nint) == sizeof(int) && (value > int.MaxValue || value < int.MinValue)) {
                 throw new ArgumentException("Serialization_InvalidPtrValue");
             }
-            value__ = unchecked((delegate* managed<T1, T2, T3, T4, T5, T6, T7, void>)value);
+            value__ = unchecked((delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, void>)value);
         }
 
         public void Invoke(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7) {
             value__(arg1, arg2, arg3, arg4, arg5, arg6, arg7);
         }
 
-        public static implicit operator ActionPtr<T1, T2, T3, T4, T5, T6, T7>(delegate* managed<T1, T2, T3, T4, T5, T6, T7, void> value) => new(value);
+        public static implicit operator ActionPtr<T1, T2, T3, T4, T5, T6, T7>(delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, void> value) => new(value);
 
-        public static implicit operator delegate* managed<T1, T2, T3, T4, T5, T6, T7, void>(ActionPtr<T1, T2, T3, T4, T5, T6, T7> value) => value.value__;
+        public static implicit operator delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, void>(ActionPtr<T1, T2, T3, T4, T5, T6, T7> value) => value.value__;
 
-        public static explicit operator ActionPtr<T1, T2, T3, T4, T5, T6, T7>(void* value) => new((delegate* managed<T1, T2, T3, T4, T5, T6, T7, void>)value);
+        public static explicit operator ActionPtr<T1, T2, T3, T4, T5, T6, T7>(void* value) => new((delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, void>)value);
 
         public static implicit operator void*(ActionPtr<T1, T2, T3, T4, T5, T6, T7> value) => value.value__;
 
@@ -1301,9 +1301,9 @@ namespace Dorabot.CInterop {
     [StructLayout(LayoutKind.Sequential)]
     public unsafe readonly struct FuncPtr<T1, T2, T3, T4, T5, T6, T7, TResult> : IComparable, IComparable<FuncPtr<T1, T2, T3, T4, T5, T6, T7, TResult>>, IEquatable<FuncPtr<T1, T2, T3, T4, T5, T6, T7, TResult>>, ISpanFormattable, IFormattable, ISerializable where TResult : unmanaged {
 
-        readonly delegate* managed<T1, T2, T3, T4, T5, T6, T7, TResult> value__;
+        readonly delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, TResult> value__;
 
-        public unsafe FuncPtr(delegate* managed<T1, T2, T3, T4, T5, T6, T7, TResult> value) {
+        public unsafe FuncPtr(delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, TResult> value) {
             value__ = value;
         }
 
@@ -1312,7 +1312,7 @@ namespace Dorabot.CInterop {
             if (sizeof(nint) == sizeof(int) && (value > int.MaxValue || value < int.MinValue)) {
                 throw new ArgumentException("Serialization_InvalidPtrValue");
             }
-            value__ = unchecked((delegate* managed<T1, T2, T3, T4, T5, T6, T7, TResult>)value);
+            value__ = unchecked((delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, TResult>)value);
         }
 
         public TResult Invoke(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7) {
@@ -1347,11 +1347,11 @@ namespace Dorabot.CInterop {
             return this.value__ == other.value__;
         }
 
-        public static implicit operator FuncPtr<T1, T2, T3, T4, T5, T6, T7, TResult>(delegate* managed<T1, T2, T3, T4, T5, T6, T7, TResult> value) => new(value);
+        public static implicit operator FuncPtr<T1, T2, T3, T4, T5, T6, T7, TResult>(delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, TResult> value) => new(value);
 
-        public static implicit operator delegate* managed<T1, T2, T3, T4, T5, T6, T7, TResult>(FuncPtr<T1, T2, T3, T4, T5, T6, T7, TResult> value) => value.value__;
+        public static implicit operator delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, TResult>(FuncPtr<T1, T2, T3, T4, T5, T6, T7, TResult> value) => value.value__;
 
-        public static explicit operator FuncPtr<T1, T2, T3, T4, T5, T6, T7, TResult>(void* value) => new((delegate* managed<T1, T2, T3, T4, T5, T6, T7, TResult>)value);
+        public static explicit operator FuncPtr<T1, T2, T3, T4, T5, T6, T7, TResult>(void* value) => new((delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, TResult>)value);
 
         public static implicit operator void*(FuncPtr<T1, T2, T3, T4, T5, T6, T7, TResult> value) => value.value__;
 
@@ -1400,9 +1400,9 @@ namespace Dorabot.CInterop {
     [StructLayout(LayoutKind.Sequential)]
     public unsafe readonly struct ActionPtr<T1, T2, T3, T4, T5, T6, T7, T8> : IComparable, IComparable<ActionPtr<T1, T2, T3, T4, T5, T6, T7, T8>>, IEquatable<ActionPtr<T1, T2, T3, T4, T5, T6, T7, T8>>, ISpanFormattable, IFormattable, ISerializable {
 
-        readonly delegate* managed<T1, T2, T3, T4, T5, T6, T7, T8, void> value__;
+        readonly delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, void> value__;
 
-        public unsafe ActionPtr(delegate* managed<T1, T2, T3, T4, T5, T6, T7, T8, void> value) {
+        public unsafe ActionPtr(delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, void> value) {
             value__ = value;
         }
 
@@ -1411,18 +1411,18 @@ namespace Dorabot.CInterop {
             if (sizeof(nint) == sizeof(int) && (value > int.MaxValue || value < int.MinValue)) {
                 throw new ArgumentException("Serialization_InvalidPtrValue");
             }
-            value__ = unchecked((delegate* managed<T1, T2, T3, T4, T5, T6, T7, T8, void>)value);
+            value__ = unchecked((delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, void>)value);
         }
 
         public void Invoke(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8) {
             value__(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);
         }
 
-        public static implicit operator ActionPtr<T1, T2, T3, T4, T5, T6, T7, T8>(delegate* managed<T1, T2, T3, T4, T5, T6, T7, T8, void> value) => new(value);
+        public static implicit operator ActionPtr<T1, T2, T3, T4, T5, T6, T7, T8>(delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, void> value) => new(value);
 
-        public static implicit operator delegate* managed<T1, T2, T3, T4, T5, T6, T7, T8, void>(ActionPtr<T1, T2, T3, T4, T5, T6, T7, T8> value) => value.value__;
+        public static implicit operator delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, void>(ActionPtr<T1, T2, T3, T4, T5, T6, T7, T8> value) => value.value__;
 
-        public static explicit operator ActionPtr<T1, T2, T3, T4, T5, T6, T7, T8>(void* value) => new((delegate* managed<T1, T2, T3, T4, T5, T6, T7, T8, void>)value);
+        public static explicit operator ActionPtr<T1, T2, T3, T4, T5, T6, T7, T8>(void* value) => new((delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, void>)value);
 
         public static implicit operator void*(ActionPtr<T1, T2, T3, T4, T5, T6, T7, T8> value) => value.value__;
 
@@ -1499,9 +1499,9 @@ namespace Dorabot.CInterop {
     [StructLayout(LayoutKind.Sequential)]
     public unsafe readonly struct FuncPtr<T1, T2, T3, T4, T5, T6, T7, T8, TResult> : IComparable, IComparable<FuncPtr<T1, T2, T3, T4, T5, T6, T7, T8, TResult>>, IEquatable<FuncPtr<T1, T2, T3, T4, T5, T6, T7, T8, TResult>>, ISpanFormattable, IFormattable, ISerializable where TResult : unmanaged {
 
-        readonly delegate* managed<T1, T2, T3, T4, T5, T6, T7, T8, TResult> value__;
+        readonly delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, TResult> value__;
 
-        public unsafe FuncPtr(delegate* managed<T1, T2, T3, T4, T5, T6, T7, T8, TResult> value) {
+        public unsafe FuncPtr(delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, TResult> value) {
             value__ = value;
         }
 
@@ -1510,7 +1510,7 @@ namespace Dorabot.CInterop {
             if (sizeof(nint) == sizeof(int) && (value > int.MaxValue || value < int.MinValue)) {
                 throw new ArgumentException("Serialization_InvalidPtrValue");
             }
-            value__ = unchecked((delegate* managed<T1, T2, T3, T4, T5, T6, T7, T8, TResult>)value);
+            value__ = unchecked((delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, TResult>)value);
         }
 
         public TResult Invoke(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8) {
@@ -1545,11 +1545,11 @@ namespace Dorabot.CInterop {
             return this.value__ == other.value__;
         }
 
-        public static implicit operator FuncPtr<T1, T2, T3, T4, T5, T6, T7, T8, TResult>(delegate* managed<T1, T2, T3, T4, T5, T6, T7, T8, TResult> value) => new(value);
+        public static implicit operator FuncPtr<T1, T2, T3, T4, T5, T6, T7, T8, TResult>(delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, TResult> value) => new(value);
 
-        public static implicit operator delegate* managed<T1, T2, T3, T4, T5, T6, T7, T8, TResult>(FuncPtr<T1, T2, T3, T4, T5, T6, T7, T8, TResult> value) => value.value__;
+        public static implicit operator delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, TResult>(FuncPtr<T1, T2, T3, T4, T5, T6, T7, T8, TResult> value) => value.value__;
 
-        public static explicit operator FuncPtr<T1, T2, T3, T4, T5, T6, T7, T8, TResult>(void* value) => new((delegate* managed<T1, T2, T3, T4, T5, T6, T7, T8, TResult>)value);
+        public static explicit operator FuncPtr<T1, T2, T3, T4, T5, T6, T7, T8, TResult>(void* value) => new((delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, TResult>)value);
 
         public static implicit operator void*(FuncPtr<T1, T2, T3, T4, T5, T6, T7, T8, TResult> value) => value.value__;
 
@@ -1598,9 +1598,9 @@ namespace Dorabot.CInterop {
     [StructLayout(LayoutKind.Sequential)]
     public unsafe readonly struct ActionPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9> : IComparable, IComparable<ActionPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9>>, IEquatable<ActionPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9>>, ISpanFormattable, IFormattable, ISerializable {
 
-        readonly delegate* managed<T1, T2, T3, T4, T5, T6, T7, T8, T9, void> value__;
+        readonly delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, T9, void> value__;
 
-        public unsafe ActionPtr(delegate* managed<T1, T2, T3, T4, T5, T6, T7, T8, T9, void> value) {
+        public unsafe ActionPtr(delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, T9, void> value) {
             value__ = value;
         }
 
@@ -1609,18 +1609,18 @@ namespace Dorabot.CInterop {
             if (sizeof(nint) == sizeof(int) && (value > int.MaxValue || value < int.MinValue)) {
                 throw new ArgumentException("Serialization_InvalidPtrValue");
             }
-            value__ = unchecked((delegate* managed<T1, T2, T3, T4, T5, T6, T7, T8, T9, void>)value);
+            value__ = unchecked((delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, T9, void>)value);
         }
 
         public void Invoke(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9) {
             value__(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
         }
 
-        public static implicit operator ActionPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9>(delegate* managed<T1, T2, T3, T4, T5, T6, T7, T8, T9, void> value) => new(value);
+        public static implicit operator ActionPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9>(delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, T9, void> value) => new(value);
 
-        public static implicit operator delegate* managed<T1, T2, T3, T4, T5, T6, T7, T8, T9, void>(ActionPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9> value) => value.value__;
+        public static implicit operator delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, T9, void>(ActionPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9> value) => value.value__;
 
-        public static explicit operator ActionPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9>(void* value) => new((delegate* managed<T1, T2, T3, T4, T5, T6, T7, T8, T9, void>)value);
+        public static explicit operator ActionPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9>(void* value) => new((delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, T9, void>)value);
 
         public static implicit operator void*(ActionPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9> value) => value.value__;
 
@@ -1697,9 +1697,9 @@ namespace Dorabot.CInterop {
     [StructLayout(LayoutKind.Sequential)]
     public unsafe readonly struct FuncPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult> : IComparable, IComparable<FuncPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult>>, IEquatable<FuncPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult>>, ISpanFormattable, IFormattable, ISerializable where TResult : unmanaged {
 
-        readonly delegate* managed<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult> value__;
+        readonly delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult> value__;
 
-        public unsafe FuncPtr(delegate* managed<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult> value) {
+        public unsafe FuncPtr(delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult> value) {
             value__ = value;
         }
 
@@ -1708,7 +1708,7 @@ namespace Dorabot.CInterop {
             if (sizeof(nint) == sizeof(int) && (value > int.MaxValue || value < int.MinValue)) {
                 throw new ArgumentException("Serialization_InvalidPtrValue");
             }
-            value__ = unchecked((delegate* managed<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult>)value);
+            value__ = unchecked((delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult>)value);
         }
 
         public TResult Invoke(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9) {
@@ -1743,11 +1743,11 @@ namespace Dorabot.CInterop {
             return this.value__ == other.value__;
         }
 
-        public static implicit operator FuncPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult>(delegate* managed<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult> value) => new(value);
+        public static implicit operator FuncPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult>(delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult> value) => new(value);
 
-        public static implicit operator delegate* managed<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult>(FuncPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult> value) => value.value__;
+        public static implicit operator delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult>(FuncPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult> value) => value.value__;
 
-        public static explicit operator FuncPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult>(void* value) => new((delegate* managed<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult>)value);
+        public static explicit operator FuncPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult>(void* value) => new((delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult>)value);
 
         public static implicit operator void*(FuncPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult> value) => value.value__;
 
@@ -1796,9 +1796,9 @@ namespace Dorabot.CInterop {
     [StructLayout(LayoutKind.Sequential)]
     public unsafe readonly struct ActionPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> : IComparable, IComparable<ActionPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>>, IEquatable<ActionPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>>, ISpanFormattable, IFormattable, ISerializable {
 
-        readonly delegate* managed<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, void> value__;
+        readonly delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, void> value__;
 
-        public unsafe ActionPtr(delegate* managed<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, void> value) {
+        public unsafe ActionPtr(delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, void> value) {
             value__ = value;
         }
 
@@ -1807,18 +1807,18 @@ namespace Dorabot.CInterop {
             if (sizeof(nint) == sizeof(int) && (value > int.MaxValue || value < int.MinValue)) {
                 throw new ArgumentException("Serialization_InvalidPtrValue");
             }
-            value__ = unchecked((delegate* managed<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, void>)value);
+            value__ = unchecked((delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, void>)value);
         }
 
         public void Invoke(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10) {
             value__(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10);
         }
 
-        public static implicit operator ActionPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(delegate* managed<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, void> value) => new(value);
+        public static implicit operator ActionPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, void> value) => new(value);
 
-        public static implicit operator delegate* managed<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, void>(ActionPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> value) => value.value__;
+        public static implicit operator delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, void>(ActionPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> value) => value.value__;
 
-        public static explicit operator ActionPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(void* value) => new((delegate* managed<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, void>)value);
+        public static explicit operator ActionPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(void* value) => new((delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, void>)value);
 
         public static implicit operator void*(ActionPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> value) => value.value__;
 
@@ -1895,9 +1895,9 @@ namespace Dorabot.CInterop {
     [StructLayout(LayoutKind.Sequential)]
     public unsafe readonly struct FuncPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult> : IComparable, IComparable<FuncPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult>>, IEquatable<FuncPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult>>, ISpanFormattable, IFormattable, ISerializable where TResult : unmanaged {
 
-        readonly delegate* managed<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult> value__;
+        readonly delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult> value__;
 
-        public unsafe FuncPtr(delegate* managed<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult> value) {
+        public unsafe FuncPtr(delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult> value) {
             value__ = value;
         }
 
@@ -1906,7 +1906,7 @@ namespace Dorabot.CInterop {
             if (sizeof(nint) == sizeof(int) && (value > int.MaxValue || value < int.MinValue)) {
                 throw new ArgumentException("Serialization_InvalidPtrValue");
             }
-            value__ = unchecked((delegate* managed<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult>)value);
+            value__ = unchecked((delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult>)value);
         }
 
         public TResult Invoke(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10) {
@@ -1941,11 +1941,11 @@ namespace Dorabot.CInterop {
             return this.value__ == other.value__;
         }
 
-        public static implicit operator FuncPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult>(delegate* managed<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult> value) => new(value);
+        public static implicit operator FuncPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult>(delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult> value) => new(value);
 
-        public static implicit operator delegate* managed<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult>(FuncPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult> value) => value.value__;
+        public static implicit operator delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult>(FuncPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult> value) => value.value__;
 
-        public static explicit operator FuncPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult>(void* value) => new((delegate* managed<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult>)value);
+        public static explicit operator FuncPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult>(void* value) => new((delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult>)value);
 
         public static implicit operator void*(FuncPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult> value) => value.value__;
 
@@ -1994,9 +1994,9 @@ namespace Dorabot.CInterop {
     [StructLayout(LayoutKind.Sequential)]
     public unsafe readonly struct ActionPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> : IComparable, IComparable<ActionPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>>, IEquatable<ActionPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>>, ISpanFormattable, IFormattable, ISerializable {
 
-        readonly delegate* managed<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, void> value__;
+        readonly delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, void> value__;
 
-        public unsafe ActionPtr(delegate* managed<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, void> value) {
+        public unsafe ActionPtr(delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, void> value) {
             value__ = value;
         }
 
@@ -2005,18 +2005,18 @@ namespace Dorabot.CInterop {
             if (sizeof(nint) == sizeof(int) && (value > int.MaxValue || value < int.MinValue)) {
                 throw new ArgumentException("Serialization_InvalidPtrValue");
             }
-            value__ = unchecked((delegate* managed<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, void>)value);
+            value__ = unchecked((delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, void>)value);
         }
 
         public void Invoke(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11) {
             value__(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11);
         }
 
-        public static implicit operator ActionPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(delegate* managed<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, void> value) => new(value);
+        public static implicit operator ActionPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, void> value) => new(value);
 
-        public static implicit operator delegate* managed<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, void>(ActionPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> value) => value.value__;
+        public static implicit operator delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, void>(ActionPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> value) => value.value__;
 
-        public static explicit operator ActionPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(void* value) => new((delegate* managed<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, void>)value);
+        public static explicit operator ActionPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(void* value) => new((delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, void>)value);
 
         public static implicit operator void*(ActionPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> value) => value.value__;
 
@@ -2093,9 +2093,9 @@ namespace Dorabot.CInterop {
     [StructLayout(LayoutKind.Sequential)]
     public unsafe readonly struct FuncPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult> : IComparable, IComparable<FuncPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult>>, IEquatable<FuncPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult>>, ISpanFormattable, IFormattable, ISerializable where TResult : unmanaged {
 
-        readonly delegate* managed<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult> value__;
+        readonly delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult> value__;
 
-        public unsafe FuncPtr(delegate* managed<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult> value) {
+        public unsafe FuncPtr(delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult> value) {
             value__ = value;
         }
 
@@ -2104,7 +2104,7 @@ namespace Dorabot.CInterop {
             if (sizeof(nint) == sizeof(int) && (value > int.MaxValue || value < int.MinValue)) {
                 throw new ArgumentException("Serialization_InvalidPtrValue");
             }
-            value__ = unchecked((delegate* managed<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult>)value);
+            value__ = unchecked((delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult>)value);
         }
 
         public TResult Invoke(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11) {
@@ -2139,11 +2139,11 @@ namespace Dorabot.CInterop {
             return this.value__ == other.value__;
         }
 
-        public static implicit operator FuncPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult>(delegate* managed<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult> value) => new(value);
+        public static implicit operator FuncPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult>(delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult> value) => new(value);
 
-        public static implicit operator delegate* managed<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult>(FuncPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult> value) => value.value__;
+        public static implicit operator delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult>(FuncPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult> value) => value.value__;
 
-        public static explicit operator FuncPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult>(void* value) => new((delegate* managed<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult>)value);
+        public static explicit operator FuncPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult>(void* value) => new((delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult>)value);
 
         public static implicit operator void*(FuncPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult> value) => value.value__;
 
@@ -2192,9 +2192,9 @@ namespace Dorabot.CInterop {
     [StructLayout(LayoutKind.Sequential)]
     public unsafe readonly struct ActionPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> : IComparable, IComparable<ActionPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>>, IEquatable<ActionPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>>, ISpanFormattable, IFormattable, ISerializable {
 
-        readonly delegate* managed<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, void> value__;
+        readonly delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, void> value__;
 
-        public unsafe ActionPtr(delegate* managed<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, void> value) {
+        public unsafe ActionPtr(delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, void> value) {
             value__ = value;
         }
 
@@ -2203,18 +2203,18 @@ namespace Dorabot.CInterop {
             if (sizeof(nint) == sizeof(int) && (value > int.MaxValue || value < int.MinValue)) {
                 throw new ArgumentException("Serialization_InvalidPtrValue");
             }
-            value__ = unchecked((delegate* managed<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, void>)value);
+            value__ = unchecked((delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, void>)value);
         }
 
         public void Invoke(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11, T12 arg12) {
             value__(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12);
         }
 
-        public static implicit operator ActionPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(delegate* managed<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, void> value) => new(value);
+        public static implicit operator ActionPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, void> value) => new(value);
 
-        public static implicit operator delegate* managed<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, void>(ActionPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> value) => value.value__;
+        public static implicit operator delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, void>(ActionPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> value) => value.value__;
 
-        public static explicit operator ActionPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(void* value) => new((delegate* managed<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, void>)value);
+        public static explicit operator ActionPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(void* value) => new((delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, void>)value);
 
         public static implicit operator void*(ActionPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> value) => value.value__;
 
@@ -2291,9 +2291,9 @@ namespace Dorabot.CInterop {
     [StructLayout(LayoutKind.Sequential)]
     public unsafe readonly struct FuncPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult> : IComparable, IComparable<FuncPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult>>, IEquatable<FuncPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult>>, ISpanFormattable, IFormattable, ISerializable where TResult : unmanaged {
 
-        readonly delegate* managed<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult> value__;
+        readonly delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult> value__;
 
-        public unsafe FuncPtr(delegate* managed<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult> value) {
+        public unsafe FuncPtr(delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult> value) {
             value__ = value;
         }
 
@@ -2302,7 +2302,7 @@ namespace Dorabot.CInterop {
             if (sizeof(nint) == sizeof(int) && (value > int.MaxValue || value < int.MinValue)) {
                 throw new ArgumentException("Serialization_InvalidPtrValue");
             }
-            value__ = unchecked((delegate* managed<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult>)value);
+            value__ = unchecked((delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult>)value);
         }
 
         public TResult Invoke(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11, T12 arg12) {
@@ -2337,11 +2337,11 @@ namespace Dorabot.CInterop {
             return this.value__ == other.value__;
         }
 
-        public static implicit operator FuncPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult>(delegate* managed<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult> value) => new(value);
+        public static implicit operator FuncPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult>(delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult> value) => new(value);
 
-        public static implicit operator delegate* managed<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult>(FuncPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult> value) => value.value__;
+        public static implicit operator delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult>(FuncPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult> value) => value.value__;
 
-        public static explicit operator FuncPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult>(void* value) => new((delegate* managed<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult>)value);
+        public static explicit operator FuncPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult>(void* value) => new((delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult>)value);
 
         public static implicit operator void*(FuncPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult> value) => value.value__;
 
@@ -2390,9 +2390,9 @@ namespace Dorabot.CInterop {
     [StructLayout(LayoutKind.Sequential)]
     public unsafe readonly struct ActionPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> : IComparable, IComparable<ActionPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>>, IEquatable<ActionPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>>, ISpanFormattable, IFormattable, ISerializable {
 
-        readonly delegate* managed<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, void> value__;
+        readonly delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, void> value__;
 
-        public unsafe ActionPtr(delegate* managed<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, void> value) {
+        public unsafe ActionPtr(delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, void> value) {
             value__ = value;
         }
 
@@ -2401,18 +2401,18 @@ namespace Dorabot.CInterop {
             if (sizeof(nint) == sizeof(int) && (value > int.MaxValue || value < int.MinValue)) {
                 throw new ArgumentException("Serialization_InvalidPtrValue");
             }
-            value__ = unchecked((delegate* managed<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, void>)value);
+            value__ = unchecked((delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, void>)value);
         }
 
         public void Invoke(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11, T12 arg12, T13 arg13) {
             value__(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13);
         }
 
-        public static implicit operator ActionPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(delegate* managed<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, void> value) => new(value);
+        public static implicit operator ActionPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, void> value) => new(value);
 
-        public static implicit operator delegate* managed<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, void>(ActionPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> value) => value.value__;
+        public static implicit operator delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, void>(ActionPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> value) => value.value__;
 
-        public static explicit operator ActionPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(void* value) => new((delegate* managed<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, void>)value);
+        public static explicit operator ActionPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(void* value) => new((delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, void>)value);
 
         public static implicit operator void*(ActionPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> value) => value.value__;
 
@@ -2489,9 +2489,9 @@ namespace Dorabot.CInterop {
     [StructLayout(LayoutKind.Sequential)]
     public unsafe readonly struct FuncPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, TResult> : IComparable, IComparable<FuncPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, TResult>>, IEquatable<FuncPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, TResult>>, ISpanFormattable, IFormattable, ISerializable where TResult : unmanaged {
 
-        readonly delegate* managed<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, TResult> value__;
+        readonly delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, TResult> value__;
 
-        public unsafe FuncPtr(delegate* managed<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, TResult> value) {
+        public unsafe FuncPtr(delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, TResult> value) {
             value__ = value;
         }
 
@@ -2500,7 +2500,7 @@ namespace Dorabot.CInterop {
             if (sizeof(nint) == sizeof(int) && (value > int.MaxValue || value < int.MinValue)) {
                 throw new ArgumentException("Serialization_InvalidPtrValue");
             }
-            value__ = unchecked((delegate* managed<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, TResult>)value);
+            value__ = unchecked((delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, TResult>)value);
         }
 
         public TResult Invoke(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11, T12 arg12, T13 arg13) {
@@ -2535,11 +2535,11 @@ namespace Dorabot.CInterop {
             return this.value__ == other.value__;
         }
 
-        public static implicit operator FuncPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, TResult>(delegate* managed<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, TResult> value) => new(value);
+        public static implicit operator FuncPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, TResult>(delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, TResult> value) => new(value);
 
-        public static implicit operator delegate* managed<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, TResult>(FuncPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, TResult> value) => value.value__;
+        public static implicit operator delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, TResult>(FuncPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, TResult> value) => value.value__;
 
-        public static explicit operator FuncPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, TResult>(void* value) => new((delegate* managed<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, TResult>)value);
+        public static explicit operator FuncPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, TResult>(void* value) => new((delegate* unmanaged[Cdecl]<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, TResult>)value);
 
         public static implicit operator void*(FuncPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, TResult> value) => value.value__;
 

@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Transactions;
 
-namespace MultiLock {
+namespace UltimateOrb.Threading {
 
     public static class MonitorExtensions {
 

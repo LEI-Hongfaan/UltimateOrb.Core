@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using UltimateOrb.Mathematics;
 using UltimateOrb.Utilities.Extensions;
 using static UltimateOrb.Utilities.BooleanIntegerModule;
@@ -7,6 +8,7 @@ using static UltimateOrb.Utilities.ThrowHelper;
 
 namespace UltimateOrb.Numerics {
 
+    [Experimental("UoWIP_F128")]
     public static partial class Binary128Arithmetic {
 
         public const int FractionBitCount = 112;

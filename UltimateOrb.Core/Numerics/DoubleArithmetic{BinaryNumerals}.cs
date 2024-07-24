@@ -1,4 +1,8 @@
 ﻿using System;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using System.Numerics;
+using System.Runtime.CompilerServices;
 using UltimateOrb.Mathematics;
 using static UltimateOrb.Utilities.SignConverter;
 
@@ -79,6 +83,83 @@ namespace UltimateOrb.Numerics {
 }
 
 namespace UltimateOrb.Numerics {
+    using MathEx = DoubleArithmetic;
+
+    public static partial class DoubleArithmetic {
+
+        /// <summary>
+        ///     <para>
+        ///         Computes the bit pattern of the next permutation in the lexicographical order.
+        ///         If the current permutation is already the maximum, the result will be the pattern with all bits <c>1</c>.
+        ///     </para>
+        /// </summary>
+        /// <param name="lo">
+        ///     <para>The <c>lo</c> part of the current bit pattern.</para>
+        /// </param>
+        /// <param name="hi">
+        ///     <para>The <c>hi</c> part of the current bit pattern.</para>
+        /// </param>
+        /// <param name="result_hi">
+        ///     <para>The <c>hi</c> part of the next bit pattern.</para>
+        /// </param>
+        /// <returns>
+        ///     <para>The <c>lo</c> part of the next bit pattern.</para>
+        /// </returns>
+        [System.CLSCompliantAttribute(false)]
+        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        public static T NextPermutation<T>(T lo, T hi, out T result_hi) where T: unmanaged, IUnsignedNumber<T>, IBinaryInteger<T> {
+            unchecked {
+                T loT;
+                T hiT;
+                T loV;
+                T hiV;
+                if (T.Zero == lo) {
+                    if (T.Zero == hi) {
+                        result_hi = T.AllBitsSet;
+                        return T.AllBitsSet;
+                    }
+                    var tHi = hi;
+                    --tHi;
+                    hiT = (hi | tHi);
+                    ++hiT;
+                    hiV = hi & (T.Zero - hi);
+                    loV = ((hiT & (T.Zero - hiT)) / hiV) >> 1;
+                    hiV = T.Zero;
+                    if (T.IsZero(loV)) {
+                        result_hi = T.AllBitsSet;
+                        return T.AllBitsSet;
+                    } else {
+                        result_hi = hiT;
+                        return --loV;
+                    }
+                } else {
+                    var tLo = lo;
+                    --tLo;
+                    loT = (lo | tLo);
+                    hiT = hi;
+                    ++loT;
+                    if (T.IsZero(loT)) {
+                        ++hiT;
+                    }
+                    loV = lo & (T.Zero - lo);
+                    hiV = hi & (T.AllBitsSet - hi);
+                    loV = MathEx.DivideUnsigned(loT & (T.Zero - loT), hiT & (T.IsZero(loT) ? (T.Zero - hiT) : (T.AllBitsSet - hiT)), loV, hiV, out hiV);
+                    unsafe {
+                        loV = (loV >> 1) | (hiV << (sizeof(T) * 8 - 1));
+                    }
+                    hiV = hiV >> 1;
+                    if (T.IsZero(loV--)) {
+                        --hiV;
+                    }
+                    result_hi = hiT | hiV;
+                    return loT | loV;
+                }
+            }
+        }
+    }
+}
+
+namespace UltimateOrb.Numerics {
 
     using UInt = UInt32;
     using ULong = UInt64;
@@ -97,6 +178,23 @@ namespace UltimateOrb.Numerics {
             return unchecked(64 + BinaryNumerals.CountLeadingZeros(lo));
         }
 
+        public static int CountLeadingZeros(UInt128 lo, UInt128 hi) {
+            if (0 != hi) {
+                return BinaryNumerals.CountLeadingZeros(hi);
+            }
+            return unchecked(128 + BinaryNumerals.CountLeadingZeros(lo));
+        }
+
+#if NET7_0_OR_GREATER
+        public static int CountLeadingZeros(System.UInt128 lo, System.UInt128 hi) {
+            if (0 != hi) {
+                return BinaryNumerals.CountLeadingZeros(hi);
+            }
+            return unchecked(128 + BinaryNumerals.CountLeadingZeros(lo));
+        }
+#endif
+
+
         public static int CountTrailingZeros(UInt64 lo, UInt64 hi) {
             if (0 != hi) {
                 return BinaryNumerals.CountTrailingZeros(hi);
@@ -104,12 +202,44 @@ namespace UltimateOrb.Numerics {
             return unchecked(64 + BinaryNumerals.CountTrailingZeros(lo));
         }
 
+        public static int CountTrailingZeros(UInt128 lo, UInt128 hi) {
+            if (0 != hi) {
+                return BinaryNumerals.CountTrailingZeros(hi);
+            }
+            return unchecked(128 + BinaryNumerals.CountTrailingZeros(lo));
+        }
+
+#if NET7_0_OR_GREATER
+        public static int CountTrailingZeros(System.UInt128 lo, System.UInt128 hi) {
+            if (0 != hi) {
+                return BinaryNumerals.CountTrailingZeros(hi);
+            }
+            return unchecked(128 + BinaryNumerals.CountTrailingZeros(lo));
+        }
+#endif
+
         public static int Log2Floor(UInt64 lo, UInt64 hi) {
             if (0 == hi) {
                 return BinaryNumerals.Log2Floor(lo);
             }
             return 64 + BinaryNumerals.Log2Floor(hi);
         }
+
+        public static int Log2Floor(UltimateOrb.UInt128 lo, UltimateOrb.UInt128 hi) {
+            if (0 == hi) {
+                return BinaryNumerals.Log2Floor(lo);
+            }
+            return 128 + BinaryNumerals.Log2Floor(hi);
+        }
+
+#if NET7_0_OR_GREATER
+        public static int Log2Floor(System.UInt128 lo, System.UInt128 hi) {
+            if (0 == hi) {
+                return BinaryNumerals.Log2Floor(lo);
+            }
+            return 128 + BinaryNumerals.Log2Floor(hi);
+        }
+#endif
 
         public static int CountStorageBits(UInt64 lo, UInt64 hi) {
             if (0 == hi) {
@@ -136,7 +266,13 @@ namespace UltimateOrb.Numerics {
         }
 
         public static bool IsPowerOfTwo(UInt64 lo, UInt64 hi) {
+            // return lo != hi && 1 == BinaryNumerals.PopulationCount(lo | hi);
             return 1 == BinaryNumerals.PopulationCount(lo) + BinaryNumerals.PopulationCount(hi);
+        }
+
+        public static bool IsPowerOfTwo(UInt128 lo, UInt128 hi) {
+            // (number & (number - 1)) == 0;
+            return lo != hi && 1 == BinaryNumerals.PopulationCount(lo | hi);
         }
 
         public static bool IsPowerOfTwo(UInt64 lo, Int64 hi) {
