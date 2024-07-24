@@ -26,7 +26,7 @@
     <Description>Provides Int128 and UInt128.</Description>
     <Authors>LEI Hongfaan</Authors>
   </PropertyGroup>
-  
+
   <PropertyGroup>
     <!-- Sync with UltimateOrb.Core -->
     <Version>3.2.0-beta.1</Version>
@@ -112,6 +112,7 @@
   <ItemGroup>
     <Folder Include="Internal\System\" />
     <Folder Include="Mathematics\Elementary\" />
+    <Folder Include="Numerics\" />
     <Folder Include="Runtime\CompilerServices\" />
     <Folder Include="System\Runtiem\CompilerServices\" />
     <Folder Include="Utilities\Extensions\" />
@@ -161,22 +162,18 @@
   </Target>
   
   <PropertyGroup Condition="'$(TargetFramework)'=='net6.0'">
-    <AssemblyDir>C:\Program Files\dotnet\shared\Microsoft.NETCore.App\6.0.8\</AssemblyDir>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)'=='net7.0'">
-    <AssemblyDir>C:\Program Files\dotnet\shared\Microsoft.NETCore.App\7.0.0-rc.2.22472.3\</AssemblyDir>
   </PropertyGroup>
 
   <Target Condition="'$(TargetFramework)'=='net6.0'" Name="Trimming" AfterTargets="PostBuild">
     <Copy SourceFiles="$(TargetPath)" DestinationFiles="tmp\UltimateOrb.Int128.dll"></Copy>
-    <ILLink AssemblyPaths="$(AssemblyDir)System.Runtime.dll;$(AssemblyDir)System.Private.CoreLib.dll;$(AssemblyDir)System.Private.Uri.dll;$(AssemblyDir)System.Diagnostics.Contracts.dll;$(AssemblyDir)System.Memory.dll;$(AssemblyDir)System.Runtime.CompilerServices.Unsafe.dll;$(AssemblyDir)System.Runtime.Numerics.dll;tmp\UltimateOrb.Int128.dll" RootAssemblyNames="" RootDescriptorFiles="linker.xml" OutputDirectory="tmp\output\" ExtraArgs="--keep-metadata parametername -t --trim-mode link" />
     <Copy SourceFiles="tmp\output\UltimateOrb.Int128.dll" DestinationFiles="$(TargetPath)"></Copy>
   </Target>
   
   <Target Condition="'$(TargetFramework)'=='net7.0'" Name="Trimming" AfterTargets="PostBuild">
     <Copy SourceFiles="$(TargetPath)" DestinationFiles="tmp\UltimateOrb.Int128.dll"></Copy>
-    <ILLink AssemblyPaths="$(AssemblyDir)System.Runtime.dll;$(AssemblyDir)System.Private.CoreLib.dll;$(AssemblyDir)System.Private.Uri.dll;$(AssemblyDir)System.Diagnostics.Contracts.dll;$(AssemblyDir)System.Memory.dll;$(AssemblyDir)System.Runtime.Numerics.dll;tmp\UltimateOrb.Int128.dll" RootAssemblyNames="" RootDescriptorFiles="linker.xml" OutputDirectory="tmp\output\" ExtraArgs="--keep-metadata parametername -t --trim-mode link" />
     <Copy SourceFiles="tmp\output\UltimateOrb.Int128.dll" DestinationFiles="$(TargetPath)"></Copy>
   </Target>
 </Project>
