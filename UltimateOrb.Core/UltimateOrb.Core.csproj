@@ -14,12 +14,14 @@
     <Product>UltimateOrb Libraries</Product>
     <RootNamespace>UltimateOrb</RootNamespace>
     <Description>UltimateOrb Core Libraries.</Description>
-    <Copyright>Copyright © 2017, 2018, 2020, 2022 LEI Hongfaan. Distributed under the MIT License.</Copyright>
+    <Copyright>Copyright © 2017, 2018, 2020, 2022, 2024 LEI Hongfaan. Distributed under the MIT License.</Copyright>
     <PackageProjectUrl>https://github.com/LEI-Hongfaan/UltimateOrb.Core</PackageProjectUrl>
     <RepositoryUrl>https://github.com/LEI-Hongfaan/UltimateOrb.Core</RepositoryUrl>
     <PackageTags>UltimateOrb;Core;BCL;Int128;UInt128;Rational;Rational64;Monad;Linq;WeakDictionary</PackageTags>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+    <Title>UltimateOrb Libraries</Title>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -47,6 +49,10 @@
   <ItemGroup>
     <None Include="..\.editorconfig" Link=".editorconfig" />
     <None Include="..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Include="..\README.md">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
