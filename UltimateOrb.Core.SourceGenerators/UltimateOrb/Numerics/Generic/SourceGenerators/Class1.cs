@@ -19,14 +19,12 @@ namespace UltimateOrb.Core.SourceGenerators.UltimateOrb.Numerics.Generic {
     public class BinaryIntegerInterfaceGenerator : IIncrementalGenerator {
         public void Initialize(IncrementalGeneratorInitializationContext context) {
             var assemblyAttributes = context.SyntaxProvider
-                .CreateSyntaxProvider(
+                .ForAttributeWithMetadataName("Ultimate.Core.SourceGenerators.GenerateUltimateOrbCoreSourceCodeAttribute",
                     predicate: (node, _) => node is AttributeSyntax,
                     transform: (context, _) => {
-                        var node = (AttributeSyntax)context.Node;
-                        var attrType = (context.SemanticModel.GetTypeInfo(node).Type as INamedTypeSymbol)!;
-                        return node;
+                        return context.TargetNode;
                     })
-                .Where(syntax => syntax is { } && (syntax?.Parent as AttributeListSyntax)?.Target?.Identifier.Kind() == SyntaxKind.AssemblyKeyword)
+                .Where((x) => true)
                 .Collect();
 
             context.RegisterPostInitializationOutput(context => {
@@ -250,7 +248,7 @@ namespace UltimateOrb.Numerics.Generic {
 
                 sourceBuilder.AppendLine($$$"""
     
-    [Experimental("UoWIP_GenericMath")]
+    [System.Diagnostics.CodeAnalysis.Experimental("UoWIP_GenericMath")]
     public interface IBinaryInteger{{{descriptor.OperatorName}}}{{{variant}}}Provider<TSelf, T>
         where TSelf :
             IBinaryInteger{{{descriptor.OperatorName}}}{{{variant}}}Provider<TSelf, T> {

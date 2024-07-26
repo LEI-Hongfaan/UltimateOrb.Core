@@ -300,7 +300,7 @@ namespace UltimateOrb.Mathematics {
         [System.Diagnostics.Contracts.PureAttribute()]
         public static long CountTrailingZeros(ReadOnlySpan<UInt64> source) {
             long r = 0;
-            for (var i = source.Length - 1; 0 <= i; --i) {
+            for (var i = 0; source.Length > i; ++i) {
                 var t = source[i];
                 if (0 == t) {
                     r = unchecked(r + 64);
