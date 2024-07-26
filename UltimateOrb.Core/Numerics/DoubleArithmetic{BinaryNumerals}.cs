@@ -87,6 +87,8 @@ namespace UltimateOrb.Numerics {
 
     public static partial class DoubleArithmetic {
 
+#if STANDALONE_XINTN_LIBRARY
+#else
 #if NET7_0_OR_GREATER
         /// <summary>
         ///     <para>
@@ -157,6 +159,7 @@ namespace UltimateOrb.Numerics {
                 }
             }
         }
+#endif
 #endif
     }
 }

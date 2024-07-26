@@ -8,7 +8,7 @@ using static UltimateOrb.Utilities.SignConverter;
 
 namespace UltimateOrb.Mathematics {
 
-#if INDEPENDENT_XINTN_LIBRARY
+#if STANDALONE_XINTN_LIBRARY
     internal
 #else
     public
@@ -133,7 +133,7 @@ namespace UltimateOrb.Mathematics {
         }
 #endif
 
-#if !INDEPENDENT_XINTN_LIBRARY || FEATURE_XINTN_INT256
+#if !STANDALONE_XINTN_LIBRARY || FEATURE_XINTN_INT256
         [System.CLSCompliantAttribute(false)]
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         public static int CountLeadingZeros(UltimateOrb.UInt256 w) {
@@ -704,7 +704,7 @@ namespace UltimateOrb.Mathematics {
         }
 #endif
 
-#if !INDEPENDENT_XINTN_LIBRARY || FEATURE_XINTN_INT256
+#if !STANDALONE_XINTN_LIBRARY || FEATURE_XINTN_INT256
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         static UInt128 GetHighPart(this UInt256 d) {
             return unchecked((UInt128)d.HiInt128Bits);

@@ -8,6 +8,8 @@ namespace UltimateOrb.Numerics {
     
     public static partial class DoubleArithmetic {
 
+#if STANDALONE_XINTN_LIBRARY
+#else
         [System.CLSCompliantAttribute(false)]
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static T DivideUnsigned<T>(T lowDividend, T highDividend, T lowDivisor, T highDivisor, out T highResult) {
@@ -66,5 +68,6 @@ namespace UltimateOrb.Numerics {
                 throw new NotImplementedException();
             }
         }
+#endif
     }
 }

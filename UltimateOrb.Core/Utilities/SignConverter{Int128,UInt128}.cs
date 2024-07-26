@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 
 namespace UltimateOrb.Utilities {
 
-#if INDEPENDENT_XINTN_LIBRARY
+#if STANDALONE_XINTN_LIBRARY
     internal
 #else
     public

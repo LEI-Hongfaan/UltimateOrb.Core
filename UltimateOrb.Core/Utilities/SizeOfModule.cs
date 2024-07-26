@@ -14,7 +14,7 @@ namespace UltimateOrb.Utilities {
     ///         Whenever you rename this type or such a member, update the build tools accordingly.
     ///     </para>
     /// </devdoc>
-#if INDEPENDENT_XINTN_LIBRARY
+#if STANDALONE_XINTN_LIBRARY
     internal
 #else
     public

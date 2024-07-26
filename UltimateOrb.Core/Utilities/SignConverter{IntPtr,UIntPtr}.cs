@@ -6,7 +6,7 @@ using System.Runtime.ConstrainedExecution;
 
 namespace UltimateOrb.Utilities {
 
-#if INDEPENDENT_XINTN_LIBRARY
+#if STANDALONE_XINTN_LIBRARY
     internal
 #else
     public

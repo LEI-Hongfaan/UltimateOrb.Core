@@ -2,7 +2,7 @@
 
 namespace UltimateOrb.Numerics {
 
-#if INDEPENDENT_XINTN_LIBRARY
+#if STANDALONE_XINTN_LIBRARY
     internal
 #else
     public

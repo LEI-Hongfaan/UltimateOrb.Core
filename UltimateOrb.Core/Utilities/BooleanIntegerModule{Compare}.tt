@@ -9,7 +9,7 @@ for (var i = 0; i < TS.Length; ++i) {
 
 namespace UltimateOrb.Utilities {
 
-#if INDEPENDENT_XINTN_LIBRARY
+#if STANDALONE_XINTN_LIBRARY
     internal
 #else
     public

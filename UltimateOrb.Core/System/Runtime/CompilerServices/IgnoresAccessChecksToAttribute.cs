@@ -26,7 +26,7 @@ namespace System.Runtime.CompilerServices {
     /// Allows the current assembly to access the internal types of a specified assembly that are ordinarily invisible.
     /// </summary>
     [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true, Inherited = false)]
-#if INDEPENDENT_XINTN_LIBRARY
+#if STANDALONE_XINTN_LIBRARY
     internal
 #else
     public

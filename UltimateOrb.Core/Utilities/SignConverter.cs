@@ -7,7 +7,7 @@ using System.Runtime.ConstrainedExecution;
 namespace UltimateOrb.Utilities {
 
     [DiscardableAttribute()]
-#if INDEPENDENT_XINTN_LIBRARY
+#if STANDALONE_XINTN_LIBRARY
     internal
 #else
     public

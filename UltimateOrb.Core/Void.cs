@@ -10,7 +10,7 @@ namespace UltimateOrb {
     /// </summary>
     [ComVisibleAttribute(true)]
     [SerializableAttribute()]
-#if INDEPENDENT_XINTN_LIBRARY
+#if STANDALONE_XINTN_LIBRARY
     internal
 #else
     public
@@ -30,7 +30,7 @@ namespace UltimateOrb {
     /// </typeparam>
     [ComVisibleAttribute(true)]
     [SerializableAttribute()]
-#if INDEPENDENT_XINTN_LIBRARY
+#if STANDALONE_XINTN_LIBRARY
     internal
 #else
     public
@@ -55,7 +55,7 @@ namespace UltimateOrb {
     /// </typeparam>
     [ComVisibleAttribute(true)]
     [SerializableAttribute()]
-#if INDEPENDENT_XINTN_LIBRARY
+#if STANDALONE_XINTN_LIBRARY
     internal
 #else
     public

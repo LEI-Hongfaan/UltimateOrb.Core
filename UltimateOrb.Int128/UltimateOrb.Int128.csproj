@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0;net7.0;net8.0;net9.0</TargetFramework>
+		<TargetFrameworks>net6.0;net7.0;net8.0;net9.0</TargetFrameworks>
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
@@ -34,13 +34,13 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DefineConstants>$(DefineConstants)TRACE;FEATURE_STANDARD_LIBRARY_INTEROPERABILITY_FORMATTING_AND_CONVERSION;INDEPENDENT_XINTN_LIBRARY</DefineConstants>
+    <DefineConstants>$(DefineConstants)TRACE;FEATURE_STANDARD_LIBRARY_INTEROPERABILITY_FORMATTING_AND_CONVERSION;STANDALONE_XINTN_LIBRARY</DefineConstants>
     <CheckForOverflowUnderflow>True</CheckForOverflowUnderflow>
     <LangVersion>preview</LangVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DefineConstants>$(DefineConstants)TRACE;FEATURE_STANDARD_LIBRARY_INTEROPERABILITY_FORMATTING_AND_CONVERSION;INDEPENDENT_XINTN_LIBRARY</DefineConstants>
+    <DefineConstants>$(DefineConstants)TRACE;FEATURE_STANDARD_LIBRARY_INTEROPERABILITY_FORMATTING_AND_CONVERSION;STANDALONE_XINTN_LIBRARY</DefineConstants>
     <CheckForOverflowUnderflow>True</CheckForOverflowUnderflow>
     <LangVersion>preview</LangVersion>
   </PropertyGroup>
@@ -58,6 +58,7 @@
     <Compile Include="..\UltimateOrb.Core\Numerics\DoubleArithmeticF.cs" Link="Numerics\DoubleArithmeticF.cs" />
     <Compile Include="..\UltimateOrb.Core\Numerics\DoubleArithmetic{Abs,Sign}.cs" Link="Numerics\DoubleArithmetic{Abs,Sign}.cs" />
     <Compile Include="..\UltimateOrb.Core\Numerics\DoubleArithmetic{BigMul,BigDivRem,BigDiv,BigRem}.cs" Link="Numerics\DoubleArithmetic{BigMul,BigDivRem,BigDiv,BigRem}.cs" />
+    <Compile Include="..\UltimateOrb.Core\Numerics\DoubleArithmetic{BigMul.Generic}.cs" Link="Numerics\DoubleArithmetic{BigMul.Generic}.cs" />
     <Compile Include="..\UltimateOrb.Core\Numerics\DoubleArithmetic{BinaryNumerals}.cs" Link="Numerics\DoubleArithmetic{BinaryNumerals}.cs" />
     <Compile Include="..\UltimateOrb.Core\Numerics\DoubleArithmetic{Compare}.cs" Link="Numerics\DoubleArithmetic{Compare}.cs">
       <DesignTime>True</DesignTime>
@@ -69,7 +70,9 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>DoubleArithmetic{Core}.tt</DependentUpon>
     </Compile>
+    <Compile Include="..\UltimateOrb.Core\Numerics\DoubleArithmetic{DivRem.Generic}.cs" Link="Numerics\DoubleArithmetic{DivRem.Generic}.cs" />
     <Compile Include="..\UltimateOrb.Core\Numerics\DoubleArithmetic{DivRem}.cs" Link="Numerics\DoubleArithmetic{DivRem}.cs" />
+    <Compile Include="..\UltimateOrb.Core\Numerics\DoubleArithmetic{Generic}.cs" Link="Numerics\DoubleArithmetic{Generic}.cs" />
     <Compile Include="..\UltimateOrb.Core\Numerics\DoubleArithmetic{Increase,Decrease}.cs" Link="Numerics\DoubleArithmetic{Increase,Decrease}.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>

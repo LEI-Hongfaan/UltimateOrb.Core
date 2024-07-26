@@ -12,7 +12,7 @@ using static UltimateOrb.Utilities.Extensions.BooleanIntegerExtensions;
 namespace UltimateOrb.Utilities {
 
     [DiscardableAttribute()]
-#if INDEPENDENT_XINTN_LIBRARY
+#if STANDALONE_XINTN_LIBRARY
     internal
 #else
     public

@@ -1150,7 +1150,7 @@ namespace UltimateOrb.Numerics {
         [System.Runtime.CompilerServices.MethodImplAttribute(
             System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining |
             System.Runtime.CompilerServices.MethodImplOptions.AggressiveOptimization)]
-#if INDEPENDENT_XINTN_LIBRARY
+#if STANDALONE_XINTN_LIBRARY
         internal
 #else
         public
@@ -1197,7 +1197,7 @@ namespace UltimateOrb.Numerics {
         [System.Runtime.CompilerServices.MethodImplAttribute(
             System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining |
             System.Runtime.CompilerServices.MethodImplOptions.AggressiveOptimization)]
-#if INDEPENDENT_XINTN_LIBRARY
+#if STANDALONE_XINTN_LIBRARY
         internal
 #else
         public
@@ -2329,7 +2329,7 @@ namespace UltimateOrb.Numerics {
         [System.Runtime.CompilerServices.MethodImplAttribute(
             System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining |
             System.Runtime.CompilerServices.MethodImplOptions.AggressiveOptimization)]
-#if INDEPENDENT_XINTN_LIBRARY
+#if STANDALONE_XINTN_LIBRARY
         internal
 #else
         public
@@ -2376,7 +2376,7 @@ namespace UltimateOrb.Numerics {
         [System.Runtime.CompilerServices.MethodImplAttribute(
             System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining |
             System.Runtime.CompilerServices.MethodImplOptions.AggressiveOptimization)]
-#if INDEPENDENT_XINTN_LIBRARY
+#if STANDALONE_XINTN_LIBRARY
         internal
 #else
         public
@@ -3508,7 +3508,7 @@ namespace UltimateOrb.Numerics {
         [System.Runtime.CompilerServices.MethodImplAttribute(
             System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining |
             System.Runtime.CompilerServices.MethodImplOptions.AggressiveOptimization)]
-#if INDEPENDENT_XINTN_LIBRARY
+#if STANDALONE_XINTN_LIBRARY
         internal
 #else
         public
@@ -3555,7 +3555,7 @@ namespace UltimateOrb.Numerics {
         [System.Runtime.CompilerServices.MethodImplAttribute(
             System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining |
             System.Runtime.CompilerServices.MethodImplOptions.AggressiveOptimization)]
-#if INDEPENDENT_XINTN_LIBRARY
+#if STANDALONE_XINTN_LIBRARY
         internal
 #else
         public

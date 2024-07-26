@@ -7,7 +7,7 @@ namespace UltimateOrb {
     /// <summary>
     /// Provides miscellaneous functions.
     /// </summary>
-#if INDEPENDENT_XINTN_LIBRARY
+#if STANDALONE_XINTN_LIBRARY
     internal
 #else
     public

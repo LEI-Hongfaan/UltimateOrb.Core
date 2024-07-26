@@ -1,6 +1,6 @@
 ﻿namespace UltimateOrb.Utilities.Extensions {
 
-#if INDEPENDENT_XINTN_LIBRARY
+#if STANDALONE_XINTN_LIBRARY
     internal
 #else
     public

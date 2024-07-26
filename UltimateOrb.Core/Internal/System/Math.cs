@@ -10,7 +10,7 @@ namespace Internal.System {
     using SizeOfModule = UltimateOrb.Utilities.SizeOfModule;
 
     [System.Runtime.CompilerServices.DiscardableAttribute()]
-#if INDEPENDENT_XINTN_LIBRARY
+#if STANDALONE_XINTN_LIBRARY
     internal
 #else
     public

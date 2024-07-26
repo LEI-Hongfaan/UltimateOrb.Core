@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace UltimateOrb.Runtime.CompilerServices {
 
-#if INDEPENDENT_XINTN_LIBRARY
+#if STANDALONE_XINTN_LIBRARY
     internal
 #else
     public
@@ -15,7 +15,7 @@ namespace UltimateOrb.Runtime.CompilerServices {
         static partial class Unsafe {
     }
 
-#if INDEPENDENT_XINTN_LIBRARY
+#if STANDALONE_XINTN_LIBRARY
     internal
 #else
     public

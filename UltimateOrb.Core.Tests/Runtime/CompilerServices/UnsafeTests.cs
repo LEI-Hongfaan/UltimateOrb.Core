@@ -8,12 +8,12 @@ using System.Threading.Tasks;
 using System.Runtime.CompilerServices;
 
 #if false
-#if INDEPENDENT_XINTN_LIBRARY
+#if STANDALONE_XINTN_LIBRARY
 #else
 namespace UltimateOrb.Runtime.CompilerServices {
     using static InlineIL.IL;
 
-#if INDEPENDENT_XINTN_LIBRARY
+#if STANDALONE_XINTN_LIBRARY
     internal
 #else
     public

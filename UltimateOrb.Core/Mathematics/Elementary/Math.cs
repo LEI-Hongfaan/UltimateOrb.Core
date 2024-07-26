@@ -7,7 +7,7 @@ using static UltimateOrb.Utilities.Extensions.BooleanIntegerExtensions;
 
 namespace UltimateOrb.Mathematics.Elementary {
 
-#if INDEPENDENT_XINTN_LIBRARY
+#if STANDALONE_XINTN_LIBRARY
     internal
 #else
     public
