@@ -672,6 +672,18 @@ namespace UltimateOrb.Mathematics {
             return unchecked((UInt64)d.LoInt64Bits);
         }
 
+        [System.CLSCompliantAttribute(false)]
+        [TargetedPatchingOptOutAttribute("")]
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        [System.Diagnostics.Contracts.PureAttribute()]
+        public static int PopulationCount(UInt128 x) {
+#if NET7_0_OR_GREATER
+            return unchecked((int)System.UInt128.PopCount(x));
+#else
+            return System.Numerics.BitOperations.PopCount(x.GetHighPart()) + System.Numerics.BitOperations.PopCount(x.GetLowPart());
+#endif
+        }
+
 #if NET7_0_OR_GREATER
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         static UInt64 GetHighPart(this System.UInt128 d) {
@@ -683,6 +695,15 @@ namespace UltimateOrb.Mathematics {
             return unchecked((UInt64)d);
         }
 
+        [System.CLSCompliantAttribute(false)]
+        [TargetedPatchingOptOutAttribute("")]
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        [System.Diagnostics.Contracts.PureAttribute()]
+        public static int PopulationCount(System.UInt128 x) {
+            return unchecked((int)System.UInt128.PopCount(x));
+        }
+#endif
+
 #if !INDEPENDENT_XINTN_LIBRARY || FEATURE_XINTN_INT256
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         static UInt128 GetHighPart(this UInt256 d) {
@@ -692,15 +713,6 @@ namespace UltimateOrb.Mathematics {
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         static UInt128 GetLowPart(this UInt256 d) {
             return unchecked((UInt128)d.LoInt128Bits);
-        }
-#endif
-
-        [System.CLSCompliantAttribute(false)]
-        [TargetedPatchingOptOutAttribute("")]
-        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
-        [System.Diagnostics.Contracts.PureAttribute()]
-        public static int PopulationCount(System.UInt128 x) {
-            return System.Numerics.BitOperations.PopCount(x.GetHighPart()) + System.Numerics.BitOperations.PopCount(x.GetLowPart());
         }
 #endif
 
@@ -836,6 +848,7 @@ namespace UltimateOrb.Mathematics {
             return DoubleArithmetic.Log2Floor(value.GetLowPart(), value.GetHighPart());
         }
 
+#if NET7_0_OR_GREATER
         [System.CLSCompliantAttribute(false)]
         [TargetedPatchingOptOutAttribute("")]
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
@@ -843,5 +856,6 @@ namespace UltimateOrb.Mathematics {
         public static int Log2Floor(System.UInt128 value) {
             return DoubleArithmetic.Log2Floor(value.GetLowPart(), value.GetHighPart());
         }
+#endif
     }
 }

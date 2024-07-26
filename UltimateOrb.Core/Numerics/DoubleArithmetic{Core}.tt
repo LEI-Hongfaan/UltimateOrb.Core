@@ -14,12 +14,21 @@ var LS = new string[] { "U", "U", "", "" };
 var HS = new string[] { "U", "", "U", "" };
 var CS = new string[] { "false", "false", "false", "true" };
 
+var macroSwitch_NET7P = TN == "System." && Di == 128;
+
 for (var i = 0; i < LS.Length; ++i) {
 	var L = LS[i];
 	var H = HS[i];
 	var C = CS[i];
 #>
 
+<#
+    if (macroSwitch_NET7P) {
+#>
+#if NET7_0_OR_GREATER
+<#
+    }
+#>
 namespace UltimateOrb.Numerics {
 	using UInt = UInt<#= Ti #>;
 	using ULong = <#= TN #>UInt<#= Di #>;
@@ -547,6 +556,13 @@ namespace UltimateOrb.Numerics {
 		}
 	}
 }
+<#
+    if (macroSwitch_NET7P) {
+#>
+#endif
+<#
+    }
+#>
 <#
 }
 }

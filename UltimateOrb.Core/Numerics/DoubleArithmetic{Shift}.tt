@@ -23,7 +23,8 @@ var CQ = new string[] { "count &= 2 * (8 * sizeof(IntT)) - 1;", "const int count
 #>
 
 <#
-    if (k == 2) {
+    var macroSwitch_NET7P = (TN == "System." && Di == 128);
+    if (macroSwitch_NET7P) {
 #>
 #if NET7_0_OR_GREATER
 <#
@@ -276,7 +277,7 @@ for (var j = 0; j < CP.Length; ++j) {
 }
 #>
 <#
-    if (k == 2) {
+    if (macroSwitch_NET7P) {
 #>
 #endif
 <#

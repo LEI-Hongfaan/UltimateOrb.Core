@@ -55,23 +55,11 @@ namespace UltimateOrb.Numerics {
 		[System.CLSCompliantAttribute(false)]
 		[System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 		public static int Compare(LIntT first_lo, HIntT first_hi, LIntT second_lo, HIntT second_hi) {
-			if (first_hi < second_hi) {
-                return -1;
-            }
-
-            if (first_hi > second_hi) {
-                return 1;
-            }
-
-            if (first_lo < second_lo) {
-                return -1;
-            }
-
-            if (first_lo > second_lo) {
-                return 1;
-            }
-
-            return 0;
+			if (first_hi < second_hi) return -1;
+			if (first_hi > second_hi) return 1;
+			if (first_lo < second_lo) return -1;
+			if (first_lo > second_lo) return 1;
+			return 0;
 		}
 	}
 }
@@ -131,27 +119,16 @@ namespace UltimateOrb.Numerics {
 		[System.CLSCompliantAttribute(false)]
 		[System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 		public static int Compare(LIntT first_lo, HIntT first_hi, LIntT second_lo, HIntT second_hi) {
-			if (first_hi < second_hi) {
-                return -1;
-            }
-
-            if (first_hi > second_hi) {
-                return 1;
-            }
-
-            if (first_lo < second_lo) {
-                return -1;
-            }
-
-            if (first_lo > second_lo) {
-                return 1;
-            }
-
-            return 0;
+			if (first_hi < second_hi) return -1;
+			if (first_hi > second_hi) return 1;
+			if (first_lo < second_lo) return -1;
+			if (first_lo > second_lo) return 1;
+			return 0;
 		}
 	}
 }
 
+#if NET7_0_OR_GREATER
 namespace UltimateOrb.Numerics {
 	using UInt = UInt64;
 	using ULong = System.UInt128;
@@ -207,27 +184,17 @@ namespace UltimateOrb.Numerics {
 		[System.CLSCompliantAttribute(false)]
 		[System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 		public static int Compare(LIntT first_lo, HIntT first_hi, LIntT second_lo, HIntT second_hi) {
-			if (first_hi < second_hi) {
-                return -1;
-            }
-
-            if (first_hi > second_hi) {
-                return 1;
-            }
-
-            if (first_lo < second_lo) {
-                return -1;
-            }
-
-            if (first_lo > second_lo) {
-                return 1;
-            }
-
-            return 0;
+			if (first_hi < second_hi) return -1;
+			if (first_hi > second_hi) return 1;
+			if (first_lo < second_lo) return -1;
+			if (first_lo > second_lo) return 1;
+			return 0;
 		}
 	}
 }
+#endif
 
+#if NET7_0_OR_GREATER
 namespace UltimateOrb.Numerics {
 	using UInt = UInt64;
 	using ULong = System.UInt128;
@@ -283,26 +250,15 @@ namespace UltimateOrb.Numerics {
 		[System.CLSCompliantAttribute(false)]
 		[System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 		public static int Compare(LIntT first_lo, HIntT first_hi, LIntT second_lo, HIntT second_hi) {
-			if (first_hi < second_hi) {
-                return -1;
-            }
-
-            if (first_hi > second_hi) {
-                return 1;
-            }
-
-            if (first_lo < second_lo) {
-                return -1;
-            }
-
-            if (first_lo > second_lo) {
-                return 1;
-            }
-
-            return 0;
+			if (first_hi < second_hi) return -1;
+			if (first_hi > second_hi) return 1;
+			if (first_lo < second_lo) return -1;
+			if (first_lo > second_lo) return 1;
+			return 0;
 		}
 	}
 }
+#endif
 
 namespace UltimateOrb.Numerics {
 	using UInt = UInt64;
@@ -359,23 +315,11 @@ namespace UltimateOrb.Numerics {
 		[System.CLSCompliantAttribute(false)]
 		[System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 		public static int Compare(LIntT first_lo, HIntT first_hi, LIntT second_lo, HIntT second_hi) {
-			if (first_hi < second_hi) {
-                return -1;
-            }
-
-            if (first_hi > second_hi) {
-                return 1;
-            }
-
-            if (first_lo < second_lo) {
-                return -1;
-            }
-
-            if (first_lo > second_lo) {
-                return 1;
-            }
-
-            return 0;
+			if (first_hi < second_hi) return -1;
+			if (first_hi > second_hi) return 1;
+			if (first_lo < second_lo) return -1;
+			if (first_lo > second_lo) return 1;
+			return 0;
 		}
 	}
 }
@@ -435,23 +379,11 @@ namespace UltimateOrb.Numerics {
 		[System.CLSCompliantAttribute(false)]
 		[System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 		public static int Compare(LIntT first_lo, HIntT first_hi, LIntT second_lo, HIntT second_hi) {
-			if (first_hi < second_hi) {
-                return -1;
-            }
-
-            if (first_hi > second_hi) {
-                return 1;
-            }
-
-            if (first_lo < second_lo) {
-                return -1;
-            }
-
-            if (first_lo > second_lo) {
-                return 1;
-            }
-
-            return 0;
+			if (first_hi < second_hi) return -1;
+			if (first_hi > second_hi) return 1;
+			if (first_lo < second_lo) return -1;
+			if (first_lo > second_lo) return 1;
+			return 0;
 		}
 	}
 }

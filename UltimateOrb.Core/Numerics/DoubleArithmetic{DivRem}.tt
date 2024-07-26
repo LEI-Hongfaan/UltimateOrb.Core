@@ -11,8 +11,17 @@ var Di = checked(Ti * 2);
 var Si = checked((Ti + 1) / 2);
 
 var T = checked(Ti * 2);
+
+var macroSwitch_NET7P = TN == "System." && Di == 128;
 #>
 
+<#
+    if (macroSwitch_NET7P) {
+#>
+#if NET7_0_OR_GREATER
+<#
+    }
+#>
 namespace UltimateOrb.Numerics {
 
 	using UInt = UInt<#= Ti #>;
@@ -414,6 +423,13 @@ namespace UltimateOrb.Numerics {
         }
     }
 }
+<#
+    if (macroSwitch_NET7P) {
+#>
+#endif
+<#
+    }
+#>
 <#
 }
 #>

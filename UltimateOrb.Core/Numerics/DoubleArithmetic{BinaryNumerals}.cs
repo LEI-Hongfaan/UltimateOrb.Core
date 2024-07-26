@@ -87,6 +87,7 @@ namespace UltimateOrb.Numerics {
 
     public static partial class DoubleArithmetic {
 
+#if NET7_0_OR_GREATER
         /// <summary>
         ///     <para>
         ///         Computes the bit pattern of the next permutation in the lexicographical order.
@@ -156,6 +157,7 @@ namespace UltimateOrb.Numerics {
                 }
             }
         }
+#endif
     }
 }
 

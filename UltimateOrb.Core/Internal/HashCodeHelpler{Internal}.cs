@@ -58,6 +58,7 @@ namespace Internal {
             return GetHashCode(value.GetLowPart() ^ value.GetHighPart());
         }
 
+#if NET7_0_OR_GREATER
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
         [TargetedPatchingOptOutAttribute("")]
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
@@ -73,5 +74,6 @@ namespace Internal {
         public static int GetHashCode(global::System.UInt128 value) {
             return GetHashCode(value.GetLowPart() ^ value.GetHighPart());
         }
+#endif
     }
 }

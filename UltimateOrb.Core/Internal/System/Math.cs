@@ -78,6 +78,7 @@ namespace Internal.System {
                 return new System.UInt128(upper: highResult, lower: lowResult);
             }
         }
+#endif
 
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
         [System.Runtime.TargetedPatchingOptOutAttribute("")]
@@ -93,7 +94,6 @@ namespace Internal.System {
                 return new UltimateOrb.UInt128(lo: lowResult, hi: highResult);
             }
         }
-#endif
 
         [System.CLSCompliantAttribute(false)]
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]

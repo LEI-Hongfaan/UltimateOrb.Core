@@ -1268,6 +1268,7 @@ namespace UltimateOrb.Numerics {
     }
 }
 
+#if NET7_0_OR_GREATER
 namespace UltimateOrb.Numerics {
 	using UInt = UInt64;
 	using ULong = System.UInt128;
@@ -2445,6 +2446,7 @@ namespace UltimateOrb.Numerics {
         }
     }
 }
+#endif
 
 namespace UltimateOrb.Numerics {
 	using UInt = UInt64;

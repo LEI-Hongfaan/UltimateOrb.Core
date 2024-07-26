@@ -341,7 +341,9 @@ namespace UltimateOrb {
             }
         }
 
+#if NET7_0_OR_GREATER
         static int INumberBase<XInt128>.Radix => throw new NotImplementedException();
+#endif
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "n")]
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
@@ -1717,7 +1719,7 @@ namespace UltimateOrb {
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         [System.Diagnostics.Contracts.PureAttribute()]
 #if !NET7_0_OR_GREATER || LEGACY_OPERATOR_CHECKNESS
-        public static XInt128 operator *(XInt128 first, XInt128 second) {
+        public static XInt128 operator /(XInt128 first, XInt128 second) {
 #else
         public static XInt128 operator checked /(XInt128 first, XInt128 second) {
 #endif
@@ -1732,7 +1734,7 @@ namespace UltimateOrb {
 #if !NET7_0_OR_GREATER || LEGACY_OPERATOR_CHECKNESS
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "op")]
-        public static XInt128 op_MultiplyUnchecked(XInt128 first, XInt128 second) {
+        public static XInt128 op_DivideUnchecked(XInt128 first, XInt128 second) {
 #else
         public static XInt128 operator /(XInt128 first, XInt128 second) {
 #endif
