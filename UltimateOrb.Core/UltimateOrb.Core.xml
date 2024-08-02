@@ -6382,6 +6382,18 @@
             Returns a string that represents the undefined value.
             </summary>
         </member>
+        <member name="M:UltimateOrb.Unmanaged.ManagedPtr.TryFormat(System.Span{System.Byte},System.Int32@,System.ReadOnlySpan{System.Char},System.IFormatProvider)">
+            <inheritdoc cref="M:System.IUtf8SpanFormattable.TryFormat(System.Span{System.Byte},System.Int32@,System.ReadOnlySpan{System.Char},System.IFormatProvider)" />
+        </member>
+        <member name="M:UltimateOrb.Unmanaged.ManagedPtr`1.TryFormat(System.Span{System.Byte},System.Int32@,System.ReadOnlySpan{System.Char},System.IFormatProvider)">
+            <inheritdoc cref="M:System.IUtf8SpanFormattable.TryFormat(System.Span{System.Byte},System.Int32@,System.ReadOnlySpan{System.Char},System.IFormatProvider)" />
+        </member>
+        <member name="M:UltimateOrb.Unmanaged.ReadOnlyManagedPtr.TryFormat(System.Span{System.Byte},System.Int32@,System.ReadOnlySpan{System.Char},System.IFormatProvider)">
+            <inheritdoc cref="M:System.IUtf8SpanFormattable.TryFormat(System.Span{System.Byte},System.Int32@,System.ReadOnlySpan{System.Char},System.IFormatProvider)" />
+        </member>
+        <member name="M:UltimateOrb.Unmanaged.ReadOnlyManagedPtr`1.TryFormat(System.Span{System.Byte},System.Int32@,System.ReadOnlySpan{System.Char},System.IFormatProvider)">
+            <inheritdoc cref="M:System.IUtf8SpanFormattable.TryFormat(System.Span{System.Byte},System.Int32@,System.ReadOnlySpan{System.Char},System.IFormatProvider)" />
+        </member>
         <member name="M:UltimateOrb.Unmanaged.NativeArray`1.Dispose">
             <summary>
             WARNING: Must not invoke Dispose multiple times.

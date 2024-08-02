@@ -2,10 +2,10 @@
 
 [assembly: CLSCompliantAttribute(true)]
 
-[assembly: System.Runtime.CompilerServices.IgnoresAccessChecksToAttribute("System.Private.CoreLib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e")]
-[assembly: System.Runtime.CompilerServices.IgnoresAccessChecksToAttribute("System.Private.CoreLib, Version=5.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e")]
 [assembly: System.Runtime.CompilerServices.IgnoresAccessChecksToAttribute("System.Private.CoreLib, Version=6.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e")]
 [assembly: System.Runtime.CompilerServices.IgnoresAccessChecksToAttribute("System.Private.CoreLib, Version=7.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e")]
+[assembly: System.Runtime.CompilerServices.IgnoresAccessChecksToAttribute("System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e")]
+[assembly: System.Runtime.CompilerServices.IgnoresAccessChecksToAttribute("System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e")]
 
 namespace UltimateOrb {
 

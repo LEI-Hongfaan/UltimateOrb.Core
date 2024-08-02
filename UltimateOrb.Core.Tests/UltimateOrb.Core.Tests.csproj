@@ -13,15 +13,9 @@
 	<CompilerGeneratedFilesOutputPath>generated</CompilerGeneratedFilesOutputPath>-->
   </PropertyGroup>
   
-	
-	
-  <ItemGroup>
-	<!--<Compile Remove="generated/**" />
-	<None Include="generated/**" />-->
-  </ItemGroup>
-  
   <ItemGroup>
     <Compile Remove="ArrayIterator.cs" />
+    <Compile Remove="ArrayIterator1.cs" />
     <Compile Remove="Ex0001.cs" />
     <Compile Remove="Graph.cs" />
     <Compile Remove="IArrayAccessorBasic.cs" />
@@ -36,6 +30,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="ArrayIterator1.cs" />
     <None Include="IArrayAccessorBasic.cs" />
     <None Include="QuadrupleReferenceProcessor.cs" />
     <None Include="StringOrdinalEqualityComparer.cs" />

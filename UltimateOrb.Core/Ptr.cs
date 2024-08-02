@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using System.Text;
@@ -125,6 +126,7 @@ namespace UltimateOrb {
 
         public ref T Dereferenced {
 
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => ref *this.value__;
         }
 
@@ -196,13 +198,29 @@ namespace UltimateOrb {
 
         public static implicit operator T*(Ptr<T> value) => value.value__;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator Ptr<T>(Ptr value) => new Ptr<T>((T*)(void*)value);
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator Ptr(Ptr<T> value) => new Ptr(value.value__);
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator Ptr<T>(void* value) => new Ptr<T>((T*)value);
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator void*(Ptr<T> value) => value.value__;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static explicit operator Ptr<T>(ReadOnlyPtr value) => new Ptr<T>((T*)(void*)value);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator ReadOnlyPtr(Ptr<T> value) => new Ptr(value.value__);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Ptr<T> operator ++(Ptr<T> ptr) => ptr.value__ + 1;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Ptr<T> operator --(Ptr<T> ptr) => ptr.value__ - 1;
 
         public static Ptr<T> operator +(Ptr<T> ptr, int offset) => ptr.value__ + offset;
 
@@ -227,6 +245,18 @@ namespace UltimateOrb {
         public static Ptr<T> operator +(Ptr<T> ptr, nuint offset) => ptr.value__ + offset;
 
         public static Ptr<T> operator +(nuint offset, Ptr<T> ptr) => offset + ptr.value__;
+
+        public static Ptr<T> operator -(Ptr<T> ptr, int offset) => ptr.value__ - offset;
+
+        public static Ptr<T> operator -(Ptr<T> ptr, uint offset) => ptr.value__ - offset;
+
+        public static Ptr<T> operator -(Ptr<T> ptr, long offset) => ptr.value__ - offset;
+
+        public static Ptr<T> operator -(Ptr<T> ptr, ulong offset) => ptr.value__ - offset;
+
+        public static Ptr<T> operator -(Ptr<T> ptr, nint offset) => ptr.value__ - offset;
+
+        public static Ptr<T> operator -(Ptr<T> ptr, nuint offset) => ptr.value__ - offset;
 
         public static nint operator -(Ptr<T> first, Ptr<T> second) => unchecked((nint)(first.value__ - second.value__));
 
@@ -291,8 +321,10 @@ namespace UltimateOrb {
             value__ = unchecked((void*)value);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator ReadOnlyPtr(Ptr value) => new ReadOnlyPtr((void*)value);
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator Ptr(ReadOnlyPtr value) => new Ptr(value.value__);
 
         public static explicit operator ReadOnlyPtr(void* value) => new ReadOnlyPtr(value);
@@ -456,25 +488,39 @@ namespace UltimateOrb {
             get => ref this.value__[offset];
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator ReadOnlyPtr<T>(Ptr<T> value) => new ReadOnlyPtr<T>((T*)value);
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator Ptr<T>(ReadOnlyPtr<T> value) => new Ptr<T>(value.value__);
 
         public static implicit operator ReadOnlyPtr<T>(T* value) => new ReadOnlyPtr<T>(value);
 
         public static explicit operator T*(ReadOnlyPtr<T> value) => value.value__;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator ReadOnlyPtr<T>(ReadOnlyPtr value) => new ReadOnlyPtr<T>((T*)(void*)value);
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator ReadOnlyPtr(ReadOnlyPtr<T> value) => new ReadOnlyPtr(value.value__);
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator ReadOnlyPtr<T>(Ptr value) => new ReadOnlyPtr<T>((T*)value);
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator Ptr(ReadOnlyPtr<T> value) => new Ptr(value.value__);
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator ReadOnlyPtr<T>(void* value) => new ReadOnlyPtr<T>((T*)value);
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator void*(ReadOnlyPtr<T> value) => value.value__;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ReadOnlyPtr<T> operator ++(ReadOnlyPtr<T> ptr) => ptr.value__ + 1;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ReadOnlyPtr<T> operator --(ReadOnlyPtr<T> ptr) => ptr.value__ - 1;
 
         public static ReadOnlyPtr<T> operator +(ReadOnlyPtr<T> ReadOnlyPtr, int offset) => ReadOnlyPtr.value__ + offset;
 
@@ -499,6 +545,18 @@ namespace UltimateOrb {
         public static ReadOnlyPtr<T> operator +(ReadOnlyPtr<T> ReadOnlyPtr, nuint offset) => ReadOnlyPtr.value__ + offset;
 
         public static ReadOnlyPtr<T> operator +(nuint offset, ReadOnlyPtr<T> ReadOnlyPtr) => offset + ReadOnlyPtr.value__;
+
+        public static ReadOnlyPtr<T> operator -(ReadOnlyPtr<T> ptr, int offset) => ptr.value__ - offset;
+
+        public static ReadOnlyPtr<T> operator -(ReadOnlyPtr<T> ptr, uint offset) => ptr.value__ - offset;
+
+        public static ReadOnlyPtr<T> operator -(ReadOnlyPtr<T> ptr, long offset) => ptr.value__ - offset;
+
+        public static ReadOnlyPtr<T> operator -(ReadOnlyPtr<T> ptr, ulong offset) => ptr.value__ - offset;
+
+        public static ReadOnlyPtr<T> operator -(ReadOnlyPtr<T> ptr, nint offset) => ptr.value__ - offset;
+
+        public static ReadOnlyPtr<T> operator -(ReadOnlyPtr<T> ptr, nuint offset) => ptr.value__ - offset;
 
         public static nint operator -(ReadOnlyPtr<T> first, ReadOnlyPtr<T> second) => unchecked((nint)(first.value__ - second.value__));
 
