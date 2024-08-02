@@ -402,6 +402,11 @@ namespace UltimateOrb.Unmanaged {
             info.AddValue("value", unchecked((nint)Unsafe.AsPointer(ref ref__)));
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public ManagedPtr<TResult> Cast<TResult>() where TResult : unmanaged {
+            return (ManagedPtr<TResult>)(ManagedPtr)this;
+        }
+
         public bool TryFormat(Span<char> destination, out int charsWritten, [StringSyntax(StringSyntaxAttribute.NumericFormat)] ReadOnlySpan<char> format = default, IFormatProvider? provider = null) {
             unsafe {
                 var cc = 0;
@@ -878,6 +883,11 @@ namespace UltimateOrb.Unmanaged {
                 throw new ArgumentNullException(nameof(info));
             }
             info.AddValue("value", unchecked((nint)Unsafe.AsPointer(ref Unsafe.AsRef(in ref__))));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public ReadOnlyManagedPtr<TResult> Cast<TResult>() where TResult : unmanaged {
+            return (ReadOnlyManagedPtr<TResult>)(ReadOnlyManagedPtr)this;
         }
 
         public bool TryFormat(Span<char> destination, out int charsWritten, [StringSyntax(StringSyntaxAttribute.NumericFormat)] ReadOnlySpan<char> format = default, IFormatProvider? provider = null) {
