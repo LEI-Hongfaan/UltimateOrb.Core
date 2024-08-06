@@ -1,22 +1,14 @@
 ﻿#pragma warning disable IDE0090 // Use 'new(...)'
 #pragma warning disable IDE0190 // Null check can be simplified
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
-using System.Text;
-using System.Threading.Tasks;
-using UltimateOrb.Utilities;
+using static UltimateOrb.Unmanaged.ManagedPtrHelpers;
 
 namespace UltimateOrb.Unmanaged {
-
-    using static ManagedPtrHelpers;
-    using static UltimateOrb.Unmanaged.ManagedPtrHelpers;
 
     static partial class SR {
 
