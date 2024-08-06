@@ -2,6 +2,7 @@
 #pragma warning disable IDE0190 // Null check can be simplified
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Numerics;
@@ -489,6 +490,11 @@ namespace UltimateOrb.Unmanaged {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator >=(ManagedPtr<T> first, ManagedPtr<T> second) => !(first < second);
+
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public ref T GetPinnableReference() {
+            return ref ref__;
+        }
     }
 
     [CLSCompliant(false)]
@@ -972,5 +978,10 @@ namespace UltimateOrb.Unmanaged {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator >=(ReadOnlyManagedPtr<T> first, ReadOnlyManagedPtr<T> second) => !(first < second);
+
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public ref readonly T GetPinnableReference() {
+            return ref ref__;
+        }
     }
 }
