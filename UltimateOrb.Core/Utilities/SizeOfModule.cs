@@ -99,7 +99,9 @@ namespace UltimateOrb.Utilities {
             ret
         ")]
         public static int SizeOf<T>() {
+#pragma warning disable IDE0004 // Remove Unnecessary Cast
             throw (NotImplementedException)null!;
+#pragma warning restore IDE0004 // Remove Unnecessary Cast
         }
     }
 }

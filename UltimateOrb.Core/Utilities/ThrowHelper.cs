@@ -200,63 +200,82 @@ namespace UltimateOrb.Utilities {
             _ = checked(0u - BooleanIntegerExtensions.AsUIntegerUnsafe(value));
         }
 
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         public static void ThrowOnNonFinite(double value) {
             CilVerifiable.CheckFinite(value);
         }
 
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         public static void ThrowOnNonZero(int value) {
             _ = checked(0u - value.ToUnsignedUnchecked());
         }
 
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         public static void ThrowOnNonZero(uint value) {
             _ = checked(0u - value.ToUnsignedUnchecked());
         }
 
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         public static void ThrowOnNonZero(long value) {
             _ = checked(0u - value.ToUnsignedUnchecked());
         }
 
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         public static void ThrowOnNonZero(ulong value) {
             _ = checked(0u - value.ToUnsignedUnchecked());
         }
 
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        public static void ThrowOnNonZero(double value) {
+            _ = checked(0u - BooleanIntegerModule.Equals(value, 0.0).ToUnsignedUnchecked());
+        }
+
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         public static void ThrowOnLessThanOrEqual(double first, double second) {
             ThrowOnNonZero(BooleanIntegerModule.LessThanOrEqual(first, second));
         }
 
         [CLSCompliant(false)]
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         public static void ThrowOnLessThanOrEqual(nuint first, nuint second) {
             ThrowOnNonZero(BooleanIntegerModule.LessThanOrEqual(first, second));
         }
 
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         public static void ThrowOnLessThanOrEqual(nint first, nint second) {
             ThrowOnNonZero(BooleanIntegerModule.LessThanOrEqual(first, second));
         }
 
         [CLSCompliant(false)]
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         public static void ThrowOnLessThanOrEqual(uint first, uint second) {
             ThrowOnNonZero(BooleanIntegerModule.LessThanOrEqual(first, second));
         }
 
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         public static void ThrowOnLessThanOrEqual(int first, int second) {
             ThrowOnNonZero(BooleanIntegerModule.LessThanOrEqual(first, second));
         }
 
         [CLSCompliant(false)]
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         public static void ThrowOnLessThanOrEqual(ulong first, ulong second) {
             ThrowOnNonZero(BooleanIntegerModule.LessThanOrEqual(first, second));
         }
 
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         public static void ThrowOnLessThanOrEqual(long first, long second) {
             ThrowOnNonZero(BooleanIntegerModule.LessThanOrEqual(first, second));
         }
 
 
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         public static void ThrowOnGreaterThan(double first, double second) {
             ThrowOnNonZero(BooleanIntegerModule.GreaterThan(first, second));
         }
 
         [CLSCompliant(false)]
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         public static void ThrowOnGreaterThan(nuint first, nuint second) {
             _ = checked(second - first);
         }
@@ -275,19 +294,23 @@ namespace UltimateOrb.Utilities {
         }
 
         [CLSCompliant(false)]
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         public static void ThrowOnGreaterThan(uint first, uint second) {
             _ = checked(second - first);
         }
 
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         public static void ThrowOnGreaterThan(int first, int second) {
             ThrowOnNonZero(BooleanIntegerModule.GreaterThan(first, second));
         }
 
         [CLSCompliant(false)]
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         public static void ThrowOnGreaterThan(ulong first, ulong second) {
             _ = checked(second - first);
         }
 
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         public static void ThrowOnGreaterThan(long first, long second) {
             ThrowOnNonZero(BooleanIntegerModule.GreaterThan(first, second));
         }

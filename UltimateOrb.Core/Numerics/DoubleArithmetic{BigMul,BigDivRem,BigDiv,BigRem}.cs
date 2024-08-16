@@ -52,7 +52,7 @@ namespace UltimateOrb.Numerics {
                 return q;
             L_Z:;
                 {
-                    throw ThrowHelper.ThrowDivideByZeroException();
+                    throw UltimateOrb.Utilities.ThrowHelper.ThrowDivideByZeroException();
                 }
             }
         }
@@ -103,6 +103,13 @@ namespace UltimateOrb.Numerics {
             System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining |
             System.Runtime.CompilerServices.MethodImplOptions.AggressiveOptimization)]
         public static ULong BigDivRem(ULong lowDividend, ULong highDividend, ULong divisor, out ULong remainder) {
+#if NET8_0_OR_GREATER
+            if (System.Runtime.Intrinsics.X86.X86Base.X64.IsSupported) {
+                var (q, r) = System.Runtime.Intrinsics.X86.X86Base.X64.DivRem(lowDividend, highDividend, divisor);
+                remainder = r;
+                return q;
+            }
+#endif
             unchecked {
                 ULong p, ql, qh;
                 // 2020Jan01

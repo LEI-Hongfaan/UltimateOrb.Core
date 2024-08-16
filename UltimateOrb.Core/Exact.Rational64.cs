@@ -35,27 +35,17 @@ namespace UltimateOrb.Mathematics.Exact {
         public static Rational64 FromFraction(UInt32 numerator, Int32 denominator) {
             Contract.EnsuresOnThrow<DivideByZeroException>(0 == Contract.OldValue(denominator));
             unchecked {
-                Int32 q;
-                if (denominator > 0) {
-                    q = denominator;
-                } else if (0 > denominator) {
-                    q = -denominator;
-                } else {
-                    (denominator / denominator).Ignore();
-                    throw null;
+                if (0 == denominator) {
+                    _ = numerator / denominator;
                 }
                 if (0 == numerator) {
                     return default(Rational64);
                 }
-                var d = EuclideanAlgorithm.GreatestCommonDivisorPartial(numerator, (UInt32)q);
+                var d = EuclideanAlgorithm.GreatestCommonDivisorPartial(numerator, Mathematics.Elementary.Math.AbsAsUnsigned(denominator));
                 numerator /= d;
-                q /= (Int32)d;
-                if (denominator > 0) {
-                    --q;
-                } else {
-                    q = -q;
-                }
-                return new Rational64((UInt64)q << 32 | numerator);
+                denominator /= (Int32)d;
+                denominator -= BooleanIntegerModule.GreaterThanOrEqual(denominator, 0);
+                return new Rational64((UInt64)denominator << 32 | numerator);
             }
         }
 
@@ -146,11 +136,9 @@ namespace UltimateOrb.Mathematics.Exact {
                     return 0;
                 }
                 c = unchecked((Int32)(c >> 32));
-                if (0 <= unchecked((Int32)c)) {
-                    return unchecked(1u + (UInt32)c);
-                } else {
-                    return unchecked((Int32)c);
-                }
+                return 0 <= unchecked((Int32)c) ?
+                    unchecked(1u + (UInt32)c) :
+                    unchecked((Int32)c);
             }
         }
 
@@ -208,11 +196,12 @@ namespace UltimateOrb.Mathematics.Exact {
         [PureAttribute()]
         public static Rational64 Negate(Rational64 value) {
             var d = unchecked((UInt32)(value.bits));
-            var c = unchecked((UInt32)(value.bits >> 32));
+            var c = unchecked((Int32)(value.bits >> 32));
             if (0u == d) {
                 return Rational64.Zero;
             } else {
-                return new Rational64(unchecked((UInt64)((Int64)(~c) << 32) | d));
+                c = 0 > c ? ~c : -c;
+                return new Rational64(unchecked((UInt64)((Int64)c << 32) | d));
             }
         }
 
@@ -357,29 +346,16 @@ namespace UltimateOrb.Mathematics.Exact {
                 var p = first_numerator * second_denominator;
                 var r = first_denominator * second_numerator;
                 var q = first_denominator * second_denominator;
-                if (CheckedNoThrow.TryAdd(p, r, out p)) {
-                    /*
-                    if (0 == p) {
-                        bits_hi = 0;
-                        return 0;
-                    }
-                    */
-                    if (0 > r) {
-                        p = -p;
-                        q = -q;
-                    }
-                } else {
-                    if (0 == p) {
-                        bits_hi = 0;
-                        return 0;
-                    }
-                    if (0 > p) {
-                        p = -p;
-                        q = -q;
-                    }
+                p += r;
+                if (p == 0) {
+                    bits_hi = 0;
+                    return 0;
                 }
                 {
                     var d = NumberTheory.EuclideanAlgorithm.GreatestCommonDivisor(p, q);
+                    if (0 > p) {
+                        d = -d;
+                    }
                     p /= d;
                     q /= d;
                 }
@@ -411,23 +387,16 @@ namespace UltimateOrb.Mathematics.Exact {
                 var p = first_numerator * second_denominator;
                 var r = first_denominator * second_numerator;
                 var q = first_denominator * second_denominator;
-                if (CheckedNoThrow.TrySubtract(p, r, out p)) {
-                    if (0 > r) {
-                        p = -p;
-                        q = -q;
-                    }
-                } else {
-                    if (0 > p) {
-                        p = -p;
-                        q = -q;
-                    }
-                }
+                p -= r;
                 {
                     var d = NumberTheory.EuclideanAlgorithm.GreatestCommonDivisor(p, q);
+                    if (0 > p) {
+                        d = -d;
+                    }
                     p /= d;
                     q /= d;
                 }
-                if (0 <= q) {
+                if (0 < q) {
                     --q;
                 }
                 bits_hi = (UInt64)q;
@@ -543,7 +512,7 @@ namespace UltimateOrb.Mathematics.Exact {
         [PureAttribute()]
         public static Rational64 operator -(Rational64 first, Rational64 second) {
             var lo = Rational64.SubtractAsRational128(first, second, out var hi);
-            return new Rational64(((Int64)checked((Int32)hi.ToSignedUnchecked())).ToUnsignedUnchecked() << 32 | (UInt64)checked((UInt32)lo));
+            return new Rational64(((Int64)checked((Int32)hi.ToSignedUnchecked())).ToUnsignedUnchecked() << 32 | (UInt64)checked((UInt32)unchecked((Int32)lo)));
         }
 
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]

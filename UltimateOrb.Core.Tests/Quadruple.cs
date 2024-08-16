@@ -634,7 +634,7 @@ namespace UltimateOrb {
                 }
                 {
                     UltimateOrb.Utilities.ThrowHelper.ThrowOnLessThan(count, 18);
-                    throw null;
+                    throw null!;
                 }
             }
             hi |= 0x0001000000000000u;
@@ -1059,7 +1059,7 @@ namespace UltimateOrb {
             [DoesNotReturnAttribute()]
             private static ArithmeticException ThrowArithmeticException() {
                 _ = System.Math.Sign(Double.NaN);
-                throw null;
+                throw null!;
             }
 
             public static Quadruple Sqrt(Quadruple value) {

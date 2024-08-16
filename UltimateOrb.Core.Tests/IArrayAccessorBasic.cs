@@ -58,7 +58,7 @@ namespace UltimateOrb {
                     return ref Unsafe.As<byte, T>(ref Unsafe.AsRef(in _Buffer.Span[offset]));
                 }
                 _ = checked(unchecked((uint)count) - unchecked((uint)index));
-                throw null;
+                throw null!;
             }
         }
 
@@ -311,7 +311,7 @@ namespace UltimateOrb {
                     return ref Unsafe.As<byte, T>(ref Unsafe.AsRef(in _BufferView.Span[offset]));
                 }
                 _ = checked(unchecked((uint)_Count) - unchecked((uint)index));
-                throw null;
+                throw null!;
             }
         }
 

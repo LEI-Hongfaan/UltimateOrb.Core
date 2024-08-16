@@ -693,14 +693,14 @@ namespace UltimateOrb.Nongeneric {
         public static Func<IObject, Func<IObject, Ordering>> compare {
 
             get {
-                throw null;
+                throw null!;
             }
         }
 
         public static Func<IObject, Func<IObject, Bool>> le {
 
             get {
-                throw null;
+                throw null!;
             }
         }
 
