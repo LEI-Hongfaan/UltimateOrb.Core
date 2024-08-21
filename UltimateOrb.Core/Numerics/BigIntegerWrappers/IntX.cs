@@ -11,8 +11,11 @@ namespace UltimateOrb.Numerics.BigIntegerWrappers {
     using static ConstructorTags;
 
     [Serializable]
-    public readonly struct Int<TBitSize>
-        where TBitSize : struct, IConstantDataType<int> {
+    public readonly struct Int<TBitSize> :
+        IMinMaxValue<Int<TBitSize>>
+        where TBitSize :
+            struct,
+            IConstantDataType<int> {
 
         readonly BigInteger Value;
 
@@ -26,13 +29,13 @@ namespace UltimateOrb.Numerics.BigIntegerWrappers {
             }
         }
 
-        public Int<TBitSize> MinValue {
+        public static Int<TBitSize> MinValue {
 
             [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
             get => new Int<TBitSize>(MinValueAsBigInteger, default(Plain));
         }
 
-        public Int<TBitSize> MaxValue {
+        public static Int<TBitSize> MaxValue {
 
             [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
             get => new Int<TBitSize>(MinValueAsBigInteger, default(Plain));

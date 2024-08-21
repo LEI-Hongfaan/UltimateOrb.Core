@@ -854,13 +854,13 @@
                 <para>The Number must be in format <c>[1-9][0-9]*</c>.</para>
             </remarks>
         </member>
-        <member name="T:UltimateOrb.Linq.EnumerableExtenstions">
+        <member name="T:UltimateOrb.Linq.EnumerableExtensions">
             <inheritdoc cref="T:System.Linq.Enumerable"/>
         </member>
-        <member name="M:UltimateOrb.Linq.EnumerableExtenstions.Skip``1(System.Collections.Generic.IEnumerable{``0},System.Int64)">
+        <member name="M:UltimateOrb.Linq.EnumerableExtensions.Skip``1(System.Collections.Generic.IEnumerable{``0},System.Int64)">
             <inheritdoc cref="M:System.Linq.Enumerable.Skip``1(System.Collections.Generic.IEnumerable{``0},System.Int32)"/>
         </member>
-        <member name="M:UltimateOrb.Linq.EnumerableExtenstions.Skip_A``1(System.Collections.Generic.IEnumerable{``0},System.Int64)">
+        <member name="M:UltimateOrb.Linq.EnumerableExtensions.Skip_A``1(System.Collections.Generic.IEnumerable{``0},System.Int64)">
             <inheritdoc cref="M:System.Linq.Enumerable.Skip``1(System.Collections.Generic.IEnumerable{``0},System.Int32)"/>
         </member>
         <member name="T:UltimateOrb.Miscellaneous">
@@ -1453,6 +1453,1134 @@
         </member>
         <member name="M:UltimateOrb.NaNDefaultedDouble.System#Numerics#IUnaryPlusOperators{UltimateOrb#NaNDefaultedDouble,UltimateOrb#NaNDefaultedDouble}#op_UnaryPlus(UltimateOrb.NaNDefaultedDouble)">
             <inheritdoc cref="M:System.Numerics.IUnaryPlusOperators`2.op_UnaryPlus(`0)" />
+        </member>
+        <member name="T:UltimateOrb.Numerics.Accelerated.QuaternionD">
+            <summary>Represents a vector that is used to encode three-dimensional physical rotations.</summary>
+            <remarks>The <see cref="T:UltimateOrb.Numerics.Accelerated.QuaternionD" /> structure is used to efficiently rotate an object about the (x,y,z) vector by the angle theta, where:
+            <c>w = cos(theta/2)</c></remarks>
+        </member>
+        <member name="F:UltimateOrb.Numerics.Accelerated.QuaternionD.m_value">
+            <summary>The vector representation of the quaternion.</summary>
+        </member>
+        <member name="P:UltimateOrb.Numerics.Accelerated.QuaternionD.X">
+            <summary>The Y value of the vector component of the quaternion.</summary>
+        </member>
+        <member name="P:UltimateOrb.Numerics.Accelerated.QuaternionD.Y">
+            <summary>The Y value of the vector component of the quaternion.</summary>
+        </member>
+        <member name="P:UltimateOrb.Numerics.Accelerated.QuaternionD.Z">
+            <summary>The Z value of the vector component of the quaternion.</summary>
+        </member>
+        <member name="P:UltimateOrb.Numerics.Accelerated.QuaternionD.W">
+            <summary>The rotation component of the quaternion.</summary>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.QuaternionD.#ctor(System.Double,System.Double,System.Double,System.Double)">
+            <summary>Constructs a quaternion from the specified components.</summary>
+            <param name="x">The value to assign to the X component of the quaternion.</param>
+            <param name="y">The value to assign to the Y component of the quaternion.</param>
+            <param name="z">The value to assign to the Z component of the quaternion.</param>
+            <param name="w">The value to assign to the W component of the quaternion.</param>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.QuaternionD.#ctor(UltimateOrb.Numerics.Accelerated.Vector3D,System.Double)">
+            <summary>Creates a quaternion from the specified vector and rotation parts.</summary>
+            <param name="vectorPart">The vector part of the quaternion.</param>
+            <param name="scalarPart">The rotation part of the quaternion.</param>
+        </member>
+        <member name="P:UltimateOrb.Numerics.Accelerated.QuaternionD.Zero">
+            <summary>Gets a quaternion that represents a zero.</summary>
+            <value>A quaternion whose values are <c>(0, 0, 0, 0)</c>.</value>
+        </member>
+        <member name="P:UltimateOrb.Numerics.Accelerated.QuaternionD.Identity">
+            <summary>Gets a quaternion that represents no rotation.</summary>
+            <value>A quaternion whose values are <c>(0, 0, 0, 1)</c>.</value>
+        </member>
+        <member name="P:UltimateOrb.Numerics.Accelerated.QuaternionD.Item(System.Int32)">
+            <summary>Gets or sets the element at the specified index.</summary>
+            <param name="index">The index of the element to get or set.</param>
+            <returns>The element at <paramref name="index" />.</returns>
+            <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="index" /> was less than zero or greater than the number of elements.</exception>
+        </member>
+        <member name="P:UltimateOrb.Numerics.Accelerated.QuaternionD.IsIdentity">
+            <summary>Gets a value that indicates whether the current instance is the identity quaternion.</summary>
+            <value><see langword="true" /> if the current instance is the identity quaternion; otherwise, <see langword="false" />.</value>
+            <altmember cref="P:UltimateOrb.Numerics.Accelerated.QuaternionD.Identity"/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.QuaternionD.op_Addition(UltimateOrb.Numerics.Accelerated.QuaternionD,UltimateOrb.Numerics.Accelerated.QuaternionD)">
+            <summary>Adds each element in one quaternion with its corresponding element in a second quaternion.</summary>
+            <param name="value1">The first quaternion.</param>
+            <param name="value2">The second quaternion.</param>
+            <returns>The quaternion that contains the summed values of <paramref name="value1" /> and <paramref name="value2" />.</returns>
+            <remarks>The <see cref="M:UltimateOrb.Numerics.Accelerated.QuaternionD.op_Addition(UltimateOrb.Numerics.Accelerated.QuaternionD,UltimateOrb.Numerics.Accelerated.QuaternionD)" /> method defines the operation of the addition operator for <see cref="T:UltimateOrb.Numerics.Accelerated.QuaternionD" /> objects.</remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.QuaternionD.op_Division(UltimateOrb.Numerics.Accelerated.QuaternionD,UltimateOrb.Numerics.Accelerated.QuaternionD)">
+            <summary>Divides one quaternion by a second quaternion.</summary>
+            <param name="value1">The dividend.</param>
+            <param name="value2">The divisor.</param>
+            <returns>The quaternion that results from dividing <paramref name="value1" /> by <paramref name="value2" />.</returns>
+            <remarks>The <see cref="M:UltimateOrb.Numerics.Accelerated.QuaternionD.op_Division(UltimateOrb.Numerics.Accelerated.QuaternionD,UltimateOrb.Numerics.Accelerated.QuaternionD)" /> method defines the division operation for <see cref="T:UltimateOrb.Numerics.Accelerated.QuaternionD" /> objects.</remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.QuaternionD.op_Equality(UltimateOrb.Numerics.Accelerated.QuaternionD,UltimateOrb.Numerics.Accelerated.QuaternionD)">
+            <summary>Returns a value that indicates whether two quaternions are equal.</summary>
+            <param name="value1">The first quaternion to compare.</param>
+            <param name="value2">The second quaternion to compare.</param>
+            <returns><see langword="true" /> if the two quaternions are equal; otherwise, <see langword="false" />.</returns>
+            <remarks>Two quaternions are equal if each of their corresponding components is equal.
+            The <see cref="M:UltimateOrb.Numerics.Accelerated.QuaternionD.op_Equality(UltimateOrb.Numerics.Accelerated.QuaternionD,UltimateOrb.Numerics.Accelerated.QuaternionD)" /> method defines the operation of the equality operator for <see cref="T:UltimateOrb.Numerics.Accelerated.QuaternionD" /> objects.</remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.QuaternionD.op_Inequality(UltimateOrb.Numerics.Accelerated.QuaternionD,UltimateOrb.Numerics.Accelerated.QuaternionD)">
+            <summary>Returns a value that indicates whether two quaternions are not equal.</summary>
+            <param name="value1">The first quaternion to compare.</param>
+            <param name="value2">The second quaternion to compare.</param>
+            <returns><see langword="true" /> if <paramref name="value1" /> and <paramref name="value2" /> are not equal; otherwise, <see langword="false" />.</returns>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.QuaternionD.op_Multiply(UltimateOrb.Numerics.Accelerated.QuaternionD,UltimateOrb.Numerics.Accelerated.QuaternionD)">
+            <summary>Returns the quaternion that results from multiplying two quaternions together.</summary>
+            <param name="value1">The first quaternion.</param>
+            <param name="value2">The second quaternion.</param>
+            <returns>The product quaternion.</returns>
+            <remarks>The <see cref="M:UltimateOrb.Numerics.Accelerated.QuaternionD.op_Multiply(UltimateOrb.Numerics.Accelerated.QuaternionD,UltimateOrb.Numerics.Accelerated.QuaternionD)" /> method defines the operation of the multiplication operator for <see cref="T:UltimateOrb.Numerics.Accelerated.QuaternionD" /> objects.</remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.QuaternionD.op_Multiply(UltimateOrb.Numerics.Accelerated.QuaternionD,System.Double)">
+            <summary>Returns the quaternion that results from scaling all the components of a specified quaternion by a scalar factor.</summary>
+            <param name="value1">The source quaternion.</param>
+            <param name="value2">The scalar value.</param>
+            <returns>The scaled quaternion.</returns>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.QuaternionD.op_Subtraction(UltimateOrb.Numerics.Accelerated.QuaternionD,UltimateOrb.Numerics.Accelerated.QuaternionD)">
+            <summary>Subtracts each element in a second quaternion from its corresponding element in a first quaternion.</summary>
+            <param name="value1">The first quaternion.</param>
+            <param name="value2">The second quaternion.</param>
+            <returns>The quaternion containing the values that result from subtracting each element in <paramref name="value2" /> from its corresponding element in <paramref name="value1" />.</returns>
+            <remarks>The <see cref="M:UltimateOrb.Numerics.Accelerated.QuaternionD.op_Subtraction(UltimateOrb.Numerics.Accelerated.QuaternionD,UltimateOrb.Numerics.Accelerated.QuaternionD)" /> method defines the operation of the subtraction operator for <see cref="T:UltimateOrb.Numerics.Accelerated.QuaternionD" /> objects.</remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.QuaternionD.op_UnaryNegation(UltimateOrb.Numerics.Accelerated.QuaternionD)">
+            <summary>Reverses the sign of each component of the quaternion.</summary>
+            <param name="value">The quaternion to negate.</param>
+            <returns>The negated quaternion.</returns>
+            <remarks>The <see cref="M:UltimateOrb.Numerics.Accelerated.QuaternionD.op_UnaryNegation(UltimateOrb.Numerics.Accelerated.QuaternionD)" /> method defines the operation of the unary negation operator for <see cref="T:UltimateOrb.Numerics.Accelerated.QuaternionD" /> objects.</remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.QuaternionD.Add(UltimateOrb.Numerics.Accelerated.QuaternionD,UltimateOrb.Numerics.Accelerated.QuaternionD)">
+            <summary>Adds each element in one quaternion with its corresponding element in a second quaternion.</summary>
+            <param name="value1">The first quaternion.</param>
+            <param name="value2">The second quaternion.</param>
+            <returns>The quaternion that contains the summed values of <paramref name="value1" /> and <paramref name="value2" />.</returns>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.QuaternionD.Concatenate(UltimateOrb.Numerics.Accelerated.QuaternionD,UltimateOrb.Numerics.Accelerated.QuaternionD)">
+            <summary>Concatenates two quaternions.</summary>
+            <param name="value1">The first quaternion rotation in the series.</param>
+            <param name="value2">The second quaternion rotation in the series.</param>
+            <returns>A new quaternion representing the concatenation of the <paramref name="value1" /> rotation followed by the <paramref name="value2" /> rotation.</returns>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.QuaternionD.Conjugate(UltimateOrb.Numerics.Accelerated.QuaternionD)">
+            <summary>Returns the conjugate of a specified quaternion.</summary>
+            <param name="value">The quaternion.</param>
+            <returns>A new quaternion that is the conjugate of <see langword="value" />.</returns>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.QuaternionD.Create(System.Double,System.Double,System.Double,System.Double)">
+            <summary>Creates a quaternion from the specified components.</summary>
+            <param name="x">The value to assign to the X component of the quaternion.</param>
+            <param name="y">The value to assign to the Y component of the quaternion.</param>
+            <param name="z">The value to assign to the Z component of the quaternion.</param>
+            <param name="w">The value to assign to the W component of the quaternion.</param>
+            <returns>A new quaternion created from the specified components.</returns>>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.QuaternionD.Create(UltimateOrb.Numerics.Accelerated.Vector3D,System.Double)">
+            <summary>Creates a quaternion from the specified vector and rotation parts.</summary>
+            <param name="vectorPart">The vector part of the quaternion.</param>
+            <param name="scalarPart">The rotation part of the quaternion.</param>
+            <returns>A new quaternion created from the specified vector and rotation parts.</returns>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.QuaternionD.CreateFromAxisAngle(UltimateOrb.Numerics.Accelerated.Vector3D,System.Double)">
+            <summary>Creates a quaternion from a unit vector and an angle to rotate around the vector.</summary>
+            <param name="axis">The unit vector to rotate around.</param>
+            <param name="angle">The angle, in radians, to rotate around the vector.</param>
+            <returns>The newly created quaternion.</returns>
+            <remarks><paramref name="axis" /> vector must be normalized before calling this method or the resulting <see cref="T:UltimateOrb.Numerics.Accelerated.QuaternionD" /> will be incorrect.</remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.QuaternionD.CreateFromRotationMatrix(System.Numerics.Matrix4x4)">
+            <summary>Creates a quaternion from the specified rotation matrix.</summary>
+            <param name="matrix">The rotation matrix.</param>
+            <returns>The newly created quaternion.</returns>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.QuaternionD.CreateFromYawPitchRollDirectX(System.Double,System.Double,System.Double)">
+            <summary>Creates a new quaternion from the given yaw, pitch, and roll.</summary>
+            <param name="yaw">The yaw angle, in radians, around the Y axis.</param>
+            <param name="pitch">The pitch angle, in radians, around the X axis.</param>
+            <param name="roll">The roll angle, in radians, around the Z axis.</param>
+            <returns>The resulting quaternion.</returns>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.QuaternionD.Divide(UltimateOrb.Numerics.Accelerated.QuaternionD,UltimateOrb.Numerics.Accelerated.QuaternionD)">
+            <summary>Divides one quaternion by a second quaternion.</summary>
+            <param name="value1">The dividend.</param>
+            <param name="value2">The divisor.</param>
+            <returns>The quaternion that results from dividing <paramref name="value1" /> by <paramref name="value2" />.</returns>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.QuaternionD.Dot(UltimateOrb.Numerics.Accelerated.QuaternionD,UltimateOrb.Numerics.Accelerated.QuaternionD)">
+            <summary>Calculates the dot product of two quaternions.</summary>
+            <param name="quaternion1">The first quaternion.</param>
+            <param name="quaternion2">The second quaternion.</param>
+            <returns>The dot product.</returns>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.QuaternionD.Inverse(UltimateOrb.Numerics.Accelerated.QuaternionD)">
+            <summary>Returns the inverse of a quaternion.</summary>
+            <param name="value">The quaternion.</param>
+            <returns>The inverted quaternion.</returns>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.QuaternionD.Lerp(UltimateOrb.Numerics.Accelerated.QuaternionD,UltimateOrb.Numerics.Accelerated.QuaternionD,System.Double)">
+            <summary>Performs a linear interpolation between two quaternions based on a value that specifies the weighting of the second quaternion.</summary>
+            <param name="quaternion1">The first quaternion.</param>
+            <param name="quaternion2">The second quaternion.</param>
+            <param name="amount">The relative weight of <paramref name="quaternion2" /> in the interpolation.</param>
+            <returns>The interpolated quaternion.</returns>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.QuaternionD.Multiply(UltimateOrb.Numerics.Accelerated.QuaternionD,UltimateOrb.Numerics.Accelerated.QuaternionD)">
+            <summary>Returns the quaternion that results from multiplying two quaternions together.</summary>
+            <param name="value1">The first quaternion.</param>
+            <param name="value2">The second quaternion.</param>
+            <returns>The product quaternion.</returns>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.QuaternionD.Multiply(UltimateOrb.Numerics.Accelerated.QuaternionD,System.Double)">
+            <summary>Returns the quaternion that results from scaling all the components of a specified quaternion by a scalar factor.</summary>
+            <param name="value1">The source quaternion.</param>
+            <param name="value2">The scalar value.</param>
+            <returns>The scaled quaternion.</returns>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.QuaternionD.Negate(UltimateOrb.Numerics.Accelerated.QuaternionD)">
+            <summary>Reverses the sign of each component of the quaternion.</summary>
+            <param name="value">The quaternion to negate.</param>
+            <returns>The negated quaternion.</returns>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.QuaternionD.Normalize(UltimateOrb.Numerics.Accelerated.QuaternionD)">
+            <summary>Divides each component of a specified <see cref="T:UltimateOrb.Numerics.Accelerated.QuaternionD" /> by its length.</summary>
+            <param name="value">The quaternion to normalize.</param>
+            <returns>The normalized quaternion.</returns>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.QuaternionD.Slerp(UltimateOrb.Numerics.Accelerated.QuaternionD,UltimateOrb.Numerics.Accelerated.QuaternionD,System.Double)">
+            <summary>Interpolates between two quaternions, using spherical linear interpolation.</summary>
+            <param name="quaternion1">The first quaternion.</param>
+            <param name="quaternion2">The second quaternion.</param>
+            <param name="amount">The relative weight of the second quaternion in the interpolation.</param>
+            <returns>The interpolated quaternion.</returns>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.QuaternionD.Subtract(UltimateOrb.Numerics.Accelerated.QuaternionD,UltimateOrb.Numerics.Accelerated.QuaternionD)">
+            <summary>Subtracts each element in a second quaternion from its corresponding element in a first quaternion.</summary>
+            <param name="value1">The first quaternion.</param>
+            <param name="value2">The second quaternion.</param>
+            <returns>The quaternion containing the values that result from subtracting each element in <paramref name="value2" /> from its corresponding element in <paramref name="value1" />.</returns>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.QuaternionD.Equals(System.Object)">
+            <summary>Returns a value that indicates whether this instance and a specified object are equal.</summary>
+            <param name="obj">The object to compare with the current instance.</param>
+            <returns><see langword="true" /> if the current instance and <paramref name="obj" /> are equal; otherwise, <see langword="false" />. If <paramref name="obj" /> is <see langword="null" />, the method returns <see langword="false" />.</returns>
+            <remarks>The current instance and <paramref name="obj" /> are equal if <paramref name="obj" /> is a <see cref="T:UltimateOrb.Numerics.Accelerated.QuaternionD" /> object and the corresponding components of each matrix are equal.</remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.QuaternionD.Equals(UltimateOrb.Numerics.Accelerated.QuaternionD)">
+            <summary>Returns a value that indicates whether this instance and another quaternion are equal.</summary>
+            <param name="other">The other quaternion.</param>
+            <returns><see langword="true" /> if the two quaternions are equal; otherwise, <see langword="false" />.</returns>
+            <remarks>Two quaternions are equal if each of their corresponding components is equal.</remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.QuaternionD.GetHashCode">
+            <summary>Returns the hash code for this instance.</summary>
+            <returns>The hash code.</returns>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.QuaternionD.Length">
+            <summary>Calculates the length of the quaternion.</summary>
+            <returns>The computed length of the quaternion.</returns>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.QuaternionD.LengthSquared">
+            <summary>Calculates the squared length of the quaternion.</summary>
+            <returns>The length squared of the quaternion.</returns>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.QuaternionD.ToString">
+            <summary>Returns a string that represents this quaternion.</summary>
+            <returns>The string representation of this quaternion.</returns>
+            <remarks>The numeric values in the returned string are formatted by using the conventions of the current culture. For example, for the en-US culture, the returned string might appear as <c>{X:1.1 Y:2.2 Z:3.3 W:4.4}</c>.</remarks>
+        </member>
+        <member name="P:UltimateOrb.Numerics.Accelerated.Vector3D.Y">
+            <summary>The Y component of the vector.</summary>
+        </member>
+        <member name="P:UltimateOrb.Numerics.Accelerated.Vector3D.Z">
+            <summary>The Z component of the vector.</summary>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.#ctor(System.Double)">
+            <summary>Creates a new <see cref="T:UltimateOrb.Numerics.Accelerated.Vector3D" /> object whose three elements have the same value.</summary>
+            <param name="value">The value to assign to all three elements.</param>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.#ctor(System.Double,System.Double,System.Double)">
+            <summary>Creates a vector whose elements have the specified values.</summary>
+            <param name="x">The value to assign to the <see cref="P:UltimateOrb.Numerics.Accelerated.Vector3D.X" /> field.</param>
+            <param name="y">The value to assign to the <see cref="P:UltimateOrb.Numerics.Accelerated.Vector3D.Y" /> field.</param>
+            <param name="z">The value to assign to the <see cref="P:UltimateOrb.Numerics.Accelerated.Vector3D.Z" /> field.</param>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.#ctor(System.ReadOnlySpan{System.Double})">
+            <summary>Constructs a vector from the given <see cref="T:System.ReadOnlySpan`1" />. The span must contain at least 3 elements.</summary>
+            <param name="values">The span of elements to assign to the vector.</param>
+        </member>
+        <member name="P:UltimateOrb.Numerics.Accelerated.Vector3D.E">
+            <inheritdoc cref="P:System.Numerics.Vector4.E" />
+        </member>
+        <member name="P:UltimateOrb.Numerics.Accelerated.Vector3D.Epsilon">
+            <inheritdoc cref="P:System.Numerics.Vector4.Epsilon" />
+        </member>
+        <member name="P:UltimateOrb.Numerics.Accelerated.Vector3D.NaN">
+            <inheritdoc cref="P:System.Numerics.Vector4.NaN" />
+        </member>
+        <member name="P:UltimateOrb.Numerics.Accelerated.Vector3D.NegativeInfinity">
+            <inheritdoc cref="P:System.Numerics.Vector4.NegativeInfinity" />
+        </member>
+        <member name="P:UltimateOrb.Numerics.Accelerated.Vector3D.NegativeZero">
+            <inheritdoc cref="P:System.Numerics.Vector4.NegativeZero" />
+        </member>
+        <member name="P:UltimateOrb.Numerics.Accelerated.Vector3D.One">
+            <inheritdoc cref="P:System.Numerics.Vector4.One" />
+        </member>
+        <member name="P:UltimateOrb.Numerics.Accelerated.Vector3D.Pi">
+            <inheritdoc cref="P:System.Numerics.Vector4.Pi" />
+        </member>
+        <member name="P:UltimateOrb.Numerics.Accelerated.Vector3D.PositiveInfinity">
+            <inheritdoc cref="P:System.Numerics.Vector4.PositiveInfinity" />
+        </member>
+        <member name="P:UltimateOrb.Numerics.Accelerated.Vector3D.Tau">
+            <inheritdoc cref="P:System.Numerics.Vector4.Tau" />
+        </member>
+        <member name="P:UltimateOrb.Numerics.Accelerated.Vector3D.UnitX">
+            <summary>Gets the vector (1,0,0).</summary>
+            <value>The vector <c>(1,0,0)</c>.</value>
+        </member>
+        <member name="P:UltimateOrb.Numerics.Accelerated.Vector3D.UnitY">
+            <summary>Gets the vector (0,1,0).</summary>
+            <value>The vector <c>(0,1,0)</c>.</value>
+        </member>
+        <member name="P:UltimateOrb.Numerics.Accelerated.Vector3D.UnitZ">
+            <summary>Gets the vector (0,0,1).</summary>
+            <value>The vector <c>(0,0,1)</c>.</value>
+        </member>
+        <member name="P:UltimateOrb.Numerics.Accelerated.Vector3D.Zero">
+            <inheritdoc cref="P:System.Numerics.Vector4.Zero" />
+        </member>
+        <member name="P:UltimateOrb.Numerics.Accelerated.Vector3D.Item(System.Int32)">
+            <summary>Gets or sets the element at the specified index.</summary>
+            <param name="index">The index of the element to get or set.</param>
+            <returns>The the element at <paramref name="index" />.</returns>
+            <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="index" /> was less than zero or greater than the number of elements.</exception>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.op_Addition(UltimateOrb.Numerics.Accelerated.Vector3D,UltimateOrb.Numerics.Accelerated.Vector3D)">
+            <summary>Adds two vectors together.</summary>
+            <param name="left">The first vector to add.</param>
+            <param name="right">The second vector to add.</param>
+            <returns>The summed vector.</returns>
+            <remarks>The <see cref="M:UltimateOrb.Numerics.Accelerated.Vector3D.op_Addition(UltimateOrb.Numerics.Accelerated.Vector3D,UltimateOrb.Numerics.Accelerated.Vector3D)" /> method defines the addition operation for <see cref="T:UltimateOrb.Numerics.Accelerated.Vector3D" /> objects.</remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.op_Division(UltimateOrb.Numerics.Accelerated.Vector3D,UltimateOrb.Numerics.Accelerated.Vector3D)">
+            <summary>Divides the first vector by the second.</summary>
+            <param name="left">The first vector.</param>
+            <param name="right">The second vector.</param>
+            <returns>The vector that results from dividing <paramref name="left" /> by <paramref name="right" />.</returns>
+            <remarks>The <see cref="M:UltimateOrb.Numerics.Accelerated.Vector3D.op_Division(UltimateOrb.Numerics.Accelerated.Vector3D,UltimateOrb.Numerics.Accelerated.Vector3D)" /> method defines the division operation for <see cref="T:UltimateOrb.Numerics.Accelerated.Vector3D" /> objects.</remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.op_Division(UltimateOrb.Numerics.Accelerated.Vector3D,System.Double)">
+            <summary>Divides the specified vector by a specified scalar value.</summary>
+            <param name="value1">The vector.</param>
+            <param name="value2">The scalar value.</param>
+            <returns>The result of the division.</returns>
+            <remarks>The <see cref="M:UltimateOrb.Numerics.Accelerated.Vector3D.op_Division(UltimateOrb.Numerics.Accelerated.Vector3D,UltimateOrb.Numerics.Accelerated.Vector3D)" /> method defines the division operation for <see cref="T:UltimateOrb.Numerics.Accelerated.Vector3D" /> objects.</remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.op_Equality(UltimateOrb.Numerics.Accelerated.Vector3D,UltimateOrb.Numerics.Accelerated.Vector3D)">
+            <summary>Returns a value that indicates whether each pair of elements in two specified vectors is equal.</summary>
+            <param name="left">The first vector to compare.</param>
+            <param name="right">The second vector to compare.</param>
+            <returns><see langword="true" /> if <paramref name="left" /> and <paramref name="right" /> are equal; otherwise, <see langword="false" />.</returns>
+            <remarks>Two <see cref="T:UltimateOrb.Numerics.Accelerated.Vector3D" /> objects are equal if each element in <paramref name="left" /> is equal to the corresponding element in <paramref name="right" />.</remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.op_Inequality(UltimateOrb.Numerics.Accelerated.Vector3D,UltimateOrb.Numerics.Accelerated.Vector3D)">
+            <summary>Returns a value that indicates whether two specified vectors are not equal.</summary>
+            <param name="left">The first vector to compare.</param>
+            <param name="right">The second vector to compare.</param>
+            <returns><see langword="true" /> if <paramref name="left" /> and <paramref name="right" /> are not equal; otherwise, <see langword="false" />.</returns>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.op_Multiply(UltimateOrb.Numerics.Accelerated.Vector3D,UltimateOrb.Numerics.Accelerated.Vector3D)">
+            <summary>Returns a new vector whose values are the product of each pair of elements in two specified vectors.</summary>
+            <param name="left">The first vector.</param>
+            <param name="right">The second vector.</param>
+            <returns>The element-wise product vector.</returns>
+            <remarks>The <see cref="M:UltimateOrb.Numerics.Accelerated.Vector3D.op_Multiply(UltimateOrb.Numerics.Accelerated.Vector3D,UltimateOrb.Numerics.Accelerated.Vector3D)" /> method defines the multiplication operation for <see cref="T:UltimateOrb.Numerics.Accelerated.Vector3D" /> objects.</remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.op_Multiply(UltimateOrb.Numerics.Accelerated.Vector3D,System.Double)">
+            <summary>Multiplies the specified vector by the specified scalar value.</summary>
+            <param name="left">The vector.</param>
+            <param name="right">The scalar value.</param>
+            <returns>The scaled vector.</returns>
+            <remarks>The <see cref="M:UltimateOrb.Numerics.Accelerated.Vector3D.op_Multiply(UltimateOrb.Numerics.Accelerated.Vector3D,UltimateOrb.Numerics.Accelerated.Vector3D)" /> method defines the multiplication operation for <see cref="T:UltimateOrb.Numerics.Accelerated.Vector3D" /> objects.</remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.op_Multiply(System.Double,UltimateOrb.Numerics.Accelerated.Vector3D)">
+            <summary>Multiplies the scalar value by the specified vector.</summary>
+            <param name="left">The vector.</param>
+            <param name="right">The scalar value.</param>
+            <returns>The scaled vector.</returns>
+            <remarks>The <see cref="M:UltimateOrb.Numerics.Accelerated.Vector3D.op_Multiply(UltimateOrb.Numerics.Accelerated.Vector3D,UltimateOrb.Numerics.Accelerated.Vector3D)" /> method defines the multiplication operation for <see cref="T:UltimateOrb.Numerics.Accelerated.Vector3D" /> objects.</remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.op_Subtraction(UltimateOrb.Numerics.Accelerated.Vector3D,UltimateOrb.Numerics.Accelerated.Vector3D)">
+            <summary>Subtracts the second vector from the first.</summary>
+            <param name="left">The first vector.</param>
+            <param name="right">The second vector.</param>
+            <returns>The vector that results from subtracting <paramref name="right" /> from <paramref name="left" />.</returns>
+            <remarks>The <see cref="M:UltimateOrb.Numerics.Accelerated.Vector3D.op_Subtraction(UltimateOrb.Numerics.Accelerated.Vector3D,UltimateOrb.Numerics.Accelerated.Vector3D)" /> method defines the subtraction operation for <see cref="T:UltimateOrb.Numerics.Accelerated.Vector3D" /> objects.</remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.op_UnaryNegation(UltimateOrb.Numerics.Accelerated.Vector3D)">
+            <summary>Negates the specified vector.</summary>
+            <param name="value">The vector to negate.</param>
+            <returns>The negated vector.</returns>
+            <remarks>The <see cref="M:UltimateOrb.Numerics.Accelerated.Vector3D.op_UnaryNegation(UltimateOrb.Numerics.Accelerated.Vector3D)" /> method defines the unary negation operation for <see cref="T:UltimateOrb.Numerics.Accelerated.Vector3D" /> objects.</remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.Abs(UltimateOrb.Numerics.Accelerated.Vector3D)">
+            <summary>Returns a vector whose elements are the absolute values of each of the specified vector's elements.</summary>
+            <param name="value">A vector.</param>
+            <returns>The absolute value vector.</returns>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.Add(UltimateOrb.Numerics.Accelerated.Vector3D,UltimateOrb.Numerics.Accelerated.Vector3D)">
+            <summary>Adds two vectors together.</summary>
+            <param name="left">The first vector to add.</param>
+            <param name="right">The second vector to add.</param>
+            <returns>The summed vector.</returns>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.Clamp(UltimateOrb.Numerics.Accelerated.Vector3D,UltimateOrb.Numerics.Accelerated.Vector3D,UltimateOrb.Numerics.Accelerated.Vector3D)">
+            <inheritdoc cref="!:ISimdVector&lt;TSelf, T&gt;.Clamp(TSelf, TSelf, TSelf)" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.ClampNative(UltimateOrb.Numerics.Accelerated.Vector3D,UltimateOrb.Numerics.Accelerated.Vector3D,UltimateOrb.Numerics.Accelerated.Vector3D)">
+            <inheritdoc cref="!:ISimdVector&lt;TSelf, T&gt;.ClampNative(TSelf, TSelf, TSelf)" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.CopySign(UltimateOrb.Numerics.Accelerated.Vector3D,UltimateOrb.Numerics.Accelerated.Vector3D)">
+            <inheritdoc cref="!:ISimdVector&lt;TSelf, T&gt;.CopySign(TSelf, TSelf)" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.Cos(UltimateOrb.Numerics.Accelerated.Vector3D)">
+            <inheritdoc cref="M:System.Numerics.Vector4.Cos(System.Numerics.Vector4)" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.Create(System.Double)">
+            <summary>Creates a new <see cref="T:UltimateOrb.Numerics.Accelerated.Vector3D" /> object whose three elements have the same value.</summary>
+            <param name="value">The value to assign to all three elements.</param>
+            <returns>A new <see cref="T:UltimateOrb.Numerics.Accelerated.Vector3D" /> whose three elements have the same value.</returns>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.Create(System.Double,System.Double,System.Double)">
+            <summary>Creates a vector whose elements have the specified values.</summary>
+            <param name="x">The value to assign to the <see cref="P:UltimateOrb.Numerics.Accelerated.Vector3D.X" /> field.</param>
+            <param name="y">The value to assign to the <see cref="P:UltimateOrb.Numerics.Accelerated.Vector3D.Y" /> field.</param>
+            <param name="z">The value to assign to the <see cref="P:UltimateOrb.Numerics.Accelerated.Vector3D.Z" /> field.</param>
+            <returns>A new <see cref="T:UltimateOrb.Numerics.Accelerated.Vector3D" /> whose elements have the specified values.</returns>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.Create(System.ReadOnlySpan{System.Double})">
+            <summary>Constructs a vector from the given <see cref="T:System.ReadOnlySpan`1" />. The span must contain at least 3 elements.</summary>
+            <param name="values">The span of elements to assign to the vector.</param>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.CreateScalar(System.Double)">
+            <summary>Creates a vector with <see cref="P:UltimateOrb.Numerics.Accelerated.Vector3D.X" /> initialized to the specified value and the remaining elements initialized to zero.</summary>
+            <param name="x">The value to assign to the <see cref="P:UltimateOrb.Numerics.Accelerated.Vector3D.X" /> field.</param>
+            <returns>A new <see cref="T:UltimateOrb.Numerics.Accelerated.Vector3D" /> with <see cref="P:UltimateOrb.Numerics.Accelerated.Vector3D.X" /> initialized <paramref name="x" /> and the remaining elements initialized to zero.</returns>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.CreateScalarUnsafe(System.Double)">
+            <summary>Creates a vector with <see cref="P:UltimateOrb.Numerics.Accelerated.Vector3D.X" /> initialized to the specified value and the remaining elements left uninitialized.</summary>
+            <param name="x">The value to assign to the <see cref="P:UltimateOrb.Numerics.Accelerated.Vector3D.X" /> field.</param>
+            <returns>A new <see cref="T:UltimateOrb.Numerics.Accelerated.Vector3D" /> with <see cref="P:UltimateOrb.Numerics.Accelerated.Vector3D.X" /> initialized <paramref name="x" /> and the remaining elements left uninitialized.</returns>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.Cross(UltimateOrb.Numerics.Accelerated.Vector3D,UltimateOrb.Numerics.Accelerated.Vector3D)">
+            <summary>Computes the cross product of two vectors.</summary>
+            <param name="vector1">The first vector.</param>
+            <param name="vector2">The second vector.</param>
+            <returns>The cross product.</returns>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.DegreesToRadians(UltimateOrb.Numerics.Accelerated.Vector3D)">
+            <inheritdoc cref="M:System.Numerics.Vector4.DegreesToRadians(System.Numerics.Vector4)" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.Distance(UltimateOrb.Numerics.Accelerated.Vector3D,UltimateOrb.Numerics.Accelerated.Vector3D)">
+            <summary>Computes the Euclidean distance between the two given points.</summary>
+            <param name="value1">The first point.</param>
+            <param name="value2">The second point.</param>
+            <returns>The distance.</returns>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.DistanceSquared(UltimateOrb.Numerics.Accelerated.Vector3D,UltimateOrb.Numerics.Accelerated.Vector3D)">
+            <summary>Returns the Euclidean distance squared between two specified points.</summary>
+            <param name="value1">The first point.</param>
+            <param name="value2">The second point.</param>
+            <returns>The distance squared.</returns>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.Divide(UltimateOrb.Numerics.Accelerated.Vector3D,UltimateOrb.Numerics.Accelerated.Vector3D)">
+            <summary>Divides the first vector by the second.</summary>
+            <param name="left">The first vector.</param>
+            <param name="right">The second vector.</param>
+            <returns>The vector resulting from the division.</returns>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.Divide(UltimateOrb.Numerics.Accelerated.Vector3D,System.Double)">
+            <summary>Divides the specified vector by a specified scalar value.</summary>
+            <param name="left">The vector.</param>
+            <param name="divisor">The scalar value.</param>
+            <returns>The vector that results from the division.</returns>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.Dot(UltimateOrb.Numerics.Accelerated.Vector3D,UltimateOrb.Numerics.Accelerated.Vector3D)">
+            <summary>Returns the dot product of two vectors.</summary>
+            <param name="vector1">The first vector.</param>
+            <param name="vector2">The second vector.</param>
+            <returns>The dot product.</returns>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.Exp(UltimateOrb.Numerics.Accelerated.Vector3D)">
+            <inheritdoc cref="M:System.Numerics.Vector4.Exp(System.Numerics.Vector4)" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.FusedMultiplyAdd(UltimateOrb.Numerics.Accelerated.Vector3D,UltimateOrb.Numerics.Accelerated.Vector3D,UltimateOrb.Numerics.Accelerated.Vector3D)">
+            <inheritdoc cref="M:System.Runtime.Intrinsics.Vector256.MultiplyAddEstimate(System.Runtime.Intrinsics.Vector256{System.Double},System.Runtime.Intrinsics.Vector256{System.Double},System.Runtime.Intrinsics.Vector256{System.Double})" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.Hypot(UltimateOrb.Numerics.Accelerated.Vector3D,UltimateOrb.Numerics.Accelerated.Vector3D)">
+            <inheritdoc cref="M:System.Numerics.Vector4.Hypot(System.Numerics.Vector4,System.Numerics.Vector4)" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.Lerp(UltimateOrb.Numerics.Accelerated.Vector3D,UltimateOrb.Numerics.Accelerated.Vector3D,System.Double)">
+            <inheritdoc cref="!:Vector4.Lerp(Vector4, Vector4, double)" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.Lerp(UltimateOrb.Numerics.Accelerated.Vector3D,UltimateOrb.Numerics.Accelerated.Vector3D,UltimateOrb.Numerics.Accelerated.Vector3D)">
+            <inheritdoc cref="M:System.Numerics.Vector4.Lerp(System.Numerics.Vector4,System.Numerics.Vector4,System.Numerics.Vector4)" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.Log(UltimateOrb.Numerics.Accelerated.Vector3D)">
+            <inheritdoc cref="M:System.Numerics.Vector4.Log2(System.Numerics.Vector4)" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.Log2(UltimateOrb.Numerics.Accelerated.Vector3D)">
+            <inheritdoc cref="M:System.Numerics.Vector4.Log(System.Numerics.Vector4)" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.Max(UltimateOrb.Numerics.Accelerated.Vector3D,UltimateOrb.Numerics.Accelerated.Vector3D)">
+            <inheritdoc cref="!:ISimdVector&lt;TSelf, T&gt;.Max(TSelf, TSelf)" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.MaxMagnitude(UltimateOrb.Numerics.Accelerated.Vector3D,UltimateOrb.Numerics.Accelerated.Vector3D)">
+            <inheritdoc cref="!:ISimdVector&lt;TSelf, T&gt;.MaxMagnitude(TSelf, TSelf)" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.MaxMagnitudeNumber(UltimateOrb.Numerics.Accelerated.Vector3D,UltimateOrb.Numerics.Accelerated.Vector3D)">
+            <inheritdoc cref="!:ISimdVector&lt;TSelf, T&gt;.MaxMagnitudeNumber(TSelf, TSelf)" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.MaxNative(UltimateOrb.Numerics.Accelerated.Vector3D,UltimateOrb.Numerics.Accelerated.Vector3D)">
+            <inheritdoc cref="!:ISimdVector&lt;TSelf, T&gt;.MaxNative(TSelf, TSelf)" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.MaxNumber(UltimateOrb.Numerics.Accelerated.Vector3D,UltimateOrb.Numerics.Accelerated.Vector3D)">
+            <inheritdoc cref="!:ISimdVector&lt;TSelf, T&gt;.MaxNumber(TSelf, TSelf)" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.Min(UltimateOrb.Numerics.Accelerated.Vector3D,UltimateOrb.Numerics.Accelerated.Vector3D)">
+            <inheritdoc cref="!:ISimdVector&lt;TSelf, T&gt;.Min(TSelf, TSelf)" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.MinMagnitude(UltimateOrb.Numerics.Accelerated.Vector3D,UltimateOrb.Numerics.Accelerated.Vector3D)">
+            <inheritdoc cref="!:ISimdVector&lt;TSelf, T&gt;.MinMagnitude(TSelf, TSelf)" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.MinMagnitudeNumber(UltimateOrb.Numerics.Accelerated.Vector3D,UltimateOrb.Numerics.Accelerated.Vector3D)">
+            <inheritdoc cref="!:ISimdVector&lt;TSelf, T&gt;.MinMagnitudeNumber(TSelf, TSelf)" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.MinNative(UltimateOrb.Numerics.Accelerated.Vector3D,UltimateOrb.Numerics.Accelerated.Vector3D)">
+            <inheritdoc cref="!:ISimdVector&lt;TSelf, T&gt;.MinNative(TSelf, TSelf)" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.MinNumber(UltimateOrb.Numerics.Accelerated.Vector3D,UltimateOrb.Numerics.Accelerated.Vector3D)">
+            <inheritdoc cref="!:ISimdVector&lt;TSelf, T&gt;.MinNumber(TSelf, TSelf)" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.Multiply(UltimateOrb.Numerics.Accelerated.Vector3D,UltimateOrb.Numerics.Accelerated.Vector3D)">
+            <summary>Returns a new vector whose values are the product of each pair of elements in two specified vectors.</summary>
+            <param name="left">The first vector.</param>
+            <param name="right">The second vector.</param>
+            <returns>The element-wise product vector.</returns>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.Multiply(UltimateOrb.Numerics.Accelerated.Vector3D,System.Double)">
+            <summary>Multiplies a vector by a specified scalar.</summary>
+            <param name="left">The vector to multiply.</param>
+            <param name="right">The scalar value.</param>
+            <returns>The scaled vector.</returns>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.Multiply(System.Double,UltimateOrb.Numerics.Accelerated.Vector3D)">
+            <summary>Multiplies a scalar value by a specified vector.</summary>
+            <param name="left">The scaled value.</param>
+            <param name="right">The vector.</param>
+            <returns>The scaled vector.</returns>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.MultiplyAddEstimate(UltimateOrb.Numerics.Accelerated.Vector3D,UltimateOrb.Numerics.Accelerated.Vector3D,UltimateOrb.Numerics.Accelerated.Vector3D)">
+            <inheritdoc cref="M:System.Runtime.Intrinsics.Vector256.MultiplyAddEstimate(System.Runtime.Intrinsics.Vector256{System.Double},System.Runtime.Intrinsics.Vector256{System.Double},System.Runtime.Intrinsics.Vector256{System.Double})" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.Negate(UltimateOrb.Numerics.Accelerated.Vector3D)">
+            <summary>Negates a specified vector.</summary>
+            <param name="value">The vector to negate.</param>
+            <returns>The negated vector.</returns>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.Normalize(UltimateOrb.Numerics.Accelerated.Vector3D)">
+            <summary>Returns a vector with the same direction as the specified vector, but with a length of one.</summary>
+            <param name="value">The vector to normalize.</param>
+            <returns>The normalized vector.</returns>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.RadiansToDegrees(UltimateOrb.Numerics.Accelerated.Vector3D)">
+            <inheritdoc cref="M:System.Numerics.Vector4.RadiansToDegrees(System.Numerics.Vector4)" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.Reflect(UltimateOrb.Numerics.Accelerated.Vector3D,UltimateOrb.Numerics.Accelerated.Vector3D)">
+            <summary>Returns the reflection of a vector off a surface that has the specified normal.</summary>
+            <param name="vector">The source vector.</param>
+            <param name="normal">The normal of the surface being reflected off.</param>
+            <returns>The reflected vector.</returns>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.Round(UltimateOrb.Numerics.Accelerated.Vector3D)">
+            <inheritdoc cref="M:System.Numerics.Vector4.Round(System.Numerics.Vector4)" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.Round(UltimateOrb.Numerics.Accelerated.Vector3D,System.MidpointRounding)">
+            <inheritdoc cref="M:System.Numerics.Vector4.Round(System.Numerics.Vector4,System.MidpointRounding)" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.Sin(UltimateOrb.Numerics.Accelerated.Vector3D)">
+            <inheritdoc cref="M:System.Numerics.Vector4.Sin(System.Numerics.Vector4)" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.SinCos(UltimateOrb.Numerics.Accelerated.Vector3D)">
+            <inheritdoc cref="M:System.Numerics.Vector4.SinCos(System.Numerics.Vector4)" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.SquareRoot(UltimateOrb.Numerics.Accelerated.Vector3D)">
+            <summary>Returns a vector whose elements are the square root of each of a specified vector's elements.</summary>
+            <param name="value">A vector.</param>
+            <returns>The square root vector.</returns>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.Subtract(UltimateOrb.Numerics.Accelerated.Vector3D,UltimateOrb.Numerics.Accelerated.Vector3D)">
+            <summary>Subtracts the second vector from the first.</summary>
+            <param name="left">The first vector.</param>
+            <param name="right">The second vector.</param>
+            <returns>The difference vector.</returns>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.Transform(UltimateOrb.Numerics.Accelerated.Vector3D,UltimateOrb.Numerics.Accelerated.QuaternionD)">
+            <summary>Transforms a vector by the specified Quaternion rotation value.</summary>
+            <param name="value">The vector to rotate.</param>
+            <param name="rotation">The rotation to apply.</param>
+            <returns>The transformed vector.</returns>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.Truncate(UltimateOrb.Numerics.Accelerated.Vector3D)">
+            <inheritdoc cref="M:System.Numerics.Vector4.Truncate(System.Numerics.Vector4)" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.CopyTo(System.Double[])">
+            <summary>Copies the elements of the vector to a specified array.</summary>
+            <param name="array">The destination array.</param>
+            <remarks><paramref name="array" /> must have at least three elements. The method copies the vector's elements starting at index 0.</remarks>
+            <exception cref="T:System.NullReferenceException"><paramref name="array" /> is <see langword="null" />.</exception>
+            <exception cref="T:System.ArgumentException">The number of elements in the current instance is greater than in the array.</exception>
+            <exception cref="T:System.RankException"><paramref name="array" /> is multidimensional.</exception>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.CopyTo(System.Double[],System.Int32)">
+            <summary>Copies the elements of the vector to a specified array starting at a specified index position.</summary>
+            <param name="array">The destination array.</param>
+            <param name="index">The index at which to copy the first element of the vector.</param>
+            <remarks><paramref name="array" /> must have a sufficient number of elements to accommodate the three vector elements. In other words, elements <paramref name="index" />, <paramref name="index" /> + 1, and <paramref name="index" /> + 2 must already exist in <paramref name="array" />.</remarks>
+            <exception cref="T:System.NullReferenceException"><paramref name="array" /> is <see langword="null" />.</exception>
+            <exception cref="T:System.ArgumentException">The number of elements in the current instance is greater than in the array.</exception>
+            <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="index" /> is less than zero.
+            -or-
+            <paramref name="index" /> is greater than or equal to the array length.</exception>
+            <exception cref="T:System.RankException"><paramref name="array" /> is multidimensional.</exception>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.CopyTo(System.Span{System.Double})">
+            <summary>Copies the vector to the given <see cref="T:System.Span`1" />. The length of the destination span must be at least 3.</summary>
+            <param name="destination">The destination span which the values are copied into.</param>
+            <exception cref="T:System.ArgumentException">If number of elements in source vector is greater than those available in destination span.</exception>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.TryCopyTo(System.Span{System.Double})">
+            <summary>Attempts to copy the vector to the given <see cref="T:System.Span`1" />. The length of the destination span must be at least 3.</summary>
+            <param name="destination">The destination span which the values are copied into.</param>
+            <returns><see langword="true" /> if the source vector was successfully copied to <paramref name="destination" />. <see langword="false" /> if <paramref name="destination" /> is not large enough to hold the source vector.</returns>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.Equals(System.Object)">
+            <summary>Returns a value that indicates whether this instance and a specified object are equal.</summary>
+            <param name="obj">The object to compare with the current instance.</param>
+            <returns><see langword="true" /> if the current instance and <paramref name="obj" /> are equal; otherwise, <see langword="false" />. If <paramref name="obj" /> is <see langword="null" />, the method returns <see langword="false" />.</returns>
+            <remarks>The current instance and <paramref name="obj" /> are equal if <paramref name="obj" /> is a <see cref="T:UltimateOrb.Numerics.Accelerated.Vector3D" /> object and their corresponding elements are equal.</remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.Equals(UltimateOrb.Numerics.Accelerated.Vector3D)">
+            <summary>Returns a value that indicates whether this instance and another vector are equal.</summary>
+            <param name="other">The other vector.</param>
+            <returns><see langword="true" /> if the two vectors are equal; otherwise, <see langword="false" />.</returns>
+            <remarks>Two vectors are equal if their <see cref="P:UltimateOrb.Numerics.Accelerated.Vector3D.X" />, <see cref="P:UltimateOrb.Numerics.Accelerated.Vector3D.Y" />, and <see cref="P:UltimateOrb.Numerics.Accelerated.Vector3D.Z" /> elements are equal.</remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.GetHashCode">
+            <summary>Returns the hash code for this instance.</summary>
+            <returns>The hash code.</returns>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.Length">
+            <summary>Returns the length of this vector object.</summary>
+            <returns>The vector's length.</returns>
+            <altmember cref="M:UltimateOrb.Numerics.Accelerated.Vector3D.LengthSquared" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.LengthSquared">
+            <summary>Returns the length of the vector squared.</summary>
+            <returns>The vector's length squared.</returns>
+            <remarks>This operation offers better performance than a call to the <see cref="M:UltimateOrb.Numerics.Accelerated.Vector3D.Length" /> method.</remarks>
+            <altmember cref="M:UltimateOrb.Numerics.Accelerated.Vector3D.Length" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.ToString">
+            <summary>Returns the string representation of the current instance using default formatting.</summary>
+            <returns>The string representation of the current instance.</returns>
+            <remarks>This method returns a string in which each element of the vector is formatted using the "G" (general) format string and the formatting conventions of the current thread culture. The "&lt;" and "&gt;" characters are used to begin and end the string, and the current culture's <see cref="P:System.Globalization.NumberFormatInfo.NumberGroupSeparator" /> property followed by a space is used to separate each element.</remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.ToString(System.String)">
+            <summary>Returns the string representation of the current instance using the specified format string to format individual elements.</summary>
+            <param name="format">A standard or custom numeric format string that defines the format of individual elements.</param>
+            <returns>The string representation of the current instance.</returns>
+            <remarks>This method returns a string in which each element of the vector is formatted using <paramref name="format" /> and the current culture's formatting conventions. The "&lt;" and "&gt;" characters are used to begin and end the string, and the current culture's <see cref="P:System.Globalization.NumberFormatInfo.NumberGroupSeparator" /> property followed by a space is used to separate each element.</remarks>
+            <related type="Article" href="/dotnet/standard/base-types/standard-numeric-format-strings">Standard Numeric Format Strings</related>
+            <related type="Article" href="/dotnet/standard/base-types/custom-numeric-format-strings">Custom Numeric Format Strings</related>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.ToString(System.String,System.IFormatProvider)">
+            <summary>Returns the string representation of the current instance using the specified format string to format individual elements and the specified format provider to define culture-specific formatting.</summary>
+            <param name="format">A standard or custom numeric format string that defines the format of individual elements.</param>
+            <param name="formatProvider">A format provider that supplies culture-specific formatting information.</param>
+            <returns>The string representation of the current instance.</returns>
+            <remarks>This method returns a string in which each element of the vector is formatted using <paramref name="format" /> and <paramref name="formatProvider" />. The "&lt;" and "&gt;" characters are used to begin and end the string, and the format provider's <see cref="P:System.Globalization.NumberFormatInfo.NumberGroupSeparator" /> property followed by a space is used to separate each element.</remarks>
+            <related type="Article" href="/dotnet/standard/base-types/standard-numeric-format-strings">Standard Numeric Format Strings</related>
+            <related type="Article" href="/dotnet/standard/base-types/custom-numeric-format-strings">Custom Numeric Format Strings</related>
+        </member>
+        <member name="T:UltimateOrb.Numerics.Accelerated.Vector4D">
+            <summary>Represents a vector with four single-precision doubleing-point values.</summary>
+        </member>
+        <member name="P:UltimateOrb.Numerics.Accelerated.Vector4D.X">
+            <summary>The Y value of the vector component of the quaternion.</summary>
+        </member>
+        <member name="P:UltimateOrb.Numerics.Accelerated.Vector4D.Y">
+            <summary>The Y value of the vector component of the quaternion.</summary>
+        </member>
+        <member name="P:UltimateOrb.Numerics.Accelerated.Vector4D.Z">
+            <summary>The Z value of the vector component of the quaternion.</summary>
+        </member>
+        <member name="P:UltimateOrb.Numerics.Accelerated.Vector4D.W">
+            <summary>The rotation component of the quaternion.</summary>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.#ctor(System.Double)">
+            <summary>Creates a new <see cref="T:UltimateOrb.Numerics.Accelerated.Vector4D" /> object whose four elements have the same value.</summary>
+            <param name="value">The value to assign to all four elements.</param>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.#ctor(UltimateOrb.Numerics.Accelerated.Vector3D,System.Double)">
+            <summary>Constructs a new <see cref="T:UltimateOrb.Numerics.Accelerated.Vector4D" /> object from the specified <see cref="T:UltimateOrb.Numerics.Vector3D" /> object and a W component.</summary>
+            <param name="value">The vector to use for the X, Y, and Z components.</param>
+            <param name="w">The W component.</param>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.#ctor(System.Double,System.Double,System.Double,System.Double)">
+            <summary>Creates a vector whose elements have the specified values.</summary>
+            <param name="x">The value to assign to the <see cref="P:UltimateOrb.Numerics.Accelerated.Vector4D.X" /> field.</param>
+            <param name="y">The value to assign to the <see cref="P:UltimateOrb.Numerics.Accelerated.Vector4D.Y" /> field.</param>
+            <param name="z">The value to assign to the <see cref="P:UltimateOrb.Numerics.Accelerated.Vector4D.Z" /> field.</param>
+            <param name="w">The value to assign to the <see cref="P:UltimateOrb.Numerics.Accelerated.Vector4D.W" /> field.</param>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.#ctor(System.ReadOnlySpan{System.Double})">
+            <summary>Constructs a vector from the given <see cref="T:System.ReadOnlySpan`1" />. The span must contain at least 4 elements.</summary>
+            <param name="values">The span of elements to assign to the vector.</param>
+        </member>
+        <member name="P:UltimateOrb.Numerics.Accelerated.Vector4D.E">
+            <summary>Gets a vector whose elements are equal to <see cref="F:System.Double.E" />.</summary>
+            <value>A vector whose elements are equal to <see cref="F:System.Double.E" /> (that is, it returns the vector <c>Create(double.E)</c>).</value>
+        </member>
+        <member name="P:UltimateOrb.Numerics.Accelerated.Vector4D.Epsilon">
+            <summary>Gets a vector whose elements are equal to <see cref="F:System.Double.Epsilon" />.</summary>
+            <value>A vector whose elements are equal to <see cref="F:System.Double.Epsilon" /> (that is, it returns the vector <c>Create(double.Epsilon)</c>).</value>
+        </member>
+        <member name="P:UltimateOrb.Numerics.Accelerated.Vector4D.NaN">
+            <summary>Gets a vector whose elements are equal to <see cref="F:System.Double.NaN" />.</summary>
+            <value>A vector whose elements are equal to <see cref="F:System.Double.NaN" /> (that is, it returns the vector <c>Create(double.NaN)</c>).</value>
+        </member>
+        <member name="P:UltimateOrb.Numerics.Accelerated.Vector4D.NegativeInfinity">
+            <summary>Gets a vector whose elements are equal to <see cref="F:System.Double.NegativeInfinity" />.</summary>
+            <value>A vector whose elements are equal to <see cref="F:System.Double.NegativeInfinity" /> (that is, it returns the vector <c>Create(double.NegativeInfinity)</c>).</value>
+        </member>
+        <member name="P:UltimateOrb.Numerics.Accelerated.Vector4D.NegativeZero">
+            <summary>Gets a vector whose elements are equal to <see cref="F:System.Double.NegativeZero" />.</summary>
+            <value>A vector whose elements are equal to <see cref="F:System.Double.NegativeZero" /> (that is, it returns the vector <c>Create(double.NegativeZero)</c>).</value>
+        </member>
+        <member name="P:UltimateOrb.Numerics.Accelerated.Vector4D.One">
+            <summary>Gets a vector whose elements are equal to one.</summary>
+            <value>A vector whose elements are equal to one (that is, it returns the vector <c>Create(1)</c>).</value>
+        </member>
+        <member name="P:UltimateOrb.Numerics.Accelerated.Vector4D.Pi">
+            <summary>Gets a vector whose elements are equal to <see cref="F:System.Double.Pi" />.</summary>
+            <value>A vector whose elements are equal to <see cref="F:System.Double.Pi" /> (that is, it returns the vector <c>Create(double.Pi)</c>).</value>
+        </member>
+        <member name="P:UltimateOrb.Numerics.Accelerated.Vector4D.PositiveInfinity">
+            <summary>Gets a vector whose elements are equal to <see cref="F:System.Double.PositiveInfinity" />.</summary>
+            <value>A vector whose elements are equal to <see cref="F:System.Double.PositiveInfinity" /> (that is, it returns the vector <c>Create(double.PositiveInfinity)</c>).</value>
+        </member>
+        <member name="P:UltimateOrb.Numerics.Accelerated.Vector4D.Tau">
+            <summary>Gets a vector whose elements are equal to <see cref="F:System.Double.Tau" />.</summary>
+            <value>A vector whose elements are equal to <see cref="F:System.Double.Tau" /> (that is, it returns the vector <c>Create(double.Tau)</c>).</value>
+        </member>
+        <member name="P:UltimateOrb.Numerics.Accelerated.Vector4D.UnitX">
+            <summary>Gets the vector (1,0,0,0).</summary>
+            <value>The vector <c>(1,0,0,0)</c>.</value>
+        </member>
+        <member name="P:UltimateOrb.Numerics.Accelerated.Vector4D.UnitY">
+            <summary>Gets the vector (0,1,0,0).</summary>
+            <value>The vector <c>(0,1,0,0)</c>.</value>
+        </member>
+        <member name="P:UltimateOrb.Numerics.Accelerated.Vector4D.UnitZ">
+            <summary>Gets the vector (0,0,1,0).</summary>
+            <value>The vector <c>(0,0,1,0)</c>.</value>
+        </member>
+        <member name="P:UltimateOrb.Numerics.Accelerated.Vector4D.UnitW">
+            <summary>Gets the vector (0,0,0,1).</summary>
+            <value>The vector <c>(0,0,0,1)</c>.</value>
+        </member>
+        <member name="P:UltimateOrb.Numerics.Accelerated.Vector4D.Zero">
+            <summary>Gets a vector whose elements are equal to zero.</summary>
+            <value>A vector whose elements are equal to zero (that is, it returns the vector <c>Create(0)</c>).</value>
+        </member>
+        <member name="P:UltimateOrb.Numerics.Accelerated.Vector4D.Item(System.Int32)">
+            <summary>Gets or sets the element at the specified index.</summary>
+            <param name="index">The index of the element to get or set.</param>
+            <returns>The the element at <paramref name="index" />.</returns>
+            <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="index" /> was less than zero or greater than the number of elements.</exception>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.op_Addition(UltimateOrb.Numerics.Accelerated.Vector4D,UltimateOrb.Numerics.Accelerated.Vector4D)">
+            <summary>Adds two vectors together.</summary>
+            <param name="left">The first vector to add.</param>
+            <param name="right">The second vector to add.</param>
+            <returns>The summed vector.</returns>
+            <remarks>The <see cref="M:UltimateOrb.Numerics.Accelerated.Vector4D.op_Addition(UltimateOrb.Numerics.Accelerated.Vector4D,UltimateOrb.Numerics.Accelerated.Vector4D)" /> method defines the addition operation for <see cref="T:UltimateOrb.Numerics.Accelerated.Vector4D" /> objects.</remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.op_Division(UltimateOrb.Numerics.Accelerated.Vector4D,UltimateOrb.Numerics.Accelerated.Vector4D)">
+            <summary>Divides the first vector by the second.</summary>
+            <param name="left">The first vector.</param>
+            <param name="right">The second vector.</param>
+            <returns>The vector that results from dividing <paramref name="left" /> by <paramref name="right" />.</returns>
+            <remarks>The <see cref="M:UltimateOrb.Numerics.Accelerated.Vector4D.op_Division(UltimateOrb.Numerics.Accelerated.Vector4D,UltimateOrb.Numerics.Accelerated.Vector4D)" /> method defines the division operation for <see cref="T:UltimateOrb.Numerics.Accelerated.Vector4D" /> objects.</remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.op_Division(UltimateOrb.Numerics.Accelerated.Vector4D,System.Double)">
+            <summary>Divides the specified vector by a specified scalar value.</summary>
+            <param name="value1">The vector.</param>
+            <param name="value2">The scalar value.</param>
+            <returns>The result of the division.</returns>
+            <remarks>The <see cref="M:UltimateOrb.Numerics.Accelerated.Vector4D.op_Division(UltimateOrb.Numerics.Accelerated.Vector4D,UltimateOrb.Numerics.Accelerated.Vector4D)" /> method defines the division operation for <see cref="T:UltimateOrb.Numerics.Accelerated.Vector4D" /> objects.</remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.op_Equality(UltimateOrb.Numerics.Accelerated.Vector4D,UltimateOrb.Numerics.Accelerated.Vector4D)">
+            <summary>Returns a value that indicates whether each pair of elements in two specified vectors is equal.</summary>
+            <param name="left">The first vector to compare.</param>
+            <param name="right">The second vector to compare.</param>
+            <returns><see langword="true" /> if <paramref name="left" /> and <paramref name="right" /> are equal; otherwise, <see langword="false" />.</returns>
+            <remarks>Two <see cref="T:UltimateOrb.Numerics.Accelerated.Vector4D" /> objects are equal if each element in <paramref name="left" /> is equal to the corresponding element in <paramref name="right" />.</remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.op_Inequality(UltimateOrb.Numerics.Accelerated.Vector4D,UltimateOrb.Numerics.Accelerated.Vector4D)">
+            <summary>Returns a value that indicates whether two specified vectors are not equal.</summary>
+            <param name="left">The first vector to compare.</param>
+            <param name="right">The second vector to compare.</param>
+            <returns><see langword="true" /> if <paramref name="left" /> and <paramref name="right" /> are not equal; otherwise, <see langword="false" />.</returns>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.op_Multiply(UltimateOrb.Numerics.Accelerated.Vector4D,UltimateOrb.Numerics.Accelerated.Vector4D)">
+            <summary>Returns a new vector whose values are the product of each pair of elements in two specified vectors.</summary>
+            <param name="left">The first vector.</param>
+            <param name="right">The second vector.</param>
+            <returns>The element-wise product vector.</returns>
+            <remarks>The <see cref="M:UltimateOrb.Numerics.Accelerated.Vector4D.op_Multiply(UltimateOrb.Numerics.Accelerated.Vector4D,UltimateOrb.Numerics.Accelerated.Vector4D)" /> method defines the multiplication operation for <see cref="T:UltimateOrb.Numerics.Accelerated.Vector4D" /> objects.</remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.op_Multiply(UltimateOrb.Numerics.Accelerated.Vector4D,System.Double)">
+            <summary>Multiplies the specified vector by the specified scalar value.</summary>
+            <param name="left">The vector.</param>
+            <param name="right">The scalar value.</param>
+            <returns>The scaled vector.</returns>
+            <remarks>The <see cref="M:UltimateOrb.Numerics.Accelerated.Vector4D.op_Multiply(UltimateOrb.Numerics.Accelerated.Vector4D,UltimateOrb.Numerics.Accelerated.Vector4D)" /> method defines the multiplication operation for <see cref="T:UltimateOrb.Numerics.Accelerated.Vector4D" /> objects.</remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.op_Multiply(System.Double,UltimateOrb.Numerics.Accelerated.Vector4D)">
+            <summary>Multiplies the scalar value by the specified vector.</summary>
+            <param name="left">The vector.</param>
+            <param name="right">The scalar value.</param>
+            <returns>The scaled vector.</returns>
+            <remarks>The <see cref="M:UltimateOrb.Numerics.Accelerated.Vector4D.op_Multiply(UltimateOrb.Numerics.Accelerated.Vector4D,UltimateOrb.Numerics.Accelerated.Vector4D)" /> method defines the multiplication operation for <see cref="T:UltimateOrb.Numerics.Accelerated.Vector4D" /> objects.</remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.op_Subtraction(UltimateOrb.Numerics.Accelerated.Vector4D,UltimateOrb.Numerics.Accelerated.Vector4D)">
+            <summary>Subtracts the second vector from the first.</summary>
+            <param name="left">The first vector.</param>
+            <param name="right">The second vector.</param>
+            <returns>The vector that results from subtracting <paramref name="right" /> from <paramref name="left" />.</returns>
+            <remarks>The <see cref="M:UltimateOrb.Numerics.Accelerated.Vector4D.op_Subtraction(UltimateOrb.Numerics.Accelerated.Vector4D,UltimateOrb.Numerics.Accelerated.Vector4D)" /> method defines the subtraction operation for <see cref="T:UltimateOrb.Numerics.Accelerated.Vector4D" /> objects.</remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.op_UnaryNegation(UltimateOrb.Numerics.Accelerated.Vector4D)">
+            <summary>Negates the specified vector.</summary>
+            <param name="value">The vector to negate.</param>
+            <returns>The negated vector.</returns>
+            <remarks>The <see cref="M:UltimateOrb.Numerics.Accelerated.Vector4D.op_UnaryNegation(UltimateOrb.Numerics.Accelerated.Vector4D)" /> method defines the unary negation operation for <see cref="T:UltimateOrb.Numerics.Accelerated.Vector4D" /> objects.</remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.Abs(UltimateOrb.Numerics.Accelerated.Vector4D)">
+            <summary>Returns a vector whose elements are the absolute values of each of the specified vector's elements.</summary>
+            <param name="value">A vector.</param>
+            <returns>The absolute value vector.</returns>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.Add(UltimateOrb.Numerics.Accelerated.Vector4D,UltimateOrb.Numerics.Accelerated.Vector4D)">
+            <summary>Adds two vectors together.</summary>
+            <param name="left">The first vector to add.</param>
+            <param name="right">The second vector to add.</param>
+            <returns>The summed vector.</returns>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.Clamp(UltimateOrb.Numerics.Accelerated.Vector4D,UltimateOrb.Numerics.Accelerated.Vector4D,UltimateOrb.Numerics.Accelerated.Vector4D)">
+            <inheritdoc cref="!:ISimdVector&lt;TSelf, T&gt;.Clamp(TSelf, TSelf, TSelf)" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.ClampNative(UltimateOrb.Numerics.Accelerated.Vector4D,UltimateOrb.Numerics.Accelerated.Vector4D,UltimateOrb.Numerics.Accelerated.Vector4D)">
+            <inheritdoc cref="!:ISimdVector&lt;TSelf, T&gt;.ClampNative(TSelf, TSelf, TSelf)" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.CopySign(UltimateOrb.Numerics.Accelerated.Vector4D,UltimateOrb.Numerics.Accelerated.Vector4D)">
+            <inheritdoc cref="!:ISimdVector&lt;TSelf, T&gt;.CopySign(TSelf, TSelf)" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.Cos(UltimateOrb.Numerics.Accelerated.Vector4D)">
+            <inheritdoc cref="M:System.Runtime.Intrinsics.Vector256.Cos(System.Runtime.Intrinsics.Vector256{System.Double})" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.Create(System.Double)">
+            <summary>Creates a new <see cref="T:UltimateOrb.Numerics.Accelerated.Vector4D" /> object whose four elements have the same value.</summary>
+            <param name="value">The value to assign to all four elements.</param>
+            <returns>A new <see cref="T:UltimateOrb.Numerics.Accelerated.Vector4D" /> whose four elements have the same value.</returns>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.Create(UltimateOrb.Numerics.Accelerated.Vector3D,System.Double)">
+            <summary>Constructs a new <see cref="T:UltimateOrb.Numerics.Accelerated.Vector4D" /> object from the specified <see cref="T:UltimateOrb.Numerics.Vector3D" /> object and a W component.</summary>
+            <param name="vector">The vector to use for the X, Y, and Z components.</param>
+            <param name="w">The W component.</param>
+            <returns>A new <see cref="T:UltimateOrb.Numerics.Accelerated.Vector4D" /> from the specified <see cref="T:UltimateOrb.Numerics.Vector3D" /> object and a W component.</returns>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.Create(System.Double,System.Double,System.Double,System.Double)">
+            <summary>Creates a vector whose elements have the specified values.</summary>
+            <param name="x">The value to assign to the <see cref="P:UltimateOrb.Numerics.Accelerated.Vector4D.X" /> field.</param>
+            <param name="y">The value to assign to the <see cref="P:UltimateOrb.Numerics.Accelerated.Vector4D.Y" /> field.</param>
+            <param name="z">The value to assign to the <see cref="P:UltimateOrb.Numerics.Accelerated.Vector4D.Z" /> field.</param>
+            <param name="w">The value to assign to the <see cref="P:UltimateOrb.Numerics.Accelerated.Vector4D.W" /> field.</param>
+            <returns>A new <see cref="T:UltimateOrb.Numerics.Accelerated.Vector4D" /> whose elements have the specified values.</returns>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.Create(System.ReadOnlySpan{System.Double})">
+            <summary>Constructs a vector from the given <see cref="T:System.ReadOnlySpan`1" />. The span must contain at least 4 elements.</summary>
+            <param name="values">The span of elements to assign to the vector.</param>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.CreateScalar(System.Double)">
+            <summary>Creates a vector with <see cref="P:UltimateOrb.Numerics.Accelerated.Vector4D.X" /> initialized to the specified value and the remaining elements initialized to zero.</summary>
+            <param name="x">The value to assign to the <see cref="P:UltimateOrb.Numerics.Accelerated.Vector4D.X" /> field.</param>
+            <returns>A new <see cref="T:UltimateOrb.Numerics.Accelerated.Vector4D" /> with <see cref="P:UltimateOrb.Numerics.Accelerated.Vector4D.X" /> initialized <paramref name="x" /> and the remaining elements initialized to zero.</returns>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.CreateScalarUnsafe(System.Double)">
+            <summary>Creates a vector with <see cref="P:UltimateOrb.Numerics.Accelerated.Vector4D.X" /> initialized to the specified value and the remaining elements left uninitialized.</summary>
+            <param name="x">The value to assign to the <see cref="P:UltimateOrb.Numerics.Accelerated.Vector4D.X" /> field.</param>
+            <returns>A new <see cref="T:UltimateOrb.Numerics.Accelerated.Vector4D" /> with <see cref="P:UltimateOrb.Numerics.Accelerated.Vector4D.X" /> initialized <paramref name="x" /> and the remaining elements left uninitialized.</returns>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.DegreesToRadians(UltimateOrb.Numerics.Accelerated.Vector4D)">
+            <inheritdoc cref="M:System.Runtime.Intrinsics.Vector256.DegreesToRadians(System.Runtime.Intrinsics.Vector256{System.Double})" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.Distance(UltimateOrb.Numerics.Accelerated.Vector4D,UltimateOrb.Numerics.Accelerated.Vector4D)">
+            <summary>Computes the Euclidean distance between the two given points.</summary>
+            <param name="value1">The first point.</param>
+            <param name="value2">The second point.</param>
+            <returns>The distance.</returns>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.DistanceSquared(UltimateOrb.Numerics.Accelerated.Vector4D,UltimateOrb.Numerics.Accelerated.Vector4D)">
+            <summary>Returns the Euclidean distance squared between two specified points.</summary>
+            <param name="value1">The first point.</param>
+            <param name="value2">The second point.</param>
+            <returns>The distance squared.</returns>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.Divide(UltimateOrb.Numerics.Accelerated.Vector4D,UltimateOrb.Numerics.Accelerated.Vector4D)">
+            <summary>Divides the first vector by the second.</summary>
+            <param name="left">The first vector.</param>
+            <param name="right">The second vector.</param>
+            <returns>The vector resulting from the division.</returns>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.Divide(UltimateOrb.Numerics.Accelerated.Vector4D,System.Double)">
+            <summary>Divides the specified vector by a specified scalar value.</summary>
+            <param name="left">The vector.</param>
+            <param name="divisor">The scalar value.</param>
+            <returns>The vector that results from the division.</returns>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.Dot(UltimateOrb.Numerics.Accelerated.Vector4D,UltimateOrb.Numerics.Accelerated.Vector4D)">
+            <summary>Returns the dot product of two vectors.</summary>
+            <param name="vector1">The first vector.</param>
+            <param name="vector2">The second vector.</param>
+            <returns>The dot product.</returns>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.Exp(UltimateOrb.Numerics.Accelerated.Vector4D)">
+            <inheritdoc cref="M:System.Runtime.Intrinsics.Vector256.Exp(System.Runtime.Intrinsics.Vector256{System.Double})" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.FusedMultiplyAdd(UltimateOrb.Numerics.Accelerated.Vector4D,UltimateOrb.Numerics.Accelerated.Vector4D,UltimateOrb.Numerics.Accelerated.Vector4D)">
+            <inheritdoc cref="M:System.Runtime.Intrinsics.Vector256.MultiplyAddEstimate(System.Runtime.Intrinsics.Vector256{System.Double},System.Runtime.Intrinsics.Vector256{System.Double},System.Runtime.Intrinsics.Vector256{System.Double})" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.Hypot(UltimateOrb.Numerics.Accelerated.Vector4D,UltimateOrb.Numerics.Accelerated.Vector4D)">
+            <inheritdoc cref="M:System.Runtime.Intrinsics.Vector256.Hypot(System.Runtime.Intrinsics.Vector256{System.Double},System.Runtime.Intrinsics.Vector256{System.Double})" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.Lerp(UltimateOrb.Numerics.Accelerated.Vector4D,UltimateOrb.Numerics.Accelerated.Vector4D,System.Double)">
+            <inheritdoc cref="M:UltimateOrb.Numerics.Accelerated.Vector4D.Lerp(UltimateOrb.Numerics.Accelerated.Vector4D,UltimateOrb.Numerics.Accelerated.Vector4D,UltimateOrb.Numerics.Accelerated.Vector4D)" />
+            <remarks><format type="text/markdown"><![CDATA[
+            The behavior of this method changed in .NET 5.0. For more information, see [Behavior change for Vector2D.Lerp and Vector4D.Lerp](/dotnet/core/compatibility/3.1-5.0#behavior-change-for-vector2lerp-and-vector4lerp).
+            ]]></format></remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.Lerp(UltimateOrb.Numerics.Accelerated.Vector4D,UltimateOrb.Numerics.Accelerated.Vector4D,UltimateOrb.Numerics.Accelerated.Vector4D)">
+            <inheritdoc cref="M:System.Runtime.Intrinsics.Vector256.Lerp(System.Runtime.Intrinsics.Vector256{System.Double},System.Runtime.Intrinsics.Vector256{System.Double},System.Runtime.Intrinsics.Vector256{System.Double})" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.Log(UltimateOrb.Numerics.Accelerated.Vector4D)">
+            <inheritdoc cref="M:System.Runtime.Intrinsics.Vector256.Log(System.Runtime.Intrinsics.Vector256{System.Double})" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.Log2(UltimateOrb.Numerics.Accelerated.Vector4D)">
+            <inheritdoc cref="M:System.Runtime.Intrinsics.Vector256.Log2(System.Runtime.Intrinsics.Vector256{System.Double})" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.Max(UltimateOrb.Numerics.Accelerated.Vector4D,UltimateOrb.Numerics.Accelerated.Vector4D)">
+            <inheritdoc cref="!:ISimdVector&lt;TSelf, T&gt;.Max(TSelf, TSelf)" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.MaxMagnitude(UltimateOrb.Numerics.Accelerated.Vector4D,UltimateOrb.Numerics.Accelerated.Vector4D)">
+            <inheritdoc cref="!:ISimdVector&lt;TSelf, T&gt;.MaxMagnitude(TSelf, TSelf)" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.MaxMagnitudeNumber(UltimateOrb.Numerics.Accelerated.Vector4D,UltimateOrb.Numerics.Accelerated.Vector4D)">
+            <inheritdoc cref="!:ISimdVector&lt;TSelf, T&gt;.MaxMagnitudeNumber(TSelf, TSelf)" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.MaxNative(UltimateOrb.Numerics.Accelerated.Vector4D,UltimateOrb.Numerics.Accelerated.Vector4D)">
+            <inheritdoc cref="!:ISimdVector&lt;TSelf, T&gt;.MaxNative(TSelf, TSelf)" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.MaxNumber(UltimateOrb.Numerics.Accelerated.Vector4D,UltimateOrb.Numerics.Accelerated.Vector4D)">
+            <inheritdoc cref="!:ISimdVector&lt;TSelf, T&gt;.MaxNumber(TSelf, TSelf)" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.Min(UltimateOrb.Numerics.Accelerated.Vector4D,UltimateOrb.Numerics.Accelerated.Vector4D)">
+            <inheritdoc cref="!:ISimdVector&lt;TSelf, T&gt;.Min(TSelf, TSelf)" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.MinMagnitude(UltimateOrb.Numerics.Accelerated.Vector4D,UltimateOrb.Numerics.Accelerated.Vector4D)">
+            <inheritdoc cref="!:ISimdVector&lt;TSelf, T&gt;.MinMagnitude(TSelf, TSelf)" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.MinMagnitudeNumber(UltimateOrb.Numerics.Accelerated.Vector4D,UltimateOrb.Numerics.Accelerated.Vector4D)">
+            <inheritdoc cref="!:ISimdVector&lt;TSelf, T&gt;.MinMagnitudeNumber(TSelf, TSelf)" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.MinNative(UltimateOrb.Numerics.Accelerated.Vector4D,UltimateOrb.Numerics.Accelerated.Vector4D)">
+            <inheritdoc cref="!:ISimdVector&lt;TSelf, T&gt;.MinNative(TSelf, TSelf)" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.MinNumber(UltimateOrb.Numerics.Accelerated.Vector4D,UltimateOrb.Numerics.Accelerated.Vector4D)">
+            <inheritdoc cref="!:ISimdVector&lt;TSelf, T&gt;.MinNumber(TSelf, TSelf)" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.Multiply(UltimateOrb.Numerics.Accelerated.Vector4D,UltimateOrb.Numerics.Accelerated.Vector4D)">
+            <summary>Returns a new vector whose values are the product of each pair of elements in two specified vectors.</summary>
+            <param name="left">The first vector.</param>
+            <param name="right">The second vector.</param>
+            <returns>The element-wise product vector.</returns>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.Multiply(UltimateOrb.Numerics.Accelerated.Vector4D,System.Double)">
+            <summary>Multiplies a vector by a specified scalar.</summary>
+            <param name="left">The vector to multiply.</param>
+            <param name="right">The scalar value.</param>
+            <returns>The scaled vector.</returns>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.Multiply(System.Double,UltimateOrb.Numerics.Accelerated.Vector4D)">
+            <summary>Multiplies a scalar value by a specified vector.</summary>
+            <param name="left">The scaled value.</param>
+            <param name="right">The vector.</param>
+            <returns>The scaled vector.</returns>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.MultiplyAddEstimate(UltimateOrb.Numerics.Accelerated.Vector4D,UltimateOrb.Numerics.Accelerated.Vector4D,UltimateOrb.Numerics.Accelerated.Vector4D)">
+            <inheritdoc cref="M:System.Runtime.Intrinsics.Vector256.MultiplyAddEstimate(System.Runtime.Intrinsics.Vector256{System.Double},System.Runtime.Intrinsics.Vector256{System.Double},System.Runtime.Intrinsics.Vector256{System.Double})" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.Negate(UltimateOrb.Numerics.Accelerated.Vector4D)">
+            <summary>Negates a specified vector.</summary>
+            <param name="value">The vector to negate.</param>
+            <returns>The negated vector.</returns>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.Normalize(UltimateOrb.Numerics.Accelerated.Vector4D)">
+            <summary>Returns a vector with the same direction as the specified vector, but with a length of one.</summary>
+            <param name="vector">The vector to normalize.</param>
+            <returns>The normalized vector.</returns>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.RadiansToDegrees(UltimateOrb.Numerics.Accelerated.Vector4D)">
+            <inheritdoc cref="M:System.Runtime.Intrinsics.Vector256.RadiansToDegrees(System.Runtime.Intrinsics.Vector256{System.Double})" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.Round(UltimateOrb.Numerics.Accelerated.Vector4D)">
+            <inheritdoc cref="M:System.Runtime.Intrinsics.Vector256.Round(System.Runtime.Intrinsics.Vector256{System.Double})" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.Round(UltimateOrb.Numerics.Accelerated.Vector4D,System.MidpointRounding)">
+            <inheritdoc cref="M:System.Runtime.Intrinsics.Vector256.Round(System.Runtime.Intrinsics.Vector256{System.Double},System.MidpointRounding)" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.Sin(UltimateOrb.Numerics.Accelerated.Vector4D)">
+            <inheritdoc cref="M:System.Runtime.Intrinsics.Vector256.Sin(System.Runtime.Intrinsics.Vector256{System.Double})" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.SinCos(UltimateOrb.Numerics.Accelerated.Vector4D)">
+            <inheritdoc cref="M:System.Runtime.Intrinsics.Vector256.SinCos(System.Runtime.Intrinsics.Vector256{System.Double})" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.SquareRoot(UltimateOrb.Numerics.Accelerated.Vector4D)">
+            <summary>Returns a vector whose elements are the square root of each of a specified vector's elements.</summary>
+            <param name="value">A vector.</param>
+            <returns>The square root vector.</returns>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.Subtract(UltimateOrb.Numerics.Accelerated.Vector4D,UltimateOrb.Numerics.Accelerated.Vector4D)">
+            <summary>Subtracts the second vector from the first.</summary>
+            <param name="left">The first vector.</param>
+            <param name="right">The second vector.</param>
+            <returns>The difference vector.</returns>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.Transform(UltimateOrb.Numerics.Accelerated.Vector3D,UltimateOrb.Numerics.Accelerated.QuaternionD)">
+            <summary>Transforms a three-dimensional vector by the specified QuaternionD rotation value.</summary>
+            <param name="value">The vector to rotate.</param>
+            <param name="rotation">The rotation to apply.</param>
+            <returns>The transformed vector.</returns>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.Transform(UltimateOrb.Numerics.Accelerated.Vector4D,UltimateOrb.Numerics.Accelerated.QuaternionD)">
+            <summary>Transforms a four-dimensional vector by the specified QuaternionD rotation value.</summary>
+            <param name="value">The vector to rotate.</param>
+            <param name="rotation">The rotation to apply.</param>
+            <returns>The transformed vector.</returns>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.Truncate(UltimateOrb.Numerics.Accelerated.Vector4D)">
+            <inheritdoc cref="M:System.Runtime.Intrinsics.Vector256.Truncate(System.Runtime.Intrinsics.Vector256{System.Double})" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.CopyTo(System.Double[])">
+            <summary>Copies the elements of the vector to a specified array.</summary>
+            <param name="array">The destination array.</param>
+            <remarks><paramref name="array" /> must have at least four elements. The method copies the vector's elements starting at index 0.</remarks>
+            <exception cref="T:System.NullReferenceException"><paramref name="array" /> is <see langword="null" />.</exception>
+            <exception cref="T:System.ArgumentException">The number of elements in the current instance is greater than in the array.</exception>
+            <exception cref="T:System.RankException"><paramref name="array" /> is multidimensional.</exception>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.CopyTo(System.Double[],System.Int32)">
+            <summary>Copies the elements of the vector to a specified array starting at a specified index position.</summary>
+            <param name="array">The destination array.</param>
+            <param name="index">The index at which to copy the first element of the vector.</param>
+            <remarks><paramref name="array" /> must have a sufficient number of elements to accommodate the four vector elements. In other words, elements <paramref name="index" /> through <paramref name="index" /> + 3 must already exist in <paramref name="array" />.</remarks>
+            <exception cref="T:System.NullReferenceException"><paramref name="array" /> is <see langword="null" />.</exception>
+            <exception cref="T:System.ArgumentException">The number of elements in the current instance is greater than in the array.</exception>
+            <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="index" /> is less than zero.
+            -or-
+            <paramref name="index" /> is greater than or equal to the array length.</exception>
+            <exception cref="T:System.RankException"><paramref name="array" /> is multidimensional.</exception>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.CopyTo(System.Span{System.Double})">
+            <summary>Copies the vector to the given <see cref="T:System.Span`1" />. The length of the destination span must be at least 4.</summary>
+            <param name="destination">The destination span which the values are copied into.</param>
+            <exception cref="T:System.ArgumentException">If number of elements in source vector is greater than those available in destination span.</exception>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.TryCopyTo(System.Span{System.Double})">
+            <summary>Attempts to copy the vector to the given <see cref="T:System.Span`1" />. The length of the destination span must be at least 4.</summary>
+            <param name="destination">The destination span which the values are copied into.</param>
+            <returns><see langword="true" /> if the source vector was successfully copied to <paramref name="destination" />. <see langword="false" /> if <paramref name="destination" /> is not large enough to hold the source vector.</returns>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.Equals(UltimateOrb.Numerics.Accelerated.Vector4D)">
+            <summary>Returns a value that indicates whether this instance and another vector are equal.</summary>
+            <param name="other">The other vector.</param>
+            <returns><see langword="true" /> if the two vectors are equal; otherwise, <see langword="false" />.</returns>
+            <remarks>Two vectors are equal if their <see cref="P:UltimateOrb.Numerics.Accelerated.Vector4D.X" />, <see cref="P:UltimateOrb.Numerics.Accelerated.Vector4D.Y" />, <see cref="P:UltimateOrb.Numerics.Accelerated.Vector4D.Z" />, and <see cref="P:UltimateOrb.Numerics.Accelerated.Vector4D.W" /> elements are equal.</remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.Equals(System.Object)">
+            <summary>Returns a value that indicates whether this instance and a specified object are equal.</summary>
+            <param name="obj">The object to compare with the current instance.</param>
+            <returns><see langword="true" /> if the current instance and <paramref name="obj" /> are equal; otherwise, <see langword="false" />. If <paramref name="obj" /> is <see langword="null" />, the method returns <see langword="false" />.</returns>
+            <remarks>The current instance and <paramref name="obj" /> are equal if <paramref name="obj" /> is a <see cref="T:UltimateOrb.Numerics.Accelerated.Vector4D" /> object and their corresponding elements are equal.</remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.GetHashCode">
+            <summary>Returns the hash code for this instance.</summary>
+            <returns>The hash code.</returns>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.Length">
+            <summary>Returns the length of this vector object.</summary>
+            <returns>The vector's length.</returns>
+            <altmember cref="M:UltimateOrb.Numerics.Accelerated.Vector4D.LengthSquared"/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.LengthSquared">
+            <summary>Returns the length of the vector squared.</summary>
+            <returns>The vector's length squared.</returns>
+            <remarks>This operation offers better performance than a call to the <see cref="M:UltimateOrb.Numerics.Accelerated.Vector4D.Length" /> method.</remarks>
+            <altmember cref="M:UltimateOrb.Numerics.Accelerated.Vector4D.Length"/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.ToString">
+            <summary>Returns the string representation of the current instance using default formatting.</summary>
+            <returns>The string representation of the current instance.</returns>
+            <remarks>This method returns a string in which each element of the vector is formatted using the "G" (general) format string and the formatting conventions of the current thread culture. The "&lt;" and "&gt;" characters are used to begin and end the string, and the current culture's <see cref="P:System.Globalization.NumberFormatInfo.NumberGroupSeparator" /> property followed by a space is used to separate each element.</remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.ToString(System.String)">
+            <summary>Returns the string representation of the current instance using the specified format string to format individual elements.</summary>
+            <param name="format">A standard or custom numeric format string that defines the format of individual elements.</param>
+            <returns>The string representation of the current instance.</returns>
+            <remarks>This method returns a string in which each element of the vector is formatted using <paramref name="format" /> and the current culture's formatting conventions. The "&lt;" and "&gt;" characters are used to begin and end the string, and the current culture's <see cref="P:System.Globalization.NumberFormatInfo.NumberGroupSeparator" /> property followed by a space is used to separate each element.</remarks>
+            <related type="Article" href="/dotnet/standard/base-types/standard-numeric-format-strings">Standard Numeric Format Strings</related>
+            <related type="Article" href="/dotnet/standard/base-types/custom-numeric-format-strings">Custom Numeric Format Strings</related>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.ToString(System.String,System.IFormatProvider)">
+            <summary>Returns the string representation of the current instance using the specified format string to format individual elements and the specified format provider to define culture-specific formatting.</summary>
+            <param name="format">A standard or custom numeric format string that defines the format of individual elements.</param>
+            <param name="formatProvider">A format provider that supplies culture-specific formatting information.</param>
+            <returns>The string representation of the current instance.</returns>
+            <remarks>This method returns a string in which each element of the vector is formatted using <paramref name="format" /> and <paramref name="formatProvider" />. The "&lt;" and "&gt;" characters are used to begin and end the string, and the format provider's <see cref="P:System.Globalization.NumberFormatInfo.NumberGroupSeparator" /> property followed by a space is used to separate each element.</remarks>
+            <related type="Article" href="/dotnet/standard/base-types/standard-numeric-format-strings">Standard Numeric Format Strings</related>
+            <related type="Article" href="/dotnet/standard/base-types/custom-numeric-format-strings">Custom Numeric Format Strings</related>
         </member>
         <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.BitwiseAnd(System.UInt32@,System.UInt32@,System.UInt32@)">
             <inheritdoc/>

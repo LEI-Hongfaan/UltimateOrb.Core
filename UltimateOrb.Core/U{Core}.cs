@@ -239,16 +239,16 @@ namespace UltimateOrb {
         /// Compares discriminated unions.<br />
         /// Two discriminated unions are not equal if their case tags are different.<br />
         /// </summary>
-        public static bool operator ==(U<T1, T2> left, U<T1, T2> right) {
-            return left.Equals(right);
+        public static bool operator ==(U<T1, T2> first, U<T1, T2> second) {
+            return first.Equals(second);
         }
 
         /// <summary>
         /// Compares discriminated unions.<br />
         /// Two discriminated unions are not equal if their case tags are different.<br />
         /// </summary>
-        public static bool operator !=(U<T1, T2> left, U<T1, T2> right) {
-            return !(left == right);
+        public static bool operator !=(U<T1, T2> first, U<T1, T2> second) {
+            return !(first == second);
         }
     }
 }

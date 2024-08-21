@@ -11,7 +11,7 @@ namespace UltimateOrb.Utilities {
 
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         private static bool IsLongArithmeticPreferred() {
-            return SizeOfModule.SizeOf<nint>() > SizeOfModule.SizeOf<int>();
+            return SizeOfModule.SizeOf<nint>() >= SizeOfModule.SizeOf<long>();
         }
 
         [CLSCompliantAttribute(false)]
@@ -63,7 +63,7 @@ namespace UltimateOrb.Utilities {
         [PureAttribute()]
         public static bool TryAdd(int first, int second, out int result) {
             if (IsLongArithmeticPreferred()) {
-                long t = (long)first - second;
+                long t = (long)first + second;
                 result = unchecked((int)t);
                 return t == result;
             } else {

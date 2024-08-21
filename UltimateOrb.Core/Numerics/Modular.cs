@@ -329,18 +329,20 @@ namespace UltimateOrb.Numerics
             return m_value.Equals(other.m_value);
         }
 
-        static bool INumberBase<Modular<T, ModulusT>>.TryConvertFromChecked<TOther>(TOther value, out Modular<T, ModulusT> result) {
-
+        static bool TryConvertFrom<TOther>(TOther value, out Modular<T, ModulusT> result) {
             throw new NotImplementedException();
+        }
+
+        static bool INumberBase<Modular<T, ModulusT>>.TryConvertFromChecked<TOther>(TOther value, out Modular<T, ModulusT> result) {
+            return TryConvertFrom(value, out result);
         }
 
         static bool INumberBase<Modular<T, ModulusT>>.TryConvertFromSaturating<TOther>(TOther value, out Modular<T, ModulusT> result) {
-
-            throw new NotImplementedException();
+            return TryConvertFrom(value, out result);
         }
 
         static bool INumberBase<Modular<T, ModulusT>>.TryConvertFromTruncating<TOther>(TOther value, out Modular<T, ModulusT> result) {
-            throw new NotImplementedException();
+            return TryConvertFrom(value, out result);
         }
 
         static bool INumberBase<Modular<T, ModulusT>>.TryConvertToChecked<TOther>(Modular<T, ModulusT> value, out TOther result) {
@@ -356,7 +358,7 @@ namespace UltimateOrb.Numerics
         }
 
         public static bool operator ==(Modular<T, ModulusT> first, Modular<T, ModulusT> second) {
-            return first.Equals(second);
+            return first.m_value == second.m_value;
         }
 
         public static bool operator !=(Modular<T, ModulusT> first, Modular<T, ModulusT> second) {

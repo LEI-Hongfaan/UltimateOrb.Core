@@ -372,12 +372,12 @@ foreach (var item in items) {
             info.AddValue(nameof(m_value), StandardValue);
         }
 
-        public static bool operator ==(<#= TypeName #> left, <#= TypeName #> right) {
-            return left.Equals(right);
+        public static bool operator ==(<#= TypeName #> first, <#= TypeName #> second) {
+            return first.Equals(second);
         }
 
-        public static bool operator !=(<#= TypeName #> left, <#= TypeName #> right) {
-            return !(left == right);
+        public static bool operator !=(<#= TypeName #> first, <#= TypeName #> second) {
+            return !(first == second);
         }
     }
 <#

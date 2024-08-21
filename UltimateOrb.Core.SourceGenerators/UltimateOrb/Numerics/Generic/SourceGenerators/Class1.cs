@@ -19,7 +19,7 @@ namespace UltimateOrb.Core.SourceGenerators.UltimateOrb.Numerics.Generic {
     public class BinaryIntegerInterfaceGenerator : IIncrementalGenerator {
         public void Initialize(IncrementalGeneratorInitializationContext context) {
             var assemblyAttributes = context.SyntaxProvider
-                .ForAttributeWithMetadataName("Ultimate.Core.SourceGenerators.GenerateUltimateOrbCoreSourceCodeAttribute",
+                .ForAttributeWithMetadataName("UltimateOrb.Core.SourceGenerators.GenerateUltimateOrbCoreSourceCodeAttribute",
                     predicate: (node, _) => node is AttributeSyntax,
                     transform: (context, _) => {
                         return context.TargetNode;
@@ -32,7 +32,7 @@ namespace UltimateOrb.Core.SourceGenerators.UltimateOrb.Numerics.Generic {
                 var source = $$$"""
 using System;
 
-namespace Ultimate.Core.SourceGenerators {
+namespace UltimateOrb.Core.SourceGenerators {
     [AttributeUsage(AttributeTargets.Assembly)]
     public class GenerateUltimateOrbCoreSourceCodeAttribute : Attribute {
     }

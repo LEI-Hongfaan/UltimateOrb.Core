@@ -9,7 +9,7 @@ using static UltimateOrb.Utilities.Extensions.CanonicalIntegerBooleanExtensions;
 namespace UltimateOrb {
     using TIntT = UInt64;
 
-    public static partial class MathWithCarrying {
+    static partial class MathWithOverflow {
 
         public static void IncreaseUnchecked(TIntT value, out TIntT result) {
             result = unchecked(value + (TIntT)1);

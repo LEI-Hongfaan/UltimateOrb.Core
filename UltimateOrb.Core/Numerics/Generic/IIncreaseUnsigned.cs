@@ -18,7 +18,7 @@ namespace UltimateOrb.Numerics.Generic {
     public struct TIntegerArithmaticPrimtive : IIntegerArithmatic<Void, ulong> {
 
         public CanonicalIntegerBoolean AddUnsignedNoThrow(CanonicalIntegerBoolean carry, in ulong first, in ulong second, out ulong result) {
-            return MathWithCarrying.AddUnsigned(carry, first, second, out result);
+            return MathWithOverflow.AddUnsigned(carry, first, second, out result);
         }
 
         public void BigMul(in ulong first, in ulong second, out ulong result_lo, out ulong result_hi) {
@@ -35,7 +35,7 @@ namespace UltimateOrb.Numerics.Generic {
         }
 
         public CanonicalIntegerBoolean SubtractUnsignedNoThrow(CanonicalIntegerBoolean carry, in ulong first, in ulong second, out ulong result) {
-            return MathWithCarrying.SubtractUnsigned(carry, first, second, out result);
+            return MathWithOverflow.SubtractUnsigned(carry, first, second, out result);
         }
 
         public void ToIntegerUnchecked(uint value, out ulong result) {

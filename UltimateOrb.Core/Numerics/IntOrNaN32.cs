@@ -333,10 +333,10 @@ namespace UltimateOrb.Numerics {
 
 
         /// <inheritdoc cref="IAdditionOperators{TSelf, TOther, TResult}.op_Addition(TSelf, TOther)" />
-        static IntOrNaN32 IAdditionOperators<IntOrNaN32, IntOrNaN32, IntOrNaN32>.operator +(IntOrNaN32 left, IntOrNaN32 right) => left + right;
+        static IntOrNaN32 IAdditionOperators<IntOrNaN32, IntOrNaN32, IntOrNaN32>.operator +(IntOrNaN32 first, IntOrNaN32 second) => first + second;
 
         /// <inheritdoc cref="IAdditionOperators{TSelf, TOther, TResult}.op_Addition(TSelf, TOther)" />
-        static IntOrNaN32 IAdditionOperators<IntOrNaN32, IntOrNaN32, IntOrNaN32>.operator checked +(IntOrNaN32 left, IntOrNaN32 right) => checked(left + right);
+        static IntOrNaN32 IAdditionOperators<IntOrNaN32, IntOrNaN32, IntOrNaN32>.operator checked +(IntOrNaN32 first, IntOrNaN32 second) => checked(first + second);
         
         /// <inheritdoc cref="IAdditiveIdentity{TSelf, TResult}.AdditiveIdentity" />
         static IntOrNaN32 IAdditiveIdentity<IntOrNaN32, IntOrNaN32>.AdditiveIdentity => default;
@@ -412,28 +412,28 @@ namespace UltimateOrb.Numerics {
         }
 
         /// <inheritdoc cref="IBitwiseOperators{TSelf, TOther, TResult}.op_BitwiseAnd(TSelf, TOther)" />
-        static IntOrNaN32 IBitwiseOperators<IntOrNaN32, IntOrNaN32, IntOrNaN32>.operator &(IntOrNaN32 left, IntOrNaN32 right) => left & right;
+        static IntOrNaN32 IBitwiseOperators<IntOrNaN32, IntOrNaN32, IntOrNaN32>.operator &(IntOrNaN32 first, IntOrNaN32 second) => first & second;
 
         /// <inheritdoc cref="IBitwiseOperators{TSelf, TOther, TResult}.op_BitwiseOr(TSelf, TOther)" />
-        static IntOrNaN32 IBitwiseOperators<IntOrNaN32, IntOrNaN32, IntOrNaN32>.operator |(IntOrNaN32 left, IntOrNaN32 right) => left | right;
+        static IntOrNaN32 IBitwiseOperators<IntOrNaN32, IntOrNaN32, IntOrNaN32>.operator |(IntOrNaN32 first, IntOrNaN32 second) => first | second;
 
         /// <inheritdoc cref="IBitwiseOperators{TSelf, TOther, TResult}.op_ExclusiveOr(TSelf, TOther)" />
-        static IntOrNaN32 IBitwiseOperators<IntOrNaN32, IntOrNaN32, IntOrNaN32>.operator ^(IntOrNaN32 left, IntOrNaN32 right) => left ^ right;
+        static IntOrNaN32 IBitwiseOperators<IntOrNaN32, IntOrNaN32, IntOrNaN32>.operator ^(IntOrNaN32 first, IntOrNaN32 second) => first ^ second;
 
         /// <inheritdoc cref="IBitwiseOperators{TSelf, TOther, TResult}.op_OnesComplement(TSelf)" />
         static IntOrNaN32 IBitwiseOperators<IntOrNaN32, IntOrNaN32, IntOrNaN32>.operator ~(IntOrNaN32 value) => ~value;
 
         /// <inheritdoc cref="IComparisonOperators{TSelf, TOther, TResult}.op_LessThan(TSelf, TOther)" />
-        static bool IComparisonOperators<IntOrNaN32, IntOrNaN32, bool>.operator <(IntOrNaN32 left, IntOrNaN32 right) => left < right;
+        static bool IComparisonOperators<IntOrNaN32, IntOrNaN32, bool>.operator <(IntOrNaN32 first, IntOrNaN32 second) => first < second;
 
         /// <inheritdoc cref="IComparisonOperators{TSelf, TOther, TResult}.op_LessThanOrEqual(TSelf, TOther)" />
-        static bool IComparisonOperators<IntOrNaN32, IntOrNaN32, bool>.operator <=(IntOrNaN32 left, IntOrNaN32 right) => left <= right;
+        static bool IComparisonOperators<IntOrNaN32, IntOrNaN32, bool>.operator <=(IntOrNaN32 first, IntOrNaN32 second) => first <= second;
 
         /// <inheritdoc cref="IComparisonOperators{TSelf, TOther, TResult}.op_GreaterThan(TSelf, TOther)" />
-        static bool IComparisonOperators<IntOrNaN32, IntOrNaN32, bool>.operator >(IntOrNaN32 left, IntOrNaN32 right) => left > right;
+        static bool IComparisonOperators<IntOrNaN32, IntOrNaN32, bool>.operator >(IntOrNaN32 first, IntOrNaN32 second) => first > second;
 
         /// <inheritdoc cref="IComparisonOperators{TSelf, TOther, TResult}.op_GreaterThanOrEqual(TSelf, TOther)" />
-        static bool IComparisonOperators<IntOrNaN32, IntOrNaN32, bool>.operator >=(IntOrNaN32 left, IntOrNaN32 right) => left >= right;
+        static bool IComparisonOperators<IntOrNaN32, IntOrNaN32, bool>.operator >=(IntOrNaN32 first, IntOrNaN32 second) => first >= second;
 
         /// <inheritdoc cref="IDecrementOperators{TSelf}.op_Decrement(TSelf)" />
         static IntOrNaN32 IDecrementOperators<IntOrNaN32>.operator --(IntOrNaN32 value) => --value;
@@ -446,17 +446,17 @@ namespace UltimateOrb.Numerics {
         //
 
         /// <inheritdoc cref="IDivisionOperators{TSelf, TOther, TResult}.op_Division(TSelf, TOther)" />
-        static IntOrNaN32 IDivisionOperators<IntOrNaN32, IntOrNaN32, IntOrNaN32>.operator /(int left, int right) => left / right;
+        static IntOrNaN32 IDivisionOperators<IntOrNaN32, IntOrNaN32, IntOrNaN32>.operator /(int first, int second) => first / second;
 
         //
         // IEqualityOperators
         //
 
         /// <inheritdoc cref="IEqualityOperators{TSelf, TOther, TResult}.op_Equality(TSelf, TOther)" />
-        static bool IEqualityOperators<int, int, bool>.operator ==(int left, int right) => left == right;
+        static bool IEqualityOperators<int, int, bool>.operator ==(int first, int second) => first == second;
 
         /// <inheritdoc cref="IEqualityOperators{TSelf, TOther, TResult}.op_Inequality(TSelf, TOther)" />
-        static bool IEqualityOperators<int, int, bool>.operator !=(int left, int right) => left != right;
+        static bool IEqualityOperators<int, int, bool>.operator !=(int first, int second) => first != second;
 
         //
         // IIncrementOperators
@@ -483,7 +483,7 @@ namespace UltimateOrb.Numerics {
         //
 
         /// <inheritdoc cref="IModulusOperators{TSelf, TOther, TResult}.op_Modulus(TSelf, TOther)" />
-        static int IModulusOperators<int, int, int>.operator %(int left, int right) => left % right;
+        static int IModulusOperators<int, int, int>.operator %(int first, int second) => first % second;
 
         //
         // IMultiplicativeIdentity
@@ -497,10 +497,10 @@ namespace UltimateOrb.Numerics {
         //
 
         /// <inheritdoc cref="IMultiplyOperators{TSelf, TOther, TResult}.op_Multiply(TSelf, TOther)" />
-        static int IMultiplyOperators<int, int, int>.operator *(int left, int right) => left * right;
+        static int IMultiplyOperators<int, int, int>.operator *(int first, int second) => first * second;
 
         /// <inheritdoc cref="IMultiplyOperators{TSelf, TOther, TResult}.op_CheckedMultiply(TSelf, TOther)" />
-        static int IMultiplyOperators<int, int, int>.operator checked *(int left, int right) => checked(left * right);
+        static int IMultiplyOperators<int, int, int>.operator checked *(int first, int second) => checked(first * second);
 
         //
         // INumber
@@ -728,7 +728,7 @@ namespace UltimateOrb.Numerics {
         static IntOrNaN32 INumberBase<IntOrNaN32>.MinMagnitudeNumber(IntOrNaN32 x, IntOrNaN32 y) => ;
 
         /// <inheritdoc cref="INumberBase{TSelf}.MultiplyAddEstimate(TSelf, TSelf, TSelf)" />
-        static IntOrNaN32 INumberBase<IntOrNaN32>.MultiplyAddEstimate(IntOrNaN32 left, IntOrNaN32 right, IntOrNaN32 addend) => (left.m_value * right.m_value) + addend.m_value;
+        static IntOrNaN32 INumberBase<IntOrNaN32>.MultiplyAddEstimate(IntOrNaN32 first, IntOrNaN32 second, IntOrNaN32 addend) => (first.m_value * second.m_value) + addend.m_value;
 
         /// <inheritdoc cref="INumberBase{TSelf}.TryConvertFromChecked{TOther}(TOther, out TSelf)" />
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1083,15 +1083,15 @@ namespace UltimateOrb.Numerics {
         public static bool TryParse(ReadOnlySpan<char> s, IFormatProvider? provider, out IntOrNaN32 result) => TryParse(s, NumberStyles.Integer, provider, out result);
 
         /// <inheritdoc cref="ISubtractionOperators{TSelf, TOther, TResult}.op_Subtraction(TSelf, TOther)" />
-        public static IntOrNaN32 operator /*unchecked */-(IntOrNaN32 left, IntOrNaN32 right) {
-            if (IsNaN(left) || IsNaN(right)) {
+        public static IntOrNaN32 operator /*unchecked */-(IntOrNaN32 first, IntOrNaN32 second) {
+            if (IsNaN(first) || IsNaN(second)) {
                 return NaN;
             }
-            return new IntOrNaN32(!CheckedNoThrow.TrySubtract(left.m_value, right.m_value, out var v) ? NaNBits : v, default(NoCheck));
+            return new IntOrNaN32(!CheckedNoThrow.TrySubtract(first.m_value, second.m_value, out var v) ? NaNBits : v, default(NoCheck));
         }
 
         /// <inheritdoc cref="ISubtractionOperators{TSelf, TOther, TResult}.op_CheckedSubtraction(TSelf, TOther)" />
-        public static IntOrNaN32 operator checked -(IntOrNaN32 left, IntOrNaN32 right) => unchecked(left - right);
+        public static IntOrNaN32 operator checked -(IntOrNaN32 first, IntOrNaN32 second) => unchecked(first - second);
 
         /// <inheritdoc cref="IUnaryNegationOperators{TSelf, TResult}.op_UnaryNegation(TSelf)" />
         public static IntOrNaN32 operator /*unchecked */-(IntOrNaN32 value) => new IntOrNaN32(unchecked(-value.m_value), default(NoCheck));

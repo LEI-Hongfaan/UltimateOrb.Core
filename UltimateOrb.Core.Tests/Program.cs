@@ -283,7 +283,7 @@ namespace UltimateOrb.Core.Tests {
                 {
                     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
                     static void aaaa() {
-                        var afa = new UltimateOrb.Numerics.QuaternionD(101, 102, 103, 104);
+                        var afa = new UltimateOrb.Numerics.QuaternionD(101, 102, 103, (double)104);
                         Console.WriteLine(afa.X);
                     }
                     aaaa();

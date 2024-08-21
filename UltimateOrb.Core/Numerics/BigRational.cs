@@ -886,43 +886,43 @@ namespace UltimateOrb.Numerics {
             return value.m_SignedNumerator.IsZero ? BigRational.MinusOne : new BigRational(value.m_Denominator, value.m_SignedNumerator - value.m_Denominator);
         }
 
-        public static BigRational DivideEuclidean(BigRational left, BigRational right) {
-            if (right.m_SignedNumerator.IsZero) {
+        public static BigRational DivideEuclidean(BigRational first, BigRational second) {
+            if (second.m_SignedNumerator.IsZero) {
                 _ = Default<int>.Value / 0;
             }
-            if (left.m_SignedNumerator.IsZero) {
+            if (first.m_SignedNumerator.IsZero) {
                 return Zero;
             }
-            return (left.m_SignedNumerator * right.Denominator) / (left.Denominator * right.m_SignedNumerator);
+            return (first.m_SignedNumerator * second.Denominator) / (first.Denominator * second.m_SignedNumerator);
         }
 
-        public static BigRational operator %(BigRational left, BigRational right) {
-            if (right.m_SignedNumerator.IsZero) {
+        public static BigRational operator %(BigRational first, BigRational second) {
+            if (second.m_SignedNumerator.IsZero) {
                 _ = Default<int>.Value / 0;
             }
-            if (left.m_SignedNumerator.IsZero) {
+            if (first.m_SignedNumerator.IsZero) {
                 return Zero;
             }
-            var p = (left.m_SignedNumerator * right.Denominator) % (left.Denominator * right.m_SignedNumerator);
-            var q = left.Denominator * right.Denominator;
+            var p = (first.m_SignedNumerator * second.Denominator) % (first.Denominator * second.m_SignedNumerator);
+            var q = first.Denominator * second.Denominator;
             var d = BigInteger.GreatestCommonDivisor(q, p);
             return new BigRational(q / d, p / d);
         }
 
-        public static bool operator <(BigRational left, BigRational right) {
-            return left.CompareTo(right) < 0;
+        public static bool operator <(BigRational first, BigRational second) {
+            return first.CompareTo(second) < 0;
         }
 
-        public static bool operator >(BigRational left, BigRational right) {
-            return left.CompareTo(right) > 0;
+        public static bool operator >(BigRational first, BigRational second) {
+            return first.CompareTo(second) > 0;
         }
 
-        public static bool operator <=(BigRational left, BigRational right) {
-            return left.CompareTo(right) <= 0;
+        public static bool operator <=(BigRational first, BigRational second) {
+            return first.CompareTo(second) <= 0;
         }
 
-        public static bool operator >=(BigRational left, BigRational right) {
-            return left.CompareTo(right) >= 0;
+        public static bool operator >=(BigRational first, BigRational second) {
+            return first.CompareTo(second) >= 0;
         }
     }
 }

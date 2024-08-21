@@ -5,10 +5,21 @@ using System.Linq;
 namespace UltimateOrb.Linq {
 
     /// <inheritdoc cref="Enumerable"/>
-    public static partial class EnumerableExtenstions {
+    public static partial class EnumerableExtensions {
 
         /// <inheritdoc cref="Enumerable.Skip"/>
         public static IEnumerable<T> Skip<T>(this IEnumerable<T> source, long count) {
+            if (source is null) {
+                throw new ArgumentNullException(nameof(source));
+            }
+            if (count <= int.MaxValue) {
+                return Enumerable.Skip(source, unchecked((int)count));
+            }
+            return source.Skip_A_Stub0001(count); 
+        }
+
+        /// <inheritdoc cref="Enumerable.Skip"/>
+        public static IEnumerable<T> Skip_A<T>(this IEnumerable<T> source, long count) {
             if (source is null) {
                 throw new ArgumentNullException(nameof(source));
             }
@@ -23,17 +34,6 @@ namespace UltimateOrb.Linq {
                 c -= n;
             } while (c > n);
             return Enumerable.Skip(s, n);
-        }
-
-        /// <inheritdoc cref="Enumerable.Skip"/>
-        public static IEnumerable<T> Skip_A<T>(this IEnumerable<T> source, long count) {
-            if (source is null) {
-                throw new ArgumentNullException(nameof(source));
-            }
-            if (count <= int.MaxValue) {
-                return Enumerable.Skip(source, unchecked((int)count));
-            }
-            return source.Skip_A_Stub0001(count);
         }
 
         static IEnumerable<T> Skip_A_Stub0001<T>(this IEnumerable<T> source, long count) {

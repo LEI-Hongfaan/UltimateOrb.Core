@@ -501,15 +501,15 @@ namespace UltimateOrb {
         /// <summary>
         /// Compares two <see cref="CanonicalIntegerBoolean"/> values.
         /// </summary>
-        public static bool operator ==(CanonicalIntegerBoolean left, CanonicalIntegerBoolean right) {
-            return left.Equals(right);
+        public static bool operator ==(CanonicalIntegerBoolean first, CanonicalIntegerBoolean second) {
+            return first.Equals(second);
         }
 
         /// <summary>
         /// Compares two <see cref="CanonicalIntegerBoolean"/> values.
         /// </summary>
-        public static bool operator !=(CanonicalIntegerBoolean left, CanonicalIntegerBoolean right) {
-            return !(left == right);
+        public static bool operator !=(CanonicalIntegerBoolean first, CanonicalIntegerBoolean second) {
+            return !(first == second);
         }
     }
 }

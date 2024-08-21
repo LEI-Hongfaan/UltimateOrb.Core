@@ -360,27 +360,27 @@ namespace UltimateOrb {
 
         /// <inheritdoc cref="IEqualityOperators{TSelf, TOther, TResult}.op_Equality(TSelf, TOther)" />
         //[NonVersionable]
-        public static bool operator ==(NaNDefaultedDouble left, NaNDefaultedDouble right) => left.Value == right.Value;
+        public static bool operator ==(NaNDefaultedDouble first, NaNDefaultedDouble second) => first.Value == second.Value;
 
         /// <inheritdoc cref="IEqualityOperators{TSelf, TOther, TResult}.op_Inequality(TSelf, TOther)" />
         //[NonVersionable]
-        public static bool operator !=(NaNDefaultedDouble left, NaNDefaultedDouble right) => left.Value != right.Value;
+        public static bool operator !=(NaNDefaultedDouble first, NaNDefaultedDouble second) => first.Value != second.Value;
 
         /// <inheritdoc cref="IComparisonOperators{TSelf, TOther, TResult}.op_LessThan(TSelf, TOther)" />
         //[NonVersionable]
-        public static bool operator <(NaNDefaultedDouble left, NaNDefaultedDouble right) => left.Value < right.Value;
+        public static bool operator <(NaNDefaultedDouble first, NaNDefaultedDouble second) => first.Value < second.Value;
 
         /// <inheritdoc cref="IComparisonOperators{TSelf, TOther, TResult}.op_GreaterThan(TSelf, TOther)" />
         //[NonVersionable]
-        public static bool operator >(NaNDefaultedDouble left, NaNDefaultedDouble right) => left.Value > right.Value;
+        public static bool operator >(NaNDefaultedDouble first, NaNDefaultedDouble second) => first.Value > second.Value;
 
         /// <inheritdoc cref="IComparisonOperators{TSelf, TOther, TResult}.op_LessThanOrEqual(TSelf, TOther)" />
         //[NonVersionable]
-        public static bool operator <=(NaNDefaultedDouble left, NaNDefaultedDouble right) => left.Value <= right.Value;
+        public static bool operator <=(NaNDefaultedDouble first, NaNDefaultedDouble second) => first.Value <= second.Value;
 
         /// <inheritdoc cref="IComparisonOperators{TSelf, TOther, TResult}.op_GreaterThanOrEqual(TSelf, TOther)" />
         //[NonVersionable]
-        public static bool operator >=(NaNDefaultedDouble left, NaNDefaultedDouble right) => left.Value >= right.Value;
+        public static bool operator >=(NaNDefaultedDouble first, NaNDefaultedDouble second) => first.Value >= second.Value;
 
         /// <inheritdoc cref="Double.Equals(Double)" />
         public bool Equals(NaNDefaultedDouble obj) {
@@ -574,7 +574,7 @@ namespace UltimateOrb {
         //
 
         /// <inheritdoc cref="IAdditionOperators{TSelf, TOther, TResult}.op_Addition(TSelf, TOther)" />
-        static NaNDefaultedDouble IAdditionOperators<NaNDefaultedDouble, NaNDefaultedDouble, NaNDefaultedDouble>.operator +(NaNDefaultedDouble left, NaNDefaultedDouble right) => left.Value + right.Value;
+        static NaNDefaultedDouble IAdditionOperators<NaNDefaultedDouble, NaNDefaultedDouble, NaNDefaultedDouble>.operator +(NaNDefaultedDouble first, NaNDefaultedDouble second) => first.Value + second.Value;
 
         //
         // IAdditiveIdentity
@@ -610,18 +610,18 @@ namespace UltimateOrb {
         //
 
         /// <inheritdoc cref="IBitwiseOperators{TSelf, TOther, TResult}.op_BitwiseAnd(TSelf, TOther)" />
-        static NaNDefaultedDouble IBitwiseOperators<NaNDefaultedDouble, NaNDefaultedDouble, NaNDefaultedDouble>.operator &(NaNDefaultedDouble left, NaNDefaultedDouble right) {
-            return new NaNDefaultedDouble(left.bits & right.bits);
+        static NaNDefaultedDouble IBitwiseOperators<NaNDefaultedDouble, NaNDefaultedDouble, NaNDefaultedDouble>.operator &(NaNDefaultedDouble first, NaNDefaultedDouble second) {
+            return new NaNDefaultedDouble(first.bits & second.bits);
         }
 
         /// <inheritdoc cref="IBitwiseOperators{TSelf, TOther, TResult}.op_BitwiseOr(TSelf, TOther)" />
-        static NaNDefaultedDouble IBitwiseOperators<NaNDefaultedDouble, NaNDefaultedDouble, NaNDefaultedDouble>.operator |(NaNDefaultedDouble left, NaNDefaultedDouble right) {
-            return new NaNDefaultedDouble(left.bits | right.bits);
+        static NaNDefaultedDouble IBitwiseOperators<NaNDefaultedDouble, NaNDefaultedDouble, NaNDefaultedDouble>.operator |(NaNDefaultedDouble first, NaNDefaultedDouble second) {
+            return new NaNDefaultedDouble(first.bits | second.bits);
         }
 
         /// <inheritdoc cref="IBitwiseOperators{TSelf, TOther, TResult}.op_ExclusiveOr(TSelf, TOther)" />
-        static NaNDefaultedDouble IBitwiseOperators<NaNDefaultedDouble, NaNDefaultedDouble, NaNDefaultedDouble>.operator ^(NaNDefaultedDouble left, NaNDefaultedDouble right) {
-            return new NaNDefaultedDouble(left.bits ^ right.bits);
+        static NaNDefaultedDouble IBitwiseOperators<NaNDefaultedDouble, NaNDefaultedDouble, NaNDefaultedDouble>.operator ^(NaNDefaultedDouble first, NaNDefaultedDouble second) {
+            return new NaNDefaultedDouble(first.bits ^ second.bits);
         }
 
         /// <inheritdoc cref="IBitwiseOperators{TSelf, TOther, TResult}.op_OnesComplement(TSelf)" />
@@ -641,7 +641,7 @@ namespace UltimateOrb {
         //
 
         /// <inheritdoc cref="IDivisionOperators{TSelf, TOther, TResult}.op_Division(TSelf, TOther)" />
-        static NaNDefaultedDouble IDivisionOperators<NaNDefaultedDouble, NaNDefaultedDouble, NaNDefaultedDouble>.operator /(NaNDefaultedDouble left, NaNDefaultedDouble right) => left.Value / right.Value;
+        static NaNDefaultedDouble IDivisionOperators<NaNDefaultedDouble, NaNDefaultedDouble, NaNDefaultedDouble>.operator /(NaNDefaultedDouble first, NaNDefaultedDouble second) => first.Value / second.Value;
 
         //
         // IExponentialFunctions
@@ -831,10 +831,10 @@ namespace UltimateOrb {
         public static NaNDefaultedDouble BitIncrement(NaNDefaultedDouble x) => Math.BitIncrement(x);
 
         /// <inheritdoc cref="IFloatingPointIeee754{TSelf}.FusedMultiplyAdd(TSelf, TSelf, TSelf)" />
-        public static NaNDefaultedDouble FusedMultiplyAdd(NaNDefaultedDouble left, NaNDefaultedDouble right, NaNDefaultedDouble addend) => Math.FusedMultiplyAdd(left, right, addend);
+        public static NaNDefaultedDouble FusedMultiplyAdd(NaNDefaultedDouble first, NaNDefaultedDouble second, NaNDefaultedDouble addend) => Math.FusedMultiplyAdd(first, second, addend);
 
         /// <inheritdoc cref="IFloatingPointIeee754{TSelf}.Ieee754Remainder(TSelf, TSelf)" />
-        public static NaNDefaultedDouble Ieee754Remainder(NaNDefaultedDouble left, NaNDefaultedDouble right) => Math.IEEERemainder(left, right);
+        public static NaNDefaultedDouble Ieee754Remainder(NaNDefaultedDouble first, NaNDefaultedDouble second) => Math.IEEERemainder(first, second);
 
         /// <inheritdoc cref="IFloatingPointIeee754{TSelf}.ILogB(TSelf)" />
         public static int ILogB(NaNDefaultedDouble x) => Math.ILogB(x);
@@ -917,7 +917,7 @@ namespace UltimateOrb {
         //
 
         /// <inheritdoc cref="IModulusOperators{TSelf, TOther, TResult}.op_Modulus(TSelf, TOther)" />
-        static NaNDefaultedDouble IModulusOperators<NaNDefaultedDouble, NaNDefaultedDouble, NaNDefaultedDouble>.operator %(NaNDefaultedDouble left, NaNDefaultedDouble right) => left.Value % right.Value;
+        static NaNDefaultedDouble IModulusOperators<NaNDefaultedDouble, NaNDefaultedDouble, NaNDefaultedDouble>.operator %(NaNDefaultedDouble first, NaNDefaultedDouble second) => first.Value % second.Value;
 
         //
         // IMultiplicativeIdentity
@@ -931,7 +931,7 @@ namespace UltimateOrb {
         //
 
         /// <inheritdoc cref="IMultiplyOperators{TSelf, TOther, TResult}.op_Multiply(TSelf, TOther)" />
-        static NaNDefaultedDouble IMultiplyOperators<NaNDefaultedDouble, NaNDefaultedDouble, NaNDefaultedDouble>.operator *(NaNDefaultedDouble left, NaNDefaultedDouble right) => left.Value * right.Value;
+        static NaNDefaultedDouble IMultiplyOperators<NaNDefaultedDouble, NaNDefaultedDouble, NaNDefaultedDouble>.operator *(NaNDefaultedDouble first, NaNDefaultedDouble second) => first.Value * second.Value;
 
         //
         // INumber
@@ -1352,7 +1352,7 @@ namespace UltimateOrb {
         //
 
         /// <inheritdoc cref="ISubtractionOperators{TSelf, TOther, TResult}.op_Subtraction(TSelf, TOther)" />
-        static NaNDefaultedDouble ISubtractionOperators<NaNDefaultedDouble, NaNDefaultedDouble, NaNDefaultedDouble>.operator -(NaNDefaultedDouble left, NaNDefaultedDouble right) => left.Value - right.Value;
+        static NaNDefaultedDouble ISubtractionOperators<NaNDefaultedDouble, NaNDefaultedDouble, NaNDefaultedDouble>.operator -(NaNDefaultedDouble first, NaNDefaultedDouble second) => first.Value - second.Value;
 
         //
         // ITrigonometricFunctions

@@ -12,8 +12,11 @@ namespace UltimateOrb.Numerics.BigIntegerWrappers {
 
     [Serializable]
     [CLSCompliant(false)]
-    public readonly struct UInt<TBitSize>
-        where TBitSize : struct, IConstantDataType<int> {
+    public readonly struct UInt<TBitSize> :
+        IMinMaxValue<UInt<TBitSize>>
+        where TBitSize :
+            struct,
+            IConstantDataType<int> {
 
         readonly BigInteger Value;
 
@@ -27,13 +30,13 @@ namespace UltimateOrb.Numerics.BigIntegerWrappers {
             }
         }
 
-        public UInt<TBitSize> MinValue {
+        public static UInt<TBitSize> MinValue {
 
             [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
             get => new UInt<TBitSize>(MinValueAsBigInteger, default(Plain));
         }
 
-        public UInt<TBitSize> MaxValue {
+        public static UInt<TBitSize> MaxValue {
 
             [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
             get => new UInt<TBitSize>(MinValueAsBigInteger, default(Plain));
@@ -63,8 +66,6 @@ namespace UltimateOrb.Numerics.BigIntegerWrappers {
         }
 
         static UInt<TBitSize> Unchecked(BigInteger Value) {
-
-
             return new UInt<TBitSize>(Value, default(Unchecked));
         }
 

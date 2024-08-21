@@ -394,7 +394,7 @@ namespace UltimateOrb.Numerics {
 
         public static QuaternionD Identity {
 
-            get => new QuaternionD(0, 0, 0, 1);
+            get => new QuaternionD(0, 0, 0, (double)1);
         }
 
         ref QuaternionD @this {
@@ -1105,11 +1105,7 @@ namespace UltimateOrb.Numerics {
     [Discardable()]
     public static partial class StandardExtensionsD {
 
-
-
-
-
-        public static void ExtractRotationIntrinsicYXZ(this Quaternion r, out float yaw, out float pitch, out float roll) {
+        public static void ExtractRotationIntrinsicYXZ(this QuaternionD r, out float yaw, out float pitch, out float roll) {
             double x = r.X;
             double y = r.Y;
             double z = r.Z;
@@ -1175,7 +1171,7 @@ namespace UltimateOrb.Numerics {
 
         public static Vector3 ExtractRotationIntrinsicYXZ(this Quaternion r) {
             Vector3 result;
-            StandardExtensionsD.ExtractRotationIntrinsicYXZ(r, out result.X, out result.Y, out result.Z);
+            StandardExtensionsD.ExtractRotationIntrinsicYXZ(new QuaternionD(r.X, r.Y, r.Z, r.W), out result.X, out result.Y, out result.Z);
             return result;
         }
 

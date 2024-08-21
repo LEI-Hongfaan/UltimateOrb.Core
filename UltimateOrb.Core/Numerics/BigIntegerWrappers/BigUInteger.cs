@@ -180,24 +180,24 @@ namespace UltimateOrb.Numerics.BigIntegerWrappers {
             }
         }
 
-        public static int Compare(BigUInteger left, BigUInteger right) {
-            return left.CompareTo(right);
+        public static int Compare(BigUInteger first, BigUInteger second) {
+            return first.CompareTo(second);
         }
 
         public static BigUInteger Abs(BigUInteger value) {
             return value;
         }
 
-        public static BigUInteger Add(BigUInteger left, BigUInteger right) {
-            return left + right;
+        public static BigUInteger Add(BigUInteger first, BigUInteger second) {
+            return first + second;
         }
 
-        public static BigUInteger Subtract(BigUInteger left, BigUInteger right) {
-            return left - right;
+        public static BigUInteger Subtract(BigUInteger first, BigUInteger second) {
+            return first - second;
         }
 
-        public static BigUInteger Multiply(BigUInteger left, BigUInteger right) {
-            return left * right;
+        public static BigUInteger Multiply(BigUInteger first, BigUInteger second) {
+            return first * second;
         }
 
         public static BigUInteger Divide(BigUInteger dividend, BigUInteger divisor) {
@@ -232,20 +232,20 @@ namespace UltimateOrb.Numerics.BigIntegerWrappers {
             return BigInteger.Log(value.m_value, 10);
         }
 
-        public static BigUInteger GreatestCommonDivisor(BigUInteger left, BigUInteger right) {
-            return new BigUInteger(BigInteger.GreatestCommonDivisor(left.m_value, right.m_value));
+        public static BigUInteger GreatestCommonDivisor(BigUInteger first, BigUInteger second) {
+            return new BigUInteger(BigInteger.GreatestCommonDivisor(first.m_value, second.m_value));
         }
 
-        public static BigUInteger Max(BigUInteger left, BigUInteger right) {
-            if (left.CompareTo(right) < 0)
-                return right;
-            return left;
+        public static BigUInteger Max(BigUInteger first, BigUInteger second) {
+            if (first.CompareTo(second) < 0)
+                return second;
+            return first;
         }
 
-        public static BigUInteger Min(BigUInteger left, BigUInteger right) {
-            if (left.CompareTo(right) <= 0)
-                return left;
-            return right;
+        public static BigUInteger Min(BigUInteger first, BigUInteger second) {
+            if (first.CompareTo(second) <= 0)
+                return first;
+            return second;
         }
 
         public static BigUInteger ModPow(BigUInteger value, BigUInteger exponent, BigUInteger modulus) {
@@ -439,12 +439,12 @@ namespace UltimateOrb.Numerics.BigIntegerWrappers {
             }
         }
 
-        public static BigUInteger operator checked -(BigUInteger left, BigUInteger right) {
-            return new BigUInteger(left.m_value - right.m_value);
+        public static BigUInteger operator checked -(BigUInteger first, BigUInteger second) {
+            return new BigUInteger(first.m_value - second.m_value);
         }
 
-        public static BigUInteger operator -(BigUInteger left, BigUInteger right) {
-            return new BigUInteger(left.m_value - right.m_value, default(ConstructorTags.Unchecked));
+        public static BigUInteger operator -(BigUInteger first, BigUInteger second) {
+            return new BigUInteger(first.m_value - second.m_value, default(ConstructorTags.Unchecked));
         }
 
         //
@@ -858,12 +858,12 @@ namespace UltimateOrb.Numerics.BigIntegerWrappers {
 
         const int StackAllocThreshold = 64;
 
-        public static BigUInteger operator &(BigUInteger left, BigUInteger right) {
+        public static BigUInteger operator &(BigUInteger first, BigUInteger second) {
 #if USE_UNSAFE_ACCESS_TO_STD_BIGINTEGER
-            var s = left.m_value.GetSignField();
-            var t = right.m_value.GetSignField();
-            var p = left.m_value.GetBitsField();
-            var q = right.m_value.GetBitsField();
+            var s = first.m_value.GetSignField();
+            var t = second.m_value.GetSignField();
+            var p = first.m_value.GetBitsField();
+            var q = second.m_value.GetBitsField();
             if (Likely(s <= 0)) {
                 if (Likely(t <= 0)) {
                     if (p is { }) {
@@ -1068,7 +1068,7 @@ namespace UltimateOrb.Numerics.BigIntegerWrappers {
                 return new BigUInteger(result, default(ConstructorTags.Unchecked));
             }
 #else
-            return new BigUInteger(left.m_value & right.m_value, default(ConstructorTags.Unchecked));
+            return new BigUInteger(first.m_value & second.m_value, default(ConstructorTags.Unchecked));
 #endif
 
             static uint[] PowOf2(int size) {
@@ -1087,32 +1087,32 @@ namespace UltimateOrb.Numerics.BigIntegerWrappers {
             return span.Length;
         }
 
-        public static BigInteger operator |(BigInteger left, BigInteger right) {
-            if (left.IsZero)
-                return right;
-            if (right.IsZero)
-                return left;
+        public static BigInteger operator |(BigInteger first, BigInteger second) {
+            if (first.IsZero)
+                return second;
+            if (second.IsZero)
+                return first;
 
-            if (left._bits is null && right._bits is null) {
-                return left._sign | right._sign;
+            if (first._bits is null && second._bits is null) {
+                return first._sign | second._sign;
             }
 
-            uint xExtend = (left._sign < 0) ? uint.MaxValue : 0;
-            uint yExtend = (right._sign < 0) ? uint.MaxValue : 0;
+            uint xExtend = (first._sign < 0) ? uint.MaxValue : 0;
+            uint yExtend = (second._sign < 0) ? uint.MaxValue : 0;
 
             uint[]? leftBufferFromPool = null;
-            int size = (left._bits?.Length ?? 1) + 1;
+            int size = (first._bits?.Length ?? 1) + 1;
             Span<uint> x = ((uint)size <= BigIntegerCalculator.StackAllocThreshold
                          ? stackalloc uint[BigIntegerCalculator.StackAllocThreshold]
                          : leftBufferFromPool = ArrayPool<uint>.Shared.Rent(size))[..size];
-            x = x.Slice(0, left.WriteTo(x));
+            x = x.Slice(0, first.WriteTo(x));
 
             uint[]? rightBufferFromPool = null;
-            size = (right._bits?.Length ?? 1) + 1;
+            size = (second._bits?.Length ?? 1) + 1;
             Span<uint> y = ((uint)size <= BigIntegerCalculator.StackAllocThreshold
                          ? stackalloc uint[BigIntegerCalculator.StackAllocThreshold]
                          : rightBufferFromPool = ArrayPool<uint>.Shared.Rent(size))[..size];
-            y = y.Slice(0, right.WriteTo(y));
+            y = y.Slice(0, second.WriteTo(y));
 
             uint[]? resultBufferFromPool = null;
             size = Math.Max(x.Length, y.Length);
@@ -1140,8 +1140,8 @@ namespace UltimateOrb.Numerics.BigIntegerWrappers {
             return result;
         }
 
-        public static BigUInteger operator ^(BigUInteger left, BigUInteger right) {
-            return new BigUInteger(left.m_value ^ right.m_value, default(ConstructorTags.Unchecked));
+        public static BigUInteger operator ^(BigUInteger first, BigUInteger second) {
+            return new BigUInteger(first.m_value ^ second.m_value, default(ConstructorTags.Unchecked));
         }
 
         public static BigUInteger operator <<(BigUInteger value, int shift) {
@@ -1215,20 +1215,20 @@ namespace UltimateOrb.Numerics.BigIntegerWrappers {
             return new BigUInteger(t, default(ConstructorTags.Unchecked));
         }
 
-        public static BigUInteger operator checked +(BigUInteger left, BigUInteger right) {
-            return new BigUInteger(checked(left.m_value + right.m_value), default(ConstructorTags.Checked));
+        public static BigUInteger operator checked +(BigUInteger first, BigUInteger second) {
+            return new BigUInteger(checked(first.m_value + second.m_value), default(ConstructorTags.Checked));
         }
 
-        public static BigUInteger operator +(BigUInteger left, BigUInteger right) {
-            return new BigUInteger(unchecked(left.m_value + right.m_value), default(ConstructorTags.Unchecked));
+        public static BigUInteger operator +(BigUInteger first, BigUInteger second) {
+            return new BigUInteger(unchecked(first.m_value + second.m_value), default(ConstructorTags.Unchecked));
         }
 
-        public static BigUInteger operator checked *(BigUInteger left, BigUInteger right) {
-            return new BigUInteger(checked(left.m_value * right.m_value), default(ConstructorTags.Checked));
+        public static BigUInteger operator checked *(BigUInteger first, BigUInteger second) {
+            return new BigUInteger(checked(first.m_value * second.m_value), default(ConstructorTags.Checked));
         }
 
-        public static BigUInteger operator *(BigUInteger left, BigUInteger right) {
-            return new BigUInteger(unchecked(left.m_value * right.m_value), default(ConstructorTags.Unchecked));
+        public static BigUInteger operator *(BigUInteger first, BigUInteger second) {
+            return new BigUInteger(unchecked(first.m_value * second.m_value), default(ConstructorTags.Unchecked));
         }
 
         public static BigUInteger operator checked /(BigUInteger dividend, BigUInteger divisor) {
@@ -1244,136 +1244,136 @@ namespace UltimateOrb.Numerics.BigIntegerWrappers {
             return new BigUInteger(BigInteger.IsNegative(t) ? unchecked(t += divisor.m_value) : t, default(ConstructorTags.Unchecked));
         }
 
-        public static bool operator <(BigUInteger left, BigUInteger right) {
-            return left.CompareTo(right) < 0;
+        public static bool operator <(BigUInteger first, BigUInteger second) {
+            return first.CompareTo(second) < 0;
         }
 
-        public static bool operator <=(BigUInteger left, BigUInteger right) {
-            return left.CompareTo(right) <= 0;
+        public static bool operator <=(BigUInteger first, BigUInteger second) {
+            return first.CompareTo(second) <= 0;
         }
 
-        public static bool operator >(BigUInteger left, BigUInteger right) {
-            return left.CompareTo(right) > 0;
+        public static bool operator >(BigUInteger first, BigUInteger second) {
+            return first.CompareTo(second) > 0;
         }
 
-        public static bool operator >=(BigUInteger left, BigUInteger right) {
-            return left.CompareTo(right) >= 0;
+        public static bool operator >=(BigUInteger first, BigUInteger second) {
+            return first.CompareTo(second) >= 0;
         }
 
-        public static bool operator ==(BigUInteger left, BigUInteger right) {
-            return left.Equals(right);
+        public static bool operator ==(BigUInteger first, BigUInteger second) {
+            return first.Equals(second);
         }
 
-        public static bool operator !=(BigUInteger left, BigUInteger right) {
-            return !left.Equals(right);
+        public static bool operator !=(BigUInteger first, BigUInteger second) {
+            return !first.Equals(second);
         }
 
-        public static bool operator <(BigUInteger left, long right) {
-            return left.CompareTo(right) < 0;
+        public static bool operator <(BigUInteger first, long second) {
+            return first.CompareTo(second) < 0;
         }
 
-        public static bool operator <=(BigUInteger left, long right) {
-            return left.CompareTo(right) <= 0;
+        public static bool operator <=(BigUInteger first, long second) {
+            return first.CompareTo(second) <= 0;
         }
 
-        public static bool operator >(BigUInteger left, long right) {
-            return left.CompareTo(right) > 0;
+        public static bool operator >(BigUInteger first, long second) {
+            return first.CompareTo(second) > 0;
         }
 
-        public static bool operator >=(BigUInteger left, long right) {
-            return left.CompareTo(right) >= 0;
+        public static bool operator >=(BigUInteger first, long second) {
+            return first.CompareTo(second) >= 0;
         }
 
-        public static bool operator ==(BigUInteger left, long right) {
-            return left.Equals(right);
+        public static bool operator ==(BigUInteger first, long second) {
+            return first.Equals(second);
         }
 
-        public static bool operator !=(BigUInteger left, long right) {
-            return !left.Equals(right);
+        public static bool operator !=(BigUInteger first, long second) {
+            return !first.Equals(second);
         }
 
-        public static bool operator <(long left, BigUInteger right) {
-            return right.CompareTo(left) > 0;
+        public static bool operator <(long first, BigUInteger second) {
+            return second.CompareTo(first) > 0;
         }
 
-        public static bool operator <=(long left, BigUInteger right) {
-            return right.CompareTo(left) >= 0;
+        public static bool operator <=(long first, BigUInteger second) {
+            return second.CompareTo(first) >= 0;
         }
 
-        public static bool operator >(long left, BigUInteger right) {
-            return right.CompareTo(left) < 0;
+        public static bool operator >(long first, BigUInteger second) {
+            return second.CompareTo(first) < 0;
         }
 
-        public static bool operator >=(long left, BigUInteger right) {
-            return right.CompareTo(left) <= 0;
+        public static bool operator >=(long first, BigUInteger second) {
+            return second.CompareTo(first) <= 0;
         }
 
-        public static bool operator ==(long left, BigUInteger right) {
-            return right.Equals(left);
+        public static bool operator ==(long first, BigUInteger second) {
+            return second.Equals(first);
         }
 
-        public static bool operator !=(long left, BigUInteger right) {
-            return !right.Equals(left);
-        }
-
-        [CLSCompliant(false)]
-        public static bool operator <(BigUInteger left, ulong right) {
-            return left.CompareTo(right) < 0;
+        public static bool operator !=(long first, BigUInteger second) {
+            return !second.Equals(first);
         }
 
         [CLSCompliant(false)]
-        public static bool operator <=(BigUInteger left, ulong right) {
-            return left.CompareTo(right) <= 0;
+        public static bool operator <(BigUInteger first, ulong second) {
+            return first.CompareTo(second) < 0;
         }
 
         [CLSCompliant(false)]
-        public static bool operator >(BigUInteger left, ulong right) {
-            return left.CompareTo(right) > 0;
+        public static bool operator <=(BigUInteger first, ulong second) {
+            return first.CompareTo(second) <= 0;
         }
 
         [CLSCompliant(false)]
-        public static bool operator >=(BigUInteger left, ulong right) {
-            return left.CompareTo(right) >= 0;
+        public static bool operator >(BigUInteger first, ulong second) {
+            return first.CompareTo(second) > 0;
         }
 
         [CLSCompliant(false)]
-        public static bool operator ==(BigUInteger left, ulong right) {
-            return left.Equals(right);
+        public static bool operator >=(BigUInteger first, ulong second) {
+            return first.CompareTo(second) >= 0;
         }
 
         [CLSCompliant(false)]
-        public static bool operator !=(BigUInteger left, ulong right) {
-            return !left.Equals(right);
+        public static bool operator ==(BigUInteger first, ulong second) {
+            return first.Equals(second);
         }
 
         [CLSCompliant(false)]
-        public static bool operator <(ulong left, BigUInteger right) {
-            return right.CompareTo(left) > 0;
+        public static bool operator !=(BigUInteger first, ulong second) {
+            return !first.Equals(second);
         }
 
         [CLSCompliant(false)]
-        public static bool operator <=(ulong left, BigUInteger right) {
-            return right.CompareTo(left) >= 0;
+        public static bool operator <(ulong first, BigUInteger second) {
+            return second.CompareTo(first) > 0;
         }
 
         [CLSCompliant(false)]
-        public static bool operator >(ulong left, BigUInteger right) {
-            return right.CompareTo(left) < 0;
+        public static bool operator <=(ulong first, BigUInteger second) {
+            return second.CompareTo(first) >= 0;
         }
 
         [CLSCompliant(false)]
-        public static bool operator >=(ulong left, BigUInteger right) {
-            return right.CompareTo(left) <= 0;
+        public static bool operator >(ulong first, BigUInteger second) {
+            return second.CompareTo(first) < 0;
         }
 
         [CLSCompliant(false)]
-        public static bool operator ==(ulong left, BigUInteger right) {
-            return right.Equals(left);
+        public static bool operator >=(ulong first, BigUInteger second) {
+            return second.CompareTo(first) <= 0;
         }
 
         [CLSCompliant(false)]
-        public static bool operator !=(ulong left, BigUInteger right) {
-            return !right.Equals(left);
+        public static bool operator ==(ulong first, BigUInteger second) {
+            return second.Equals(first);
+        }
+
+        [CLSCompliant(false)]
+        public static bool operator !=(ulong first, BigUInteger second) {
+            return !second.Equals(first);
         }
 
         /// <summary>
@@ -1397,14 +1397,14 @@ namespace UltimateOrb.Numerics.BigIntegerWrappers {
         //
 
         /// <inheritdoc cref="IBinaryInteger{TSelf}.DivRem(TSelf, TSelf)" />
-        public static (BigUInteger Quotient, BigUInteger Remainder) DivRem(BigUInteger left, BigUInteger right) {
-            var d1 = BigInteger.Abs(right.m_value);
-            var q1 = BigInteger.DivRem(left.m_value, d1, out BigInteger r1);
+        public static (BigUInteger Quotient, BigUInteger Remainder) DivRem(BigUInteger first, BigUInteger second) {
+            var d1 = BigInteger.Abs(second.m_value);
+            var q1 = BigInteger.DivRem(first.m_value, d1, out BigInteger r1);
             if (BigInteger.IsNegative(r1)) {
                 unchecked {
                     r1 += d1;
                 }
-                if (BigInteger.IsNegative(left.m_value)) {
+                if (BigInteger.IsNegative(first.m_value)) {
                     ++q1;
                 } else {
                     --q1;

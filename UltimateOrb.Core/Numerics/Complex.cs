@@ -90,40 +90,40 @@ namespace UltimateOrb.Numerics {
             return -value;
         }
 
-        public static Complex Add(Complex left, Complex right) {
-            return left + right;
+        public static Complex Add(Complex first, Complex second) {
+            return first + second;
         }
 
-        public static Complex Add(Complex left, double right) {
-            return left + right;
+        public static Complex Add(Complex first, double second) {
+            return first + second;
         }
 
-        public static Complex Add(double left, Complex right) {
-            return left + right;
+        public static Complex Add(double first, Complex second) {
+            return first + second;
         }
 
-        public static Complex Subtract(Complex left, Complex right) {
-            return left - right;
+        public static Complex Subtract(Complex first, Complex second) {
+            return first - second;
         }
 
-        public static Complex Subtract(Complex left, double right) {
-            return left - right;
+        public static Complex Subtract(Complex first, double second) {
+            return first - second;
         }
 
-        public static Complex Subtract(double left, Complex right) {
-            return left - right;
+        public static Complex Subtract(double first, Complex second) {
+            return first - second;
         }
 
-        public static Complex Multiply(Complex left, Complex right) {
-            return left * right;
+        public static Complex Multiply(Complex first, Complex second) {
+            return first * second;
         }
 
-        public static Complex Multiply(Complex left, double right) {
-            return left * right;
+        public static Complex Multiply(Complex first, double second) {
+            return first * second;
         }
 
-        public static Complex Multiply(double left, Complex right) {
-            return left * right;
+        public static Complex Multiply(double first, Complex second) {
+            return first * second;
         }
 
         public static Complex Divide(Complex dividend, Complex divisor) {
@@ -142,34 +142,34 @@ namespace UltimateOrb.Numerics {
             return new Complex(-value.m_value);
         }
 
-        public static Complex operator +(Complex left, Complex right) {
-            return new Complex(left.m_value + right.m_value);
+        public static Complex operator +(Complex first, Complex second) {
+            return new Complex(first.m_value + second.m_value);
         }
 
-        public static Complex operator +(Complex left, double right) {
-            return new Complex(left.m_value + Vector128.CreateScalar(right));
+        public static Complex operator +(Complex first, double second) {
+            return new Complex(first.m_value + Vector128.CreateScalar(second));
         }
 
-        public static Complex operator +(double left, Complex right) {
-            return new Complex(Vector128.CreateScalar(left) + right.m_value);
+        public static Complex operator +(double first, Complex second) {
+            return new Complex(Vector128.CreateScalar(first) + second.m_value);
         }
 
-        public static Complex operator -(Complex left, Complex right) {
-            return new Complex(left.m_value - right.m_value);
+        public static Complex operator -(Complex first, Complex second) {
+            return new Complex(first.m_value - second.m_value);
         }
 
-        public static Complex operator -(Complex left, double right) {
-            return new Complex(left.m_value - Vector128.CreateScalar(right));
+        public static Complex operator -(Complex first, double second) {
+            return new Complex(first.m_value - Vector128.CreateScalar(second));
         }
 
-        public static Complex operator -(double left, Complex right) {
-            return new Complex(Vector128.CreateScalar(left) - right.m_value);
+        public static Complex operator -(double first, Complex second) {
+            return new Complex(Vector128.CreateScalar(first) - second.m_value);
         }
 
-        public static Complex operator *(Complex left, Complex right) {
+        public static Complex operator *(Complex first, Complex second) {
             if (Fma.IsSupported) {
-                var x = left.m_value;
-                var y = right.m_value;
+                var x = first.m_value;
+                var y = second.m_value;
 
                 var cc = Avx.Permute(y, 0b00);
                 var ba = Avx.Permute(x, 0b01);
@@ -179,26 +179,26 @@ namespace UltimateOrb.Numerics {
 
                 return new Complex(mult);
             } else {
-                var result_realpart = (left.m_real * right.m_real) - (left.m_imaginary * right.m_imaginary);
-                var result_imaginarypart = (left.m_imaginary * right.m_real) + (left.m_real * right.m_imaginary);
+                var result_realpart = (first.m_real * second.m_real) - (first.m_imaginary * second.m_imaginary);
+                var result_imaginarypart = (first.m_imaginary * second.m_real) + (first.m_real * second.m_imaginary);
                 return new Complex(result_realpart, result_imaginarypart);
             }
         }
 
-        public static Complex operator *(Complex left, double right) {
-            return new Complex(Vector128.Multiply(left.m_value, right));
+        public static Complex operator *(Complex first, double second) {
+            return new Complex(Vector128.Multiply(first.m_value, second));
         }
 
-        public static Complex operator *(double left, Complex right) {
-            return new Complex(Vector128.Multiply(left, right.m_value));
+        public static Complex operator *(double first, Complex second) {
+            return new Complex(Vector128.Multiply(first, second.m_value));
         }
 
-        public static Complex operator /(Complex left, Complex right) {
+        public static Complex operator /(Complex first, Complex second) {
             // Division : Smith's formula.
-            double a = left.m_real;
-            double b = left.m_imaginary;
-            double c = right.m_real;
-            double d = right.m_imaginary;
+            double a = first.m_real;
+            double b = first.m_imaginary;
+            double c = second.m_real;
+            double d = second.m_imaginary;
 
             // Computing c * c + d * d will overflow even in cases where the actual result of the division does not overflow.
             if (Math.Abs(d) < Math.Abs(c)) {
@@ -210,15 +210,15 @@ namespace UltimateOrb.Numerics {
             }
         }
 
-        public static Complex operator /(Complex left, double right) {
-            return new Complex(Vector128.Divide(left.m_value, right));
+        public static Complex operator /(Complex first, double second) {
+            return new Complex(Vector128.Divide(first.m_value, second));
         }
 
-        public static Complex operator /(double left, Complex right) {
+        public static Complex operator /(double first, Complex second) {
             // Division : Smith's formula.
-            double a = left;
-            double c = right.m_real;
-            double d = right.m_imaginary;
+            double a = first;
+            double c = second.m_real;
+            double d = second.m_imaginary;
 
             // Computing c * c + d * d will overflow even in cases where the actual result of the division does not overflow.
             if (Math.Abs(d) < Math.Abs(c)) {
@@ -266,12 +266,12 @@ namespace UltimateOrb.Numerics {
             return One / value;
         }
 
-        public static bool operator ==(Complex left, Complex right) {
-            return left.m_value ==  right.m_value;
+        public static bool operator ==(Complex first, Complex second) {
+            return first.m_value ==  second.m_value;
         }
 
-        public static bool operator !=(Complex left, Complex right) {
-            return left.m_value != right.m_value;
+        public static bool operator !=(Complex first, Complex second) {
+            return first.m_value != second.m_value;
         }
 
         public override bool Equals([NotNullWhen(true)] object? obj) {
@@ -561,7 +561,7 @@ namespace UltimateOrb.Numerics {
             // cancelation when |b| << |a|. We can get around this by noting that our formulas imply
             // x^2 y^2 = b^2 / 4, so |x| |y| = |b| / 2. So after computing the one that doesn't suffer
             // from cancelation, we can compute the other with just a division. This is basically just
-            // the right way to evaluate the quadratic formula without cancelation.
+            // the second way to evaluate the quadratic formula without cancelation.
 
             // All this reduces our total cost to two sqrts and a few flops, and it respects the desired
             // symmetries. Much better than atan + cos + sin!
@@ -1206,8 +1206,8 @@ namespace UltimateOrb.Numerics {
 
         /*
         /// <inheritdoc cref="INumberBase{TSelf}.MultiplyAddEstimate(TSelf, TSelf, TSelf)" />
-        static Complex INumberBase<Complex>.MultiplyAddEstimate(Complex left, Complex right, Complex addend) {
-            return left * right + addend;
+        static Complex INumberBase<Complex>.MultiplyAddEstimate(Complex first, Complex second, Complex addend) {
+            return first * second + addend;
         }
         */
 

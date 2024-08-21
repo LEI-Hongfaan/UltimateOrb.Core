@@ -7,6 +7,8 @@ using NUnit.Framework;
 using UltimateOrb.Numerics;
 using System.Numerics;
 using UltimateOrb.Utilities;
+using UltimateOrb.Linq;
+using UltimateOrb.Mathematics;
 
 namespace UltimateOrb.Core.Tests {
 
@@ -72,14 +74,14 @@ namespace UltimateOrb.Core.Tests {
             // Assert
             Assert.Fail();
         }
+#endif
 
         [Test]
         public void MultiplyAsRational128_StateUnderTest_ExpectedBehavior() {
             // Arrange
-            var Rational64 = new Rational64(TODO);
-            Rational64 first = default(global::UltimateOrb.Mathematics.Exact.Rational64);
-            Rational64 second = default(global::UltimateOrb.Mathematics.Exact.Rational64);
-            UInt64 bits_hi = 0;
+            Rational64 first = 1;
+            Rational64 second = -10000001;
+            UInt64 bits_hi = 1919810;
 
             // Act
             var result = Rational64.MultiplyAsRational128(
@@ -87,10 +89,106 @@ namespace UltimateOrb.Core.Tests {
                 second,
                 out bits_hi);
 
-            // Assert
-            Assert.Fail();
+            Assert.Multiple(() => {
+                // Assert
+                Assert.That(result, Is.EqualTo(10000001));
+                Assert.That(bits_hi, Is.EqualTo(unchecked((UInt64)(-1L))));
+            });
         }
-#endif
+
+        [Property(MaxTest = 2000000, QuietOnSuccess = true, MaxFail = 1)]
+        public void MultiplyAsRational128_1(UInt32 a, Int32 b, UInt32 c, Int32 d) {
+            if (b == 0 || d == 0) {
+                return;
+            }
+            // Arrange
+            Rational64 first = Rational64.FromFraction(a, b);
+            Rational64 second = Rational64.FromFraction(c, d);
+            BigRational first0 = BigRational.FromFraction(a, b);
+            BigRational second0 = BigRational.FromFraction(c, d);
+            BigRational result0 = first0 * second0;
+
+            UInt64 bits_hi = 1919810;
+            // Act
+            var result = Rational64.MultiplyAsRational128(
+                first,
+                second,
+                out bits_hi);
+
+            var q = result0.Denominator;
+
+            if (0 > result0.Sign) {
+                q = -q;
+            } else {
+                --q;
+            }
+
+            if ((BigInteger)result != result0.Numerator ||
+                (BigInteger)bits_hi.ToSignedUnchecked() != q) {
+                Assert.Warn($@"a: {a}");
+                Assert.Warn($@"b: {b}");
+                Assert.Warn($@"c: {c}");
+                Assert.Warn($@"d: {d}");
+            }
+            Assert.Multiple(() => {
+                // Assert
+                Assert.That((BigInteger)result, Is.EqualTo(result0.Numerator));
+                Assert.That((BigInteger)bits_hi.ToSignedUnchecked(), Is.EqualTo(q));
+            });
+        }
+
+        [Property(MaxTest = 2000000, QuietOnSuccess = true, MaxFail = 1)]
+        public void Multiply_1(UInt32 a, Int32 b, UInt32 c, Int32 d) {
+            if (b == 0 || d == 0) {
+                return;
+            }
+            // Arrange
+            Rational64 first = Rational64.FromFraction(a, b);
+            Rational64 second = Rational64.FromFraction(c, d);
+            BigRational first0 = BigRational.FromFraction(a, b);
+            BigRational second0 = BigRational.FromFraction(c, d);
+            BigRational result0 = first0 * second0;
+            var p = result0.Numerator;
+            var q = result0.Denominator;
+            if (0 > result0.Sign) {
+                q = -q;
+            } else {
+                --q;
+            }
+
+            bool ov0 = UInt32.MinValue > p || p > UInt32.MaxValue ||
+                Int32.MinValue > q || q > Int32.MaxValue;
+
+
+            // Act
+            Rational64 result = default;
+            bool ov1;
+            try {
+                result = Rational64.Multiply(
+                    first,
+                    second);
+                ov1 = false;
+            } catch (OverflowException) {
+                ov1 = true;
+            }
+
+            if (ov0) {
+                Assert.That(ov1);
+            } else {
+                Assert.Multiple(() => {
+                    // Assert
+                    Assert.That(!ov1);
+                    Assert.That((BigInteger)result.Denominator, Is.EqualTo(result0.Denominator));
+                    Assert.That((BigInteger)result.Numerator, Is.EqualTo(result0.Numerator));
+                    Assert.That(result.Sign, Is.EqualTo(result0.Sign));
+                });
+            }
+        }
+        [Property(MaxTest = 1, QuietOnSuccess = true, MaxFail = 1)]
+        public void Multiply_2() {
+            throw new NotImplementedException();
+
+        }
 
         [Test]
         public void AddAsRational128_StateUnderTest_ExpectedBehavior() {
@@ -600,6 +698,31 @@ namespace UltimateOrb.Core.Tests {
             Assert.Fail();
         }
 #endif
+
+        [Property(MaxTest = 2000000, QuietOnSuccess = true, MaxFail = 1)]
+        public void DivRemIntegral_1(UInt32 a, Int32 b, UInt32 c, Int32 d) {
+            if (b == 0 || c == 0 || d == 0) {
+                return;
+            }
+            // Arrange
+            Rational64 dividend = Rational64.FromFraction(a, b);
+            Rational64 divisor = Rational64.FromFraction(c, d);
+            var (q, r) = Rational64.DivRemIntegral(dividend, divisor);
+            if (dividend != Rational64.Multiply(divisor, q) + r ||
+                !(Rational64.Abs(r) < Rational64.Abs(divisor))) {
+                Assert.Warn($@"a: {a}");
+                Assert.Warn($@"b: {b}");
+                Assert.Warn($@"c: {c}");
+                Assert.Warn($@"d: {d}");
+            }
+
+
+
+            Assert.Multiple(() => {
+                Assert.That(dividend, Is.EqualTo(Rational64.Multiply(divisor, q) + r));
+                Assert.That(Rational64.Abs(r), Is.LessThan(Rational64.Abs(divisor)));
+            });
+        }
     }
 }
 #pragma warning restore UoWIP // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.

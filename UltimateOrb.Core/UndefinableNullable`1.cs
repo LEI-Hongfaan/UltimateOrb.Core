@@ -115,12 +115,12 @@ namespace UltimateOrb {
             };
         }
 
-        public static bool operator ==(UndefinableNullable<T> left, UndefinableNullable<T> right) {
-            return left.Equals(right);
+        public static bool operator ==(UndefinableNullable<T> first, UndefinableNullable<T> second) {
+            return first.Equals(second);
         }
 
-        public static bool operator !=(UndefinableNullable<T> left, UndefinableNullable<T> right) {
-            return !(left == right);
+        public static bool operator !=(UndefinableNullable<T> first, UndefinableNullable<T> second) {
+            return !(first == second);
         }
 
         public T GetValueOrDefault() {

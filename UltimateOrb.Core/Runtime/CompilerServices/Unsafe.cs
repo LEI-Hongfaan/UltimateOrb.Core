@@ -483,7 +483,7 @@ namespace UltimateOrb.Runtime.CompilerServices {
             ceq
             ret
         ")]
-        public static bool AreSame<T>(ref T left, ref T right) {
+        public static bool AreSame<T>(ref T first, ref T second) {
             throw null!;
         }
 
@@ -494,7 +494,7 @@ namespace UltimateOrb.Runtime.CompilerServices {
             cgt.un
             ret
         ")]
-        public static bool IsAddressGreaterThan<T>(ref T left, ref T right) {
+        public static bool IsAddressGreaterThan<T>(ref T first, ref T second) {
             throw null!;
         }
 
@@ -505,7 +505,7 @@ namespace UltimateOrb.Runtime.CompilerServices {
             clt.un
             ret
         ")]
-        public static bool IsAddressLessThan<T>(ref T left, ref T right) {
+        public static bool IsAddressLessThan<T>(ref T first, ref T second) {
             throw null!;
         }
 

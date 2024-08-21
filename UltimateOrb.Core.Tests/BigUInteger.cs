@@ -190,8 +190,8 @@ namespace UltimateOrb.Core.Tests {
         }
 
         public static void DivRem(ref BigUIntegerBuilder lhs, ref BigUIntegerBuilder rhs, out BigUIntegerBuilder quo, out BigUIntegerBuilder rem) {
-            // This is modified from the CoreFX BigUIntegerBuilderCalculator.DivRem.cs implementation:
-            // https://github.com/dotnet/corefx/blob/0bb106232745aedfc0d0c5a84ff2b244bf190317/src/System.Runtime.Numerics/src/System/Numerics/BigUIntegerBuilderCalculator.DivRem.cs
+            // This is modified from the CoreFX BigUIntegerBuilderCalculator.DivRemIntegral.cs implementation:
+            // https://github.com/dotnet/corefx/blob/0bb106232745aedfc0d0c5a84ff2b244bf190317/src/System.Runtime.Numerics/src/System/Numerics/BigUIntegerBuilderCalculator.DivRemIntegral.cs
 
             Debug.Assert(!rhs.IsZero());
 

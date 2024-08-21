@@ -78,9 +78,9 @@ namespace UltimateOrb.Threading {
         /// <inheritdoc cref="CancellationToken.UnsafeRegister(Action{object?}, object?)"/>
         public CancellationTokenRegistration UnsafeRegister(Action<object?> callback, object? state) => CancellationToken.UnsafeRegister(callback, state);
 
-        public static bool operator ==(AsyncOptions left, AsyncOptions right) => left.Equals(right);
+        public static bool operator ==(AsyncOptions first, AsyncOptions second) => first.Equals(second);
 
-        public static bool operator !=(AsyncOptions left, AsyncOptions right) => !(left == right);
+        public static bool operator !=(AsyncOptions first, AsyncOptions second) => !(first == second);
        
         public readonly CancellationToken CancellationToken {
 

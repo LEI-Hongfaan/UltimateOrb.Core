@@ -350,12 +350,12 @@ namespace UltimateOrb {
             info.AddValue(nameof(m_value), StandardValue);
         }
 
-        public static bool operator ==(Boolean8 left, Boolean8 right) {
-            return left.Equals(right);
+        public static bool operator ==(Boolean8 first, Boolean8 second) {
+            return first.Equals(second);
         }
 
-        public static bool operator !=(Boolean8 left, Boolean8 right) {
-            return !(left == right);
+        public static bool operator !=(Boolean8 first, Boolean8 second) {
+            return !(first == second);
         }
     }
 
@@ -700,12 +700,12 @@ namespace UltimateOrb {
             info.AddValue(nameof(m_value), StandardValue);
         }
 
-        public static bool operator ==(Boolean32 left, Boolean32 right) {
-            return left.Equals(right);
+        public static bool operator ==(Boolean32 first, Boolean32 second) {
+            return first.Equals(second);
         }
 
-        public static bool operator !=(Boolean32 left, Boolean32 right) {
-            return !(left == right);
+        public static bool operator !=(Boolean32 first, Boolean32 second) {
+            return !(first == second);
         }
     }
 }

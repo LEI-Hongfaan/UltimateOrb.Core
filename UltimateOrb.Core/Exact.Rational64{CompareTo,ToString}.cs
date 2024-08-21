@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -8,19 +9,10 @@ namespace UltimateOrb.Mathematics.Exact {
     public readonly partial struct Rational64 : IComparable, IFormattable {
 
         public int CompareTo(object other) {
-            if (other is Rational64) {
-                var t = (Rational64)other;
-                return t.CompareTo(other);
-            }
-            {
-                var s = base.Equals(other);
-                if (s) {
-                    return 0;
-                }
-            }
-            return CompareTo__ThrowArgumentException();
+            return other is not Rational64 q ? CompareTo__ThrowArgumentException() : CompareTo(q);
         }
 
+        [DoesNotReturn]
         [MethodImplAttribute(MethodImplOptions.NoInlining)]
         private static int CompareTo__ThrowArgumentException() {
             const string msg = @"Object must be of type Rational64.";

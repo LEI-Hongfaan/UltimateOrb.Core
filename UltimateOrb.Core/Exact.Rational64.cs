@@ -8,13 +8,44 @@ using System.Runtime.InteropServices;
 using UltimateOrb.Utilities;
 using UltimateOrb.Mathematics.NumberTheory;
 using static UltimateOrb.Utilities.ThrowHelper;
+using System.Numerics;
+using System.Globalization;
+using UltimateOrb.Numerics;
 
 namespace UltimateOrb.Mathematics.Exact {
 
     [ComVisibleAttribute(true)]
     [SerializableAttribute()]
     [StructLayoutAttribute(LayoutKind.Sequential, Pack = 8)]
-    public readonly partial struct Rational64 : IComparable<Rational64>, IEquatable<Rational64> {
+    public readonly partial struct Rational64 :
+        IComparable<Rational64>,
+        IEquatable<Rational64>,
+        // ISpanFormattable,
+        IMinMaxValue<Rational64>,
+        // IUtf8SpanFormattable,
+        // IParsable<Rational64>,
+        // ISpanParsable<Rational64>,
+        // IUtf8SpanParsable<Rational64>,
+        IAdditionOperators<Rational64, Rational64, Rational64>,
+        IAdditiveIdentity<Rational64, Rational64>,
+        IComparisonOperators<Rational64, Rational64, bool>,
+        IDecrementOperators<Rational64>,
+        IDivisionOperators<Rational64, Rational64, Rational64>,
+        IEqualityOperators<Rational64, Rational64, bool>,
+        // IExponentialFunctions<Rational64>,
+        // IFloatingPoint<Rational64>,
+        IIncrementOperators<Rational64>,
+        IModulusOperators<Rational64, Rational64, Rational64>,
+        IMultiplicativeIdentity<Rational64, Rational64>,
+        IMultiplyOperators<Rational64, Rational64, Rational64>,
+        // INumber<Rational64>,
+        INumberBase<Rational64>,
+        // IPowerFunctions<Rational64>,
+        // IRootFunctions<Rational64>,
+        ISignedNumber<Rational64>,
+        ISubtractionOperators<Rational64, Rational64, Rational64>,
+        IUnaryNegationOperators<Rational64, Rational64>,
+        IUnaryPlusOperators<Rational64, Rational64> {
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private readonly Int64 bits;
@@ -70,6 +101,53 @@ namespace UltimateOrb.Mathematics.Exact {
             get {
                 return default(Rational64);
             }
+        }
+
+        static Rational64 IAdditiveIdentity<Rational64, Rational64>.AdditiveIdentity {
+
+            get => Zero;
+        }
+
+        public static Rational64 One {
+
+            get => new Rational64((UInt64)1);
+        }
+
+        static Rational64 IMultiplicativeIdentity<Rational64, Rational64>.MultiplicativeIdentity {
+
+            get => One;
+        }
+
+        public static Rational64 MinusOne {
+
+            get => new Rational64(unchecked((UInt64)(1 | ((Int64)(Int32)UInt32.MaxValue << 32))));
+        }
+
+        static Rational64 ISignedNumber<Rational64>.NegativeOne {
+
+            get => MinusOne;
+        }
+
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        public static Rational64 PositiveEpsilon {
+
+            get => new Rational64(unchecked((UInt64)(1 | ((Int64)Int32.MaxValue << 32))));
+        }
+
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        public static Rational64 NegativeEpsilon {
+
+            get => new Rational64(unchecked((UInt64)(1 | ((Int64)Int32.MinValue << 32))));
+        }
+
+        public static Rational64 MaxValue {
+
+            get => new Rational64((UInt64)UInt32.MaxValue);
+        }
+
+        public static Rational64 MinValue {
+
+            get => new Rational64(UInt64.MaxValue);
         }
 
         [PureAttribute()]
@@ -158,6 +236,8 @@ namespace UltimateOrb.Mathematics.Exact {
                 }
             }
         }
+
+        static int INumberBase<Rational64>.Radix => throw new NotSupportedException();
 
         [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
         [TargetedPatchingOptOutAttribute("")]
@@ -256,14 +336,70 @@ namespace UltimateOrb.Mathematics.Exact {
                     second_denominator = (Int32)((UInt32)second_denominator / d);
                 }
                 /*
-                var q = (Int64)((UInt64)(UInt32)first_denominator * (UInt32)second_denominator);
+                var q = (Int64)((UInt64)(UInt32)denominator * (UInt32)second_denominator);
                 if (s) {
                     q = -q;
                 } else {
                     --q;
                 }
                 checked((Int32)q).Ignore();
-                return new Rational64(checked(first_numerator * second_numerator) | (UInt64)q << 32);
+                return new Rational64(checked(numerator * second_numerator) | (UInt64)q << 32);
+                */
+                var p = (UInt64)first_numerator * second_numerator;
+                var q = (Int64)((UInt64)(UInt32)first_denominator * (UInt32)second_denominator);
+                p = checked((UInt32)p);
+                checked(unchecked((UInt32)Int32.MinValue) - unchecked((UInt64)q)).Ignore();
+                if (s) {
+                    return new Rational64((UInt64)(-q << 32) | p);
+                } else {
+                    return new Rational64((UInt64)(--q << 32) | p);
+                }
+            }
+        }
+
+        [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
+        [TargetedPatchingOptOutAttribute("")]
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        [PureAttribute()]
+        public static Rational64 Multiply(Rational64 first, Int64 second) {
+            unchecked {
+                var first_numerator = (UInt32)first.bits;
+                var first_denominator = (Int32)(first.bits >> 32);
+                var second_numerator = UltimateOrb.Mathematics.Elementary.Math.AbsAsUnsigned(second);
+                var second_denominator = (Int32)Int64.Sign(second);
+                if (0 == first_numerator || 0 == second_numerator) {
+                    return Zero;
+                }
+                var s = 0 > (first_denominator ^ second_denominator);
+                if (0 <= first_denominator) {
+                    ++first_denominator;
+                } else {
+                    first_denominator = -first_denominator;
+                }
+                if (0 <= second_denominator) {
+                    ++second_denominator;
+                } else {
+                    second_denominator = -second_denominator;
+                }
+                {
+                    var d = EuclideanAlgorithm.GreatestCommonDivisorPartial((UInt32)first_denominator, second_numerator);
+                    first_denominator = (Int32)((UInt32)first_denominator / d);
+                    second_numerator /= d;
+                }
+                {
+                    var d = EuclideanAlgorithm.GreatestCommonDivisorPartial(first_numerator, (UInt32)second_denominator);
+                    first_numerator /= d;
+                    second_denominator = (Int32)((UInt32)second_denominator / d);
+                }
+                /*
+                var q = (Int64)((UInt64)(UInt32)denominator * (UInt32)second_denominator);
+                if (s) {
+                    q = -q;
+                } else {
+                    --q;
+                }
+                checked((Int32)q).Ignore();
+                return new Rational64(checked(numerator * second_numerator) | (UInt64)q << 32);
                 */
                 var p = (UInt64)first_numerator * second_numerator;
                 var q = (Int64)((UInt64)(UInt32)first_denominator * (UInt32)second_denominator);
@@ -406,7 +542,7 @@ namespace UltimateOrb.Mathematics.Exact {
 
         [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
         [TargetedPatchingOptOutAttribute("")]
-        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        [MethodImplAttribute(MethodImplOptions.AggressiveOptimization)]
         [PureAttribute()]
         public static Rational64 operator /(Rational64 first, Rational64 second) {
             var d = unchecked((UInt32)first.bits);
@@ -450,6 +586,74 @@ namespace UltimateOrb.Mathematics.Exact {
             }
             q = ((Int64)checked((Int32)q) << 32) | (Int64)p;
             return new Rational64(unchecked((UInt64)q));
+        }
+
+        static Int64 DecodeDenominator(Int32 encodedDenominator) {
+            var r = (Int64)encodedDenominator;
+            return r >= 0 ? r + 1 : r;
+        }
+
+        static Int32 EncodeDenominator(Int32 denominator) {
+            Debug.Assert(denominator != 0);
+            return denominator > 0 ? denominator - 1 : denominator;
+        }
+
+        static Int32 EncodeDenominator(Int64 denominator) {
+            Debug.Assert(denominator != 0);
+            return checked((Int32)(denominator > 0 ? unchecked(denominator - 1) : denominator));
+        }
+
+        public static (Int64 quotient, Rational64 remainder) DivRemIntegral(Rational64 dividend, Rational64 divisor) {
+            // Introduce local variables for Denominator and Numerator fields
+            var dividendDenominator = DecodeDenominator(unchecked((Int32)(dividend.bits >> 32)));
+            var dividendNumerator = unchecked((UInt32)(dividend.bits));
+            var divisorDenominator = DecodeDenominator(unchecked((Int32)(divisor.bits >> 32)));
+            var divisorNumerator = unchecked((UInt32)(divisor.bits));
+
+            if (dividend.bits == 0) {
+                return default;
+            }
+
+            // Calculate the remainder denominator
+            Int64 remainderDenominator = divisorNumerator * dividendDenominator;
+
+            // Calculate the quotient and remainder using Math.DivRem
+            Int64 quotient = Math.DivRem(dividendNumerator * divisorDenominator, remainderDenominator, out Int64 remainderNumerator);
+            
+            if (0 > remainderNumerator) {
+                remainderNumerator = -remainderNumerator;
+                remainderDenominator = -remainderDenominator;
+            }
+
+            // Create the remainder Rational64 using the internal constructor and correct denominator
+            Rational64 remainder = new Rational64(unchecked((UInt64)(checked((UInt32)remainderNumerator) | ((Int64)EncodeDenominator(remainderDenominator) << 32))));
+
+            return (quotient, remainder);
+        }
+
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        public static Rational64 operator %(Rational64 dividend, Rational64 divisor) {
+            // Introduce local variables for Denominator and Numerator fields
+            var dividendDenominator = DecodeDenominator(unchecked((Int32)(dividend.bits >> 32)));
+            var dividendNumerator = unchecked((UInt32)(dividend.bits));
+            var divisorDenominator = DecodeDenominator(unchecked((Int32)(dividend.bits >> 32)));
+            var divisorNumerator = unchecked((UInt32)(dividend.bits));
+
+            // Calculate the remainder denominator
+            Int64 remainderDenominator = divisorNumerator * dividendDenominator;
+
+            // Calculate the quotient and remainder using Math.DivRem
+            var remainderNumerator = dividendNumerator * divisorDenominator % remainderDenominator;
+
+            if (0 > remainderNumerator) {
+                remainderNumerator = -remainderNumerator;
+                remainderDenominator = -remainderDenominator;
+            }
+
+            // Create the remainder Rational64 using the internal constructor and correct denominator
+            Rational64 remainder = new Rational64(unchecked((UInt64)(checked((UInt32)remainderNumerator) | ((Int64)EncodeDenominator(remainderDenominator) << 32))));
+
+            return remainder;
         }
 
         [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
@@ -503,7 +707,7 @@ namespace UltimateOrb.Mathematics.Exact {
         [PureAttribute()]
         public static Rational64 operator +(Rational64 first, Rational64 second) {
             var lo = Rational64.AddAsRational128(first, second, out var hi);
-            return new Rational64(((Int64)checked((Int32)hi.ToSignedUnchecked())).ToUnsignedUnchecked() << 32 | (UInt64)checked((UInt32)lo));
+            return ToRational64Checked(lo, hi);
         }
 
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
@@ -512,7 +716,7 @@ namespace UltimateOrb.Mathematics.Exact {
         [PureAttribute()]
         public static Rational64 operator -(Rational64 first, Rational64 second) {
             var lo = Rational64.SubtractAsRational128(first, second, out var hi);
-            return new Rational64(((Int64)checked((Int32)hi.ToSignedUnchecked())).ToUnsignedUnchecked() << 32 | (UInt64)checked((UInt32)unchecked((Int32)lo)));
+            return ToRational64Checked(lo, hi);
         }
 
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
@@ -848,7 +1052,38 @@ namespace UltimateOrb.Mathematics.Exact {
                     ++c;
                 }
             }
-            return unchecked((Int64)((Double)(UInt32)value.bits / c));
+            return (Double)unchecked((UInt32)value.bits) / unchecked((Int32)c);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static bool IsPow2(UInt32 value) {
+            Debug.Assert(0 != value);
+            return (value & (value - 1)) == 0;
+        }
+
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
+        [TargetedPatchingOptOutAttribute("")]
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        [PureAttribute()]
+        public static Double ToDoubleExact(Rational64 value) {
+            var c = value.bits;
+            if (0 == c) {
+                return 0;
+            }
+            c = unchecked((Int32)(c >> 32));
+            UInt32 d = unchecked((UInt32)(Int32)c);
+            if (0 <= unchecked((Int32)d)) {
+                unchecked {
+                    ++c;
+                    ++d;
+                }
+            } else {
+                unchecked {
+                    d = (-d.ToSignedUnchecked()).ToUnsignedUnchecked();
+                }
+            }
+            UltimateOrb.Utilities.ThrowHelper.ThrowOnTrue(IsPow2(d));
+            return (Double)unchecked((UInt32)value.bits) / unchecked((Int32)c);
         }
 
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
@@ -856,17 +1091,66 @@ namespace UltimateOrb.Mathematics.Exact {
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         [PureAttribute()]
         public static explicit operator Double(Rational64 value) {
+            return ToDoubleInexact(value);
+        }
+
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
+        [TargetedPatchingOptOutAttribute("")]
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        [PureAttribute()]
+        public static explicit operator checked Double(Rational64 value) {
+            return ToDoubleExact(value);
+        }
+
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
+        [TargetedPatchingOptOutAttribute("")]
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        [PureAttribute()]
+        public static Single ToSingleInexact(Rational64 value) {
+            return (Single)ToDoubleInexact(value);
+        }
+
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
+        [TargetedPatchingOptOutAttribute("")]
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        [PureAttribute()]
+        public static Single ToSingleExact(Rational64 value) {
             var c = value.bits;
             if (0 == c) {
                 return 0;
             }
             c = unchecked((Int32)(c >> 32));
-            if (0 <= unchecked((Int32)c)) {
+            UInt32 d = unchecked((UInt32)(Int32)c);
+            if (0 <= unchecked((Int32)d)) {
                 unchecked {
                     ++c;
+                    ++d;
+                }
+            } else {
+                unchecked {
+                    d = (-d.ToSignedUnchecked()).ToUnsignedUnchecked();
                 }
             }
-            return unchecked((Int64)((Double)(UInt32)value.bits / c));
+            var e = unchecked(BinaryNumerals.CountLeadingZeros(unchecked((UInt32)value.bits)) + BinaryNumerals.CountTrailingZeros(unchecked((UInt32)value.bits)));
+            UltimateOrb.Utilities.ThrowHelper.ThrowOnGreaterThan(e, 32 - (1 + 23));
+            UltimateOrb.Utilities.ThrowHelper.ThrowOnTrue(IsPow2(d));
+            return (Single)(Double)unchecked((UInt32)value.bits) / unchecked((Int32)c);
+        }
+
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
+        [TargetedPatchingOptOutAttribute("")]
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        [PureAttribute()]
+        public static explicit operator Single(Rational64 value) {
+            return ToSingleInexact(value);
+        }
+
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
+        [TargetedPatchingOptOutAttribute("")]
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        [PureAttribute()]
+        public static explicit operator checked Single(Rational64 value) {
+            return ToSingleExact(value);
         }
 
         [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
@@ -879,7 +1163,7 @@ namespace UltimateOrb.Mathematics.Exact {
                 // TODO: Perf
                 throw new NotFiniteNumberException(value);
             }
-            // Interval "( 2 ^ 32 - 1 - 1 / 2, 2 ^ 32 - 1 + 1 / 2 )"
+            // IntervalI "( 2 ^ 32 - 1 - 1 / 2, 2 ^ 32 - 1 + 1 / 2 )"
             var s = 0 > value;
             var a = (Double)(s ? -value : value);
             const Double b = 4.294967296e9;
@@ -895,7 +1179,7 @@ namespace UltimateOrb.Mathematics.Exact {
             var d = unchecked((UInt32)Math.Floor(a));
             var p1 = d;
             var q1 = (UInt32)1;
-            L_0:
+        L_0:
             a = 1.0 / (a - d);
             var c = unchecked((UInt32)Math.Floor(a));
             var p0 = unchecked((UInt64)c * p1 + p2);
@@ -963,6 +1247,154 @@ namespace UltimateOrb.Mathematics.Exact {
             }
         }
 
+        public static Rational64 Abs(Rational64 value) {
+            return IsNegative(value) ? -value : value;
+        }
+
+        static bool INumberBase<Rational64>.IsCanonical(Rational64 value) {
+            return true;
+        }
+
+        static bool INumberBase<Rational64>.IsComplexNumber(Rational64 value) {
+            return true;
+        }
+
+        static bool INumberBase<Rational64>.IsEvenInteger(Rational64 value) {
+            return IsInteger(value) && (0 == (1 & unchecked((int)value.bits)));
+        }
+
+        static bool INumberBase<Rational64>.IsFinite(Rational64 value) {
+            return true;
+        }
+
+        static bool INumberBase<Rational64>.IsImaginaryNumber(Rational64 value) {
+            return false;
+        }
+
+        static bool INumberBase<Rational64>.IsInfinity(Rational64 value) {
+            return false;
+        }
+
+        public static bool IsInteger(Rational64 value) {
+            return unchecked(1 + (UInt32)(value.bits >> 32)) <= 1;
+        }
+
+        static bool INumberBase<Rational64>.IsNaN(Rational64 value) {
+            return false;
+        }
+
+        public static bool IsNegative(Rational64 value) {
+            return 0 > value.bits;
+        }
+
+        static bool INumberBase<Rational64>.IsNegativeInfinity(Rational64 value) {
+            return false;
+        }
+
+        static bool INumberBase<Rational64>.IsNormal(Rational64 value) {
+            return 0 != value.bits;
+        }
+
+        static bool INumberBase<Rational64>.IsOddInteger(Rational64 value) {
+            return IsInteger(value) && (0 != (1 & unchecked((int)value.bits)));
+        }
+
+        public static bool IsPositive(Rational64 value) {
+            return value.bits > 0;
+        }
+
+        static bool INumberBase<Rational64>.IsPositiveInfinity(Rational64 value) {
+            return false;
+        }
+
+        static bool INumberBase<Rational64>.IsRealNumber(Rational64 value) {
+            return true;
+        }
+
+        static bool INumberBase<Rational64>.IsSubnormal(Rational64 value) {
+            return false;
+        }
+
+        public static bool IsZero(Rational64 value) {
+            return 0 == value.bits;
+        }
+
+        static Rational64 INumberBase<Rational64>.MaxMagnitude(Rational64 x, Rational64 y) {
+            return IntegerGenericMathImpl.MaxMagnitude(x, y);
+        }
+
+        static Rational64 INumberBase<Rational64>.MaxMagnitudeNumber(Rational64 x, Rational64 y) {
+            return IntegerGenericMathImpl.MaxMagnitude(x, y);
+        }
+
+        static Rational64 INumberBase<Rational64>.MinMagnitude(Rational64 x, Rational64 y) {
+            return IntegerGenericMathImpl.MinMagnitude(x, y);
+        }
+
+        static Rational64 INumberBase<Rational64>.MinMagnitudeNumber(Rational64 x, Rational64 y) {
+            return IntegerGenericMathImpl.MinMagnitude(x, y);
+        }
+
+        static Rational64 INumberBase<Rational64>.Parse(ReadOnlySpan<char> s, NumberStyles style, IFormatProvider? provider) {
+            throw new NotImplementedException();
+        }
+
+        static Rational64 INumberBase<Rational64>.Parse(string s, NumberStyles style, IFormatProvider? provider) {
+            throw new NotImplementedException();
+        }
+
+        static bool INumberBase<Rational64>.TryConvertFromChecked<TOther>(TOther value, out Rational64 result) {
+            throw new NotImplementedException();
+        }
+
+        static bool INumberBase<Rational64>.TryConvertFromSaturating<TOther>(TOther value, out Rational64 result) {
+            throw new NotImplementedException();
+        }
+
+        static bool INumberBase<Rational64>.TryConvertFromTruncating<TOther>(TOther value, out Rational64 result) {
+            throw new NotImplementedException();
+        }
+
+        static bool INumberBase<Rational64>.TryConvertToChecked<TOther>(Rational64 value, out TOther result) {
+            throw new NotImplementedException();
+        }
+
+        static bool INumberBase<Rational64>.TryConvertToSaturating<TOther>(Rational64 value, out TOther result) {
+            throw new NotImplementedException();
+        }
+
+        static bool INumberBase<Rational64>.TryConvertToTruncating<TOther>(Rational64 value, out TOther result) {
+            throw new NotImplementedException();
+        }
+
+        static bool INumberBase<Rational64>.TryParse(ReadOnlySpan<char> s, NumberStyles style, IFormatProvider? provider, out Rational64 result) {
+            throw new NotImplementedException();
+        }
+
+        static bool INumberBase<Rational64>.TryParse(string? s, NumberStyles style, IFormatProvider? provider, out Rational64 result) {
+            throw new NotImplementedException();
+        }
+
+        bool ISpanFormattable.TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider) {
+            throw new NotImplementedException();
+        }
+
+        static Rational64 ISpanParsable<Rational64>.Parse(ReadOnlySpan<char> s, IFormatProvider? provider) {
+            throw new NotImplementedException();
+        }
+
+        static bool ISpanParsable<Rational64>.TryParse(ReadOnlySpan<char> s, IFormatProvider? provider, out Rational64 result) {
+            throw new NotImplementedException();
+        }
+
+        static Rational64 IParsable<Rational64>.Parse(string s, IFormatProvider? provider) {
+            throw new NotImplementedException();
+        }
+
+        static bool IParsable<Rational64>.TryParse(string? s, IFormatProvider? provider, out Rational64 result) {
+            throw new NotImplementedException();
+        }
+
         [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
         [TargetedPatchingOptOutAttribute("")]
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
@@ -970,7 +1402,7 @@ namespace UltimateOrb.Mathematics.Exact {
         public static explicit operator Rational64(Double value) {
             // TODO: Perf
             ThrowOnInfinite(value);
-            // Interval "( 2 ^ 32 - 1 - 1 / 2, 2 ^ 32 - 1 + 1 / 2 )"
+            // IntervalI "( 2 ^ 32 - 1 - 1 / 2, 2 ^ 32 - 1 + 1 / 2 )"
             var s = 0 > value;
             var a = (Double)(s ? -value : value);
             const Double b = 4.294967296e9;
@@ -983,7 +1415,7 @@ namespace UltimateOrb.Mathematics.Exact {
             var d = unchecked((UInt32)Math.Floor(a));
             var p1 = d;
             var q1 = (UInt32)1;
-            L_0:
+        L_0:
             a = 1.0 / (a - d);
             var c = unchecked((UInt32)Math.Floor(a));
             var p0 = unchecked((UInt64)c * p1 + p2);
@@ -1001,6 +1433,89 @@ namespace UltimateOrb.Mathematics.Exact {
             q1 = unchecked((UInt32)q0);
             d = unchecked((UInt32)Math.Floor(a));
             goto L_0;
+        }
+
+        public static UInt64 DecreaseAsRational128(Rational64 value, out UInt64 bits_hi) {
+            unchecked {
+                var numerator = (UInt32)value.bits;
+                var denominator = value.bits >> 32;
+                if (0 <= denominator) {
+                    ++denominator;
+                }
+                var p = (Int64)numerator;
+                var q = denominator;
+                p -= denominator;
+                {
+                    if (0 > p) {
+                        p = -p;
+                        q = -q;
+                    }
+                }
+                if (0 <= q) {
+                    --q;
+                }
+                bits_hi = (UInt64)q;
+                return (UInt64)p;
+            }
+        }
+
+        public static Rational64 operator --(Rational64 value) {
+            var lo = DecreaseAsRational128(value, out var hi);
+            return ToRational64Checked(lo, hi);
+        }
+
+        public static UInt64 IncreaseAsRational128(Rational64 value, out UInt64 bits_hi) {
+            unchecked {
+                var numerator = (UInt32)value.bits;
+                var denominator = value.bits >> 32;
+                if (0 <= denominator) {
+                    ++denominator;
+                }
+                var p = (Int64)numerator;
+                var q = denominator;
+                p += denominator;
+                if (p == 0) {
+                    bits_hi = 0;
+                    return 0;
+                }
+                {
+                    if (0 > p) {
+                        p = -p;
+                        q = -q;
+                    }
+                }
+                if (0 <= q) {
+                    --q;
+                }
+                bits_hi = (UInt64)q;
+                return (UInt64)p;
+            }
+        }
+
+        public static Rational64 operator ++(Rational64 value) {
+            var lo = IncreaseAsRational128(value, out var hi);
+            return ToRational64Checked(lo, hi);
+        }
+
+        public static bool operator <(Rational64 first, Rational64 second) {
+            return first.CompareTo(second) < 0;
+        }
+
+        public static bool operator <=(Rational64 first, Rational64 second) {
+            return first.CompareTo(second) <= 0;
+        }
+
+        public static bool operator >(Rational64 first, Rational64 second) {
+            return first.CompareTo(second) > 0;
+        }
+
+        public static bool operator >=(Rational64 first, Rational64 second) {
+            return first.CompareTo(second) >= 0;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static Rational64 ToRational64Checked(ulong lo, ulong hi) {
+            return new Rational64(((Int64)checked((Int32)hi.ToSignedUnchecked())).ToUnsignedUnchecked() << 32 | (UInt64)checked((UInt32)lo));
         }
     }
 }

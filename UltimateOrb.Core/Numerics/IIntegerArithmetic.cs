@@ -232,7 +232,7 @@ namespace UltimateOrb.Numerics {
 
     //    T NegateUnsigned(T value);
 
-    //    T AddUnsigned(T first, T second);
+    //    T AddUnsignedWithOverflow(T first, T second);
 
     //    T SubtractUnsigned(T first, T second);
 

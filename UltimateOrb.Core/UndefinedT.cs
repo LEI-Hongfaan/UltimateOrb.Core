@@ -34,28 +34,28 @@ namespace UltimateOrb {
             return other is not null;
         }
 
-        public static bool operator <(UndefinedT? left, UndefinedT? right) {
-            return Utilities.CilVerifiable.LessThan((object?)left, (object?)right);
+        public static bool operator <(UndefinedT? first, UndefinedT? second) {
+            return Utilities.CilVerifiable.LessThan((object?)first, (object?)second);
         }
 
-        public static bool operator <=(UndefinedT? left, UndefinedT? right) {
-            return Utilities.CilVerifiable.LessThanOrEqual((object?)left, (object?)right);
+        public static bool operator <=(UndefinedT? first, UndefinedT? second) {
+            return Utilities.CilVerifiable.LessThanOrEqual((object?)first, (object?)second);
         }
 
-        public static bool operator >(UndefinedT? left, UndefinedT? right) {
-            return Utilities.CilVerifiable.GreaterThan((object?)left, (object?)right);
+        public static bool operator >(UndefinedT? first, UndefinedT? second) {
+            return Utilities.CilVerifiable.GreaterThan((object?)first, (object?)second);
         }
 
-        public static bool operator >=(UndefinedT? left, UndefinedT? right) {
-            return Utilities.CilVerifiable.GreaterThanOrEqual((object?)left, (object?)right);
+        public static bool operator >=(UndefinedT? first, UndefinedT? second) {
+            return Utilities.CilVerifiable.GreaterThanOrEqual((object?)first, (object?)second);
         }
 
-        public static bool operator ==(UndefinedT? left, UndefinedT? right) {
-            return ReferenceEquals(left, right);
+        public static bool operator ==(UndefinedT? first, UndefinedT? second) {
+            return ReferenceEquals(first, second);
         }
 
-        public static bool operator !=(UndefinedT? left, UndefinedT? right) {
-            return !(left == right);
+        public static bool operator !=(UndefinedT? first, UndefinedT? second) {
+            return !(first == second);
         }
 
         /// <summary>
