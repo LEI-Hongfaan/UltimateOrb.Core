@@ -588,6 +588,23 @@ namespace UltimateOrb.Numerics {
 
 namespace UltimateOrb.Numerics {
 
+    public readonly partial struct BigRational {
+
+        public static partial class Math {
+
+            public static BigRational Floor(BigRational value) {
+                var quotient = BigInteger.DivRem(value.SignedNumerator, value.Denominator, out var remainder);
+                if (BigInteger.IsNegative(remainder)) {
+                    --quotient;
+                }
+                return quotient;
+            }
+        }
+    }
+}
+
+namespace UltimateOrb.Numerics {
+
     public readonly partial struct BigRational
         : INumber<BigRational> {
 
