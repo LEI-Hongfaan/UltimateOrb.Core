@@ -134,7 +134,7 @@ namespace UltimateOrb.Numerics {
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         [PureAttribute()]
         public static implicit operator BigRational(BigInteger value) {
-            return value.IsZero ? default : new BigRational(value, s_BigIntegerOne);
+            return value.IsZero ? default : new BigRational(denominator: s_BigIntegerOne, signedNumerator: value);
         }
 
         [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
@@ -758,8 +758,6 @@ namespace UltimateOrb.Numerics {
         static readonly BigInteger s_ByteMaxValueAsBigInteger = byte.MaxValue;
 
         static readonly BigInteger s_UIntPtrMaxValueAsBigInteger = UIntPtr.MaxValue;
-
-
 
         static bool INumberBase<BigRational>.TryConvertToTruncating<TOther>(BigRational value, out TOther result) {
             static BigInteger F(BigRational value) {
