@@ -280,7 +280,7 @@ namespace UltimateOrb.Mathematics.Exact {
             if (0u == d) {
                 return Rational64.Zero;
             } else {
-                c = 0 > c ? ~c : -c;
+                c = 0 > c ? ~c : unchecked(-c);
                 return new Rational64(unchecked((UInt64)((Int64)c << 32) | d));
             }
         }
@@ -765,7 +765,7 @@ namespace UltimateOrb.Mathematics.Exact {
         [TargetedPatchingOptOutAttribute("")]
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         [PureAttribute()]
-        public static Rational64 FromInt64Bits(Int64 bits) {
+        internal static Rational64 FromInt64Bits(Int64 bits) {
             var numerator = unchecked((UInt32)bits);
             var denominator = unchecked((Int32)(bits >> 32));
             var s = 0 > denominator;
@@ -1204,10 +1204,10 @@ namespace UltimateOrb.Mathematics.Exact {
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         [PureAttribute()]
         public int CompareTo(Rational64 other) {
-            var this_numerator = (UInt32)this.bits;
-            var this_denominator = (Int32)(this.bits >> 32);
-            var other_numerator = (UInt32)other.bits;
-            var other_denominator = (Int32)(other.bits >> 32);
+            var this_numerator = unchecked((UInt32)this.bits);
+            var this_denominator = unchecked((Int32)(this.bits >> 32));
+            var other_numerator = unchecked((UInt32)other.bits);
+            var other_denominator = unchecked((Int32)(other.bits >> 32));
             if (0 <= this_denominator) {
                 if (0 <= other_denominator) {
                     unchecked {
@@ -1517,9 +1517,17 @@ namespace UltimateOrb.Mathematics.Exact {
         static Rational64 ToRational64Checked(ulong lo, ulong hi) {
             return new Rational64(((Int64)checked((Int32)hi.ToSignedUnchecked())).ToUnsignedUnchecked() << 32 | (UInt64)checked((UInt32)lo));
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+        public static Rational64 GetFractionPart(Rational64 value) {
+            var m = unchecked((Int32)(value.bits >> 32));
+            var m1 = unchecked((UInt32)(0 > value.bits ? -m : 1 + m));
+            var n = unchecked((UInt32)value.bits);
+            var r = n % m1;
+            return 0 == r ? default : new Rational64(unchecked(r | ((UInt64)m << 32)));
+        }
     }
 }
-
 
 namespace UltimateOrb.Mathematics.Exact {
 

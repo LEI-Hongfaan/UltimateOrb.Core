@@ -105,7 +105,9 @@ namespace UltimateOrb.Numerics {
         public static ULong BigDivRem(ULong lowDividend, ULong highDividend, ULong divisor, out ULong remainder) {
 #if NET8_0_OR_GREATER
             if (System.Runtime.Intrinsics.X86.X86Base.X64.IsSupported) {
+#pragma warning disable SYSLIB5004
                 var (q, r) = System.Runtime.Intrinsics.X86.X86Base.X64.DivRem(lowDividend, highDividend, divisor);
+#pragma warning restore SYSLIB5004
                 remainder = r;
                 return q;
             }

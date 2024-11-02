@@ -9,6 +9,7 @@ using System.Numerics;
 using UltimateOrb.Utilities;
 using UltimateOrb.Linq;
 using UltimateOrb.Mathematics;
+using System.Diagnostics;
 
 namespace UltimateOrb.Core.Tests {
 
@@ -722,6 +723,54 @@ namespace UltimateOrb.Core.Tests {
                 Assert.That(dividend, Is.EqualTo(Rational64.Multiply(divisor, q) + r));
                 Assert.That(Rational64.Abs(r), Is.LessThan(Rational64.Abs(divisor)));
             });
+        }
+
+        // Property: Fraction part of a rational number should always have the same sign as the input
+        // and its absolute value should be less than 1
+        [Property(MaxTest = 1000000)]
+        public bool FractionPart_SameSign_And_AbsoluteLessThanOne(uint num, int den) {
+            if (den == 0) den = 1; // Avoid division by zero
+            var value = Rational64.FromFraction(num, den);
+
+            var fractionPart = Rational64.GetFractionPart(value);
+
+            return (fractionPart.Sign * value.Sign >= 0 && Rational64.Abs(fractionPart) < Rational64.One);
+        }
+
+        // Property: Fraction part of a rational number should ensure (x - fractionPart(x)) is an integer
+        [Property(MaxTest = 1000000)]
+        public bool FractionPart_SubtractionIsInteger(uint num, int den) {
+            if (den == 0) den = 1; // Avoid division by zero
+            var value = Rational64.FromFraction(num, den);
+
+            var fractionPart = Rational64.GetFractionPart(value);
+            var difference = value - fractionPart;
+
+            return IsInteger(difference);
+        }
+
+        // Property: Fraction part of integers should be zero
+        [Property(MaxTest = 1000000)]
+        public void FractionPart_OfIntegersIsZero(uint integer) {
+            {
+                var value = Rational64.FromFraction(integer, 1);
+                var fractionPart = Rational64.GetFractionPart(value);
+
+                Assert.That(fractionPart == Rational64.Zero);
+            }
+            {
+                var value = Rational64.FromFraction(integer, -1);
+                var fractionPart = Rational64.GetFractionPart(value);
+                if (fractionPart != 0) {
+                    var sdfa = new object();
+                }
+                Assert.That(fractionPart == Rational64.Zero);
+            }
+        }
+
+        private bool IsInteger(Rational64 value) {
+            // A rational number is an integer if its denominator is 1
+            return value.Denominator == 1;
         }
     }
 }

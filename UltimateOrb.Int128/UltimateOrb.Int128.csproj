@@ -2,7 +2,7 @@
 
   <PropertyGroup>
 		<TargetFrameworks>net6.0;net7.0;net8.0;net9.0</TargetFrameworks>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -26,6 +26,7 @@
     <Description>Provides Int128 and UInt128.</Description>
     <Authors>LEI Hongfaan</Authors>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<EnablePreviewFeatures>true</EnablePreviewFeatures>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -186,7 +187,7 @@
   </UsingTask>
 
   <PropertyGroup Condition="'$(TargetFramework)'=='net6.0'">
-    <AssemblyDir>C:\Program Files\dotnet\shared\Microsoft.NETCore.App\6.0.32\</AssemblyDir>
+    <AssemblyDir>C:\Program Files\dotnet\shared\Microsoft.NETCore.App\6.0.35\</AssemblyDir>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)'=='net7.0'">
@@ -194,11 +195,11 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)'=='net8.0'">
-    <AssemblyDir>C:\Program Files\dotnet\shared\Microsoft.NETCore.App\8.0.7\</AssemblyDir>
+    <AssemblyDir>C:\Program Files\dotnet\shared\Microsoft.NETCore.App\8.0.10\</AssemblyDir>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)'=='net9.0'">
-    <AssemblyDir>C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.0-preview.6.24327.7\</AssemblyDir>
+    <AssemblyDir>C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.0-rc.2.24473.5\</AssemblyDir>
   </PropertyGroup>
   
   <Target Name="TrimmingEnvVar" BeforeTargets="Trimming">

@@ -1602,7 +1602,7 @@
             <param name="matrix">The rotation matrix.</param>
             <returns>The newly created quaternion.</returns>
         </member>
-        <member name="M:UltimateOrb.Numerics.Accelerated.QuaternionD.CreateFromYawPitchRollDirectX(System.Double,System.Double,System.Double)">
+        <member name="M:UltimateOrb.Numerics.Accelerated.QuaternionD.CreateFromYawPitchRoll_DirectXMath(System.Double,System.Double,System.Double)">
             <summary>Creates a new quaternion from the given yaw, pitch, and roll.</summary>
             <param name="yaw">The yaw angle, in radians, around the Y axis.</param>
             <param name="pitch">The pitch angle, in radians, around the X axis.</param>

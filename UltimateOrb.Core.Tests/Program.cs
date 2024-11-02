@@ -24,6 +24,7 @@ namespace UltimateOrb.Core.Tests {
     using UltimateOrb.Mathematics.Geometry;
     using UltimateOrb.Numerics;
     using UltimateOrb.Plain.ValueTypes;
+
     // using UltimateOrb.Runtime.CompilerServices.Tests;
 
 
@@ -73,6 +74,18 @@ namespace UltimateOrb.Core.Tests {
 
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private static int Main(string[] args) {
+
+            {
+
+                var t = new Rational64ExactTests();
+                for (long i = 0; i < 330000000; i++) {
+                    t.FractionPart_OfIntegersIsZero((uint)i);
+                }
+                return 0;
+
+            }
+
+
             {
                 var s = 0;
                 for (var i = 0L; 1_000_000_000_000 > i; ++i) {
