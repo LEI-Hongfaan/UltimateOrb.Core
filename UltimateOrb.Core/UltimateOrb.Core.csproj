@@ -47,6 +47,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Numerics\BigDecimal.cs" />
     <Compile Remove="Numerics\Complex.cs" />
   </ItemGroup>
 
@@ -60,6 +61,7 @@
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
+    <None Include="Numerics\BigDecimal.cs" />
     <None Include="Numerics\Complex.cs" />
   </ItemGroup>
 
