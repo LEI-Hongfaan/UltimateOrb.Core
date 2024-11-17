@@ -294,7 +294,7 @@ namespace UltimateOrb.Numerics
         public static Modular<T, ModulusT> operator *(Modular<T, ModulusT> first, Modular<T, ModulusT> second) {
             if (!IsZeroRng) {
                 UltimateOrb.Numerics.StandardGenericMathArithmeticProvider<T>.BigMulUnsigned(out var result_lo, out var result_hi, first.m_value, second.m_value);
-
+                throw new NotImplementedException();
                 return Zero;
             }
             return Zero;
