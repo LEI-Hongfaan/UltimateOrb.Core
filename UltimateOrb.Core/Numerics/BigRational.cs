@@ -367,8 +367,8 @@ namespace UltimateOrb.Numerics {
             Contract.Ensures(Contract.Result<string>() != null);
             var sb = new StringBuilder(33);
             sb.Append(this.m_SignedNumerator);
-            var t = this.m_Denominator;
-            if (1 != t) {
+            var t = this.Denominator;
+            if (!t.IsOne) {
                 var i = sb.Length - 1;
                 for (; 0 <= i; --i) {
                     var c = sb[i];
