@@ -2,7 +2,6 @@
 
   <PropertyGroup>
 		<TargetFrameworks>net6.0;net7.0;net8.0;net9.0</TargetFrameworks>
-    <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -195,38 +194,71 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)'=='net8.0'">
-    <AssemblyDir>C:\Program Files\dotnet\shared\Microsoft.NETCore.App\8.0.10\</AssemblyDir>
+    <AssemblyDir>C:\Program Files\dotnet\shared\Microsoft.NETCore.App\8.0.11\</AssemblyDir>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)'=='net9.0'">
-    <AssemblyDir>C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.0-rc.2.24473.5\</AssemblyDir>
+    <AssemblyDir>C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.0\</AssemblyDir>
   </PropertyGroup>
   
-  <Target Name="TrimmingEnvVar" BeforeTargets="Trimming">
+  <Target Name="TrimmingEnvVar">
     <SetEnvironmentVariableTask Name="DOTNET_HOST_PATH" Value="C:\Program Files\dotnet\dotnet.exe" />
   </Target>
   
-  <Target Name="Trimming" Condition="'$(TargetFramework)'=='net6.0'" AfterTargets="PostBuild">
-    <Copy SourceFiles="$(TargetPath)" DestinationFiles="tmp\UltimateOrb.Int128.dll"></Copy>
-    <ILLink AssemblyPaths="$(AssemblyDir)System.Runtime.dll;$(AssemblyDir)System.Private.CoreLib.dll;$(AssemblyDir)System.Private.Uri.dll;$(AssemblyDir)System.Diagnostics.Contracts.dll;$(AssemblyDir)System.Memory.dll;$(AssemblyDir)System.Runtime.Numerics.dll;tmp\UltimateOrb.Int128.dll" RootAssemblyNames="" RootDescriptorFiles="linker.xml" OutputDirectory="tmp\output\" ExtraArgs="--keep-metadata parametername -t --trim-mode link" />
-    <Copy SourceFiles="tmp\output\UltimateOrb.Int128.dll" DestinationFiles="$(TargetPath)"></Copy>
+  <Target Name="TrimmingNet60" Condition="'$(TargetFramework)'=='net6.0'" AfterTargets="PostBuild" BeforeTargets="TrimmingNet70" DependsOnTargets="TrimmingEnvVar">
+		<ItemGroup>
+			<!-- Items representing the specific .dll and .pdb files -->
+			<FilesToCopy Include="$(OutputPath)\UltimateOrb.Int128.dll" />
+			<FilesToCopy Include="$(OutputPath)\UltimateOrb.Int128.pdb" />
+		</ItemGroup>
+		<Message Importance="High" Text="Trimming $(TargetFramework)"></Message>
+		<Delete Files="tmp\$(TargetFramework)\"></Delete>
+		<Copy SourceFiles="@(FilesToCopy)" DestinationFolder="tmp\$(TargetFramework)\"></Copy>
+		<ILLink AssemblyPaths="$(AssemblyDir)System.Runtime.dll;$(AssemblyDir)System.Private.CoreLib.dll;$(AssemblyDir)System.Private.Uri.dll;$(AssemblyDir)System.Diagnostics.Contracts.dll;$(AssemblyDir)System.Memory.dll;$(AssemblyDir)System.Runtime.Numerics.dll;$(AssemblyDir)System.Runtime.CompilerServices.Unsafe.dll;tmp\$(TargetFramework)\UltimateOrb.Int128.dll" RootAssemblyNames="" RootDescriptorFiles="linker.xml" OutputDirectory="tmp\$(TargetFramework)\output\" ExtraArgs="--keep-metadata parametername -t --trim-mode link" />
+		<Copy SourceFiles="tmp\$(TargetFramework)\output\UltimateOrb.Int128.dll;" DestinationFolder="$(OutputPath)"></Copy>
+		<Message Importance="High" Text="Trimmed $(TargetFramework)"></Message>
+	</Target>
+	
+	<Target Name="TrimmingNet70" Condition="'$(TargetFramework)'=='net7.0'" AfterTargets="PostBuild" BeforeTargets="TrimmingNet80" DependsOnTargets="TrimmingEnvVar">
+		<ItemGroup>
+			<!-- Items representing the specific .dll and .pdb files -->
+			<FilesToCopy Include="$(OutputPath)\UltimateOrb.Int128.dll" />
+			<FilesToCopy Include="$(OutputPath)\UltimateOrb.Int128.pdb" />
+		</ItemGroup>
+		<Message Importance="High" Text="Trimming $(TargetFramework)"></Message>
+		<Delete Files="tmp\$(TargetFramework)\"></Delete>
+		<Copy SourceFiles="@(FilesToCopy)" DestinationFolder="tmp\$(TargetFramework)\"></Copy>
+		<ILLink AssemblyPaths="$(AssemblyDir)System.Runtime.dll;$(AssemblyDir)System.Private.CoreLib.dll;$(AssemblyDir)System.Private.Uri.dll;$(AssemblyDir)System.Diagnostics.Contracts.dll;$(AssemblyDir)System.Memory.dll;$(AssemblyDir)System.Runtime.Numerics.dll;$(AssemblyDir)System.Runtime.Intrinsics.dll;tmp\$(TargetFramework)\UltimateOrb.Int128.dll" RootAssemblyNames="" RootDescriptorFiles="linker.xml" OutputDirectory="tmp\$(TargetFramework)\output\" ExtraArgs="--keep-metadata parametername -t --trim-mode link" />
+		<Copy SourceFiles="tmp\$(TargetFramework)\output\UltimateOrb.Int128.dll;" DestinationFolder="$(OutputPath)"></Copy>
+		<Message Importance="High" Text="Trimmed $(TargetFramework)"></Message>
   </Target>
 	
-	<Target Name="Trimming" Condition="'$(TargetFramework)'=='net7.0'" AfterTargets="PostBuild">
-		<Copy SourceFiles="$(TargetPath)" DestinationFiles="tmp\UltimateOrb.Int128.dll"></Copy>
-		<ILLink AssemblyPaths="$(AssemblyDir)System.Runtime.dll;$(AssemblyDir)System.Private.CoreLib.dll;$(AssemblyDir)System.Private.Uri.dll;$(AssemblyDir)System.Diagnostics.Contracts.dll;$(AssemblyDir)System.Memory.dll;$(AssemblyDir)System.Runtime.Numerics.dll;tmp\UltimateOrb.Int128.dll" RootAssemblyNames="" RootDescriptorFiles="linker.xml" OutputDirectory="tmp\output\" ExtraArgs="--keep-metadata parametername -t --trim-mode link" />
-		<Copy SourceFiles="tmp\output\UltimateOrb.Int128.dll" DestinationFiles="$(TargetPath)"></Copy>
-	</Target>
-	
-	<Target Name="Trimming" Condition="'$(TargetFramework)'=='net8.0'" AfterTargets="PostBuild">
-		<Copy SourceFiles="$(TargetPath)" DestinationFiles="tmp\UltimateOrb.Int128.dll"></Copy>
-		<ILLink AssemblyPaths="$(AssemblyDir)System.Runtime.dll;$(AssemblyDir)System.Private.CoreLib.dll;$(AssemblyDir)System.Private.Uri.dll;$(AssemblyDir)System.Diagnostics.Contracts.dll;$(AssemblyDir)System.Memory.dll;$(AssemblyDir)System.Runtime.Numerics.dll;tmp\UltimateOrb.Int128.dll" RootAssemblyNames="" RootDescriptorFiles="linker.xml" OutputDirectory="tmp\output\" ExtraArgs="--keep-metadata parametername --trim-mode link" />
-		<Copy SourceFiles="tmp\output\UltimateOrb.Int128.dll" DestinationFiles="$(TargetPath)"></Copy>
+	<Target Name="TrimmingNet80" Condition="'$(TargetFramework)'=='net8.0'" AfterTargets="PostBuild" BeforeTargets="TrimmingNet90" DependsOnTargets="TrimmingEnvVar">
+		<ItemGroup>
+			<!-- Items representing the specific .dll and .pdb files -->
+			<FilesToCopy Include="$(OutputPath)\UltimateOrb.Int128.dll" />
+			<FilesToCopy Include="$(OutputPath)\UltimateOrb.Int128.pdb" />
+		</ItemGroup>
+		<Message Importance="High" Text="Trimming $(TargetFramework)"></Message>
+		<Delete Files="tmp\$(TargetFramework)\"></Delete>
+		<Copy SourceFiles="@(FilesToCopy)" DestinationFolder="tmp\$(TargetFramework)\"></Copy>
+		<ILLink AssemblyPaths="$(AssemblyDir)System.Runtime.dll;$(AssemblyDir)System.Private.CoreLib.dll;$(AssemblyDir)System.Private.Uri.dll;$(AssemblyDir)System.Diagnostics.Contracts.dll;$(AssemblyDir)System.Memory.dll;$(AssemblyDir)System.Runtime.Numerics.dll;$(AssemblyDir)System.Runtime.Intrinsics.dll;tmp\$(TargetFramework)\UltimateOrb.Int128.dll" RootAssemblyNames="" RootDescriptorFiles="linker.xml" OutputDirectory="tmp\$(TargetFramework)\output\" ExtraArgs="--keep-metadata parametername --trim-mode link" />
+		<Copy SourceFiles="tmp\$(TargetFramework)\output\UltimateOrb.Int128.dll;" DestinationFolder="$(OutputPath)"></Copy>
+		<Message Importance="High" Text="Trimmed $(TargetFramework)"></Message>
 	</Target>
 
-	<Target Name="Trimming" Condition="'$(TargetFramework)'=='net9.0'" AfterTargets="PostBuild">
-		<Copy SourceFiles="$(TargetPath)" DestinationFiles="tmp\UltimateOrb.Int128.dll"></Copy>
-		<ILLink AssemblyPaths="$(AssemblyDir)System.Runtime.dll;$(AssemblyDir)System.Private.CoreLib.dll;$(AssemblyDir)System.Private.Uri.dll;$(AssemblyDir)System.Diagnostics.Contracts.dll;$(AssemblyDir)System.Memory.dll;$(AssemblyDir)System.Runtime.Numerics.dll;tmp\UltimateOrb.Int128.dll" RootAssemblyNames="" RootDescriptorFiles="linker.xml" OutputDirectory="tmp\output\" ExtraArgs="--keep-metadata parametername --trim-mode link" />
-		<Copy SourceFiles="tmp\output\UltimateOrb.Int128.dll" DestinationFiles="$(TargetPath)"></Copy>
+	<Target Name="TrimmingNet90" Condition="'$(TargetFramework)'=='net9.0'" AfterTargets="PostBuild" DependsOnTargets="TrimmingEnvVar">
+		<ItemGroup>
+			<!-- Items representing the specific .dll and .pdb files -->
+			<FilesToCopy Include="$(OutputPath)\UltimateOrb.Int128.dll" />
+			<FilesToCopy Include="$(OutputPath)\UltimateOrb.Int128.pdb" />
+		</ItemGroup>
+		<Message Importance="High" Text="Trimming $(TargetFramework)"></Message>
+		<Delete Files="tmp\$(TargetFramework)\"></Delete>
+		<Copy SourceFiles="@(FilesToCopy)" DestinationFolder="tmp\$(TargetFramework)\"></Copy>
+		<ILLink AssemblyPaths="$(AssemblyDir)System.Runtime.dll;$(AssemblyDir)System.Private.CoreLib.dll;$(AssemblyDir)System.Private.Uri.dll;$(AssemblyDir)System.Diagnostics.Contracts.dll;$(AssemblyDir)System.Memory.dll;$(AssemblyDir)System.Runtime.Numerics.dll;tmp\$(TargetFramework)\UltimateOrb.Int128.dll" RootAssemblyNames="" RootDescriptorFiles="linker.xml" OutputDirectory="tmp\$(TargetFramework)\output\" ExtraArgs="--keep-metadata parametername --trim-mode link" />
+		<Copy SourceFiles="tmp\$(TargetFramework)\output\UltimateOrb.Int128.dll;" DestinationFolder="$(OutputPath)"></Copy>
+		<Message Importance="High" Text="Trimmed $(TargetFramework)"></Message>
 	</Target>
+
 </Project>
