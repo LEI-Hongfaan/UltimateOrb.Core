@@ -29,6 +29,18 @@ namespace UltimateOrb.Core.Tests {
 
 
 
+    internal static class Win32DecimalHelpers {
+
+        [UnsafeAccessor(UnsafeAccessorKind.Field, Name = "_flags")]
+        internal static extern ref readonly Int32 GetFlagsInternal(this in decimal dec);
+
+        [UnsafeAccessor(UnsafeAccessorKind.Field, Name = "_hi32")]
+        internal static extern ref readonly UInt32 GetHigh32Internal(this in decimal dec);
+
+        [UnsafeAccessor(UnsafeAccessorKind.Field, Name = "_lo64")]
+        internal static extern ref readonly UInt64 GetLow64Internal(this in decimal dec);
+    }
+
     [UltimateOrb.Numerics.Specialized.GenerateFixedDecimal32(3)]
     public readonly partial struct MilliDecimal {
 
@@ -71,10 +83,26 @@ namespace UltimateOrb.Core.Tests {
 
         }
 
+        [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.AggressiveOptimization)]
+        static T UInt128ConversionTest1<T>(decimal a) where T : INumberBase<T> {
+            return T.CreateChecked(a);
+        }
+
+
 
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private static int Main(string[] args) {
+            {
+                var sdfasdf = 34325451245454352453523453453.735354345m;
+                sdfasdf /= 100m;
+                Console.WriteLine($@"{sdfasdf.GetFlagsInternal():R} {sdfasdf.GetHigh32Internal():R} {sdfasdf.GetLow64Internal():R}");
+                Console.WriteLine($@"{sdfasdf:R}");
+                var aaa = UInt128ConversionTest1<UltimateOrb.UInt128>(sdfasdf);
 
+                Console.WriteLine($@"{aaa:R}");
+
+                return 0;
+            }
             {
 
                 var t = new Rational64ExactTests();

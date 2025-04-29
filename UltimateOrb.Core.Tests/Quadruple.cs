@@ -844,7 +844,7 @@ namespace UltimateOrb {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static Quadruple Clamp(Quadruple value, Quadruple min, Quadruple max) {
                 if (min > max) {
-                    ThrowMinMaxException(min, max);
+                    _ = ThrowMinMaxException(min, max);
                 }
 
                 if (value < min) {

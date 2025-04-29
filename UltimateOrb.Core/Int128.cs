@@ -1498,12 +1498,9 @@ namespace UltimateOrb {
             return this.ToString(null, provider);
         }
 
-        object IConvertible.ToType(Type conversionType, IFormatProvider? provider) {
-            if (null == conversionType) {
-                throw new ArgumentNullException(nameof(conversionType));
-            }
-            // return Convert.DefaultToType((IConvertible)this, type, provider);
-            throw new NotImplementedException();
+        object IConvertible.ToType(Type type, IFormatProvider? provider) {
+            ArgumentNullException.ThrowIfNull(type);
+            return ConvertInternal.DefaultToType(this, type, provider);
         }
 #endif
         #endregion

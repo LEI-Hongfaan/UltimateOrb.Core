@@ -265,14 +265,14 @@ namespace UltimateOrb.Numerics {
                 var lo = radicand << (Misc.ULong.BitSize - 2);
                 radicand = radicand >> 2;
                 ULong h;
-                DoubleArithmetic.BigDivNoThrow
+                DoubleArithmetic.BigDivNoThrowWhenOverflow
                 var l = DoubleArithmetic.BigSquare(old_hi, out h);
                 l += lo;
                 h += radicand;
                 if (l < lo) {
                     ++h;
                 }
-                var @new = MathEx.BigDivNoThrow(l, h, old) >> 1;
+                var @new = MathEx.BigDivNoThrowWhenOverflow(l, h, old) >> 1;
                 l = MathEx.BigSquare(@new, out h);
                 if ((h > radicand) || ((h == radicand) && (l > lo))) {
                     --@new;

@@ -2614,7 +2614,7 @@ namespace UltimateOrb {
                 System.Diagnostics.Contracts.Contract.Requires(n > second);
                 System.Diagnostics.Contracts.Contract.Ensures(System.Diagnostics.Contracts.Contract.OldValue(n) > System.Diagnostics.Contracts.Contract.Result<XInt256>());
                 var p_lo_lo = UltimateOrb.Numerics.DoubleArithmetic.BigMul(first.lo, first.hi, second.lo, second.hi, out var p_lo_hi, out var p_hi_lo, out var p_hi_hi);
-                var lo = UltimateOrb.Numerics.DoubleArithmetic.BigRemNoThrow(p_lo_lo, p_lo_hi, p_hi_lo, p_hi_hi, n.lo, n.hi, out var hi);
+                var lo = UltimateOrb.Numerics.DoubleArithmetic.BigRemNoThrowWhenOverflow(p_lo_lo, p_lo_hi, p_hi_lo, p_hi_hi, n.lo, n.hi, out var hi);
                 return new XInt256(lo, hi);
             }
 
@@ -2627,7 +2627,7 @@ namespace UltimateOrb {
                 System.Diagnostics.Contracts.Contract.Requires(n > value);
                 System.Diagnostics.Contracts.Contract.Ensures(System.Diagnostics.Contracts.Contract.OldValue(n) > System.Diagnostics.Contracts.Contract.Result<XInt256>());
                 var p_lo_lo = UltimateOrb.Numerics.DoubleArithmetic.BigSquare(value.lo, value.hi, out var p_lo_hi, out var p_hi_lo, out var p_hi_hi);
-                var lo = UltimateOrb.Numerics.DoubleArithmetic.BigRemNoThrow(p_lo_lo, p_lo_hi, p_hi_lo, p_hi_hi, n.lo, n.hi, out var hi);
+                var lo = UltimateOrb.Numerics.DoubleArithmetic.BigRemNoThrowWhenOverflow(p_lo_lo, p_lo_hi, p_hi_lo, p_hi_hi, n.lo, n.hi, out var hi);
                 return new XInt256(lo, hi);
             }
 

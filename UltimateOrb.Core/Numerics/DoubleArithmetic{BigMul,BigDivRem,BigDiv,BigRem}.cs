@@ -93,7 +93,9 @@ namespace UltimateOrb.Numerics {
          *   - Undefined behavior on invalid inputs.
          * ~Internal:
          *   - Users should not use them directly.
-         * ~NoThrowOnDivideByZero:
+         * ~NoThrowWhenDivideByZero:
+         *   - No throw on divide-by-zero conditions.
+         * ~NoThrowWhenOverflow:
          *   - No throw on divide-by-zero conditions.
          * ~NoThrow:
          *   - No throw on exceptionl conditions.
@@ -192,7 +194,20 @@ namespace UltimateOrb.Numerics {
         [System.Runtime.CompilerServices.MethodImplAttribute(
             System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining |
             System.Runtime.CompilerServices.MethodImplOptions.AggressiveOptimization)]
-        public static ULong BigDivRemNoThrow(ULong lowDividend, ULong highDividend, ULong divisor, out ULong remainder) {
+        public static ULong BigDivRemNoThrowWhenOverflow(ULong lowDividend, ULong highDividend, ULong divisor, out ULong remainder) {
+#if NET8_0_OR_GREATER
+            if (System.Runtime.Intrinsics.X86.X86Base.X64.IsSupported) {
+                if (divisor > highDividend) {
+#pragma warning disable SYSLIB5004
+                    var (q, r) = System.Runtime.Intrinsics.X86.X86Base.X64.DivRem(lowDividend, highDividend, divisor);
+#pragma warning restore SYSLIB5004
+                    remainder = r;
+                    return q;
+                }
+                remainder = ULong.MaxValue;
+                return ULong.MaxValue;
+            }
+#endif
             unchecked {
                 ULong p, ql, qh;
                 if (0u == highDividend) {
@@ -257,7 +272,18 @@ namespace UltimateOrb.Numerics {
         [System.Runtime.CompilerServices.MethodImplAttribute(
             System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining |
             System.Runtime.CompilerServices.MethodImplOptions.AggressiveOptimization)]
-        public static ULong BigDivNoThrow(ULong lowDividend, ULong highDividend, ULong divisor) {
+        public static ULong BigDivNoThrowWhenOverflow(ULong lowDividend, ULong highDividend, ULong divisor) {
+#if NET8_0_OR_GREATER
+            if (System.Runtime.Intrinsics.X86.X86Base.X64.IsSupported) {
+                if (divisor > highDividend) {
+#pragma warning disable SYSLIB5004
+                    var (q, r) = System.Runtime.Intrinsics.X86.X86Base.X64.DivRem(lowDividend, highDividend, divisor);
+#pragma warning restore SYSLIB5004
+                    return q;
+                }
+                return ULong.MaxValue;
+            }
+#endif
             unchecked {
                 ULong p, ql, qh;
                 if (0u == highDividend) {
@@ -648,7 +674,18 @@ namespace UltimateOrb.Numerics {
         [System.Runtime.CompilerServices.MethodImplAttribute(
             System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining |
             System.Runtime.CompilerServices.MethodImplOptions.AggressiveOptimization)]
-        public static ULong BigRemNoThrow(ULong lowDividend, ULong highDividend, ULong divisor) {
+        public static ULong BigRemNoThrowWhenOverflow(ULong lowDividend, ULong highDividend, ULong divisor) {
+#if NET8_0_OR_GREATER
+            if (System.Runtime.Intrinsics.X86.X86Base.X64.IsSupported) {
+                if (divisor > highDividend) {
+#pragma warning disable SYSLIB5004
+                    var (q, r) = System.Runtime.Intrinsics.X86.X86Base.X64.DivRem(lowDividend, highDividend, divisor);
+#pragma warning restore SYSLIB5004
+                    return r;
+                }
+                return ULong.MaxValue;
+            }
+#endif
             unchecked {
                 ULong p;
                 if (0u == highDividend) {
@@ -707,7 +744,7 @@ namespace UltimateOrb.Numerics {
             | System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining
 #endif
         )]
-        public static ULong BigRemNoThrow(ULong dividend_lo_lo, ULong dividend_lo_hi, ULong dividend_hi_lo, ULong dividend_hi_hi, ULong divisor_lo, ULong divisor_hi, out ULong result_hi) {
+        public static ULong BigRemNoThrowWhenOverflow(ULong dividend_lo_lo, ULong dividend_lo_hi, ULong dividend_hi_lo, ULong dividend_hi_hi, ULong divisor_lo, ULong divisor_hi, out ULong result_hi) {
             unchecked {
                 if (0u == dividend_hi_lo && 0u == dividend_hi_hi) {
                     return Remainder(dividend_lo_lo, dividend_lo_hi, divisor_lo, divisor_hi, out result_hi);
@@ -868,6 +905,15 @@ namespace UltimateOrb.Numerics {
             System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining |
             System.Runtime.CompilerServices.MethodImplOptions.AggressiveOptimization)]
         internal static ULong BigDivRemInternal(ULong lowDividend, ULong highDividend, ULong divisor, out ULong remainder) {
+#if NET8_0_OR_GREATER
+            if (System.Runtime.Intrinsics.X86.X86Base.X64.IsSupported) {
+#pragma warning disable SYSLIB5004
+                var (q, r) = System.Runtime.Intrinsics.X86.X86Base.X64.DivRem(lowDividend, highDividend, divisor);
+#pragma warning restore SYSLIB5004
+                remainder = r;
+                return q;
+            }
+#endif
             unchecked {
                 ULong p, ql, qh;
                 if (0u == highDividend) {
@@ -933,6 +979,14 @@ namespace UltimateOrb.Numerics {
             System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining |
             System.Runtime.CompilerServices.MethodImplOptions.AggressiveOptimization)]
         internal static ULong BigRemInternal(ULong lowDividend, ULong highDividend, ULong divisor) {
+#if NET8_0_OR_GREATER
+            if (System.Runtime.Intrinsics.X86.X86Base.X64.IsSupported) {
+#pragma warning disable SYSLIB5004
+                var (q, r) = System.Runtime.Intrinsics.X86.X86Base.X64.DivRem(lowDividend, highDividend, divisor);
+#pragma warning restore SYSLIB5004
+                return r;
+            }
+#endif
             // 2014Sep19
             unchecked {
                 ULong p, ql, qh;
@@ -995,6 +1049,14 @@ namespace UltimateOrb.Numerics {
             System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining |
             System.Runtime.CompilerServices.MethodImplOptions.AggressiveOptimization)]
         internal static ULong BigDivInternal(ULong lowDividend, ULong highDividend, ULong divisor) {
+#if NET8_0_OR_GREATER
+            if (System.Runtime.Intrinsics.X86.X86Base.X64.IsSupported) {
+#pragma warning disable SYSLIB5004
+                var (q, r) = System.Runtime.Intrinsics.X86.X86Base.X64.DivRem(lowDividend, highDividend, divisor);
+#pragma warning restore SYSLIB5004
+                return q;
+            }
+#endif
             // 2014Sep13
             unchecked {
                 ULong p, ql, qh;
@@ -1063,6 +1125,15 @@ namespace UltimateOrb.Numerics {
         public static ULong BigDivRemPartialInternal(ULong lowDividend, ULong highDividend, ULong divisor, out ULong remainder) {
             System.Diagnostics.Debug.Assert(0 != highDividend);
             System.Diagnostics.Debug.Assert(divisor > highDividend);
+#if NET8_0_OR_GREATER
+            if (System.Runtime.Intrinsics.X86.X86Base.X64.IsSupported) {
+#pragma warning disable SYSLIB5004
+                var (q, r) = System.Runtime.Intrinsics.X86.X86Base.X64.DivRem(lowDividend, highDividend, divisor);
+#pragma warning restore SYSLIB5004
+                remainder = r;
+                return q;
+            }
+#endif
             unchecked {
                 var dh = (ULong)(UInt)(divisor >> Misc.UInt.BitSize);
                 var dl = (ULong)(UInt)divisor;
@@ -1312,7 +1383,9 @@ namespace UltimateOrb.Numerics {
          *   - Undefined behavior on invalid inputs.
          * ~Internal:
          *   - Users should not use them directly.
-         * ~NoThrowOnDivideByZero:
+         * ~NoThrowWhenDivideByZero:
+         *   - No throw on divide-by-zero conditions.
+         * ~NoThrowWhenOverflow:
          *   - No throw on divide-by-zero conditions.
          * ~NoThrow:
          *   - No throw on exceptionl conditions.
@@ -1402,7 +1475,7 @@ namespace UltimateOrb.Numerics {
         [System.Runtime.CompilerServices.MethodImplAttribute(
             System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining |
             System.Runtime.CompilerServices.MethodImplOptions.AggressiveOptimization)]
-        public static ULong BigDivRemNoThrow(ULong lowDividend, ULong highDividend, ULong divisor, out ULong remainder) {
+        public static ULong BigDivRemNoThrowWhenOverflow(ULong lowDividend, ULong highDividend, ULong divisor, out ULong remainder) {
             unchecked {
                 ULong p, ql, qh;
                 if (0u == highDividend) {
@@ -1467,7 +1540,7 @@ namespace UltimateOrb.Numerics {
         [System.Runtime.CompilerServices.MethodImplAttribute(
             System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining |
             System.Runtime.CompilerServices.MethodImplOptions.AggressiveOptimization)]
-        public static ULong BigDivNoThrow(ULong lowDividend, ULong highDividend, ULong divisor) {
+        public static ULong BigDivNoThrowWhenOverflow(ULong lowDividend, ULong highDividend, ULong divisor) {
             unchecked {
                 ULong p, ql, qh;
                 if (0u == highDividend) {
@@ -1838,7 +1911,7 @@ namespace UltimateOrb.Numerics {
         [System.Runtime.CompilerServices.MethodImplAttribute(
             System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining |
             System.Runtime.CompilerServices.MethodImplOptions.AggressiveOptimization)]
-        public static ULong BigRemNoThrow(ULong lowDividend, ULong highDividend, ULong divisor) {
+        public static ULong BigRemNoThrowWhenOverflow(ULong lowDividend, ULong highDividend, ULong divisor) {
             unchecked {
                 ULong p;
                 if (0u == highDividend) {
@@ -1894,7 +1967,7 @@ namespace UltimateOrb.Numerics {
         [System.CLSCompliantAttribute(false)]
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveOptimization
         )]
-        public static ULong BigRemNoThrow(ULong dividend_lo_lo, ULong dividend_lo_hi, ULong dividend_hi_lo, ULong dividend_hi_hi, ULong divisor_lo, ULong divisor_hi, out ULong result_hi) {
+        public static ULong BigRemNoThrowWhenOverflow(ULong dividend_lo_lo, ULong dividend_lo_hi, ULong dividend_hi_lo, ULong dividend_hi_hi, ULong divisor_lo, ULong divisor_hi, out ULong result_hi) {
             unchecked {
                 if (0u == dividend_hi_lo && 0u == dividend_hi_hi) {
                     return Remainder(dividend_lo_lo, dividend_lo_hi, divisor_lo, divisor_hi, out result_hi);
@@ -2491,7 +2564,9 @@ namespace UltimateOrb.Numerics {
          *   - Undefined behavior on invalid inputs.
          * ~Internal:
          *   - Users should not use them directly.
-         * ~NoThrowOnDivideByZero:
+         * ~NoThrowWhenDivideByZero:
+         *   - No throw on divide-by-zero conditions.
+         * ~NoThrowWhenOverflow:
          *   - No throw on divide-by-zero conditions.
          * ~NoThrow:
          *   - No throw on exceptionl conditions.
@@ -2581,7 +2656,7 @@ namespace UltimateOrb.Numerics {
         [System.Runtime.CompilerServices.MethodImplAttribute(
             System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining |
             System.Runtime.CompilerServices.MethodImplOptions.AggressiveOptimization)]
-        public static ULong BigDivRemNoThrow(ULong lowDividend, ULong highDividend, ULong divisor, out ULong remainder) {
+        public static ULong BigDivRemNoThrowWhenOverflow(ULong lowDividend, ULong highDividend, ULong divisor, out ULong remainder) {
             unchecked {
                 ULong p, ql, qh;
                 if (0u == highDividend) {
@@ -2646,7 +2721,7 @@ namespace UltimateOrb.Numerics {
         [System.Runtime.CompilerServices.MethodImplAttribute(
             System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining |
             System.Runtime.CompilerServices.MethodImplOptions.AggressiveOptimization)]
-        public static ULong BigDivNoThrow(ULong lowDividend, ULong highDividend, ULong divisor) {
+        public static ULong BigDivNoThrowWhenOverflow(ULong lowDividend, ULong highDividend, ULong divisor) {
             unchecked {
                 ULong p, ql, qh;
                 if (0u == highDividend) {
@@ -3017,7 +3092,7 @@ namespace UltimateOrb.Numerics {
         [System.Runtime.CompilerServices.MethodImplAttribute(
             System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining |
             System.Runtime.CompilerServices.MethodImplOptions.AggressiveOptimization)]
-        public static ULong BigRemNoThrow(ULong lowDividend, ULong highDividend, ULong divisor) {
+        public static ULong BigRemNoThrowWhenOverflow(ULong lowDividend, ULong highDividend, ULong divisor) {
             unchecked {
                 ULong p;
                 if (0u == highDividend) {
@@ -3073,7 +3148,7 @@ namespace UltimateOrb.Numerics {
         [System.CLSCompliantAttribute(false)]
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveOptimization
         )]
-        public static ULong BigRemNoThrow(ULong dividend_lo_lo, ULong dividend_lo_hi, ULong dividend_hi_lo, ULong dividend_hi_hi, ULong divisor_lo, ULong divisor_hi, out ULong result_hi) {
+        public static ULong BigRemNoThrowWhenOverflow(ULong dividend_lo_lo, ULong dividend_lo_hi, ULong dividend_hi_lo, ULong dividend_hi_hi, ULong divisor_lo, ULong divisor_hi, out ULong result_hi) {
             unchecked {
                 if (0u == dividend_hi_lo && 0u == dividend_hi_hi) {
                     return Remainder(dividend_lo_lo, dividend_lo_hi, divisor_lo, divisor_hi, out result_hi);

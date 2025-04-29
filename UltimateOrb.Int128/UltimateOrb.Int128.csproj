@@ -30,24 +30,31 @@
 
   <PropertyGroup>
     <!-- Sync with UltimateOrb.Core -->
-    <Version>3.3.0-beta.1</Version>
+    <Version>3.4.0-beta.2</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DefineConstants>$(DefineConstants)TRACE;FEATURE_STANDARD_LIBRARY_INTEROPERABILITY_FORMATTING_AND_CONVERSION;STANDALONE_XINTN_LIBRARY</DefineConstants>
+    <DefineConstants>$(DefineConstants)TRACE;FEATURE_STANDARD_LIBRARY_INTEROPERABILITY_FORMATTING_AND_CONVERSION;FEATURE_WIN32_DECIMAL_INTEROPERABILITY;STANDALONE_XINTN_LIBRARY</DefineConstants>
     <CheckForOverflowUnderflow>True</CheckForOverflowUnderflow>
     <LangVersion>preview</LangVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DefineConstants>$(DefineConstants)TRACE;FEATURE_STANDARD_LIBRARY_INTEROPERABILITY_FORMATTING_AND_CONVERSION;STANDALONE_XINTN_LIBRARY</DefineConstants>
+    <DefineConstants>$(DefineConstants)TRACE;FEATURE_STANDARD_LIBRARY_INTEROPERABILITY_FORMATTING_AND_CONVERSION;FEATURE_WIN32_DECIMAL_INTEROPERABILITY;STANDALONE_XINTN_LIBRARY</DefineConstants>
     <CheckForOverflowUnderflow>True</CheckForOverflowUnderflow>
     <LangVersion>preview</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="tmp\**" />
+    <EmbeddedResource Remove="tmp\**" />
+    <None Remove="tmp\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Include="..\UltimateOrb.Core\Core.cs" Link="Core.cs" />
-    <Compile Include="..\UltimateOrb.Core\Int128.cs" Link="Int128.cs" />
+		<Compile Include="..\UltimateOrb.Core\ConvertInternal.cs" Link="ConvertInternal.cs" />
+		<Compile Include="..\UltimateOrb.Core\Int128.cs" Link="Int128.cs" />
     <Compile Include="..\UltimateOrb.Core\Internal\HashCodeHelpler{Internal}.cs" Link="Internal\HashCodeHelpler{Internal}.cs" />
     <Compile Include="..\UltimateOrb.Core\Internal\System\IConvertible{Internal}.cs" Link="Internal\System\IConvertible{Internal}.cs" />
     <Compile Include="..\UltimateOrb.Core\Internal\System\Math.cs" Link="Internal\System\Math.cs" />
@@ -168,97 +175,4 @@
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
     <Exec WorkingDirectory="$(SolutionDir)UltimateOrb.Core.BuildTools\BuildTools" Command="echo 'Invoking build tools to modify the output assembly (&quot;$(TargetPath)&quot;)...' &amp;&amp; UltimateOrb.Core.BuildTools $(TargetPath) &amp;&amp; echo 'To sign the assembly, rebuild with &quot;Sign the assembly&quot;, then use the command:' &amp;&amp; echo '    sn -Ra &quot;$(TargetPath)&quot; &quot;$(ProjectDir)test.snk&quot;' &amp;&amp; echo 'To verify the assembly, use the command:' &amp;&amp; echo '    peverify &quot;$(TargetPath)&quot;' &amp;&amp; echo 'If PEVerify can not resolve the dependent assemblies ([HRESULT 0x80070002]), edit &quot;*.dll.config&quot; files and copy them to the same directory as the output assembly.'" />
   </Target>
-  
-  
-  <UsingTask TaskName="SetEnvironmentVariableTask" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
-    <ParameterGroup>
-      <Name ParameterType="System.String" Required="true" />
-      <Value ParameterType="System.String" Required="true" />
-    </ParameterGroup>
-    <Task>
-      <Using Namespace="System" />
-      <Code Type="Fragment" Language="cs">
-        <![CDATA[
-        Environment.SetEnvironmentVariable(Name, Value);
-        ]]>
-      </Code>
-    </Task>
-  </UsingTask>
-
-  <PropertyGroup Condition="'$(TargetFramework)'=='net6.0'">
-    <AssemblyDir>C:\Program Files\dotnet\shared\Microsoft.NETCore.App\6.0.35\</AssemblyDir>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(TargetFramework)'=='net7.0'">
-    <AssemblyDir>C:\Program Files\dotnet\shared\Microsoft.NETCore.App\7.0.20\</AssemblyDir>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(TargetFramework)'=='net8.0'">
-    <AssemblyDir>C:\Program Files\dotnet\shared\Microsoft.NETCore.App\8.0.11\</AssemblyDir>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(TargetFramework)'=='net9.0'">
-    <AssemblyDir>C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.0\</AssemblyDir>
-  </PropertyGroup>
-  
-  <Target Name="TrimmingEnvVar">
-    <SetEnvironmentVariableTask Name="DOTNET_HOST_PATH" Value="C:\Program Files\dotnet\dotnet.exe" />
-  </Target>
-  
-  <Target Name="TrimmingNet60" Condition="'$(TargetFramework)'=='net6.0'" AfterTargets="PostBuild" BeforeTargets="TrimmingNet70" DependsOnTargets="TrimmingEnvVar">
-		<ItemGroup>
-			<!-- Items representing the specific .dll and .pdb files -->
-			<FilesToCopy Include="$(OutputPath)\UltimateOrb.Int128.dll" />
-			<FilesToCopy Include="$(OutputPath)\UltimateOrb.Int128.pdb" />
-		</ItemGroup>
-		<Message Importance="High" Text="Trimming $(TargetFramework)"></Message>
-		<Delete Files="tmp\$(TargetFramework)\"></Delete>
-		<Copy SourceFiles="@(FilesToCopy)" DestinationFolder="tmp\$(TargetFramework)\"></Copy>
-		<ILLink AssemblyPaths="$(AssemblyDir)System.Runtime.dll;$(AssemblyDir)System.Private.CoreLib.dll;$(AssemblyDir)System.Private.Uri.dll;$(AssemblyDir)System.Diagnostics.Contracts.dll;$(AssemblyDir)System.Memory.dll;$(AssemblyDir)System.Runtime.Numerics.dll;$(AssemblyDir)System.Runtime.CompilerServices.Unsafe.dll;tmp\$(TargetFramework)\UltimateOrb.Int128.dll" RootAssemblyNames="" RootDescriptorFiles="linker.xml" OutputDirectory="tmp\$(TargetFramework)\output\" ExtraArgs="--keep-metadata parametername -t --trim-mode link" />
-		<Copy SourceFiles="tmp\$(TargetFramework)\output\UltimateOrb.Int128.dll;" DestinationFolder="$(OutputPath)"></Copy>
-		<Message Importance="High" Text="Trimmed $(TargetFramework)"></Message>
-	</Target>
-	
-	<Target Name="TrimmingNet70" Condition="'$(TargetFramework)'=='net7.0'" AfterTargets="PostBuild" BeforeTargets="TrimmingNet80" DependsOnTargets="TrimmingEnvVar">
-		<ItemGroup>
-			<!-- Items representing the specific .dll and .pdb files -->
-			<FilesToCopy Include="$(OutputPath)\UltimateOrb.Int128.dll" />
-			<FilesToCopy Include="$(OutputPath)\UltimateOrb.Int128.pdb" />
-		</ItemGroup>
-		<Message Importance="High" Text="Trimming $(TargetFramework)"></Message>
-		<Delete Files="tmp\$(TargetFramework)\"></Delete>
-		<Copy SourceFiles="@(FilesToCopy)" DestinationFolder="tmp\$(TargetFramework)\"></Copy>
-		<ILLink AssemblyPaths="$(AssemblyDir)System.Runtime.dll;$(AssemblyDir)System.Private.CoreLib.dll;$(AssemblyDir)System.Private.Uri.dll;$(AssemblyDir)System.Diagnostics.Contracts.dll;$(AssemblyDir)System.Memory.dll;$(AssemblyDir)System.Runtime.Numerics.dll;$(AssemblyDir)System.Runtime.Intrinsics.dll;tmp\$(TargetFramework)\UltimateOrb.Int128.dll" RootAssemblyNames="" RootDescriptorFiles="linker.xml" OutputDirectory="tmp\$(TargetFramework)\output\" ExtraArgs="--keep-metadata parametername -t --trim-mode link" />
-		<Copy SourceFiles="tmp\$(TargetFramework)\output\UltimateOrb.Int128.dll;" DestinationFolder="$(OutputPath)"></Copy>
-		<Message Importance="High" Text="Trimmed $(TargetFramework)"></Message>
-  </Target>
-	
-	<Target Name="TrimmingNet80" Condition="'$(TargetFramework)'=='net8.0'" AfterTargets="PostBuild" BeforeTargets="TrimmingNet90" DependsOnTargets="TrimmingEnvVar">
-		<ItemGroup>
-			<!-- Items representing the specific .dll and .pdb files -->
-			<FilesToCopy Include="$(OutputPath)\UltimateOrb.Int128.dll" />
-			<FilesToCopy Include="$(OutputPath)\UltimateOrb.Int128.pdb" />
-		</ItemGroup>
-		<Message Importance="High" Text="Trimming $(TargetFramework)"></Message>
-		<Delete Files="tmp\$(TargetFramework)\"></Delete>
-		<Copy SourceFiles="@(FilesToCopy)" DestinationFolder="tmp\$(TargetFramework)\"></Copy>
-		<ILLink AssemblyPaths="$(AssemblyDir)System.Runtime.dll;$(AssemblyDir)System.Private.CoreLib.dll;$(AssemblyDir)System.Private.Uri.dll;$(AssemblyDir)System.Diagnostics.Contracts.dll;$(AssemblyDir)System.Memory.dll;$(AssemblyDir)System.Runtime.Numerics.dll;$(AssemblyDir)System.Runtime.Intrinsics.dll;tmp\$(TargetFramework)\UltimateOrb.Int128.dll" RootAssemblyNames="" RootDescriptorFiles="linker.xml" OutputDirectory="tmp\$(TargetFramework)\output\" ExtraArgs="--keep-metadata parametername --trim-mode link" />
-		<Copy SourceFiles="tmp\$(TargetFramework)\output\UltimateOrb.Int128.dll;" DestinationFolder="$(OutputPath)"></Copy>
-		<Message Importance="High" Text="Trimmed $(TargetFramework)"></Message>
-	</Target>
-
-	<Target Name="TrimmingNet90" Condition="'$(TargetFramework)'=='net9.0'" AfterTargets="PostBuild" DependsOnTargets="TrimmingEnvVar">
-		<ItemGroup>
-			<!-- Items representing the specific .dll and .pdb files -->
-			<FilesToCopy Include="$(OutputPath)\UltimateOrb.Int128.dll" />
-			<FilesToCopy Include="$(OutputPath)\UltimateOrb.Int128.pdb" />
-		</ItemGroup>
-		<Message Importance="High" Text="Trimming $(TargetFramework)"></Message>
-		<Delete Files="tmp\$(TargetFramework)\"></Delete>
-		<Copy SourceFiles="@(FilesToCopy)" DestinationFolder="tmp\$(TargetFramework)\"></Copy>
-		<ILLink AssemblyPaths="$(AssemblyDir)System.Runtime.dll;$(AssemblyDir)System.Private.CoreLib.dll;$(AssemblyDir)System.Private.Uri.dll;$(AssemblyDir)System.Diagnostics.Contracts.dll;$(AssemblyDir)System.Memory.dll;$(AssemblyDir)System.Runtime.Numerics.dll;tmp\$(TargetFramework)\UltimateOrb.Int128.dll" RootAssemblyNames="" RootDescriptorFiles="linker.xml" OutputDirectory="tmp\$(TargetFramework)\output\" ExtraArgs="--keep-metadata parametername --trim-mode link" />
-		<Copy SourceFiles="tmp\$(TargetFramework)\output\UltimateOrb.Int128.dll;" DestinationFolder="$(OutputPath)"></Copy>
-		<Message Importance="High" Text="Trimmed $(TargetFramework)"></Message>
-	</Target>
-
 </Project>

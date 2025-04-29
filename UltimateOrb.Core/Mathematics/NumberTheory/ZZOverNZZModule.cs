@@ -124,7 +124,7 @@ namespace UltimateOrb.Mathematics.NumberTheory {
             System.Diagnostics.Contracts.Contract.Ensures(System.Diagnostics.Contracts.Contract.OldValue(n) > System.Diagnostics.Contracts.Contract.Result<ulong>());
             ulong q;
             var p = Math.BigMul(first, second, out q);
-            return Math.BigRemNoThrow(p, q, n);
+            return Math.BigRemNoThrowWhenOverflow(p, q, n);
         }
 
         [System.CLSCompliantAttribute(false)]
@@ -148,7 +148,7 @@ namespace UltimateOrb.Mathematics.NumberTheory {
             System.Diagnostics.Contracts.Contract.Ensures(System.Diagnostics.Contracts.Contract.OldValue(n) > System.Diagnostics.Contracts.Contract.Result<ulong>());
             ulong q;
             var p = Math.BigSquare(value, out q);
-            return Math.BigRemNoThrow(p, q, n);
+            return Math.BigRemNoThrowWhenOverflow(p, q, n);
         }
 
         [System.CLSCompliantAttribute(false)]

@@ -1,4 +1,8 @@
 ﻿using System;
+using System.Diagnostics;
+using System.Diagnostics.Contracts;
+using System.Runtime;
+using System.Runtime.CompilerServices;
 
 namespace UltimateOrb.Numerics {
 
@@ -11,6 +15,45 @@ namespace UltimateOrb.Numerics {
     using MathEx = DoubleArithmetic;
 
     public static partial class DoubleArithmetic {
+
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        private static ulong AdjustSquareRoot(ulong radicand_lo, ulong radicand_hi, ulong candidate) {
+            unchecked {
+                var lo = DoubleArithmetic.BigSquare(candidate, out var hi);
+                var rem_lo = DoubleArithmetic.SubtractUnchecked(radicand_lo, radicand_hi, lo, hi, out var rem_hi);
+                lo = DoubleArithmetic.ShiftLeft(candidate, 0, out hi);
+                return DoubleArithmetic.LessThanOrEqual(rem_lo, rem_hi, lo, hi) ? candidate : 1 + candidate;
+            }
+        }
+
+        [CLSCompliantAttribute(false)]
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        public static UInt64 Sqrt_A_F2(UInt64 radicand_lo, UInt64 radicand_hi) {
+            unchecked {
+                if (0 == radicand_hi) {
+                    return Mathematics.Elementary.Math.Sqrt_A_F(radicand_lo);
+                }
+                UInt64 t;
+                if (radicand_hi < (UInt64)0XFFFFFFFFFFFFFC00) {
+                    // truncated
+                    t = (UInt64)System.Math.Sqrt((double)new UInt128(lo: radicand_lo, hi: radicand_hi));
+                } else {
+                    t = (UInt64)((Int64)radicand_hi >> 1);
+                }
+                
+                var q = DoubleArithmetic.BigDivNoThrowWhenOverflow(radicand_lo, radicand_hi, t);
+                var e = (UInt64)((Int64)(q - t) >> 1);
+                t += e;
+                q = DoubleArithmetic.BigDivNoThrowWhenOverflow(radicand_lo, radicand_hi, t);
+                e = (UInt64)((Int64)(q - t) >> 1);
+                if (0 == e) {
+                    return t;
+                }
+                t += e;
+                return AdjustSquareRoot(radicand_lo, radicand_hi, t - 1);
+                //Debugger.Log(3, "LOGIC", $"{e}\n");
+            }
+        }
 
         /*
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
@@ -56,7 +99,7 @@ namespace UltimateOrb.Numerics {
                 if (l < lo) {
                     ++h;
                 }
-                var @new = MathEx.BigDivNoThrow(l, h, old) >> 1;
+                var @new = MathEx.BigDivNoThrowWhenOverflow(l, h, old) >> 1;
                 l = MathEx.BigSquare(@new, out h);
                 if ((h > hi) || ((h == hi) && (l > lo))) {
                     return @new - (ULong)1u;
@@ -81,7 +124,7 @@ namespace UltimateOrb.Numerics {
                 if (l < lo) {
                     ++h;
                 }
-                var @new = MathEx.BigDivNoThrow(l, h, old) >> 1;
+                var @new = MathEx.BigDivNoThrowWhenOverflow(l, h, old) >> 1;
                 l = MathEx.BigSquare(@new, out h);
                 if ((h > hi) || ((h == hi) && (l > lo))) {
                     remainder = lo - l - ((@new << 1) - 1u);
@@ -106,7 +149,7 @@ namespace UltimateOrb.Numerics {
         ///     <para>The square root.</para>
         /// </returns>
         [System.CLSCompliantAttribute(false)]
-        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static ULong BigSqrt(ULong lo, ULong hi) {
             unchecked {
                 if (0u == hi) {
@@ -121,7 +164,7 @@ namespace UltimateOrb.Numerics {
                     if (l < lo) {
                         ++h;
                     }
-                    var @new = MathEx.BigDivNoThrow(l, h, old) >> 1;
+                    var @new = MathEx.BigDivNoThrowWhenOverflow(l, h, old) >> 1;
                     l = MathEx.BigSquare(@new, out h);
                     if ((h > hi) || ((h == hi) && (l > lo))) {
                         return @new - (ULong)1u;
@@ -144,7 +187,7 @@ namespace UltimateOrb.Numerics {
                     if (l < lo) {
                         ++h;
                     }
-                    var @new = MathEx.BigDivNoThrow(l, h, old) >> 1;
+                    var @new = MathEx.BigDivNoThrowWhenOverflow(l, h, old) >> 1;
                     l = MathEx.BigSquare(@new, out h);
                     if ((h > hi) || ((h == hi) && (l > lo))) {
                         --@new;
@@ -230,7 +273,7 @@ namespace UltimateOrb.Numerics {
                     if (l < lo) {
                         ++h;
                     }
-                    var @new = MathEx.BigDivNoThrow(l, h, old) >> 1;
+                    var @new = MathEx.BigDivNoThrowWhenOverflow(l, h, old) >> 1;
                     l = MathEx.BigSquare(@new, out h);
                     if ((h > radicand) || ((h == radicand) && (l > lo))) {
                         --@new;

@@ -17,6 +17,14 @@ namespace UltimateOrb {
         }
     }
 
+    [DiscardableAfterILLink]
+    [AttributeUsage(AttributeTargets.All, Inherited = false, AllowMultiple = false)]
+    sealed class DiscardableAfterILLink : Attribute {
+
+        public DiscardableAfterILLink() {
+        }
+    }
+    
     [ForceDiscard]
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Constructor, Inherited = false, AllowMultiple = false)]
     sealed class ILMethodBodyAttribute : Attribute {

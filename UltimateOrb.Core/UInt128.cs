@@ -7,22 +7,24 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Runtime.Intrinsics.Arm;
+using System.Runtime.Intrinsics.X86;
 using UltimateOrb.Numerics;
+using UltimateOrb.Utilities;
 using static UltimateOrb.Utilities.SignConverter;
 
 namespace UltimateOrb {
-    using static global::Internal.System.IConvertibleModule;
     using static global::Internal.System.Converter;
-    using static UltimateOrb.Utilities.ThrowHelper;
+    using static global::Internal.System.IConvertibleModule;
     using static UltimateOrb.Utilities.Extensions.BooleanIntegerExtensions;
+    using static UltimateOrb.Utilities.ThrowHelper;
     using static UltimateOrb.XInt128Helpers;
-
-    using MathEx = UltimateOrb.Numerics.DoubleArithmetic;
-
-    using XInt128 = UInt128;
-    using OInt128 = Int128;
     using HInt64 = UInt64;
+    using MathEx = UltimateOrb.Numerics.DoubleArithmetic;
+    using OInt128 = Int128;
+    using XInt128 = UInt128;
 
     [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Interoperability", "CA1413:AvoidNonpublicFieldsInComVisibleValueTypes")]
     [System.CLSCompliantAttribute(false)]
@@ -39,6 +41,9 @@ namespace UltimateOrb {
 #endif
 #if FEATURE_STANDARD_LIBRARY_INTEROPERABILITY_FORMATTING_AND_CONVERSION
         , IConvertible, IFormattable
+#if NET8_0_OR_GREATER
+        , IUtf8SpanFormattable
+#endif
 #endif
     {
 
@@ -279,6 +284,139 @@ namespace UltimateOrb {
             }
         }
 
+#if NET7_0_OR_GREATER
+        static int INumberBase<XInt128>.Radix {
+
+            get => 2;
+        }
+
+        /*
+        [DiscardableAfterILLink]
+        [Obsolete]
+        internal static partial class StubILLinkHintDelegates<TSelf> where TSelf : INumberBase<TSelf> {
+            public delegate bool TryParseSpanFunc(ReadOnlySpan<char> s, NumberStyles style, IFormatProvider? provider, [MaybeNullWhen(false)] out TSelf result);
+            public delegate TSelf ParseStringFunc(string s, NumberStyles style, IFormatProvider? provider);
+            public delegate TSelf ParseSpanFunc(ReadOnlySpan<char> s, NumberStyles style, IFormatProvider? provider);
+            public delegate TSelf ParseUtf8SpanFunc(ReadOnlySpan<byte> s, NumberStyles style, IFormatProvider? provider);
+            public delegate bool TryParseStringFunc([NotNullWhen(true)] string? s, NumberStyles style, IFormatProvider? provider, [MaybeNullWhen(false)] out TSelf result);
+            public delegate bool TryParseUtf8SpanFunc(ReadOnlySpan<byte> utf8Text, NumberStyles style, IFormatProvider? provider, [MaybeNullWhen(false)] out TSelf result);
+            public delegate TSelf AbsFunc(TSelf value);
+            public delegate bool IsCanonicalFunc(TSelf value);
+            public delegate bool IsComplexNumberFunc(TSelf value);
+            public delegate bool IsEvenIntegerFunc(TSelf value);
+            public delegate bool IsFiniteFunc(TSelf value);
+            public delegate bool IsImaginaryNumberFunc(TSelf value);
+            public delegate bool IsInfinityFunc(TSelf value);
+            public delegate bool IsIntegerFunc(TSelf value);
+            public delegate bool IsNaNFunc(TSelf value);
+            public delegate bool IsNegativeFunc(TSelf value);
+            public delegate bool IsNegativeInfinityFunc(TSelf value);
+            public delegate bool IsNormalFunc(TSelf value);
+            public delegate bool IsOddIntegerFunc(TSelf value);
+            public delegate bool IsPositiveFunc(TSelf value);
+            public delegate bool IsPositiveInfinityFunc(TSelf value);
+            public delegate bool IsRealNumberFunc(TSelf value);
+            public delegate bool IsSubnormalFunc(TSelf value);
+            public delegate bool IsZeroFunc(TSelf value);
+            public delegate TSelf MaxMagnitudeFunc(TSelf x, TSelf y);
+            public delegate TSelf MaxMagnitudeNumberFunc(TSelf x, TSelf y);
+            public delegate TSelf MinMagnitudeFunc(TSelf x, TSelf y);
+            public delegate TSelf MinMagnitudeNumberFunc(TSelf x, TSelf y);
+            public delegate TSelf CreateCheckedFunc(TSelf value);
+            public delegate TSelf CreateSaturatingFunc(TSelf value);
+            public delegate TSelf CreateTruncatingFunc(TSelf value);
+            public delegate bool TryConvertFromCheckedFunc(TSelf value, [MaybeNullWhen(false)] out TSelf result);
+            public delegate bool TryConvertFromSaturatingFunc(TSelf value, [MaybeNullWhen(false)] out TSelf result);
+            public delegate bool TryConvertFromTruncatingFunc(TSelf value, [MaybeNullWhen(false)] out TSelf result);
+            public delegate bool TryConvertToCheckedFunc(TSelf value, [MaybeNullWhen(false)] out TSelf result);
+            public delegate bool TryConvertToSaturatingFunc(TSelf value, [MaybeNullWhen(false)] out TSelf result);
+            public delegate bool TryConvertToTruncatingFunc(TSelf value, [MaybeNullWhen(false)] out TSelf result);
+        }
+
+        [DiscardableAfterILLink]
+        [Obsolete]
+        internal static void StubILLinkHint<T>() where T : INumberBase<T> {
+            // Properties
+            GC.KeepAlive(T.One);
+            GC.KeepAlive(T.Radix);
+            GC.KeepAlive(T.Zero);
+            // Methods
+            GC.KeepAlive((StubILLinkHintDelegates<T>.AbsFunc)T.Abs);
+            GC.KeepAlive((StubILLinkHintDelegates<T>.IsCanonicalFunc)T.IsCanonical);
+            GC.KeepAlive((StubILLinkHintDelegates<T>.IsComplexNumberFunc)T.IsComplexNumber);
+            GC.KeepAlive((StubILLinkHintDelegates<T>.IsEvenIntegerFunc)T.IsEvenInteger);
+            GC.KeepAlive((StubILLinkHintDelegates<T>.IsFiniteFunc)T.IsFinite);
+            GC.KeepAlive((StubILLinkHintDelegates<T>.IsImaginaryNumberFunc)T.IsImaginaryNumber);
+            GC.KeepAlive((StubILLinkHintDelegates<T>.IsInfinityFunc)T.IsInfinity);
+            GC.KeepAlive((StubILLinkHintDelegates<T>.IsIntegerFunc)T.IsInteger);
+            GC.KeepAlive((StubILLinkHintDelegates<T>.IsNaNFunc)T.IsNaN);
+            GC.KeepAlive((StubILLinkHintDelegates<T>.IsNegativeFunc)T.IsNegative);
+            GC.KeepAlive((StubILLinkHintDelegates<T>.IsNegativeInfinityFunc)T.IsNegativeInfinity);
+            GC.KeepAlive((StubILLinkHintDelegates<T>.IsNormalFunc)T.IsNormal);
+            GC.KeepAlive((StubILLinkHintDelegates<T>.IsOddIntegerFunc)T.IsOddInteger);
+            GC.KeepAlive((StubILLinkHintDelegates<T>.IsPositiveFunc)T.IsPositive);
+            GC.KeepAlive((StubILLinkHintDelegates<T>.IsPositiveInfinityFunc)T.IsPositiveInfinity);
+            GC.KeepAlive((StubILLinkHintDelegates<T>.IsRealNumberFunc)T.IsRealNumber);
+            GC.KeepAlive((StubILLinkHintDelegates<T>.IsSubnormalFunc)T.IsSubnormal);
+            GC.KeepAlive((StubILLinkHintDelegates<T>.IsZeroFunc)T.IsZero);
+            GC.KeepAlive((StubILLinkHintDelegates<T>.MaxMagnitudeFunc)T.MaxMagnitude);
+            GC.KeepAlive((StubILLinkHintDelegates<T>.MaxMagnitudeNumberFunc)T.MaxMagnitudeNumber);
+            GC.KeepAlive((StubILLinkHintDelegates<T>.MinMagnitudeFunc)T.MinMagnitude);
+            GC.KeepAlive((StubILLinkHintDelegates<T>.MinMagnitudeNumberFunc)T.MinMagnitudeNumber);
+            GC.KeepAlive((StubILLinkHintDelegates<T>.CreateCheckedFunc)T.CreateChecked<T>);
+            GC.KeepAlive((StubILLinkHintDelegates<T>.CreateSaturatingFunc)T.CreateSaturating<T>);
+            GC.KeepAlive((StubILLinkHintDelegates<T>.CreateTruncatingFunc)T.CreateTruncating<T>);
+            GC.KeepAlive((StubILLinkHintDelegates<T>.ParseStringFunc)T.Parse);
+            GC.KeepAlive((StubILLinkHintDelegates<T>.ParseSpanFunc)T.Parse);
+            GC.KeepAlive((StubILLinkHintDelegates<T>.TryParseStringFunc)T.TryParse);
+            GC.KeepAlive((StubILLinkHintDelegates<T>.TryParseSpanFunc)T.TryParse);
+
+            {
+                
+                // _ = T.TryParse(default(ReadOnlySpan<byte>), default(NumberStyles), default(IFormatProvider)!, out _);
+                // T.Parse(default(ReadOnlySpan<byte>), default(NumberStyles), default(IFormatProvider)!);
+
+            }
+
+
+
+            GC.KeepAlive((StubILLinkHintDelegates<T>.TryConvertFromCheckedFunc)T.TryConvertFromChecked<T>);
+            GC.KeepAlive((StubILLinkHintDelegates<T>.TryConvertFromSaturatingFunc)T.TryConvertFromSaturating<T>);
+            GC.KeepAlive((StubILLinkHintDelegates<T>.TryConvertFromTruncatingFunc)T.TryConvertFromTruncating<T>);
+            GC.KeepAlive((StubILLinkHintDelegates<T>.TryConvertToCheckedFunc)T.TryConvertToChecked<T>);
+            GC.KeepAlive((StubILLinkHintDelegates<T>.TryConvertToSaturatingFunc)T.TryConvertToSaturating<T>);
+            GC.KeepAlive((StubILLinkHintDelegates<T>.TryConvertToTruncatingFunc)T.TryConvertToTruncating<T>);
+
+            GC.KeepAlive(T.AdditiveIdentity);
+            GC.KeepAlive(T.MultiplicativeIdentity);
+            GC.KeepAlive(() => {
+                var t = default(T)!;
+                unchecked {
+                    --t;
+                    _ = t / t;
+                    ++t;
+                    _ = t * t;
+                }
+                checked {
+                    --t;
+                    _ = t / t;
+                    ++t;
+                    _ = t * t;
+                }
+            });
+
+        }
+
+        [DiscardableAfterILLink]
+        [Obsolete]
+        internal static void StubILLinkHint() {
+            StubILLinkHint<XInt128>();
+
+
+            // Add other necessary types here
+        }*/
+#endif
+
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         [System.Diagnostics.Contracts.PureAttribute()]
         public int Sign {
@@ -340,10 +478,6 @@ namespace UltimateOrb {
                 return CanConvertToUIntN(16);
             }
         }
-
-#if NET7_0_OR_GREATER
-        static int INumberBase<XInt128>.Radix => throw new NotImplementedException();
-#endif
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "n")]
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
@@ -774,7 +908,7 @@ namespace UltimateOrb {
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         [System.Diagnostics.Contracts.PureAttribute()]
         public static implicit operator XInt128(char value) {
-            return new XInt128(unchecked((UInt64)value), 0);
+            return new XInt128(lo: unchecked((UInt64)(uint)value), 0);
         }
 
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
@@ -787,12 +921,12 @@ namespace UltimateOrb {
 #endif
             XInt128(sbyte value) {
 
-            return new XInt128(unchecked((UInt64)checked((byte)value)), 0);
+            return new XInt128(unchecked((UInt64)checked((uint)(int)value)), 0);
         }
 
 #if NET7_0_OR_GREATER && !LEGACY_OPERATOR_CHECKNESS
         public static explicit operator XInt128(sbyte value) {
-            return new XInt128(unchecked((UInt64)(byte)value), 0);
+            return unchecked((XInt128)(Int128)(int)value);
         }
 #endif
 
@@ -805,12 +939,12 @@ namespace UltimateOrb {
             checked
 #endif
             XInt128(Int16 value) {
-            return new XInt128(unchecked((UInt64)checked((UInt16)value)), 0);
+            return new XInt128(unchecked((UInt64)checked((uint)(int)value)), 0);
         }
 
 #if NET7_0_OR_GREATER && !LEGACY_OPERATOR_CHECKNESS
         public static explicit operator XInt128(Int16 value) {
-            return new XInt128(unchecked((UInt64)(UInt16)value), 0);
+            return unchecked((XInt128)(Int128)(int)value);
         }
 #endif
 
@@ -823,12 +957,12 @@ namespace UltimateOrb {
             checked
 #endif
             XInt128(Int32 value) {
-            return new XInt128(unchecked((UInt64)checked((UInt32)value)), 0);
+            return new XInt128(unchecked((UInt64)checked((uint)(int)value)), 0);
         }
 
 #if NET7_0_OR_GREATER && !LEGACY_OPERATOR_CHECKNESS
         public static explicit operator XInt128(Int32 value) {
-            return new XInt128(unchecked((UInt64)(UInt32)value), 0);
+            return unchecked((XInt128)(Int128)(int)value);
         }
 #endif
 
@@ -841,12 +975,12 @@ namespace UltimateOrb {
             checked
 #endif
             XInt128(Int64 value) {
-            return new XInt128(unchecked((UInt64)checked((UInt64)value)), 0);
+            return new XInt128(checked((UInt64)value), 0);
         }
 
 #if NET7_0_OR_GREATER && !LEGACY_OPERATOR_CHECKNESS
         public static explicit operator XInt128(Int64 value) {
-            return new XInt128(unchecked((UInt64)(UInt64)value), 0);
+            return unchecked((XInt128)(Int128)value);
         }
 #endif
 
@@ -1086,19 +1220,19 @@ namespace UltimateOrb {
                     e = unchecked(e - (FractionBitSize + ExponentBias));
                     var lo = unchecked((UInt64)(((Int64)1 << FractionBitSize) | (FractionMask & b)));
                     var hi = (UInt64)0;
-                    if (e > 0) {
+                    if (e < 0) {
+                        var ol = (UInt64)0;
+                        ol = MathEx.ShiftRight(ol, lo, unchecked(-e), out lo);
+                        // Do NOT uncomment. (int)3.5 == 3
+                        /*
+                        // IEEE Std 754-2008 roundTiesToEven
+                        if (unchecked((UInt64)Int64.MinValue) < ol || (unchecked((UInt64)Int64.MinValue) == ol && 0 != (1 & lo))) {
+                            lo = unchecked(1 + lo);
+                        }
+                        */
+                    } else {
                         lo = Numerics.DoubleArithmetic.ShiftLeft(lo, hi, e, out hi);
-                    } // else if (e < 0) {
-                      // var ol = (UInt64)0;
-                      // ol = MathEx.ShiftRight(ol, lo, unchecked(-e), out lo);
-                      // // Do NOT uncomment. (int)3.5 == 3
-                    /*
-                    // IEEE Std 754-2008 roundTiesToEven
-                    if (unchecked((UInt64)Int64.MinValue) < ol || (unchecked((UInt64)Int64.MinValue) == ol && 0 != (1 & lo))) {
-                        lo = unchecked(1 + lo);
                     }
-                    */
-                    // }
                     if (0 > b) {
                         lo = Numerics.DoubleArithmetic.NegateUnchecked(lo, hi, out hi);
                     }
@@ -1123,28 +1257,26 @@ namespace UltimateOrb {
             var b = BitConverter.DoubleToInt64Bits(value);
             var e = checked((int)(ExponentMask >> FractionBitSize)) & unchecked((int)(b >> FractionBitSize));
             if (e >= checked(ExponentBias - 1)) {
-                {
-                    e = unchecked(e - (FractionBitSize + ExponentBias));
-                    var lo = unchecked((UInt64)(((Int64)1 << FractionBitSize) | (FractionMask & b)));
-                    var hi = (UInt64)0;
-                    if (e > 0) {
-                        lo = Numerics.DoubleArithmetic.ShiftLeft(lo, hi, e, out hi);
-                    } // else if (e < 0) {
-                      // var ol = (UInt64)0;
-                      // ol = MathEx.ShiftRight(ol, lo, unchecked(-e), out lo);
-                      // // Do NOT uncomment. (int)3.5 == 3
+                e = unchecked(e - (FractionBitSize + ExponentBias));
+                var lo = unchecked((UInt64)(((Int64)1 << FractionBitSize) | (FractionMask & b)));
+                var hi = (UInt64)0;
+                if (e < 0) {
+                    var ol = (UInt64)0;
+                    ol = MathEx.ShiftRight(ol, lo, unchecked(-e), out lo);
+                    // Do NOT uncomment. (int)3.5 == 3
                     /*
                     // IEEE Std 754-2008 roundTiesToEven
                     if (unchecked((UInt64)Int64.MinValue) < ol || (unchecked((UInt64)Int64.MinValue) == ol && 0 != (1 & lo))) {
                         lo = unchecked(1 + lo);
                     }
                     */
-                    // }
-                    if (0 > b) {
-                        lo = Numerics.DoubleArithmetic.NegateUnchecked(lo, hi, out hi);
-                    }
-                    return new XInt128(lo, hi);
+                } else {
+                    lo = Numerics.DoubleArithmetic.ShiftLeft(lo, hi, e, out hi);
                 }
+                if (0 > b) {
+                    lo = Numerics.DoubleArithmetic.NegateUnchecked(lo, hi, out hi);
+                }
+                return new XInt128(lo, hi);
             }
             return Zero;
         }
@@ -1155,47 +1287,43 @@ namespace UltimateOrb {
         [System.Runtime.TargetedPatchingOptOutAttribute("")]
         [System.Diagnostics.Contracts.PureAttribute()]
         public static explicit operator Half(XInt128 value) {
-            const int BitSize = 64;
-            const int ExponentBitSize = 11;
-            const int ExponentBias = unchecked(checked((1 << (ExponentBitSize - 1))) - 1);
-            const int SignBitSize = 1;
-            const int FractionBitSize = checked(BitSize - SignBitSize - ExponentBitSize);
-
-            const int BitSizeTo = 16;
-            const int ExponentBitSizeTo = 5;
-            // const int ExponentBiasTo = unchecked(checked((1 << (ExponentBitSizeTo - 1))) - 1);
-            const int SignBitSizeTo = 1;
-            const int FractionBitSizeTo = checked(BitSizeTo - SignBitSizeTo - ExponentBitSizeTo);
-
             var lo = value.lo;
             var hi = value.hi;
-            if (0 != hi) {
-                if (hi < (((UInt64)1 << checked(1 + 1 + FractionBitSizeTo)) - 1) << checked(BitSize - (1 + 1 + FractionBitSizeTo))) {
-                    // var c = Mathematics.BinaryNumerals.CountLeadingZeros(unchecked((UInt64)hi));
-                    var c = 0;
-                    for (var tmp = hi; 0 <= unchecked((Int64)tmp); tmp <<= 1) {
-                        unchecked {
-                            ++c;
-                        }
-                    }
-                    var s = unchecked((UInt64)(checked(128 - 1 + ExponentBias) - c)) << FractionBitSize;
-                    lo = Numerics.DoubleArithmetic.ShiftLeft(lo, hi, unchecked(1 + c), out hi);
-                    var lo0 = lo & unchecked(((UInt64)1 << checked(BitSize - FractionBitSizeTo)) - 1);
-                    lo = Numerics.DoubleArithmetic.ShiftRightUnsigned(lo, hi, checked(BitSize - FractionBitSizeTo), out hi);
-                    // IEEE Std 754-2008 roundTiesToEven
-                    if (unchecked((UInt64)Int64.MinValue) < lo || (unchecked((UInt64)Int64.MinValue) == lo && (lo0 > 0 || (lo0 == 0 && 0 != (1 & hi))))) {
-                        unchecked {
-                            ++hi;
-                        }
-                    }
-                    s = unchecked(s + (hi << checked(FractionBitSize - FractionBitSizeTo)));
-                    return unchecked((Half)BitConverter.Int64BitsToDouble(unchecked((Int64)s)));
-                }
-                return Half.PositiveInfinity;
-            }
+
             // We cannot write "return (Half)lo;" because of the double rounding issue.
             // See https://www.exploringbinary.com/double-rounding-errors-in-floating-point-conversions/ .
-            return ToHalf(lo);
+            return 0 != hi || 65520 <= lo ? Half.PositiveInfinity : BitConverter.Int16BitsToHalf(unchecked((Int16)ToHalfPartial((uint)lo)));
+
+            static int ToHalfPartial(uint value) {
+                unchecked {
+                    const int exponentBias = 15;
+                    const int mantissaBits = 10;
+
+                    if (value == 0) {
+                        return 0;
+                    }
+
+                    // Count leading zeros to find the position of the highest set bit
+                    var leadingZeros = Mathematics.BinaryNumerals.CountLeadingZeros(value);
+
+                    int exponent = 32 - 1 + exponentBias - leadingZeros;
+
+                    uint shifted = value << (1 + leadingZeros);
+
+                    uint mantissa = shifted >>> (32 - mantissaBits);
+
+                    // Remaining bits for rounding (bits 21-0)
+                    uint remaining = shifted & 0x3FFFFF;
+
+                    // Apply rounding (round to nearest, ties to even)
+                    if (remaining > 0x200000 || (remaining == 0x200000 && 0 != (1 & mantissa))) {
+                        ++mantissa;
+                    }
+
+                    // Combine into half-precision format (sign bit is 0 for unsigned input)
+                    return (exponent << mantissaBits) + (int)mantissa;
+                }
+            }
         }
 #endif
 
@@ -1260,13 +1388,15 @@ namespace UltimateOrb {
             var lo = value.lo;
             var hi = value.hi;
             if (0 != hi) {
-                // var c = Mathematics.BinaryNumerals.CountLeadingZeros(unchecked((UInt64)hi));
+                var c = Mathematics.BinaryNumerals.CountLeadingZeros(unchecked((UInt64)hi));
+                /*
                 var c = 0;
                 for (var tmp = hi; 0 <= unchecked((Int64)tmp); tmp <<= 1) {
                     unchecked {
                         ++c;
                     }
                 }
+                */
                 var s = unchecked((UInt64)(checked(128 - 1 + ExponentBias) - c)) << FractionBitSize;
                 lo = Numerics.DoubleArithmetic.ShiftLeft(lo, hi, unchecked(1 + c), out hi);
                 var lo0 = lo & unchecked(((UInt64)1 << checked(BitSize - FractionBitSize)) - 1);
@@ -1629,7 +1759,7 @@ namespace UltimateOrb {
             remainder = new XInt128(remainder_lo, remainder_hi);
             return new XInt128(lo, hi);
         }
-        
+
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
         [System.Runtime.TargetedPatchingOptOutAttribute("")]
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -1807,7 +1937,7 @@ namespace UltimateOrb {
                     value = unchecked((XInt128)v);
                     return true;
                 }
-                
+
             }
             value = default;
             return false;
@@ -1848,7 +1978,7 @@ namespace UltimateOrb {
             return value;
         }
 
-       public static XInt128 Max(XInt128 x, XInt128 y) {
+        public static XInt128 Max(XInt128 x, XInt128 y) {
             return (x > y) ? x : y;
         }
 
@@ -1881,7 +2011,7 @@ namespace UltimateOrb {
         }
 
         int IBinaryInteger<XInt128>.GetShortestBitLength() {
-            return unchecked( 128 - Numerics.DoubleArithmetic.CountLeadingZeros(lo, hi));
+            return unchecked(128 - Numerics.DoubleArithmetic.CountLeadingZeros(lo, hi));
         }
 
         static XInt128 IBinaryNumber<XInt128>.AllBitsSet {
@@ -1961,28 +2091,595 @@ namespace UltimateOrb {
             return value.IsZero;
         }
 
-        static bool INumberBase<XInt128>.TryConvertFromChecked<TOther>(TOther value, [NotNullWhen(true)] out XInt128 result) {
-            throw new NotImplementedException();
+        /// <inheritdoc cref="INumberBase{TSelf}.TryConvertFromChecked{TOther}(TOther, out TSelf)" />
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static bool INumberBase<UInt128>.TryConvertFromChecked<TOther>(TOther value, out UInt128 result) => TryConvertFromChecked(value, out result);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static bool TryConvertFromChecked<TOther>(TOther value, out UInt128 result)
+            where TOther : INumberBase<TOther> {
+            // In order to reduce overall code duplication and improve the inlinabilty of these
+            // methods for the corelib types we have `ConvertFrom` handle the same sign and
+            // `ConvertTo` handle the opposite sign. However, since there is an uneven split
+            // between signed and unsigned types, the one that handles unsigned will also
+            // handle `Decimal`.
+            //
+            // That is, `ConvertFrom` for `UltimateOrb.UInt128` will handle all types in corelib (System) and the other unsigned types in UltimateOrb. And
+            // `ConvertTo` will handle all types in corelib (System) and the signed types in UltimateOrb.
+
+            // Handle UltimateOrb.Int128 (signed 128-bit)
+            /*if (value is UltimateOrb.Int128 s128) {
+                if (s128.IsNegative) {
+                    result = default;
+                    return false;
+                }
+                result = unchecked((UInt128)s128);
+                return true;
+            }*/
+            if (false) {
+            }
+#if NET7_0_OR_GREATER
+            // Handle System.Int128 (signed 128-bit)
+            else if (value is System.Int128 sysS128) {
+                if (System.Int128.IsNegative(sysS128)) {
+                    result = default;
+                    return false;
+                }
+                result = unchecked((UInt128)sysS128);
+                return true;
+            }
+#endif
+            // Handle other integer types
+            else if (value is ulong ul) {
+                result = ul;
+                return true;
+            } else if (value is char c) {
+                result = c;
+                return true;
+            } else if (value is long il) {
+                if (il < 0) {
+                    result = default;
+                    return false;
+                }
+                result = unchecked((UInt128)il);
+                return true;
+            } else if (value is uint ui) {
+                result = ui;
+                return true;
+            } else if (value is int i) {
+                if (i < 0) {
+                    result = default;
+                    return false;
+                }
+                result = unchecked((UInt128)i);
+                return true;
+            } else if (value is ushort us) {
+                result = us;
+                return true;
+            } else if (value is short ss) {
+                if (ss < 0) {
+                    result = default;
+                    return false;
+                }
+                result = unchecked((UInt128)ss);
+                return true;
+            } else if (value is byte b) {
+                result = b;
+                return true;
+            } else if (value is sbyte sb) {
+                if (sb < 0) {
+                    result = default;
+                    return false;
+                }
+                result = unchecked((UInt128)sb);
+                return true;
+            }
+
+            // Handle platform-dependent size types
+            else if (value is nuint uPtr) {
+                result = unchecked((UInt128)uPtr);
+                return true;
+            } else if (value is nint ptr) {
+                if (ptr < 0) {
+                    result = default;
+                    return false;
+                }
+                result = unchecked((UInt128)ptr);
+                return true;
+            }
+            // Handle floating-point types
+            else if (value is double d) {
+                return TryConvertFromChecked(d, out result);
+            } else if (value is float f) {
+                return TryConvertFromChecked(unchecked((double)f), out result);
+            } else if (value is Half h) {
+                return TryConvertFromChecked(unchecked((double)h), out result);
+            }
+            // Handle decimal
+            else if (value is decimal dec) {
+                dec = decimal.Truncate(dec);
+                if (dec < 0.0m) {
+                    result = default;
+                    return false;
+                }
+                Span<int> bits = stackalloc int[4];
+                decimal.GetBits(dec, bits);
+                var _lo64 = unchecked((uint)bits[0] + ((ulong)(uint)bits[1] << 32));
+                var _hi32 = unchecked((uint)bits[2]);
+                result = new UInt128(lo: _lo64, hi: _hi32);
+                return true;
+            }
+            // Handle UltimateOrb.UInt128 (unsigned 128-bit)
+            else if (value is UltimateOrb.UInt128 u128) {
+                result = u128;
+                return true;
+            }
+#if NET7_0_OR_GREATER
+            // Handle System.UInt128 (unsigned 128-bit)
+            else if (value is System.UInt128 sysU128) {
+                result = sysU128;
+                return true;
+            }
+#endif
+            // Unsupported type
+            else {
+                result = default;
+                return false;
+            }
+
+            static bool TryConvertFromChecked(double value, out UInt128 result) {
+                const int BitSize = 64;
+                const int ExponentBitSize = 11;
+                const int ExponentBias = unchecked(checked((1 << (ExponentBitSize - 1))) - 1);
+                const int SignBitSize = 1;
+                const int FractionBitSize = checked(BitSize - SignBitSize - ExponentBitSize);
+
+                // const Int64 SignMask = unchecked((Int64)checked((Int64)1u << (ExponentBitSize + FractionBitSize)));
+                const Int64 ExponentMask = unchecked((Int64)checked((((Int64)1u << ExponentBitSize) - 1u) << FractionBitSize));
+                const Int64 FractionMask = unchecked((Int64)checked(((Int64)1u << FractionBitSize) - 1u));
+
+                var b = BitConverter.DoubleToInt64Bits(value);
+                var e = checked((int)(ExponentMask >> FractionBitSize)) & unchecked((int)(b >> FractionBitSize));
+                if (e >= checked(ExponentBias - 1)) {
+                    if (0 > b) {
+                        result = default;
+                        return false;
+                    }
+                    checked(checked(ExponentBias - 1 + 128) - e).Ignore();
+                    {
+                        e = unchecked(e - (FractionBitSize + ExponentBias));
+                        var lo = unchecked((UInt64)(((Int64)1 << FractionBitSize) | (FractionMask & b)));
+                        var hi = (UInt64)0;
+                        if (e > 0) {
+                            lo = Numerics.DoubleArithmetic.ShiftLeft(lo, hi, e, out hi);
+                        } // else if (e < 0) {
+                          // var ol = (UInt64)0;
+                          // ol = MathEx.ShiftRight(ol, lo, unchecked(-e), out lo);
+                          // // Do NOT uncomment. (int)3.5 == 3
+                        /*
+                        // IEEE Std 754-2008 roundTiesToEven
+                        if (unchecked((UInt64)Int64.MinValue) < ol || (unchecked((UInt64)Int64.MinValue) == ol && 0 != (1 & lo))) {
+                            lo = unchecked(1 + lo);
+                        }
+                        */
+                        // }
+                        if (0 > b) {
+                            lo = Numerics.DoubleArithmetic.NegateUnchecked(lo, hi, out hi);
+                        }
+                        result = new XInt128(lo, hi);
+                        return true;
+                    }
+                }
+                result = Zero;
+                return true;
+            }
         }
 
-        static bool INumberBase<XInt128>.TryConvertFromSaturating<TOther>(TOther value, [NotNullWhen(true)] out XInt128 result) {
-            throw new NotImplementedException();
+        /// <inheritdoc cref="INumberBase{TSelf}.TryConvertFromSaturating{TOther}(TOther, out TSelf)" />
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static bool INumberBase<UInt128>.TryConvertFromSaturating<TOther>(TOther value, out UInt128 result) => TryConvertFromSaturating(value, out result);
+
+        static partial class INumberBaseExtensions<T>
+            where T : INumberBase<T> {
+
+            public static bool TryConvertFromSaturating<TOther>(TOther value, out T result)
+                where TOther : INumberBase<TOther> {
+                return T.TryConvertFromSaturating(value, out result!);
+            }
         }
 
-        static bool INumberBase<XInt128>.TryConvertFromTruncating<TOther>(TOther value, [NotNullWhen(true)] out XInt128 result) {
-            throw new NotImplementedException();
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static bool TryConvertFromSaturating<TOther>(TOther value, out UInt128 result)
+            where TOther : INumberBase<TOther> {
+            // In order to reduce overall code duplication and improve the inlinabilty of these
+            // methods for the corelib types we have `ConvertFrom` handle the same sign and
+            // `ConvertTo` handle the opposite sign. However, since there is an uneven split
+            // between signed and unsigned types, the one that handles unsigned will also
+            // handle `Decimal`.
+            //
+            // That is, `ConvertFrom` for `UltimateOrb.UInt128` will handle all types in corelib (System) and the other unsigned types in UltimateOrb. And
+            // `ConvertTo` will handle all types in corelib (System) and the signed types in UltimateOrb.
+
+            // Handle UltimateOrb.Int128 (signed 128-bit)
+            if (value is UltimateOrb.Int128 s128) {
+                result = s128.IsNegative ? UInt128.MinValue : (UInt128)s128;
+                return true;
+            }
+#if NET7_0_OR_GREATER
+            // Handle System.Int128 (signed 128-bit)
+            else if (value is System.Int128 sysS128) {
+                result = sysS128 < 0 ? UInt128.MinValue : (UInt128)sysS128;
+                return true;
+            }
+#endif
+            // Handle unsigned integer types
+            else if (value is long il) {
+                result = long.IsNegative(il) ? UInt128.MinValue : (UInt128)unchecked((ulong)il);
+                return true;
+            } else if (value is ulong ul) {
+                result = ul;
+                return true;
+            } else if (value is int i) {
+                result = int.IsNegative(i) ? UInt128.MinValue : (UInt128)unchecked((uint)i);
+                return true;
+            } else if (value is uint ui) {
+                result = ui;
+                return true;
+            } else if (value is short ss) {
+                result = short.IsNegative(ss) ? UInt128.MinValue : (UInt128)unchecked((ushort)ss);
+                return true;
+            } else if (value is ushort us) {
+                result = us;
+                return true;
+            } else if (value is char c) {
+                result = c;
+                return true;
+            } else if (value is byte b) {
+                result = b;
+                return true;
+            } else if (value is sbyte sb) {
+                result = sbyte.IsNegative(sb) ? UInt128.MinValue : (UInt128)unchecked((byte)sb);
+                return true;
+            }
+            // Handle platform-dependent unsigned size (nuint)
+            else if (value is nuint uPtr) {
+                result = (UInt128)uPtr.ToUInt64();
+                return true;
+            } else if (value is nint ptr) {
+                result = nint.IsNegative(ptr) ? UInt128.MinValue : (UInt128)unchecked((UInt64)ptr.ToInt64());
+                return true;
+            }
+            // Handle floating-point types with saturation logic
+            else if (value is double d) {
+                return TryConvertFromSaturating(d, out result);
+            } else if (value is float f) {
+                return TryConvertFromSaturating(unchecked((double)f), out result);
+            } else if (value is Half h) {
+                return TryConvertFromSaturating(unchecked((double)h), out result);
+            }
+            // Handle decimal (clamp negative values to 0)
+            else if (value is decimal dec) {
+                result = decimal.IsNegative(dec) ? UInt128.MinValue : unchecked((UInt128)dec);
+                return true;
+            }
+            // Handle UltimateOrb.UInt128 (unsigned 128-bit)
+            else if (value is UltimateOrb.UInt128 u128) {
+                result = u128;
+                return true;
+            }
+#if NET7_0_OR_GREATER
+            // Handle System.UInt128 (unsigned 128-bit)
+            else if (value is System.UInt128 sysU128) {
+                result = sysU128;
+                return true;
+            }
+#endif
+            // Unsupported type
+            else {
+                result = default;
+                return false;
+            }
+
+            static bool TryConvertFromSaturating(double d, out XInt128 result) {
+                var x = BitConverter.DoubleToInt64Bits(d).ToUnsignedUnchecked();
+                if (x >= 0X3ff0000000000000) {
+                    if (0 <= x.ToSignedUnchecked()) {
+                        if (x <= 0X7ff0000000000000) {
+                            result = UInt128.MaxValue;
+                        } else {
+                            // NaN
+                            result = default;
+                            return false;
+                        }
+                    } else {
+                        if (x <= 0Xfff0000000000000) {
+                            result = UInt128.MinValue;
+                        } else {
+                            // NaN
+                            result = default;
+                            return false;
+                        }
+                    }
+                } else {
+                    result = unchecked((UInt128)d);
+                }
+                return true;
+            }
         }
 
-        static bool INumberBase<XInt128>.TryConvertToChecked<TOther>(XInt128 value, [NotNullWhen(true)] out TOther? result) where TOther : default {
-            throw new NotImplementedException();
+        /// <inheritdoc cref="INumberBase{TSelf}.TryConvertFromTruncating{TOther}(TOther, out TSelf)" />
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static bool INumberBase<UInt128>.TryConvertFromTruncating<TOther>(TOther value, out UInt128 result) => TryConvertFromTruncating(value, out result);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static bool TryConvertFromTruncating<TOther>(TOther value, out UInt128 result)
+            where TOther : INumberBase<TOther> {
+            // In order to reduce overall code duplication and improve the inlinabilty of these
+            // methods for the corelib types we have `ConvertFrom` handle the same sign and
+            // `ConvertTo` handle the opposite sign. However, since there is an uneven split
+            // between signed and unsigned types, the one that handles unsigned will also
+            // handle `Decimal`.
+            //
+            // That is, `ConvertFrom` for `UltimateOrb.UInt128` will handle all types in corelib (System) and the other unsigned types in UltimateOrb. And
+            // `ConvertTo` will handle all types in corelib (System) and the signed types in UltimateOrb.
+
+            // Handle UltimateOrb.Int128 (signed 128-bit)
+            if (value is UltimateOrb.Int128 s128) {
+                result = unchecked((UInt128)s128);
+                return true;
+            }
+#if NET7_0_OR_GREATER
+            // Handle System.Int128 (signed 128-bit)
+            else if (value is System.Int128 sysS128) {
+                result = unchecked((UInt128)sysS128);
+                return true;
+            }
+#endif
+            // Handle integer types with truncating conversion
+            else if (value is long il) {
+                result = unchecked((UInt128)(Int128)il);
+                return true;
+            } else if (value is ulong ul) {
+                result = ul;
+                return true;
+            } else if (value is int i) {
+                result = unchecked((UInt128)(Int128)i);
+                return true;
+            } else if (value is uint ui) {
+                result = ui;
+                return true;
+            } else if (value is short ss) {
+                result = unchecked((UInt128)(Int128)ss);
+                return true;
+            } else if (value is ushort us) {
+                result = us;
+                return true;
+            } else if (value is char c) {
+                result = c;
+                return true;
+            } else if (value is byte b) {
+                result = b;
+                return true;
+            } else if (value is sbyte sb) {
+                result = unchecked((UInt128)(Int128)sb);
+                return true;
+            }
+            // Handle platform-dependent size
+            else if (value is nuint uPtr) {
+                result = (UInt128)uPtr.ToUInt64();
+                return true;
+            } else if (value is nint ptr) {
+                result = unchecked((UInt128)(Int128)ptr.ToInt64());
+                return true;
+            }
+            // Handle floating-point types with truncating logic
+            else if (value is double d) {
+                return TryConvertFromTruncating(d, out result);
+            } else if (value is float f) {
+                return TryConvertFromTruncating((double)f, out result);
+            } else if (value is Half h) {
+                return TryConvertFromTruncating((double)h, out result);
+            }
+            // Handle decimal with truncating conversion
+            else if (value is decimal dec) {
+                result = unchecked((UInt128)(Int128)dec);
+                return true;
+            }
+            // Handle UltimateOrb.UInt128 (unsigned 128-bit)
+            else if (value is UltimateOrb.UInt128 u128) {
+                result = u128;
+                return true;
+            }
+#if NET7_0_OR_GREATER
+            // Handle System.UInt128 (unsigned 128-bit)
+            else if (value is System.UInt128 sysU128) {
+                result = sysU128;
+                return true;
+            }
+#endif
+            // Unsupported type
+            else {
+                result = default;
+                return false;
+            }
+
+            static bool TryConvertFromTruncating(double d, out UInt128 result) {
+                if (!double.IsFinite(d)) {
+                    result = default;
+                    return false;
+                }
+
+                result = unchecked((UInt128)d);
+                return true;
+            }
         }
 
-        static bool INumberBase<XInt128>.TryConvertToSaturating<TOther>(XInt128 value, [NotNullWhen(true)] out TOther? result) where TOther : default {
-            throw new NotImplementedException();
+        /// <inheritdoc cref="INumberBase{TSelf}.TryConvertToChecked{TOther}(TSelf, out TOther)" />
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static bool INumberBase<UInt128>.TryConvertToChecked<TOther>(UInt128 value, [MaybeNullWhen(false)] out TOther result) {
+            // In order to reduce overall code duplication and improve the inlinabilty of these
+            // methods for the corelib types we have `ConvertFrom` handle the same sign and
+            // `ConvertTo` handle the opposite sign. However, since there is an uneven split
+            // between signed and unsigned types, the one that handles unsigned will also
+            // handle `Decimal`.
+            //
+            // That is, `ConvertFrom` for `UInt128` will handle the other unsigned types and
+            // `ConvertTo` will handle the signed types
+
+            if (typeof(TOther) == typeof(double)) {
+                double actualResult = (double)value;
+                result = (TOther)(object)actualResult;
+                return true;
+            } else if (typeof(TOther) == typeof(Half)) {
+                Half actualResult = (Half)value;
+                result = (TOther)(object)actualResult;
+                return true;
+            } else if (typeof(TOther) == typeof(short)) {
+                short actualResult = checked((short)value);
+                result = (TOther)(object)actualResult;
+                return true;
+            } else if (typeof(TOther) == typeof(int)) {
+                int actualResult = checked((int)value);
+                result = (TOther)(object)actualResult;
+                return true;
+            } else if (typeof(TOther) == typeof(long)) {
+                long actualResult = checked((long)value);
+                result = (TOther)(object)actualResult;
+                return true;
+            } else if (typeof(TOther) == typeof(Int128)) {
+                Int128 actualResult = checked((Int128)value);
+                result = (TOther)(object)actualResult;
+                return true;
+            } else if (typeof(TOther) == typeof(nint)) {
+                nint actualResult = checked((nint)value);
+                result = (TOther)(object)actualResult;
+                return true;
+            } else if (typeof(TOther) == typeof(sbyte)) {
+                sbyte actualResult = checked((sbyte)value);
+                result = (TOther)(object)actualResult;
+                return true;
+            } else if (typeof(TOther) == typeof(float)) {
+                float actualResult = (float)value;
+                result = (TOther)(object)actualResult;
+                return true;
+            } else {
+                result = default;
+                return false;
+            }
         }
 
-        static bool INumberBase<XInt128>.TryConvertToTruncating<TOther>(XInt128 value, [NotNullWhen(true)] out TOther? result) where TOther : default {
-            throw new NotImplementedException();
+        /// <inheritdoc cref="INumberBase{TSelf}.TryConvertToSaturating{TOther}(TSelf, out TOther)" />
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static bool INumberBase<UInt128>.TryConvertToSaturating<TOther>(UInt128 value, [MaybeNullWhen(false)] out TOther result) {
+            // In order to reduce overall code duplication and improve the inlinabilty of these
+            // methods for the corelib types we have `ConvertFrom` handle the same sign and
+            // `ConvertTo` handle the opposite sign. However, since there is an uneven split
+            // between signed and unsigned types, the one that handles unsigned will also
+            // handle `Decimal`.
+            //
+            // That is, `ConvertFrom` for `UInt128` will handle the other unsigned types and
+            // `ConvertTo` will handle the signed types
+
+            if (typeof(TOther) == typeof(double)) {
+                double actualResult = (double)value;
+                result = (TOther)(object)actualResult;
+                return true;
+            } else if (typeof(TOther) == typeof(Half)) {
+                Half actualResult = (Half)value;
+                result = (TOther)(object)actualResult;
+                return true;
+            } else if (typeof(TOther) == typeof(short)) {
+                short actualResult = (value >= new UInt128(0x0000_0000_0000_0000, 0x0000_0000_0000_7FFF)) ? short.MaxValue : (short)value;
+                result = (TOther)(object)actualResult;
+                return true;
+            } else if (typeof(TOther) == typeof(int)) {
+                int actualResult = (value >= new UInt128(0x0000_0000_0000_0000, 0x0000_0000_7FFF_FFFF)) ? int.MaxValue : (int)value;
+                result = (TOther)(object)actualResult;
+                return true;
+            } else if (typeof(TOther) == typeof(long)) {
+                long actualResult = (value >= new UInt128(0x0000_0000_0000_0000, 0x7FFF_FFFF_FFFF_FFFF)) ? long.MaxValue : (long)value;
+                result = (TOther)(object)actualResult;
+                return true;
+            } else if (typeof(TOther) == typeof(Int128)) {
+                Int128 actualResult = (value >= new UInt128(0x7FFF_FFFF_FFFF_FFFF, 0xFFFF_FFFF_FFFF_FFFF)) ? Int128.MaxValue : (Int128)value;
+                result = (TOther)(object)actualResult;
+                return true;
+            } else if (typeof(TOther) == typeof(nint)) {
+#if TARGET_32BIT
+                nint actualResult = (value >= new UInt128(0x0000_0000_0000_0000, 0x0000_0000_7FFF_FFFF)) ? nint.MaxValue : (nint)value;
+                result = (TOther)(object)actualResult;
+                return true;
+#else
+                nint actualResult = (value >= new UInt128(0x0000_0000_0000_0000, 0x7FFF_FFFF_FFFF_FFFF)) ? nint.MaxValue : (nint)value;
+                result = (TOther)(object)actualResult;
+                return true;
+#endif
+            } else if (typeof(TOther) == typeof(sbyte)) {
+                sbyte actualResult = (value >= new UInt128(0x0000_0000_0000_0000, 0x0000_0000_0000_007F)) ? sbyte.MaxValue : (sbyte)value;
+                result = (TOther)(object)actualResult;
+                return true;
+            } else if (typeof(TOther) == typeof(float)) {
+                float actualResult = (float)value;
+                result = (TOther)(object)actualResult;
+                return true;
+            } else {
+                result = default;
+                return false;
+            }
+        }
+
+        /// <inheritdoc cref="INumberBase{TSelf}.TryConvertToTruncating{TOther}(TSelf, out TOther)" />
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static bool INumberBase<UInt128>.TryConvertToTruncating<TOther>(UInt128 value, [MaybeNullWhen(false)] out TOther result) {
+            // In order to reduce overall code duplication and improve the inlinabilty of these
+            // methods for the corelib types we have `ConvertFrom` handle the same sign and
+            // `ConvertTo` handle the opposite sign. However, since there is an uneven split
+            // between signed and unsigned types, the one that handles unsigned will also
+            // handle `Decimal`.
+            //
+            // That is, `ConvertFrom` for `UInt128` will handle the other unsigned types and
+            // `ConvertTo` will handle the signed types
+
+            if (typeof(TOther) == typeof(double)) {
+                double actualResult = (double)value;
+                result = (TOther)(object)actualResult;
+                return true;
+            } else if (typeof(TOther) == typeof(Half)) {
+                Half actualResult = (Half)value;
+                result = (TOther)(object)actualResult;
+                return true;
+            } else if (typeof(TOther) == typeof(short)) {
+                short actualResult = (short)value;
+                result = (TOther)(object)actualResult;
+                return true;
+            } else if (typeof(TOther) == typeof(int)) {
+                int actualResult = (int)value;
+                result = (TOther)(object)actualResult;
+                return true;
+            } else if (typeof(TOther) == typeof(long)) {
+                long actualResult = (long)value;
+                result = (TOther)(object)actualResult;
+                return true;
+            } else if (typeof(TOther) == typeof(Int128)) {
+                Int128 actualResult = (Int128)value;
+                result = (TOther)(object)actualResult;
+                return true;
+            } else if (typeof(TOther) == typeof(nint)) {
+                nint actualResult = (nint)value;
+                result = (TOther)(object)actualResult;
+                return true;
+            } else if (typeof(TOther) == typeof(sbyte)) {
+                sbyte actualResult = (sbyte)value;
+                result = (TOther)(object)actualResult;
+                return true;
+            } else if (typeof(TOther) == typeof(float)) {
+                float actualResult = (float)value;
+                result = (TOther)(object)actualResult;
+                return true;
+            } else {
+                result = default;
+                return false;
+            }
         }
         #endregion
 #endif
@@ -2095,15 +2792,12 @@ namespace UltimateOrb {
             return this.ToString(null, provider);
         }
 
-        object IConvertible.ToType(Type conversionType, IFormatProvider? provider) {
-            if (null == conversionType) {
-                throw new ArgumentNullException(nameof(conversionType));
-            }
-            // return Convert.DefaultToType((IConvertible)this, type, provider);
-            throw new NotImplementedException();
+        object IConvertible.ToType(Type type, IFormatProvider? provider) {
+            ArgumentNullException.ThrowIfNull(type);
+            return ConvertInternal.DefaultToType(this, type, provider);
         }
 #endif
-#endregion
+        #endregion
 
         /// <summary>
         ///     <para>Parses an unsigned integer.</para>
@@ -2282,7 +2976,7 @@ namespace UltimateOrb {
 #endif
 #if NET7_0_OR_GREATER && !LEGACY_OPERATOR_CHECKNESS
         public static XInt128 Parse(ReadOnlySpan<char> s, NumberStyles style, IFormatProvider? provider) {
-            throw new NotImplementedException();
+            return System.UInt128.Parse(s, style, provider);
         }
 
         public static XInt128 Parse(string s, NumberStyles style, IFormatProvider? provider) {
@@ -2290,7 +2984,8 @@ namespace UltimateOrb {
         }
 
         public static bool TryParse(ReadOnlySpan<char> s, NumberStyles style, IFormatProvider? provider, out XInt128 result) {
-            throw new NotImplementedException();
+            Unsafe.SkipInit(out result);
+            return System.UInt128.TryParse(s, style, provider, out Unsafe.As<UltimateOrb.UInt128, System.UInt128>(ref result));
         }
 
         public static bool TryParse(string? s, NumberStyles style, IFormatProvider? provider, out XInt128 result) {
@@ -2314,7 +3009,7 @@ namespace UltimateOrb {
         }
 
         bool ISpanFormattable.TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider) {
-            throw new NotImplementedException();
+            return ((System.UInt128)this).TryFormat(destination, out charsWritten, format, provider);
         }
 #endif
     }
@@ -2322,15 +3017,12 @@ namespace UltimateOrb {
 
 namespace UltimateOrb {
     using Internal;
-
-    using static UltimateOrb.Utilities.ThrowHelper;
-
-    using MathEx = UltimateOrb.Numerics.DoubleArithmetic;
-
-    using XInt128 = UInt128;
-    using OInt128 = Int128;
-    using HInt64 = UInt64;
     using UltimateOrb.Runtime.CompilerServices;
+    using static UltimateOrb.Utilities.ThrowHelper;
+    using HInt64 = UInt64;
+    using MathEx = UltimateOrb.Numerics.DoubleArithmetic;
+    using OInt128 = Int128;
+    using XInt128 = UInt128;
 
     public partial struct UInt128 {
 
@@ -2629,7 +3321,7 @@ namespace UltimateOrb {
                 System.Diagnostics.Contracts.Contract.Requires(n > second);
                 System.Diagnostics.Contracts.Contract.Ensures(System.Diagnostics.Contracts.Contract.OldValue(n) > System.Diagnostics.Contracts.Contract.Result<XInt128>());
                 var p_lo_lo = UltimateOrb.Numerics.DoubleArithmetic.BigMul(first.lo, first.hi, second.lo, second.hi, out var p_lo_hi, out var p_hi_lo, out var p_hi_hi);
-                var lo = UltimateOrb.Numerics.DoubleArithmetic.BigRemNoThrow(p_lo_lo, p_lo_hi, p_hi_lo, p_hi_hi, n.lo, n.hi, out var hi);
+                var lo = UltimateOrb.Numerics.DoubleArithmetic.BigRemNoThrowWhenOverflow(p_lo_lo, p_lo_hi, p_hi_lo, p_hi_hi, n.lo, n.hi, out var hi);
                 return new XInt128(lo, hi);
             }
 
@@ -2642,7 +3334,7 @@ namespace UltimateOrb {
                 System.Diagnostics.Contracts.Contract.Requires(n > value);
                 System.Diagnostics.Contracts.Contract.Ensures(System.Diagnostics.Contracts.Contract.OldValue(n) > System.Diagnostics.Contracts.Contract.Result<XInt128>());
                 var p_lo_lo = UltimateOrb.Numerics.DoubleArithmetic.BigSquare(value.lo, value.hi, out var p_lo_hi, out var p_hi_lo, out var p_hi_hi);
-                var lo = UltimateOrb.Numerics.DoubleArithmetic.BigRemNoThrow(p_lo_lo, p_lo_hi, p_hi_lo, p_hi_hi, n.lo, n.hi, out var hi);
+                var lo = UltimateOrb.Numerics.DoubleArithmetic.BigRemNoThrowWhenOverflow(p_lo_lo, p_lo_hi, p_hi_lo, p_hi_hi, n.lo, n.hi, out var hi);
                 return new XInt128(lo, hi);
             }
 
@@ -2806,10 +3498,15 @@ namespace Internal.System {
             var value_ = value;
             if (0 != value_) {
                 // var c = Mathematics.BinaryNumerals.CountLeadingZeros(unchecked((UInt64)value_));
-                var c = 0;
-                for (var tmp = value_; 0 <= unchecked((Int64)tmp); tmp <<= 1) {
-                    unchecked {
-                        ++c;
+                int c;
+                if (Lzcnt.X64.IsSupported || ArmBase.Arm64.IsSupported || X86Base.X64.IsSupported) {
+                    c = BitOperations.LeadingZeroCount(unchecked((UInt64)value_));
+                } else {
+                    c = 0;
+                    for (var tmp = value_; 0 <= unchecked((Int64)tmp); tmp <<= 1) {
+                        unchecked {
+                            ++c;
+                        }
                     }
                 }
                 var s = unchecked((UInt64)(checked(64 - 1 + ExponentBias) - c)) << FractionBitSize;

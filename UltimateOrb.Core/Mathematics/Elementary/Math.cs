@@ -4,6 +4,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.ConstrainedExecution;
 using System.Diagnostics.Contracts;
 using static UltimateOrb.Utilities.Extensions.BooleanIntegerExtensions;
+using UltimateOrb.Numerics;
 
 namespace UltimateOrb.Mathematics.Elementary {
 
@@ -110,8 +111,10 @@ namespace UltimateOrb.Mathematics.Elementary {
         public static UInt64 Sqrt_A_F(UInt64 radicand) {
             unchecked {
                 // truncated
-                var t = (UInt32)System.Math.Sqrt(radicand);
-                return 0 == t ? (0 == radicand ? 0u : ~(UInt32)0u) : ((UInt64)t * t > radicand ? --t : t);
+                // var candidate = (UInt32)(UInt64)System.Math.Sqrt((double)radicand);
+                // return 0 == candidate ? (0 == radicand ? 0u : ~(UInt32)0u) : ((UInt64)candidate * candidate > radicand ? --candidate : candidate);
+                var t = (UInt64)System.Math.Sqrt((double)radicand);
+                return t > UInt32.MaxValue ? UInt32.MaxValue : ((UInt64)(UInt32)t * (UInt32)t > radicand ? --t : t);
             }
         }
 
@@ -123,7 +126,7 @@ namespace UltimateOrb.Mathematics.Elementary {
         public static UInt32 Sqrt_A_F(UInt32 radicand) {
             unchecked {
                 // truncated
-                return (UInt16)(System.Math.Sqrt(radicand));
+                return (UInt16)(UInt32)System.Math.Sqrt((double)radicand);
             }
         }
 
@@ -166,6 +169,28 @@ namespace UltimateOrb.Mathematics.Elementary {
                 return r;
             }
         }
+
+        [CLSCompliantAttribute(false)]
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
+        [TargetedPatchingOptOutAttribute("")]
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        [PureAttribute()]
+        public static UltimateOrb.UInt128 Sqrt(UltimateOrb.UInt128 radicand) {
+            // return DoubleArithmetic.Sqrt_A_F2(radicand.GetLowPart(), radicand.GetHighPart());
+            return DoubleArithmetic.BigSqrt(radicand.GetLowPart(), radicand.GetHighPart());
+        }
+
+#if NET7_0_OR_GREATER
+        [CLSCompliantAttribute(false)]
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
+        [TargetedPatchingOptOutAttribute("")]
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        [PureAttribute()]
+        public static System.UInt128 Sqrt(System.UInt128 radicand) {
+            //return DoubleArithmetic.Sqrt_A_F2(radicand.GetLowPart(), radicand.GetHighPart());
+            return DoubleArithmetic.BigSqrt(radicand.GetLowPart(), radicand.GetHighPart());
+        }
+#endif
 
         [CLSCompliantAttribute(false)]
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]

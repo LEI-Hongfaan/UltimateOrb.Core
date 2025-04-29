@@ -201,25 +201,25 @@ namespace UltimateOrb.Numerics {
 
 
         public static int CountTrailingZeros(UInt64 lo, UInt64 hi) {
-            if (0 != hi) {
-                return BinaryNumerals.CountTrailingZeros(hi);
+            if (0 != lo) {
+                return BinaryNumerals.CountTrailingZeros(lo);
             }
-            return unchecked(64 + BinaryNumerals.CountTrailingZeros(lo));
+            return unchecked(64 + BinaryNumerals.CountTrailingZeros(hi));
         }
 
         public static int CountTrailingZeros(UInt128 lo, UInt128 hi) {
-            if (0 != hi) {
-                return BinaryNumerals.CountTrailingZeros(hi);
+            if (0 != lo) {
+                return BinaryNumerals.CountTrailingZeros(lo);
             }
-            return unchecked(128 + BinaryNumerals.CountTrailingZeros(lo));
+            return unchecked(128 + BinaryNumerals.CountTrailingZeros(hi));
         }
 
 #if NET7_0_OR_GREATER
         public static int CountTrailingZeros(System.UInt128 lo, System.UInt128 hi) {
-            if (0 != hi) {
-                return BinaryNumerals.CountTrailingZeros(hi);
+            if (0 != lo) {
+                return BinaryNumerals.CountTrailingZeros(lo);
             }
-            return unchecked(128 + BinaryNumerals.CountTrailingZeros(lo));
+            return unchecked(128 + BinaryNumerals.CountTrailingZeros(hi));
         }
 #endif
 

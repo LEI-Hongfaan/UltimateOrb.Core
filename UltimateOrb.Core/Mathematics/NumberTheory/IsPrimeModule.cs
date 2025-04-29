@@ -63,9 +63,6 @@ namespace UltimateOrb.Mathematics.NumberTheory {
         public static bool IsPrime(UInt64 value) {
             unchecked {
                 if (64u > value) {
-                    if (2u > value) {
-                        return false;
-                    }
                     return 0 != (1 & (int)(prime_table >> (int)value));
                 }
                 if (!IsProbablePrimeTrialDivision(primes_2_3_7, euler_2_3_7, value)) {
@@ -266,9 +263,6 @@ namespace UltimateOrb.Mathematics.NumberTheory {
         public static bool IsPrime(UInt32 value) {
             unchecked {
                 if (64u > value) {
-                    if (2u > value) {
-                        return false;
-                    }
                     return 0 != (1 & (int)(prime_table >> (int)value));
                 }
                 if (!IsProbablePrimeTrialDivision(primes_2_3_7, euler_2_3_7, value)) {

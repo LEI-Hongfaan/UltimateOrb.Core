@@ -48,6 +48,13 @@ namespace Internal.System {
             System.Diagnostics.Contracts.Contract.Ensures(System.Diagnostics.Contracts.Contract.OldValue(divisor) > System.Diagnostics.Contracts.Contract.ValueAtReturn(out remainder));
             System.Diagnostics.Contracts.Contract.EnsuresOnThrow<DivideByZeroException>(!(0u != System.Diagnostics.Contracts.Contract.OldValue(divisor)));
             unchecked {
+#if NET6_0_OR_GREATER
+                {
+                    var (q, r) = System.Math.DivRem(dividend, divisor);
+                    remainder = r;
+                    return q;
+                }
+#endif
                 // 2019Dec27
                 if (true || SizeOfModule.SizeOf<UInt64>() > SizeOfModule.SizeOf<UIntPtr>()) {
                     var q = dividend / divisor;

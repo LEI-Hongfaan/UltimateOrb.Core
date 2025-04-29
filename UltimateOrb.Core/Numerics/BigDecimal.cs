@@ -86,7 +86,7 @@ namespace UltimateOrb.Numerics {
             this.m_SignedShiftCount = signedShiftCount;
         }
         /*
-        [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
         [TargetedPatchingOptOutAttribute("")]
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         [PureAttribute()]
@@ -99,7 +99,7 @@ namespace UltimateOrb.Numerics {
         private static readonly BigInteger s_Rational64MaxNumerator = UInt32.MaxValue;
         */
 
-        [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
         [TargetedPatchingOptOutAttribute("")]
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         [PureAttribute()]
@@ -129,7 +129,7 @@ namespace UltimateOrb.Numerics {
 
         private static readonly BigInteger s_BigIntegerOne = BigInteger.One;
 
-        [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
         [TargetedPatchingOptOutAttribute("")]
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         [PureAttribute()]
@@ -137,7 +137,7 @@ namespace UltimateOrb.Numerics {
             return value.IsZero ? default : new BigDecimal(value, s_BigIntegerOne);
         }
 
-        [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
         [TargetedPatchingOptOutAttribute("")]
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         [PureAttribute()]
@@ -148,7 +148,7 @@ namespace UltimateOrb.Numerics {
             return value.m_SignedNumerator / value.m_SignedShiftCount;
         }
 
-        [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
         [TargetedPatchingOptOutAttribute("")]
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         [PureAttribute()]
@@ -167,7 +167,7 @@ namespace UltimateOrb.Numerics {
             return value;
         }
 
-        [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
         [TargetedPatchingOptOutAttribute("")]
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         [PureAttribute()]
@@ -175,7 +175,7 @@ namespace UltimateOrb.Numerics {
             return new BigDecimal(value.m_SignedShiftCount, -value.m_SignedNumerator);
         }
 
-        [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
         [TargetedPatchingOptOutAttribute("")]
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         [PureAttribute()]
@@ -195,7 +195,7 @@ namespace UltimateOrb.Numerics {
             return new BigDecimal(d / g, n / g);
         }
 
-        [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
         [TargetedPatchingOptOutAttribute("")]
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         [PureAttribute()]
@@ -215,7 +215,7 @@ namespace UltimateOrb.Numerics {
             return new BigDecimal(d / g, n / g);
         }
 
-        [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
         [TargetedPatchingOptOutAttribute("")]
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         [PureAttribute()]
@@ -230,7 +230,7 @@ namespace UltimateOrb.Numerics {
             return new BigDecimal(d, n);
         }
 
-        [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
         [TargetedPatchingOptOutAttribute("")]
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         [PureAttribute()]
@@ -252,7 +252,7 @@ namespace UltimateOrb.Numerics {
             return new BigDecimal(d, n);
         }
 
-        [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
         [TargetedPatchingOptOutAttribute("")]
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         [PureAttribute()]
@@ -267,7 +267,7 @@ namespace UltimateOrb.Numerics {
             return 0 > s ? new BigDecimal(-value.m_SignedShiftCount, -value.m_SignedNumerator) : new BigDecimal(value.m_SignedShiftCount, value.m_SignedNumerator);
         }
 
-        [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
         [TargetedPatchingOptOutAttribute("")]
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         [PureAttribute()]
@@ -285,7 +285,7 @@ namespace UltimateOrb.Numerics {
             return new BigDecimal(denominator / g, numerator / g);
         }
 
-        [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
         [TargetedPatchingOptOutAttribute("")]
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         [PureAttribute()]
