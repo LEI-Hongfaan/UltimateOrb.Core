@@ -22,15 +22,16 @@ This is the Core part of the UltimateOrb Libraries' adjustment of the Base Class
 This independent library provides Int128 and UInt128.
 
 Version 2.1.x is built against .NET 6.0.
-Version 3.x.x is built against .NET 7.0.
+Version 3.x.x is built against .NET 6.0 to .NET 10.0.
 
-[WIP] Support for Generic Math interfaces.
+[WIP] (U)Int256
+[WIP] Quadruple (IEEE binary256)
 
 ### What's new ###
 
 * Now UltimateOrb.Int128 uses exactly the same codebase as UltimateOrb.Core. 
-* The library is trimmed by ILLink.
-* More intrinsics are ultilized to accelate the computations.
+* The libraries are trimmable.
+* More intrinsics are utilized to accelerate the computations.
 
 ### UltimateOrb.XIntN ###
 The future name of this library.
