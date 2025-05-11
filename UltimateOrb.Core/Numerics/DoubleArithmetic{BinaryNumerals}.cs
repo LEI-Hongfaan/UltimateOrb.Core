@@ -177,83 +177,49 @@ namespace UltimateOrb.Numerics {
     public static partial class DoubleArithmetic {
 
         public static int CountLeadingZeros(UInt64 lo, UInt64 hi) {
-            if (0 != hi) {
-                return BinaryNumerals.CountLeadingZeros(hi);
-            }
-            return unchecked(64 + BinaryNumerals.CountLeadingZeros(lo));
+            return 0 == hi ? unchecked(64 + BinaryNumerals.CountLeadingZeros(lo)) : BinaryNumerals.CountLeadingZeros(hi);
         }
 
         public static int CountLeadingZeros(UInt128 lo, UInt128 hi) {
-            if (0 != hi) {
-                return BinaryNumerals.CountLeadingZeros(hi);
-            }
-            return unchecked(128 + BinaryNumerals.CountLeadingZeros(lo));
+            return 0 == hi ? unchecked(128 + BinaryNumerals.CountLeadingZeros(lo)) : BinaryNumerals.CountLeadingZeros(hi);
         }
 
 #if NET7_0_OR_GREATER
         public static int CountLeadingZeros(System.UInt128 lo, System.UInt128 hi) {
-            if (0 != hi) {
-                return BinaryNumerals.CountLeadingZeros(hi);
-            }
-            return unchecked(128 + BinaryNumerals.CountLeadingZeros(lo));
+            return 0 == hi ? unchecked(128 + BinaryNumerals.CountLeadingZeros(lo)) : BinaryNumerals.CountLeadingZeros(hi);
         }
 #endif
 
-
         public static int CountTrailingZeros(UInt64 lo, UInt64 hi) {
-            if (0 != lo) {
-                return BinaryNumerals.CountTrailingZeros(lo);
-            }
-            return unchecked(64 + BinaryNumerals.CountTrailingZeros(hi));
+            return 0 == lo ? unchecked(64 + BinaryNumerals.CountTrailingZeros(hi)) : BinaryNumerals.CountTrailingZeros(lo);
         }
 
         public static int CountTrailingZeros(UInt128 lo, UInt128 hi) {
-            if (0 != lo) {
-                return BinaryNumerals.CountTrailingZeros(lo);
-            }
-            return unchecked(128 + BinaryNumerals.CountTrailingZeros(hi));
+            return 0 == lo ? unchecked(128 + BinaryNumerals.CountTrailingZeros(hi)) : BinaryNumerals.CountTrailingZeros(lo);
         }
 
 #if NET7_0_OR_GREATER
         public static int CountTrailingZeros(System.UInt128 lo, System.UInt128 hi) {
-            if (0 != lo) {
-                return BinaryNumerals.CountTrailingZeros(lo);
-            }
-            return unchecked(128 + BinaryNumerals.CountTrailingZeros(hi));
+            return 0 == lo ? unchecked(128 + BinaryNumerals.CountTrailingZeros(hi)) : BinaryNumerals.CountTrailingZeros(lo);
         }
 #endif
 
         public static int Log2Floor(UInt64 lo, UInt64 hi) {
-            if (0 == hi) {
-                return BinaryNumerals.Log2Floor(lo);
-            }
-            return 64 + BinaryNumerals.Log2Floor(hi);
+            return 0 == hi ? BinaryNumerals.Log2Floor(lo) : 64 + BinaryNumerals.Log2Floor(hi);
         }
 
         public static int Log2Floor(UltimateOrb.UInt128 lo, UltimateOrb.UInt128 hi) {
-            if (0 == hi) {
-                return BinaryNumerals.Log2Floor(lo);
-            }
-            return 128 + BinaryNumerals.Log2Floor(hi);
+            return 0 == hi ? BinaryNumerals.Log2Floor(lo) : 128 + BinaryNumerals.Log2Floor(hi);
         }
 
 #if NET7_0_OR_GREATER
         public static int Log2Floor(System.UInt128 lo, System.UInt128 hi) {
-            if (0 == hi) {
-                return BinaryNumerals.Log2Floor(lo);
-            }
-            return 128 + BinaryNumerals.Log2Floor(hi);
+            return 0 == hi ? BinaryNumerals.Log2Floor(lo) : 128 + BinaryNumerals.Log2Floor(hi);
         }
 #endif
 
         public static int CountStorageBits(UInt64 lo, UInt64 hi) {
-            if (0 == hi) {
-                if (0 == lo) {
-                    return 0;
-                }
-                return 1 + BinaryNumerals.Log2Floor(lo);
-            }
-            return 1 + 64 + BinaryNumerals.Log2Floor(hi);
+            return unchecked(0 == hi ? 0 == lo ? 0 : 1 + BinaryNumerals.Log2Floor(lo) : 1 + 64 + BinaryNumerals.Log2Floor(hi));
         }
 
         public static int CountStorageBits(UInt64 lo, Int64 hi) {
@@ -261,13 +227,7 @@ namespace UltimateOrb.Numerics {
                 lo = ~lo;
                 hi = ~hi;
             }
-            if (0 == hi) {
-                if (0 == lo) {
-                    return 0;
-                }
-                return 2 + BinaryNumerals.Log2Floor(lo);
-            }
-            return 2 + 64 + BinaryNumerals.Log2Floor(hi.ToUnsignedUnchecked());
+            return 0 == hi ? 0 == lo ? 0 : 2 + BinaryNumerals.Log2Floor(lo) : 2 + 64 + BinaryNumerals.Log2Floor(hi.ToUnsignedUnchecked());
         }
 
         public static bool IsPowerOfTwo(UInt64 lo, UInt64 hi) {
@@ -281,10 +241,7 @@ namespace UltimateOrb.Numerics {
         }
 
         public static bool IsPowerOfTwo(UInt64 lo, Int64 hi) {
-            if (0 > hi) {
-                return false;
-            }
-            return IsPowerOfTwo(lo, hi.ToUnsignedUnchecked());
+            return 0 > hi ? false : IsPowerOfTwo(lo, hi.ToUnsignedUnchecked());
         }
     }
 }

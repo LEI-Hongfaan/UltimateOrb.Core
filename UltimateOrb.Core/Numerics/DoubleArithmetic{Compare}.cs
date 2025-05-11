@@ -57,11 +57,9 @@ namespace UltimateOrb.Numerics {
 		public static int Compare(LIntT first_lo, HIntT first_hi, LIntT second_lo, HIntT second_hi) {
 			if (first_hi < second_hi) return -1;
 			if (first_hi > second_hi) return 1;
-			if (first_lo < second_lo) return -1;
-			if (first_lo > second_lo) return 1;
-			return 0;
-		}
-	}
+            return first_lo < second_lo ? -1 : first_lo > second_lo ? 1 : 0;
+        }
+    }
 }
 
 namespace UltimateOrb.Numerics {
@@ -121,11 +119,9 @@ namespace UltimateOrb.Numerics {
 		public static int Compare(LIntT first_lo, HIntT first_hi, LIntT second_lo, HIntT second_hi) {
 			if (first_hi < second_hi) return -1;
 			if (first_hi > second_hi) return 1;
-			if (first_lo < second_lo) return -1;
-			if (first_lo > second_lo) return 1;
-			return 0;
-		}
-	}
+            return first_lo < second_lo ? -1 : first_lo > second_lo ? 1 : 0;
+        }
+    }
 }
 
 #if NET7_0_OR_GREATER
@@ -186,11 +182,9 @@ namespace UltimateOrb.Numerics {
 		public static int Compare(LIntT first_lo, HIntT first_hi, LIntT second_lo, HIntT second_hi) {
 			if (first_hi < second_hi) return -1;
 			if (first_hi > second_hi) return 1;
-			if (first_lo < second_lo) return -1;
-			if (first_lo > second_lo) return 1;
-			return 0;
-		}
-	}
+            return first_lo < second_lo ? -1 : first_lo > second_lo ? 1 : 0;
+        }
+    }
 }
 #endif
 
@@ -252,11 +246,9 @@ namespace UltimateOrb.Numerics {
 		public static int Compare(LIntT first_lo, HIntT first_hi, LIntT second_lo, HIntT second_hi) {
 			if (first_hi < second_hi) return -1;
 			if (first_hi > second_hi) return 1;
-			if (first_lo < second_lo) return -1;
-			if (first_lo > second_lo) return 1;
-			return 0;
-		}
-	}
+            return first_lo < second_lo ? -1 : first_lo > second_lo ? 1 : 0;
+        }
+    }
 }
 #endif
 
@@ -317,11 +309,9 @@ namespace UltimateOrb.Numerics {
 		public static int Compare(LIntT first_lo, HIntT first_hi, LIntT second_lo, HIntT second_hi) {
 			if (first_hi < second_hi) return -1;
 			if (first_hi > second_hi) return 1;
-			if (first_lo < second_lo) return -1;
-			if (first_lo > second_lo) return 1;
-			return 0;
-		}
-	}
+            return first_lo < second_lo ? -1 : first_lo > second_lo ? 1 : 0;
+        }
+    }
 }
 
 namespace UltimateOrb.Numerics {
@@ -381,9 +371,7 @@ namespace UltimateOrb.Numerics {
 		public static int Compare(LIntT first_lo, HIntT first_hi, LIntT second_lo, HIntT second_hi) {
 			if (first_hi < second_hi) return -1;
 			if (first_hi > second_hi) return 1;
-			if (first_lo < second_lo) return -1;
-			if (first_lo > second_lo) return 1;
-			return 0;
-		}
-	}
+            return first_lo < second_lo ? -1 : first_lo > second_lo ? 1 : 0;
+        }
+    }
 }

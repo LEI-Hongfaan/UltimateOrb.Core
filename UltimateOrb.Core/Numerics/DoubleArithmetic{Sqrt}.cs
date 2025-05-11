@@ -101,11 +101,7 @@ namespace UltimateOrb.Numerics {
                 }
                 var @new = MathEx.BigDivNoThrowWhenOverflow(l, h, old) >> 1;
                 l = MathEx.BigSquare(@new, out h);
-                if ((h > hi) || ((h == hi) && (l > lo))) {
-                    return @new - (ULong)1u;
-                } else {
-                    return @new;
-                }
+                return (h > hi) || ((h == hi) && (l > lo)) ? @new - (ULong)1u : @new;
             }
         }
 
@@ -166,11 +162,7 @@ namespace UltimateOrb.Numerics {
                     }
                     var @new = MathEx.BigDivNoThrowWhenOverflow(l, h, old) >> 1;
                     l = MathEx.BigSquare(@new, out h);
-                    if ((h > hi) || ((h == hi) && (l > lo))) {
-                        return @new - (ULong)1u;
-                    } else {
-                        return @new;
-                    }
+                    return (h > hi) || ((h == hi) && (l > lo)) ? @new - (ULong)1u : @new;
                 }
                 {
                     if (hi == ~(ULong)0) {

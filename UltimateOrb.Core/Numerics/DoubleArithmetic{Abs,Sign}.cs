@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
+using UltimateOrb.Utilities;
 using static UltimateOrb.Utilities.Extensions.BooleanIntegerExtensions;
 
 namespace UltimateOrb.Numerics {
@@ -35,23 +37,24 @@ namespace UltimateOrb.Numerics {
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static ULong AbsSignedAsUnsigned(ULong value_lo, Long value_hi, out ULong result_hi) {
             unchecked {
-                if (0 > (Long)value_hi) {
-                    return MathEx.NegateUnchecked(value_lo, (ULong)value_hi, out result_hi);
-                }
-                result_hi = (ULong)value_hi;
-                return value_lo;
+                // Create a mask: if value_hi is negative, mask will be all 1's; otherwise, it is 0.
+                var mask = (ULong)(((Long)value_hi) >> (SizeOfModule.BitSizeOf<ULong>() - 1));
+                // XOR with mask flips bits if negative.
+                var t_lo = value_lo ^ mask;
+                var t_hi = ((ULong)value_hi) ^ mask;
+                // Add (mask & 1) to complete the two's complement if negative.
+                var absLo = t_lo + (mask & 1U);
+                // Check for a carry (overflow from the low part).
+                var absHi = t_hi + (absLo < t_lo ? 1U : 0U);
+                result_hi = absHi;
+                return absLo;
             }
         }
 
         [System.CLSCompliantAttribute(false)]
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static int Sign(ULong value_lo, Long value_hi) {
-            unchecked {
-                if (0 > value_hi) {
-                    return -1;
-                }
-                return (0 != (value_hi | (Long)value_lo)).AsIntegerUnsafe();
-            }
+            return 0 <= value_hi ? (0 != (value_hi | (Long)value_lo)).AsIntegerUnsafe() : -1;
         }
     }
 }
@@ -91,23 +94,29 @@ namespace UltimateOrb.Numerics {
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static ULong AbsSignedAsUnsigned(ULong value_lo, Long value_hi, out ULong result_hi) {
             unchecked {
-                if (0 > (Long)value_hi) {
-                    return MathEx.NegateUnchecked(value_lo, (ULong)value_hi, out result_hi);
-                }
-                result_hi = (ULong)value_hi;
-                return value_lo;
+                // Create a mask: if value_hi is negative, mask will be all 1's; otherwise, it is 0.
+                var mask = (ULong)(((Long)value_hi) >> (SizeOfModule.BitSizeOf<ULong>() - 1));
+                // XOR with mask flips bits if negative.
+                var t_lo = value_lo ^ mask;
+                var t_hi = ((ULong)value_hi) ^ mask;
+                // Add (mask & 1) to complete the two's complement if negative.
+                var absLo = t_lo + (mask & 1U);
+                // Check for a carry (overflow from the low part).
+                var absHi = t_hi + (absLo < t_lo ? 1U : 0U);
+                result_hi = absHi;
+                return absLo;
             }
         }
 
         [System.CLSCompliantAttribute(false)]
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static int Sign(ULong value_lo, Long value_hi) {
-            unchecked {
-                if (0 > value_hi) {
-                    return -1;
-                }
-                return (0 != (value_hi | (Long)value_lo)).AsIntegerUnsafe();
-            }
+            /*
+            var t = (0 <= value_hi).AsIntegerUnsafe();
+            var s = unchecked(t + t - 1);
+            return (0 == (unchecked((Long)value_lo) | value_hi)) ? 0 : s;
+            */
+            return 0 <= value_hi ? (0 != (value_hi | (Long)value_lo)).AsIntegerUnsafe() : -1;
         }
     }
 }
@@ -147,23 +156,24 @@ namespace UltimateOrb.Numerics {
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static ULong AbsSignedAsUnsigned(ULong value_lo, Long value_hi, out ULong result_hi) {
             unchecked {
-                if (0 > (Long)value_hi) {
-                    return MathEx.NegateUnchecked(value_lo, (ULong)value_hi, out result_hi);
-                }
-                result_hi = (ULong)value_hi;
-                return value_lo;
+                // Create a mask: if value_hi is negative, mask will be all 1's; otherwise, it is 0.
+                var mask = (ULong)(((Long)value_hi) >> (SizeOfModule.BitSizeOf<ULong>() - 1));
+                // XOR with mask flips bits if negative.
+                var t_lo = value_lo ^ mask;
+                var t_hi = ((ULong)value_hi) ^ mask;
+                // Add (mask & 1) to complete the two's complement if negative.
+                var absLo = t_lo + (mask & 1U);
+                // Check for a carry (overflow from the low part).
+                var absHi = t_hi + (absLo < t_lo ? 1U : 0U);
+                result_hi = absHi;
+                return absLo;
             }
         }
 
         [System.CLSCompliantAttribute(false)]
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static int Sign(ULong value_lo, Long value_hi) {
-            unchecked {
-                if (0 > value_hi) {
-                    return -1;
-                }
-                return (0 != (value_hi | (Long)value_lo)).AsIntegerUnsafe();
-            }
+            return 0 <= value_hi ? (0 != (value_hi | (Long)value_lo)).AsIntegerUnsafe() : -1;
         }
     }
 }

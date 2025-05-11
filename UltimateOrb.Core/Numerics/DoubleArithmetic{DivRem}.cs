@@ -135,11 +135,7 @@ namespace UltimateOrb.Numerics {
                         return lowResult;
                     } else {
                         highResult = 0u;
-                        if (highDivisor <= highDividend && (highDivisor != highDividend || lowDivisor <= lowDividend)) {
-                            return 1u;
-                        } else {
-                            return 0u;
-                        }
+                        return highDivisor <= highDividend && (highDivisor != highDividend || lowDivisor <= lowDividend) ? 1u : 0u;
                     }
                 } else {
                     highResult = Math.DivRem(highDividend, lowDivisor, out ULong t);
@@ -534,11 +530,7 @@ namespace UltimateOrb.Numerics {
                         return lowResult;
                     } else {
                         highResult = 0u;
-                        if (highDivisor <= highDividend && (highDivisor != highDividend || lowDivisor <= lowDividend)) {
-                            return 1u;
-                        } else {
-                            return 0u;
-                        }
+                        return highDivisor <= highDividend && (highDivisor != highDividend || lowDivisor <= lowDividend) ? (ULong)1u : (ULong)0u;
                     }
                 } else {
                     highResult = Math.DivRem(highDividend, lowDivisor, out ULong t);
@@ -933,11 +925,7 @@ namespace UltimateOrb.Numerics {
                         return lowResult;
                     } else {
                         highResult = 0u;
-                        if (highDivisor <= highDividend && (highDivisor != highDividend || lowDivisor <= lowDividend)) {
-                            return 1u;
-                        } else {
-                            return 0u;
-                        }
+                        return highDivisor <= highDividend && (highDivisor != highDividend || lowDivisor <= lowDividend) ? (ULong)1u : (ULong)0u;
                     }
                 } else {
                     highResult = Math.DivRem(highDividend, lowDivisor, out ULong t);

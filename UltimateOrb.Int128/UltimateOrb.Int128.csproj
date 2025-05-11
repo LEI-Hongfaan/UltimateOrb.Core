@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-		<TargetFrameworks>net6.0;net7.0;net8.0;net9.0</TargetFrameworks>
+		<TargetFrameworks>net6.0;net7.0;net8.0;net9.0;net10.0</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -54,6 +54,7 @@
   <ItemGroup>
     <Compile Include="..\UltimateOrb.Core\Core.cs" Link="Core.cs" />
 		<Compile Include="..\UltimateOrb.Core\ConvertInternal.cs" Link="ConvertInternal.cs" />
+		<Compile Include="..\UltimateOrb.Core\HalfHelpers.cs" Link="HalfHelpers.cs" />
 		<Compile Include="..\UltimateOrb.Core\Int128.cs" Link="Int128.cs" />
     <Compile Include="..\UltimateOrb.Core\Internal\HashCodeHelpler{Internal}.cs" Link="Internal\HashCodeHelpler{Internal}.cs" />
     <Compile Include="..\UltimateOrb.Core\Internal\System\IConvertible{Internal}.cs" Link="Internal\System\IConvertible{Internal}.cs" />

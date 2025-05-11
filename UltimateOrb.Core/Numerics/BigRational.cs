@@ -18,9 +18,9 @@ namespace UltimateOrb.Numerics {
         : IEquatable<BigRational>
         , IComparable<BigRational> {
 
-        private readonly BigInteger m_Denominator;
+        internal readonly BigInteger m_Denominator;
 
-        private readonly BigInteger m_SignedNumerator;
+        internal readonly BigInteger m_SignedNumerator;
 
         public BigInteger Denominator {
 
@@ -156,7 +156,80 @@ namespace UltimateOrb.Numerics {
             if (value.m_SignedNumerator.IsZero) {
                 return (Double)0;
             }
-            return (Double)value.m_SignedNumerator / (Double)value.m_Denominator;
+            return DivideToDouble(value.m_SignedNumerator, value.m_Denominator);
+        }
+
+        static double DivideToDouble(BigInteger signedNumerator, BigInteger denominator) {
+            Debug.Assert(denominator.Sign > 0);
+            bool negative = BigInteger.IsNegative(signedNumerator);
+            BigInteger absDividend = BigInteger.Abs(signedNumerator);
+            BigInteger absDivisor = denominator;
+
+            // Check for overflow
+            var dividendBits = checked((int)absDividend.GetBitLength());
+            var divisorBits = checked((int)absDivisor.GetBitLength());
+            var o = BigInteger.TrailingZeroCount(absDividend);
+            var p = BigInteger.TrailingZeroCount(absDivisor);
+
+            var exponent = unchecked(dividendBits - divisorBits);
+            if (exponent >= 0) {
+                var t = absDividend >> exponent;
+                if (t < absDivisor) {
+                    unchecked {
+                        --exponent;
+                    }
+                }
+            } else {
+                var t = absDivisor >> unchecked(-exponent);
+                var a = absDividend.CompareTo(t);
+                if (a < 0 || (a == 0 && p < unchecked(-exponent))) {
+                    unchecked {
+                        --exponent;
+                    }
+                }
+            }
+
+            if (exponent > 1023) {
+                return negative ? double.NegativeInfinity : double.PositiveInfinity;
+            }
+
+            // Check for underflow
+            if (exponent < -1075) {
+                return negative ? -0.0 : 0.0;
+            }
+
+            exponent = exponent < -1022 ? -1022 : exponent;
+
+            // Compute the scaled exponent
+            var e = unchecked((int)(exponent - (long)52));
+            bool h = default!;
+            var f = unchecked(e - 1);
+            if (e > 0) {
+                h = !((BigInteger.One << f) & absDividend).IsZero;
+                absDividend >>= e;
+            } else {
+                absDividend <<= unchecked(-e);
+            }
+            var (q, r) = BigInteger.DivRem(absDividend, absDivisor);
+            int w = 0;
+            r <<= 1;
+            if (e > 0) {
+                if (h) {
+                    ++r;
+                }
+                w = (o == f) ? 0 : 1;
+            }
+            w |= r.CompareTo(absDivisor);
+            if (w > 0 || (w == 0 && !q.IsEven)) {
+                ++q;
+            }
+
+            // Construct the double
+            var biasedExponent = (UInt64)(exponent + (1023 - 1)) << 52;
+            var s = (UInt64)q;
+            var result = unchecked(((negative ? (UInt64)1u : 0u) << 63) + (biasedExponent + s));
+
+            return BitConverter.Int64BitsToDouble(unchecked((Int64)result));
         }
 
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
@@ -938,6 +1011,26 @@ namespace UltimateOrb.Numerics {
 
         public static bool operator >=(BigRational first, BigRational second) {
             return first.CompareTo(second) >= 0;
+        }
+    }
+}
+
+namespace UltimateOrb.Numerics {
+
+    [Experimental("UoWIP")]
+    public static partial class BigRationalExtensions {
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Double ToDouble(this BigRational value) {
+            return (Double)value;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Double ToDoubleEstimate(this BigRational value) {
+            if (value.m_SignedNumerator.IsZero) {
+                return (Double)0;
+            }
+            return (double)value.m_SignedNumerator / (double)value.m_Denominator;
         }
     }
 }

@@ -628,7 +628,7 @@ namespace UltimateOrb {
         [System.Runtime.TargetedPatchingOptOutAttribute("")]
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         [System.Diagnostics.Contracts.PureAttribute()]
-        static XInt128 IShiftOperators<XInt128, int, XInt128>.operator >>>(XInt128 value, int count) {
+        public static XInt128 operator >>>(XInt128 value, int count) {
             var lo = Numerics.DoubleArithmetic.ShiftRightUnsigned(value.lo, value.hi, count, out HInt64 hi);
             return new XInt128(lo, hi);
         }
@@ -1293,100 +1293,131 @@ namespace UltimateOrb {
             // We cannot write "return (Half)lo;" because of the double rounding issue.
             // See https://www.exploringbinary.com/double-rounding-errors-in-floating-point-conversions/ .
             return 0 != hi || 65520 <= lo ? Half.PositiveInfinity : BitConverter.Int16BitsToHalf(unchecked((Int16)ToHalfPartial((uint)lo)));
-
-            static int ToHalfPartial(uint value) {
-                unchecked {
-                    const int exponentBias = 15;
-                    const int mantissaBits = 10;
-
-                    if (value == 0) {
-                        return 0;
-                    }
-
-                    // Count leading zeros to find the position of the highest set bit
-                    var leadingZeros = Mathematics.BinaryNumerals.CountLeadingZeros(value);
-
-                    int exponent = 32 - 1 + exponentBias - leadingZeros;
-
-                    uint shifted = value << (1 + leadingZeros);
-
-                    uint mantissa = shifted >>> (32 - mantissaBits);
-
-                    // Remaining bits for rounding (bits 21-0)
-                    uint remaining = shifted & 0x3FFFFF;
-
-                    // Apply rounding (round to nearest, ties to even)
-                    if (remaining > 0x200000 || (remaining == 0x200000 && 0 != (1 & mantissa))) {
-                        ++mantissa;
-                    }
-
-                    // Combine into half-precision format (sign bit is 0 for unsigned input)
-                    return (exponent << mantissaBits) + (int)mantissa;
-                }
-            }
         }
 #endif
+
+        internal static int ToHalfPartial(uint value) {
+            Debug.Assert(value <= 65519);
+            unchecked {
+                const int exponentBias = 15;
+                const int mantissaBits = 10;
+
+                if (value == 0) {
+                    return 0;
+                }
+
+                // Count leading zeros to find the position of the highest set bit
+                var leadingZeros = Mathematics.BinaryNumerals.CountLeadingZeros(value);
+
+                int exponent = 32 - 1 + exponentBias - leadingZeros;
+
+                uint shifted = value << (1 + leadingZeros);
+
+                uint mantissa = shifted >>> (32 - mantissaBits);
+
+                // Remaining bits for rounding (bits 21-0)
+                uint remaining = shifted & 0x3FFFFF;
+
+                // Apply rounding (round to nearest, ties to even)
+                if (remaining > 0x200000 || (remaining == 0x200000 && 0 != (1 & mantissa))) {
+                    ++mantissa;
+                }
+
+                // Combine into half-precision format (sign bit is 0 for unsigned input)
+                return (exponent << mantissaBits) + (int)mantissa;
+            }
+        }
+
+#if NET7_0_OR_GREATER
+        private static Single ToSingle(System.UInt128 value) {
+            return ToSingle(unchecked((UInt64)(value)), unchecked((UInt64)(value >>> 64)));
+        }
+#endif
+
+        internal static Single ToSingle(UInt64 lo, UInt64 hi) {
+            unchecked {
+                if (0 == (lo | hi)) {
+                    return default; // 0.0F
+                }
+                var lz = UltimateOrb.Numerics.DoubleArithmetic.CountLeadingZeros(lo, hi);
+                UInt32 resultBits;
+                if (lz < 104) {
+                    var shift = 103 - lz;
+
+                    // Logical shift right
+                    var shrdVal = UltimateOrb.Numerics.DoubleArithmetic.ShiftRight(lo, hi, shift);
+                    var shrxVal = hi >> shift;
+                    var shrVal = (shift & 64) == 0 ? shrdVal : shrxVal;
+
+                    // To prepare for rounding the code extracts bits from the lower 24 bits.
+                    var mantissaCandidate = (UInt32)shrVal & 0xFFFFFF;
+                    ++mantissaCandidate; // rounding adjustment
+                    mantissaCandidate >>= 1;
+
+                    // Count trailing zeros
+                    var tzc = UltimateOrb.Numerics.DoubleArithmetic.CountTrailingZeros(lo, hi); ;
+
+                    resultBits = mantissaCandidate & ~(shift == tzc ? 1u : 0u); // cancel the rounding adjustment if no extra bits
+                } else {
+                    // The number is small enough that a simple left-shift of lo is enough.
+                    var shift = lz - 104;
+                    var shifted = (UInt32)(lo << shift);
+                    resultBits = shifted & 0x7FFFFF;
+                }
+                return BitConverter.UInt32BitsToSingle(0X7f000000 + resultBits - ((UInt32)lz << 23));
+            }
+        }
+
+        [Obsolete]
+        internal static Int32 ToSinglePartial(UInt64 value_lo, UInt64 value_hi) {
+            Debug.Assert(value_hi != 0);
+            unchecked {
+                const int exponentBias = 127;
+                const int mantissaBitCount = 23;
+                const int nonMantissaBitCount = 32 - mantissaBitCount;
+
+                // Count leading zeros to find the position of the highest set bit
+                int shiftCount = 1 + BitOperations.LeadingZeroCount(value_hi);
+
+                int exponent = 128 + exponentBias - shiftCount;
+
+                UInt64 shifted = 1 == value_hi ? value_lo : (value_lo >>> (64 - shiftCount)) | (value_hi << shiftCount);
+
+                Int32 mantissa = (int)(shifted >>> (32 + nonMantissaBitCount));
+
+                // Remaining bits for rounding (bits 40-0)
+                UInt64 remaining = shifted & 0X1ffffffffff;
+
+                if (!(1 == value_hi) && 0 != value_lo << shiftCount) {
+                    remaining |= 1;
+                }
+
+                // Apply rounding (round to nearest, ties to even)
+                if (remaining > 0X10000000000 || (remaining == 0X10000000000 && 0 != (1 & mantissa))) {
+                    ++mantissa;
+                }
+
+                // Combine into half-precision format (sign bit is 0 for unsigned input)
+                return (exponent << mantissaBitCount) + mantissa;
+            }
+        }
 
         // Make the conversion explicit due to precision loss may be significant.
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
         [System.Runtime.TargetedPatchingOptOutAttribute("")]
         [System.Diagnostics.Contracts.PureAttribute()]
         public static explicit operator Single(XInt128 value) {
-            const int BitSize = 64;
-            const int ExponentBitSize = 11;
-            const int ExponentBias = unchecked(checked((1 << (ExponentBitSize - 1))) - 1);
-            const int SignBitSize = 1;
-            const int FractionBitSize = checked(BitSize - SignBitSize - ExponentBitSize);
-
-            const int BitSizeTo = 32;
-            const int ExponentBitSizeTo = 8;
-            // const int ExponentBiasTo = unchecked(checked((1 << (ExponentBitSizeTo - 1))) - 1);
-            const int SignBitSizeTo = 1;
-            const int FractionBitSizeTo = checked(BitSizeTo - SignBitSizeTo - ExponentBitSizeTo);
-
-            var lo = value.lo;
-            var hi = value.hi;
-            if (0 != hi) {
-                if (hi < (((UInt64)1 << checked(1 + 1 + FractionBitSizeTo)) - 1) << checked(BitSize - (1 + 1 + FractionBitSizeTo))) {
-                    // var c = Mathematics.BinaryNumerals.CountLeadingZeros(unchecked((UInt64)hi));
-                    var c = 0;
-                    for (var tmp = hi; 0 <= unchecked((Int64)tmp); tmp <<= 1) {
-                        unchecked {
-                            ++c;
-                        }
-                    }
-                    var s = unchecked((UInt64)(checked(128 - 1 + ExponentBias) - c)) << FractionBitSize;
-                    lo = Numerics.DoubleArithmetic.ShiftLeft(lo, hi, unchecked(1 + c), out hi);
-                    var lo0 = lo & unchecked(((UInt64)1 << checked(BitSize - FractionBitSizeTo)) - 1);
-                    lo = Numerics.DoubleArithmetic.ShiftRightUnsigned(lo, hi, checked(BitSize - FractionBitSizeTo), out hi);
-                    // IEEE Std 754-2008 roundTiesToEven
-                    if (unchecked((UInt64)Int64.MinValue) < lo || (unchecked((UInt64)Int64.MinValue) == lo && (lo0 > 0 || (lo0 == 0 && 0 != (1 & hi))))) {
-                        unchecked {
-                            ++hi;
-                        }
-                    }
-                    s = unchecked(s + (hi << checked(FractionBitSize - FractionBitSizeTo)));
-                    return unchecked((Single)BitConverter.Int64BitsToDouble(unchecked((Int64)s)));
-                }
-                return Single.PositiveInfinity;
-            }
-            // We cannot write "return (Single)lo;" because of the double rounding issue.
-            // See https://www.exploringbinary.com/double-rounding-errors-in-floating-point-conversions/ .
-            return ToSingle(lo);
+            return ToSingle(value.lo, value.hi);
         }
 
-        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
-        [System.Runtime.TargetedPatchingOptOutAttribute("")]
-        [System.Diagnostics.Contracts.PureAttribute()]
-        public static implicit operator double(XInt128 value) {
+        [Obsolete]
+        internal static double ToDouble(UInt64 lo, UInt64 hi) {
             const int BitSize = 64;
             const int ExponentBitSize = 11;
             const int ExponentBias = unchecked(checked((1 << (ExponentBitSize - 1))) - 1);
             const int SignBitSize = 1;
             const int FractionBitSize = checked(BitSize - SignBitSize - ExponentBitSize);
 
-            var lo = value.lo;
-            var hi = value.hi;
             if (0 != hi) {
                 var c = Mathematics.BinaryNumerals.CountLeadingZeros(unchecked((UInt64)hi));
                 /*
@@ -1409,6 +1440,53 @@ namespace UltimateOrb {
                 return BitConverter.Int64BitsToDouble(unchecked((Int64)s));
             }
             return unchecked((double)lo);
+        }
+
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
+        [System.Runtime.TargetedPatchingOptOutAttribute("")]
+        [System.Diagnostics.Contracts.PureAttribute()]
+        public static implicit operator double(XInt128 value) {
+            unchecked {
+                // This code is based on `u128_to_f64_round` from m-ou-se/floatconv
+                // Copyright (c) 2020 Mara Bos <m-ou.se@m-ou.se>. All rights reserved.
+                //
+                // Licensed under the BSD 2 - Clause "Simplified" License
+                // See THIRD-PARTY-NOTICES.TXT for the full license text
+
+                const double TwoPow52 = 4503599627370496.0;
+                const double TwoPow76 = 75557863725914323419136.0;
+                const double TwoPow104 = 20282409603651670423947251286016.0;
+                const double TwoPow128 = 340282366920938463463374607431768211456.0;
+
+                const ulong TwoPow52Bits = 0x4330000000000000;
+                const ulong TwoPow76Bits = 0x44B0000000000000;
+                const ulong TwoPow104Bits = 0x4670000000000000;
+                const ulong TwoPow128Bits = 0x47F0000000000000;
+
+                var lo = value.lo;
+                var hi = value.hi;
+                if ((hi >> 24) == 0) {
+                    // value < (2^104)
+
+                    // For values greater than ulong.MaxValue but less than 2^104 this takes advantage
+                    // that we can represent both "halves" of the uint128 within the 52-bit mantissa of
+                    // a pair of doubles.
+
+                    double lower = BitConverter.UInt64BitsToDouble(TwoPow52Bits | ((lo << 12) >> 12)) - TwoPow52;
+                    double upper = BitConverter.UInt64BitsToDouble(TwoPow104Bits | UltimateOrb.Numerics.DoubleArithmetic.ShiftRightUnsigned(lo, hi, 52, out _)) - TwoPow104;
+
+                    return lower + upper;
+                } else {
+                    // For values greater than 2^104 we basically do the same as before but we need to account
+                    // for the precision loss that double will have. As such, the lower value effectively drops the
+                    // lowest 24 bits and then or's them back to ensure rounding stays correct.
+
+                    double lower = BitConverter.UInt64BitsToDouble(TwoPow76Bits | (UltimateOrb.Numerics.DoubleArithmetic.ShiftRightUnsigned(lo, hi, 12, out _) >> 12) | (lo & 0xFFFFFF)) - TwoPow76;
+                    double upper = BitConverter.UInt64BitsToDouble(TwoPow128Bits | UltimateOrb.Numerics.DoubleArithmetic.ShiftRightUnsigned(lo, hi, 76, out _)) - TwoPow128;
+
+                    return lower + upper;
+                }
+            }
         }
 
 #if FEATURE_STANDARD_LIBRARY_INTEROPERABILITY_FORMATTING_AND_CONVERSION
@@ -3013,6 +3091,20 @@ namespace UltimateOrb {
         }
 #endif
     }
+}
+
+namespace UltimateOrb {
+
+#if NET8_0_OR_GREATER
+    static class UInt32UnsafeAccessors {
+
+        [UnsafeAccessor(UnsafeAccessorKind.Field, Name = "_lower")]
+        public extern static UInt64 GetLowerUInt64(in System.UInt128 value);
+
+        [UnsafeAccessor(UnsafeAccessorKind.Field, Name = "_upper")]
+        public extern static UInt64 GetUpperUInt64(in System.UInt128 value);
+    }
+#endif
 }
 
 namespace UltimateOrb {

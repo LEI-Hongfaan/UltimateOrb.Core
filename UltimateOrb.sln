@@ -38,6 +38,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UltimateOrb.Tests.WasmBrows
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Benchmark0071", "Benchmark0071\Benchmark0071.csproj", "{E9D28198-0E84-4439-BB6C-8C7D666A035F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Benchmark0072", "Benchmark0072\Benchmark0072.csproj", "{35F4A0FD-6DC5-4600-A8EC-CCD67FC16296}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -92,6 +94,10 @@ Global
 		{E9D28198-0E84-4439-BB6C-8C7D666A035F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E9D28198-0E84-4439-BB6C-8C7D666A035F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E9D28198-0E84-4439-BB6C-8C7D666A035F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{35F4A0FD-6DC5-4600-A8EC-CCD67FC16296}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{35F4A0FD-6DC5-4600-A8EC-CCD67FC16296}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{35F4A0FD-6DC5-4600-A8EC-CCD67FC16296}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{35F4A0FD-6DC5-4600-A8EC-CCD67FC16296}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

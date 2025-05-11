@@ -21,10 +21,9 @@ namespace UltimateOrb {
 
     using XInt256 = UInt256;
     using OInt256 = Int256;
-    using HInt128 = System.UInt128;
-    using SUInt128 = System.UInt128;
-    using SInt128 = System.Int128;
-
+    using LInt128 = UInt128;
+    using HInt128 = UInt128;
+    
     [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Interoperability", "CA1413:AvoidNonpublicFieldsInComVisibleValueTypes")]
     [System.CLSCompliantAttribute(false)]
     [System.Runtime.InteropServices.ComVisibleAttribute(true)]
@@ -44,32 +43,32 @@ namespace UltimateOrb {
     {
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        private readonly SUInt128 lo;
+        private readonly LInt128 lo;
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private readonly HInt128 hi;
 
         [System.Diagnostics.Contracts.PureAttribute()]
-        public SInt128 LoInt128Bits {
+        public Int128 LoInt128Bits {
 
             // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
             [System.Runtime.TargetedPatchingOptOutAttribute("")]
             [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             [System.Diagnostics.Contracts.PureAttribute()]
             get {
-                return unchecked((SInt128)this.lo);
+                return unchecked((Int128)this.lo);
             }
         }
 
         [System.Diagnostics.Contracts.PureAttribute()]
-        public SInt128 HiInt128Bits {
+        public Int128 HiInt128Bits {
 
             // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
             [System.Runtime.TargetedPatchingOptOutAttribute("")]
             [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             [System.Diagnostics.Contracts.PureAttribute()]
             get {
-                return unchecked((SInt128)this.hi);
+                return unchecked((Int128)this.hi);
             }
         }
 
@@ -77,7 +76,7 @@ namespace UltimateOrb {
         [System.Runtime.TargetedPatchingOptOutAttribute("")]
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         [System.Diagnostics.Contracts.PureAttribute()]
-        internal UInt256(SUInt128 lo, HInt128 hi) {
+        internal UInt256(LInt128 lo, HInt128 hi) {
             this.lo = lo;
             this.hi = hi;
         }
@@ -86,8 +85,8 @@ namespace UltimateOrb {
         [System.Runtime.TargetedPatchingOptOutAttribute("")]
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         [System.Diagnostics.Contracts.PureAttribute()]
-        public static XInt256 FromBits(SInt128 lo, SInt128 hi) {
-            return new XInt256(unchecked((SUInt128)lo), unchecked((HInt128)hi));
+        public static XInt256 FromBits(Int128 lo, Int128 hi) {
+            return new XInt256(unchecked((LInt128)lo), unchecked((HInt128)hi));
         }
 
         [System.CLSCompliantAttribute(false)]
@@ -95,8 +94,8 @@ namespace UltimateOrb {
         [System.Runtime.TargetedPatchingOptOutAttribute("")]
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         [System.Diagnostics.Contracts.PureAttribute()]
-        public static XInt256 FromBits(SUInt128 lo, HInt128 hi) {
-            return new XInt256(unchecked((SUInt128)lo), unchecked((HInt128)hi));
+        public static XInt256 FromBits(LInt128 lo, HInt128 hi) {
+            return new XInt256(unchecked((LInt128)lo), unchecked((HInt128)hi));
         }
 
         #region Standard values
@@ -135,7 +134,7 @@ namespace UltimateOrb {
             [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             [System.Diagnostics.Contracts.PureAttribute()]
             get {
-                return 0 == (this.lo | unchecked((SUInt128)this.hi));
+                return 0 == (this.lo | unchecked((LInt128)this.hi));
             }
         }
 
@@ -211,7 +210,7 @@ namespace UltimateOrb {
             [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             [System.Diagnostics.Contracts.PureAttribute()]
             get {
-                return new XInt256(SUInt128.MaxValue, HInt128.MaxValue);
+                return new XInt256(LInt128.MaxValue, HInt128.MaxValue);
             }
         }
 
@@ -224,7 +223,7 @@ namespace UltimateOrb {
             [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             [System.Diagnostics.Contracts.PureAttribute()]
             get {
-                return SUInt128.MaxValue == this.lo && HInt128.MaxValue == this.hi;
+                return LInt128.MaxValue == this.lo && HInt128.MaxValue == this.hi;
             }
         }
 
@@ -236,7 +235,7 @@ namespace UltimateOrb {
             [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             [System.Diagnostics.Contracts.PureAttribute()]
             get {
-                return new XInt256(SUInt128.MinValue, HInt128.MinValue);
+                return new XInt256(LInt128.MinValue, HInt128.MinValue);
             }
         }
 
@@ -249,7 +248,7 @@ namespace UltimateOrb {
             [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             [System.Diagnostics.Contracts.PureAttribute()]
             get {
-                return SUInt128.MinValue == this.lo && HInt128.MinValue == this.hi;
+                return LInt128.MinValue == this.lo && HInt128.MinValue == this.hi;
             }
         }
         #endregion
@@ -325,6 +324,8 @@ namespace UltimateOrb {
             [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             [System.Diagnostics.Contracts.PureAttribute()]
             get {
+                UltimateOrb.UInt128 a;
+
                 return 0 == this.hi && 0 == unchecked((UInt64)(this.lo >>> 64) >> 32);
             }
         }
@@ -566,6 +567,23 @@ namespace UltimateOrb {
             return Numerics.DoubleArithmetic.Compare(this.lo, this.hi, other.lo, other.hi);
         }
 
+        private static readonly string messageForCompareToArgumentException = getMessageForCompareToArgumentException();
+
+        static string? getMessageForCompareToArgumentException() {
+            try {
+                ((Int128)(-1)).CompareTo(Type.EmptyTypes).Ignore(); // Generate an InvalidCastException.
+            } catch (InvalidCastException ex) {
+                // Catch the InvalidCastException and extract the value of Message property.
+                try {
+                    // So everyone can use their language.
+                    return ex.Message.Replace(nameof(Int128), nameof(UInt256));
+                } catch (Exception) {
+                }
+            } catch (Exception) {
+            }
+            return null;
+        }
+
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
         [System.Runtime.TargetedPatchingOptOutAttribute("")]
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -578,24 +596,9 @@ namespace UltimateOrb {
                 return CompareTo(value);
             }
 
-            static string? getMessageForCompareToArgumentException() {
-                try {
-                    ((SInt128)(-1)).CompareTo(Type.EmptyTypes).Ignore(); // Generate an InvalidCastException.
-                } catch (InvalidCastException ex) {
-                    // Catch the InvalidCastException and extract the value of Message property.
-                    try {
-                        // So everyone can use their language.
-                        return ex.Message.Replace(nameof(SInt128), nameof(UInt256));
-                    } catch (Exception) {
-                    }
-                } catch (Exception) {
-                }
-                return null;
-            }
-
             [DoesNotReturn]
             static ArgumentException ThrowArgumentException() {
-                throw new InvalidCastException(getMessageForCompareToArgumentException());
+                throw new InvalidCastException(messageForCompareToArgumentException);
             }
 
             throw ThrowArgumentException();
@@ -671,7 +674,7 @@ namespace UltimateOrb {
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         [System.Diagnostics.Contracts.PureAttribute()]
         public OInt256 AsSigned() {
-            return new OInt256(unchecked((SUInt128)this.lo), unchecked((SInt128)this.hi));
+            return new OInt256(unchecked((UInt128)this.lo), unchecked((Int128)this.hi));
         }
 
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
@@ -679,7 +682,7 @@ namespace UltimateOrb {
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         [System.Diagnostics.Contracts.PureAttribute()]
         public OInt256 ToSignedUnchecked() {
-            return new OInt256(unchecked((SUInt128)this.lo), unchecked((SInt128)this.hi));
+            return new OInt256(unchecked((UInt128)this.lo), unchecked((Int128)this.hi));
         }
 
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
@@ -687,7 +690,7 @@ namespace UltimateOrb {
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         [System.Diagnostics.Contracts.PureAttribute()]
         public OInt256 ToSignedChecked() {
-            return new OInt256(unchecked((SUInt128)this.lo), checked((SInt128)this.hi));
+            return new OInt256(unchecked((UInt128)this.lo), checked((Int128)this.hi));
         }
 
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
@@ -695,7 +698,7 @@ namespace UltimateOrb {
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         [System.Diagnostics.Contracts.PureAttribute()]
         public OInt256 ToSigned() {
-            return new OInt256(unchecked((SUInt128)this.lo), checked((SInt128)this.hi));
+            return new OInt256(unchecked((UInt128)this.lo), checked((Int128)this.hi));
         }
 
         #region Numeric Conversions
@@ -720,7 +723,7 @@ namespace UltimateOrb {
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         [System.Diagnostics.Contracts.PureAttribute()]
         public static implicit operator XInt256(byte value) {
-            return new XInt256(unchecked((SUInt128)value), 0);
+            return new XInt256(unchecked((LInt128)(UInt128)value), 0);
         }
 
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
@@ -728,7 +731,7 @@ namespace UltimateOrb {
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         [System.Diagnostics.Contracts.PureAttribute()]
         public static implicit operator XInt256(UInt16 value) {
-            return new XInt256(unchecked((SUInt128)value), 0);
+            return new XInt256(unchecked((LInt128)(UInt128)value), 0);
         }
 
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
@@ -736,15 +739,23 @@ namespace UltimateOrb {
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         [System.Diagnostics.Contracts.PureAttribute()]
         public static implicit operator XInt256(UInt32 value) {
-            return new XInt256(unchecked((SUInt128)value), 0);
+            return new XInt256(unchecked((LInt128)(UInt128)value), 0);
         }
 
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
         [System.Runtime.TargetedPatchingOptOutAttribute("")]
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         [System.Diagnostics.Contracts.PureAttribute()]
-        public static implicit operator XInt256(SUInt128 value) {
-            return new XInt256(unchecked((SUInt128)value), 0);
+        public static implicit operator XInt256(UInt64 value) {
+            return new XInt256(unchecked((LInt128)(UInt128)value), 0);
+        }
+
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
+        [System.Runtime.TargetedPatchingOptOutAttribute("")]
+        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Diagnostics.Contracts.PureAttribute()]
+        public static implicit operator XInt256(UInt128 value) {
+            return new XInt256(unchecked((LInt128)value), 0);
         }
 
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
@@ -752,7 +763,7 @@ namespace UltimateOrb {
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         [System.Diagnostics.Contracts.PureAttribute()]
         public static implicit operator XInt256(char value) {
-            return new XInt256(unchecked((SUInt128)value), 0);
+            return new XInt256(unchecked((LInt128)(UInt128)value), 0);
         }
 
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
@@ -760,7 +771,7 @@ namespace UltimateOrb {
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         [System.Diagnostics.Contracts.PureAttribute()]
         public static explicit operator XInt256(sbyte value) {
-            return new XInt256(unchecked((SUInt128)checked((byte)value)), 0);
+            return new XInt256(unchecked((LInt128)checked((byte)value)), 0);
         }
 
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
@@ -768,7 +779,7 @@ namespace UltimateOrb {
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         [System.Diagnostics.Contracts.PureAttribute()]
         public static explicit operator XInt256(Int16 value) {
-            return new XInt256(unchecked((SUInt128)checked((UInt16)value)), 0);
+            return new XInt256(unchecked((LInt128)checked((UInt16)value)), 0);
         }
 
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
@@ -776,15 +787,23 @@ namespace UltimateOrb {
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         [System.Diagnostics.Contracts.PureAttribute()]
         public static explicit operator XInt256(Int32 value) {
-            return new XInt256(unchecked((SUInt128)checked((UInt32)value)), 0);
+            return new XInt256(unchecked((LInt128)checked((UInt32)value)), 0);
         }
 
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
         [System.Runtime.TargetedPatchingOptOutAttribute("")]
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         [System.Diagnostics.Contracts.PureAttribute()]
-        public static explicit operator XInt256(SInt128 value) {
-            return new XInt256(unchecked((SUInt128)checked((SUInt128)value)), 0);
+        public static explicit operator XInt256(Int64 value) {
+            return new XInt256(unchecked((LInt128)checked((UInt64)value)), 0);
+        }
+
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
+        [System.Runtime.TargetedPatchingOptOutAttribute("")]
+        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Diagnostics.Contracts.PureAttribute()]
+        public static explicit operator XInt256(Int128 value) {
+            return new XInt256(unchecked((LInt128)checked((UInt128)value)), 0);
         }
 
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
@@ -792,7 +811,7 @@ namespace UltimateOrb {
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         [System.Diagnostics.Contracts.PureAttribute()]
         public static explicit operator byte(XInt256 value) {
-            (checked(0 - unchecked((SUInt128)value.hi))).Ignore(); // check overflow
+            (checked(0 - unchecked((UInt128)value.hi))).Ignore(); // check overflow
             return checked((byte)value.lo);
         }
 
@@ -801,7 +820,7 @@ namespace UltimateOrb {
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         [System.Diagnostics.Contracts.PureAttribute()]
         public static explicit operator UInt16(XInt256 value) {
-            (checked(0 - unchecked((SUInt128)value.hi))).Ignore(); // check overflow
+            (checked(0 - unchecked((UInt128)value.hi))).Ignore(); // check overflow
             return checked((UInt16)value.lo);
         }
 
@@ -810,7 +829,7 @@ namespace UltimateOrb {
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         [System.Diagnostics.Contracts.PureAttribute()]
         public static explicit operator UInt32(XInt256 value) {
-            (checked(0 - unchecked((SUInt128)value.hi))).Ignore(); // check overflow
+            (checked(0 - unchecked((UInt128)value.hi))).Ignore(); // check overflow
             return checked((UInt32)value.lo);
         }
 
@@ -818,8 +837,17 @@ namespace UltimateOrb {
         [System.Runtime.TargetedPatchingOptOutAttribute("")]
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         [System.Diagnostics.Contracts.PureAttribute()]
-        public static explicit operator SUInt128(XInt256 value) {
-            (checked(0 - unchecked((SUInt128)value.hi))).Ignore(); // check overflow
+        public static explicit operator UInt64(XInt256 value) {
+            (checked(0 - unchecked((UInt128)value.hi))).Ignore(); // check overflow
+            return checked((UInt64)value.lo);
+        }
+
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
+        [System.Runtime.TargetedPatchingOptOutAttribute("")]
+        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Diagnostics.Contracts.PureAttribute()]
+        public static explicit operator UInt128(XInt256 value) {
+            (checked(0 - unchecked((UInt128)value.hi))).Ignore(); // check overflow
             return value.lo;
         }
 
@@ -828,7 +856,7 @@ namespace UltimateOrb {
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         [System.Diagnostics.Contracts.PureAttribute()]
         public static explicit operator char(XInt256 value) {
-            (checked(0 - unchecked((SUInt128)value.hi))).Ignore(); // check overflow
+            (checked(0 - unchecked((UInt128)value.hi))).Ignore(); // check overflow
             return checked((char)value.lo);
         }
 
@@ -863,9 +891,18 @@ namespace UltimateOrb {
         [System.Runtime.TargetedPatchingOptOutAttribute("")]
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         [System.Diagnostics.Contracts.PureAttribute()]
-        public static explicit operator SInt128(XInt256 value) {
+        public static explicit operator Int64(XInt256 value) {
             (checked(0 - value.hi)).Ignore(); // check overflow
-            return checked((SInt128)value.lo);
+            return checked((Int64)value.lo);
+        }
+
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
+        [System.Runtime.TargetedPatchingOptOutAttribute("")]
+        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Diagnostics.Contracts.PureAttribute()]
+        public static explicit operator Int128(XInt256 value) {
+            (checked(0 - value.hi)).Ignore(); // check overflow
+            return checked((Int128)value.lo);
         }
 
 #if (NET5_0 || NET6_0 || NET5_0_OR_GREATER)
@@ -897,8 +934,8 @@ namespace UltimateOrb {
             const int FractionBitSize = checked(BitSize - SignBitSize - ExponentBitSize);
 
             // var SInt128 SignMask = unchecked((SInt128)checked((SInt128)1u << (ExponentBitSize + FractionBitSize)));
-            var ExponentMask = unchecked((SInt128)checked((((SInt128)1u << ExponentBitSize) - 1u) << FractionBitSize));
-            var FractionMask = unchecked((SInt128)checked(((SInt128)1u << FractionBitSize) - 1u));
+            var ExponentMask = unchecked((Int128)checked((((Int128)1u << ExponentBitSize) - 1u) << FractionBitSize));
+            var FractionMask = unchecked((Int128)checked(((Int128)1u << FractionBitSize) - 1u));
 
             var b = BitConverter.DoubleToInt64Bits(value);
             var e = checked((int)(ExponentMask >> FractionBitSize)) & unchecked((int)(b >> FractionBitSize));
@@ -907,21 +944,21 @@ namespace UltimateOrb {
                 checked(checked(ExponentBias - 1 + 256) - e).Ignore();
                 {
                     e = unchecked(e - (FractionBitSize + ExponentBias));
-                    var lo = unchecked((SUInt128)(((SInt128)1 << FractionBitSize) | (FractionMask & b)));
-                    var hi = (SUInt128)0;
-                    if (e > 0) {
+                    var lo = unchecked((UInt128)(((Int128)1 << FractionBitSize) | (FractionMask & b)));
+                    var hi = (UInt128)0;
+                    if (e < 0) {
+                        var ol = (UInt128)0;
+                        ol = MathEx.ShiftRight(ol, lo, unchecked(-e), out lo);
+                        // Do NOT uncomment. (int)3.5 == 3
+                        /*
+                        // IEEE Std 754-2008 roundTiesToEven
+                        if (unchecked((SUInt128)SInt128.MinValue) < ol || (unchecked((SUInt128)SInt128.MinValue) == ol && 0 != (1 & lo))) {
+                            lo = unchecked(1 + lo);
+                        }
+                        */
+                    } else {
                         lo = Numerics.DoubleArithmetic.ShiftLeft(lo, hi, e, out hi);
-                    } // else if (e < 0) {
-                      // var ol = (SUInt128)0;
-                      // ol = MathEx.ShiftRight(ol, lo, unchecked(-e), out lo);
-                      // // Do NOT uncomment. (int)3.5 == 3
-                    /*
-                    // IEEE Std 754-2008 roundTiesToEven
-                    if (unchecked((SUInt128)SInt128.MinValue) < ol || (unchecked((SUInt128)SInt128.MinValue) == ol && 0 != (1 & lo))) {
-                        lo = unchecked(1 + lo);
                     }
-                    */
-                    // }
                     if (0 > b) {
                         lo = Numerics.DoubleArithmetic.NegateUnchecked(lo, hi, out hi);
                     }
@@ -932,106 +969,20 @@ namespace UltimateOrb {
         }
 
 #if (NET5_0 || NET6_0 || NET5_0_OR_GREATER)
-        [Obsolete("Not implemented")]
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
         [System.Runtime.TargetedPatchingOptOutAttribute("")]
         [System.Diagnostics.Contracts.PureAttribute()]
         public static explicit operator Half(XInt256 value) {
-            throw new NotImplementedException();
-            const int BitSize = 128;
-            const int ExponentBitSize = 11;
-            const int ExponentBias = unchecked(checked((1 << (ExponentBitSize - 1))) - 1);
-            const int SignBitSize = 1;
-            const int FractionBitSize = checked(BitSize - SignBitSize - ExponentBitSize);
-
-            const int BitSizeTo = 16;
-            const int ExponentBitSizeTo = 5;
-            // const int ExponentBiasTo = unchecked(checked((1 << (ExponentBitSizeTo - 1))) - 1);
-            const int SignBitSizeTo = 1;
-            const int FractionBitSizeTo = checked(BitSizeTo - SignBitSizeTo - ExponentBitSizeTo);
-
-            var lo = value.lo;
-            var hi = value.hi;
-            if (0 != hi) {
-                if (hi < (((SUInt128)1 << checked(1 + 1 + FractionBitSizeTo)) - 1) << checked(BitSize - (1 + 1 + FractionBitSizeTo))) {
-                    // var c = Mathematics.BinaryNumerals.CountLeadingZeros(unchecked((SUInt128)hi));
-                    var c = 0;
-                    for (var tmp = hi; 0 <= unchecked((SInt128)tmp); tmp <<= 1) {
-                        unchecked {
-                            ++c;
-                        }
-                    }
-                    var s = unchecked((SUInt128)(checked(256 - 1 + ExponentBias) - c)) << FractionBitSize;
-                    lo = Numerics.DoubleArithmetic.ShiftLeft(lo, hi, unchecked(1 + c), out hi);
-                    var lo0 = lo & unchecked(((SUInt128)1 << checked(BitSize - FractionBitSizeTo)) - 1);
-                    lo = Numerics.DoubleArithmetic.ShiftRightUnsigned(lo, hi, checked(BitSize - FractionBitSizeTo), out hi);
-                    // IEEE Std 754-2008 roundTiesToEven
-                    if (unchecked((SUInt128)SInt128.MinValue) < lo || (unchecked((SUInt128)SInt128.MinValue) == lo && (lo0 > 0 || (lo0 == 0 && 0 != (1 & hi))))) {
-                        unchecked {
-                            ++hi;
-                        }
-                    }
-                    s = unchecked(s + (hi << checked(FractionBitSize - FractionBitSizeTo)));
-                    // TODO:
-                    // return unchecked((Half)BitConverter.Int128BitsToQuadruple(unchecked((SInt128)s)));
-                }
-                return Half.PositiveInfinity;
-            }
-            // We cannot write "return (Half)lo;" because of the double rounding issue.
-            // See https://www.exploringbinary.com/double-rounding-errors-in-floating-point-conversions/ .
-            return ToHalf(lo);
+            return value.hi == 0 ? (Half)value.lo : Half.PositiveInfinity;
         }
 #endif
 
         // Make the conversion explicit due to precision loss may be significant.
-        [Obsolete("Not implemented")]
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
         [System.Runtime.TargetedPatchingOptOutAttribute("")]
         [System.Diagnostics.Contracts.PureAttribute()]
         public static explicit operator Single(XInt256 value) {
-            throw new System.NotImplementedException();
-            const int BitSize = 128;
-            const int ExponentBitSize = 11;
-            const int ExponentBias = unchecked(checked((1 << (ExponentBitSize - 1))) - 1);
-            const int SignBitSize = 1;
-            const int FractionBitSize = checked(BitSize - SignBitSize - ExponentBitSize);
-
-            const int BitSizeTo = 32;
-            const int ExponentBitSizeTo = 8;
-            // const int ExponentBiasTo = unchecked(checked((1 << (ExponentBitSizeTo - 1))) - 1);
-            const int SignBitSizeTo = 1;
-            const int FractionBitSizeTo = checked(BitSizeTo - SignBitSizeTo - ExponentBitSizeTo);
-
-            var lo = value.lo;
-            var hi = value.hi;
-            if (0 != hi) {
-                if (hi < (((SUInt128)1 << checked(1 + 1 + FractionBitSizeTo)) - 1) << checked(BitSize - (1 + 1 + FractionBitSizeTo))) {
-                    // var c = Mathematics.BinaryNumerals.CountLeadingZeros(unchecked((SUInt128)hi));
-                    var c = 0;
-                    for (var tmp = hi; 0 <= unchecked((SInt128)tmp); tmp <<= 1) {
-                        unchecked {
-                            ++c;
-                        }
-                    }
-                    var s = unchecked((SUInt128)(checked(256 - 1 + ExponentBias) - c)) << FractionBitSize;
-                    lo = Numerics.DoubleArithmetic.ShiftLeft(lo, hi, unchecked(1 + c), out hi);
-                    var lo0 = lo & unchecked(((SUInt128)1 << checked(BitSize - FractionBitSizeTo)) - 1);
-                    lo = Numerics.DoubleArithmetic.ShiftRightUnsigned(lo, hi, checked(BitSize - FractionBitSizeTo), out hi);
-                    // IEEE Std 754-2008 roundTiesToEven
-                    if (unchecked((SUInt128)SInt128.MinValue) < lo || (unchecked((SUInt128)SInt128.MinValue) == lo && (lo0 > 0 || (lo0 == 0 && 0 != (1 & hi))))) {
-                        unchecked {
-                            ++hi;
-                        }
-                    }
-                    s = unchecked(s + (hi << checked(FractionBitSize - FractionBitSizeTo)));
-                    // TODO:
-                    // return unchecked((Single)BitConverter.Int128BitsToQuadruple(unchecked((SInt128)s)));
-                }
-                return Single.PositiveInfinity;
-            }
-            // We cannot write "return (Single)lo;" because of the double rounding issue.
-            // See https://www.exploringbinary.com/double-rounding-errors-in-floating-point-conversions/ .
-            return ToSingle(lo);
+            return value.hi == 0 ? (Single)value.lo : Single.PositiveInfinity;
         }
 
         [Obsolete("Not implemented")]
@@ -1039,36 +990,12 @@ namespace UltimateOrb {
         [System.Runtime.TargetedPatchingOptOutAttribute("")]
         [System.Diagnostics.Contracts.PureAttribute()]
         public static implicit operator double(XInt256 value) {
-            throw new NotImplementedException();
-            const int BitSize = 128;
-            const int ExponentBitSize = 11;
-            const int ExponentBias = unchecked(checked((1 << (ExponentBitSize - 1))) - 1);
-            const int SignBitSize = 1;
-            const int FractionBitSize = checked(BitSize - SignBitSize - ExponentBitSize);
+            return value.hi == 0 ? (double)value.lo : ToDoublePartial(value.lo, value.hi);
 
-            var lo = value.lo;
-            var hi = value.hi;
-            if (0 != hi) {
-                // var c = Mathematics.BinaryNumerals.CountLeadingZeros(unchecked((SUInt128)hi));
-                var c = 0;
-                for (var tmp = hi; 0 <= unchecked((SInt128)tmp); tmp <<= 1) {
-                    unchecked {
-                        ++c;
-                    }
-                }
-                var s = unchecked((SUInt128)(checked(256 - 1 + ExponentBias) - c)) << FractionBitSize;
-                lo = Numerics.DoubleArithmetic.ShiftLeft(lo, hi, unchecked(1 + c), out hi);
-                var lo0 = lo & unchecked(((SUInt128)1 << checked(BitSize - FractionBitSize)) - 1);
-                lo = Numerics.DoubleArithmetic.ShiftRightUnsigned(lo, hi, checked(BitSize - FractionBitSize), out hi);
-                s |= hi;
-                // IEEE Std 754-2008 roundTiesToEven
-                if (unchecked((SUInt128)SInt128.MinValue) < lo || (unchecked((SUInt128)SInt128.MinValue) == lo && (lo0 > 0 || (lo0 == 0 && 0 != (1 & hi))))) {
-                    s = unchecked(1 + s);
-                }
-                // TODO:
-                // return BitConverter.Int128BitsToQuadruple(unchecked((SInt128)s));
+            static double ToDoublePartial(UInt128 lo, UInt128 hi) {
+                Debug.Assert(0 != hi);
+                throw new NotImplementedException();
             }
-            return unchecked((double)lo);
         }
 
 #if FEATURE_STANDARD_LIBRARY_INTEROPERABILITY_FORMATTING_AND_CONVERSION
@@ -1077,8 +1004,9 @@ namespace UltimateOrb {
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         [System.Diagnostics.Contracts.PureAttribute()]
         public static explicit operator global::System.Decimal(XInt256 value) {
-            checked((UInt32)value.hi).Ignore(); // check overflow
-            return new decimal(unchecked((Int32)(value.lo >> (32 * 0))), unchecked((Int32)(value.lo >> (32 * 1))), unchecked((Int32)(value.hi >> (32 * 0))), false, 0);
+            // This operator is considered checked currently.
+            checked(0 - unchecked((UInt128)value.hi)).Ignore();
+            return (global::System.Decimal)value.lo;
         }
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
@@ -1086,7 +1014,7 @@ namespace UltimateOrb {
         private static readonly XInt256[] PowersOf10 = GetPowersOf10();
 
         private static XInt256[] GetPowersOf10() {
-            var lo = (SUInt128)1;
+            var lo = (LInt128)1;
             var hi = (HInt128)0;
             var r = new XInt256[39];
             for (var i = 1; r.Length > i; ++i) {
@@ -1101,31 +1029,7 @@ namespace UltimateOrb {
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveOptimization)]
         [System.Diagnostics.Contracts.PureAttribute()]
         public static explicit operator XInt256(global::System.Decimal value) {
-            // TODO: Struct layout of global::System.Decimal may vary...
-#if (NET5_0 || NET6_0 || NET5_0_OR_GREATER)
-            var a = (stackalloc UInt32[4]);
-            global::System.Decimal.GetBits(value, MemoryMarshal.Cast<UInt32, Int32>(a));
-#else
-            var a = (((object)global::System.Decimal.GetBits(value)) as UInt32[])!; // CLI actually allows such sign casts.
-#endif
-            var lo = a[0] | ((SUInt128)a[1] << 32);
-            var hi = (HInt128)a[2];
-            var f = a[3];
-            var scale = (f >> 16) & 0x1F;
-            var d = PowersOf10[scale];
-            lo = Numerics.DoubleArithmetic.DivRemUnchecked(lo, hi, d.lo, d.hi, out HInt128 r_lo, out HInt128 r_hi, out hi);
-            // Note: r <= (a[0] | ((SUInt128)a[1] << 32), (SInt128)a[2]) .
-            //   ==> r: Left shift (as a multiplication) will not lead to an arithmetic overflow.
-            r_lo = Numerics.DoubleArithmetic.ShiftLeft(r_lo, r_hi, out r_hi);
-            var c = Numerics.DoubleArithmetic.Compare(d.lo, d.hi, r_lo, r_hi);
-            // 'Banker's rounding' (same as IEEE Std 754-2008 roundTiesToEven)
-            if (c > 0 || (0 == c && (0 != (1 & lo)))) {
-                lo = Numerics.DoubleArithmetic.IncreaseUnsigned(lo, hi, out hi);
-            }
-            if (0 > f) {
-                lo = Numerics.DoubleArithmetic.NegateUnsigned(lo, hi, out hi);
-            }
-            return new XInt256(lo, hi);
+            return (UInt128)value;
         }
 #endif
 
@@ -1425,7 +1329,7 @@ namespace UltimateOrb {
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         [System.Diagnostics.Contracts.PureAttribute()]
         public static (XInt256 Quotient, XInt256 Remainder) DivRem(XInt256 first, XInt256 second) {
-            var lo = Numerics.DoubleArithmetic.DivRem(first.lo, first.hi, second.lo, second.hi, out SUInt128 remainder_lo, out HInt128 remainder_hi, out HInt128 hi);
+            var lo = Numerics.DoubleArithmetic.DivRem(first.lo, first.hi, second.lo, second.hi, out UInt128 remainder_lo, out HInt128 remainder_hi, out HInt128 hi);
             return (new XInt256(lo, hi), new XInt256(remainder_lo, remainder_hi));
         }
 
@@ -1531,10 +1435,10 @@ namespace UltimateOrb {
         }
 
         bool IBinaryInteger<XInt256>.TryWriteLittleEndian(Span<byte> destination, out int bytesWritten) {
-            if (16 <= destination.Length) {
+            if (32 <= destination.Length) {
                 BinaryPrimitives.TryWriteUInt128LittleEndian(destination, lo);
-                BinaryPrimitives.TryWriteUInt128LittleEndian(destination[8..], hi);
-                bytesWritten = 16;
+                BinaryPrimitives.TryWriteUInt128LittleEndian(destination[16..], hi);
+                bytesWritten = 32;
                 return true;
             }
             bytesWritten = default;
@@ -1542,10 +1446,10 @@ namespace UltimateOrb {
         }
 
         bool IBinaryInteger<XInt256>.TryWriteBigEndian(System.Span<byte> destination, out int bytesWritten) {
-            if (16 <= destination.Length) {
+            if (32 <= destination.Length) {
                 BinaryPrimitives.TryWriteUInt128BigEndian(destination, hi);
-                BinaryPrimitives.TryWriteUInt128BigEndian(destination[8..], lo);
-                bytesWritten = 16;
+                BinaryPrimitives.TryWriteUInt128BigEndian(destination[16..], lo);
+                bytesWritten = 32;
                 return true;
             }
             bytesWritten = default;
@@ -1638,7 +1542,7 @@ namespace UltimateOrb {
 
         static XInt256 IBinaryNumber<XInt256>.AllBitsSet {
 
-            get => new(~(SUInt128)0, ~(HInt128)0);
+            get => new(~(LInt128)0, ~(HInt128)0);
         }
 
         static XInt256 INumberBase<XInt256>.Abs(XInt256 value) {
@@ -1887,8 +1791,8 @@ namespace UltimateOrb {
             if (null != s && s.Length > 0) {
                 var i = 0;
                 var c = s[i++];
-                SUInt128 lo;
-                SUInt128 hi;
+                UInt128 lo;
+                UInt128 hi;
                 var d = c - '0';
                 if (0 < d && d < 10) {
                     lo = unchecked((uint)d);
@@ -1922,8 +1826,8 @@ namespace UltimateOrb {
             if (null != s && s.Length > 0) {
                 var i = 0;
                 var c = s[i++];
-                SUInt128 lo;
-                SUInt128 hi;
+                UInt128 lo;
+                UInt128 hi;
                 var d = c - '0';
                 if ((0 < d && d < 10) || (17 <= d && d < 23)) {
                     if (10 <= d) {
@@ -1978,11 +1882,11 @@ namespace UltimateOrb {
 
         public Span<char> ToStringCStyleU256(Span<char> buffer) {
             var lo = this.lo;
-            var hi = unchecked((SUInt128)this.hi);
+            var hi = unchecked((UInt128)this.hi);
             var i = buffer.Length;
             {
-                SUInt128 r_lo;
-                SUInt128 r_hi;
+                UInt128 r_lo;
+                UInt128 r_hi;
                 do {
                     lo = Numerics.DoubleArithmetic.DivRem(lo, hi, 10, 0, out r_lo, out r_hi, out hi);
                     buffer[--i] = unchecked((char)('0' + r_lo));
@@ -2028,14 +1932,14 @@ namespace UltimateOrb {
 
 #if NET7_0_OR_GREATER && !LEGACY_OPERATOR_CHECKNESS
         public static explicit operator XInt256(BigInteger value) {
-            var lo = unchecked((SUInt128)(value & SUInt128.MaxValue));
-            var hi = unchecked((SUInt128)((value >> 128) & SUInt128.MaxValue));
+            var lo = unchecked((UInt128)(value & UInt128.MaxValue));
+            var hi = unchecked((UInt128)((value >> 128) & UInt128.MaxValue));
             return new XInt256(lo, hi);
         }
 
         public static explicit operator checked XInt256(BigInteger value) {
-            var lo = unchecked((SUInt128)(value & SUInt128.MaxValue));
-            var hi = checked((SUInt128)(value >> 128));
+            var lo = unchecked((UInt128)(value & UInt128.MaxValue));
+            var hi = checked((UInt128)(value >> 128));
             return new XInt256(lo, hi);
         }
 #else
@@ -2122,7 +2026,10 @@ namespace UltimateOrb {
             [System.Diagnostics.Contracts.PureAttribute()]
             public static XInt256 DivRem(XInt256 dividend, XInt256 divisor, out XInt256 remainder) {
                 Unsafe.SkipInit(out remainder);
-                var lo = Numerics.DoubleArithmetic.DivRem(dividend.lo, dividend.hi, divisor.lo, divisor.hi, out Unsafe.AsRef(in remainder.lo), out Unsafe.AsRef(in remainder.hi), out SUInt128 hi);
+                var lo = Numerics.DoubleArithmetic.DivRem(
+                    unchecked((UInt128)dividend.lo), unchecked((UInt128)dividend.hi),
+                    unchecked((UInt128)divisor.lo), unchecked((UInt128)divisor.hi),
+                    out Unsafe.AsRef<UInt128>(in remainder.lo), out Unsafe.AsRef<UInt128>(in remainder.hi), out UInt128 hi);
                 return new XInt256(lo, hi);
             }
 

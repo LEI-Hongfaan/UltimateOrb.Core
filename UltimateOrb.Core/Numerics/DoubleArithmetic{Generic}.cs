@@ -11,10 +11,9 @@ namespace UltimateOrb.Numerics {
 
 #if NET7_0_OR_GREATER
         public static int LeadingZeroCount<TInt>(TInt lo, TInt hi) where TInt: IBinaryInteger<TInt> {
-            if (0 != TInt.Sign(hi)) {
-                return int.CreateChecked(TInt.LeadingZeroCount(hi));
-            }
-            return checked(8 * hi.GetByteCount() + int.CreateChecked(TInt.LeadingZeroCount(lo)));
+            return 0 != TInt.Sign(hi)
+                ? int.CreateChecked(TInt.LeadingZeroCount(hi))
+                : checked(8 * hi.GetByteCount() + int.CreateChecked(TInt.LeadingZeroCount(lo)));
         }
 #endif
     }
