@@ -379,3 +379,4 @@ FodyWeavers.xsd
 /Benchmark[0-9a-fA-F]+
 tmp/
 /UltimateOrb.Int128/tmp/
+/Benchmark0072
