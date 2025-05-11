@@ -376,8 +376,6 @@ FodyWeavers.xsd
 /UltimateOrb.Int128/tmp/net8.0/UltimateOrb.Int128.pdb
 
 /sketching
-/Benchmark[0-9a-fA-F]+
+/Benchmark[0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F]
 tmp/
 /UltimateOrb.Int128/tmp/
-/Benchmark0072
-/Benchmark0071/Program.cs
