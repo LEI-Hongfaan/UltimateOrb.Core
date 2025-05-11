@@ -5,6 +5,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using UltimateOrb.Utilities;
 
 namespace UltimateOrb {
 
@@ -17,7 +18,7 @@ namespace UltimateOrb {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Half ToHalf(ushort value) {
-            return 65520 <= value ? Half.PositiveInfinity : BitConverter.Int16BitsToHalf(unchecked((Int16)ToHalfPartial(value)));
+            return 65520 <= value ? Half.PositiveInfinity : BitConverter.Int16BitsToHalf(unchecked((Int16)ToHalfInternal(value)));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -89,27 +90,73 @@ namespace UltimateOrb {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Half ToHalf(int value) {
-
+        public static Half ToHalf(sbyte value) {
+            unchecked {
+                var valueInt = (int)value;
+                var mask = valueInt >> (SizeOfModule.BitSizeOf<int>() - 1);
+                var v = (valueInt ^ mask - mask).ToUnsignedUnchecked();
+                var sign = mask & (int)Int16.MinValue;
+                return BitConverter.Int16BitsToHalf((Int16)(sign + ToHalfPartial(v)));
+            }
         }
 
-         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static int ToHalfPartial(int value) {
-            Debug.Assert(value <= 65519);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Half ToHalf(short value) {
+            return ToHalf((int)value);
+        }
+
+        internal const int HalfPositiveInfinityBits = 0X7c00;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Half ToHalf(int value) {
+            unchecked {
+                var mask = value >> (SizeOfModule.BitSizeOf<int>() - 1);
+                var v = (value ^ mask - mask).ToUnsignedUnchecked();
+                var sign = mask & (int)Int16.MinValue;
+                var t = value + 65519;
+                return BitConverter.Int16BitsToHalf((Int16)(sign + (t.ToUnsignedUnchecked() > 65519 * 2 ? HalfPositiveInfinityBits : ToHalfPartial(v))));
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Half ToHalf(long value) {
+            unchecked {
+                var valueInt = (int)value;
+                var mask = valueInt >> (SizeOfModule.BitSizeOf<int>() - 1);
+                var v = (valueInt ^ mask - mask).ToUnsignedUnchecked();
+                var sign = mask & (int)Int16.MinValue;
+                var t = value + 65519;
+                return BitConverter.Int16BitsToHalf((Int16)(sign + (t.ToUnsignedUnchecked() > 65519 * 2 ? HalfPositiveInfinityBits : ToHalfPartial(v))));
+            }
+        }
+
+        [Obsolete]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static int ToHalfInternal(Int32 value) {
             unchecked {
                 const int exponentBias = 15;
                 const int mantissaBits = 10;
 
+                var mask = value >> (32 - 1);
+                var sign = mask & (Int32)Int16.MinValue;
+                {
+                    var t = value + 65519;
+                    if ((uint)t > 65519 * 2) {
+                        return HalfPositiveInfinityBits + sign;
+                    }
+                }
                 if (value == 0) {
                     return 0;
                 }
-                UInt32;
+
+                var v = (value ^ mask - mask).ToUnsignedUnchecked();
+
                 // Count leading zeros to find the position of the highest set bit
-                var leadingZeros = Mathematics.BinaryNumerals.CountLeadingZeros(value);
+                var leadingZeros = Mathematics.BinaryNumerals.CountLeadingZeros(v);
 
                 int exponent = 32 - 1 + exponentBias - leadingZeros;
 
-                uint shifted = value << (1 + leadingZeros);
+                uint shifted = v << (1 + leadingZeros);
 
                 uint mantissa = shifted >>> (32 - mantissaBits);
 
@@ -122,7 +169,7 @@ namespace UltimateOrb {
                 }
 
                 // Combine into half-precision format (sign bit is 0 for unsigned input)
-                return (exponent << mantissaBits) + (int)mantissa;
+                return (exponent << mantissaBits) + (int)mantissa + sign;
             }
         }
     }

@@ -5,6 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Runtime.InteropServices;
 using UltimateOrb.Numerics;
+using UltimateOrb.Utilities;
 
 namespace UltimateOrb {
     using static global::Internal.System.IConvertibleModule;
@@ -886,48 +887,14 @@ namespace UltimateOrb {
         [System.Runtime.TargetedPatchingOptOutAttribute("")]
         [System.Diagnostics.Contracts.PureAttribute()]
         public static explicit operator Half(XInt128 value) {
-            const int BitSize = 64;
-            const int ExponentBitSize = 11;
-            const int ExponentBias = unchecked(checked((1 << (ExponentBitSize - 1))) - 1);
-            const int SignBitSize = 1;
-            const int FractionBitSize = checked(BitSize - SignBitSize - ExponentBitSize);
-
-            const int BitSizeTo = 16;
-            const int ExponentBitSizeTo = 5;
-            // const int ExponentBiasTo = unchecked(checked((1 << (ExponentBitSizeTo - 1))) - 1);
-            const int SignBitSizeTo = 1;
-            const int FractionBitSizeTo = checked(BitSizeTo - SignBitSizeTo - ExponentBitSizeTo);
-
-            var lo = value.lo;
-            var hi = value.hi;
-            if (0 != hi) {
-                var s = (0 > hi ? Int64.MinValue : 0);
-                if (0 > hi) {
-                    lo = Numerics.DoubleArithmetic.NegateUnchecked(lo, hi, out hi);
-                }
-                // var c = Mathematics.BinaryNumerals.CountLeadingZeros(unchecked((UInt64)hi));
-                var c = 0;
-                for (var tmp = hi; 0 <= unchecked((Int64)tmp); tmp <<= 1) {
-                    unchecked {
-                        ++c;
-                    }
-                }
-                s |= unchecked((Int64)(checked(128 - 1 + ExponentBias) - c)) << FractionBitSize;
-                lo = Numerics.DoubleArithmetic.ShiftLeft(lo, hi, unchecked(1 + c), out hi);
-                var lo0 = lo & unchecked(((UInt64)1 << checked(BitSize - FractionBitSizeTo)) - 1);
-                lo = Numerics.DoubleArithmetic.ShiftRightUnsigned(lo, hi, checked(BitSize - FractionBitSizeTo), out hi);
-                // IEEE Std 754-2008 roundTiesToEven
-                if (unchecked((UInt64)Int64.MinValue) < lo || (unchecked((UInt64)Int64.MinValue) == lo && (lo0 > 0 || (lo0 == 0 && 0 != (1 & hi))))) {
-                    unchecked {
-                        ++hi;
-                    }
-                }
-                s = unchecked(s + (hi << checked(FractionBitSize - FractionBitSizeTo)));
-                return unchecked((Half)BitConverter.Int64BitsToDouble(unchecked((Int64)s)));
+            unchecked {
+                var valueInt = (int)value.lo;
+                var mask = valueInt >> (SizeOfModule.BitSizeOf<int>() - 1);
+                var v = (valueInt ^ mask - mask).ToUnsignedUnchecked();
+                var sign = mask & (int)Int16.MinValue;
+                var t = value + 65519;
+                return BitConverter.Int16BitsToHalf((Int16)(sign + ((t.ToUnsignedUnchecked() > 65519 * 2 || value.hi.ToSignedUnchecked() != mask) ? HalfHelpers.HalfPositiveInfinityBits : HalfHelpers.ToHalfPartial(v))));
             }
-            // We cannot write "return (Half)lo;" because of the double rounding issue.
-            // See https://www.exploringbinary.com/double-rounding-errors-in-floating-point-conversions/ .
-            return ToHalf(lo);
         }
 #endif
 

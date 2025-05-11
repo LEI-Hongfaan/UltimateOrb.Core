@@ -69,7 +69,7 @@ namespace UltimateOrb.Numerics.Tests {
 
         [Test]
         public void AddWithOverflowTest_Signed_2() {
-            var a = UltimateOrb.Utilities.Extensions.BitPatternEnumerable.GetUInt32BitsWithPopCountLessThanOrEqual(32, 3);
+            var a = UltimateOrb.Utilities.BitPatternEnumerable.GetUInt32BitsWithPopCountLessThanOrEqual(32, 3);
             foreach (var x in a) {
                 foreach (var y in a) {
                     AddWithOverflowTest_Signed(x.ToSignedUnchecked(), y.ToSignedUnchecked());
@@ -82,7 +82,7 @@ namespace UltimateOrb.Numerics.Tests {
 
         [Test]
         public void AddWithOverflowTest_Unsigned_2() {
-            var a = UltimateOrb.Utilities.Extensions.BitPatternEnumerable.GetUInt32BitsWithPopCountLessThanOrEqual(32, 3);
+            var a = UltimateOrb.Utilities.BitPatternEnumerable.GetUInt32BitsWithPopCountLessThanOrEqual(32, 3);
             foreach (var x in a) {
                 foreach (var y in a) {
                     AddWithOverflowTest_Unsigned(x.ToUnsignedUnchecked(), y.ToUnsignedUnchecked());
@@ -95,7 +95,7 @@ namespace UltimateOrb.Numerics.Tests {
 
         [Test]
         public void AddWithCarryTest_Signed_2() {
-            var a = UltimateOrb.Utilities.Extensions.BitPatternEnumerable.GetUInt32BitsWithPopCountLessThanOrEqual(32, 3);
+            var a = UltimateOrb.Utilities.BitPatternEnumerable.GetUInt32BitsWithPopCountLessThanOrEqual(32, 3);
             foreach (var x in a) {
                 foreach (var y in a) {
                     AddWithCarryTest_Signed(x.ToSignedUnchecked(), y.ToSignedUnchecked());
@@ -108,7 +108,7 @@ namespace UltimateOrb.Numerics.Tests {
 
         [Test]
         public void AddWithCarryTest_Unsigned_2() {
-            var a = UltimateOrb.Utilities.Extensions.BitPatternEnumerable.GetUInt32BitsWithPopCountLessThanOrEqual(32, 3);
+            var a = UltimateOrb.Utilities.BitPatternEnumerable.GetUInt32BitsWithPopCountLessThanOrEqual(32, 3);
             foreach (var x in a) {
                 foreach (var y in a) {
                     AddWithCarryTest_Unsigned(x.ToUnsignedUnchecked(), y.ToUnsignedUnchecked());
@@ -145,7 +145,7 @@ namespace UltimateOrb.Numerics.Tests {
 
         [Test]
         public void SubtractWithBorrowTest_Signed_2() {
-            var a = UltimateOrb.Utilities.Extensions.BitPatternEnumerable.GetUInt32BitsWithPopCountLessThanOrEqual(32, 3);
+            var a = UltimateOrb.Utilities.BitPatternEnumerable.GetUInt32BitsWithPopCountLessThanOrEqual(32, 3);
             foreach (var x in a) {
                 foreach (var y in a) {
                     SubtractWithBorrowTest_Signed(x.ToSignedUnchecked(), y.ToSignedUnchecked());
@@ -158,7 +158,7 @@ namespace UltimateOrb.Numerics.Tests {
 
         [Test]
         public void SubtractWithBorrowTest_Unsigned_2() {
-            var a = UltimateOrb.Utilities.Extensions.BitPatternEnumerable.GetUInt32BitsWithPopCountLessThanOrEqual(32, 3);
+            var a = UltimateOrb.Utilities.BitPatternEnumerable.GetUInt32BitsWithPopCountLessThanOrEqual(32, 3);
             foreach (var x in a) {
                 foreach (var y in a) {
                     SubtractWithBorrowTest_Unsigned(x.ToUnsignedUnchecked(), y.ToUnsignedUnchecked());
@@ -195,7 +195,7 @@ namespace UltimateOrb.Numerics.Tests {
 
         [Test]
         public void SubtractWithOverflowTest_Signed_2() {
-            var a = UltimateOrb.Utilities.Extensions.BitPatternEnumerable.GetUInt32BitsWithPopCountLessThanOrEqual(32, 3);
+            var a = UltimateOrb.Utilities.BitPatternEnumerable.GetUInt32BitsWithPopCountLessThanOrEqual(32, 3);
             foreach (var x in a) {
                 foreach (var y in a) {
                     SubtractWithOverflowTest_Signed(x.ToSignedUnchecked(), y.ToSignedUnchecked());
@@ -208,7 +208,7 @@ namespace UltimateOrb.Numerics.Tests {
 
         [Test]
         public void SubtractWithOverflowTest_Unsigned_2() {
-            var a = UltimateOrb.Utilities.Extensions.BitPatternEnumerable.GetUInt32BitsWithPopCountLessThanOrEqual(32, 3);
+            var a = UltimateOrb.Utilities.BitPatternEnumerable.GetUInt32BitsWithPopCountLessThanOrEqual(32, 3);
             foreach (var x in a) {
                 foreach (var y in a) {
                     SubtractWithOverflowTest_Unsigned(x.ToUnsignedUnchecked(), y.ToUnsignedUnchecked());

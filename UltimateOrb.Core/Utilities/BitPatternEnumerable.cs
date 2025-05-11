@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UltimateOrb.Mathematics;
 
-namespace UltimateOrb.Utilities.Extensions {
+namespace UltimateOrb.Utilities {
 
     public static partial class BitPatternEnumerable {
 
