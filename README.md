@@ -39,7 +39,6 @@ The future name of this library.
 Plans:
 * It will contains other bigger integer types.
 * Special code paths to perform better on Browser (WASM).
-* ~Change parameter orders from "least significant bits"-to-"most significant bits" to msb-to-lsb.~
 * The structure layout byte orders of fixed-size integer types will be compile-time configurable.
 
 ## License
