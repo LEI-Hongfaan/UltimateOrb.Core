@@ -1,4 +1,5 @@
 ﻿
+#pragma warning disable UoWIP // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
 
 using System;
 /*
@@ -17,9 +18,11 @@ namespace UltimateOrb.Numerics.Specialized {
 */
 
 namespace UltimateOrb.Core.Tests {
+    using System.Diagnostics.CodeAnalysis;
     using System.Numerics;
     using System.Runtime.CompilerServices;
     using System.Runtime.InteropServices;
+    using System.Text.RegularExpressions;
     using System.Threading;
     using UltimateOrb.Mathematics.Geometry;
     using UltimateOrb.Numerics;
@@ -27,7 +30,26 @@ namespace UltimateOrb.Core.Tests {
 
     // using UltimateOrb.Runtime.CompilerServices.Tests;
 
+    public static partial class WhitespaceRemover {
 
+        // This attribute tells the compiler to generate efficient regex code at compile time.
+        [GeneratedRegex(@"\s+", RegexOptions.Compiled)]
+        private static partial Regex WhitespaceRegex();
+
+        /// <summary>
+        /// Removes all Unicode whitespace characters from the input string.
+        /// </summary>
+        /// <param name="input">The string from which to remove whitespace.</param>
+        /// <returns>The string without any whitespace characters.</returns>
+        [return: NotNullIfNotNull(nameof(input))]
+        public static string? RemoveWhitespace(this string? input) {
+            if (string.IsNullOrEmpty(input)) {
+                return input;
+            }
+
+            return WhitespaceRegex().Replace(input, "");
+        }
+    }
 
     internal static class Win32DecimalHelpers {
 
@@ -92,6 +114,64 @@ namespace UltimateOrb.Core.Tests {
 
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private static int Main(string[] args) {
+            {
+
+                Console.WriteLine((BigRational)Math.PI);
+                Console.WriteLine(BigRational.FromDoubleByContinuedFraction(Math.PI));
+
+
+                for (int i = 1; i < 30; ++i) {
+                    Console.WriteLine(BigRational.FromRationalByContinuedFraction((BigRational)Math.PI, i));
+
+                }
+                for (int i = 1; i < 30; ++i) {
+                    Console.WriteLine(BigRational.FromRationalByContinuedFraction((BigRational)0.1, i));
+
+                }
+                for (int i = 1; i < 30; ++i) {
+                    Console.WriteLine(BigRational.FromDoubleByContinuedFraction(0.1, i));
+
+                }
+                Console.WriteLine(BigRational.FromDoubleByContinuedFraction(float.PositiveInfinity));
+
+                return 0;
+            }
+            {
+                
+
+                string output = $$$"""{{{3:V:<s:aaa>}}}""";
+                Console.WriteLine(output);
+                return 0;
+            }
+            {
+                {
+                    var a = """
+                194286934960954013505219131142675643538134782692201101987417450051523093244750612407244445269834128729581999001097698837
+                059113628401747382012597604790968895348450733898006365028455976752552318787766900421989105252601990430439871601888440842
+                224149126597339343184859242253914800956534425991653876968765566900786049362862971570561111/11588945817616684075008826067
+                085048249736465095545485270761101056576578952644709576992975689593185437220926517277187699610446278876498377104974586240
+                406864862576323161803360152645281736589031288050365377966313964390654862478447629844776743834403928717405761405728126068
+                257954320624252883485392554162544380618209422131790230847488
+                """;
+                    a = a.RemoveWhitespace();
+                    var b = a.Split('/', 2, StringSplitOptions.TrimEntries);
+                    BigInteger n;
+                    var m = BigInteger.One;
+                    if (b.Length == 1) {
+                        n = BigInteger.Parse(b[0]);
+                    } else {
+                        n = BigInteger.Parse(b[0]);
+                        m = BigInteger.Parse(b[1]);
+                    }
+                    var p = BigRational.FromFraction(n, m);
+                    Console.WriteLine(p);
+                    Console.WriteLine((double)p);
+
+                    return 0;
+
+                }
+
+            }
             {
                 var sdfasdf = 34325451245454352453523453453.735354345m;
                 sdfasdf /= 100m;
@@ -1246,3 +1326,4 @@ namespace UltimateOrb.Plain.ValueTypes {
         }
     }
 }
+#pragma warning restore UoWIP // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.

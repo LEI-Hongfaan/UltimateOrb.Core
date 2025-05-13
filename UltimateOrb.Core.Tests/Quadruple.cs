@@ -246,6 +246,7 @@ namespace UltimateOrb {
         /// </summary>
         /// <param name="value">The specified value.</param>
         /// <returns>The radix b of the format of x, that is, two or ten.</returns>
+        [Obsolete]
         [System.Runtime.TargetedPatchingOptOutAttribute("")]
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         [System.Diagnostics.Contracts.PureAttribute()]

@@ -9,10 +9,12 @@ using System.Runtime;
 using System.Runtime.CompilerServices;
 using System.Runtime.ConstrainedExecution;
 using UltimateOrb.Mathematics.Exact;
+using UltimateOrb.Utilities;
 
 namespace UltimateOrb.Numerics {
 
     [Experimental("UoWIP")]
+    [DebuggerDisplay("{ToDebugDisplayString(),nq}")]
     [SerializableAttribute()]
     public readonly partial struct BigRational
         : IEquatable<BigRational>
@@ -156,10 +158,10 @@ namespace UltimateOrb.Numerics {
             if (value.m_SignedNumerator.IsZero) {
                 return (Double)0;
             }
-            return DivideToDouble(value.m_SignedNumerator, value.m_Denominator);
+            return DivideToDoubleInternal(value.m_SignedNumerator, value.m_Denominator);
         }
 
-        static double DivideToDouble(BigInteger signedNumerator, BigInteger denominator) {
+        static double DivideToDoubleInternal(BigInteger signedNumerator, BigInteger denominator) {
             Debug.Assert(denominator.Sign > 0);
             bool negative = BigInteger.IsNegative(signedNumerator);
             BigInteger absDividend = BigInteger.Abs(signedNumerator);
@@ -210,7 +212,9 @@ namespace UltimateOrb.Numerics {
             } else {
                 absDividend <<= unchecked(-e);
             }
+
             var (q, r) = BigInteger.DivRem(absDividend, absDivisor);
+
             int w = 0;
             r <<= 1;
             if (e > 0) {
@@ -332,12 +336,12 @@ namespace UltimateOrb.Numerics {
         public static BigRational Invert(BigRational value) {
             var s = value.m_SignedNumerator.Sign;
             if (0 == s) {
-                var ignored = Default<int>.Value / 0;
+                _ = Default<int>.Value / 0;
             }
             if (value.m_SignedNumerator.IsZero) {
                 return default;
             }
-            return 0 > s ? new BigRational(-value.m_Denominator, -value.m_SignedNumerator) : new BigRational(value.m_Denominator, value.m_SignedNumerator);
+            return 0 > s ? new BigRational(-value.m_SignedNumerator, -value.m_Denominator) : new BigRational(value.m_SignedNumerator, value.m_Denominator);
         }
 
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
@@ -437,34 +441,23 @@ namespace UltimateOrb.Numerics {
     public readonly partial struct BigRational : IFormattable {
 
         public override string ToString() {
+            return ToString(null, null);
+        }
+
+        string ToDebugDisplayString() {
+            return $@"{(double)SignedNumerator}/{(double)Denominator}";
+        }
+
+        public string ToString(IFormatProvider? formatProvider) {
+            return this.ToString(null, formatProvider);
+        }
+
+        public string ToString(string? format, IFormatProvider? formatProvider) {
             Contract.Ensures(Contract.Result<string>() != null);
-            var sb = new StringBuilder(33);
-            sb.Append(this.m_SignedNumerator);
+            var sb = new StringBuilder(38);
+            sb.Append(this.m_SignedNumerator.ToString(format, formatProvider));
             var t = this.Denominator;
             if (!t.IsOne) {
-                var i = sb.Length - 1;
-                for (; 0 <= i; --i) {
-                    var c = sb[i];
-                    if (char.IsNumber(c)) {
-                        break;
-                    }
-                }
-                sb.Insert(i + 1, '/');
-                sb.Insert(i + 2, t);
-            }
-            return sb.ToString();
-        }
-
-        public string ToString(IFormatProvider formatProvider) {
-            return this.ToString(null!, formatProvider);
-        }
-
-        public string ToString(string format, IFormatProvider formatProvider) {
-            Contract.Ensures(Contract.Result<string>() != null);
-            var sb = new StringBuilder(33);
-            sb.Append(this.m_SignedNumerator.ToString(format, formatProvider));
-            var t = this.m_Denominator;
-            if (1 != t) {
                 var i = sb.Length - 1;
                 for (; 0 <= i; --i) {
                     var c = sb[i];
@@ -598,13 +591,13 @@ namespace UltimateOrb.Numerics {
 
         static BigRational ContinuedFraction(double value, int maxIterations) {
             Debug.Assert(value > 0);
-            BigInteger numerator = 0;
-            BigInteger denominator = 1;
-            BigInteger prevNumerator = 1;
-            BigInteger prevDenominator = 0;
-
-            for (int i = 0; i < maxIterations; i++) {
-                if (value == 0) {
+            BigInteger d = 0;
+            BigInteger n = 1;
+            BigInteger prevD = 1;
+            BigInteger prevN = 0;
+            int i = 0;
+            for (; i < maxIterations; i++) {
+                if (!double.IsFinite(value)) {
                     break;
                 }
 
@@ -612,47 +605,107 @@ namespace UltimateOrb.Numerics {
                 value -= (double)integerPart;
                 value = 1.0 / value;
 
-                BigInteger tempNumerator = numerator;
-                numerator = integerPart * numerator + prevNumerator;
-                prevNumerator = tempNumerator;
+                BigInteger tempD = d;
+                d = integerPart * d + prevD;
+                prevD = tempD;
 
-                BigInteger tempDenominator = denominator;
-                denominator = integerPart * denominator + prevDenominator;
-                prevDenominator = tempDenominator;
+                BigInteger tempN = n;
+                n = integerPart * n + prevN;
+                prevN = tempN;
             }
-            if (numerator.IsZero) {
-                return Zero;
-            }
-            return new BigRational(denominator, numerator);
+            return BigRational.FromFraction(n, d);
         }
-        public static BigRational FromFloatContinuedFraction(float value, int maxIterations = 13) {
+
+        /// <summary>
+        /// Finds a rational value close to the specified value.
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="maxIterations"></param>
+        /// <exception cref="ArithmeticException"><paramref name="value"/> is not a finite number.</exception>
+        /// <exception cref="OutOfMemoryException">The denominator or numerator of the result goes too large.</exception>
+        /// <returns></returns>
+        public static BigRational FromSingleByContinuedFraction(Single value, int maxIterations = 12) {
             ArgumentOutOfRangeException.ThrowIfNegativeOrZero(maxIterations);
-            if (float.IsNaN(value) || float.IsInfinity(value)) {
-                ThrowNotFiniteNumberException(value);
-            }
+            CilVerifiable.CheckFinite(value);
             bool isNegative = value < 0;
             if (isNegative) {
                 value = -value;
             }
             BigRational result = ContinuedFraction(value, maxIterations);
             if (isNegative) {
-                result = new BigRational(result.Denominator, - result.Numerator);
+                result = -result;
             }
             return result;
         }
 
-        public static BigRational FromDoubleContinuedFraction(double value, int maxIterations = 26) {
+        /// <summary>
+        /// Finds a rational value close to the specified value.
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="maxIterations"></param>
+        /// <exception cref="ArithmeticException"><paramref name="value"/> is not a finite number.</exception>
+        /// <exception cref="OutOfMemoryException">The denominator or numerator of the result goes too large.</exception>
+        /// <returns></returns>
+        public static BigRational FromDoubleByContinuedFraction(double value, int maxIterations = 17) {
             ArgumentOutOfRangeException.ThrowIfNegativeOrZero(maxIterations);
-            if (double.IsNaN(value) || double.IsInfinity(value)) {
-                ThrowNotFiniteNumberException(value);
-            }
+            CilVerifiable.CheckFinite(value);
             bool isNegative = value < 0;
             if (isNegative) {
                 value = -value;
             }
             BigRational result = ContinuedFraction(value, maxIterations);
             if (isNegative) {
-                result = new BigRational(result.Denominator , - result.Numerator);
+                result = -result;
+            }
+            return result;
+        }
+
+        static BigRational ContinuedFraction(BigRational value, int maxIterations) {
+            Debug.Assert(value > 0);
+            BigInteger d = 0;
+            BigInteger n = 1;
+            BigInteger prevD = 1;
+            BigInteger prevN = 0;
+            int i = 0;
+            for (; i < maxIterations; i++) {
+
+                BigInteger integerPart = (BigInteger)value;
+
+                BigInteger tempNumerator = d;
+                d = integerPart * d + prevD;
+                prevD = tempNumerator;
+
+                BigInteger tempDenominator = n;
+                n = integerPart * n + prevN;
+                prevN = tempDenominator;
+
+                if (value.m_Denominator.IsOne) {
+                    break;
+                }
+
+                value -= integerPart;
+                value = BigRational.Invert(value);
+            }
+            return BigRational.FromFraction(n, d);
+        }
+
+        /// <summary>
+        /// Finds a rational value close to the specified value.
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="maxIterations"></param>
+        /// <exception cref="ArithmeticException"><paramref name="value"/> is not a finite number.</exception>
+        /// <exception cref="OutOfMemoryException">The denominator or numerator of the result goes too large.</exception>
+        /// <returns></returns>
+        public static BigRational FromRationalByContinuedFraction(BigRational value, int maxIterations = 17) {
+            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(maxIterations);
+            bool isNegative = value < 0;
+            if (isNegative) {
+                value = -value;
+            }
+            BigRational result = ContinuedFraction(value, maxIterations);
+            if (isNegative) {
+                result = -result;
             }
             return result;
         }
@@ -923,7 +976,7 @@ namespace UltimateOrb.Numerics {
                         return true;
                     }
                     if (c < -1075) {
-                        result = (TOther)(object)(BigInteger.IsNegative(value.m_SignedNumerator) ? -0.0: 0.0);
+                        result = (TOther)(object)(BigInteger.IsNegative(value.m_SignedNumerator) ? -0.0 : 0.0);
                         return true;
                     }
                     var c0 = (int)c;
@@ -952,14 +1005,14 @@ namespace UltimateOrb.Numerics {
 
         public int CompareTo(object? obj) {
             if (obj == null) {
-                    return 1;
-                }
+                return 1;
+            }
 
-                if (obj is not BigRational bigRational) {
-                    throw new ArgumentException("The parameter must be a BigRational.", nameof(obj));
-                }
+            if (obj is not BigRational bigRational) {
+                throw new ArgumentException("The parameter must be a BigRational.", nameof(obj));
+            }
 
-                return CompareTo(bigRational);
+            return CompareTo(bigRational);
         }
 
         public bool TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider) {
