@@ -25,10 +25,10 @@ namespace UltimateOrb.Runtime.CompilerServices {
         private Boxed() => throw new NotImplementedException();
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        public ref T Value => ref Unsafe.Unbox<T>(this);
+        public ref T Value => ref Unsafe.As<StrongBox<T>>(this).Value;
 
         [return: NotNullIfNotNull(nameof(boxed))]
-        public static Boxed<T>? GetTypedReference(object? boxed) => boxed switch {
+        public static Boxed<T>? GetTypedObjectReference(object? boxed) => boxed switch {
             null => null,
             T => Unsafe.As<Boxed<T>>(boxed),
             _ => throw new ArgumentException("Type mismatched.", nameof(boxed)),
