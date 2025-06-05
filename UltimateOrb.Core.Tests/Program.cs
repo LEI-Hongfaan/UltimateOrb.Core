@@ -22,10 +22,12 @@ namespace UltimateOrb.Core.Tests {
     using System.Numerics;
     using System.Runtime.CompilerServices;
     using System.Runtime.InteropServices;
+    using System.Runtime.Intrinsics;
     using System.Text.RegularExpressions;
     using System.Threading;
     using UltimateOrb.Mathematics.Geometry;
     using UltimateOrb.Numerics;
+    using UltimateOrb.Numerics.Specialized;
     using UltimateOrb.Plain.ValueTypes;
 
     // using UltimateOrb.Runtime.CompilerServices.Tests;
@@ -114,6 +116,11 @@ namespace UltimateOrb.Core.Tests {
 
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private static int Main(string[] args) {
+            {
+
+                Console.WriteLine(new BitMatrix16x16(Vector256<UInt16>.One) << 9.AsRowShiftCount());
+                return 0;
+            }
             {
 
                 Console.WriteLine((BigRational)Math.PI);

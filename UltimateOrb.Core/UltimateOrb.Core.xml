@@ -444,6 +444,10 @@
                 </para>
             </summary>
         </member>
+        <!-- Badly formed XML comment ignored for member "T:UltimateOrb.RowShiftCount`1" -->
+        <member name="M:UltimateOrb.RowShiftCount`1.ToString">
+            <inheritdoc/>
+        </member>
         <member name="T:UltimateOrb.Collections.Generic.ReferenceTypes.LinkedTree`1.PreorderNodeModifiableEnumerator">
             <summary>
             modifiable:
@@ -7330,6 +7334,32 @@
                     </list>
                 </para>
             </returns>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Specialized.BitMatrix16x16.#ctor(System.Runtime.Intrinsics.Vector256{System.UInt16})">
+            <summary>
+            Initializes an instance with the provided SIMD vector.
+            </summary>
+        </member>
+        <member name="P:UltimateOrb.Numerics.Specialized.BitMatrix16x16.Empty">
+            <summary>
+            Returns an instance with all bits cleared.
+            </summary>
+        </member>
+        <member name="P:UltimateOrb.Numerics.Specialized.BitMatrix16x16.Item(System.Int32,System.Int32)">
+            <summary>
+            Provides read‑only two‑dimensional access to bits using row and column indices.
+            Indices must be in the range 0..15.
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Specialized.BitMatrix16x16.WithBit(System.Int32,System.Int32,System.Boolean)">
+            <summary>
+            Returns a new BitMatrix16x16 with the specified bit updated.
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Specialized.BitMatrix16x16.ToString">
+            <summary>
+            Returns a string representation of the 16×16 bit array.
+            </summary>
         </member>
         <member name="M:UltimateOrb.Runtime.CompilerServices.Boxed`1.op_Implicit(UltimateOrb.Runtime.CompilerServices.Boxed{`0})~System.ValueType">
             <returns>Untyped reference to a boxed value.</returns>

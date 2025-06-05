@@ -1877,7 +1877,7 @@ namespace UltimateOrb {
         //}
 
         public string ToStringCStyleU256() {
-            return new string(ToStringCStyleU256(stackalloc char[40]));
+            return new string(ToStringCStyleU256(stackalloc char[80]));
         }
 
         public Span<char> ToStringCStyleU256(Span<char> buffer) {
