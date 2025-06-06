@@ -825,9 +825,23 @@ namespace UltimateOrb {
         [System.Runtime.TargetedPatchingOptOutAttribute("")]
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         [System.Diagnostics.Contracts.PureAttribute()]
-        public static explicit operator XInt128(OInt128 value) {
+        public static explicit operator
+#if NET7_0_OR_GREATER && !LEGACY_OPERATOR_CHECKNESS
+            checked
+#endif
+            XInt128(OInt128 value) {
             return value.ToUnsignedChecked();
         }
+
+#if NET7_0_OR_GREATER && !LEGACY_OPERATOR_CHECKNESS
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
+        [System.Runtime.TargetedPatchingOptOutAttribute("")]
+        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Diagnostics.Contracts.PureAttribute()]
+        public static explicit operator XInt128(OInt128 value) {
+            return value.ToUnsignedUnchecked();
+        }
+#endif
 
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
         [System.Runtime.TargetedPatchingOptOutAttribute("")]
@@ -890,17 +904,44 @@ namespace UltimateOrb {
         [System.Runtime.TargetedPatchingOptOutAttribute("")]
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         [System.Diagnostics.Contracts.PureAttribute()]
-        public static implicit operator XInt128(System.Int128 value) {
+        public static explicit operator
+#if NET7_0_OR_GREATER && !LEGACY_OPERATOR_CHECKNESS
+            checked
+#endif
+            XInt128(System.Int128 value) {
+            return new XInt128(lo: value.GetLowPart(), hi: checked((HInt64)value.GetHighPart()));
+        }
+
+#if NET7_0_OR_GREATER && !LEGACY_OPERATOR_CHECKNESS
+        [System.Runtime.TargetedPatchingOptOutAttribute("")]
+        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Diagnostics.Contracts.PureAttribute()]
+        public static explicit operator XInt128(System.Int128 value) {
             return new XInt128(lo: value.GetLowPart(), hi: unchecked((HInt64)value.GetHighPart()));
         }
+#endif
 
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
         [System.Runtime.TargetedPatchingOptOutAttribute("")]
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         [System.Diagnostics.Contracts.PureAttribute()]
-        public static implicit operator System.Int128(XInt128 value) {
-            return new System.Int128(upper: value.GetHighPart(), lower: value.GetLowPart());
+        public static explicit operator
+#if NET7_0_OR_GREATER && !LEGACY_OPERATOR_CHECKNESS
+            checked
+#endif
+            System.Int128(XInt128 value) {
+            return new System.Int128(upper: unchecked((UInt64)checked((Int64)value.GetHighPart())), lower: value.GetLowPart());
         }
+
+#if NET7_0_OR_GREATER && !LEGACY_OPERATOR_CHECKNESS
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
+        [System.Runtime.TargetedPatchingOptOutAttribute("")]
+        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Diagnostics.Contracts.PureAttribute()]
+        public static explicit operator System.Int128(XInt128 value) {
+            return new System.Int128(upper: unchecked((UInt64)unchecked((Int64)value.GetHighPart())), lower: value.GetLowPart());
+        }
+#endif
 #endif
 
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
