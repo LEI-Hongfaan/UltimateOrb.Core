@@ -18,9 +18,16 @@ namespace UltimateOrb.Numerics {
         : IEquatable<BigDecimal>
         , IComparable<BigDecimal> {
 
-        private readonly BigInteger m_SignedNumerator;
+        private readonly BigInteger m_SignedSignificand;
 
-        private readonly nint m_SignedShiftCount;
+        private readonly nint m_shiftCount;
+
+
+        // result's default precision is determined by these fields of the operands.
+        private static nuint s_defaultPrecision; // 
+        private static FloatingPointRounding s_defaultRounding = FloatingPointRounding.ToNearestWithMidpointToEven; // IEEE rounding, default: roundTiesToEven
+
+
 
         /*
         public BigInteger Denominator {
@@ -37,13 +44,13 @@ namespace UltimateOrb.Numerics {
             }
         }
         
-        public BigInteger SignedNumerator {
+        public BigInteger SignedSignificand {
 
             // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
             [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
             [PureAttribute()]
             get {
-                return m_SignedNumerator;
+                return m_SignedSignificand;
             }
         }
 
@@ -52,7 +59,7 @@ namespace UltimateOrb.Numerics {
             [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
             [PureAttribute()]
             get {
-                return BigInteger.Abs(m_SignedNumerator);
+                return BigInteger.Abs(m_SignedSignificand);
             }
         }
 
@@ -62,8 +69,8 @@ namespace UltimateOrb.Numerics {
             [PureAttribute()]
             get {
                 var q = m_SignedShiftCount;
-                var p = m_SignedNumerator.Sign;
-                return p == 0 ? 1 : (0 > m_SignedNumerator.Sign ? -q : q);
+                var p = m_SignedSignificand.Sign;
+                return p == 0 ? 1 : (0 > m_SignedSignificand.Sign ? -q : q);
             }
         }
         */
@@ -74,15 +81,16 @@ namespace UltimateOrb.Numerics {
             [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
             [PureAttribute()]
             get {
-                return m_SignedNumerator.Sign;
+                double a;
+                return m_SignedSignificand.Sign;
             }
         }
 
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         [PureAttribute()]
-        private BigDecimal(BigInteger signedNumerator, nint signedShiftCount) {
-            this.m_SignedNumerator = signedNumerator;
+        private BigDecimal(BigInteger signedSignificand, nint signedShiftCount) {
+            this.m_SignedSignificand = signedSignificand;
             this.m_SignedShiftCount = signedShiftCount;
         }
         /*
@@ -91,7 +99,7 @@ namespace UltimateOrb.Numerics {
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         [PureAttribute()]
         public static implicit operator BigDecimal(Rational64 value) {
-            return default(Rational64) == value ? default : new BigDecimal(value.Denominator, value.SignedNumerator);
+            return default(Rational64) == value ? default : new BigDecimal(value.Denominator, value.SignedSignificand);
         }
         
         private static readonly BigInteger s_Rational64MaxDenominator = unchecked((UInt32)Int32.MinValue);
@@ -107,7 +115,7 @@ namespace UltimateOrb.Numerics {
             var d = value.m_SignedShiftCount;
             if (!d.IsZero) {
                 if (d <= s_Rational64MaxDenominator) {
-                    var n = value.m_SignedNumerator;
+                    var n = value.m_SignedSignificand;
                     if (0 < n.Sign) {
                         if (n <= s_Rational64MaxNumerator) {
                             return Rational64.FromInt64Bits(((Int64)(unchecked((Int32)checked((UInt32)d) - (Int32)1)) << 32 | (Int64)unchecked((Int32)checked((UInt32)n))));
@@ -134,7 +142,7 @@ namespace UltimateOrb.Numerics {
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         [PureAttribute()]
         public static implicit operator BigDecimal(BigInteger value) {
-            return value.IsZero ? default : new BigDecimal(value, s_BigIntegerOne);
+            return value.IsZero ? default : new BigDecimal(value, 0);
         }
 
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
@@ -142,10 +150,10 @@ namespace UltimateOrb.Numerics {
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         [PureAttribute()]
         public static explicit operator BigInteger(BigDecimal value) {
-            if (value.m_SignedNumerator.IsZero) {
+            if (value.m_SignedSignificand.IsZero) {
                 return default;
             }
-            return value.m_SignedNumerator / value.m_SignedShiftCount;
+            return value.m_SignedSignificand / value.m_SignedShiftCount;
         }
 
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
@@ -153,10 +161,10 @@ namespace UltimateOrb.Numerics {
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         [PureAttribute()]
         public static explicit operator Double(BigDecimal value) {
-            if (value.m_SignedNumerator.IsZero) {
+            if (value.m_SignedSignificand.IsZero) {
                 return (Double)0;
             }
-            return (Double)value.m_SignedNumerator / (Double)value.m_SignedShiftCount;
+            return (Double)value.m_SignedSignificand / (Double)value.m_SignedShiftCount;
         }
 
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
@@ -172,7 +180,7 @@ namespace UltimateOrb.Numerics {
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         [PureAttribute()]
         public static BigDecimal operator -(BigDecimal value) {
-            return new BigDecimal(value.m_SignedShiftCount, -value.m_SignedNumerator);
+            return new BigDecimal(-value.m_SignedSignificand, value.m_SignedShiftCount );
         }
 
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
@@ -180,14 +188,14 @@ namespace UltimateOrb.Numerics {
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         [PureAttribute()]
         public static BigDecimal operator +(BigDecimal first, BigDecimal second) {
-            if (first.m_SignedNumerator.IsZero) {
+            if (first.m_SignedSignificand.IsZero) {
                 return second;
             }
-            if (second.m_SignedNumerator.IsZero) {
+            if (second.m_SignedSignificand.IsZero) {
                 return first;
             }
             var d = first.m_SignedShiftCount * second.m_SignedShiftCount;
-            var n = first.m_SignedNumerator * second.m_SignedShiftCount + first.m_SignedShiftCount * second.m_SignedNumerator;
+            var n = first.m_SignedSignificand * second.m_SignedShiftCount + first.m_SignedShiftCount * second.m_SignedSignificand;
             if (n.IsZero) {
                 return default;
             }
@@ -200,14 +208,14 @@ namespace UltimateOrb.Numerics {
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         [PureAttribute()]
         public static BigDecimal operator -(BigDecimal first, BigDecimal second) {
-            if (first.m_SignedNumerator.IsZero) {
+            if (first.m_SignedSignificand.IsZero) {
                 return -second;
             }
-            if (second.m_SignedNumerator.IsZero) {
+            if (second.m_SignedSignificand.IsZero) {
                 return first;
             }
             var d = first.m_SignedShiftCount * second.m_SignedShiftCount;
-            var n = first.m_SignedNumerator * second.m_SignedShiftCount - first.m_SignedShiftCount * second.m_SignedNumerator;
+            var n = first.m_SignedSignificand * second.m_SignedShiftCount - first.m_SignedShiftCount * second.m_SignedSignificand;
             if (n.IsZero) {
                 return default;
             }
@@ -220,13 +228,13 @@ namespace UltimateOrb.Numerics {
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         [PureAttribute()]
         public static BigDecimal operator *(BigDecimal first, BigDecimal second) {
-            if (first.m_SignedNumerator.IsZero || second.m_SignedNumerator.IsZero) {
+            if (first.m_SignedSignificand.IsZero || second.m_SignedSignificand.IsZero) {
                 return default;
             }
-            var g0 = BigInteger.GreatestCommonDivisor(first.m_SignedShiftCount, second.m_SignedNumerator);
-            var g1 = BigInteger.GreatestCommonDivisor(first.m_SignedNumerator, second.m_SignedShiftCount);
+            var g0 = BigInteger.GreatestCommonDivisor(first.m_SignedShiftCount, second.m_SignedSignificand);
+            var g1 = BigInteger.GreatestCommonDivisor(first.m_SignedSignificand, second.m_SignedShiftCount);
             var d = (first.m_SignedShiftCount / g0) * (second.m_SignedShiftCount / g1);
-            var n = (first.m_SignedNumerator / g1) * (second.m_SignedNumerator / g0);
+            var n = (first.m_SignedSignificand / g1) * (second.m_SignedSignificand / g0);
             return new BigDecimal(d, n);
         }
 
@@ -235,16 +243,16 @@ namespace UltimateOrb.Numerics {
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         [PureAttribute()]
         public static BigDecimal operator /(BigDecimal first, BigDecimal second) {
-            if (second.m_SignedNumerator.IsZero) {
+            if (second.m_SignedSignificand.IsZero) {
                 var ignored = Default<int>.Value / 0;
             }
-            if (first.m_SignedNumerator.IsZero) {
+            if (first.m_SignedSignificand.IsZero) {
                 return default;
             }
             var g0 = BigInteger.GreatestCommonDivisor(first.m_SignedShiftCount, second.m_SignedShiftCount);
-            var g1 = BigInteger.GreatestCommonDivisor(first.m_SignedNumerator, second.m_SignedNumerator);
-            var d = (first.m_SignedShiftCount / g0) * (second.m_SignedNumerator / g1);
-            var n = (first.m_SignedNumerator / g1) * (second.m_SignedShiftCount / g0);
+            var g1 = BigInteger.GreatestCommonDivisor(first.m_SignedSignificand, second.m_SignedSignificand);
+            var d = (first.m_SignedShiftCount / g0) * (second.m_SignedSignificand / g1);
+            var n = (first.m_SignedSignificand / g1) * (second.m_SignedShiftCount / g0);
             if (0 > d.Sign) {
                 d = -d;
                 n = -n;
@@ -257,14 +265,14 @@ namespace UltimateOrb.Numerics {
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         [PureAttribute()]
         public static BigDecimal Invert(BigDecimal value) {
-            var s = value.m_SignedNumerator.Sign;
+            var s = value.m_SignedSignificand.Sign;
             if (0 == s) {
                 var ignored = Default<int>.Value / 0;
             }
-            if (value.m_SignedNumerator.IsZero) {
+            if (value.m_SignedSignificand.IsZero) {
                 return default;
             }
-            return 0 > s ? new BigDecimal(-value.m_SignedShiftCount, -value.m_SignedNumerator) : new BigDecimal(value.m_SignedShiftCount, value.m_SignedNumerator);
+            return 0 > s ? new BigDecimal(-value.m_SignedShiftCount, -value.m_SignedSignificand) : new BigDecimal(value.m_SignedShiftCount, value.m_SignedSignificand);
         }
 
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
@@ -309,7 +317,7 @@ namespace UltimateOrb.Numerics {
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         [PureAttribute()]
         public static bool operator ==(BigDecimal first, BigDecimal second) {
-            return first.m_SignedNumerator == second.m_SignedNumerator && first.m_SignedShiftCount == second.m_SignedShiftCount;
+            return first.m_SignedSignificand == second.m_SignedSignificand && first.m_SignedShiftCount == second.m_SignedShiftCount;
         }
 
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
@@ -317,7 +325,7 @@ namespace UltimateOrb.Numerics {
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         [PureAttribute()]
         public static bool operator !=(BigDecimal first, BigDecimal second) {
-            return first.m_SignedNumerator != second.m_SignedNumerator || first.m_SignedShiftCount != second.m_SignedShiftCount;
+            return first.m_SignedSignificand != second.m_SignedSignificand || first.m_SignedShiftCount != second.m_SignedShiftCount;
         }
 
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
@@ -336,7 +344,7 @@ namespace UltimateOrb.Numerics {
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         [PureAttribute()]
         public override int GetHashCode() {
-            return this.m_SignedShiftCount.GetHashCode() ^ this.m_SignedNumerator.GetHashCode();
+            return this.m_SignedShiftCount.GetHashCode() ^ this.m_SignedSignificand.GetHashCode();
         }
 
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
@@ -344,7 +352,7 @@ namespace UltimateOrb.Numerics {
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         [PureAttribute()]
         public bool Equals(BigDecimal other) {
-            return this.m_SignedShiftCount.Equals(other.m_SignedShiftCount) && this.m_SignedNumerator.Equals(other.m_SignedNumerator);
+            return this.m_SignedShiftCount.Equals(other.m_SignedShiftCount) && this.m_SignedSignificand.Equals(other.m_SignedSignificand);
         }
 
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
@@ -352,8 +360,8 @@ namespace UltimateOrb.Numerics {
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         [PureAttribute()]
         public int CompareTo(BigDecimal other) {
-            var a = this.m_SignedNumerator.CompareTo(other.m_SignedNumerator);
-            return 0 != a ? a : (this.m_SignedNumerator * other.m_SignedShiftCount).CompareTo(this.m_SignedShiftCount * other.m_SignedNumerator);
+            var a = this.m_SignedSignificand.CompareTo(other.m_SignedSignificand);
+            return 0 != a ? a : (this.m_SignedSignificand * other.m_SignedShiftCount).CompareTo(this.m_SignedShiftCount * other.m_SignedSignificand);
         }
     }
 }
@@ -366,7 +374,7 @@ namespace UltimateOrb.Numerics {
         public override string ToString() {
             Contract.Ensures(Contract.Result<string>() != null);
             var sb = new StringBuilder(33);
-            sb.Append(this.m_SignedNumerator);
+            sb.Append(this.m_SignedSignificand);
             var t = this.m_SignedShiftCount;
             if (1 != t) {
                 var i = sb.Length - 1;
@@ -389,7 +397,7 @@ namespace UltimateOrb.Numerics {
         public string ToString(string format, IFormatProvider formatProvider) {
             Contract.Ensures(Contract.Result<string>() != null);
             var sb = new StringBuilder(33);
-            sb.Append(this.m_SignedNumerator.ToString(format, formatProvider));
+            sb.Append(this.m_SignedSignificand.ToString(format, formatProvider));
             var t = this.m_SignedShiftCount;
             if (1 != t) {
                 var i = sb.Length - 1;
@@ -604,7 +612,7 @@ namespace UltimateOrb.Numerics {
         static BigDecimal IMultiplicativeIdentity<BigDecimal, BigDecimal>.MultiplicativeIdentity => default;
 
         public static BigDecimal Abs(BigDecimal value) {
-            return new BigDecimal(value.m_SignedShiftCount, BigInteger.Abs(value.m_SignedNumerator));
+            return new BigDecimal(value.m_SignedShiftCount, BigInteger.Abs(value.m_SignedSignificand));
         }
 
         public static bool IsCanonical(BigDecimal value) {
@@ -616,7 +624,7 @@ namespace UltimateOrb.Numerics {
         }
 
         public static bool IsEvenInteger(BigDecimal value) {
-            return (value.m_SignedShiftCount.IsOne && value.m_SignedNumerator.IsEven) || value.m_SignedNumerator.IsZero;
+            return (value.m_SignedShiftCount.IsOne && value.m_SignedSignificand.IsEven) || value.m_SignedSignificand.IsZero;
         }
 
         public static bool IsFinite(BigDecimal value) {
@@ -640,7 +648,7 @@ namespace UltimateOrb.Numerics {
         }
 
         public static bool IsNegative(BigDecimal value) {
-            return BigInteger.IsNegative(value.m_SignedNumerator);
+            return BigInteger.IsNegative(value.m_SignedSignificand);
         }
 
         public static bool IsNegativeInfinity(BigDecimal value) {
@@ -648,15 +656,15 @@ namespace UltimateOrb.Numerics {
         }
 
         public static bool IsNormal(BigDecimal value) {
-            return !value.m_SignedNumerator.IsZero;
+            return !value.m_SignedSignificand.IsZero;
         }
 
         public static bool IsOddInteger(BigDecimal value) {
-            return (value.m_SignedShiftCount.IsOne && !value.m_SignedNumerator.IsEven) || value.m_SignedNumerator.IsZero;
+            return (value.m_SignedShiftCount.IsOne && !value.m_SignedSignificand.IsEven) || value.m_SignedSignificand.IsZero;
         }
 
         public static bool IsPositive(BigDecimal value) {
-            return BigInteger.IsPositive(value.m_SignedNumerator);
+            return BigInteger.IsPositive(value.m_SignedSignificand);
         }
 
         public static bool IsPositiveInfinity(BigDecimal value) {
@@ -672,7 +680,7 @@ namespace UltimateOrb.Numerics {
         }
 
         public static bool IsZero(BigDecimal value) {
-            return value.m_SignedNumerator.IsZero;
+            return value.m_SignedSignificand.IsZero;
         }
 
         public static BigDecimal MaxMagnitude(BigDecimal x, BigDecimal y) {
@@ -763,10 +771,10 @@ namespace UltimateOrb.Numerics {
 
         static bool INumberBase<BigDecimal>.TryConvertToTruncating<TOther>(BigDecimal value, out TOther result) {
             static BigInteger F(BigDecimal value) {
-                if (value.m_SignedNumerator.IsZero) {
-                    return value.m_SignedNumerator;
+                if (value.m_SignedSignificand.IsZero) {
+                    return value.m_SignedSignificand;
                 }
-                return value.m_SignedNumerator / value.m_SignedShiftCount;
+                return value.m_SignedSignificand / value.m_SignedShiftCount;
             }
             if (typeof(TOther) == typeof(BigInteger)) {
                 result = (TOther)(object)F(value);
@@ -823,19 +831,19 @@ namespace UltimateOrb.Numerics {
                 return true;
             } else if (typeof(TOther) == typeof(double)) {
                 // TODO:
-                if (!value.m_SignedNumerator.IsZero) {
-                    var p = BigInteger.Abs(value.m_SignedNumerator);
+                if (!value.m_SignedSignificand.IsZero) {
+                    var p = BigInteger.Abs(value.m_SignedSignificand);
                     var a = p.GetBitLength();
                     Debug.Assert(a > 0);
                     var b = value.m_SignedShiftCount.GetBitLength();
                     Debug.Assert(b > 0);
                     var c = a - b;
                     if (c > 1024) {
-                        result = (TOther)(object)(BigInteger.IsNegative(value.m_SignedNumerator) ? double.NegativeInfinity : double.PositiveInfinity);
+                        result = (TOther)(object)(BigInteger.IsNegative(value.m_SignedSignificand) ? double.NegativeInfinity : double.PositiveInfinity);
                         return true;
                     }
                     if (c < -1075) {
-                        result = (TOther)(object)(BigInteger.IsNegative(value.m_SignedNumerator) ? -0.0: 0.0);
+                        result = (TOther)(object)(BigInteger.IsNegative(value.m_SignedSignificand) ? -0.0: 0.0);
                         return true;
                     }
                     var c0 = (int)c;
@@ -879,31 +887,31 @@ namespace UltimateOrb.Numerics {
         }
 
         public static BigDecimal operator ++(BigDecimal value) {
-            return value.m_SignedNumerator.IsZero ? BigDecimal.One : new BigDecimal(value.m_SignedShiftCount, value.m_SignedNumerator + value.m_SignedShiftCount);
+            return value.m_SignedSignificand.IsZero ? BigDecimal.One : new BigDecimal(value.m_SignedShiftCount, value.m_SignedSignificand + value.m_SignedShiftCount);
         }
 
         public static BigDecimal operator --(BigDecimal value) {
-            return value.m_SignedNumerator.IsZero ? BigDecimal.MinusOne : new BigDecimal(value.m_SignedShiftCount, value.m_SignedNumerator - value.m_SignedShiftCount);
+            return value.m_SignedSignificand.IsZero ? BigDecimal.MinusOne : new BigDecimal(value.m_SignedShiftCount, value.m_SignedSignificand - value.m_SignedShiftCount);
         }
 
         public static BigDecimal DivideEuclidean(BigDecimal first, BigDecimal second) {
-            if (second.m_SignedNumerator.IsZero) {
+            if (second.m_SignedSignificand.IsZero) {
                 _ = Default<int>.Value / 0;
             }
-            if (first.m_SignedNumerator.IsZero) {
+            if (first.m_SignedSignificand.IsZero) {
                 return Zero;
             }
-            return (first.m_SignedNumerator * second.Denominator) / (first.Denominator * second.m_SignedNumerator);
+            return (first.m_SignedSignificand * second.Denominator) / (first.Denominator * second.m_SignedSignificand);
         }
 
         public static BigDecimal operator %(BigDecimal first, BigDecimal second) {
-            if (second.m_SignedNumerator.IsZero) {
+            if (second.m_SignedSignificand.IsZero) {
                 _ = Default<int>.Value / 0;
             }
-            if (first.m_SignedNumerator.IsZero) {
+            if (first.m_SignedSignificand.IsZero) {
                 return Zero;
             }
-            var p = (first.m_SignedNumerator * second.Denominator) % (first.Denominator * second.m_SignedNumerator);
+            var p = (first.m_SignedSignificand * second.Denominator) % (first.Denominator * second.m_SignedSignificand);
             var q = first.Denominator * second.Denominator;
             var d = BigInteger.GreatestCommonDivisor(q, p);
             return new BigDecimal(q / d, p / d);

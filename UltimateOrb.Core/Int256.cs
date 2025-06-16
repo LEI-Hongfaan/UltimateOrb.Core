@@ -622,16 +622,31 @@ namespace UltimateOrb {
         }
 
         #region Numeric Conversions
-        [System.CLSCompliantAttribute(false)]
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
+        [System.Runtime.TargetedPatchingOptOutAttribute("")]
+        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Diagnostics.Contracts.PureAttribute()]
+        public static explicit operator
+#if NET7_0_OR_GREATER && !LEGACY_OPERATOR_CHECKNESS
+            checked
+#endif
+            XInt256(OInt256 value) {
+            return value.ToSignedChecked();
+        }
+
+#if NET7_0_OR_GREATER && !LEGACY_OPERATOR_CHECKNESS
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
         [System.Runtime.TargetedPatchingOptOutAttribute("")]
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         [System.Diagnostics.Contracts.PureAttribute()]
         public static explicit operator XInt256(OInt256 value) {
-            return value.ToSignedChecked();
+            return value.ToSignedUnchecked();
         }
+#endif
 
-        [System.CLSCompliantAttribute(false)]
+#if NET7_0_OR_GREATER && !LEGACY_OPERATOR_CHECKNESS
+        [Obsolete]
+#endif
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
         [System.Runtime.TargetedPatchingOptOutAttribute("")]
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -663,6 +678,14 @@ namespace UltimateOrb {
         [System.Diagnostics.Contracts.PureAttribute()]
         public static implicit operator XInt256(Int32 value) {
             return new XInt256(unchecked((SUInt128)(SInt128)value), value >> (32 - 1));
+        }
+
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
+        [System.Runtime.TargetedPatchingOptOutAttribute("")]
+        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Diagnostics.Contracts.PureAttribute()]
+        public static implicit operator XInt256(Int64 value) {
+            return new XInt256(unchecked((SUInt128)(SInt128)value), value >> (64 - 1));
         }
 
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
@@ -704,6 +727,15 @@ namespace UltimateOrb {
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         [System.Diagnostics.Contracts.PureAttribute()]
         public static implicit operator XInt256(UInt32 value) {
+            return new XInt256(value, 0);
+        }
+
+        [System.CLSCompliantAttribute(false)]
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
+        [System.Runtime.TargetedPatchingOptOutAttribute("")]
+        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Diagnostics.Contracts.PureAttribute()]
+        public static implicit operator XInt256(UInt64 value) {
             return new XInt256(value, 0);
         }
 
@@ -972,7 +1004,7 @@ namespace UltimateOrb {
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
         [System.Runtime.TargetedPatchingOptOutAttribute("")]
         [System.Diagnostics.Contracts.PureAttribute()]
-        public static implicit operator double(XInt256 value) {
+        public static explicit operator double(XInt256 value) {
             throw new NotImplementedException();
             const int BitSize = 128;
             const int ExponentBitSize = 11;

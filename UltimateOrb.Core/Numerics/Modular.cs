@@ -41,7 +41,6 @@ namespace UltimateOrb.Numerics
             _ = T.One / ModulusT.Value;
         }
 
-
         public static Modular<T, ModulusT> One {
 
             get => new(default, ModulusT.Value <= T.One ? T.Zero : T.One);
@@ -77,14 +76,10 @@ namespace UltimateOrb.Numerics
         }
 
         public static bool IsEvenInteger(Modular<T, ModulusT> value) {
-            /*
-            ModulusT.Value.
-            if (typeof(T) == typeof(ulong)) {
-                T.TrailingZeroCount(value.m_Value)
-                var d = Mathematics.NumberTheory.EuclideanAlgorithm.GreatestCommonDivisor((ulong)(object)ModulusT.Value, (ulong)(object)value, out var r);
-
-            }*/
-            throw new NotImplementedException();
+            if (T.IsEvenInteger(ModulusT.Value)) {
+                return T.IsEvenInteger(value.m_value);
+            }
+            return T.IsInteger(value.m_value);
         }
 
         public static bool IsFinite(Modular<T, ModulusT> value) {

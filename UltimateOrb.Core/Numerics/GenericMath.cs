@@ -43,11 +43,11 @@ namespace UltimateOrb.Numerics {
                 }
                 var root = T.CreateTruncating(Math.Sqrt(double.CreateSaturating(value)));
                 for (; ; ) {
-                    var d = (root - value / root) >> 1;
+                    var d = (root - (value / root)) >> 1;
                     var next = root + d;
                     if (T.IsZero(d)) {
                         return root;
-                    } else if (d == T.One) {                        
+                    } else if (d == T.One) {
                         return next * next > value ? root : next;
                     } else if (d == ISqrtTT<T>.MinusOne) {
                         return root * root > value ? next : next;

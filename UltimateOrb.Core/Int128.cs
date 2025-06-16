@@ -995,7 +995,7 @@ namespace UltimateOrb {
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
         [System.Runtime.TargetedPatchingOptOutAttribute("")]
         [System.Diagnostics.Contracts.PureAttribute()]
-        public static implicit operator double(XInt128 value) {
+        public static explicit operator double(XInt128 value) {
             const int BitSize = 64;
             const int ExponentBitSize = 11;
             const int ExponentBias = unchecked(checked((1 << (ExponentBitSize - 1))) - 1);

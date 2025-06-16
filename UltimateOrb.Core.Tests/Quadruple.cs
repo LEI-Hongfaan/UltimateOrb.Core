@@ -46,7 +46,7 @@ namespace UltimateOrb {
         }
 
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
-        public static Quadruple Add(Quadruple first, Quadruple second, FloatingPointRounding rounding) {
+        public static Quadruple Add(Quadruple first, Quadruple second, [ConstantExpected] FloatingPointRounding rounding) {
             return new Quadruple(Binary128Arithmetic.Add(first._Lo64Bits, first._Hi64Bits, second._Lo64Bits, second._Hi64Bits, rounding, out var t), t);
         }
 
@@ -61,7 +61,7 @@ namespace UltimateOrb {
         }
 
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
-        public static Quadruple Subtract(Quadruple first, Quadruple second, FloatingPointRounding rounding) {
+        public static Quadruple Subtract(Quadruple first, Quadruple second, [ConstantExpected] FloatingPointRounding rounding) {
             return new Quadruple(Binary128Arithmetic.Subtract(first._Lo64Bits, first._Hi64Bits, second._Lo64Bits, second._Hi64Bits, rounding, out var t), t);
         }
 
@@ -75,7 +75,7 @@ namespace UltimateOrb {
         }
 
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
-        public static Quadruple Multiply(Quadruple first, Quadruple second, FloatingPointRounding rounding) {
+        public static Quadruple Multiply(Quadruple first, Quadruple second, [ConstantExpected] FloatingPointRounding rounding) {
             return new Quadruple(Binary128Arithmetic.Multiply(first._Lo64Bits, first._Hi64Bits, second._Lo64Bits, second._Hi64Bits, rounding, out var t), t);
         }
 
@@ -89,7 +89,7 @@ namespace UltimateOrb {
         }
 
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
-        public static Quadruple Divide(Quadruple first, Quadruple second, FloatingPointRounding rounding) {
+        public static Quadruple Divide(Quadruple first, Quadruple second, [ConstantExpected] FloatingPointRounding rounding) {
             return new Quadruple(Binary128Arithmetic.Divide(first._Lo64Bits, first._Hi64Bits, second._Lo64Bits, second._Hi64Bits, rounding, out var t), t);
         }
 
@@ -103,7 +103,7 @@ namespace UltimateOrb {
         }
 
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
-        public static Quadruple Remainder(Quadruple first, Quadruple second, FloatingPointRounding rounding) {
+        public static Quadruple Remainder(Quadruple first, Quadruple second, [ConstantExpected] FloatingPointRounding rounding) {
             return new Quadruple(Binary128Arithmetic.Remainder(first._Lo64Bits, first._Hi64Bits, second._Lo64Bits, second._Hi64Bits, rounding, out var t), t);
         }
         #region Non-computational Operations
@@ -786,7 +786,7 @@ namespace UltimateOrb {
                 return ScaleB(x, n, FloatingPointRounding.ToNearestWithMidpointToEven);
             }
 
-            public static Quadruple ScaleB(Quadruple x, int n, FloatingPointRounding rounding) {
+            public static Quadruple ScaleB(Quadruple x, int n, [ConstantExpected] FloatingPointRounding rounding) {
                 return new Quadruple(Binary128Arithmetic.ScaleB(x._Lo64Bits, x._Hi64Bits, n, rounding, out var t), t);
             }
 
@@ -1067,7 +1067,7 @@ namespace UltimateOrb {
                 return new Quadruple(Binary128Arithmetic.Sqrt(value._Lo64Bits, value._Hi64Bits, FloatingPointRounding.ToNearestWithMidpointToEven, out var hi), hi);
             }
 
-            public static Quadruple Sqrt(Quadruple value, FloatingPointRounding rounding) {
+            public static Quadruple Sqrt(Quadruple value, [ConstantExpected] FloatingPointRounding rounding) {
                 return new Quadruple(Binary128Arithmetic.Sqrt(value._Lo64Bits, value._Hi64Bits, rounding, out var hi), hi);
             }
 
@@ -1077,7 +1077,7 @@ namespace UltimateOrb {
             }
 
             [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
-            public static Quadruple IEEERemainder(Quadruple first, Quadruple second, FloatingPointRounding rounding) {
+            public static Quadruple IEEERemainder(Quadruple first, Quadruple second, [ConstantExpected] FloatingPointRounding rounding) {
                 return new Quadruple(Binary128Arithmetic.IEEERemainder(first._Lo64Bits, first._Hi64Bits, second._Lo64Bits, second._Hi64Bits, rounding, out var t), t);
             }
 

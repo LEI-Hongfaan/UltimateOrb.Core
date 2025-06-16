@@ -23,7 +23,7 @@ namespace UltimateOrb {
     using OInt256 = Int256;
     using LInt128 = UInt128;
     using HInt128 = UInt128;
-    
+
     [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Interoperability", "CA1413:AvoidNonpublicFieldsInComVisibleValueTypes")]
     [System.CLSCompliantAttribute(false)]
     [System.Runtime.InteropServices.ComVisibleAttribute(true)]
@@ -706,10 +706,27 @@ namespace UltimateOrb {
         [System.Runtime.TargetedPatchingOptOutAttribute("")]
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         [System.Diagnostics.Contracts.PureAttribute()]
-        public static explicit operator XInt256(OInt256 value) {
+        public static explicit operator
+#if NET7_0_OR_GREATER && !LEGACY_OPERATOR_CHECKNESS
+            checked
+#endif
+            XInt256(OInt256 value) {
             return value.ToUnsignedChecked();
         }
 
+#if NET7_0_OR_GREATER && !LEGACY_OPERATOR_CHECKNESS
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
+        [System.Runtime.TargetedPatchingOptOutAttribute("")]
+        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Diagnostics.Contracts.PureAttribute()]
+        public static explicit operator XInt256(OInt256 value) {
+            return value.ToUnsignedUnchecked();
+        }
+#endif
+
+#if NET7_0_OR_GREATER && !LEGACY_OPERATOR_CHECKNESS
+        [Obsolete]
+#endif
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
         [System.Runtime.TargetedPatchingOptOutAttribute("")]
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -989,12 +1006,42 @@ namespace UltimateOrb {
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
         [System.Runtime.TargetedPatchingOptOutAttribute("")]
         [System.Diagnostics.Contracts.PureAttribute()]
-        public static implicit operator double(XInt256 value) {
-            return value.hi == 0 ? (double)value.lo : ToDoublePartial(value.lo, value.hi);
+        public static explicit operator double(XInt256 value) {
+            return /*Unlikely*/(value.hi == 0) ? (double)value.lo : ToDoublePartial(value.lo, value.hi);
 
             static double ToDoublePartial(UInt128 lo, UInt128 hi) {
-                Debug.Assert(0 != hi);
-                throw new NotImplementedException();
+                Debug.Assert(!hi.IsZero);
+                unchecked {
+                    // Count leading zeros in the 256-bit value
+                    var lz = UltimateOrb.Mathematics.BinaryNumerals.CountLeadingZeros(hi);
+                    UInt64 resultBits;
+                    if (lz < 203) {
+                        // 203 = 256 - 53 (double mantissa bits + 1 for implicit bit)
+                        var shift = 202 - lz;
+
+                        // Logical shift right
+                        var shrdVal = UltimateOrb.Numerics.DoubleArithmetic.ShiftRight(lo, hi, shift);
+                        var shrxVal = hi >> shift;
+                        var shrVal = (shift & 128) == 0 ? shrdVal : shrxVal;
+
+                        // To prepare for rounding, extract bits from the lower 53 bits.
+                        var mantissaCandidate = (UInt64)shrVal & 0x1FFFFFFFFFFFFF; // 53 bits
+                        ++mantissaCandidate; // rounding adjustment
+                        mantissaCandidate >>= 1;
+
+                        // Count trailing zeros
+                        var tzc = UltimateOrb.Numerics.DoubleArithmetic.CountTrailingZeros(lo, hi);
+
+                        resultBits = mantissaCandidate & ~(shift == tzc ? 1UL : 0UL); // cancel the rounding adjustment if no extra bits
+                    } else {
+                        // The number is small enough that a simple left-shift of lo is enough.
+                        var shift = lz - 203;
+                        var shifted = (UInt64)(lo << shift);
+                        resultBits = shifted & 0xFFFFFFFFFFFFF; // 52 bits
+                    }
+                    // Compose the double bits: sign=0, exponent, mantissa
+                    return BitConverter.UInt64BitsToDouble(0X4fe0000000000000 + resultBits - ((UInt64)(uint)lz << 52));
+                }
             }
         }
 
@@ -1323,7 +1370,7 @@ namespace UltimateOrb {
             remainder = new XInt256(remainder_lo, remainder_hi);
             return new XInt256(lo, hi);
         }
-        
+
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
         [System.Runtime.TargetedPatchingOptOutAttribute("")]
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -1463,7 +1510,7 @@ namespace UltimateOrb {
                     value = unchecked((XInt256)v);
                     return true;
                 }
-                
+
             }
             value = default;
             return false;
@@ -1504,7 +1551,7 @@ namespace UltimateOrb {
             return value;
         }
 
-       public static XInt256 Max(XInt256 x, XInt256 y) {
+        public static XInt256 Max(XInt256 x, XInt256 y) {
             return (x > y) ? x : y;
         }
 
@@ -1537,7 +1584,7 @@ namespace UltimateOrb {
         }
 
         int IBinaryInteger<XInt256>.GetShortestBitLength() {
-            return unchecked( 256 - Numerics.DoubleArithmetic.CountLeadingZeros(lo, hi));
+            return unchecked(256 - Numerics.DoubleArithmetic.CountLeadingZeros(lo, hi));
         }
 
         static XInt256 IBinaryNumber<XInt256>.AllBitsSet {
@@ -1654,65 +1701,65 @@ namespace UltimateOrb {
         }
 
         Char IConvertible.ToChar(IFormatProvider? provider) {
-            if ((long)Char.MinValue <= this && this <= (long)Char.MaxValue) {
+            if (this <= Char.MaxValue) {
                 return unchecked((Char)this.lo).ToChar(provider);
             }
-            return ((long)Char.MinValue - 1).ToChar(provider); // Let the underlying standard libraries raise the exception.
+            return ((long)Char.MaxValue + 1).ToChar(provider); // Let the underlying standard libraries raise the exception.
         }
 
         sbyte IConvertible.ToSByte(IFormatProvider? provider) {
-            if ((long)sbyte.MinValue <= this && this <= (long)sbyte.MaxValue) {
+            if (this <= (byte)sbyte.MaxValue) {
                 return unchecked((sbyte)this.lo).ToSByte(provider);
             }
-            return ((long)sbyte.MinValue - 1).ToSByte(provider); // Let the underlying standard libraries raise the exception.
+            return ((long)sbyte.MaxValue + 1).ToSByte(provider); // Let the underlying standard libraries raise the exception.
         }
 
         byte IConvertible.ToByte(IFormatProvider? provider) {
-            if ((long)byte.MinValue <= this && this <= (long)byte.MaxValue) {
+            if (this <= byte.MaxValue) {
                 return unchecked((byte)this.lo).ToByte(provider);
             }
-            return ((long)byte.MinValue - 1).ToByte(provider); // Let the underlying standard libraries raise the exception.
+            return ((long)byte.MaxValue + 1).ToByte(provider); // Let the underlying standard libraries raise the exception.
         }
 
         Int16 IConvertible.ToInt16(IFormatProvider? provider) {
-            if ((long)Int16.MinValue <= this && this <= (long)Int16.MaxValue) {
+            if (this <= (UInt16)Int16.MaxValue) {
                 return unchecked((Int16)this.lo).ToInt16(provider);
             }
-            return ((long)Int16.MinValue - 1).ToInt16(provider); // Let the underlying standard libraries raise the exception.
+            return ((long)Int16.MaxValue + 1).ToInt16(provider); // Let the underlying standard libraries raise the exception.
         }
 
         UInt16 IConvertible.ToUInt16(IFormatProvider? provider) {
-            if ((long)UInt16.MinValue <= this && this <= (long)UInt16.MaxValue) {
+            if (this <= UInt16.MaxValue) {
                 return unchecked((UInt16)this.lo).ToUInt16(provider);
             }
-            return ((long)UInt16.MinValue - 1).ToUInt16(provider); // Let the underlying standard libraries raise the exception.
+            return ((long)UInt16.MaxValue + 1).ToUInt16(provider); // Let the underlying standard libraries raise the exception.
         }
 
         Int32 IConvertible.ToInt32(IFormatProvider? provider) {
-            if ((long)Int32.MinValue <= this && this <= (long)Int32.MaxValue) {
+            if (this <= (UInt32)Int32.MaxValue) {
                 return unchecked((Int32)this.lo).ToInt32(provider);
             }
-            return ((long)Int32.MinValue - 1).ToInt32(provider); // Let the underlying standard libraries raise the exception.
+            return ((long)Int32.MaxValue + 1).ToInt32(provider); // Let the underlying standard libraries raise the exception.
         }
 
         UInt32 IConvertible.ToUInt32(IFormatProvider? provider) {
-            if ((long)UInt32.MinValue <= this && this <= (long)UInt32.MaxValue) {
+            if (this <= UInt32.MaxValue) {
                 return unchecked((UInt32)this.lo).ToUInt32(provider);
             }
-            return ((long)UInt32.MinValue - 1).ToUInt32(provider); // Let the underlying standard libraries raise the exception.
+            return ((long)UInt32.MaxValue + 1).ToUInt32(provider); // Let the underlying standard libraries raise the exception.
         }
         Int64 IConvertible.ToInt64(IFormatProvider? provider) {
-            if (Int64.MinValue <= this && this <= Int64.MaxValue) {
+            if (this <= (UInt64)Int64.MaxValue) {
                 return unchecked((Int64)this.lo).ToInt64(provider);
             }
-            return ((long)Int32.MinValue - 1).ToInt32(provider); // Let the underlying standard libraries raise the exception.
+            return (UInt64.MaxValue).ToInt64(provider); // Let the underlying standard libraries raise the exception.
         }
 
         UInt64 IConvertible.ToUInt64(IFormatProvider? provider) {
-            if (UInt64.MinValue <= this && this <= UInt64.MaxValue) {
+            if (this <= UInt64.MaxValue) {
                 return unchecked((UInt64)this.lo).ToUInt64(provider);
             }
-            return ((long)UInt32.MinValue - 1).ToUInt32(provider); // Let the underlying standard libraries raise the exception.
+            return (Int64.MinValue).ToUInt64(provider); // Let the underlying standard libraries raise the exception.
         }
 
         /*
@@ -1774,7 +1821,7 @@ namespace UltimateOrb {
             throw new NotImplementedException();
         }
 #endif
-#endregion
+        #endregion
 
         /// <summary>
         ///     <para>Parses an unsigned integer.</para>
@@ -1923,7 +1970,7 @@ namespace UltimateOrb {
         public static implicit operator BigInteger(XInt256 value) {
             // TODO: Perf
             Span<byte> buffer = stackalloc byte[32];
-            BinaryPrimitives.WriteUInt64LittleEndian(buffer, Numerics. DoubleArithmetic.GetLowPart(value.lo));
+            BinaryPrimitives.WriteUInt64LittleEndian(buffer, Numerics.DoubleArithmetic.GetLowPart(value.lo));
             BinaryPrimitives.WriteUInt64LittleEndian(buffer.Slice(8), Numerics.DoubleArithmetic.GetHighPart(value.lo));
             BinaryPrimitives.WriteUInt64LittleEndian(buffer.Slice(16), Numerics.DoubleArithmetic.GetLowPart(value.hi));
             BinaryPrimitives.WriteUInt64LittleEndian(buffer.Slice(24), Numerics.DoubleArithmetic.GetHighPart(value.hi));
@@ -2773,4 +2820,5 @@ namespace Internal.System {
             return default;
         }
     }
+
 }

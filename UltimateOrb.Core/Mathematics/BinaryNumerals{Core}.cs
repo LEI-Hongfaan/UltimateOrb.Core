@@ -267,7 +267,7 @@ namespace UltimateOrb.Mathematics {
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
         [TargetedPatchingOptOutAttribute("")]
         [System.Diagnostics.Contracts.PureAttribute()]
-        public static long CountTrailingZeros(byte[] source) {
+        public static long CountTrailingZeros(ReadOnlySpan<byte> source) {
             if (source == null) {
                 return -1;
             }

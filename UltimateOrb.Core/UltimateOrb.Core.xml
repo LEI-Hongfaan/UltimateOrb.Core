@@ -49,6 +49,45 @@
             The size of a value of this type is the same as sizeof(int).
             </remarks>
         </member>
+        <member name="T:UltimateOrb.Buffers.Extensions.MemoryExtensions">
+            <summary>
+            Provides extension methods for working with memory and span types.
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.Buffers.Extensions.MemoryExtensions.DangerousAsWritable``1(System.ReadOnlySpan{``0})">
+            <summary>
+            Returns a writable <see cref="T:System.Span`1"/> from a <see cref="T:System.ReadOnlySpan`1"/>.
+            This is dangerous and should only be used when it is guaranteed that the underlying data is not actually read-only.
+            </summary>
+            <typeparam name="T">The type of elements in the span.</typeparam>
+            <param name="span">The read-only span to convert.</param>
+            <returns>A writable span over the same memory.</returns>
+        </member>
+        <member name="M:UltimateOrb.Buffers.Extensions.MemoryExtensions.AsReadOnly``1(System.Span{``0})">
+            <summary>
+            Returns a <see cref="T:System.ReadOnlySpan`1"/> from a <see cref="T:System.Span`1"/>.
+            </summary>
+            <typeparam name="T">The type of elements in the span.</typeparam>
+            <param name="span">The span to convert.</param>
+            <returns>A read-only span over the same memory.</returns>
+        </member>
+        <member name="M:UltimateOrb.Buffers.Extensions.MemoryExtensions.AsReadOnly``1(System.Memory{``0})">
+            <summary>
+            Returns a <see cref="T:System.ReadOnlyMemory`1"/> from a <see cref="T:System.Memory`1"/>.
+            </summary>
+            <typeparam name="T">The type of elements in the memory.</typeparam>
+            <param name="memory">The memory to convert.</param>
+            <returns>A read-only memory over the same memory region.</returns>
+        </member>
+        <member name="M:UltimateOrb.Buffers.Extensions.MemoryExtensions.DangerousAsWritable``1(System.ReadOnlyMemory{``0})">
+            <summary>
+            Returns a writable <see cref="T:System.Memory`1"/> from a <see cref="T:System.ReadOnlyMemory`1"/>.
+            This is dangerous and should only be used when it is guaranteed that the underlying data is not actually read-only.
+            </summary>
+            <typeparam name="T">The type of elements in the memory.</typeparam>
+            <param name="memory">The read-only memory to convert.</param>
+            <returns>A writable memory over the same memory region.</returns>
+        </member>
         <member name="T:UltimateOrb.CanonicalIntegerBoolean">
             <summary>
             <para>
@@ -7393,6 +7432,66 @@
             Returns the case count of a discriminated union.
             </summary>
         </member>
+        <member name="T:UltimateOrb.RefAction`1">
+            <summary>
+            Represents a method that performs an action on a value passed by reference.
+            </summary>
+            <typeparam name="T">The type of the value to be passed by reference.</typeparam>
+            <param name="byRef">The value to be passed by reference.</param>
+        </member>
+        <member name="T:UltimateOrb.RefAction`2">
+            <summary>
+            Represents a method that performs an action on a value passed by reference, with an additional argument.
+            </summary>
+            <typeparam name="T">The type of the value to be passed by reference.</typeparam>
+            <typeparam name="TArg">The type of the additional argument.</typeparam>
+            <param name="byRef">The value to be passed by reference.</param>
+            <param name="arg">The additional argument.</param>
+        </member>
+        <member name="T:UltimateOrb.StandardFuncWrapper">
+            <summary>
+            Provides static factory methods to create <see cref="T:UltimateOrb.StandardFuncWrapper`1"/> and its generic variants
+            from standard <see cref="T:System.Func`1"/> delegates.
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.StandardFuncWrapper.Create``1(System.Func{``0})">
+            <summary>
+            Creates a <see cref="T:UltimateOrb.StandardFuncWrapper`1"/> from a <see cref="T:System.Func`1"/> delegate.
+            </summary>
+            <typeparam name="TResult">The return type of the function.</typeparam>
+            <param name="value">The function delegate to wrap.</param>
+            <returns>A <see cref="T:UltimateOrb.StandardFuncWrapper`1"/> wrapping the specified delegate.</returns>
+        </member>
+        <member name="M:UltimateOrb.StandardFuncWrapper.Create``2(System.Func{``0,``1})">
+            <summary>
+            Creates a <see cref="T:UltimateOrb.StandardFuncWrapper`2"/> from a <see cref="T:System.Func`2"/> delegate.
+            </summary>
+            <typeparam name="T">The type of the function's argument.</typeparam>
+            <typeparam name="TResult">The return type of the function.</typeparam>
+            <param name="value">The function delegate to wrap.</param>
+            <returns>A <see cref="T:UltimateOrb.StandardFuncWrapper`2"/> wrapping the specified delegate.</returns>
+        </member>
+        <member name="M:UltimateOrb.StandardFuncWrapper.Create``3(System.Func{``0,``1,``2})">
+            <summary>
+            Creates a <see cref="T:UltimateOrb.StandardFuncWrapper`3"/> from a <see cref="T:System.Func`3"/> delegate.
+            </summary>
+            <typeparam name="T1">The type of the first argument.</typeparam>
+            <typeparam name="T2">The type of the second argument.</typeparam>
+            <typeparam name="TResult">The return type of the function.</typeparam>
+            <param name="value">The function delegate to wrap.</param>
+            <returns>A <see cref="T:UltimateOrb.StandardFuncWrapper`3"/> wrapping the specified delegate.</returns>
+        </member>
+        <member name="M:UltimateOrb.StandardFuncWrapper.Create``4(System.Func{``0,``1,``2,``3})">
+            <summary>
+            Creates a <see cref="T:UltimateOrb.StandardFuncWrapper`4"/> from a <see cref="T:System.Func`4"/> delegate.
+            </summary>
+            <typeparam name="T1">The type of the first argument.</typeparam>
+            <typeparam name="T2">The type of the second argument.</typeparam>
+            <typeparam name="T3">The type of the third argument.</typeparam>
+            <typeparam name="TResult">The return type of the function.</typeparam>
+            <param name="value">The function delegate to wrap.</param>
+            <returns>A <see cref="T:UltimateOrb.StandardFuncWrapper`4"/> wrapping the specified delegate.</returns>
+        </member>
         <member name="P:UltimateOrb.Threading.AsyncOptions.IsCancellationRequested">
             <inheritdoc cref="P:System.Threading.CancellationToken.IsCancellationRequested"/>
         </member>
@@ -7576,6 +7675,296 @@
                 </para>
                 <para>
                     For floating-point numbers, this function will return 0 if the numbers are unordered (either or both are NaN). The infinite values are equal to themselves.
+                </para>
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.Utilities.Extensions.BooleanIntegerExtensions.AsIntegerUnsafe(System.Boolean)">
+            <devdoc>
+                <para>
+                    ECMA-335: (III.1.1.1 Numeric data types - Short integers)
+                    <c>bool</c> or <see cref="T:System.Boolean"/> (8-bit) is zero-extended.
+                </para>
+                <para>
+                    The body of this method will be modified by the build tools.
+                </para>
+            </devdoc>
+        </member>
+        <member name="M:UltimateOrb.Utilities.Extensions.BooleanIntegerExtensions.AsUIntegerUnsafe(System.Boolean)">
+            <devdoc>
+                <para>
+                    ECMA-335: (III.1.1.1 Numeric data types - Short integers)
+                    <c>bool</c> or <see cref="T:System.Boolean"/> (8-bit) is zero-extended.
+                </para>
+                <para>
+                    The body of this method will be modified by the build tools.
+                </para>
+            </devdoc>
+        </member>
+        <member name="M:UltimateOrb.Utilities.Extensions.CanonicalIntegerBooleanExtensions.AsIntegerUnsafe(UltimateOrb.CanonicalIntegerBoolean)">
+            <devdoc>
+                <para>
+                    ECMA-335: (III.1.1.1 Numeric data types - Short integers)
+                    <c>bool</c> or <see cref="T:System.Boolean"/> (8-bit) is zero-extended.
+                </para>
+            </devdoc>
+        </member>
+        <member name="M:UltimateOrb.Utilities.Extensions.CanonicalIntegerBooleanExtensions.AsUIntegerUnsafe(UltimateOrb.CanonicalIntegerBoolean)">
+            <devdoc>
+                <para>
+                    ECMA-335: (III.1.1.1 Numeric data types - Short integers)
+                    <c>bool</c> or <see cref="T:System.Boolean"/> (8-bit) is zero-extended.
+                </para>
+            </devdoc>
+        </member>
+        <member name="T:UltimateOrb.Utilities.SizeOfModule">
+            <summary>
+                <para>
+                    Provides static methods for getting the managed size of the specified type.
+                </para>
+            </summary>
+            <devdoc>
+                <para>
+                    This type contains members will be modified by the build tools.
+                    The build tools identify the type and those members by their names.
+                    Whenever you rename this type or such a member, update the build tools accordingly.
+                </para>
+            </devdoc>
+        </member>
+        <member name="F:UltimateOrb.Utilities.SizeOfModule.BitsPerByte">
+            <summary>
+                <para>Represents the number of bits in a byte.</para>
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.Utilities.SizeOfModule.BitSizeOf``1">
+            <summary>
+                <para>
+                    Returns the bit size of the specified type.
+                </para>
+            </summary>
+            <typeparam name="T">
+                <para>
+                    Specifies the type.
+                </para>
+            </typeparam>
+            <returns>
+                <para>
+                    The managed size, in bits, of a type.
+                </para>
+            </returns>
+            <remarks>
+                <para>
+                    For a reference type, the size returned is the size of the object reference itself (same as <c>sizeof(IntPtr)</c>), not the actural size of the data stored in the object.
+                </para>
+            </remarks>
+            <devdoc>
+                <para>
+                    ECMA-335: Note that the runtime size of a value type shall not exceed 1 MiB (0x100000 bytes).
+                </para>
+            </devdoc>
+        </member>
+        <member name="M:UltimateOrb.Utilities.SizeOfModule.SizeOf``1">
+            <summary>
+                <para>
+                    Returns the result of the CIL <c>sizeof</c> instruction of the specified type.
+                </para>
+            </summary>
+            <typeparam name="T">
+                <para>
+                    Specifies the type parameter of the instruction.
+                </para>
+            </typeparam>
+            <returns>
+                <para>
+                    The managed size, in bytes, of a type.
+                </para>
+            </returns>
+            <remarks>
+                <para>
+                    For a reference type, the size returned is the size of the object reference itself (same as <c>sizeof(IntPtr)</c>), not the actural size of the data stored in the object.
+                </para>
+            </remarks>
+            <devdoc>
+                <para>
+                    ECMA-335: Note that the runtime size of a value type shall not exceed 1 MiB (0x100000 bytes).
+                </para>
+                <para>
+                    The body of this method will be modified by the build tools.
+                    The build tools identify the method by its names.
+                    Whenever you rename this method, update the build tools accordingly.
+                </para>
+            </devdoc>
+        </member>
+        <member name="T:UltimateOrb.U">
+            <summary>
+            Provides static methods to support discriminated unions. 
+            </summary>
+        </member>
+        <member name="T:UltimateOrb.U`2">
+            <summary>
+            Defines a value-type discriminated union with two cases.
+            </summary>
+        </member>
+        <member name="F:UltimateOrb.U`2.Case">
+            <summary>
+            Determines of which case the value is in a discriminated union.
+            </summary>
+        </member>
+        <member name="F:UltimateOrb.U`2.Case1OrDefault">
+            <summary>
+            Value when <see cref="F:UltimateOrb.U`2.Case"/> is 1 or default.
+            </summary>
+        </member>
+        <member name="F:UltimateOrb.U`2.Case2OrDefault">
+            <summary>
+            Value when <see cref="F:UltimateOrb.U`2.Case"/> is 2 or default.
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.U`2.#ctor(`0)">
+            <summary>
+            Constructs a discriminated union from the value of case 1. 
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.U`2.#ctor(`1)">
+            <summary>
+            Constructs a discriminated union from the value of case 2. 
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.U`2.Create``1(``0,System.Int32)">
+            <summary>
+            Constructs a discriminated union from the value. 
+            </summary>
+        </member>
+        <member name="P:UltimateOrb.U`2.Case1">
+            <summary>
+            Value of case 1.
+            </summary>
+        </member>
+        <member name="P:UltimateOrb.U`2.Case2">
+            <summary>
+            Value of case 2.
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.U`2.GetValue``1">
+            <summary>
+            Value of case 2.
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.U`2.CompareTo(UltimateOrb.U{`0,`1})">
+            <summary>
+            Compares discriminated unions. Two discriminated unions are not equal if their case numbers are different.
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.U`2.Equals(UltimateOrb.U{`0,`1})">
+            <summary>
+            Compares discriminated unions. Two discriminated unions are not equal if their case numbers are different.
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.U`2.op_Explicit(UltimateOrb.U{`0,`1})~`0">
+            <summary>
+            Extracts the value in a discriminated union.
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.U`2.op_Explicit(UltimateOrb.U{`0,`1})~`1">
+            <summary>
+            Extracts the value in a discriminated union.
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.U`2.op_Implicit(`0)~UltimateOrb.U{`0,`1}">
+            <summary>
+            Warps a value into a discriminated union.
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.U`2.op_Implicit(`1)~UltimateOrb.U{`0,`1}">
+            <summary>
+            Warps a value into a discriminated union.
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.U`2.Equals(System.Object)">
+            <summary>
+            Compares discriminated unions.<br />
+            Two discriminated unions are not equal if their case tags are different.<br />
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.U`2.GetHashCode">
+            <summary>
+            Calculates the hash code for the current <see cref="T:UltimateOrb.U`2"/> instance.
+            </summary>
+            <returns>The hash code for the current <see cref="T:UltimateOrb.U`2"/> instance.</returns>
+        </member>
+        <member name="M:UltimateOrb.U`2.ToString">
+            <summary>
+            Returns a string that represents the value of this <see cref="T:UltimateOrb.U`2"/> instance.
+            </summary>
+            <returns>The string representation of this <see cref="T:UltimateOrb.U`2"/> instance.</returns>
+        </member>
+        <member name="M:UltimateOrb.U`2.op_Equality(UltimateOrb.U{`0,`1},UltimateOrb.U{`0,`1})">
+            <summary>
+            Compares discriminated unions.<br />
+            Two discriminated unions are not equal if their case tags are different.<br />
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.U`2.op_Inequality(UltimateOrb.U{`0,`1},UltimateOrb.U{`0,`1})">
+            <summary>
+            Compares discriminated unions.<br />
+            Two discriminated unions are not equal if their case tags are different.<br />
+            </summary>
+        </member>
+        <member name="T:UltimateOrb.Void">
+            <summary>
+                <para>
+                    Provides a placeholder type.
+                </para>
+            </summary>
+        </member>
+        <member name="T:UltimateOrb.Void`1">
+            <summary>
+                <para>
+                    Provides a type that is different from the specified type.
+                </para>
+            </summary>
+            <typeparam name="T">
+                <para>
+                    The specified type.
+                </para>
+            </typeparam>
+        </member>
+        <member name="T:UltimateOrb.Void`2">
+            <summary>
+                <para>
+                    Provides a type that is different from the specified types.
+                </para>
+            </summary>
+            <typeparam name="T1">
+                <para>
+                    The first specified type.
+                </para>
+            </typeparam>
+            <typeparam name="T2">
+                <para>
+                    The second specified type.
+                </para>
+            </typeparam>
+        </member>
+        <member name="T:System.Runtime.CompilerServices.IgnoresAccessChecksToAttribute">
+            <summary>
+            Allows the current assembly to access the internal types of a specified assembly that are ordinarily invisible.
+            </summary>
+        </member>
+        <member name="M:System.Runtime.CompilerServices.IgnoresAccessChecksToAttribute.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:System.Runtime.CompilerServices.IgnoresAccessChecksToAttribute" /> class with the name of the specified assembly.
+            </summary>
+            <param name="assemblyName">The name of the specified assembly.</param>
+        </member>
+        <member name="P:System.Runtime.CompilerServices.IgnoresAccessChecksToAttribute.AssemblyName">
+            <summary>
+            Gets the name of the specified assembly whose access checks against the current assembly are ignored .
+            </summary>
+            <value>A string that represents the name of the specified assembly.</value>
+        </member>
+    </members>
+</doc>
+n will return 0 if the numbers are unordered (either or both are NaN). The infinite values are equal to themselves.
                 </para>
             </summary>
         </member>

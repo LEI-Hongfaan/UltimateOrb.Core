@@ -11,7 +11,7 @@ namespace UltimateOrb.Numerics {
 
     public static partial class GenericMath {
 
-        static partial class TypeTraits<T>
+        internal static partial class TypeTraits<T>
             where T :
                 IBinaryInteger<T> {
 
@@ -30,7 +30,7 @@ namespace UltimateOrb.Numerics {
             return ~T.Zero != T.Zero && T.IsNegative(~T.Zero);
         }
 
-        private static T GetMinValue<T>()
+        private static T GetMinValueInternal<T>()
             where T :
                 IBinaryInteger<T> {
             if (IsSigned<T>()) {
@@ -38,6 +38,42 @@ namespace UltimateOrb.Numerics {
             } else {
                 return default!;
             }
+        }
+
+        private static T GetMinValue<T>()
+           where T :
+               IBinaryInteger<T> {
+            var minValue = GetMinValueInternal<T>();
+            // Check that both unchecked(--r) and unchecked(++r) are greater than minValue
+            {
+                bool s = false;
+                T r = minValue;
+                try {
+                    unchecked {
+                        --r;
+                    }
+                } catch (ArithmeticException) {
+                    s = true; // overflow occurred
+                }
+                if (!s && r <= minValue) {
+                    throw new NotSupportedException();
+                }
+            }
+            {
+                bool s = false;
+                T r = minValue;
+                try {
+                    unchecked {
+                        ++r;
+                    }
+                } catch (ArithmeticException) {
+                    s = true; // overflow occurred
+                }
+                if (!s && r <= minValue) {
+                    throw new NotSupportedException();
+                }
+            }
+            return minValue;
         }
 
         private static T GetHighestBitSet<T>()

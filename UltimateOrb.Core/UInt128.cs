@@ -843,6 +843,9 @@ namespace UltimateOrb {
         }
 #endif
 
+#if NET7_0_OR_GREATER && !LEGACY_OPERATOR_CHECKNESS
+        [Obsolete]
+#endif
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
         [System.Runtime.TargetedPatchingOptOutAttribute("")]
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -1405,7 +1408,7 @@ namespace UltimateOrb {
                     var shifted = (UInt32)(lo << shift);
                     resultBits = shifted & 0x7FFFFF;
                 }
-                return BitConverter.UInt32BitsToSingle(0X7f000000 + resultBits - ((UInt32)lz << 23));
+                return BitConverter.UInt32BitsToSingle(0X7f000000 + resultBits - ((UInt32)(uint)lz << 23));
             }
         }
 
@@ -1486,7 +1489,7 @@ namespace UltimateOrb {
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
         [System.Runtime.TargetedPatchingOptOutAttribute("")]
         [System.Diagnostics.Contracts.PureAttribute()]
-        public static implicit operator double(XInt128 value) {
+        public static explicit operator double(XInt128 value) {
             unchecked {
                 // This code is based on `u128_to_f64_round` from m-ou-se/floatconv
                 // Copyright (c) 2020 Mara Bos <m-ou.se@m-ou.se>. All rights reserved.
@@ -2814,66 +2817,66 @@ namespace UltimateOrb {
         }
 
         Char IConvertible.ToChar(IFormatProvider? provider) {
-            if ((long)Char.MinValue <= this && this <= (long)Char.MaxValue) {
+            if (this <= Char.MaxValue) {
                 return unchecked((Char)this.lo).ToChar(provider);
             }
-            return ((long)Char.MinValue - 1).ToChar(provider); // Let the underlying standard libraries raise the exception.
+            return ((long)Char.MaxValue + 1).ToChar(provider); // Let the underlying standard libraries raise the exception.
         }
 
         sbyte IConvertible.ToSByte(IFormatProvider? provider) {
-            if ((long)sbyte.MinValue <= this && this <= (long)sbyte.MaxValue) {
+            if (this <= (byte)sbyte.MaxValue) {
                 return unchecked((sbyte)this.lo).ToSByte(provider);
             }
-            return ((long)sbyte.MinValue - 1).ToSByte(provider); // Let the underlying standard libraries raise the exception.
+            return ((long)sbyte.MaxValue + 1).ToSByte(provider); // Let the underlying standard libraries raise the exception.
         }
 
         byte IConvertible.ToByte(IFormatProvider? provider) {
-            if ((long)byte.MinValue <= this && this <= (long)byte.MaxValue) {
+            if (this <= byte.MaxValue) {
                 return unchecked((byte)this.lo).ToByte(provider);
             }
-            return ((long)byte.MinValue - 1).ToByte(provider); // Let the underlying standard libraries raise the exception.
+            return ((long)byte.MaxValue + 1).ToByte(provider); // Let the underlying standard libraries raise the exception.
         }
 
         Int16 IConvertible.ToInt16(IFormatProvider? provider) {
-            if ((long)Int16.MinValue <= this && this <= (long)Int16.MaxValue) {
+            if (this <= (UInt16)Int16.MaxValue) {
                 return unchecked((Int16)this.lo).ToInt16(provider);
             }
-            return ((long)Int16.MinValue - 1).ToInt16(provider); // Let the underlying standard libraries raise the exception.
+            return ((long)Int16.MaxValue + 1).ToInt16(provider); // Let the underlying standard libraries raise the exception.
         }
 
         UInt16 IConvertible.ToUInt16(IFormatProvider? provider) {
-            if ((long)UInt16.MinValue <= this && this <= (long)UInt16.MaxValue) {
+            if (this <= UInt16.MaxValue) {
                 return unchecked((UInt16)this.lo).ToUInt16(provider);
             }
-            return ((long)UInt16.MinValue - 1).ToUInt16(provider); // Let the underlying standard libraries raise the exception.
+            return ((long)UInt16.MaxValue + 1).ToUInt16(provider); // Let the underlying standard libraries raise the exception.
         }
 
         Int32 IConvertible.ToInt32(IFormatProvider? provider) {
-            if ((long)Int32.MinValue <= this && this <= (long)Int32.MaxValue) {
+            if (this <= (UInt32)Int32.MaxValue) {
                 return unchecked((Int32)this.lo).ToInt32(provider);
             }
-            return ((long)Int32.MinValue - 1).ToInt32(provider); // Let the underlying standard libraries raise the exception.
+            return ((long)Int32.MaxValue + 1).ToInt32(provider); // Let the underlying standard libraries raise the exception.
         }
 
         UInt32 IConvertible.ToUInt32(IFormatProvider? provider) {
-            if ((long)UInt32.MinValue <= this && this <= (long)UInt32.MaxValue) {
+            if (this <= UInt32.MaxValue) {
                 return unchecked((UInt32)this.lo).ToUInt32(provider);
             }
-            return ((long)UInt32.MinValue - 1).ToUInt32(provider); // Let the underlying standard libraries raise the exception.
+            return ((long)UInt32.MaxValue + 1).ToUInt32(provider); // Let the underlying standard libraries raise the exception.
         }
 
         Int64 IConvertible.ToInt64(IFormatProvider? provider) {
-            if (Int64.MinValue <= this && this <= Int64.MaxValue) {
+            if (this <= (UInt64)Int64.MaxValue) {
                 return unchecked((Int64)this.lo).ToInt64(provider);
             }
-            return ((long)Int32.MinValue - 1).ToInt32(provider); // Let the underlying standard libraries raise the exception.
+            return (UInt64.MaxValue).ToInt64(provider); // Let the underlying standard libraries raise the exception.
         }
 
         UInt64 IConvertible.ToUInt64(IFormatProvider? provider) {
-            if (UInt64.MinValue <= this && this <= UInt64.MaxValue) {
+            if (this <= UInt64.MaxValue) {
                 return unchecked((UInt64)this.lo).ToUInt64(provider);
             }
-            return ((long)UInt32.MinValue - 1).ToUInt32(provider); // Let the underlying standard libraries raise the exception.
+            return (Int64.MinValue).ToUInt64(provider); // Let the underlying standard libraries raise the exception.
         }
 
         Single IConvertible.ToSingle(IFormatProvider? provider) {

@@ -367,18 +367,37 @@ namespace UltimateOrb.Numerics {
 
         /// <inheritdoc cref="IBinaryInteger{TSelf}.TryReadBigEndian(ReadOnlySpan{byte}, bool, out TSelf)" />
         static bool IBinaryInteger<IntOrNaN32>.TryReadBigEndian(ReadOnlySpan<byte> source, bool isUnsigned, out IntOrNaN32 value) {
-            return
+            if (source.Length < sizeof(int)) {
+                value = default;
+                return false;
+            }
+            int v = BinaryPrimitives.ReadInt32BigEndian(source);
+            value = new IntOrNaN32(v, default(NoCheck));
+            return true;
         }
 
         /// <inheritdoc cref="IBinaryInteger{TSelf}.TryReadLittleEndian(ReadOnlySpan{byte}, bool, out TSelf)" />
         static bool IBinaryInteger<IntOrNaN32>.TryReadLittleEndian(ReadOnlySpan<byte> source, bool isUnsigned, out IntOrNaN32 value) {
-            return
+            if (source.Length < sizeof(int)) {
+                value = default;
+                return false;
+            }
+            int v = BinaryPrimitives.ReadInt32LittleEndian(source);
+            value = new IntOrNaN32(v, default(NoCheck));
+            return true;
         }
 
         /// <inheritdoc cref="IBinaryInteger{TSelf}.GetShortestBitLength()" />
+        /// <inheritdoc cref="IBinaryInteger{TSelf}.GetShortestBitLength()" />
         int IBinaryInteger<IntOrNaN32>.GetShortestBitLength() {
             var v = m_value;
-            return NaNBits == v ? NaNBits : ;
+            return NaNBits == v ? NaNBits : GetShortestBitLength(unchecked((uint)v));
+
+            static int GetShortestBitLength(uint value) {
+                // This method calculates the shortest bit length of a given unsigned integer.
+                // It counts the number of bits required to represent the value in binary.
+                return 32 - BitOperations.LeadingZeroCount(value);
+            }
         }
 
         /// <inheritdoc cref="IBinaryInteger{TSelf}.GetByteCount()" />
@@ -386,7 +405,13 @@ namespace UltimateOrb.Numerics {
 
         /// <inheritdoc cref="IBinaryInteger{TSelf}.TryWriteBigEndian(Span{byte}, out int)" />
         bool IBinaryInteger<IntOrNaN32>.TryWriteBigEndian(Span<byte> destination, out int bytesWritten) {
-
+            if (destination.Length < sizeof(int)) {
+                bytesWritten = 0;
+                return false;
+            }
+            BinaryPrimitives.WriteInt32BigEndian(destination, m_value);
+            bytesWritten = sizeof(int);
+            return true;
         }
 
         /// <inheritdoc cref="IBinaryInteger{TSelf}.TryWriteLittleEndian(Span{byte}, out int)" />

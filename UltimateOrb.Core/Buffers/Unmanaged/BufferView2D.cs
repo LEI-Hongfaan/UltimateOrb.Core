@@ -12,19 +12,19 @@ namespace UltimateOrb.Buffers.Unmanaged {
 
         unsafe readonly T* _Base;
 
-        readonly nuint _Length0;
+        readonly nuint _Length0;   // Number of rows
 
-        readonly nuint _Stride0;
+        readonly nuint _Stride0;   // Row stride (elements between starts of rows)
 
-        readonly nuint _Length1;
+        readonly nuint _Length1;   // Number of columns
 
         public ref T this[nint index0, nint index1] {
-
             get {
                 if (_Length0 > unchecked((nuint)index0) &&
                     _Length1 > unchecked((nuint)index1)) {
                     unsafe {
-                        return ref _Base[unchecked(_Length1 * (nuint)index0 + (nuint)index1)];
+                        // Use stride for row offset, col for column offset
+                        return ref _Base[unchecked(_Stride0 * (nuint)index0 + (nuint)index1)];
                     }
                 }
                 throw new IndexOutOfRangeException();
@@ -32,7 +32,7 @@ namespace UltimateOrb.Buffers.Unmanaged {
         }
 
         [CLSCompliant(false)]
-        public unsafe BufferView2D(T* data, nint length0, nint length1) : this(data, length0, length1, length0) {
+        public unsafe BufferView2D(T* data, nint length0, nint length1) : this(data, length0, length1, length1) {
         }
 
         [CLSCompliant(false)]
@@ -54,9 +54,15 @@ namespace UltimateOrb.Buffers.Unmanaged {
             unsafe {
                 if (0 != (nuint)_Base) {
                     var a = new T[_Length0, _Length1];
-                    var cb = unchecked((uint)sizeof(T) * _Length0 * _Length1);
                     fixed (T* p = a) {
-                        Buffer.MemoryCopy(_Base, p, cb, cb);
+                        for (nuint i = 0; i < _Length0; ++i) {
+                            Buffer.MemoryCopy(
+                                _Base + i * _Stride0,
+                                p + i * _Length1,
+                                unchecked((uint)sizeof(T)) * _Length1,
+                                unchecked((uint)sizeof(T)) * _Length1
+                            );
+                        }
                     }
                     return a;
                 }

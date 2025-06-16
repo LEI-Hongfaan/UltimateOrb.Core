@@ -181,7 +181,7 @@ namespace UltimateOrb.Numerics {
         }
 
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static UInt64 GetBitsFromRawPartsWithRounding(UInt64 fraction_cy, UInt64 fraction_lo, UInt64 fraction_hi, int exponent, int sign, FloatingPointRounding rounding, out UInt64 result_hi) {
+        public static UInt64 GetBitsFromRawPartsWithRounding(UInt64 fraction_cy, UInt64 fraction_lo, UInt64 fraction_hi, int exponent, int sign, [ConstantExpected] FloatingPointRounding rounding, out UInt64 result_hi) {
             var roundTiesToEven = (rounding == FloatingPointRounding.ToNearestWithMidpointToEven);
             var cy = (0 > unchecked((Int64)fraction_cy));
             if (!roundTiesToEven && (rounding != FloatingPointRounding.ToNearestWithMidpointAwayFromZero)) {
@@ -304,7 +304,7 @@ namespace UltimateOrb.Numerics {
         }
 
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static UInt64 Round(UInt64 value_lo, UInt64 value_hi, FloatingPointRounding roundingMode, out UInt64 result_hi) {
+        public static UInt64 Round(UInt64 value_lo, UInt64 value_hi, [ConstantExpected] FloatingPointRounding roundingMode, out UInt64 result_hi) {
             unchecked {
                 var exponent = GetRawExponentFromHi64Bits(value_hi);
                 UInt64 lo;
@@ -477,7 +477,7 @@ namespace UltimateOrb.Numerics {
         }
 
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        static UInt64 GetBitsFromRawPartsWithNormalizationAndRounding(UInt64 fraction_lo, UInt64 fraction_hi, int exponent, int sign, FloatingPointRounding rounding, out UInt64 result_hi) {
+        static UInt64 GetBitsFromRawPartsWithNormalizationAndRounding(UInt64 fraction_lo, UInt64 fraction_hi, int exponent, int sign, [ConstantExpected] FloatingPointRounding rounding, out UInt64 result_hi) {
             if (0 == fraction_hi) {
                 unchecked {
                     exponent -= 64;
@@ -513,7 +513,7 @@ namespace UltimateOrb.Numerics {
         }
 
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        internal static UInt64 AddAbsoluteValuesThenCopySign(UInt64 first_lo, UInt64 first_hi, UInt64 second_lo, UInt64 second_hi, int sign, FloatingPointRounding rounding, out UInt64 result_hi) {
+        internal static UInt64 AddAbsoluteValuesThenCopySign(UInt64 first_lo, UInt64 first_hi, UInt64 second_lo, UInt64 second_hi, int sign, [ConstantExpected] FloatingPointRounding rounding, out UInt64 result_hi) {
             int first_e;
             UInt64 first_f_lo, first_f_hi;
             int second_e;
@@ -618,7 +618,7 @@ namespace UltimateOrb.Numerics {
 
 
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        internal static UInt64 SubtractAbsoluteValuesThenCopySign(UInt64 first_lo, UInt64 first_hi, UInt64 second_lo, UInt64 second_hi, int sign, FloatingPointRounding rounding, out UInt64 result_hi) {
+        internal static UInt64 SubtractAbsoluteValuesThenCopySign(UInt64 first_lo, UInt64 first_hi, UInt64 second_lo, UInt64 second_hi, int sign, [ConstantExpected] FloatingPointRounding rounding, out UInt64 result_hi) {
             int first_e;
             UInt64 first_f_lo, first_f_hi;
             int second_e;
@@ -735,7 +735,7 @@ namespace UltimateOrb.Numerics {
             return Binary128Arithmetic.GetNaN(first_lo, first_hi, second_lo, second_hi, out result_hi);
         }
 
-        public static UInt64 Add(UInt64 first_lo, UInt64 first_hi, UInt64 second_lo, UInt64 second_hi, FloatingPointRounding rounding, out UInt64 result_hi) {
+        public static UInt64 Add(UInt64 first_lo, UInt64 first_hi, UInt64 second_lo, UInt64 second_hi, [ConstantExpected] FloatingPointRounding rounding, out UInt64 result_hi) {
             var first_s = Binary128Arithmetic.GetRawSignFromHi64Bits(first_hi);
             var second_s = Binary128Arithmetic.GetRawSignFromHi64Bits(second_hi);
             if (first_s == second_s) {
@@ -745,7 +745,7 @@ namespace UltimateOrb.Numerics {
             }
         }
 
-        public static UInt64 Subtract(UInt64 first_lo, UInt64 first_hi, UInt64 second_lo, UInt64 second_hi, FloatingPointRounding rounding, out UInt64 result_hi) {
+        public static UInt64 Subtract(UInt64 first_lo, UInt64 first_hi, UInt64 second_lo, UInt64 second_hi, [ConstantExpected] FloatingPointRounding rounding, out UInt64 result_hi) {
             var first_s = Binary128Arithmetic.GetRawSignFromHi64Bits(first_hi);
             var second_s = Binary128Arithmetic.GetRawSignFromHi64Bits(second_hi);
             if (first_s == second_s) {
@@ -755,7 +755,7 @@ namespace UltimateOrb.Numerics {
             }
         }
 
-        public static UInt64 Divide(UInt64 first_lo, UInt64 first_hi, UInt64 second_lo, UInt64 second_hi, FloatingPointRounding rounding, out UInt64 result_hi) {
+        public static UInt64 Divide(UInt64 first_lo, UInt64 first_hi, UInt64 second_lo, UInt64 second_hi, [ConstantExpected] FloatingPointRounding rounding, out UInt64 result_hi) {
             var first_s = Binary128Arithmetic.GetRawSignFromHi64Bits(first_hi);
             var second_s = Binary128Arithmetic.GetRawSignFromHi64Bits(second_hi);
             var first_e = Binary128Arithmetic.GetRawExponentFromHi64Bits(first_hi);
@@ -895,7 +895,7 @@ namespace UltimateOrb.Numerics {
             return GetNaN(first_lo, first_hi, second_lo, second_hi, out result_hi);
         }
 
-        public static UInt64 Multiply(UInt64 first_lo, UInt64 first_hi, UInt64 second_lo, UInt64 second_hi, FloatingPointRounding rounding, out UInt64 result_hi) {
+        public static UInt64 Multiply(UInt64 first_lo, UInt64 first_hi, UInt64 second_lo, UInt64 second_hi, [ConstantExpected] FloatingPointRounding rounding, out UInt64 result_hi) {
             var first_e = Binary128Arithmetic.GetRawExponentFromHi64Bits(first_hi);
             var first_f_hi = Binary128Arithmetic.GetRawFractionHiFromHi64Bits(first_hi);
             var second_e = Binary128Arithmetic.GetRawExponentFromHi64Bits(second_hi);
@@ -961,7 +961,7 @@ namespace UltimateOrb.Numerics {
             return GetNaN(first_lo, first_hi, second_lo, second_hi, out result_hi);
         }
 
-        public static UInt64 Sqrt(UInt64 value_lo, UInt64 value_hi, FloatingPointRounding rounding, out UInt64 result_hi) {
+        public static UInt64 Sqrt(UInt64 value_lo, UInt64 value_hi, [ConstantExpected] FloatingPointRounding rounding, out UInt64 result_hi) {
             unchecked {
                 var value_s = GetRawSignFromHi64Bits(value_hi);
                 var value_e = GetRawExponentFromHi64Bits(value_hi);
@@ -1087,7 +1087,7 @@ namespace UltimateOrb.Numerics {
         }
 
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        internal static UInt64 Remainder(UInt64 first_lo, UInt64 first_hi, UInt64 second_lo, UInt64 second_hi, FloatingPointRounding rounding, bool quotientTowardZero, out UInt64 result_hi) {
+        internal static UInt64 Remainder(UInt64 first_lo, UInt64 first_hi, UInt64 second_lo, UInt64 second_hi, [ConstantExpected] FloatingPointRounding rounding, bool quotientTowardZero, out UInt64 result_hi) {
             unchecked {
                 var first_f_lo = first_lo;
                 var first_f_hi = Binary128Arithmetic.GetRawFractionHiFromHi64Bits(first_hi);
@@ -1207,11 +1207,11 @@ namespace UltimateOrb.Numerics {
             }
         }
 
-        public static UInt64 IEEERemainder(UInt64 first_lo, UInt64 first_hi, UInt64 second_lo, UInt64 second_hi, FloatingPointRounding rounding, out UInt64 result_hi) {
+        public static UInt64 IEEERemainder(UInt64 first_lo, UInt64 first_hi, UInt64 second_lo, UInt64 second_hi, [ConstantExpected] FloatingPointRounding rounding, out UInt64 result_hi) {
             return Remainder(first_lo, first_hi, second_lo, second_hi, rounding, false, out result_hi);
         }
 
-        public static UInt64 Remainder(UInt64 first_lo, UInt64 first_hi, UInt64 second_lo, UInt64 second_hi, FloatingPointRounding rounding, out UInt64 result_hi) {
+        public static UInt64 Remainder(UInt64 first_lo, UInt64 first_hi, UInt64 second_lo, UInt64 second_hi, [ConstantExpected] FloatingPointRounding rounding, out UInt64 result_hi) {
             return Remainder(first_lo, first_hi, second_lo, second_hi, rounding, true, out result_hi);
         }
 
@@ -1310,7 +1310,7 @@ namespace UltimateOrb.Numerics {
             }
         }
 
-        public static UInt64 FusedMultiplyAdd(UInt64 first_lo, UInt64 first_hi, UInt64 second_lo, UInt64 second_hi, UInt64 addend_lo, UInt64 addend_hi, FloatingPointRounding rounding, out UInt64 result_hi) {
+        public static UInt64 FusedMultiplyAdd(UInt64 first_lo, UInt64 first_hi, UInt64 second_lo, UInt64 second_hi, UInt64 addend_lo, UInt64 addend_hi, [ConstantExpected] FloatingPointRounding rounding, out UInt64 result_hi) {
             throw new NotImplementedException();
         }
 
@@ -1343,7 +1343,7 @@ namespace UltimateOrb.Numerics {
         }
 
 
-        public static UInt64 ScaleB(UInt64 x_lo, UInt64 x_hi, int n, FloatingPointRounding rounding, out UInt64 result_hi) {
+        public static UInt64 ScaleB(UInt64 x_lo, UInt64 x_hi, int n, [ConstantExpected] FloatingPointRounding rounding, out UInt64 result_hi) {
             var lx = x_lo;
             var hx = x_hi;
             var k = Binary128Arithmetic.GetRawExponentFromHi64Bits(hx);
@@ -1376,7 +1376,7 @@ namespace UltimateOrb.Numerics {
             return Binary128Arithmetic.GetBitsFromRawPartsWithRounding(0, lx, f_hi, k, s, rounding: rounding, out result_hi);
         }
 
-        public static UInt64 ModF(UInt64 x_lo, UInt64 x_hi, int n, FloatingPointRounding rounding, out UInt64 result_hi) {
+        public static UInt64 ModF(UInt64 x_lo, UInt64 x_hi, int n, [ConstantExpected] FloatingPointRounding rounding, out UInt64 result_hi) {
             var lx = x_lo;
             var hx = x_hi;
             var k = Binary128Arithmetic.GetRawExponentFromHi64Bits(hx);

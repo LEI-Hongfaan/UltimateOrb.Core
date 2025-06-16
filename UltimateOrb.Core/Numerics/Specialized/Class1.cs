@@ -6,6 +6,8 @@ using System.Runtime.Intrinsics;
 using System.Runtime.Intrinsics.X86;
 using System.Text;
 using System.Threading.Tasks;
+using UltimateOrb.Internal;
+using UltimateOrb.Utilities;
 using Unsafe = System.Runtime.CompilerServices.Unsafe;
 
 namespace UltimateOrb.Numerics.Specialized {
@@ -32,10 +34,8 @@ namespace UltimateOrb.Numerics.Specialized {
         /// </summary>
         public bool this[int row, int col] {
             get {
-                if (row is < 0 or >= 16 || col is < 0 or >= 16) {
-                    throw new IndexOutOfRangeException("Indices must be in the range [0, 15].");
-                }
-
+                ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(row.ToUnsignedUnchecked(), 16U, nameof(row));
+                ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(col.ToUnsignedUnchecked(), 16U, nameof(col));
                 UInt16 rowValue = _data.GetElement(row);
                 return ((rowValue >> col) & 1) != 0;
             }
@@ -69,7 +69,7 @@ namespace UltimateOrb.Numerics.Specialized {
         }
 
         public static BitMatrix16x16 operator >>>(BitMatrix16x16 m, int shift) {
-            return m >> shift;
+            return new BitMatrix16x16(m._data >>> shift);
         }
 
         // — Row shifting operators —
@@ -92,7 +92,7 @@ namespace UltimateOrb.Numerics.Specialized {
             Debug.Assert(BitConverter.IsLittleEndian);
 
             UInt256 u = Unsafe.As<BitMatrix16x16, UInt256>(ref m);
-            u <<= (count << 3);
+            u <<= count << 3;
             return Unsafe.As<UInt256, BitMatrix16x16>(ref u);
         }
 
@@ -114,7 +114,7 @@ namespace UltimateOrb.Numerics.Specialized {
             Debug.Assert(BitConverter.IsLittleEndian);
 
             UInt256 u = Unsafe.As<BitMatrix16x16, UInt256>(ref m);
-            u <<= (count << 3);
+            u <<= count << 3;
             return Unsafe.As<UInt256, BitMatrix16x16>(ref u);
         }
 
