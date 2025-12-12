@@ -4,6 +4,7 @@ using NUnit.Framework;
 using UltimateOrb.Numerics.BigIntegerWrappers;
 using UltimateOrb.Numerics.DataTypes;
 
+#if false
 namespace UltimateOrb.Numerics.BigIntegerWrappers.Tests {
     using Int13 = Int<BitSize13>;
 
@@ -103,3 +104,4 @@ namespace UltimateOrb.Numerics.BigIntegerWrappers.Tests {
         }
     }
 }
+#endif

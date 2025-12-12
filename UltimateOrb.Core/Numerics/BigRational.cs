@@ -4,10 +4,12 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Globalization;
+using System.Linq;
 using System.Numerics;
 using System.Runtime;
 using System.Runtime.CompilerServices;
 using System.Runtime.ConstrainedExecution;
+using System.Runtime.InteropServices;
 using UltimateOrb.Mathematics.Exact;
 using UltimateOrb.Utilities;
 
@@ -137,6 +139,36 @@ namespace UltimateOrb.Numerics {
         [PureAttribute()]
         public static implicit operator BigRational(BigInteger value) {
             return value.IsZero ? default : new BigRational(denominator: s_BigIntegerOne, signedNumerator: value);
+        }
+
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator BigRational(int value) {
+            return 0 == value ? default : new BigRational(denominator: s_BigIntegerOne, signedNumerator: value);
+        }
+
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator BigRational(uint value) {
+            return 0u == value ? default : new BigRational(denominator: s_BigIntegerOne, signedNumerator: value);
+        }
+
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator BigRational(nint value) {
+            return 0 == value ? default : new BigRational(denominator: s_BigIntegerOne, signedNumerator: value);
+        }
+
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator BigRational(nuint value) {
+            return 0u == value ? default : new BigRational(denominator: s_BigIntegerOne, signedNumerator: value);
+        }
+
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator BigRational(long value) {
+            return 0 == value ? default : new BigRational(denominator: s_BigIntegerOne, signedNumerator: value);
+        }
+
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator BigRational(ulong value) {
+            return 0u == value ? default : new BigRational(denominator: s_BigIntegerOne, signedNumerator: value);
         }
 
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
@@ -478,7 +510,7 @@ namespace UltimateOrb.Numerics {
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         [PureAttribute()]
         public int CompareTo(BigRational other) {
-            var a = this.m_SignedNumerator.CompareTo(other.m_SignedNumerator);
+            var a = this.m_SignedNumerator.Sign.CompareTo(other.m_SignedNumerator.Sign);
             return 0 != a ? a : (this.m_SignedNumerator * other.m_Denominator).CompareTo(this.m_Denominator * other.m_SignedNumerator);
         }
     }
@@ -757,6 +789,108 @@ namespace UltimateOrb.Numerics {
                 result = -result;
             }
             return result;
+        }
+    }
+}
+
+namespace UltimateOrb.Numerics {
+
+    [StructLayout(LayoutKind.Sequential)]
+    readonly struct SystemDecimal {
+        public readonly int _flags;
+        public readonly uint _hi32;
+        public readonly ulong _lo64;
+
+
+        private readonly static BigInteger[] s_BigIntPow10 = GetPow10Table();
+
+        private static BigInteger[] GetPow10Table() {
+            return Enumerable.Range(0, 28).Select(exp => BigInteger.Pow(10, exp)).ToArray();
+        }
+
+        internal static ReadOnlySpan<BigInteger> BigIntPow10 => s_BigIntPow10.AsSpan();
+
+        internal static BigInteger GetPow10(ushort exp) {
+            return exp < BigIntPow10.Length ? BigIntPow10[unchecked((int)exp)] : BigInteger.Pow(10, exp);
+        }
+    }
+
+    public readonly partial struct BigRational {
+
+        public static implicit operator BigRational(decimal value) {
+            ref SystemDecimal v = ref Unsafe.As<decimal, SystemDecimal>(ref value);
+            var e = unchecked((byte)(v._flags >> 16));
+            var m = new System.UInt128(upper: v._hi32, lower: v._lo64);
+            var q = SystemDecimal.GetPow10(e);
+            var p = (BigInteger)m;
+            var g = BigInteger.GreatestCommonDivisor(p, q);
+            if (!g.IsOne) {
+                q /= g;
+                p /= g;
+            }
+            if (0 > v._flags) {
+                p = -p;
+            }
+            return new BigRational(denominator: q, signedNumerator: p);
+        }
+
+        public static explicit operator decimal(BigRational value) {
+            if (TryConvertToDecimal(value, out var r)) {
+                return r;
+            }
+
+            throw new OverflowException("Value does not fit into a System.Decimal.");
+        }
+
+        private static bool TryConvertToDecimal(BigRational value, out decimal result) {
+            if (BigRational.IsZero(value)) {
+                result = 0m;
+                return true;
+            }
+
+            // Extract numerator and denominator
+            var p = value.SignedNumerator;
+            var q = value.Denominator;
+
+            // Normalize sign and absolute numerator
+            bool negative = p.Sign < 0;
+            if (negative) p = -p;
+
+            // Try scales 0..28 (decimal supports up to 28 decimal places)
+            for (int scale = 28; scale >= 0; --scale) {
+                var pow10 = SystemDecimal.GetPow10(unchecked((byte)scale));
+                var scaled = p * pow10;
+
+                // Division with remainder
+                BigInteger div = BigInteger.DivRem(scaled, q, out BigInteger rem);
+
+                // If remainder != 0, perform round-to-nearest, ties to even (banker's rounding)
+                if (rem != BigInteger.Zero) {
+                    var twiceRem = rem << 1; // rem * 2
+                    int cmp = BigInteger.Compare(twiceRem, q);
+                    if (cmp > 0) {
+                        // round up
+                        div += BigInteger.One;
+                    } else if (cmp == 0) {
+                        // tie: round to even
+                        if (!div.IsEven) div += BigInteger.One;
+                    }
+                }
+
+                // Check fit into 96 bits
+                if (div.GetByteCount(isUnsigned: true) <= 12) {
+                    // Build decimal from 96-bit integer parts
+                    var lo = (UInt32)(div & 0xFFFFFFFF);
+                    var mid = (UInt32)((div >> 32) & 0xFFFFFFFF);
+                    var hi = (UInt32)((div >> 64) & 0xFFFFFFFF);
+
+                    // decimal ctor: (int lo, int mid, int hi, bool isNegative, byte scale)
+                    result = unchecked(new decimal((Int32)lo, (Int32)mid, (Int32)hi, negative, (byte)scale));
+                    return true;
+                }
+            }
+            result = default;
+            return false;
         }
     }
 }

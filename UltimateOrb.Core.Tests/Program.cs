@@ -117,6 +117,18 @@ namespace UltimateOrb.Core.Tests {
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private static int Main(string[] args) {
             {
+                var d = (decimal)BigRational.FromFraction(22, 7);
+                Console.WriteLine(d);
+                var d1 = (decimal)(double)BigRational.FromFraction(22, 7);
+                Console.WriteLine(d1);
+
+                Console.WriteLine((BigRational)d);
+
+                return 0;
+            }
+
+
+            {
 
                 Console.WriteLine(new BitMatrix16x16(Vector256<UInt16>.One) << 9.AsRowShiftCount());
                 return 0;

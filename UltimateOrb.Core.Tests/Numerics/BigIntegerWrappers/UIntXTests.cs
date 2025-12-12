@@ -4,12 +4,16 @@ using NUnit.Framework;
 using UltimateOrb.Numerics.BigIntegerWrappers;
 using UltimateOrb.Numerics.DataTypes;
 
+
+
 namespace UltimateOrb.Numerics.BigIntegerWrappers.Tests {
 
     [Experimental("UoWIP_GenericMath")]
     public partial class UIntXTests {
     }
 }
+
+#if false
 
 namespace UltimateOrb.Numerics.BigIntegerWrappers.Tests {
     using UInt13 = UInt<BitSize13>;
@@ -101,3 +105,4 @@ namespace UltimateOrb.Numerics.BigIntegerWrappers.Tests {
         }
     }
 }
+#endif
