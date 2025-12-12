@@ -47,11 +47,35 @@ namespace UltimateOrb {
 #endif
     {
 
+#if NET10_0_OR_GREATER
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        private readonly UInt64 d0;
+
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        private readonly UInt64 d1;
+
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        [UnscopedRef]
+        private readonly ref readonly UInt64 lo {
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => ref BitConverter.IsLittleEndian ? ref d0 : ref d1;
+        }
+
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        [UnscopedRef]
+        private readonly ref readonly HInt64 hi {
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => ref Unsafe.As<UInt64, HInt64>(ref Unsafe.AsRef(in BitConverter.IsLittleEndian ? ref d1 : ref d0));
+        }
+#else
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private readonly UInt64 lo;
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private readonly HInt64 hi;
+#endif
 
         [System.Diagnostics.Contracts.PureAttribute()]
         public Int64 LoInt64Bits {
@@ -82,8 +106,13 @@ namespace UltimateOrb {
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         [System.Diagnostics.Contracts.PureAttribute()]
         internal UInt128(UInt64 lo, HInt64 hi) {
+#if NET10_0_OR_GREATER
+            this.d0 = BitConverter.IsLittleEndian ? lo : unchecked((UInt64)hi);
+            this.d1 = BitConverter.IsLittleEndian ? unchecked((UInt64)hi) : lo;
+#else
             this.lo = lo;
             this.hi = hi;
+#endif
         }
 
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]

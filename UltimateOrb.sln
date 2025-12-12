@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.3.32519.111
+# Visual Studio Version 18
+VisualStudioVersion = 18.3.11222.16 d18.3
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UltimateOrb.Core", "UltimateOrb.Core\UltimateOrb.Core.csproj", "{0C7C3810-CA53-449F-BEA3-2FEA77AA3E37}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -39,6 +39,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Benchmark0071", "Benchmark0071\Benchmark0071.csproj", "{E9D28198-0E84-4439-BB6C-8C7D666A035F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Benchmark0072", "Benchmark0072\Benchmark0072.csproj", "{35F4A0FD-6DC5-4600-A8EC-CCD67FC16296}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Benchmark0090", "Benchmark0090\Benchmark0090.csproj", "{733C8A3D-44B9-4AFE-A79B-8039FBD2FEEA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -98,6 +100,10 @@ Global
 		{35F4A0FD-6DC5-4600-A8EC-CCD67FC16296}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{35F4A0FD-6DC5-4600-A8EC-CCD67FC16296}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{35F4A0FD-6DC5-4600-A8EC-CCD67FC16296}.Release|Any CPU.Build.0 = Release|Any CPU
+		{733C8A3D-44B9-4AFE-A79B-8039FBD2FEEA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{733C8A3D-44B9-4AFE-A79B-8039FBD2FEEA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{733C8A3D-44B9-4AFE-A79B-8039FBD2FEEA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{733C8A3D-44B9-4AFE-A79B-8039FBD2FEEA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

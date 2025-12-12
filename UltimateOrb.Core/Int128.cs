@@ -3,22 +3,21 @@ using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using UltimateOrb.Numerics;
 using UltimateOrb.Utilities;
 
 namespace UltimateOrb {
-    using static global::Internal.System.IConvertibleModule;
     using static global::Internal.System.Converter;
-    using static UltimateOrb.Utilities.ThrowHelper;
+    using static global::Internal.System.IConvertibleModule;
     using static UltimateOrb.Utilities.Extensions.BooleanIntegerExtensions;
+    using static UltimateOrb.Utilities.ThrowHelper;
     using static UltimateOrb.XInt128Helpers;
-
-    using MathEx = UltimateOrb.Numerics.DoubleArithmetic;
-
-    using XInt128 = Int128;
-    using OInt128 = UInt128;
     using HInt64 = Int64;
+    using MathEx = UltimateOrb.Numerics.DoubleArithmetic;
+    using OInt128 = UInt128;
+    using XInt128 = Int128;
 
     [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Interoperability", "CA1413:AvoidNonpublicFieldsInComVisibleValueTypes")]
     [System.Runtime.InteropServices.ComVisibleAttribute(true)]
@@ -31,11 +30,35 @@ namespace UltimateOrb {
 #endif
     {
 
+#if NET10_0_OR_GREATER
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        private readonly UInt64 d0;
+
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        private readonly UInt64 d1;
+
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        [UnscopedRef]
+        private readonly ref readonly UInt64 lo {
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => ref BitConverter.IsLittleEndian ? ref d0 : ref d1;
+        }
+
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        [UnscopedRef]
+        private readonly ref readonly HInt64 hi {
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => ref Unsafe.As<UInt64, HInt64>(ref Unsafe.AsRef(in BitConverter.IsLittleEndian ? ref d1 : ref d0));
+        }
+#else
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private readonly UInt64 lo;
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private readonly HInt64 hi;
+#endif
 
         [System.Diagnostics.Contracts.PureAttribute()]
         public Int64 LoInt64Bits {
@@ -66,8 +89,13 @@ namespace UltimateOrb {
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         [System.Diagnostics.Contracts.PureAttribute()]
         internal Int128(UInt64 lo, HInt64 hi) {
+#if NET10_0_OR_GREATER
+            this.d0 = BitConverter.IsLittleEndian ? lo : unchecked((UInt64)hi);
+            this.d1 = BitConverter.IsLittleEndian ? unchecked((UInt64)hi) : lo;
+#else
             this.lo = lo;
             this.hi = hi;
+#endif
         }
 
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
@@ -996,6 +1024,8 @@ namespace UltimateOrb {
         [System.Runtime.TargetedPatchingOptOutAttribute("")]
         [System.Diagnostics.Contracts.PureAttribute()]
         public static explicit operator double(XInt128 value) {
+            return unchecked(0 > value.hi ? -(double)(OInt128)(-value) : (double)(OInt128)value);
+            /*
             const int BitSize = 64;
             const int ExponentBitSize = 11;
             const int ExponentBias = unchecked(checked((1 << (ExponentBitSize - 1))) - 1);
@@ -1033,6 +1063,7 @@ namespace UltimateOrb {
                 return -unchecked((double)lo);
             }
             return unchecked((double)lo);
+            */
         }
 
 #if FEATURE_STANDARD_LIBRARY_INTEROPERABILITY_FORMATTING_AND_CONVERSION
@@ -1149,18 +1180,26 @@ namespace UltimateOrb {
         [System.Runtime.TargetedPatchingOptOutAttribute("")]
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         [System.Diagnostics.Contracts.PureAttribute()]
+#if !NET7_0_OR_GREATER || LEGACY_OPERATOR_CHECKNESS
         public static XInt128 operator -(XInt128 value) {
-            var lo = Numerics.DoubleArithmetic.NegateSigned(value.lo, value.hi, out HInt64 hi);
+#else
+        public static XInt128 operator checked -(XInt128 value) {
+#endif
+            var lo = Numerics.DoubleArithmetic.NegateUnsigned(value.lo, value.hi, out HInt64 hi);
             return new XInt128(lo, hi);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "op")]
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
         [System.Runtime.TargetedPatchingOptOutAttribute("")]
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         [System.Diagnostics.Contracts.PureAttribute()]
+#if !NET7_0_OR_GREATER || LEGACY_OPERATOR_CHECKNESS
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "op")]
         public static XInt128 op_UnaryNegationUnchecked(XInt128 value) {
+#else
+        public static XInt128 operator -(XInt128 value) {
+#endif
             var lo = Numerics.DoubleArithmetic.NegateUnchecked(value.lo, value.hi, out HInt64 hi);
             return new XInt128(lo, hi);
         }
@@ -1665,15 +1704,12 @@ namespace UltimateOrb {
 
 namespace UltimateOrb {
     using Internal;
-
-    using static UltimateOrb.Utilities.ThrowHelper;
-
-    using MathEx = UltimateOrb.Numerics.DoubleArithmetic;
-
-    using XInt128 = Int128;
-    using OInt128 = UInt128;
-    using HInt64 = Int64;
     using UltimateOrb.Runtime.CompilerServices;
+    using static UltimateOrb.Utilities.ThrowHelper;
+    using HInt64 = Int64;
+    using MathEx = UltimateOrb.Numerics.DoubleArithmetic;
+    using OInt128 = UInt128;
+    using XInt128 = Int128;
 
     public partial struct Int128 {
 
