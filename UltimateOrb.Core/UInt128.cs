@@ -1525,7 +1525,7 @@ namespace UltimateOrb {
                     // for the precision loss that double will have. As such, the lower value effectively drops the
                     // lowest 24 bits and then or's them back to ensure rounding stays correct.
 
-                    double lower = BitConverter.UInt64BitsToDouble(TwoPow76Bits | (UltimateOrb.Numerics.DoubleArithmetic.ShiftRightUnsigned(lo, hi, 12, out _) >> 12) | (lo & 0xFFFFFF)) - TwoPow76;
+                    double lower = BitConverter.UInt64BitsToDouble(TwoPow76Bits | (UltimateOrb.Numerics.DoubleArithmetic.ShiftRightUnsigned(lo, hi, 12, out _) >> 12) | ((0u != (0xFFFFFF & lo)) ? 1u : 0u)) - TwoPow76;
                     double upper = BitConverter.UInt64BitsToDouble(TwoPow128Bits | UltimateOrb.Numerics.DoubleArithmetic.ShiftRightUnsigned(lo, hi, 76, out _)) - TwoPow128;
 
                     return lower + upper;
@@ -3069,7 +3069,7 @@ namespace UltimateOrb {
             // TODO: Perf
             Span<byte> buffer = stackalloc byte[16];
             BinaryPrimitives.WriteUInt64LittleEndian(buffer, value.lo);
-            BinaryPrimitives.WriteUInt64LittleEndian(buffer.Slice(4), value.hi);
+            BinaryPrimitives.WriteUInt64LittleEndian(buffer.Slice(8), value.hi);
             return new BigInteger(buffer, isUnsigned: true, isBigEndian: false);
         }
 

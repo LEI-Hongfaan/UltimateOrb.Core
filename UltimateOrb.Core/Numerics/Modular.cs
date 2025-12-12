@@ -280,6 +280,7 @@ namespace UltimateOrb.Numerics
         public static Modular<T, ModulusT> operator --(Modular<T, ModulusT> value) {
             if (!IsZeroRng) {
                 var t = T.IsZero(value.m_value) ? ModulusT.Value : value.m_value;
+
                 return new(default, --t);
             }
             return Zero;

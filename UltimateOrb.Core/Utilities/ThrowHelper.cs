@@ -7,7 +7,6 @@ using System.Runtime.CompilerServices;
 using System.Runtime.ConstrainedExecution;
 using UltimateOrb.Utilities.Extensions;
 using static UltimateOrb.Utilities.Extensions.BooleanIntegerExtensions;
-using static UltimateOrb.Utilities.Extensions.BooleanIntegerExtensions;
 
 namespace UltimateOrb.Utilities {
 
@@ -141,10 +140,27 @@ namespace UltimateOrb.Utilities {
             checked((nuint)first - second).Ignore();
         }
 
+        [CLSCompliantAttribute(false)]
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
+        [TargetedPatchingOptOutAttribute("")]
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        public static void ThrowOnLessThan(this long first, ulong second) {
+            checked((ulong)first - second).Ignore();
+        }
+
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
         [TargetedPatchingOptOutAttribute("")]
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         public static void ThrowOnNotEqual(this int first, int second) {
+            if (first != second) {
+                ThrowOnNotEqualPartial(first, second);
+            }
+        }
+
+        [DoesNotReturn()]
+        [MethodImplAttribute(MethodImplOptions.NoInlining | MethodImplOptions.AggressiveOptimization)]
+        static void ThrowOnNotEqualPartial(this int first, int second) {
+            Debug.Assert(first != second);
             checked(0u - unchecked(first - second).ToUnsignedUnchecked()).Ignore();
         }
 
@@ -153,6 +169,15 @@ namespace UltimateOrb.Utilities {
         [TargetedPatchingOptOutAttribute("")]
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         public static void ThrowOnNotEqual(this uint first, uint second) {
+            if (first != second) {
+                ThrowOnNotEqualPartial(first, second);
+            }
+        }
+
+        [DoesNotReturn()]
+        [MethodImplAttribute(MethodImplOptions.NoInlining | MethodImplOptions.AggressiveOptimization)]
+        static void ThrowOnNotEqualPartial(this uint first, uint second) {
+            Debug.Assert(first != second);
             checked(0u - unchecked(first - second).ToUnsignedUnchecked()).Ignore();
         }
 
@@ -160,6 +185,15 @@ namespace UltimateOrb.Utilities {
         [TargetedPatchingOptOutAttribute("")]
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         public static void ThrowOnNotEqual(this long first, long second) {
+            if (first != second) {
+                ThrowOnNotEqualPartial(first, second);
+            }
+        }
+
+        [DoesNotReturn()]
+        [MethodImplAttribute(MethodImplOptions.NoInlining | MethodImplOptions.AggressiveOptimization)]
+        static void ThrowOnNotEqualPartial(this long first, long second) {
+            Debug.Assert(first != second);
             checked(0u - unchecked(first - second).ToUnsignedUnchecked()).Ignore();
         }
 
@@ -168,9 +202,53 @@ namespace UltimateOrb.Utilities {
         [TargetedPatchingOptOutAttribute("")]
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         public static void ThrowOnNotEqual(this ulong first, ulong second) {
+            if (first != second) {
+                ThrowOnNotEqualPartial(first, second);
+            }
+        }
+
+        [DoesNotReturn()]
+        [MethodImplAttribute(MethodImplOptions.NoInlining | MethodImplOptions.AggressiveOptimization)]
+        static void ThrowOnNotEqualPartial(this ulong first, ulong second) {
+            Debug.Assert(first != second);
             checked(0u - unchecked(first - second).ToUnsignedUnchecked()).Ignore();
         }
 
+        [CLSCompliantAttribute(false)]
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
+        [TargetedPatchingOptOutAttribute("")]
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        public static void ThrowOnNotEqualNumeric(this double first, double second) {
+            if (first != second) {
+                ThrowOnNotEqualNumericPartial(first, second);
+            }
+        }
+
+        [DoesNotReturn()]
+        [MethodImplAttribute(MethodImplOptions.NoInlining | MethodImplOptions.AggressiveOptimization)]
+        static void ThrowOnNotEqualNumericPartial(this double first, double second) {
+            Debug.Assert(first != second);
+            checked(BooleanIntegerModule.Equals(first, second).ToUnsignedUnchecked() - 1u).Ignore();
+        }
+
+        [CLSCompliantAttribute(false)]
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
+        [TargetedPatchingOptOutAttribute("")]
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        public static void ThrowOnNotEqualTotalOrder(this double first, double second) {
+            if (first.Equals(second)) {
+                ThrowOnNotEqualTotalOrderPartial(first, second);
+            }
+        }
+
+        [DoesNotReturn()]
+        [MethodImplAttribute(MethodImplOptions.NoInlining | MethodImplOptions.AggressiveOptimization)]
+        static void ThrowOnNotEqualTotalOrderPartial(this double first, double second) {
+            Debug.Assert(first.Equals(second));
+            checked((first.Equals(second) ? 1u : 0u) - 1u).Ignore();
+        }
+
+        [DoesNotReturn()]
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
         [TargetedPatchingOptOutAttribute("")]
         [MethodImplAttribute(MethodImplOptions.NoInlining)]
@@ -178,6 +256,7 @@ namespace UltimateOrb.Utilities {
             throw new TException();
         }
 
+        [DoesNotReturn()]
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
         [TargetedPatchingOptOutAttribute("")]
         [MethodImplAttribute(MethodImplOptions.NoInlining)]
@@ -197,7 +276,7 @@ namespace UltimateOrb.Utilities {
 
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         public static void ThrowOnFalse(bool value) {
-            _ = checked(0u - BooleanIntegerExtensions.AsUIntegerUnsafe(value));
+            _ = checked(~0u + BooleanIntegerExtensions.AsUIntegerUnsafe(value));
         }
 
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]

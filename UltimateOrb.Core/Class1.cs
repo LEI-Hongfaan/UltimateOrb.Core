@@ -18,7 +18,7 @@ namespace UltimateOrb {
 
     /// <summary>
     /// A strongly typed shift count for row shifts. This generic struct leverages
-    /// generic math (via INumber<T>) and allows for implicit conversion from the numeric type.
+    /// generic math (via INumber{T}) and allows for implicit conversion from the numeric type.
     /// </summary>
     public readonly struct RowShiftCount<T> {
 

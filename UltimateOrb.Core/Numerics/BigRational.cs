@@ -236,6 +236,55 @@ namespace UltimateOrb.Numerics {
             return BitConverter.Int64BitsToDouble(unchecked((Int64)result));
         }
 
+        static double ToDoubleInternal(BigInteger value) {
+            if (value.IsZero) {
+                return 0.0;
+            }
+            bool negative = BigInteger.IsNegative(value);
+            BigInteger absDividend = negative ? -value : value;
+
+            var dividendBits = checked((int)absDividend.GetBitLength());
+            var o = BigInteger.TrailingZeroCount(absDividend);
+
+            var exponent = unchecked(dividendBits - 1);
+
+            if (exponent > 1023) {
+                return negative ? double.NegativeInfinity : double.PositiveInfinity;
+            }
+
+            // Compute the scaled exponent
+            var e = unchecked((int)(exponent - (long)52));
+            bool h = false;
+            var f = unchecked(e - 1);
+            UInt64 q;
+            if (e > 0) {
+                // 
+                /*
+                h = !((BigInteger.One << f) & absDividend).IsZero;
+                absDividend >>= e;
+                q = UInt64.CreateTruncating(absDividend);
+                */
+                // TODO: Cleanup this after BigInteger.TestBit is available.
+                absDividend >>= f;
+                q = UInt64.CreateTruncating(absDividend);
+                h = (0 != (1 & q));
+                q >>= 1;
+            } else {
+                q = UInt64.CreateTruncating(absDividend) << unchecked(-e);
+            }
+
+            //if (!h && ((e > 0 && o != f) || (((e > 0 && o == f) || e <= 0) && !q.IsEven))) {
+            if (!h && (!(0 == (1 & q)) || (e > 0 && o != f))) {
+                ++q;
+            }
+
+            // Construct the double
+            var biasedExponent = (UInt64)(exponent + (1023 - 1)) << 52;
+            var result = unchecked(((negative ? (UInt64)1u : 0u) << 63) + (biasedExponent + q));
+
+            return BitConverter.Int64BitsToDouble(unchecked((Int64)result));
+        }
+
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
         [TargetedPatchingOptOutAttribute("")]
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
@@ -1025,6 +1074,10 @@ namespace UltimateOrb.Numerics {
 
         public static BigRational operator --(BigRational value) {
             return value.m_SignedNumerator.IsZero ? BigRational.MinusOne : new BigRational(value.m_Denominator, value.m_SignedNumerator - value.m_Denominator);
+        }
+
+        public static BigRational CopySign(BigRational value, BigRational sign) {
+            return new BigRational(value.m_Denominator, BigInteger.CopySign(value.m_SignedNumerator, sign.m_SignedNumerator));
         }
 
         public static BigRational DivideEuclidean(BigRational first, BigRational second) {
