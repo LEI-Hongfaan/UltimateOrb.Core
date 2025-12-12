@@ -830,8 +830,151 @@
         </member>
         <member name="T:UltimateOrb.Mathematics.NumberTheory.ZZOverNZZModule">
             <summary>
-                <para>Provides methods for modular arithmetic.</para>
+                <para>Provides methods for modular arithmetic over the ring Z/nZ.</para>
+                <para>
+                    This static class implements common modular arithmetic operations such as addition, subtraction,
+                    multiplication, squaring, and exponentiation for unsigned 32-bit and 64-bit integers.
+                    All operations assume that the modulus <paramref name="n"/> is greater than the operands.
+                </para>
             </summary>
+        </member>
+        <member name="M:UltimateOrb.Mathematics.NumberTheory.ZZOverNZZModule.Sum(System.UInt32,System.UInt32,System.UInt32)">
+            <summary>
+            Computes the sum of two unsigned 32-bit integers modulo <paramref name="n"/>.
+            </summary>
+            <param name="n">The modulus. Must be greater than <paramref name="first"/> and <paramref name="second"/>.</param>
+            <param name="first">The first operand.</param>
+            <param name="second">The second operand.</param>
+            <returns>The result of (first + second) mod n.</returns>
+        </member>
+        <member name="M:UltimateOrb.Mathematics.NumberTheory.ZZOverNZZModule.Sum(System.UInt64,System.UInt64,System.UInt64)">
+            <summary>
+            Computes the sum of two unsigned 64-bit integers modulo <paramref name="n"/>.
+            </summary>
+            <param name="n">The modulus. Must be greater than <paramref name="first"/> and <paramref name="second"/>.</param>
+            <param name="first">The first operand.</param>
+            <param name="second">The second operand.</param>
+            <returns>The result of (first + second) mod n.</returns>
+        </member>
+        <member name="M:UltimateOrb.Mathematics.NumberTheory.ZZOverNZZModule.Double(System.UInt32,System.UInt32)">
+            <summary>
+            Computes the modular doubling of an unsigned 32-bit integer.
+            </summary>
+            <param name="n">The modulus. Must be greater than <paramref name="value"/>.</param>
+            <param name="value">The value to double.</param>
+            <returns>The result of (2 * value) mod n.</returns>
+        </member>
+        <member name="M:UltimateOrb.Mathematics.NumberTheory.ZZOverNZZModule.Double(System.UInt64,System.UInt64)">
+            <summary>
+            Computes the modular doubling of an unsigned 64-bit integer.
+            </summary>
+            <param name="n">The modulus. Must be greater than <paramref name="value"/>.</param>
+            <param name="value">The value to double.</param>
+            <returns>The result of (2 * value) mod n.</returns>
+        </member>
+        <member name="M:UltimateOrb.Mathematics.NumberTheory.ZZOverNZZModule.Difference(System.UInt32,System.UInt32,System.UInt32)">
+            <summary>
+            Computes the difference of two unsigned 32-bit integers modulo <paramref name="n"/>.
+            </summary>
+            <param name="n">The modulus. Must be greater than <paramref name="first"/> and <paramref name="second"/>.</param>
+            <param name="first">The minuend.</param>
+            <param name="second">The subtrahend.</param>
+            <returns>The result of (first - second) mod n.</returns>
+        </member>
+        <member name="M:UltimateOrb.Mathematics.NumberTheory.ZZOverNZZModule.Difference(System.UInt64,System.UInt64,System.UInt64)">
+            <summary>
+            Computes the difference of two unsigned 64-bit integers modulo <paramref name="n"/>.
+            </summary>
+            <param name="n">The modulus. Must be greater than <paramref name="first"/> and <paramref name="second"/>.</param>
+            <param name="first">The minuend.</param>
+            <param name="second">The subtrahend.</param>
+            <returns>The result of (first - second) mod n.</returns>
+        </member>
+        <member name="M:UltimateOrb.Mathematics.NumberTheory.ZZOverNZZModule.Opposite(System.UInt32,System.UInt32)">
+            <summary>
+            Computes the modular additive inverse (opposite) of an unsigned 32-bit integer.
+            </summary>
+            <param name="n">The modulus. Must be greater than <paramref name="value"/>.</param>
+            <param name="value">The value to negate.</param>
+            <returns>The result of (-value) mod n.</returns>
+        </member>
+        <member name="M:UltimateOrb.Mathematics.NumberTheory.ZZOverNZZModule.Opposite(System.UInt64,System.UInt64)">
+            <summary>
+            Computes the modular additive inverse (opposite) of an unsigned 64-bit integer.
+            </summary>
+            <param name="n">The modulus. Must be greater than <paramref name="value"/>.</param>
+            <param name="value">The value to negate.</param>
+            <returns>The result of (-value) mod n.</returns>
+        </member>
+        <member name="M:UltimateOrb.Mathematics.NumberTheory.ZZOverNZZModule.Product(System.UInt32,System.UInt32,System.UInt32)">
+            <summary>
+            Computes the product of two unsigned 32-bit integers modulo <paramref name="n"/>.
+            </summary>
+            <param name="n">The modulus. Must be greater than <paramref name="first"/> and <paramref name="second"/>.</param>
+            <param name="first">The first operand.</param>
+            <param name="second">The second operand.</param>
+            <returns>The result of (first * second) mod n.</returns>
+        </member>
+        <member name="M:UltimateOrb.Mathematics.NumberTheory.ZZOverNZZModule.Product(System.UInt64,System.UInt64,System.UInt64)">
+            <summary>
+            Computes the product of two unsigned 64-bit integers modulo <paramref name="n"/>.
+            </summary>
+            <param name="n">The modulus. Must be greater than <paramref name="first"/> and <paramref name="second"/>.</param>
+            <param name="first">The first operand.</param>
+            <param name="second">The second operand.</param>
+            <returns>The result of (first * second) mod n.</returns>
+        </member>
+        <member name="M:UltimateOrb.Mathematics.NumberTheory.ZZOverNZZModule.Square(System.UInt32,System.UInt32)">
+            <summary>
+            Computes the square of an unsigned 32-bit integer modulo <paramref name="n"/>.
+            </summary>
+            <param name="n">The modulus. Must be greater than <paramref name="value"/>.</param>
+            <param name="value">The value to square.</param>
+            <returns>The result of (value * value) mod n.</returns>
+        </member>
+        <member name="M:UltimateOrb.Mathematics.NumberTheory.ZZOverNZZModule.Square(System.UInt64,System.UInt64)">
+            <summary>
+            Computes the square of an unsigned 64-bit integer modulo <paramref name="n"/>.
+            </summary>
+            <param name="n">The modulus. Must be greater than <paramref name="value"/>.</param>
+            <param name="value">The value to square.</param>
+            <returns>The result of (value * value) mod n.</returns>
+        </member>
+        <member name="M:UltimateOrb.Mathematics.NumberTheory.ZZOverNZZModule.Power(System.UInt32,System.UInt32,System.UInt32)">
+            <summary>
+            Computes the modular exponentiation of an unsigned 32-bit integer base raised to a 32-bit exponent.
+            </summary>
+            <param name="n">The modulus. Must be greater than <paramref name="base"/>.</param>
+            <param name="base">The base value.</param>
+            <param name="exponent">The exponent value.</param>
+            <returns>The result of (base ^ exponent) mod n.</returns>
+        </member>
+        <member name="M:UltimateOrb.Mathematics.NumberTheory.ZZOverNZZModule.Power(System.UInt32,System.UInt32,System.UInt64)">
+            <summary>
+            Computes the modular exponentiation of an unsigned 32-bit integer base raised to a 64-bit exponent.
+            </summary>
+            <param name="n">The modulus. Must be greater than <paramref name="base"/>.</param>
+            <param name="base">The base value.</param>
+            <param name="exponent">The exponent value.</param>
+            <returns>The result of (base ^ exponent) mod n.</returns>
+        </member>
+        <member name="M:UltimateOrb.Mathematics.NumberTheory.ZZOverNZZModule.Power(System.UInt64,System.UInt64,System.UInt32)">
+            <summary>
+            Computes the modular exponentiation of an unsigned 64-bit integer base raised to a 32-bit exponent.
+            </summary>
+            <param name="n">The modulus. Must be greater than <paramref name="base"/>.</param>
+            <param name="base">The base value.</param>
+            <param name="exponent">The exponent value.</param>
+            <returns>The result of (base ^ exponent) mod n.</returns>
+        </member>
+        <member name="M:UltimateOrb.Mathematics.NumberTheory.ZZOverNZZModule.Power(System.UInt64,System.UInt64,System.UInt64)">
+            <summary>
+            Computes the modular exponentiation of an unsigned 64-bit integer base raised to a 64-bit exponent.
+            </summary>
+            <param name="n">The modulus. Must be greater than <paramref name="base"/>.</param>
+            <param name="base">The base value.</param>
+            <param name="exponent">The exponent value.</param>
+            <returns>The result of (base ^ exponent) mod n.</returns>
         </member>
         <member name="M:UltimateOrb.Extensions.MemorySpanRuntimeHelpers.DangerousGetPinnedObjectDataSize(System.Object)">
             <summary>
@@ -1761,31 +1904,31 @@
             <param name="values">The span of elements to assign to the vector.</param>
         </member>
         <member name="P:UltimateOrb.Numerics.Accelerated.Vector3D.E">
-            <inheritdoc cref="!:Vector4.E" />
+            <inheritdoc cref="P:System.Numerics.Vector4.E" />
         </member>
         <member name="P:UltimateOrb.Numerics.Accelerated.Vector3D.Epsilon">
-            <inheritdoc cref="!:Vector4.Epsilon" />
+            <inheritdoc cref="P:System.Numerics.Vector4.Epsilon" />
         </member>
         <member name="P:UltimateOrb.Numerics.Accelerated.Vector3D.NaN">
-            <inheritdoc cref="!:Vector4.NaN" />
+            <inheritdoc cref="P:System.Numerics.Vector4.NaN" />
         </member>
         <member name="P:UltimateOrb.Numerics.Accelerated.Vector3D.NegativeInfinity">
-            <inheritdoc cref="!:Vector4.NegativeInfinity" />
+            <inheritdoc cref="P:System.Numerics.Vector4.NegativeInfinity" />
         </member>
         <member name="P:UltimateOrb.Numerics.Accelerated.Vector3D.NegativeZero">
-            <inheritdoc cref="!:Vector4.NegativeZero" />
+            <inheritdoc cref="P:System.Numerics.Vector4.NegativeZero" />
         </member>
         <member name="P:UltimateOrb.Numerics.Accelerated.Vector3D.One">
             <inheritdoc cref="P:System.Numerics.Vector4.One" />
         </member>
         <member name="P:UltimateOrb.Numerics.Accelerated.Vector3D.Pi">
-            <inheritdoc cref="!:Vector4.Pi" />
+            <inheritdoc cref="P:System.Numerics.Vector4.Pi" />
         </member>
         <member name="P:UltimateOrb.Numerics.Accelerated.Vector3D.PositiveInfinity">
-            <inheritdoc cref="!:Vector4.PositiveInfinity" />
+            <inheritdoc cref="P:System.Numerics.Vector4.PositiveInfinity" />
         </member>
         <member name="P:UltimateOrb.Numerics.Accelerated.Vector3D.Tau">
-            <inheritdoc cref="!:Vector4.Tau" />
+            <inheritdoc cref="P:System.Numerics.Vector4.Tau" />
         </member>
         <member name="P:UltimateOrb.Numerics.Accelerated.Vector3D.UnitX">
             <summary>Gets the vector (1,0,0).</summary>
@@ -1887,8 +2030,17 @@
             <param name="right">The second vector to add.</param>
             <returns>The summed vector.</returns>
         </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.Clamp(UltimateOrb.Numerics.Accelerated.Vector3D,UltimateOrb.Numerics.Accelerated.Vector3D,UltimateOrb.Numerics.Accelerated.Vector3D)">
+            <inheritdoc cref="!:ISimdVector&lt;TSelf, T&gt;.Clamp(TSelf, TSelf, TSelf)" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.ClampNative(UltimateOrb.Numerics.Accelerated.Vector3D,UltimateOrb.Numerics.Accelerated.Vector3D,UltimateOrb.Numerics.Accelerated.Vector3D)">
+            <inheritdoc cref="!:ISimdVector&lt;TSelf, T&gt;.ClampNative(TSelf, TSelf, TSelf)" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.CopySign(UltimateOrb.Numerics.Accelerated.Vector3D,UltimateOrb.Numerics.Accelerated.Vector3D)">
+            <inheritdoc cref="!:ISimdVector&lt;TSelf, T&gt;.CopySign(TSelf, TSelf)" />
+        </member>
         <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.Cos(UltimateOrb.Numerics.Accelerated.Vector3D)">
-            <inheritdoc cref="!:Vector4.Cos(Vector4)" />
+            <inheritdoc cref="M:System.Numerics.Vector4.Cos(System.Numerics.Vector4)" />
         </member>
         <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.Create(System.Double)">
             <summary>Creates a new <see cref="T:UltimateOrb.Numerics.Accelerated.Vector3D" /> object whose three elements have the same value.</summary>
@@ -1923,7 +2075,7 @@
             <returns>The cross product.</returns>
         </member>
         <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.DegreesToRadians(UltimateOrb.Numerics.Accelerated.Vector3D)">
-            <inheritdoc cref="!:Vector4.DegreesToRadians(Vector4)" />
+            <inheritdoc cref="M:System.Numerics.Vector4.DegreesToRadians(System.Numerics.Vector4)" />
         </member>
         <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.Distance(UltimateOrb.Numerics.Accelerated.Vector3D,UltimateOrb.Numerics.Accelerated.Vector3D)">
             <summary>Computes the Euclidean distance between the two given points.</summary>
@@ -1955,17 +2107,56 @@
             <param name="vector2">The second vector.</param>
             <returns>The dot product.</returns>
         </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.Exp(UltimateOrb.Numerics.Accelerated.Vector3D)">
+            <inheritdoc cref="M:System.Numerics.Vector4.Exp(System.Numerics.Vector4)" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.FusedMultiplyAdd(UltimateOrb.Numerics.Accelerated.Vector3D,UltimateOrb.Numerics.Accelerated.Vector3D,UltimateOrb.Numerics.Accelerated.Vector3D)">
+            <inheritdoc cref="M:System.Runtime.Intrinsics.Vector256.MultiplyAddEstimate(System.Runtime.Intrinsics.Vector256{System.Double},System.Runtime.Intrinsics.Vector256{System.Double},System.Runtime.Intrinsics.Vector256{System.Double})" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.Hypot(UltimateOrb.Numerics.Accelerated.Vector3D,UltimateOrb.Numerics.Accelerated.Vector3D)">
+            <inheritdoc cref="M:System.Numerics.Vector4.Hypot(System.Numerics.Vector4,System.Numerics.Vector4)" />
+        </member>
         <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.Lerp(UltimateOrb.Numerics.Accelerated.Vector3D,UltimateOrb.Numerics.Accelerated.Vector3D,System.Double)">
             <inheritdoc cref="!:Vector4.Lerp(Vector4, Vector4, double)" />
         </member>
         <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.Lerp(UltimateOrb.Numerics.Accelerated.Vector3D,UltimateOrb.Numerics.Accelerated.Vector3D,UltimateOrb.Numerics.Accelerated.Vector3D)">
-            <inheritdoc cref="!:Vector4.Lerp(Vector4, Vector4, Vector4)" />
+            <inheritdoc cref="M:System.Numerics.Vector4.Lerp(System.Numerics.Vector4,System.Numerics.Vector4,System.Numerics.Vector4)" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.Log(UltimateOrb.Numerics.Accelerated.Vector3D)">
+            <inheritdoc cref="M:System.Numerics.Vector4.Log2(System.Numerics.Vector4)" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.Log2(UltimateOrb.Numerics.Accelerated.Vector3D)">
+            <inheritdoc cref="M:System.Numerics.Vector4.Log(System.Numerics.Vector4)" />
         </member>
         <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.Max(UltimateOrb.Numerics.Accelerated.Vector3D,UltimateOrb.Numerics.Accelerated.Vector3D)">
             <inheritdoc cref="!:ISimdVector&lt;TSelf, T&gt;.Max(TSelf, TSelf)" />
         </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.MaxMagnitude(UltimateOrb.Numerics.Accelerated.Vector3D,UltimateOrb.Numerics.Accelerated.Vector3D)">
+            <inheritdoc cref="!:ISimdVector&lt;TSelf, T&gt;.MaxMagnitude(TSelf, TSelf)" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.MaxMagnitudeNumber(UltimateOrb.Numerics.Accelerated.Vector3D,UltimateOrb.Numerics.Accelerated.Vector3D)">
+            <inheritdoc cref="!:ISimdVector&lt;TSelf, T&gt;.MaxMagnitudeNumber(TSelf, TSelf)" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.MaxNative(UltimateOrb.Numerics.Accelerated.Vector3D,UltimateOrb.Numerics.Accelerated.Vector3D)">
+            <inheritdoc cref="!:ISimdVector&lt;TSelf, T&gt;.MaxNative(TSelf, TSelf)" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.MaxNumber(UltimateOrb.Numerics.Accelerated.Vector3D,UltimateOrb.Numerics.Accelerated.Vector3D)">
+            <inheritdoc cref="!:ISimdVector&lt;TSelf, T&gt;.MaxNumber(TSelf, TSelf)" />
+        </member>
         <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.Min(UltimateOrb.Numerics.Accelerated.Vector3D,UltimateOrb.Numerics.Accelerated.Vector3D)">
             <inheritdoc cref="!:ISimdVector&lt;TSelf, T&gt;.Min(TSelf, TSelf)" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.MinMagnitude(UltimateOrb.Numerics.Accelerated.Vector3D,UltimateOrb.Numerics.Accelerated.Vector3D)">
+            <inheritdoc cref="!:ISimdVector&lt;TSelf, T&gt;.MinMagnitude(TSelf, TSelf)" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.MinMagnitudeNumber(UltimateOrb.Numerics.Accelerated.Vector3D,UltimateOrb.Numerics.Accelerated.Vector3D)">
+            <inheritdoc cref="!:ISimdVector&lt;TSelf, T&gt;.MinMagnitudeNumber(TSelf, TSelf)" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.MinNative(UltimateOrb.Numerics.Accelerated.Vector3D,UltimateOrb.Numerics.Accelerated.Vector3D)">
+            <inheritdoc cref="!:ISimdVector&lt;TSelf, T&gt;.MinNative(TSelf, TSelf)" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.MinNumber(UltimateOrb.Numerics.Accelerated.Vector3D,UltimateOrb.Numerics.Accelerated.Vector3D)">
+            <inheritdoc cref="!:ISimdVector&lt;TSelf, T&gt;.MinNumber(TSelf, TSelf)" />
         </member>
         <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.Multiply(UltimateOrb.Numerics.Accelerated.Vector3D,UltimateOrb.Numerics.Accelerated.Vector3D)">
             <summary>Returns a new vector whose values are the product of each pair of elements in two specified vectors.</summary>
@@ -1986,7 +2177,7 @@
             <returns>The scaled vector.</returns>
         </member>
         <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.MultiplyAddEstimate(UltimateOrb.Numerics.Accelerated.Vector3D,UltimateOrb.Numerics.Accelerated.Vector3D,UltimateOrb.Numerics.Accelerated.Vector3D)">
-            <inheritdoc cref="!:Vector256.MultiplyAddEstimate(Vector256&lt;double&gt;, Vector256&lt;double&gt;, Vector256&lt;double&gt;)" />
+            <inheritdoc cref="M:System.Runtime.Intrinsics.Vector256.MultiplyAddEstimate(System.Runtime.Intrinsics.Vector256{System.Double},System.Runtime.Intrinsics.Vector256{System.Double},System.Runtime.Intrinsics.Vector256{System.Double})" />
         </member>
         <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.Negate(UltimateOrb.Numerics.Accelerated.Vector3D)">
             <summary>Negates a specified vector.</summary>
@@ -1999,7 +2190,7 @@
             <returns>The normalized vector.</returns>
         </member>
         <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.RadiansToDegrees(UltimateOrb.Numerics.Accelerated.Vector3D)">
-            <inheritdoc cref="!:Vector4.RadiansToDegrees(Vector4)" />
+            <inheritdoc cref="M:System.Numerics.Vector4.RadiansToDegrees(System.Numerics.Vector4)" />
         </member>
         <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.Reflect(UltimateOrb.Numerics.Accelerated.Vector3D,UltimateOrb.Numerics.Accelerated.Vector3D)">
             <summary>Returns the reflection of a vector off a surface that has the specified normal.</summary>
@@ -2007,11 +2198,17 @@
             <param name="normal">The normal of the surface being reflected off.</param>
             <returns>The reflected vector.</returns>
         </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.Round(UltimateOrb.Numerics.Accelerated.Vector3D)">
+            <inheritdoc cref="M:System.Numerics.Vector4.Round(System.Numerics.Vector4)" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.Round(UltimateOrb.Numerics.Accelerated.Vector3D,System.MidpointRounding)">
+            <inheritdoc cref="M:System.Numerics.Vector4.Round(System.Numerics.Vector4,System.MidpointRounding)" />
+        </member>
         <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.Sin(UltimateOrb.Numerics.Accelerated.Vector3D)">
-            <inheritdoc cref="!:Vector4.Sin(Vector4)" />
+            <inheritdoc cref="M:System.Numerics.Vector4.Sin(System.Numerics.Vector4)" />
         </member>
         <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.SinCos(UltimateOrb.Numerics.Accelerated.Vector3D)">
-            <inheritdoc cref="!:Vector4.SinCos(Vector4)" />
+            <inheritdoc cref="M:System.Numerics.Vector4.SinCos(System.Numerics.Vector4)" />
         </member>
         <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.SquareRoot(UltimateOrb.Numerics.Accelerated.Vector3D)">
             <summary>Returns a vector whose elements are the square root of each of a specified vector's elements.</summary>
@@ -2029,6 +2226,9 @@
             <param name="value">The vector to rotate.</param>
             <param name="rotation">The rotation to apply.</param>
             <returns>The transformed vector.</returns>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.Truncate(UltimateOrb.Numerics.Accelerated.Vector3D)">
+            <inheritdoc cref="M:System.Numerics.Vector4.Truncate(System.Numerics.Vector4)" />
         </member>
         <member name="M:UltimateOrb.Numerics.Accelerated.Vector3D.CopyTo(System.Double[])">
             <summary>Copies the elements of the vector to a specified array.</summary>
@@ -2285,6 +2485,18 @@
             <param name="right">The second vector to add.</param>
             <returns>The summed vector.</returns>
         </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.Clamp(UltimateOrb.Numerics.Accelerated.Vector4D,UltimateOrb.Numerics.Accelerated.Vector4D,UltimateOrb.Numerics.Accelerated.Vector4D)">
+            <inheritdoc cref="!:ISimdVector&lt;TSelf, T&gt;.Clamp(TSelf, TSelf, TSelf)" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.ClampNative(UltimateOrb.Numerics.Accelerated.Vector4D,UltimateOrb.Numerics.Accelerated.Vector4D,UltimateOrb.Numerics.Accelerated.Vector4D)">
+            <inheritdoc cref="!:ISimdVector&lt;TSelf, T&gt;.ClampNative(TSelf, TSelf, TSelf)" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.CopySign(UltimateOrb.Numerics.Accelerated.Vector4D,UltimateOrb.Numerics.Accelerated.Vector4D)">
+            <inheritdoc cref="!:ISimdVector&lt;TSelf, T&gt;.CopySign(TSelf, TSelf)" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.Cos(UltimateOrb.Numerics.Accelerated.Vector4D)">
+            <inheritdoc cref="M:System.Runtime.Intrinsics.Vector256.Cos(System.Runtime.Intrinsics.Vector256{System.Double})" />
+        </member>
         <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.Create(System.Double)">
             <summary>Creates a new <see cref="T:UltimateOrb.Numerics.Accelerated.Vector4D" /> object whose four elements have the same value.</summary>
             <param name="value">The value to assign to all four elements.</param>
@@ -2319,7 +2531,7 @@
             <returns>A new <see cref="T:UltimateOrb.Numerics.Accelerated.Vector4D" /> with <see cref="P:UltimateOrb.Numerics.Accelerated.Vector4D.X" /> initialized <paramref name="x" /> and the remaining elements left uninitialized.</returns>
         </member>
         <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.DegreesToRadians(UltimateOrb.Numerics.Accelerated.Vector4D)">
-            <inheritdoc cref="!:Vector256.DegreesToRadians(Vector256&lt;double&gt;)" />
+            <inheritdoc cref="M:System.Runtime.Intrinsics.Vector256.DegreesToRadians(System.Runtime.Intrinsics.Vector256{System.Double})" />
         </member>
         <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.Distance(UltimateOrb.Numerics.Accelerated.Vector4D,UltimateOrb.Numerics.Accelerated.Vector4D)">
             <summary>Computes the Euclidean distance between the two given points.</summary>
@@ -2351,6 +2563,15 @@
             <param name="vector2">The second vector.</param>
             <returns>The dot product.</returns>
         </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.Exp(UltimateOrb.Numerics.Accelerated.Vector4D)">
+            <inheritdoc cref="M:System.Runtime.Intrinsics.Vector256.Exp(System.Runtime.Intrinsics.Vector256{System.Double})" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.FusedMultiplyAdd(UltimateOrb.Numerics.Accelerated.Vector4D,UltimateOrb.Numerics.Accelerated.Vector4D,UltimateOrb.Numerics.Accelerated.Vector4D)">
+            <inheritdoc cref="M:System.Runtime.Intrinsics.Vector256.MultiplyAddEstimate(System.Runtime.Intrinsics.Vector256{System.Double},System.Runtime.Intrinsics.Vector256{System.Double},System.Runtime.Intrinsics.Vector256{System.Double})" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.Hypot(UltimateOrb.Numerics.Accelerated.Vector4D,UltimateOrb.Numerics.Accelerated.Vector4D)">
+            <inheritdoc cref="M:System.Runtime.Intrinsics.Vector256.Hypot(System.Runtime.Intrinsics.Vector256{System.Double},System.Runtime.Intrinsics.Vector256{System.Double})" />
+        </member>
         <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.Lerp(UltimateOrb.Numerics.Accelerated.Vector4D,UltimateOrb.Numerics.Accelerated.Vector4D,System.Double)">
             <inheritdoc cref="M:UltimateOrb.Numerics.Accelerated.Vector4D.Lerp(UltimateOrb.Numerics.Accelerated.Vector4D,UltimateOrb.Numerics.Accelerated.Vector4D,UltimateOrb.Numerics.Accelerated.Vector4D)" />
             <remarks><format type="text/markdown"><![CDATA[
@@ -2358,10 +2579,43 @@
             ]]></format></remarks>
         </member>
         <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.Lerp(UltimateOrb.Numerics.Accelerated.Vector4D,UltimateOrb.Numerics.Accelerated.Vector4D,UltimateOrb.Numerics.Accelerated.Vector4D)">
-            <inheritdoc cref="!:Vector256.Lerp(Vector256&lt;double&gt;, Vector256&lt;double&gt;, Vector256&lt;double&gt;)" />
+            <inheritdoc cref="M:System.Runtime.Intrinsics.Vector256.Lerp(System.Runtime.Intrinsics.Vector256{System.Double},System.Runtime.Intrinsics.Vector256{System.Double},System.Runtime.Intrinsics.Vector256{System.Double})" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.Log(UltimateOrb.Numerics.Accelerated.Vector4D)">
+            <inheritdoc cref="M:System.Runtime.Intrinsics.Vector256.Log(System.Runtime.Intrinsics.Vector256{System.Double})" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.Log2(UltimateOrb.Numerics.Accelerated.Vector4D)">
+            <inheritdoc cref="M:System.Runtime.Intrinsics.Vector256.Log2(System.Runtime.Intrinsics.Vector256{System.Double})" />
         </member>
         <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.Max(UltimateOrb.Numerics.Accelerated.Vector4D,UltimateOrb.Numerics.Accelerated.Vector4D)">
             <inheritdoc cref="!:ISimdVector&lt;TSelf, T&gt;.Max(TSelf, TSelf)" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.MaxMagnitude(UltimateOrb.Numerics.Accelerated.Vector4D,UltimateOrb.Numerics.Accelerated.Vector4D)">
+            <inheritdoc cref="!:ISimdVector&lt;TSelf, T&gt;.MaxMagnitude(TSelf, TSelf)" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.MaxMagnitudeNumber(UltimateOrb.Numerics.Accelerated.Vector4D,UltimateOrb.Numerics.Accelerated.Vector4D)">
+            <inheritdoc cref="!:ISimdVector&lt;TSelf, T&gt;.MaxMagnitudeNumber(TSelf, TSelf)" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.MaxNative(UltimateOrb.Numerics.Accelerated.Vector4D,UltimateOrb.Numerics.Accelerated.Vector4D)">
+            <inheritdoc cref="!:ISimdVector&lt;TSelf, T&gt;.MaxNative(TSelf, TSelf)" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.MaxNumber(UltimateOrb.Numerics.Accelerated.Vector4D,UltimateOrb.Numerics.Accelerated.Vector4D)">
+            <inheritdoc cref="!:ISimdVector&lt;TSelf, T&gt;.MaxNumber(TSelf, TSelf)" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.Min(UltimateOrb.Numerics.Accelerated.Vector4D,UltimateOrb.Numerics.Accelerated.Vector4D)">
+            <inheritdoc cref="!:ISimdVector&lt;TSelf, T&gt;.Min(TSelf, TSelf)" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.MinMagnitude(UltimateOrb.Numerics.Accelerated.Vector4D,UltimateOrb.Numerics.Accelerated.Vector4D)">
+            <inheritdoc cref="!:ISimdVector&lt;TSelf, T&gt;.MinMagnitude(TSelf, TSelf)" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.MinMagnitudeNumber(UltimateOrb.Numerics.Accelerated.Vector4D,UltimateOrb.Numerics.Accelerated.Vector4D)">
+            <inheritdoc cref="!:ISimdVector&lt;TSelf, T&gt;.MinMagnitudeNumber(TSelf, TSelf)" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.MinNative(UltimateOrb.Numerics.Accelerated.Vector4D,UltimateOrb.Numerics.Accelerated.Vector4D)">
+            <inheritdoc cref="!:ISimdVector&lt;TSelf, T&gt;.MinNative(TSelf, TSelf)" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.MinNumber(UltimateOrb.Numerics.Accelerated.Vector4D,UltimateOrb.Numerics.Accelerated.Vector4D)">
+            <inheritdoc cref="!:ISimdVector&lt;TSelf, T&gt;.MinNumber(TSelf, TSelf)" />
         </member>
         <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.Multiply(UltimateOrb.Numerics.Accelerated.Vector4D,UltimateOrb.Numerics.Accelerated.Vector4D)">
             <summary>Returns a new vector whose values are the product of each pair of elements in two specified vectors.</summary>
@@ -2382,7 +2636,7 @@
             <returns>The scaled vector.</returns>
         </member>
         <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.MultiplyAddEstimate(UltimateOrb.Numerics.Accelerated.Vector4D,UltimateOrb.Numerics.Accelerated.Vector4D,UltimateOrb.Numerics.Accelerated.Vector4D)">
-            <inheritdoc cref="!:Vector256.MultiplyAddEstimate(Vector256&lt;double&gt;, Vector256&lt;double&gt;, Vector256&lt;double&gt;)" />
+            <inheritdoc cref="M:System.Runtime.Intrinsics.Vector256.MultiplyAddEstimate(System.Runtime.Intrinsics.Vector256{System.Double},System.Runtime.Intrinsics.Vector256{System.Double},System.Runtime.Intrinsics.Vector256{System.Double})" />
         </member>
         <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.Negate(UltimateOrb.Numerics.Accelerated.Vector4D)">
             <summary>Negates a specified vector.</summary>
@@ -2395,10 +2649,19 @@
             <returns>The normalized vector.</returns>
         </member>
         <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.RadiansToDegrees(UltimateOrb.Numerics.Accelerated.Vector4D)">
-            <inheritdoc cref="!:Vector256.RadiansToDegrees(Vector256&lt;double&gt;)" />
+            <inheritdoc cref="M:System.Runtime.Intrinsics.Vector256.RadiansToDegrees(System.Runtime.Intrinsics.Vector256{System.Double})" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.Round(UltimateOrb.Numerics.Accelerated.Vector4D)">
+            <inheritdoc cref="M:System.Runtime.Intrinsics.Vector256.Round(System.Runtime.Intrinsics.Vector256{System.Double})" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.Round(UltimateOrb.Numerics.Accelerated.Vector4D,System.MidpointRounding)">
+            <inheritdoc cref="M:System.Runtime.Intrinsics.Vector256.Round(System.Runtime.Intrinsics.Vector256{System.Double},System.MidpointRounding)" />
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.Sin(UltimateOrb.Numerics.Accelerated.Vector4D)">
+            <inheritdoc cref="M:System.Runtime.Intrinsics.Vector256.Sin(System.Runtime.Intrinsics.Vector256{System.Double})" />
         </member>
         <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.SinCos(UltimateOrb.Numerics.Accelerated.Vector4D)">
-            <inheritdoc cref="!:Vector256.SinCos(Vector256&lt;double&gt;)" />
+            <inheritdoc cref="M:System.Runtime.Intrinsics.Vector256.SinCos(System.Runtime.Intrinsics.Vector256{System.Double})" />
         </member>
         <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.SquareRoot(UltimateOrb.Numerics.Accelerated.Vector4D)">
             <summary>Returns a vector whose elements are the square root of each of a specified vector's elements.</summary>
@@ -2422,6 +2685,9 @@
             <param name="value">The vector to rotate.</param>
             <param name="rotation">The rotation to apply.</param>
             <returns>The transformed vector.</returns>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.Truncate(UltimateOrb.Numerics.Accelerated.Vector4D)">
+            <inheritdoc cref="M:System.Runtime.Intrinsics.Vector256.Truncate(System.Runtime.Intrinsics.Vector256{System.Double})" />
         </member>
         <member name="M:UltimateOrb.Numerics.Accelerated.Vector4D.CopyTo(System.Double[])">
             <summary>Copies the elements of the vector to a specified array.</summary>
@@ -7675,296 +7941,6 @@
                 </para>
                 <para>
                     For floating-point numbers, this function will return 0 if the numbers are unordered (either or both are NaN). The infinite values are equal to themselves.
-                </para>
-            </summary>
-        </member>
-        <member name="M:UltimateOrb.Utilities.Extensions.BooleanIntegerExtensions.AsIntegerUnsafe(System.Boolean)">
-            <devdoc>
-                <para>
-                    ECMA-335: (III.1.1.1 Numeric data types - Short integers)
-                    <c>bool</c> or <see cref="T:System.Boolean"/> (8-bit) is zero-extended.
-                </para>
-                <para>
-                    The body of this method will be modified by the build tools.
-                </para>
-            </devdoc>
-        </member>
-        <member name="M:UltimateOrb.Utilities.Extensions.BooleanIntegerExtensions.AsUIntegerUnsafe(System.Boolean)">
-            <devdoc>
-                <para>
-                    ECMA-335: (III.1.1.1 Numeric data types - Short integers)
-                    <c>bool</c> or <see cref="T:System.Boolean"/> (8-bit) is zero-extended.
-                </para>
-                <para>
-                    The body of this method will be modified by the build tools.
-                </para>
-            </devdoc>
-        </member>
-        <member name="M:UltimateOrb.Utilities.Extensions.CanonicalIntegerBooleanExtensions.AsIntegerUnsafe(UltimateOrb.CanonicalIntegerBoolean)">
-            <devdoc>
-                <para>
-                    ECMA-335: (III.1.1.1 Numeric data types - Short integers)
-                    <c>bool</c> or <see cref="T:System.Boolean"/> (8-bit) is zero-extended.
-                </para>
-            </devdoc>
-        </member>
-        <member name="M:UltimateOrb.Utilities.Extensions.CanonicalIntegerBooleanExtensions.AsUIntegerUnsafe(UltimateOrb.CanonicalIntegerBoolean)">
-            <devdoc>
-                <para>
-                    ECMA-335: (III.1.1.1 Numeric data types - Short integers)
-                    <c>bool</c> or <see cref="T:System.Boolean"/> (8-bit) is zero-extended.
-                </para>
-            </devdoc>
-        </member>
-        <member name="T:UltimateOrb.Utilities.SizeOfModule">
-            <summary>
-                <para>
-                    Provides static methods for getting the managed size of the specified type.
-                </para>
-            </summary>
-            <devdoc>
-                <para>
-                    This type contains members will be modified by the build tools.
-                    The build tools identify the type and those members by their names.
-                    Whenever you rename this type or such a member, update the build tools accordingly.
-                </para>
-            </devdoc>
-        </member>
-        <member name="F:UltimateOrb.Utilities.SizeOfModule.BitsPerByte">
-            <summary>
-                <para>Represents the number of bits in a byte.</para>
-            </summary>
-        </member>
-        <member name="M:UltimateOrb.Utilities.SizeOfModule.BitSizeOf``1">
-            <summary>
-                <para>
-                    Returns the bit size of the specified type.
-                </para>
-            </summary>
-            <typeparam name="T">
-                <para>
-                    Specifies the type.
-                </para>
-            </typeparam>
-            <returns>
-                <para>
-                    The managed size, in bits, of a type.
-                </para>
-            </returns>
-            <remarks>
-                <para>
-                    For a reference type, the size returned is the size of the object reference itself (same as <c>sizeof(IntPtr)</c>), not the actural size of the data stored in the object.
-                </para>
-            </remarks>
-            <devdoc>
-                <para>
-                    ECMA-335: Note that the runtime size of a value type shall not exceed 1 MiB (0x100000 bytes).
-                </para>
-            </devdoc>
-        </member>
-        <member name="M:UltimateOrb.Utilities.SizeOfModule.SizeOf``1">
-            <summary>
-                <para>
-                    Returns the result of the CIL <c>sizeof</c> instruction of the specified type.
-                </para>
-            </summary>
-            <typeparam name="T">
-                <para>
-                    Specifies the type parameter of the instruction.
-                </para>
-            </typeparam>
-            <returns>
-                <para>
-                    The managed size, in bytes, of a type.
-                </para>
-            </returns>
-            <remarks>
-                <para>
-                    For a reference type, the size returned is the size of the object reference itself (same as <c>sizeof(IntPtr)</c>), not the actural size of the data stored in the object.
-                </para>
-            </remarks>
-            <devdoc>
-                <para>
-                    ECMA-335: Note that the runtime size of a value type shall not exceed 1 MiB (0x100000 bytes).
-                </para>
-                <para>
-                    The body of this method will be modified by the build tools.
-                    The build tools identify the method by its names.
-                    Whenever you rename this method, update the build tools accordingly.
-                </para>
-            </devdoc>
-        </member>
-        <member name="T:UltimateOrb.U">
-            <summary>
-            Provides static methods to support discriminated unions. 
-            </summary>
-        </member>
-        <member name="T:UltimateOrb.U`2">
-            <summary>
-            Defines a value-type discriminated union with two cases.
-            </summary>
-        </member>
-        <member name="F:UltimateOrb.U`2.Case">
-            <summary>
-            Determines of which case the value is in a discriminated union.
-            </summary>
-        </member>
-        <member name="F:UltimateOrb.U`2.Case1OrDefault">
-            <summary>
-            Value when <see cref="F:UltimateOrb.U`2.Case"/> is 1 or default.
-            </summary>
-        </member>
-        <member name="F:UltimateOrb.U`2.Case2OrDefault">
-            <summary>
-            Value when <see cref="F:UltimateOrb.U`2.Case"/> is 2 or default.
-            </summary>
-        </member>
-        <member name="M:UltimateOrb.U`2.#ctor(`0)">
-            <summary>
-            Constructs a discriminated union from the value of case 1. 
-            </summary>
-        </member>
-        <member name="M:UltimateOrb.U`2.#ctor(`1)">
-            <summary>
-            Constructs a discriminated union from the value of case 2. 
-            </summary>
-        </member>
-        <member name="M:UltimateOrb.U`2.Create``1(``0,System.Int32)">
-            <summary>
-            Constructs a discriminated union from the value. 
-            </summary>
-        </member>
-        <member name="P:UltimateOrb.U`2.Case1">
-            <summary>
-            Value of case 1.
-            </summary>
-        </member>
-        <member name="P:UltimateOrb.U`2.Case2">
-            <summary>
-            Value of case 2.
-            </summary>
-        </member>
-        <member name="M:UltimateOrb.U`2.GetValue``1">
-            <summary>
-            Value of case 2.
-            </summary>
-        </member>
-        <member name="M:UltimateOrb.U`2.CompareTo(UltimateOrb.U{`0,`1})">
-            <summary>
-            Compares discriminated unions. Two discriminated unions are not equal if their case numbers are different.
-            </summary>
-        </member>
-        <member name="M:UltimateOrb.U`2.Equals(UltimateOrb.U{`0,`1})">
-            <summary>
-            Compares discriminated unions. Two discriminated unions are not equal if their case numbers are different.
-            </summary>
-        </member>
-        <member name="M:UltimateOrb.U`2.op_Explicit(UltimateOrb.U{`0,`1})~`0">
-            <summary>
-            Extracts the value in a discriminated union.
-            </summary>
-        </member>
-        <member name="M:UltimateOrb.U`2.op_Explicit(UltimateOrb.U{`0,`1})~`1">
-            <summary>
-            Extracts the value in a discriminated union.
-            </summary>
-        </member>
-        <member name="M:UltimateOrb.U`2.op_Implicit(`0)~UltimateOrb.U{`0,`1}">
-            <summary>
-            Warps a value into a discriminated union.
-            </summary>
-        </member>
-        <member name="M:UltimateOrb.U`2.op_Implicit(`1)~UltimateOrb.U{`0,`1}">
-            <summary>
-            Warps a value into a discriminated union.
-            </summary>
-        </member>
-        <member name="M:UltimateOrb.U`2.Equals(System.Object)">
-            <summary>
-            Compares discriminated unions.<br />
-            Two discriminated unions are not equal if their case tags are different.<br />
-            </summary>
-        </member>
-        <member name="M:UltimateOrb.U`2.GetHashCode">
-            <summary>
-            Calculates the hash code for the current <see cref="T:UltimateOrb.U`2"/> instance.
-            </summary>
-            <returns>The hash code for the current <see cref="T:UltimateOrb.U`2"/> instance.</returns>
-        </member>
-        <member name="M:UltimateOrb.U`2.ToString">
-            <summary>
-            Returns a string that represents the value of this <see cref="T:UltimateOrb.U`2"/> instance.
-            </summary>
-            <returns>The string representation of this <see cref="T:UltimateOrb.U`2"/> instance.</returns>
-        </member>
-        <member name="M:UltimateOrb.U`2.op_Equality(UltimateOrb.U{`0,`1},UltimateOrb.U{`0,`1})">
-            <summary>
-            Compares discriminated unions.<br />
-            Two discriminated unions are not equal if their case tags are different.<br />
-            </summary>
-        </member>
-        <member name="M:UltimateOrb.U`2.op_Inequality(UltimateOrb.U{`0,`1},UltimateOrb.U{`0,`1})">
-            <summary>
-            Compares discriminated unions.<br />
-            Two discriminated unions are not equal if their case tags are different.<br />
-            </summary>
-        </member>
-        <member name="T:UltimateOrb.Void">
-            <summary>
-                <para>
-                    Provides a placeholder type.
-                </para>
-            </summary>
-        </member>
-        <member name="T:UltimateOrb.Void`1">
-            <summary>
-                <para>
-                    Provides a type that is different from the specified type.
-                </para>
-            </summary>
-            <typeparam name="T">
-                <para>
-                    The specified type.
-                </para>
-            </typeparam>
-        </member>
-        <member name="T:UltimateOrb.Void`2">
-            <summary>
-                <para>
-                    Provides a type that is different from the specified types.
-                </para>
-            </summary>
-            <typeparam name="T1">
-                <para>
-                    The first specified type.
-                </para>
-            </typeparam>
-            <typeparam name="T2">
-                <para>
-                    The second specified type.
-                </para>
-            </typeparam>
-        </member>
-        <member name="T:System.Runtime.CompilerServices.IgnoresAccessChecksToAttribute">
-            <summary>
-            Allows the current assembly to access the internal types of a specified assembly that are ordinarily invisible.
-            </summary>
-        </member>
-        <member name="M:System.Runtime.CompilerServices.IgnoresAccessChecksToAttribute.#ctor(System.String)">
-            <summary>
-            Initializes a new instance of the <see cref="T:System.Runtime.CompilerServices.IgnoresAccessChecksToAttribute" /> class with the name of the specified assembly.
-            </summary>
-            <param name="assemblyName">The name of the specified assembly.</param>
-        </member>
-        <member name="P:System.Runtime.CompilerServices.IgnoresAccessChecksToAttribute.AssemblyName">
-            <summary>
-            Gets the name of the specified assembly whose access checks against the current assembly are ignored .
-            </summary>
-            <value>A string that represents the name of the specified assembly.</value>
-        </member>
-    </members>
-</doc>
-n will return 0 if the numbers are unordered (either or both are NaN). The infinite values are equal to themselves.
                 </para>
             </summary>
         </member>

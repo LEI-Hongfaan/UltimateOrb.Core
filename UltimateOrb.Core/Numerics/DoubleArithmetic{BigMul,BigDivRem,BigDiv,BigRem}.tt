@@ -82,6 +82,7 @@ namespace UltimateOrb.Numerics {
 	using Int = Int<#= Ti #>;
 	using Long = <#= TN #>Int<#= Di #>;
 
+    using Misc = DoubleArithmetic.Misc<#= Ti #>;
     using Math = global::Internal.System.Math;
 
     public static partial class DoubleArithmetic {
@@ -379,7 +380,7 @@ namespace UltimateOrb.Numerics {
             unchecked {
                 // 2019Dec15
                 // Currently, we have fast multiplication instructions on most platforms.
-                if (true || Misc.ULong.Size > Misc.UIntPtr.Size) {
+                if (true || Misc.ULong.Size > UIntPtr.Size) {
                     // 2013Oct04, 2013Dec24
                     var fl = (UInt)first;
                     var fh = (UInt)(first >> Misc.UInt.BitSize);
@@ -450,7 +451,7 @@ namespace UltimateOrb.Numerics {
         // primary overload
         public static ULong BigMul_A_Karatsuba(ULong first, ULong second, out ULong highResult) {
             unchecked {
-                if (Misc.ULong.Size > Misc.UIntPtr.Size) {
+                if (Misc.ULong.Size > UIntPtr.Size) {
                     // 2013Oct04
                     // 我很滿意。
                     var fl = (UInt)first;
@@ -502,7 +503,7 @@ namespace UltimateOrb.Numerics {
         // primary overload
         public static ULong BigMul_A_Long(ULong first, ULong second, out ULong highResult) {
             unchecked {
-                if (Misc.ULong.Size > Misc.UIntPtr.Size) {
+                if (Misc.ULong.Size > UIntPtr.Size) {
                     // 2013Oct03
                     // 我很滿意。
                     var fl = (UInt)first;
@@ -877,7 +878,7 @@ namespace UltimateOrb.Numerics {
 #else
 <# } #>
             unchecked {
-                if (Misc.ULong.Size > Misc.UIntPtr.Size) {
+                if (Misc.ULong.Size > UIntPtr.Size) {
                     // 2013Oct04
                     var fl = (UInt)value;
                     var fh = (UInt)(value >> Misc.UInt.BitSize);

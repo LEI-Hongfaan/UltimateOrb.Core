@@ -29,6 +29,8 @@ namespace UltimateOrb.Numerics {
 	using Int = Int<#= Ti #>;
 	using Long = <#= TN #>Int<#= Di #>;
 
+    using Misc = DoubleArithmetic.Misc<#= Ti #>;
+
     using Math = global::Internal.System.Math;
     using MathEx = DoubleArithmetic;
 

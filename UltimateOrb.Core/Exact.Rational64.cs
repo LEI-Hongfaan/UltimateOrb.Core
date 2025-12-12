@@ -363,53 +363,57 @@ namespace UltimateOrb.Mathematics.Exact {
         [PureAttribute()]
         public static Rational64 Multiply(Rational64 first, Int64 second) {
             unchecked {
-                var first_numerator = (UInt32)first.bits;
-                var first_denominator = (Int32)(first.bits >> 32);
-                var second_numerator = UltimateOrb.Mathematics.Elementary.Math.AbsAsUnsigned(second);
-                var second_denominator = (Int32)Int64.Sign(second);
-                if (0 == first_numerator || 0 == second_numerator) {
-                    return Zero;
+                try {
+                    var first_numerator = (UInt32)first.bits;
+                    var first_denominator = (Int32)(first.bits >> 32);
+                    var second_numerator = UltimateOrb.Mathematics.Elementary.Math.AbsAsUnsigned(second);
+                    var second_denominator = (Int32)(second >> 63);
+                    if (0 == first_numerator || 0 == second_numerator) {
+                        return Zero;
+                    }
+                    var s = 0 > (first_denominator ^ second_denominator);
+                    if (0 <= first_denominator) {
+                        ++first_denominator;
+                    } else {
+                        first_denominator = -first_denominator;
+                    }
+                    if (0 <= second_denominator) {
+                        ++second_denominator;
+                    } else {
+                        second_denominator = -second_denominator;
+                    }
+                    {
+                        var d = EuclideanAlgorithm.GreatestCommonDivisorPartial((UInt32)first_denominator, second_numerator);
+                        first_denominator = (Int32)((UInt32)first_denominator / d);
+                        second_numerator /= d;
+                    }
+                    {
+                        var d = EuclideanAlgorithm.GreatestCommonDivisorPartial(first_numerator, (UInt32)second_denominator);
+                        first_numerator /= d;
+                        second_denominator = (Int32)((UInt32)second_denominator / d);
+                    }
+                    /*
+                    var q = (Int64)((UInt64)(UInt32)denominator * (UInt32)second_denominator);
+                    if (s) {
+                        q = -q;
+                    } else {
+                        --q;
+                    }
+                    checked((Int32)q).Ignore();
+                    return new Rational64(checked(numerator * second_numerator) | (UInt64)q << 32);
+                    */
+                    var p = (UInt64)first_numerator * second_numerator;
+                    var q = (Int64)((UInt64)(UInt32)first_denominator * (UInt32)second_denominator);
+                    p = checked((UInt32)p);
+                    checked(unchecked((UInt32)Int32.MinValue) - unchecked((UInt64)q)).Ignore();
+                    if (s) {
+                        return new Rational64((UInt64)(-q << 32) | p);
+                    } else {
+                        return new Rational64((UInt64)(--q << 32) | p);
+                    }
+                } catch (Exception) {
                 }
-                var s = 0 > (first_denominator ^ second_denominator);
-                if (0 <= first_denominator) {
-                    ++first_denominator;
-                } else {
-                    first_denominator = -first_denominator;
-                }
-                if (0 <= second_denominator) {
-                    ++second_denominator;
-                } else {
-                    second_denominator = -second_denominator;
-                }
-                {
-                    var d = EuclideanAlgorithm.GreatestCommonDivisorPartial((UInt32)first_denominator, second_numerator);
-                    first_denominator = (Int32)((UInt32)first_denominator / d);
-                    second_numerator /= d;
-                }
-                {
-                    var d = EuclideanAlgorithm.GreatestCommonDivisorPartial(first_numerator, (UInt32)second_denominator);
-                    first_numerator /= d;
-                    second_denominator = (Int32)((UInt32)second_denominator / d);
-                }
-                /*
-                var q = (Int64)((UInt64)(UInt32)denominator * (UInt32)second_denominator);
-                if (s) {
-                    q = -q;
-                } else {
-                    --q;
-                }
-                checked((Int32)q).Ignore();
-                return new Rational64(checked(numerator * second_numerator) | (UInt64)q << 32);
-                */
-                var p = (UInt64)first_numerator * second_numerator;
-                var q = (Int64)((UInt64)(UInt32)first_denominator * (UInt32)second_denominator);
-                p = checked((UInt32)p);
-                checked(unchecked((UInt32)Int32.MinValue) - unchecked((UInt64)q)).Ignore();
-                if (s) {
-                    return new Rational64((UInt64)(-q << 32) | p);
-                } else {
-                    return new Rational64((UInt64)(--q << 32) | p);
-                }
+                return default;
             }
         }
 
@@ -615,20 +619,35 @@ namespace UltimateOrb.Mathematics.Exact {
             }
 
             // Calculate the remainder denominator
-            Int64 remainderDenominator = divisorNumerator * dividendDenominator;
+            Int64 remainderDenominator = unchecked((Int64)dividendDenominator * (Int64)divisorDenominator);
 
             // Calculate the quotient and remainder using Math.DivRem
-            Int64 quotient = Math.DivRem(dividendNumerator * divisorDenominator, remainderDenominator, out Int64 remainderNumerator);
+            Int64 quotient = Math.DivRem(dividendNumerator * divisorDenominator, dividendDenominator * divisorNumerator, out Int64 remainderNumerator);
             
             if (0 > remainderNumerator) {
                 remainderNumerator = -remainderNumerator;
                 remainderDenominator = -remainderDenominator;
             }
-
+            remainderNumerator = unchecked((Int64)Reduce1((UInt64)remainderNumerator, remainderDenominator, out remainderDenominator));
             // Create the remainder Rational64 using the internal constructor and correct denominator
             Rational64 remainder = new Rational64(unchecked((UInt64)(checked((UInt32)remainderNumerator) | ((Int64)EncodeDenominator(remainderDenominator) << 32))));
 
             return (quotient, remainder);
+
+            [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+            static UInt64 Reduce1(UInt64 p, Int64 q, out Int64 r) {
+                UInt64 s = Mathematics.Elementary.Math.AbsAsUnsigned(q);
+                var t = p;
+                for (; ; ) {
+                    var o = t % s;
+                    if (0 == o) {
+                        r = q / unchecked((Int64)s);
+                        return p / s;
+                    }
+                    t = s;
+                    s = o;
+                }
+            }
         }
 
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]

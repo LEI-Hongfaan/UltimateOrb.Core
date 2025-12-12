@@ -56,7 +56,8 @@ namespace UltimateOrb.Numerics {
             return unchecked((UInt64)value.LoInt64Bits);
         }
 
-        private static partial class Misc {
+        [Obsolete]
+        internal static partial class Misc32 {
 
             public static partial class UInt {
 
@@ -85,19 +86,37 @@ namespace UltimateOrb.Numerics {
 
                 public const int BitSize = 64;
             }
+        }
 
-            public static partial class UIntPtr {
+        [Obsolete]
+        internal static partial class Misc64 {
 
-                public static readonly int Size = System.UIntPtr.Size;
+            public static partial class UInt {
 
-                public static readonly int BitSize = 8 * Size;
+                public const int Size = 8;
+
+                public const int BitSize = 64;
             }
 
-            public static partial class IntPtr {
+            public static partial class ULong {
 
-                public static readonly int Size = System.IntPtr.Size;
+                public const int Size = 16;
 
-                public static readonly int BitSize = 8 * Size;
+                public const int BitSize = 128;
+            }
+
+            public static partial class Int {
+
+                public const int Size = 8;
+
+                public const int BitSize = 64;
+            }
+
+            public static partial class Long {
+
+                public const int Size = 16;
+
+                public const int BitSize = 128;
             }
         }
     }
