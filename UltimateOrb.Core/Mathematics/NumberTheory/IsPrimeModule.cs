@@ -285,34 +285,15 @@ namespace UltimateOrb.Mathematics.NumberTheory {
                 if (!IsPrimeMillerRabinModule.IsMillerRabinPseudoprimeInternal(2, value, d, s)) {
                     return false;
                 }
-                /* // 2017Oct06
                 if (value < 2047u) {
                     return true;
                 }
-                if (!IsPrimeMillerRabinModule.IsMillerRabinPseudoprimeInternal(3, value, d, s)) {
-                    return false;
-                }
-                if (value < 1373653u) {
-                    return true;
-                }
-                if (!IsPrimeMillerRabinModule.IsMillerRabinPseudoprimeInternal(5, value, d, s)) {
-                    return false;
-                }
-                if (value < 25326001u) {
-                    return true;
-                }
-                */
                 if (!IsPrimeMillerRabinModule.IsMillerRabinPseudoprimeInternal(7, value, d, s)) {
                     return false;
                 }
-                /* // 2017Oct06
-                if (value < 3215031751u) {
+                if (value < 314821u) {
                     return true;
                 }
-                if (!IsPrimeMillerRabinModule.IsMillerRabinPseudoprimeInternal(11, value, d, s)) {
-                    return false;
-                }
-                */
                 if (!IsPrimeMillerRabinModule.IsMillerRabinPseudoprimeInternal(61, value, d, s)) {
                     return false;
                 }
@@ -361,27 +342,84 @@ namespace UltimateOrb.Mathematics.NumberTheory {
                 if (!IsPrimeMillerRabinModule.IsMillerRabinPseudoprimeInternal(2, (UInt32)value, d, s)) {
                     return false;
                 }
-                /* // 2017Oct06
-                if ((UInt32)value < 2047u) {
+                if (value < 2047u) {
                     return true;
                 }
-                if (!IsPrimeMillerRabinModule.IsMillerRabinPseudoprimeInternal(3, (UInt32)value, d, s)) {
-                    return false;
-                }
-                if ((UInt32)value < 1373653u) {
-                    return true;
-                }
-                if (!IsPrimeMillerRabinModule.IsMillerRabinPseudoprimeInternal(5, (UInt32)value, d, s)) {
-                    return false;
-                }
-                if ((UInt32)value < 25326001u) {
-                    return true;
-                }
-                */
                 if (!IsPrimeMillerRabinModule.IsMillerRabinPseudoprimeInternal(7, (UInt32)value, d, s)) {
                     return false;
                 }
+                if (value < 314821u) {
+                    return true;
+                }
                 if (!IsPrimeMillerRabinModule.IsMillerRabinPseudoprimeInternal(61, (UInt32)value, d, s)) {
+                    return false;
+                }
+                return true;
+            }
+        }
+
+        public static bool IsPrime(UInt16 value) {
+            unchecked {
+                if (64u > value) {
+                    return 0 != (1 & (int)(prime_table >> (int)value));
+                }
+                if (!IsProbablePrimeTrialDivision(primes_2_3_7, euler_2_3_7, value)) {
+                    return false;
+                }
+                if (!IsProbablePrimeTrialDivision(primes_5_11, euler_5_11, value)) {
+                    return false;
+                }
+                /*
+                var d = value - 1;
+                var firstCoefficient = Utilities.CountTrailingZeros(d);
+                d >>= firstCoefficient;
+                */
+                var d = (uint)value >> 1;
+                int s = 1;
+                while (0u == (1u & d)) {
+                    d >>= 1;
+                    ++s;
+                }
+                if (!IsPrimeMillerRabinModule.IsMillerRabinPseudoprimeInternal(2, value, d, s)) {
+                    return false;
+                }
+                if (value < 2047u) {
+                    return true;
+                }
+                if (!IsPrimeMillerRabinModule.IsMillerRabinPseudoprimeInternal(3, value, d, s)) {
+                    return false;
+                }
+                return true;
+            }
+        }
+
+        public static bool IsPrime(Int16 value) {
+            unchecked {
+                if (64 > value) {
+                    if (2 > value) {
+                        return false;
+                    }
+                    return 0 != (1 & (int)(prime_table >> (int)value));
+                }
+                if (!IsProbablePrimeTrialDivision(primes_2_3_7, euler_2_3_7, (uint)value)) {
+                    return false;
+                }
+                if (!IsProbablePrimeTrialDivision(primes_5_11, euler_5_11, (uint)value)) {
+                    return false;
+                }
+                var d = (uint)value >> 1;
+                int s = 1;
+                while (0u == (1u & d)) {
+                    d >>= 1;
+                    ++s;
+                }
+                if (!IsPrimeMillerRabinModule.IsMillerRabinPseudoprimeInternal(2, (uint)value, d, s)) {
+                    return false;
+                }
+                if (value < 2047u) {
+                    return true;
+                }
+                if (!IsPrimeMillerRabinModule.IsMillerRabinPseudoprimeInternal(3, (uint)value, d, s)) {
                     return false;
                 }
                 return true;

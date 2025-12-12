@@ -68,7 +68,7 @@ namespace UltimateOrb.Mathematics.NumberTheory {
                 if ((value & 1u) == 0u) {
                     return false;
                 }
-                var d = value - 1;
+                var d = value - 1u;
                 var s = Utilities.CountTrailingZeros(d);
                 d >>= s;
                 if (!IsMillerRabinPseudoprimeInternal(2, value, d, s)) {
@@ -147,11 +147,14 @@ namespace UltimateOrb.Mathematics.NumberTheory {
                 if ((value & 1u) == 0u) {
                     return false;
                 }
-                var d = value - 1;
+                var d = value - 1u;
                 var s = Utilities.CountTrailingZeros(d);
                 d >>= s;
-                if (!IsMillerRabinPseudoprimeInternal(2, value, d, s)) {
+                if (!IsMillerRabinPseudoprimeInternal(2u, value, d, s)) {
                     return false;
+                }
+                if (value < 2047u) {
+                    return true;
                 }
                 /* // 2017Oct06
                 if (value < 2047u) {
@@ -170,8 +173,11 @@ namespace UltimateOrb.Mathematics.NumberTheory {
                     return true;
                 }
                 */
-                if (!IsMillerRabinPseudoprimeInternal(7, value, d, s)) {
+                if (!IsMillerRabinPseudoprimeInternal(7u, value, d, s)) {
                     return false;
+                }
+                if (value < 314821u) {
+                    return true;
                 }
                 /* // 2017Oct06
                 if (value < 3215031751u) {
@@ -181,7 +187,35 @@ namespace UltimateOrb.Mathematics.NumberTheory {
                     return false;
                 }
                 */
-                if (!IsMillerRabinPseudoprimeInternal(61, value, d, s)) {
+                if (!IsMillerRabinPseudoprimeInternal(61u, value, d, s)) {
+                    return false;
+                }
+                return true;
+            }
+        }
+
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
+        [System.Runtime.TargetedPatchingOptOutAttribute("")]
+        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Diagnostics.Contracts.PureAttribute()]
+        internal static bool IsPrimeMillerRabin(UInt16 value) {
+            unchecked {
+                if (value <= 2u) {
+                    return value == 2u;
+                }
+                if ((value & 1u) == 0u) {
+                    return false;
+                }
+                var d = value - 1u;
+                var s = Utilities.CountTrailingZeros(d);
+                d >>= s;
+                if (!IsMillerRabinPseudoprimeInternal(2u, value, d, s)) {
+                    return false;
+                }
+                if (value < 2047u) {
+                    return true;
+                }
+                if (!IsMillerRabinPseudoprimeInternal(3, value, d, s)) {
                     return false;
                 }
                 return true;
@@ -216,6 +250,19 @@ namespace UltimateOrb.Mathematics.NumberTheory {
 
         /// <summary>
         ///     <para>This API supports the product infrastructure and is not intended to be used directly from your code.</para>
+        ///     <seealso cref="IsPrimeModule.IsPrime(UInt16)"/>
+        /// </summary>
+        [System.CLSCompliantAttribute(false)]
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
+        [System.Runtime.TargetedPatchingOptOutAttribute("")]
+        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Diagnostics.Contracts.PureAttribute()]
+        public static bool IsPrime(UInt16 value) {
+            return IsPrimeMillerRabin(value);
+        }
+
+        /// <summary>
+        ///     <para>This API supports the product infrastructure and is not intended to be used directly from your code.</para>
         ///     <seealso cref="IsPrimeModule.IsPrime(Int64)"/>
         /// </summary>
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
@@ -242,6 +289,21 @@ namespace UltimateOrb.Mathematics.NumberTheory {
                 return false;
             }
             return IsPrimeMillerRabin(unchecked((UInt32)value));
+        }
+        
+        /// <summary>
+        ///     <para>This API supports the product infrastructure and is not intended to be used directly from your code.</para>
+        ///     <seealso cref="IsPrimeModule.IsPrime(Int16)"/>
+        /// </summary>
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
+        [System.Runtime.TargetedPatchingOptOutAttribute("")]
+        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Diagnostics.Contracts.PureAttribute()]
+        public static bool IsPrime(Int16 value) {
+            if (0 > value) {
+                return false;
+            }
+            return IsPrimeMillerRabin(unchecked((UInt16)value));
         }
     }
 }

@@ -18,9 +18,9 @@ namespace UltimateOrb.CodeAnalysis.SourceGenerators {
     }
     [AttributeUsage(AttributeTargets.Interface, Inherited = false, AllowMultiple = false)]
     [System.Diagnostics.Conditional("InterfaceExtensionsGenerator_DEBUG")]
-    sealed class GeneratExtensionsAttribute : Attribute {
+    sealed class GenerateExtensionsAttribute : Attribute {
 
-        public GeneratExtensionsAttribute() {
+        public GenerateExtensionsAttribute() {
         }
 
         public string? Namespace { get; set; }
@@ -41,7 +41,7 @@ using System;
 
 namespace MyCode {
 
-    [UltimateOrb.CodeAnalysis.SourceGenerators.GeneratExtensions]
+    [UltimateOrb.CodeAnalysis.SourceGenerators.GenerateExtensions]
     interface IInterfaceA<T> {
 
         bool Property1 {

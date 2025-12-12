@@ -497,5 +497,71 @@ namespace UltimateOrb.Mathematics.Elementary {
         public static ulong AbsAsUnsigned(ulong value) {
             return value;
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint Cbrt(uint radicand) {
+            return unchecked((uint)System.Math.Cbrt(radicand));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint CbrtRem(uint radicand, out uint remainder) {
+            unchecked {
+                var root = (uint)System.Math.Cbrt(radicand);
+                remainder = radicand - root * root * root;
+                return root;
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ulong Cbrt(ulong radicand) {
+            unchecked {
+                var root = (ulong)(1e-8 + System.Math.Cbrt(radicand));
+                var p = root * root * root;
+                return radicand >= p ? root : --root;
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ulong CbrtRem(ulong radicand, out ulong remainder) {
+            unchecked {
+                var root = (ulong)(1e-8 + System.Math.Cbrt(radicand));
+                var p = root * root * root;
+                var m = radicand - p;
+                if ((long)m >= 0) {
+                    remainder = m;
+                    return root;
+                } else {
+                    --root;
+                    remainder = radicand - root * root * root;
+                    return root;
+                }
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static UInt128 Cbrt(UInt128 radicand) {
+            unchecked {
+                var root = (ulong)(1e-2 + System.Math.Cbrt((double)radicand));
+                var p = root * (UInt128)root * root;
+                return radicand >= p ? root : --root;
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static UInt128 CbrtRem(UInt128 radicand, out UInt128 remainder) {
+            unchecked {
+                var root = (ulong)(1e-2 + System.Math.Cbrt((double)radicand));
+                var p = root * (UInt128)root * root;
+                var m = radicand - p;
+                if ((Int128)m >= 0) {
+                    remainder = m;
+                    return root;
+                } else {
+                    --root;
+                    remainder = radicand - root * (UInt128)root * root;
+                    return root;
+                }
+            }
+        }
     }
 }

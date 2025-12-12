@@ -935,9 +935,9 @@ namespace UltimateOrb {
         [System.Diagnostics.Contracts.PureAttribute()]
         public static explicit operator Half(XInt128 value) {
             unchecked {
-                var valueInt = (int)value.lo;
-                var mask = valueInt >> (SizeOfModule.BitSizeOf<int>() - 1);
-                var v = (valueInt ^ mask - mask).ToUnsignedUnchecked();
+                var lo = (int)value.lo;
+                var mask = lo >> (SizeOfModule.BitSizeOf<int>() - 1);
+                var v = (lo ^ mask - mask).ToUnsignedUnchecked();
                 var sign = mask & (int)Int16.MinValue;
                 var t = value + 65519;
                 return BitConverter.Int16BitsToHalf((Int16)(sign + ((t.ToUnsignedUnchecked() > 65519 * 2 || value.hi.ToSignedUnchecked() != mask) ? HalfHelpers.HalfPositiveInfinityBits : HalfHelpers.ToHalfPartial(v))));

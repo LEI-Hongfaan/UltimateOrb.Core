@@ -29,7 +29,7 @@ using System;
 namespace MyCode {
 
     [UltimateOrb.Numerics.Specialized.GenerateFixedDecimal32(-3)]
-    public readonly partial struct MilliDecimal {
+    public readonly partial struct MilliDecimal32 {
     }
 }
 """"");

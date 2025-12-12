@@ -483,7 +483,12 @@
                 </para>
             </summary>
         </member>
-        <!-- Badly formed XML comment ignored for member "T:UltimateOrb.RowShiftCount`1" -->
+        <member name="T:UltimateOrb.RowShiftCount`1">
+            <summary>
+            A strongly typed shift count for row shifts. This generic struct leverages
+            generic math (via INumber{T}) and allows for implicit conversion from the numeric type.
+            </summary>
+        </member>
         <member name="M:UltimateOrb.RowShiftCount`1.ToString">
             <inheritdoc/>
         </member>
@@ -755,6 +760,12 @@
                 <seealso cref="M:UltimateOrb.Mathematics.NumberTheory.IsPrimeModule.IsPrime(System.UInt32)"/>
             </summary>
         </member>
+        <member name="M:UltimateOrb.Mathematics.NumberTheory.IsPrimeMillerRabinModule.IsPrime(System.UInt16)">
+            <summary>
+                <para>This API supports the product infrastructure and is not intended to be used directly from your code.</para>
+                <seealso cref="M:UltimateOrb.Mathematics.NumberTheory.IsPrimeModule.IsPrime(System.UInt16)"/>
+            </summary>
+        </member>
         <member name="M:UltimateOrb.Mathematics.NumberTheory.IsPrimeMillerRabinModule.IsPrime(System.Int64)">
             <summary>
                 <para>This API supports the product infrastructure and is not intended to be used directly from your code.</para>
@@ -765,6 +776,12 @@
             <summary>
                 <para>This API supports the product infrastructure and is not intended to be used directly from your code.</para>
                 <seealso cref="M:UltimateOrb.Mathematics.NumberTheory.IsPrimeModule.IsPrime(System.Int32)"/>
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.Mathematics.NumberTheory.IsPrimeMillerRabinModule.IsPrime(System.Int16)">
+            <summary>
+                <para>This API supports the product infrastructure and is not intended to be used directly from your code.</para>
+                <seealso cref="M:UltimateOrb.Mathematics.NumberTheory.IsPrimeModule.IsPrime(System.Int16)"/>
             </summary>
         </member>
         <member name="T:UltimateOrb.Mathematics.NumberTheory.IsPrimeModule">
@@ -7639,6 +7656,69 @@
                     </list>
                 </para>
             </returns>
+        </member>
+        <member name="T:UltimateOrb.Numerics.IDoubleArithmeticBigDivRemFunctions`1">
+            <summary>
+            Defines methods for performing division and remainder operations on types that support double-width arithmetic.
+            </summary>
+            <typeparam name="TSelf">The type that implements this interface.</typeparam>
+        </member>
+        <member name="M:UltimateOrb.Numerics.IDoubleArithmeticBigDivRemFunctions`1.BigDivRem(`0,`0,`0)">
+            <summary>
+            Computes the quotient and remainder of the division of a double-width dividend by a divisor.
+            </summary>
+            <param name="dividend_lo">The lower part of the dividend.</param>
+            <param name="dividend_hi">The higher part of the dividend.</param>
+            <param name="divisor">The divisor.</param>
+            <returns>A tuple containing the quotient and remainder.</returns>
+        </member>
+        <member name="M:UltimateOrb.Numerics.IDoubleArithmeticBigDivRemFunctions`1.BigDivide(`0,`0,`0)">
+            <summary>
+            Computes the quotient of the division of a double-width dividend by a divisor.
+            </summary>
+            <param name="dividend_lo">The lower part of the dividend.</param>
+            <param name="dividend_hi">The higher part of the dividend.</param>
+            <param name="divisor">The divisor.</param>
+            <returns>The quotient.</returns>
+        </member>
+        <member name="M:UltimateOrb.Numerics.IDoubleArithmeticBigDivRemFunctions`1.BigRemainder(`0,`0,`0)">
+            <summary>
+            Computes the remainder of the division of a double-width dividend by a divisor.
+            </summary>
+            <param name="dividend_lo">The lower part of the dividend.</param>
+            <param name="dividend_hi">The higher part of the dividend.</param>
+            <param name="divisor">The divisor.</param>
+            <returns>The remainder.</returns>
+        </member>
+        <member name="T:UltimateOrb.Numerics.IDoubleArithmeticBigMulFunctions`1">
+            <summary>
+            Defines methods for performing double-width multiplication operations.
+            </summary>
+            <typeparam name="TSelf">The type that implements this interface.</typeparam>
+        </member>
+        <member name="M:UltimateOrb.Numerics.IDoubleArithmeticBigMulFunctions`1.BigMultiply(`0,`0)">
+            <summary>
+            Computes the product of two values, returning the lower and higher parts of the result.
+            </summary>
+            <param name="left">The first value to multiply.</param>
+            <param name="right">The second value to multiply.</param>
+            <returns>A tuple containing the lower and higher parts of the product.</returns>
+        </member>
+        <member name="M:UltimateOrb.Numerics.IDoubleArithmeticBigMulFunctions`1.BigMultiplyLow(`0,`0)">
+            <summary>
+            Computes the lower part of the product of two values.
+            </summary>
+            <param name="left">The first value to multiply.</param>
+            <param name="right">The second value to multiply.</param>
+            <returns>The lower part of the product.</returns>
+        </member>
+        <member name="M:UltimateOrb.Numerics.IDoubleArithmeticBigMulFunctions`1.BigMultiplyHigh(`0,`0)">
+            <summary>
+            Computes the higher part of the product of two values.
+            </summary>
+            <param name="left">The first value to multiply.</param>
+            <param name="right">The second value to multiply.</param>
+            <returns>The higher part of the product.</returns>
         </member>
         <member name="M:UltimateOrb.Numerics.Specialized.BitMatrix16x16.#ctor(System.Runtime.Intrinsics.Vector256{System.UInt16})">
             <summary>

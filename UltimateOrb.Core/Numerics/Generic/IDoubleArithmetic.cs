@@ -62,7 +62,7 @@ namespace UltimateOrb.Numerics.Generic {
         internal static int BitSize_Checked {
 
             [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-            get => CheckBitSize(BitSize_Checked);
+            get => CheckBitSize(TSelf.BitSize);
         }
 
         public static abstract void BitwiseOr(out T result, T first, T second);
@@ -126,7 +126,6 @@ namespace UltimateOrb.Numerics.Generic {
         public static abstract void DivRemUnchecked(out T result, out T remainder, T dividend, T divisor);
 
         public static abstract void MultiplyUnchecked(out T result, T first, T second);
-
 
         public static abstract void BigMul(out T result_lo, out T result_hi, T first, T second);
 

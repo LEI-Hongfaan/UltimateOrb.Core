@@ -26,20 +26,19 @@ namespace UltimateOrb.Numerics.BigIntegerWrappers {
         }
 
 #if NET8_0_OR_GREATER && USE_UNSAFE_ACCESS_TO_STD_BIGINTEGER
-        /*
         [UnsafeAccessor(UnsafeAccessorKind.Field, Name = "_sign")]
         internal extern static ref readonly int GetSignField(this ref readonly System.Numerics.BigInteger obj);
 
         [UnsafeAccessor(UnsafeAccessorKind.Field, Name = "_bits")]
         internal extern static ref readonly uint[] GetBitsField(this ref readonly System.Numerics.BigInteger obj);
-        */
 
+        /*
         [UnsafeAccessor(UnsafeAccessorKind.Field, Name = "_sign")]
         internal extern static int GetSignField(this System.Numerics.BigInteger obj);
 
         [UnsafeAccessor(UnsafeAccessorKind.Field, Name = "_bits")]
         internal extern static uint[] GetBitsField(this System.Numerics.BigInteger obj);
-
+        */
         [UnsafeAccessor(UnsafeAccessorKind.Constructor)]
         internal extern static System.Numerics.BigInteger CreateBigIntegerInternal(int sign, uint[]? bits);
 #endif

@@ -38,11 +38,11 @@ namespace UltimateOrb.Mathematics.Exact {
             return sb.ToString();
         }
 
-        public string ToString(IFormatProvider formatProvider) {
+        public string ToString(IFormatProvider? formatProvider) {
             return this.ToString(null, formatProvider);
         }
 
-        public string ToString(string format, IFormatProvider formatProvider) {
+        public string ToString(string? format, IFormatProvider? formatProvider) {
             Contract.Ensures(Contract.Result<string>() != null);
             var sb = new StringBuilder(33);
             sb.Append(this.SignedNumerator.ToString(format, formatProvider));

@@ -39,9 +39,9 @@ namespace UltimateOrb.CodeAnalysis.SourceGenerators {
     /*
     [AttributeUsage(AttributeTargets.Interface, Inherited = false, AllowMultiple = false)]
     [System.Diagnostics.Conditional("InterfaceExtensionsGenerator_DEBUG")]
-    public class GeneratExtensionsAttribute : Attribute {
+    public class GenerateExtensionsAttribute : Attribute {
 
-        public GeneratExtensionsAttribute() {
+        public GenerateExtensionsAttribute() {
         }
 
         public readonly string? Namespace;
@@ -51,26 +51,26 @@ namespace UltimateOrb.CodeAnalysis.SourceGenerators {
     [Generator]
     public class InterfaceExtensionsGenerator : ISourceGenerator {
 
-        private const string attributeText = @"
+        private const string attributeText = """
 using System;
 
 namespace UltimateOrb.CodeAnalysis.SourceGenerators {
 
     [AttributeUsage(AttributeTargets.Interface, Inherited = false, AllowMultiple = false)]
-    [System.Diagnostics.Conditional(""InterfaceExtensionsGenerator_DEBUG"")]
-    public class GeneratExtensionsAttribute : Attribute {
+    [System.Diagnostics.Conditional("InterfaceExtensionsGenerator_DEBUG")]
+    public class GenerateExtensionsAttribute : Attribute {
 
-        public GeneratExtensionsAttribute() {
+        public GenerateExtensionsAttribute() {
         }
 
         public readonly string? Namespace;
     }
 }
-";
+""";
 
         public void Initialize(GeneratorInitializationContext context) {
 
-            context.RegisterForPostInitialization(postInitContext => postInitContext.AddSource("GeneratExtensionsAttribute", attributeText));
+            context.RegisterForPostInitialization(postInitContext => postInitContext.AddSource("GenerateExtensionsAttribute", attributeText));
 
             context.RegisterForSyntaxNotifications(() => new SyntaxReceiver());
         }
@@ -80,7 +80,7 @@ namespace UltimateOrb.CodeAnalysis.SourceGenerators {
                 return;
             }
 
-            var attributeSymbol = context.Compilation.GetTypeByMetadataName("UltimateOrb.CodeAnalysis.SourceGenerators.GeneratExtensionsAttribute");
+            var attributeSymbol = context.Compilation.GetTypeByMetadataName("UltimateOrb.CodeAnalysis.SourceGenerators.GenerateExtensionsAttribute");
 
             foreach (var group in receiver.Members.GroupBy(m => m.Parent)) {
                 var interf = group.Key!;
@@ -112,7 +112,7 @@ namespace UltimateOrb.CodeAnalysis.SourceGenerators {
                         var t = sm.GetTypeInfo(x);
                         var attributeType = t.Type;
                         var fullName = attributeType.ToString();
-                        if (fullName != "UltimateOrb.CodeAnalysis.SourceGenerators.GeneratExtensionsAttribute") {
+                        if (fullName != "UltimateOrb.CodeAnalysis.SourceGenerators.GenerateExtensionsAttribute") {
                             return false;
                         }
                         return true;
