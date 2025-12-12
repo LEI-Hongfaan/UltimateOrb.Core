@@ -8,6 +8,8 @@ namespace UltimateOrb.Numerics {
 	using Int = Int32;
 	using Long = Int64;
 
+    using Misc = DoubleArithmetic.Misc32;
+
     using Math = global::Internal.System.Math;
     using MathEx = DoubleArithmetic;
 
@@ -135,7 +137,11 @@ namespace UltimateOrb.Numerics {
                         return lowResult;
                     } else {
                         highResult = 0u;
-                        return highDivisor <= highDividend && (highDivisor != highDividend || lowDivisor <= lowDividend) ? 1u : 0u;
+                        if (highDivisor <= highDividend && (highDivisor != highDividend || lowDivisor <= lowDividend)) {
+                            return 1u;
+                        } else {
+                            return 0u;
+                        }
                     }
                 } else {
                     highResult = Math.DivRem(highDividend, lowDivisor, out ULong t);
@@ -403,6 +409,8 @@ namespace UltimateOrb.Numerics {
 	using Int = Int64;
 	using Long = System.Int128;
 
+    using Misc = DoubleArithmetic.Misc64;
+
     using Math = global::Internal.System.Math;
     using MathEx = DoubleArithmetic;
 
@@ -530,7 +538,11 @@ namespace UltimateOrb.Numerics {
                         return lowResult;
                     } else {
                         highResult = 0u;
-                        return highDivisor <= highDividend && (highDivisor != highDividend || lowDivisor <= lowDividend) ? (ULong)1u : (ULong)0u;
+                        if (highDivisor <= highDividend && (highDivisor != highDividend || lowDivisor <= lowDividend)) {
+                            return 1u;
+                        } else {
+                            return 0u;
+                        }
                     }
                 } else {
                     highResult = Math.DivRem(highDividend, lowDivisor, out ULong t);
@@ -798,6 +810,8 @@ namespace UltimateOrb.Numerics {
 	using Int = Int64;
 	using Long = UltimateOrb.Int128;
 
+    using Misc = DoubleArithmetic.Misc64;
+
     using Math = global::Internal.System.Math;
     using MathEx = DoubleArithmetic;
 
@@ -925,7 +939,11 @@ namespace UltimateOrb.Numerics {
                         return lowResult;
                     } else {
                         highResult = 0u;
-                        return highDivisor <= highDividend && (highDivisor != highDividend || lowDivisor <= lowDividend) ? (ULong)1u : (ULong)0u;
+                        if (highDivisor <= highDividend && (highDivisor != highDividend || lowDivisor <= lowDividend)) {
+                            return 1u;
+                        } else {
+                            return 0u;
+                        }
                     }
                 } else {
                     highResult = Math.DivRem(highDividend, lowDivisor, out ULong t);

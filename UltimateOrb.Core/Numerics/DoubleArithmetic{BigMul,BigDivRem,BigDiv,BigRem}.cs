@@ -65,6 +65,7 @@ namespace UltimateOrb.Numerics {
 	using Int = Int32;
 	using Long = Int64;
 
+    using Misc = DoubleArithmetic.Misc32;
     using Math = global::Internal.System.Math;
 
     public static partial class DoubleArithmetic {
@@ -354,7 +355,7 @@ namespace UltimateOrb.Numerics {
             unchecked {
                 // 2019Dec15
                 // Currently, we have fast multiplication instructions on most platforms.
-                if (true || Misc.ULong.Size > Misc.UIntPtr.Size) {
+                if (true || Misc.ULong.Size > UIntPtr.Size) {
                     // 2013Oct04, 2013Dec24
                     var fl = (UInt)first;
                     var fh = (UInt)(first >> Misc.UInt.BitSize);
@@ -419,7 +420,7 @@ namespace UltimateOrb.Numerics {
         // primary overload
         public static ULong BigMul_A_Karatsuba(ULong first, ULong second, out ULong highResult) {
             unchecked {
-                if (Misc.ULong.Size > Misc.UIntPtr.Size) {
+                if (Misc.ULong.Size > UIntPtr.Size) {
                     // 2013Oct04
                     // 我很滿意。
                     var fl = (UInt)first;
@@ -471,7 +472,7 @@ namespace UltimateOrb.Numerics {
         // primary overload
         public static ULong BigMul_A_Long(ULong first, ULong second, out ULong highResult) {
             unchecked {
-                if (Misc.ULong.Size > Misc.UIntPtr.Size) {
+                if (Misc.ULong.Size > UIntPtr.Size) {
                     // 2013Oct03
                     // 我很滿意。
                     var fl = (UInt)first;
@@ -832,7 +833,7 @@ namespace UltimateOrb.Numerics {
             return lowResult;
 #else
             unchecked {
-                if (Misc.ULong.Size > Misc.UIntPtr.Size) {
+                if (Misc.ULong.Size > UIntPtr.Size) {
                     // 2013Oct04
                     var fl = (UInt)value;
                     var fh = (UInt)(value >> Misc.UInt.BitSize);
@@ -1355,6 +1356,7 @@ namespace UltimateOrb.Numerics {
 	using Int = Int64;
 	using Long = System.Int128;
 
+    using Misc = DoubleArithmetic.Misc64;
     using Math = global::Internal.System.Math;
 
     public static partial class DoubleArithmetic {
@@ -1607,7 +1609,7 @@ namespace UltimateOrb.Numerics {
             unchecked {
                 // 2019Dec15
                 // Currently, we have fast multiplication instructions on most platforms.
-                if (true || Misc.ULong.Size > Misc.UIntPtr.Size) {
+                if (true || Misc.ULong.Size > UIntPtr.Size) {
                     // 2013Oct04, 2013Dec24
                     var fl = (UInt)first;
                     var fh = (UInt)(first >> Misc.UInt.BitSize);
@@ -1666,7 +1668,7 @@ namespace UltimateOrb.Numerics {
         // primary overload
         public static ULong BigMul_A_Karatsuba(ULong first, ULong second, out ULong highResult) {
             unchecked {
-                if (Misc.ULong.Size > Misc.UIntPtr.Size) {
+                if (Misc.ULong.Size > UIntPtr.Size) {
                     // 2013Oct04
                     // 我很滿意。
                     var fl = (UInt)first;
@@ -1718,7 +1720,7 @@ namespace UltimateOrb.Numerics {
         // primary overload
         public static ULong BigMul_A_Long(ULong first, ULong second, out ULong highResult) {
             unchecked {
-                if (Misc.ULong.Size > Misc.UIntPtr.Size) {
+                if (Misc.ULong.Size > UIntPtr.Size) {
                     // 2013Oct03
                     // 我很滿意。
                     var fl = (UInt)first;
@@ -2051,7 +2053,7 @@ namespace UltimateOrb.Numerics {
             System.Runtime.CompilerServices.MethodImplOptions.AggressiveOptimization)]
         public static ULong BigSquare(ULong value, out ULong highResult) {
             unchecked {
-                if (Misc.ULong.Size > Misc.UIntPtr.Size) {
+                if (Misc.ULong.Size > UIntPtr.Size) {
                     // 2013Oct04
                     var fl = (UInt)value;
                     var fh = (UInt)(value >> Misc.UInt.BitSize);
@@ -2536,6 +2538,7 @@ namespace UltimateOrb.Numerics {
 	using Int = Int64;
 	using Long = UltimateOrb.Int128;
 
+    using Misc = DoubleArithmetic.Misc64;
     using Math = global::Internal.System.Math;
 
     public static partial class DoubleArithmetic {
@@ -2788,7 +2791,7 @@ namespace UltimateOrb.Numerics {
             unchecked {
                 // 2019Dec15
                 // Currently, we have fast multiplication instructions on most platforms.
-                if (true || Misc.ULong.Size > Misc.UIntPtr.Size) {
+                if (true || Misc.ULong.Size > UIntPtr.Size) {
                     // 2013Oct04, 2013Dec24
                     var fl = (UInt)first;
                     var fh = (UInt)(first >> Misc.UInt.BitSize);
@@ -2847,7 +2850,7 @@ namespace UltimateOrb.Numerics {
         // primary overload
         public static ULong BigMul_A_Karatsuba(ULong first, ULong second, out ULong highResult) {
             unchecked {
-                if (Misc.ULong.Size > Misc.UIntPtr.Size) {
+                if (Misc.ULong.Size > UIntPtr.Size) {
                     // 2013Oct04
                     // 我很滿意。
                     var fl = (UInt)first;
@@ -2899,7 +2902,7 @@ namespace UltimateOrb.Numerics {
         // primary overload
         public static ULong BigMul_A_Long(ULong first, ULong second, out ULong highResult) {
             unchecked {
-                if (Misc.ULong.Size > Misc.UIntPtr.Size) {
+                if (Misc.ULong.Size > UIntPtr.Size) {
                     // 2013Oct03
                     // 我很滿意。
                     var fl = (UInt)first;
@@ -3232,7 +3235,7 @@ namespace UltimateOrb.Numerics {
             System.Runtime.CompilerServices.MethodImplOptions.AggressiveOptimization)]
         public static ULong BigSquare(ULong value, out ULong highResult) {
             unchecked {
-                if (Misc.ULong.Size > Misc.UIntPtr.Size) {
+                if (Misc.ULong.Size > UIntPtr.Size) {
                     // 2013Oct04
                     var fl = (UInt)value;
                     var fh = (UInt)(value >> Misc.UInt.BitSize);

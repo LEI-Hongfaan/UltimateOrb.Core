@@ -11,6 +11,8 @@ namespace UltimateOrb.Numerics {
     using Int = Int32;
     using Long = Int64;
 
+    using Misc = DoubleArithmetic.Misc32;
+
     using Math = System.Math;
     using MathEx = DoubleArithmetic;
 
