@@ -15,20 +15,20 @@ namespace UltimateOrb {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public static nint AsIntPtr(object? handle) {
+        public static nint AsIntPtr(object? o) {
             unsafe {
-                return handle is null ? 0 : (nint)(-1 + (IntPtr**)Unsafe.AsPointer(ref Unsafe.As<ObjectBaseLayout>(handle).FirstUserByte));
+                return o is null ? 0 : (nint)(-1 + (IntPtr**)Unsafe.AsPointer(ref Unsafe.As<ObjectBaseLayout>(o).FirstUserByte));
             }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public static unsafe void* AsPointer(object? handle) {
-            return unchecked((void*)(nuint)AsIntPtr(handle));
+        public static unsafe void* AsPointer(object? o) {
+            return unchecked((void*)(nuint)AsIntPtr(o));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public static unsafe T* AsPointer<T>(object? handle) where T : unmanaged {
-            return unchecked((T*)(nuint)AsIntPtr(handle));
+        public static unsafe T* AsPointer<T>(object? o) where T : unmanaged {
+            return unchecked((T*)(nuint)AsIntPtr(o));
         }
     }
 }
