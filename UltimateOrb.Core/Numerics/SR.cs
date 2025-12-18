@@ -2,10 +2,15 @@
 
     static partial class SR {
 
-        public static string Arg_MustBeInt32OrNaN = "";
+        internal static readonly string Argument_InvalidEnumValue = "The value '{0}' is not valid for this usage of the type {1}.";
+        internal static readonly string Arg_MustBeInt32OrNaN = "";
 
         internal static string? Format(string format, object? p1) {
             return string.Format(format, p1);
+        }
+
+        internal static string? Format(string format, object? p1, object? p2) {
+            return string.Format(format, p1, p2);
         }
     }
 }

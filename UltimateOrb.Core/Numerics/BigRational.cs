@@ -908,6 +908,76 @@ namespace UltimateOrb.Numerics {
                 }
                 return quotient;
             }
+
+            public static BigRational Round(BigRational value, int decimals, MidpointRounding mode = MidpointRounding.ToEven) {
+                BigInteger num = value.SignedNumerator;
+                BigInteger den = value.Denominator;
+
+                // Scale numerator or denominator depending on decimals sign
+                BigInteger scaledNum = num;
+                BigInteger scaledDen = den;
+                if (decimals >= 0) {
+                    var factor = BigInteger.Pow(10, decimals);
+                    scaledNum = num * factor;
+                } else {
+                    var factor = BigInteger.Pow(10, -decimals);
+                    scaledDen = den * factor;
+                }
+
+                // integer division with remainder
+                BigInteger q = BigInteger.DivRem(scaledNum, scaledDen, out BigInteger r);
+
+                BigInteger absR = BigInteger.Abs(r);
+                BigInteger absDen = BigInteger.Abs(scaledDen);
+                int cmp = (absR * 2).CompareTo(absDen);
+
+                bool increment = false;
+                if (cmp > 0) {
+                    increment = true; // > 0.5
+                } else if (cmp < 0) {
+                    increment = false; // < 0.5
+                } else // tie: exactly .5
+                  {
+                    switch (mode) {
+                    case MidpointRounding.ToEven:
+                        // increment if q is odd
+                        increment = (q & 1) != 0;
+                        break;
+                    case MidpointRounding.AwayFromZero:
+                        increment = true;
+                        break;
+                    case MidpointRounding.ToZero:
+                        increment = false;
+                        break;
+                    case MidpointRounding.ToNegativeInfinity:
+                        increment = (scaledNum.Sign < 0);
+                        break;
+                    case MidpointRounding.ToPositiveInfinity:
+                        increment = (scaledNum.Sign > 0);
+                        break;
+                    default:
+                        ThrowHelper.ThrowArgumentException_InvalidEnumValue(mode);
+                        return default;
+                    }
+                }
+
+                if (increment) {
+                    q += scaledNum.Sign >= 0 ? BigInteger.One : BigInteger.Negate(BigInteger.One);
+                }
+
+                // Build result and reduce
+                BigInteger resultNum, resultDen;
+                if (decimals >= 0) {
+                    resultNum = q;
+                    resultDen = BigInteger.Pow(10, decimals);
+                } else {
+                    var factor = BigInteger.Pow(10, -decimals);
+                    resultNum = q * factor;
+                    resultDen = BigInteger.One;
+                }
+
+                return BigRational.FromFraction(resultNum, resultDen);
+            }
         }
     }
 }
