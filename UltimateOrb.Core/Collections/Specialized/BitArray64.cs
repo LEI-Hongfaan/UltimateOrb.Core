@@ -13,7 +13,7 @@ using static UltimateOrb.Utilities.Extensions.BooleanIntegerExtensions;
 
 namespace UltimateOrb.Collections.Specialized {
 
-    public static partial class BitArrayExtenstions {
+    public static partial class BitArrayExtensions {
 
         public readonly struct CancellationTokenAsSpinWait : IFunc<bool> {
 

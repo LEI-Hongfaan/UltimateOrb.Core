@@ -28,7 +28,7 @@ namespace UltimateOrb.Collections.Plain.ValueTypes {
 
         public static bool TryCompareExchange<TSpinWait>(this BitListCore list, int index, bool value, bool comparand, out bool original, ref TSpinWait spinner)
             where TSpinWait : IFunc<bool> {
-            return BitArrayExtenstions.TryCompareExchange(
+            return BitArrayExtensions.TryCompareExchange(
                 ref list.Array.Value[index >> Log2DigitBitSize],
                 DigitBitIndexMask & index,
                 value, comparand, out original, ref spinner);
@@ -44,7 +44,7 @@ namespace UltimateOrb.Collections.Plain.ValueTypes {
 
         public static bool TryExchange<TSpinWait>(this ref BitList list, int index, bool value, out bool original, ref TSpinWait spinner)
             where TSpinWait : IFunc<bool> {
-            return BitArrayExtenstions.TryExchange(
+            return BitArrayExtensions.TryExchange(
                 ref list.Array[index >> Log2DigitBitSize],
                 DigitBitIndexMask & index,
                 value, out original, ref spinner);

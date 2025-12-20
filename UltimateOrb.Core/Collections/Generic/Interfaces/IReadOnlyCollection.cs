@@ -4,7 +4,7 @@ using UltimateOrb.Utilities;
 
 namespace UltimateOrb.Collections.Generic.Interfaces.Huge {
 
-    public static partial class Extenstions {
+    public static partial class Extensions {
 
         public static int get_Count<T, TReadOnlyCollection>(this ref TReadOnlyCollection value)
             where TReadOnlyCollection : struct, IReadOnlyCollection<T> {

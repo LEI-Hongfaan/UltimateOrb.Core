@@ -45,7 +45,7 @@ namespace UltimateOrb.Reflection.Traits {
 }
     namespace UltimateOrb {
 
-    public static class LongHashCodeExtenstions {
+    public static class LongHashCodeExtensions {
         
         public static long GetLongHashCode<T>(this T obj) {
             if (typeof(T).IsValueType) {

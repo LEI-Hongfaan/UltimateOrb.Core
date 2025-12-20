@@ -13,7 +13,7 @@ using UltimateOrb.Runtime.CompilerServices;
 
 namespace UltimateOrb.Collections.Specialized {
 
-    public static partial class BitArrayExtenstions {
+    public static partial class BitArrayExtensions {
 
         [CLSCompliantAttribute(false)]
         public static bool TryCompareExchange<TSpinWait>(this ref UInt32 chunk, int index, bool value, bool comparand, out bool original, ref TSpinWait spinner)

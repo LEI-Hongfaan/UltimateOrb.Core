@@ -35,7 +35,7 @@ namespace UltimateOrb.Linq.Try {
         }
     }
 
-    public static class TryExtenstions {
+    public static class TryExtensions {
 
         public static StandardFuncWrapper<TResult> Wrap<TResult>(this Func<TResult> value) => value;
     
@@ -44,7 +44,7 @@ namespace UltimateOrb.Linq.Try {
         public static StandardFuncWrapper<T1, T2, TResult> Wrap<T1, T2, TResult>(this Func<T1, T2, TResult> value) => value;
     }
 
-    public static class ExceptionalExtenstions {
+    public static class ExceptionalExtensions {
 
         public static Exceptional<TResult, TException> Select<TSource, TResult, TException>(this Exceptional<TSource, TException> source, Func<TSource, TResult> selector)
             where TException : Exception => source.Select(selector.Wrap());
