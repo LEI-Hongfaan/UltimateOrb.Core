@@ -760,12 +760,6 @@
                 <seealso cref="M:UltimateOrb.Mathematics.NumberTheory.IsPrimeModule.IsPrime(System.UInt32)"/>
             </summary>
         </member>
-        <member name="M:UltimateOrb.Mathematics.NumberTheory.IsPrimeMillerRabinModule.IsPrime(System.UInt16)">
-            <summary>
-                <para>This API supports the product infrastructure and is not intended to be used directly from your code.</para>
-                <seealso cref="M:UltimateOrb.Mathematics.NumberTheory.IsPrimeModule.IsPrime(System.UInt16)"/>
-            </summary>
-        </member>
         <member name="M:UltimateOrb.Mathematics.NumberTheory.IsPrimeMillerRabinModule.IsPrime(System.Int64)">
             <summary>
                 <para>This API supports the product infrastructure and is not intended to be used directly from your code.</para>
@@ -789,34 +783,6 @@
                 <para>Provides methods for primality tests.</para>
             </summary>
         </member>
-        <member name="M:UltimateOrb.Mathematics.NumberTheory.IsPrimeModule.IsPrime(System.UInt64)">
-            <summary>
-                <para>Checks whether an input number is prime or not.</para>
-            </summary>
-            <param name="value">
-                <para>The input number.</para>
-            </param>
-            <returns>
-                <para>
-                    <c lang="cs">true</c> if the input number is prime;
-                    otherwise, <c lang="cs">false</c>.
-                </para>
-            </returns>
-        </member>
-        <member name="M:UltimateOrb.Mathematics.NumberTheory.IsPrimeModule.IsPrime(System.Int64)">
-            <summary>
-                <para>Checks whether an input number is prime or not.</para>
-            </summary>
-            <param name="value">
-                <para>The input number.</para>
-            </param>
-            <returns>
-                <para>
-                    <c lang="cs">true</c> if the input number is prime;
-                    otherwise, <c lang="cs">false</c>.
-                </para>
-            </returns>
-        </member>
         <member name="M:UltimateOrb.Mathematics.NumberTheory.IsPrimeModule.IsPrime(System.UInt32)">
             <summary>
                 <para>Checks whether an input number is prime or not.</para>
@@ -832,6 +798,34 @@
             </returns>
         </member>
         <member name="M:UltimateOrb.Mathematics.NumberTheory.IsPrimeModule.IsPrime(System.Int32)">
+            <summary>
+                <para>Checks whether an input number is prime or not.</para>
+            </summary>
+            <param name="value">
+                <para>The input number.</para>
+            </param>
+            <returns>
+                <para>
+                    <c lang="cs">true</c> if the input number is prime;
+                    otherwise, <c lang="cs">false</c>.
+                </para>
+            </returns>
+        </member>
+        <member name="M:UltimateOrb.Mathematics.NumberTheory.IsPrimeModule.IsPrime(System.UInt64)">
+            <summary>
+                <para>Checks whether an input number is prime or not.</para>
+            </summary>
+            <param name="value">
+                <para>The input number.</para>
+            </param>
+            <returns>
+                <para>
+                    <c lang="cs">true</c> if the input number is prime;
+                    otherwise, <c lang="cs">false</c>.
+                </para>
+            </returns>
+        </member>
+        <member name="M:UltimateOrb.Mathematics.NumberTheory.IsPrimeModule.IsPrime(System.Int64)">
             <summary>
                 <para>Checks whether an input number is prime or not.</para>
             </summary>
@@ -987,6 +981,102 @@
         <member name="M:UltimateOrb.Mathematics.NumberTheory.ZZOverNZZModule.Power(System.UInt64,System.UInt64,System.UInt64)">
             <summary>
             Computes the modular exponentiation of an unsigned 64-bit integer base raised to a 64-bit exponent.
+            </summary>
+            <param name="n">The modulus. Must be greater than <paramref name="base"/>.</param>
+            <param name="base">The base value.</param>
+            <param name="exponent">The exponent value.</param>
+            <returns>The result of (base ^ exponent) mod n.</returns>
+        </member>
+        <member name="M:UltimateOrb.Mathematics.NumberTheory.ZZOverNZZModule.Sum``1(``0,``0,``0)">
+            <summary>
+            Computes the sum of two unsigned 32-bit integers modulo <paramref name="n"/>.
+            </summary>
+            <param name="n">The modulus. Must be greater than <paramref name="first"/> and <paramref name="second"/>.</param>
+            <param name="first">The first operand.</param>
+            <param name="second">The second operand.</param>
+            <returns>The result of (first + second) mod n.</returns>
+        </member>
+        <member name="M:UltimateOrb.Mathematics.NumberTheory.ZZOverNZZModule.Double``1(``0,``0)">
+            <summary>
+            Computes the modular doubling of an unsigned 32-bit integer.
+            </summary>
+            <param name="n">The modulus. Must be greater than <paramref name="value"/>.</param>
+            <param name="value">The value to double.</param>
+            <returns>The result of (2 * value) mod n.</returns>
+        </member>
+        <member name="M:UltimateOrb.Mathematics.NumberTheory.ZZOverNZZModule.Difference``1(``0,``0,``0)">
+            <summary>
+            Computes the difference of two unsigned 32-bit integers modulo <paramref name="n"/>.
+            </summary>
+            <param name="n">The modulus. Must be greater than <paramref name="first"/> and <paramref name="second"/>.</param>
+            <param name="first">The minuend.</param>
+            <param name="second">The subtrahend.</param>
+            <returns>The result of (first - second) mod n.</returns>
+        </member>
+        <member name="M:UltimateOrb.Mathematics.NumberTheory.ZZOverNZZModule.Opposite``1(``0,``0)">
+            <summary>
+            Computes the modular additive inverse (opposite) of an unsigned 32-bit integer.
+            </summary>
+            <param name="n">The modulus. Must be greater than <paramref name="value"/>.</param>
+            <param name="value">The value to negate.</param>
+            <returns>The result of (-value) mod n.</returns>
+        </member>
+        <member name="M:UltimateOrb.Mathematics.NumberTheory.ZZOverNZZModule.Product``1(``0,``0,``0)">
+            <summary>
+            Computes the product of two unsigned 32-bit integers modulo <paramref name="n"/>.
+            </summary>
+            <param name="n">The modulus. Must be greater than <paramref name="first"/> and <paramref name="second"/>.</param>
+            <param name="first">The first operand.</param>
+            <param name="second">The second operand.</param>
+            <returns>The result of (first * second) mod n.</returns>
+        </member>
+        <member name="M:UltimateOrb.Mathematics.NumberTheory.ZZOverNZZModule.Square``1(``0,``0)">
+            <summary>
+            Computes the square of an unsigned 32-bit integer modulo <paramref name="n"/>.
+            </summary>
+            <param name="n">The modulus. Must be greater than <paramref name="value"/>.</param>
+            <param name="value">The value to square.</param>
+            <returns>The result of (value * value) mod n.</returns>
+        </member>
+        <member name="M:UltimateOrb.Mathematics.NumberTheory.ZZOverNZZModule.Power``1(``0,``0,System.UInt32)">
+            <summary>
+            Computes the modular exponentiation of an unsigned 32-bit integer base raised to a 32-bit exponent.
+            </summary>
+            <param name="n">The modulus. Must be greater than <paramref name="base"/>.</param>
+            <param name="base">The base value.</param>
+            <param name="exponent">The exponent value.</param>
+            <returns>The result of (base ^ exponent) mod n.</returns>
+        </member>
+        <member name="M:UltimateOrb.Mathematics.NumberTheory.ZZOverNZZModule.Power``1(``0,``0,System.UInt64)">
+            <summary>
+            Computes the modular exponentiation of an unsigned 32-bit integer base raised to a 32-bit exponent.
+            </summary>
+            <param name="n">The modulus. Must be greater than <paramref name="base"/>.</param>
+            <param name="base">The base value.</param>
+            <param name="exponent">The exponent value.</param>
+            <returns>The result of (base ^ exponent) mod n.</returns>
+        </member>
+        <member name="M:UltimateOrb.Mathematics.NumberTheory.ZZOverNZZModule.Power``1(``0,``0,System.UInt128)">
+            <summary>
+            Computes the modular exponentiation of an unsigned 32-bit integer base raised to a 32-bit exponent.
+            </summary>
+            <param name="n">The modulus. Must be greater than <paramref name="base"/>.</param>
+            <param name="base">The base value.</param>
+            <param name="exponent">The exponent value.</param>
+            <returns>The result of (base ^ exponent) mod n.</returns>
+        </member>
+        <member name="M:UltimateOrb.Mathematics.NumberTheory.ZZOverNZZModule.Power``1(``0,``0,UltimateOrb.UInt128)">
+            <summary>
+            Computes the modular exponentiation of an unsigned 32-bit integer base raised to a 32-bit exponent.
+            </summary>
+            <param name="n">The modulus. Must be greater than <paramref name="base"/>.</param>
+            <param name="base">The base value.</param>
+            <param name="exponent">The exponent value.</param>
+            <returns>The result of (base ^ exponent) mod n.</returns>
+        </member>
+        <member name="M:UltimateOrb.Mathematics.NumberTheory.ZZOverNZZModule.Power``2(``0,``0,``1)">
+            <summary>
+            Computes the modular exponentiation of an unsigned 32-bit integer base raised to a 32-bit exponent.
             </summary>
             <param name="n">The modulus. Must be greater than <paramref name="base"/>.</param>
             <param name="base">The base value.</param>

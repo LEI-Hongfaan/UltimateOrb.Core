@@ -41,9 +41,13 @@ namespace UltimateOrb.Numerics {
                 if (ISqrtTT<T>.NeedComparison && value <= ISqrtTT<T>.Value) {
                     return T.CreateTruncating(unchecked((UInt64)Math.Sqrt(double.CreateTruncating(value))));
                 }
-                var root = T.CreateTruncating(Math.Sqrt(double.CreateSaturating(value)));
+                var a = double.CreateSaturating(value);
+                if (double.IsInfinity(a)) {
+                    a = double.MaxValue;
+                }
+                var root = T.CreateTruncating(Math.Sqrt(a));
                 for (; ; ) {
-                    var d = (root - (value / root)) >> 1;
+                    var d = ((value / root) - root) >> 1;
                     var next = root + d;
                     if (T.IsZero(d)) {
                         return root;
@@ -56,5 +60,8 @@ namespace UltimateOrb.Numerics {
                 }
             }
         }
+    }
+
+    public static partial class GenericMath {
     }
 }

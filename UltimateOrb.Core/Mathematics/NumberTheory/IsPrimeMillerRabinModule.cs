@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Diagnostics;
+using System.Numerics;
+using System.Runtime.CompilerServices;
 
 namespace UltimateOrb.Mathematics.NumberTheory {
     using Utilities = BinaryNumerals;
@@ -250,19 +253,6 @@ namespace UltimateOrb.Mathematics.NumberTheory {
 
         /// <summary>
         ///     <para>This API supports the product infrastructure and is not intended to be used directly from your code.</para>
-        ///     <seealso cref="IsPrimeModule.IsPrime(UInt16)"/>
-        /// </summary>
-        [System.CLSCompliantAttribute(false)]
-        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
-        [System.Runtime.TargetedPatchingOptOutAttribute("")]
-        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        [System.Diagnostics.Contracts.PureAttribute()]
-        public static bool IsPrime(UInt16 value) {
-            return IsPrimeMillerRabin(value);
-        }
-
-        /// <summary>
-        ///     <para>This API supports the product infrastructure and is not intended to be used directly from your code.</para>
         ///     <seealso cref="IsPrimeModule.IsPrime(Int64)"/>
         /// </summary>
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
@@ -304,6 +294,36 @@ namespace UltimateOrb.Mathematics.NumberTheory {
                 return false;
             }
             return IsPrimeMillerRabin(unchecked((UInt16)value));
+        }
+    }
+
+
+    public static partial class IsPrimeMillerRabinModule {
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static bool IsMillerRabinPseudoprimeInternal<T>(uint a, T n, T d, int s)
+            where T : notnull, IUnsignedNumber<T>, IBinaryInteger<T> {
+            Debug.Assert(Unsafe.SizeOf<T>() >= sizeof(uint));
+            unchecked {
+                var nm1 = n;
+                {
+                    --nm1;
+                }
+                var t = ZZOverNZZModule.PowerWithPositiveBase(n, T.CreateTruncating(a), d);
+                if (t == T.One) {
+                    return true;
+                }
+                if (t == nm1) {
+                    return true;
+                }
+                for (int i = s; i != 0; --i) {
+                    t = ZZOverNZZModule.Square(n, t);
+                    if (t == nm1) {
+                        return true;
+                    }
+                }
+                return false;
+            }
         }
     }
 }

@@ -1,4 +1,8 @@
 ﻿using System;
+using System.Diagnostics;
+using System.Numerics;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace UltimateOrb.Mathematics.NumberTheory {
     using Utilities = BinaryNumerals;
@@ -42,387 +46,522 @@ namespace UltimateOrb.Mathematics.NumberTheory {
             }
             return true;
         }
+    }
+}
 
-        /// <summary>
-        ///     <para>Checks whether an input number is prime or not.</para>
-        /// </summary>
-        /// <param name="value">
-        ///     <para>The input number.</para>
-        /// </param>
-        /// <returns>
-        ///     <para>
-        ///         <c lang="cs">true</c> if the input number is prime;
-        ///         otherwise, <c lang="cs">false</c>.
-        ///     </para>
-        /// </returns>
-        [System.CLSCompliantAttribute(false)]
-        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
-        [System.Runtime.TargetedPatchingOptOutAttribute("")]
-        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        [System.Diagnostics.Contracts.PureAttribute()]
-        public static bool IsPrime(UInt64 value) {
+
+namespace UltimateOrb.Mathematics.NumberTheory {
+    using static IsPrimeModule;
+    using MathEx = UltimateOrb.Numerics.DoubleArithmetic;
+
+    public static partial class IsPrimeModule {
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static bool IsProbablePrimeTrialDivision(uint primesModulus, ReadOnlySpan<char> eulerMask, uint value) {
             unchecked {
-                if (64u > value) {
-                    return 0 != (1 & (int)(prime_table >> (int)value));
-                }
-                if (!IsProbablePrimeTrialDivision(primes_2_3_7, euler_2_3_7, value)) {
+                // Wheel sieve check
+                uint residue = (uint)(value % primesModulus);
+                int wordIndex = (int)(residue >> 4); // /16
+                int bitIndex = (int)(residue & 15);  // 0..15
+                var mask = 1u << bitIndex;
+                var word = Unsafe.Add(ref MemoryMarshal.GetReference(eulerMask), wordIndex);
+                return (word & mask) != 0u;
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static bool IsProbablePrimeTrialDivision(uint primesModulus, ReadOnlySpan<char> eulerMask, ulong value) {
+            unchecked {
+                // Wheel sieve check
+                uint residue = (uint)(value % primesModulus);
+                int wordIndex = (int)(residue >> 4); // /16
+                int bitIndex = (int)(residue & 15);  // 0..15
+                var mask = 1u << bitIndex;
+                var word = Unsafe.Add(ref MemoryMarshal.GetReference(eulerMask), wordIndex);
+                return (word & mask) != 0u;
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static bool IsProbablePrimeTrialDivision(uint primesModulus, ReadOnlySpan<char> eulerMask, UInt128 value) {
+            unchecked {
+                // Wheel sieve check
+                uint residue = (uint)(value % primesModulus);
+                int wordIndex = (int)(residue >> 4); // /16
+                int bitIndex = (int)(residue & 15);  // 0..15
+                var mask = 1u << bitIndex;
+                var word = Unsafe.Add(ref MemoryMarshal.GetReference(eulerMask), wordIndex);
+                return (word & mask) != 0u;
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static bool IsProbablePrimeTrialDivision<T>(uint primesModulus, ReadOnlySpan<char> eulerMask, T value)
+            where T : notnull, IUnsignedNumber<T>, IBinaryInteger<T> {
+            if (typeof(T) == typeof(UInt32)) {
+                return IsProbablePrimeTrialDivision(primesModulus, eulerMask, (UInt32)(object)value);
+            }
+            if (typeof(T) == typeof(UInt64)) {
+                return IsProbablePrimeTrialDivision(primesModulus, eulerMask, (UInt64)(object)value);
+            }
+            if (typeof(T) == typeof(UInt128)) {
+                return IsProbablePrimeTrialDivision(primesModulus, eulerMask, (UInt128)(object)value);
+            }
+            unchecked {
+                // Wheel sieve check
+                uint residue = uint.CreateTruncating(value % T.CreateTruncating(primesModulus));
+                Debug.Assert(residue < primesModulus);
+                int wordIndex = (int)(residue >> 4); // /16
+                int bitIndex = (int)(residue & 15);  // 0..15
+                var mask = 1u << bitIndex;
+                var word = Unsafe.Add(ref MemoryMarshal.GetReference(eulerMask), wordIndex);
+                return (word & mask) != 0u;
+            }
+        }
+    }
+
+
+    public static partial class IsPrimeModule {
+
+        internal const uint PrimesModulus_3_5_17 = checked(3u * 5u * 17u);
+
+        internal const string EulerMask_3_5_17 =
+            "\u6996\uB4C9\uDA61\u6D32\uB689\u5B4C\u2DA6\u9653" +
+            "\uCA69\u65B4\u32DA\u916D\u4CB6\u865B\u932D\u6996";
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static bool IsProbablePrimeTrialDivision_3_5_17<T>(T value)
+            where T : notnull, IUnsignedNumber<T>, IBinaryInteger<T> {
+            return IsProbablePrimeTrialDivision(PrimesModulus_3_5_17, EulerMask_3_5_17, value);
+        }
+    }
+
+    public static partial class IsPrimeModule {
+
+        internal const uint PrimesModulus_11_23 = checked(11u * 23u);
+
+        internal const string EulerMask_11_23 =
+            "\uF7FE\uFF3F\uAFFD\uFF7F\uDFDB\uEEFF\uBFF7\uFDF7" +
+            "\u7BEF\uFBFF\uFFDD\uF6FE\u7FBF\uEFFD\uFF3F\uDFFB";
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static bool IsProbablePrimeTrialDivision_11_23<T>(T value)
+            where T : notnull, IUnsignedNumber<T>, IBinaryInteger<T> {
+            return IsProbablePrimeTrialDivision(PrimesModulus_11_23, EulerMask_11_23, value);
+        }
+    }
+
+    public static partial class IsPrimeModule {
+
+        internal const uint PrimesModulus_13_19 = checked(13u * 19u);
+
+        internal const string EulerMask_13_19 =
+            "\uDFFE\uFBF7\uFF3F\uFDEF\uAFFD\u77FF\uFEFF\uFFDB" +
+            "\u7FDB\uEEFF\uF5FF\uBFBF\uFFF7\uDFFC\uFBEF\uFF7F";
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static bool IsProbablePrimeTrialDivision_13_19<T>(T value)
+            where T : notnull, IUnsignedNumber<T>, IBinaryInteger<T> {
+            return IsProbablePrimeTrialDivision(PrimesModulus_13_19, EulerMask_13_19, value);
+        }
+    }
+
+    public static partial class IsPrimeModule {
+
+        internal const uint PrimesModulus_7_29 = checked(7u * 29u);
+
+        internal const string EulerMask_7_29 =
+            "\uBF7E\uCFDF\uFBF7\u7AFD\uDFBF\uF76F\uFDFB\uBF6E" +
+            "\uEFDF\uFBF5\u3EFD\uDFBF\uF7EF\uFDFB\uBE7E\uEFDF";
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static bool IsProbablePrimeTrialDivision_7_29<T>(T value)
+            where T : notnull, IUnsignedNumber<T>, IBinaryInteger<T> {
+            return IsProbablePrimeTrialDivision(PrimesModulus_7_29, EulerMask_7_29, value);
+        }
+    }
+
+    public static partial class IsPrimeModule {
+
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static bool IsProbablePrimeTrialDivision_3To29<T>(T value)
+            where T : notnull, IUnsignedNumber<T>, IBinaryInteger<T> {
+            if (!IsProbablePrimeTrialDivision_3_5_17(value)) {
+                return false;
+            }
+            if (!IsProbablePrimeTrialDivision_11_23(value)) {
+                return false;
+            }
+            if (!IsProbablePrimeTrialDivision_13_19(value)) {
+                return false;
+            }
+            if (!IsProbablePrimeTrialDivision_7_29(value)) {
+                return false;
+            }
+            return true;
+        }
+    }
+
+    public static partial class IsPrimeModule {
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsOddPrimeInternal(UInt16 value) {
+            Debug.Assert(0u != (1u & value));
+            Debug.Assert(64u <= value);
+            unchecked {
+                if (!IsProbablePrimeTrialDivision_3To29(value)) {
                     return false;
                 }
-                if (!IsProbablePrimeTrialDivision(primes_5_11, euler_5_11, value)) {
+                var d = (uint)value - 1;
+                var s = BitOperations.TrailingZeroCount(d);
+                d >>>= s;
+                if (!IsPrimeMillerRabinModule.IsMillerRabinPseudoprimeInternal(2u, value, d, s)) {
                     return false;
                 }
-                var d = (UInt64)value >> 1;
-                int s = 1;
-                while (0u == (1u & d)) {
-                    d >>= 1;
-                    ++s;
-                }
-                if (!IsPrimeMillerRabinModule.IsMillerRabinPseudoprimeInternal(2, value, d, s)) {
-                    return false;
-                }
-                if (value < 2047u) {
+                if (value < 2047u + 1986u) {
                     return true;
                 }
-                if (!IsPrimeMillerRabinModule.IsMillerRabinPseudoprimeInternal(3, value, d, s)) {
-                    return false;
-                }
-                if (value < 1373653u) {
-                    return true;
-                }
-                if (!IsPrimeMillerRabinModule.IsMillerRabinPseudoprimeInternal(5, value, d, s)) {
-                    return false;
-                }
-                if (value < 25326001u) {
-                    return true;
-                }
-                if (!IsPrimeMillerRabinModule.IsMillerRabinPseudoprimeInternal(7, value, d, s)) {
-                    return false;
-                }
-                if (value < 3215031751u) {
-                    return true;
-                }
-                if (!IsPrimeMillerRabinModule.IsMillerRabinPseudoprimeInternal(11, value, d, s)) {
-                    return false;
-                }
-                if (value < 2152302898747u) {
-                    return true;
-                }
-                if (!IsPrimeMillerRabinModule.IsMillerRabinPseudoprimeInternal(13, value, d, s)) {
-                    return false;
-                }
-                if (value < 3474749660383u) {
-                    return true;
-                }
-                if (!IsPrimeMillerRabinModule.IsMillerRabinPseudoprimeInternal(17, value, d, s)) {
-                    return false;
-                }
-                if (value < 341550071728321u) {
-                    return true;
-                }
-                if (!IsPrimeMillerRabinModule.IsMillerRabinPseudoprimeInternal(19, value, d, s)) {
-                    return false;
-                }
-                if (!IsPrimeMillerRabinModule.IsMillerRabinPseudoprimeInternal(23, value, d, s)) {
-                    return false;
-                }
-                if (value < 3825123056546413051u) {
-                    return true;
-                }
-                if (!IsPrimeMillerRabinModule.IsMillerRabinPseudoprimeInternal(29, value, d, s)) {
-                    return false;
-                }
-                if (!IsPrimeMillerRabinModule.IsMillerRabinPseudoprimeInternal(31, value, d, s)) {
-                    return false;
-                }
-                if (!IsPrimeMillerRabinModule.IsMillerRabinPseudoprimeInternal(37, value, d, s)) {
+                if (!IsPrimeMillerRabinModule.IsMillerRabinPseudoprimeInternal(7u, value, d, s)) {
                     return false;
                 }
                 return true;
             }
         }
 
-        /// <summary>
-        ///     <para>Checks whether an input number is prime or not.</para>
-        /// </summary>
-        /// <param name="value">
-        ///     <para>The input number.</para>
-        /// </param>
-        /// <returns>
-        ///     <para>
-        ///         <c lang="cs">true</c> if the input number is prime;
-        ///         otherwise, <c lang="cs">false</c>.
-        ///     </para>
-        /// </returns>
-        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
-        [System.Runtime.TargetedPatchingOptOutAttribute("")]
-        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        [System.Diagnostics.Contracts.PureAttribute()]
-        // ~14.5 kCyc : rnd positive odd numbers
-        // 0b 0??????? ???????? ???????? ???????? ???????? ???????? ???????? ???????1
-        public static bool IsPrime(Int64 value) {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsOddPrimePartialInternal(UInt16 value) {
+            Debug.Assert(0u != (1u & value));
+            Debug.Assert(64u <= value);
+            Debug.Assert(0 <= (Int16)value);
             unchecked {
-                if (64 > value) {
-                    if (2 > value) {
-                        return false;
-                    }
-                    return 0 != (1 & (int)(prime_table >> (int)value));
-                }
-                if (!IsProbablePrimeTrialDivision(primes_2_3_7, euler_2_3_7, (UInt64)value)) {
+                if (!IsProbablePrimeTrialDivision_3To29(value)) {
                     return false;
                 }
-                if (!IsProbablePrimeTrialDivision(primes_5_11, euler_5_11, (UInt64)value)) {
-                    return false;
-                }
-                var d = (UInt64)value >> 1;
-                int s = 1;
-                while (0u == (1u & d)) {
-                    d >>= 1;
-                    ++s;
-                }
-                if (!IsPrimeMillerRabinModule.IsMillerRabinPseudoprimeInternal(2, (UInt64)value, d, s)) {
-                    return false;
-                }
-                if ((UInt64)value < 2047u) {
-                    return true;
-                }
-                if (!IsPrimeMillerRabinModule.IsMillerRabinPseudoprimeInternal(3, (UInt64)value, d, s)) {
-                    return false;
-                }
-                if ((UInt64)value < 1373653u) {
-                    return true;
-                }
-                if (!IsPrimeMillerRabinModule.IsMillerRabinPseudoprimeInternal(5, (UInt64)value, d, s)) {
-                    return false;
-                }
-                if ((UInt64)value < 25326001u) {
-                    return true;
-                }
-                if (!IsPrimeMillerRabinModule.IsMillerRabinPseudoprimeInternal(7, (UInt64)value, d, s)) {
-                    return false;
-                }
-                if ((UInt64)value < 3215031751u) {
-                    return true;
-                }
-                if (!IsPrimeMillerRabinModule.IsMillerRabinPseudoprimeInternal(11, (UInt64)value, d, s)) {
-                    return false;
-                }
-                if ((UInt64)value < 2152302898747u) {
-                    return true;
-                }
-                if (!IsPrimeMillerRabinModule.IsMillerRabinPseudoprimeInternal(13, (UInt64)value, d, s)) {
-                    return false;
-                }
-                if ((UInt64)value < 3474749660383u) {
-                    return true;
-                }
-                if (!IsPrimeMillerRabinModule.IsMillerRabinPseudoprimeInternal(17, (UInt64)value, d, s)) {
-                    return false;
-                }
-                if ((UInt64)value < 341550071728321u) {
-                    return true;
-                }
-                if (!IsPrimeMillerRabinModule.IsMillerRabinPseudoprimeInternal(19, (UInt64)value, d, s)) {
-                    return false;
-                }
-                if (!IsPrimeMillerRabinModule.IsMillerRabinPseudoprimeInternal(23, (UInt64)value, d, s)) {
-                    return false;
-                }
-                if ((UInt64)value < 3825123056546413051u) {
-                    return true;
-                }
-                if (!IsPrimeMillerRabinModule.IsMillerRabinPseudoprimeInternal(29, (UInt64)value, d, s)) {
-                    return false;
-                }
-                if (!IsPrimeMillerRabinModule.IsMillerRabinPseudoprimeInternal(31, (UInt64)value, d, s)) {
-                    return false;
-                }
-                if (!IsPrimeMillerRabinModule.IsMillerRabinPseudoprimeInternal(37, (UInt64)value, d, s)) {
-                    return false;
+                var d = (uint)value - 1;
+                var s = BitOperations.TrailingZeroCount(d);
+                d >>>= s;
+                if (!IsPrimeMillerRabinModule.IsMillerRabinPseudoprimeInternal(921211727u, value, d, s)) {
+                    return value == 331u;
                 }
                 return true;
             }
         }
 
-        /// <summary>
-        ///     <para>Checks whether an input number is prime or not.</para>
-        /// </summary>
-        /// <param name="value">
-        ///     <para>The input number.</para>
-        /// </param>
-        /// <returns>
-        ///     <para>
-        ///         <c lang="cs">true</c> if the input number is prime;
-        ///         otherwise, <c lang="cs">false</c>.
-        ///     </para>
-        /// </returns>
-        [System.CLSCompliantAttribute(false)]
-        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
-        [System.Runtime.TargetedPatchingOptOutAttribute("")]
-        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        [System.Diagnostics.Contracts.PureAttribute()]
-        public static bool IsPrime(UInt32 value) {
-            unchecked {
-                if (64u > value) {
-                    return 0 != (1 & (int)(prime_table >> (int)value));
-                }
-                if (!IsProbablePrimeTrialDivision(primes_2_3_7, euler_2_3_7, value)) {
-                    return false;
-                }
-                if (!IsProbablePrimeTrialDivision(primes_5_11, euler_5_11, value)) {
-                    return false;
-                }
-                /*
-                var d = value - 1;
-                var firstCoefficient = Utilities.CountTrailingZeros(d);
-                d >>= firstCoefficient;
-                */
-                var d = value >> 1;
-                int s = 1;
-                while (0u == (1u & d)) {
-                    d >>= 1;
-                    ++s;
-                }
-                if (!IsPrimeMillerRabinModule.IsMillerRabinPseudoprimeInternal(2, value, d, s)) {
-                    return false;
-                }
-                if (value < 2047u) {
-                    return true;
-                }
-                if (!IsPrimeMillerRabinModule.IsMillerRabinPseudoprimeInternal(7, value, d, s)) {
-                    return false;
-                }
-                if (value < 314821u) {
-                    return true;
-                }
-                if (!IsPrimeMillerRabinModule.IsMillerRabinPseudoprimeInternal(61, value, d, s)) {
-                    return false;
-                }
-                return true;
-            }
-        }
-
-        /// <summary>
-        ///     <para>Checks whether an input number is prime or not.</para>
-        /// </summary>
-        /// <param name="value">
-        ///     <para>The input number.</para>
-        /// </param>
-        /// <returns>
-        ///     <para>
-        ///         <c lang="cs">true</c> if the input number is prime;
-        ///         otherwise, <c lang="cs">false</c>.
-        ///     </para>
-        /// </returns>
-        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
-        [System.Runtime.TargetedPatchingOptOutAttribute("")]
-        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        [System.Diagnostics.Contracts.PureAttribute()]
-        // ~2.44 kCyc : rnd positive odd numbers
-        // 0b 0??????? ???????? ???????? ???????1
-        public static bool IsPrime(Int32 value) {
-            unchecked {
-                if (64 > value) {
-                    if (2 > value) {
-                        return false;
-                    }
-                    return 0 != (1 & (int)(prime_table >> (int)value));
-                }
-                if (!IsProbablePrimeTrialDivision(primes_2_3_7, euler_2_3_7, (UInt32)value)) {
-                    return false;
-                }
-                if (!IsProbablePrimeTrialDivision(primes_5_11, euler_5_11, (UInt32)value)) {
-                    return false;
-                }
-                var d = (UInt32)value >> 1;
-                int s = 1;
-                while (0u == (1u & d)) {
-                    d >>= 1;
-                    ++s;
-                }
-                if (!IsPrimeMillerRabinModule.IsMillerRabinPseudoprimeInternal(2, (UInt32)value, d, s)) {
-                    return false;
-                }
-                if (value < 2047u) {
-                    return true;
-                }
-                if (!IsPrimeMillerRabinModule.IsMillerRabinPseudoprimeInternal(7, (UInt32)value, d, s)) {
-                    return false;
-                }
-                if (value < 314821u) {
-                    return true;
-                }
-                if (!IsPrimeMillerRabinModule.IsMillerRabinPseudoprimeInternal(61, (UInt32)value, d, s)) {
-                    return false;
-                }
-                return true;
-            }
-        }
-
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsPrime(UInt16 value) {
             unchecked {
-                if (64u > value) {
+                // 64 ~ 0 in prime_table
+                // 65 ~ 1 in prime_table
+                // 66 !~ 2 in prime_table
+                if (64u + 2u > value) {
                     return 0 != (1 & (int)(prime_table >> (int)value));
                 }
-                if (!IsProbablePrimeTrialDivision(primes_2_3_7, euler_2_3_7, value)) {
+                if (0u == (1u & value)) {
                     return false;
                 }
-                if (!IsProbablePrimeTrialDivision(primes_5_11, euler_5_11, value)) {
+                return IsOddPrimeInternal(value);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsOddPrime(UInt16 value) {
+            unchecked {
+                if (0u == (1u & value)) {
                     return false;
                 }
-                /*
+                // 65 ~ 1 in prime_table
+                // 67 ~ 3 in prime_table
+                // 69 !~ 5 in prime_table
+                if (64u + 5u > value) {
+                    return 0 != (1 & (int)(prime_table >> (int)value));
+                }
+                return IsOddPrimeInternal(value);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsPrime(Int16 value) {
+            unchecked {
+                // 64 ~ 0 in prime_table
+                // 65 ~ 1 in prime_table
+                // 66 !~ 2 in prime_table
+                if (64 + 2 > value) {
+                    return value >= 0 && 0 != (1 & (int)(prime_table >> (int)value));
+                }
+                if (0u == (1u & value)) {
+                    return false;
+                }
+                return IsOddPrimePartialInternal((UInt16)value);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsOddPrime(Int16 value) {
+            unchecked {
+                if (0u == (1u & (UInt16)value)) {
+                    return false;
+                }
+                // 65 ~ 1 in prime_table
+                // 67 ~ 3 in prime_table
+                // 69 !~ 5 in prime_table
+                if (64 + 5 > value) {
+                    return value >= 0 && 0 != (1 & (int)(prime_table >> (int)value));
+                }
+                return IsOddPrimePartialInternal((UInt16)value);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static bool IsOddPrimeInternal(UInt32 value) {
+            unchecked {
+                if (!IsProbablePrimeTrialDivision_3To29(value)) {
+                    return false;
+                }
                 var d = value - 1;
-                var firstCoefficient = Utilities.CountTrailingZeros(d);
-                d >>= firstCoefficient;
-                */
-                var d = (uint)value >> 1;
-                int s = 1;
-                while (0u == (1u & d)) {
-                    d >>= 1;
-                    ++s;
-                }
-                if (!IsPrimeMillerRabinModule.IsMillerRabinPseudoprimeInternal(2, value, d, s)) {
+                var s = BitOperations.TrailingZeroCount(d);
+                d >>>= s;
+                if (!IsPrimeMillerRabinModule.IsMillerRabinPseudoprimeInternal(2u, value, d, s)) {
                     return false;
                 }
-                if (value < 2047u) {
+                if (value < 2047u + 1986u) {
                     return true;
                 }
-                if (!IsPrimeMillerRabinModule.IsMillerRabinPseudoprimeInternal(3, value, d, s)) {
+                if (!IsPrimeMillerRabinModule.IsMillerRabinPseudoprimeInternal(7u, value, d, s)) {
+                    return false;
+                }
+                if (value < 314821u + 1954272u) {
+                    return true;
+                }
+                if (!IsPrimeMillerRabinModule.IsMillerRabinPseudoprimeInternal(61u, value, d, s)) {
                     return false;
                 }
                 return true;
             }
         }
 
-        public static bool IsPrime(Int16 value) {
+        /// <summary>
+        ///     <para>Checks whether an input number is prime or not.</para>
+        /// </summary>
+        /// <param name="value">
+        ///     <para>The input number.</para>
+        /// </param>
+        /// <returns>
+        ///     <para>
+        ///         <c lang="cs">true</c> if the input number is prime;
+        ///         otherwise, <c lang="cs">false</c>.
+        ///     </para>
+        /// </returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsPrime(UInt32 value) {
             unchecked {
-                if (64 > value) {
-                    if (2 > value) {
-                        return false;
-                    }
+                // 64 ~ 0 in prime_table
+                // 65 ~ 1 in prime_table
+                // 66 !~ 2 in prime_table
+                if (64u + 2u > value) {
                     return 0 != (1 & (int)(prime_table >> (int)value));
                 }
-                if (!IsProbablePrimeTrialDivision(primes_2_3_7, euler_2_3_7, (uint)value)) {
+                if (0u == (1u & value)) {
                     return false;
                 }
-                if (!IsProbablePrimeTrialDivision(primes_5_11, euler_5_11, (uint)value)) {
+                return IsOddPrimeInternal(value);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsOddPrime(UInt32 value) {
+            unchecked {
+                if (0u == (1u & value)) {
                     return false;
                 }
-                var d = (uint)value >> 1;
-                int s = 1;
-                while (0u == (1u & d)) {
-                    d >>= 1;
-                    ++s;
+                // 65 ~ 1 in prime_table
+                // 67 ~ 3 in prime_table
+                // 69 !~ 5 in prime_table
+                if (64u + 5u > value) {
+                    return 0 != (1 & (int)(prime_table >> (int)value));
                 }
-                if (!IsPrimeMillerRabinModule.IsMillerRabinPseudoprimeInternal(2, (uint)value, d, s)) {
+                return IsOddPrimeInternal(value);
+            }
+        }
+
+        /// <summary>
+        ///     <para>Checks whether an input number is prime or not.</para>
+        /// </summary>
+        /// <param name="value">
+        ///     <para>The input number.</para>
+        /// </param>
+        /// <returns>
+        ///     <para>
+        ///         <c lang="cs">true</c> if the input number is prime;
+        ///         otherwise, <c lang="cs">false</c>.
+        ///     </para>
+        /// </returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsPrime(Int32 value) {
+            unchecked {
+                // 64 ~ 0 in prime_table
+                // 65 ~ 1 in prime_table
+                // 66 !~ 2 in prime_table
+                if (64 + 2 > value) {
+                    return value >= 0 && 0 != (1 & (int)(prime_table >> (int)value));
+                }
+                if (0u == (1u & (UInt32)value)) {
                     return false;
                 }
-                if (value < 2047u) {
-                    return true;
-                }
-                if (!IsPrimeMillerRabinModule.IsMillerRabinPseudoprimeInternal(3, (uint)value, d, s)) {
+                return IsOddPrimeInternal((UInt32)value);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsOddPrime(Int32 value) {
+            unchecked {
+                if (0u == (1u & value)) {
                     return false;
                 }
+                // 65 ~ 1 in prime_table
+                // 67 ~ 3 in prime_table
+                // 69 !~ 5 in prime_table
+                if (64 + 5 > value) {
+                    return value >= 0 && 0 != (1 & (int)(prime_table >> (int)value));
+                }
+                return IsOddPrimeInternal((UInt32)value);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static bool IsOddPrimeInternal(UInt64 value) {
+            unchecked {
+                if (value <= UInt32.MaxValue) {
+                    return IsOddPrimeInternal((UInt32)value);
+                }
+                if (!IsProbablePrimeTrialDivision_3To29(value)) {
+                    return false;
+                }
+                var d = value - 1;
+                var s = BitOperations.TrailingZeroCount(d);
+                d >>>= s;
+                if (!IsPrimeMillerRabinModule.IsMillerRabinPseudoprimeInternal(2u, value, d, s)) {
+                    return false;
+                }
+                //if (value < 2047u + 1986u) {
+                //    return true;
+                //}
+                if (!IsPrimeMillerRabinModule.IsMillerRabinPseudoprimeInternal(450775u, value, d, s)) {
+                    return false;
+                }
+                //if (value < 1373653u) {
+                //    return true;
+                //}
+                if (!IsPrimeMillerRabinModule.IsMillerRabinPseudoprimeInternal(325u, value, d, s)) {
+                    return false;
+                }
+                //if (value < 95452781u) {
+                //    return true;
+                //}
+                if (!IsPrimeMillerRabinModule.IsMillerRabinPseudoprimeInternal(9375u, value, d, s)) {
+                    return false;
+                }
+                //if (value < 3874471147u) {
+                //    return true;
+                //}
+                if (!IsPrimeMillerRabinModule.IsMillerRabinPseudoprimeInternal(28178u, value, d, s)) {
+                    return false;
+                } // 3874471147
+                if (!IsPrimeMillerRabinModule.IsMillerRabinPseudoprimeInternal(9780504u, value, d, s)) {
+                    return false;
+                } // ?
+                if (!IsPrimeMillerRabinModule.IsMillerRabinPseudoprimeInternal(1795265022u, value, d, s)) {
+                    return false;
+                } // ?
                 return true;
+            }
+        }
+
+        /// <summary>
+        ///     <para>Checks whether an input number is prime or not.</para>
+        /// </summary>
+        /// <param name="value">
+        ///     <para>The input number.</para>
+        /// </param>
+        /// <returns>
+        ///     <para>
+        ///         <c lang="cs">true</c> if the input number is prime;
+        ///         otherwise, <c lang="cs">false</c>.
+        ///     </para>
+        /// </returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsPrime(UInt64 value) {
+            unchecked {
+                // 64 ~ 0 in prime_table
+                // 65 ~ 1 in prime_table
+                // 66 !~ 2 in prime_table
+                if (64u + 2u > value) {
+                    return 0 != (1 & (int)(prime_table >> (int)value));
+                }
+                if (0u == (1u & value)) {
+                    return false;
+                }
+                return IsOddPrimeInternal(value);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsOddPrime(UInt64 value) {
+            unchecked {
+                if (0u == (1u & value)) {
+                    return false;
+                }
+                // 65 ~ 1 in prime_table
+                // 67 ~ 3 in prime_table
+                // 69 !~ 5 in prime_table
+                if (64u + 5u > value) {
+                    return 0 != (1 & (int)(prime_table >> (int)value));
+                }
+                return IsOddPrimeInternal(value);
+            }
+        }
+
+        /// <summary>
+        ///     <para>Checks whether an input number is prime or not.</para>
+        /// </summary>
+        /// <param name="value">
+        ///     <para>The input number.</para>
+        /// </param>
+        /// <returns>
+        ///     <para>
+        ///         <c lang="cs">true</c> if the input number is prime;
+        ///         otherwise, <c lang="cs">false</c>.
+        ///     </para>
+        /// </returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsPrime(Int64 value) {
+            unchecked {
+                // 64 ~ 0 in prime_table
+                // 65 ~ 1 in prime_table
+                // 66 !~ 2 in prime_table
+                if (64 + 2 > value) {
+                    return value >= 0 && 0 != (1 & (int)(prime_table >> (int)value));
+                }
+                if (0u == (1u & value)) {
+                    return false;
+                }
+                return IsOddPrimeInternal((UInt64)value);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsOddPrime(Int64 value) {
+            unchecked {
+                if (0u == (1u & value)) {
+                    return false;
+                }
+                // 65 ~ 1 in prime_table
+                // 67 ~ 3 in prime_table
+                // 69 !~ 5 in prime_table
+                if (64 + 5 > value) {
+                    return value >= 0 && 0 != (1 & (int)(prime_table >> (int)value));
+                }
+                return IsOddPrimeInternal((UInt64)value);
             }
         }
     }
