@@ -122,6 +122,64 @@ namespace Internal.System {
         [System.Runtime.TargetedPatchingOptOutAttribute("")]
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         [System.Diagnostics.Contracts.PureAttribute()]
+        public static Int64 DivRem(Int64 dividend, Int64 divisor, out Int64 remainder) {
+            System.Diagnostics.Contracts.Contract.Requires(0u != divisor);
+            System.Diagnostics.Contracts.Contract.Ensures(System.Diagnostics.Contracts.Contract.OldValue(divisor) > System.Diagnostics.Contracts.Contract.ValueAtReturn(out remainder));
+            System.Diagnostics.Contracts.Contract.EnsuresOnThrow<DivideByZeroException>(!(0u != System.Diagnostics.Contracts.Contract.OldValue(divisor)));
+            return System.Math.DivRem(dividend, divisor, out remainder);
+        }
+
+#if NET7_0_OR_GREATER
+
+        [System.CLSCompliantAttribute(false)]
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
+        [System.Runtime.TargetedPatchingOptOutAttribute("")]
+        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Diagnostics.Contracts.PureAttribute()]
+        public static System.Int128 DivRem(System.Int128 dividend, System.Int128 divisor, out System.Int128 remainder) {
+            System.Diagnostics.Contracts.Contract.Requires(0u != divisor);
+            System.Diagnostics.Contracts.Contract.Ensures(System.Diagnostics.Contracts.Contract.OldValue(divisor) > System.Diagnostics.Contracts.Contract.ValueAtReturn(out remainder));
+            System.Diagnostics.Contracts.Contract.EnsuresOnThrow<DivideByZeroException>(!(0u != System.Diagnostics.Contracts.Contract.OldValue(divisor)));
+            unchecked {
+                var lowResult = DoubleArithmetic.DivRem(DoubleArithmetic.GetLowPart(dividend), DoubleArithmetic.GetHighPart(dividend), DoubleArithmetic.GetLowPart(divisor), DoubleArithmetic.GetHighPart(divisor), out var lowRemainder, out var highRemainder, out var highResult);
+                remainder = new System.Int128(upper: unchecked((UInt64)highRemainder), lower: lowRemainder);
+                return new System.Int128(upper: unchecked((UInt64)highResult), lower: lowResult);
+            }
+        }
+#endif
+
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
+        [System.Runtime.TargetedPatchingOptOutAttribute("")]
+        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Diagnostics.Contracts.PureAttribute()]
+        public static UltimateOrb.Int128 DivRem(UltimateOrb.Int128 dividend, UltimateOrb.Int128 divisor, out UltimateOrb.Int128 remainder) {
+            System.Diagnostics.Contracts.Contract.Requires(0u != divisor);
+            System.Diagnostics.Contracts.Contract.Ensures(System.Diagnostics.Contracts.Contract.OldValue(divisor) > System.Diagnostics.Contracts.Contract.ValueAtReturn(out remainder));
+            System.Diagnostics.Contracts.Contract.EnsuresOnThrow<DivideByZeroException>(!(0u != System.Diagnostics.Contracts.Contract.OldValue(divisor)));
+            unchecked {
+                var lowResult = DoubleArithmetic.DivRem(DoubleArithmetic.GetLowPart(dividend), DoubleArithmetic.GetHighPart(dividend), DoubleArithmetic.GetLowPart(divisor), DoubleArithmetic.GetHighPart(divisor), out var lowRemainder, out var highRemainder, out var highResult);
+                remainder = new UltimateOrb.Int128(lo: lowRemainder, hi: highRemainder);
+                return new UltimateOrb.Int128(lo: lowResult, hi: highResult);
+            }
+        }
+
+        [System.CLSCompliantAttribute(false)]
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
+        [System.Runtime.TargetedPatchingOptOutAttribute("")]
+        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Diagnostics.Contracts.PureAttribute()]
+        public static Int32 DivRem(Int32 dividend, Int32 divisor, out Int32 remainder) {
+            System.Diagnostics.Contracts.Contract.Requires(0u != divisor);
+            System.Diagnostics.Contracts.Contract.Ensures(System.Diagnostics.Contracts.Contract.OldValue(divisor) > System.Diagnostics.Contracts.Contract.ValueAtReturn(out remainder));
+            System.Diagnostics.Contracts.Contract.EnsuresOnThrow<DivideByZeroException>(!(0u != System.Diagnostics.Contracts.Contract.OldValue(divisor)));
+            return System.Math.DivRem(dividend, divisor, out remainder);
+        }
+
+        [System.CLSCompliantAttribute(false)]
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
+        [System.Runtime.TargetedPatchingOptOutAttribute("")]
+        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Diagnostics.Contracts.PureAttribute()]
         public static Int64 Remainder(Int64 dividend, Int64 divisor) {
             System.Diagnostics.Contracts.Contract.Requires(0u != divisor);
             System.Diagnostics.Contracts.Contract.Ensures(System.Diagnostics.Contracts.Contract.OldValue(dividend) <= 0 || 0 <= System.Diagnostics.Contracts.Contract.Result<Int64>());

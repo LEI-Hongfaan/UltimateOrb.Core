@@ -72,34 +72,36 @@ namespace UltimateOrb.Numerics {
 
         /*
          * BigDivRem, BigDiv, BigRem:
-         *   - The dividend has bigger size than the divisor's.
-         *   - The dividend should be a fused-bigmul-add result.
-         *   - The quotient can not overflow.
-         *   - Throws DivideByZeroException on 0 == divisor.
-         *   - Throws OverflowException on quotient overflowed.
+         *   - The dividend has a larger size than the divisor.
+         *   - The dividend should be the result of a fused big-multiply-add.
+         *   - The quotient cannot overflow.
+         *   - Throws DivideByZeroException when divisor == 0.
+         *   - Throws OverflowException when the quotient overflows.
+         * DivRemChecked, DivideChecked, RemainderChecked:
+         *   - (Unsigned cases) The quotient cannot overflow.
+         *   - Throws DivideByZeroException when divisor == 0.
+         *   - Throws OverflowException when the quotient overflows.
          * DivRem, Divide, Remainder:
-         *   - (Unsigned cases) The quotient can not overflow. 
-         *   - Throws DivideByZeroException on 0 == divisor.
-         *   - Throws OverflowException on quotient overflowed.
+         *   - Same as DivRemChecked, DivideChecked, RemainderChecked, but delegate to the underlying system '/', '%', and DivRem in case of overflow.
          * ~Unchecked:
-         *   - Overflowed results are truncated.
-         *   - Lower bits of results are correct on valid inputs.
+         *   - Results that overflow are truncated.
+         *   - The lower bits of results are correct for valid inputs.
          * ~Unsafe:
-         *   - Used as a dependent routine.
-         *   - No check on exceptionl conditions.
-         *   - Undefined behavior on invalid inputs or exceptionl conditions.
+         *   - Used as a helper routine.
+         *   - No checks for exceptional conditions.
+         *   - Undefined behavior on invalid inputs or exceptional conditions.
          * ~Partial:
          *   - Used as a subroutine.
-         *   - Works only on specialized conditions.
+         *   - Works only under specialized conditions.
          *   - Undefined behavior on invalid inputs.
          * ~Internal:
-         *   - Users should not use them directly.
+         *   - These routines should not be used directly by users.
          * ~NoThrowWhenDivideByZero:
-         *   - No throw on divide-by-zero conditions.
+         *   - Does not throw on divide-by-zero conditions.
          * ~NoThrowWhenOverflow:
-         *   - No throw on divide-by-zero conditions.
+         *   - Does not throw on overflow conditions.
          * ~NoThrow:
-         *   - No throw on exceptionl conditions.
+         *   - Does not throw on exceptional conditions.
          */
         [System.CLSCompliantAttribute(false)]
         [System.Runtime.CompilerServices.MethodImplAttribute(
@@ -1363,34 +1365,36 @@ namespace UltimateOrb.Numerics {
 
         /*
          * BigDivRem, BigDiv, BigRem:
-         *   - The dividend has bigger size than the divisor's.
-         *   - The dividend should be a fused-bigmul-add result.
-         *   - The quotient can not overflow.
-         *   - Throws DivideByZeroException on 0 == divisor.
-         *   - Throws OverflowException on quotient overflowed.
+         *   - The dividend has a larger size than the divisor.
+         *   - The dividend should be the result of a fused big-multiply-add.
+         *   - The quotient cannot overflow.
+         *   - Throws DivideByZeroException when divisor == 0.
+         *   - Throws OverflowException when the quotient overflows.
+         * DivRemChecked, DivideChecked, RemainderChecked:
+         *   - (Unsigned cases) The quotient cannot overflow.
+         *   - Throws DivideByZeroException when divisor == 0.
+         *   - Throws OverflowException when the quotient overflows.
          * DivRem, Divide, Remainder:
-         *   - (Unsigned cases) The quotient can not overflow. 
-         *   - Throws DivideByZeroException on 0 == divisor.
-         *   - Throws OverflowException on quotient overflowed.
+         *   - Same as DivRemChecked, DivideChecked, RemainderChecked, but delegate to the underlying system '/', '%', and DivRem in case of overflow.
          * ~Unchecked:
-         *   - Overflowed results are truncated.
-         *   - Lower bits of results are correct on valid inputs.
+         *   - Results that overflow are truncated.
+         *   - The lower bits of results are correct for valid inputs.
          * ~Unsafe:
-         *   - Used as a dependent routine.
-         *   - No check on exceptionl conditions.
-         *   - Undefined behavior on invalid inputs or exceptionl conditions.
+         *   - Used as a helper routine.
+         *   - No checks for exceptional conditions.
+         *   - Undefined behavior on invalid inputs or exceptional conditions.
          * ~Partial:
          *   - Used as a subroutine.
-         *   - Works only on specialized conditions.
+         *   - Works only under specialized conditions.
          *   - Undefined behavior on invalid inputs.
          * ~Internal:
-         *   - Users should not use them directly.
+         *   - These routines should not be used directly by users.
          * ~NoThrowWhenDivideByZero:
-         *   - No throw on divide-by-zero conditions.
+         *   - Does not throw on divide-by-zero conditions.
          * ~NoThrowWhenOverflow:
-         *   - No throw on divide-by-zero conditions.
+         *   - Does not throw on overflow conditions.
          * ~NoThrow:
-         *   - No throw on exceptionl conditions.
+         *   - Does not throw on exceptional conditions.
          */
         [System.CLSCompliantAttribute(false)]
         [System.Runtime.CompilerServices.MethodImplAttribute(
@@ -2545,34 +2549,36 @@ namespace UltimateOrb.Numerics {
 
         /*
          * BigDivRem, BigDiv, BigRem:
-         *   - The dividend has bigger size than the divisor's.
-         *   - The dividend should be a fused-bigmul-add result.
-         *   - The quotient can not overflow.
-         *   - Throws DivideByZeroException on 0 == divisor.
-         *   - Throws OverflowException on quotient overflowed.
+         *   - The dividend has a larger size than the divisor.
+         *   - The dividend should be the result of a fused big-multiply-add.
+         *   - The quotient cannot overflow.
+         *   - Throws DivideByZeroException when divisor == 0.
+         *   - Throws OverflowException when the quotient overflows.
+         * DivRemChecked, DivideChecked, RemainderChecked:
+         *   - (Unsigned cases) The quotient cannot overflow.
+         *   - Throws DivideByZeroException when divisor == 0.
+         *   - Throws OverflowException when the quotient overflows.
          * DivRem, Divide, Remainder:
-         *   - (Unsigned cases) The quotient can not overflow. 
-         *   - Throws DivideByZeroException on 0 == divisor.
-         *   - Throws OverflowException on quotient overflowed.
+         *   - Same as DivRemChecked, DivideChecked, RemainderChecked, but delegate to the underlying system '/', '%', and DivRem in case of overflow.
          * ~Unchecked:
-         *   - Overflowed results are truncated.
-         *   - Lower bits of results are correct on valid inputs.
+         *   - Results that overflow are truncated.
+         *   - The lower bits of results are correct for valid inputs.
          * ~Unsafe:
-         *   - Used as a dependent routine.
-         *   - No check on exceptionl conditions.
-         *   - Undefined behavior on invalid inputs or exceptionl conditions.
+         *   - Used as a helper routine.
+         *   - No checks for exceptional conditions.
+         *   - Undefined behavior on invalid inputs or exceptional conditions.
          * ~Partial:
          *   - Used as a subroutine.
-         *   - Works only on specialized conditions.
+         *   - Works only under specialized conditions.
          *   - Undefined behavior on invalid inputs.
          * ~Internal:
-         *   - Users should not use them directly.
+         *   - These routines should not be used directly by users.
          * ~NoThrowWhenDivideByZero:
-         *   - No throw on divide-by-zero conditions.
+         *   - Does not throw on divide-by-zero conditions.
          * ~NoThrowWhenOverflow:
-         *   - No throw on divide-by-zero conditions.
+         *   - Does not throw on overflow conditions.
          * ~NoThrow:
-         *   - No throw on exceptionl conditions.
+         *   - Does not throw on exceptional conditions.
          */
         [System.CLSCompliantAttribute(false)]
         [System.Runtime.CompilerServices.MethodImplAttribute(

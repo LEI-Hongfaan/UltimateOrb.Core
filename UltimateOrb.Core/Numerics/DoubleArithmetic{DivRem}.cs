@@ -272,7 +272,7 @@ namespace UltimateOrb.Numerics {
 
         [System.CLSCompliantAttribute(false)]
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static ULong DivRem(ULong lowDividend, Long highDividend, ULong lowDivisor, Long highDivisor, out ULong lowRemainder, out Long highRemainder, out Long highResult) {
+        public static ULong DivRemChecked(ULong lowDividend, Long highDividend, ULong lowDivisor, Long highDivisor, out ULong lowRemainder, out Long highRemainder, out Long highResult) {
             unchecked {
                 Long s = highDividend, t = highDivisor;
                 if (0 > highDivisor) {
@@ -288,6 +288,41 @@ namespace UltimateOrb.Numerics {
                 lowResult = DivRem(lowDividend, (ULong)highDividend, lowDivisor, (ULong)highDivisor, out lowProduct, out highProduct, out r);
                 if (0 > (s ^ t)) {
                     lowResult = MathEx.NegateSigned(lowResult, r, out r);
+                }
+                if (0 > s) {
+                    lowProduct = MathEx.NegateUnchecked(lowProduct, highProduct, out highProduct);
+                }
+                lowRemainder = lowProduct;
+                highRemainder = (Long)highProduct;
+                highResult = (Long)r;
+                return lowResult;
+            }
+        }
+
+        [System.CLSCompliantAttribute(false)]
+        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        public static ULong DivRem(ULong lowDividend, Long highDividend, ULong lowDivisor, Long highDivisor, out ULong lowRemainder, out Long highRemainder, out Long highResult) {
+            unchecked {
+                Long s = highDividend, t = highDivisor;
+                if (0 > highDivisor) {
+                    lowDivisor = MathEx.NegateUnchecked(lowDivisor, highDivisor, out highDivisor);
+                }
+                if (0 > highDividend) {
+                    if (~(ULong)0 == lowDivisor && lowDivisor == unchecked((ULong)highDivisor) && Long.MinValue == highDividend && 0 == lowDividend) {
+                        var q = Math.DivRem(highDividend, highDivisor, out highRemainder);
+                        lowRemainder = 0;
+                        highResult = q;
+                        return 0;
+                    }
+                    lowDividend = MathEx.NegateUnchecked(lowDividend, highDividend, out highDividend);
+                }
+                ULong lowProduct;
+                ULong highProduct;
+                ULong lowResult;
+                ULong r;
+                lowResult = DivRem(lowDividend, (ULong)highDividend, lowDivisor, (ULong)highDivisor, out lowProduct, out highProduct, out r);
+                if (0 > (s ^ t)) {
+                    lowResult = MathEx.NegateUnchecked(lowResult, r, out r);
                 }
                 if (0 > s) {
                     lowProduct = MathEx.NegateUnchecked(lowProduct, highProduct, out highProduct);
@@ -330,12 +365,38 @@ namespace UltimateOrb.Numerics {
 
         [System.CLSCompliantAttribute(false)]
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        public static ULong DivideChecked(ULong lowDividend, Long highDividend, ULong lowDivisor, Long highDivisor, out Long highResult) {
+            unchecked {
+                Long s = highDividend, t = highDivisor;
+                if (0 > highDividend) {
+                    if (~(ULong)0 == lowDivisor && lowDivisor == unchecked((ULong)highDivisor) && Long.MinValue == highDividend && 0 == lowDividend) {
+                        highResult = checked(-highDividend); // throws
+                        return 0;
+                    }
+                    lowDividend = MathEx.NegateUnchecked(lowDividend, highDividend, out highDividend);
+                }
+                if (0 > highDivisor) {
+                    lowDivisor = MathEx.NegateUnchecked(lowDivisor, highDivisor, out highDivisor);
+                }
+                ULong lowResult;
+                ULong r;
+                lowResult = Divide(lowDividend, (ULong)highDividend, lowDivisor, (ULong)highDivisor, out r);
+                if (0 > (s ^ t)) {
+                    lowResult = MathEx.NegateUnchecked(lowResult, r, out r);
+                }
+                highResult = (Long)r;
+                return lowResult;
+            }
+        }
+
+        [System.CLSCompliantAttribute(false)]
+        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static ULong Divide(ULong lowDividend, Long highDividend, ULong lowDivisor, Long highDivisor, out Long highResult) {
             unchecked {
                 Long s = highDividend, t = highDivisor;
                 if (0 > highDividend) {
                     if (~(ULong)0 == lowDivisor && lowDivisor == unchecked((ULong)highDivisor) && Long.MinValue == highDividend && 0 == lowDividend) {
-                        highResult = checked(-highDividend);
+                        highResult = checked(highDividend / highDivisor);
                         return 0;
                     }
                     lowDividend = MathEx.NegateUnchecked(lowDividend, highDividend, out highDividend);
@@ -379,6 +440,29 @@ namespace UltimateOrb.Numerics {
         [System.CLSCompliantAttribute(false)]
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         // ~ 192 Cyc (special input set test6)
+        public static ULong RemainderChecked(ULong lowDividend, Long highDividend, ULong lowDivisor, Long highDivisor, out Long highResult) {
+            unchecked {
+                Long s = highDividend, t = highDivisor;
+                if (0 > highDivisor) {
+                    lowDivisor = MathEx.NegateUnchecked(lowDivisor, highDivisor, out highDivisor);
+                }
+                if (0 > highDividend) {
+                    lowDividend = MathEx.NegateUnchecked(lowDividend, highDividend, out highDividend);
+                }
+                ULong lowResult;
+                ULong r;
+                lowResult = Remainder(lowDividend, (ULong)highDividend, lowDivisor, (ULong)highDivisor, out r);
+                if (0 > s) {
+                    lowResult = MathEx.NegateUnchecked(lowResult, r, out r);
+                }
+                highResult = (Long)r;
+                return lowResult;
+            }
+        }
+
+        [System.CLSCompliantAttribute(false)]
+        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        // ~ 192 Cyc (special input set test6)
         public static ULong Remainder(ULong lowDividend, Long highDividend, ULong lowDivisor, Long highDivisor, out Long highResult) {
             unchecked {
                 Long s = highDividend, t = highDivisor;
@@ -386,6 +470,10 @@ namespace UltimateOrb.Numerics {
                     lowDivisor = MathEx.NegateUnchecked(lowDivisor, highDivisor, out highDivisor);
                 }
                 if (0 > highDividend) {
+                    if (~(ULong)0 == lowDivisor && lowDivisor == unchecked((ULong)highDivisor) && Long.MinValue == highDividend && 0 == lowDividend) {
+                        highResult = checked(highDividend % highDivisor);
+                        return 0;
+                    }
                     lowDividend = MathEx.NegateUnchecked(lowDividend, highDividend, out highDividend);
                 }
                 ULong lowResult;
@@ -673,7 +761,7 @@ namespace UltimateOrb.Numerics {
 
         [System.CLSCompliantAttribute(false)]
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static ULong DivRem(ULong lowDividend, Long highDividend, ULong lowDivisor, Long highDivisor, out ULong lowRemainder, out Long highRemainder, out Long highResult) {
+        public static ULong DivRemChecked(ULong lowDividend, Long highDividend, ULong lowDivisor, Long highDivisor, out ULong lowRemainder, out Long highRemainder, out Long highResult) {
             unchecked {
                 Long s = highDividend, t = highDivisor;
                 if (0 > highDivisor) {
@@ -689,6 +777,41 @@ namespace UltimateOrb.Numerics {
                 lowResult = DivRem(lowDividend, (ULong)highDividend, lowDivisor, (ULong)highDivisor, out lowProduct, out highProduct, out r);
                 if (0 > (s ^ t)) {
                     lowResult = MathEx.NegateSigned(lowResult, r, out r);
+                }
+                if (0 > s) {
+                    lowProduct = MathEx.NegateUnchecked(lowProduct, highProduct, out highProduct);
+                }
+                lowRemainder = lowProduct;
+                highRemainder = (Long)highProduct;
+                highResult = (Long)r;
+                return lowResult;
+            }
+        }
+
+        [System.CLSCompliantAttribute(false)]
+        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        public static ULong DivRem(ULong lowDividend, Long highDividend, ULong lowDivisor, Long highDivisor, out ULong lowRemainder, out Long highRemainder, out Long highResult) {
+            unchecked {
+                Long s = highDividend, t = highDivisor;
+                if (0 > highDivisor) {
+                    lowDivisor = MathEx.NegateUnchecked(lowDivisor, highDivisor, out highDivisor);
+                }
+                if (0 > highDividend) {
+                    if (~(ULong)0 == lowDivisor && lowDivisor == unchecked((ULong)highDivisor) && Long.MinValue == highDividend && 0 == lowDividend) {
+                        var q = Math.DivRem(highDividend, highDivisor, out highRemainder);
+                        lowRemainder = 0;
+                        highResult = q;
+                        return 0;
+                    }
+                    lowDividend = MathEx.NegateUnchecked(lowDividend, highDividend, out highDividend);
+                }
+                ULong lowProduct;
+                ULong highProduct;
+                ULong lowResult;
+                ULong r;
+                lowResult = DivRem(lowDividend, (ULong)highDividend, lowDivisor, (ULong)highDivisor, out lowProduct, out highProduct, out r);
+                if (0 > (s ^ t)) {
+                    lowResult = MathEx.NegateUnchecked(lowResult, r, out r);
                 }
                 if (0 > s) {
                     lowProduct = MathEx.NegateUnchecked(lowProduct, highProduct, out highProduct);
@@ -731,12 +854,38 @@ namespace UltimateOrb.Numerics {
 
         [System.CLSCompliantAttribute(false)]
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        public static ULong DivideChecked(ULong lowDividend, Long highDividend, ULong lowDivisor, Long highDivisor, out Long highResult) {
+            unchecked {
+                Long s = highDividend, t = highDivisor;
+                if (0 > highDividend) {
+                    if (~(ULong)0 == lowDivisor && lowDivisor == unchecked((ULong)highDivisor) && Long.MinValue == highDividend && 0 == lowDividend) {
+                        highResult = checked(-highDividend); // throws
+                        return 0;
+                    }
+                    lowDividend = MathEx.NegateUnchecked(lowDividend, highDividend, out highDividend);
+                }
+                if (0 > highDivisor) {
+                    lowDivisor = MathEx.NegateUnchecked(lowDivisor, highDivisor, out highDivisor);
+                }
+                ULong lowResult;
+                ULong r;
+                lowResult = Divide(lowDividend, (ULong)highDividend, lowDivisor, (ULong)highDivisor, out r);
+                if (0 > (s ^ t)) {
+                    lowResult = MathEx.NegateUnchecked(lowResult, r, out r);
+                }
+                highResult = (Long)r;
+                return lowResult;
+            }
+        }
+
+        [System.CLSCompliantAttribute(false)]
+        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static ULong Divide(ULong lowDividend, Long highDividend, ULong lowDivisor, Long highDivisor, out Long highResult) {
             unchecked {
                 Long s = highDividend, t = highDivisor;
                 if (0 > highDividend) {
                     if (~(ULong)0 == lowDivisor && lowDivisor == unchecked((ULong)highDivisor) && Long.MinValue == highDividend && 0 == lowDividend) {
-                        highResult = checked(-highDividend);
+                        highResult = checked(highDividend / highDivisor);
                         return 0;
                     }
                     lowDividend = MathEx.NegateUnchecked(lowDividend, highDividend, out highDividend);
@@ -780,6 +929,29 @@ namespace UltimateOrb.Numerics {
         [System.CLSCompliantAttribute(false)]
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         // ~ 192 Cyc (special input set test6)
+        public static ULong RemainderChecked(ULong lowDividend, Long highDividend, ULong lowDivisor, Long highDivisor, out Long highResult) {
+            unchecked {
+                Long s = highDividend, t = highDivisor;
+                if (0 > highDivisor) {
+                    lowDivisor = MathEx.NegateUnchecked(lowDivisor, highDivisor, out highDivisor);
+                }
+                if (0 > highDividend) {
+                    lowDividend = MathEx.NegateUnchecked(lowDividend, highDividend, out highDividend);
+                }
+                ULong lowResult;
+                ULong r;
+                lowResult = Remainder(lowDividend, (ULong)highDividend, lowDivisor, (ULong)highDivisor, out r);
+                if (0 > s) {
+                    lowResult = MathEx.NegateUnchecked(lowResult, r, out r);
+                }
+                highResult = (Long)r;
+                return lowResult;
+            }
+        }
+
+        [System.CLSCompliantAttribute(false)]
+        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        // ~ 192 Cyc (special input set test6)
         public static ULong Remainder(ULong lowDividend, Long highDividend, ULong lowDivisor, Long highDivisor, out Long highResult) {
             unchecked {
                 Long s = highDividend, t = highDivisor;
@@ -787,6 +959,10 @@ namespace UltimateOrb.Numerics {
                     lowDivisor = MathEx.NegateUnchecked(lowDivisor, highDivisor, out highDivisor);
                 }
                 if (0 > highDividend) {
+                    if (~(ULong)0 == lowDivisor && lowDivisor == unchecked((ULong)highDivisor) && Long.MinValue == highDividend && 0 == lowDividend) {
+                        highResult = checked(highDividend % highDivisor);
+                        return 0;
+                    }
                     lowDividend = MathEx.NegateUnchecked(lowDividend, highDividend, out highDividend);
                 }
                 ULong lowResult;
@@ -1074,7 +1250,7 @@ namespace UltimateOrb.Numerics {
 
         [System.CLSCompliantAttribute(false)]
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static ULong DivRem(ULong lowDividend, Long highDividend, ULong lowDivisor, Long highDivisor, out ULong lowRemainder, out Long highRemainder, out Long highResult) {
+        public static ULong DivRemChecked(ULong lowDividend, Long highDividend, ULong lowDivisor, Long highDivisor, out ULong lowRemainder, out Long highRemainder, out Long highResult) {
             unchecked {
                 Long s = highDividend, t = highDivisor;
                 if (0 > highDivisor) {
@@ -1090,6 +1266,41 @@ namespace UltimateOrb.Numerics {
                 lowResult = DivRem(lowDividend, (ULong)highDividend, lowDivisor, (ULong)highDivisor, out lowProduct, out highProduct, out r);
                 if (0 > (s ^ t)) {
                     lowResult = MathEx.NegateSigned(lowResult, r, out r);
+                }
+                if (0 > s) {
+                    lowProduct = MathEx.NegateUnchecked(lowProduct, highProduct, out highProduct);
+                }
+                lowRemainder = lowProduct;
+                highRemainder = (Long)highProduct;
+                highResult = (Long)r;
+                return lowResult;
+            }
+        }
+
+        [System.CLSCompliantAttribute(false)]
+        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        public static ULong DivRem(ULong lowDividend, Long highDividend, ULong lowDivisor, Long highDivisor, out ULong lowRemainder, out Long highRemainder, out Long highResult) {
+            unchecked {
+                Long s = highDividend, t = highDivisor;
+                if (0 > highDivisor) {
+                    lowDivisor = MathEx.NegateUnchecked(lowDivisor, highDivisor, out highDivisor);
+                }
+                if (0 > highDividend) {
+                    if (~(ULong)0 == lowDivisor && lowDivisor == unchecked((ULong)highDivisor) && Long.MinValue == highDividend && 0 == lowDividend) {
+                        var q = Math.DivRem(highDividend, highDivisor, out highRemainder);
+                        lowRemainder = 0;
+                        highResult = q;
+                        return 0;
+                    }
+                    lowDividend = MathEx.NegateUnchecked(lowDividend, highDividend, out highDividend);
+                }
+                ULong lowProduct;
+                ULong highProduct;
+                ULong lowResult;
+                ULong r;
+                lowResult = DivRem(lowDividend, (ULong)highDividend, lowDivisor, (ULong)highDivisor, out lowProduct, out highProduct, out r);
+                if (0 > (s ^ t)) {
+                    lowResult = MathEx.NegateUnchecked(lowResult, r, out r);
                 }
                 if (0 > s) {
                     lowProduct = MathEx.NegateUnchecked(lowProduct, highProduct, out highProduct);
@@ -1132,12 +1343,38 @@ namespace UltimateOrb.Numerics {
 
         [System.CLSCompliantAttribute(false)]
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        public static ULong DivideChecked(ULong lowDividend, Long highDividend, ULong lowDivisor, Long highDivisor, out Long highResult) {
+            unchecked {
+                Long s = highDividend, t = highDivisor;
+                if (0 > highDividend) {
+                    if (~(ULong)0 == lowDivisor && lowDivisor == unchecked((ULong)highDivisor) && Long.MinValue == highDividend && 0 == lowDividend) {
+                        highResult = checked(-highDividend); // throws
+                        return 0;
+                    }
+                    lowDividend = MathEx.NegateUnchecked(lowDividend, highDividend, out highDividend);
+                }
+                if (0 > highDivisor) {
+                    lowDivisor = MathEx.NegateUnchecked(lowDivisor, highDivisor, out highDivisor);
+                }
+                ULong lowResult;
+                ULong r;
+                lowResult = Divide(lowDividend, (ULong)highDividend, lowDivisor, (ULong)highDivisor, out r);
+                if (0 > (s ^ t)) {
+                    lowResult = MathEx.NegateUnchecked(lowResult, r, out r);
+                }
+                highResult = (Long)r;
+                return lowResult;
+            }
+        }
+
+        [System.CLSCompliantAttribute(false)]
+        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static ULong Divide(ULong lowDividend, Long highDividend, ULong lowDivisor, Long highDivisor, out Long highResult) {
             unchecked {
                 Long s = highDividend, t = highDivisor;
                 if (0 > highDividend) {
                     if (~(ULong)0 == lowDivisor && lowDivisor == unchecked((ULong)highDivisor) && Long.MinValue == highDividend && 0 == lowDividend) {
-                        highResult = checked(-highDividend);
+                        highResult = checked(highDividend / highDivisor);
                         return 0;
                     }
                     lowDividend = MathEx.NegateUnchecked(lowDividend, highDividend, out highDividend);
@@ -1181,6 +1418,29 @@ namespace UltimateOrb.Numerics {
         [System.CLSCompliantAttribute(false)]
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         // ~ 192 Cyc (special input set test6)
+        public static ULong RemainderChecked(ULong lowDividend, Long highDividend, ULong lowDivisor, Long highDivisor, out Long highResult) {
+            unchecked {
+                Long s = highDividend, t = highDivisor;
+                if (0 > highDivisor) {
+                    lowDivisor = MathEx.NegateUnchecked(lowDivisor, highDivisor, out highDivisor);
+                }
+                if (0 > highDividend) {
+                    lowDividend = MathEx.NegateUnchecked(lowDividend, highDividend, out highDividend);
+                }
+                ULong lowResult;
+                ULong r;
+                lowResult = Remainder(lowDividend, (ULong)highDividend, lowDivisor, (ULong)highDivisor, out r);
+                if (0 > s) {
+                    lowResult = MathEx.NegateUnchecked(lowResult, r, out r);
+                }
+                highResult = (Long)r;
+                return lowResult;
+            }
+        }
+
+        [System.CLSCompliantAttribute(false)]
+        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        // ~ 192 Cyc (special input set test6)
         public static ULong Remainder(ULong lowDividend, Long highDividend, ULong lowDivisor, Long highDivisor, out Long highResult) {
             unchecked {
                 Long s = highDividend, t = highDivisor;
@@ -1188,6 +1448,10 @@ namespace UltimateOrb.Numerics {
                     lowDivisor = MathEx.NegateUnchecked(lowDivisor, highDivisor, out highDivisor);
                 }
                 if (0 > highDividend) {
+                    if (~(ULong)0 == lowDivisor && lowDivisor == unchecked((ULong)highDivisor) && Long.MinValue == highDividend && 0 == lowDividend) {
+                        highResult = checked(highDividend % highDivisor);
+                        return 0;
+                    }
                     lowDividend = MathEx.NegateUnchecked(lowDividend, highDividend, out highDividend);
                 }
                 ULong lowResult;

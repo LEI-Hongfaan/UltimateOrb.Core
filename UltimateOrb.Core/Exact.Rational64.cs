@@ -661,7 +661,7 @@ namespace UltimateOrb.Mathematics.Exact {
             // Calculate the remainder denominator
             Int64 remainderDenominator = divisorNumerator * dividendDenominator;
 
-            // Calculate the quotient and remainder using Math.DivRem
+            // Calculate the quotient and remainder
             var remainderNumerator = dividendNumerator * divisorDenominator % remainderDenominator;
 
             if (0 > remainderNumerator) {

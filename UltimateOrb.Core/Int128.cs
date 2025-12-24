@@ -1372,7 +1372,7 @@ namespace UltimateOrb {
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         [System.Diagnostics.Contracts.PureAttribute()]
         public static XInt128 DivRem(XInt128 first, XInt128 second, out XInt128 remainder) {
-            var lo = Numerics.DoubleArithmetic.DivRem(first.lo, first.hi, second.lo, second.hi, out UInt64 remainder_lo, out HInt64 remainder_hi, out HInt64 hi);
+            var lo = Numerics.DoubleArithmetic.DivRemChecked(first.lo, first.hi, second.lo, second.hi, out UInt64 remainder_lo, out HInt64 remainder_hi, out HInt64 hi);
             remainder = new XInt128(remainder_lo, remainder_hi);
             return new XInt128(lo, hi);
         }
@@ -1393,6 +1393,15 @@ namespace UltimateOrb {
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         [System.Diagnostics.Contracts.PureAttribute()]
         public static XInt128 Division(XInt128 first, XInt128 second) {
+            var lo = Numerics.DoubleArithmetic.DivideChecked(first.lo, first.hi, second.lo, second.hi, out HInt64 hi);
+            return new XInt128(lo, hi);
+        }
+
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
+        [System.Runtime.TargetedPatchingOptOutAttribute("")]
+        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Diagnostics.Contracts.PureAttribute()]
+        public static XInt128 operator /(XInt128 first, XInt128 second) {
             var lo = Numerics.DoubleArithmetic.Divide(first.lo, first.hi, second.lo, second.hi, out HInt64 hi);
             return new XInt128(lo, hi);
         }
@@ -1404,7 +1413,7 @@ namespace UltimateOrb {
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         [System.Diagnostics.Contracts.PureAttribute()]
         public static XInt128 op_IntegerDivision(XInt128 first, XInt128 second) {
-            var lo = Numerics.DoubleArithmetic.Divide(first.lo, first.hi, second.lo, second.hi, out HInt64 hi);
+            var lo = Numerics.DoubleArithmetic.DivideChecked(first.lo, first.hi, second.lo, second.hi, out HInt64 hi);
             return new XInt128(lo, hi);
         }
 
@@ -1424,7 +1433,7 @@ namespace UltimateOrb {
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         [System.Diagnostics.Contracts.PureAttribute()]
         public static XInt128 Remainder(XInt128 first, XInt128 second) {
-            var lo = Numerics.DoubleArithmetic.Remainder(first.lo, first.hi, second.lo, second.hi, out HInt64 hi);
+            var lo = Numerics.DoubleArithmetic.RemainderChecked(first.lo, first.hi, second.lo, second.hi, out HInt64 hi);
             return new XInt128(lo, hi);
         }
 
