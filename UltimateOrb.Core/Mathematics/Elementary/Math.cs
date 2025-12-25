@@ -175,7 +175,7 @@ namespace UltimateOrb.Mathematics.Elementary {
         [TargetedPatchingOptOutAttribute("")]
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         [PureAttribute()]
-        public static UltimateOrb.UInt128 Sqrt(UltimateOrb.UInt128 radicand) {
+        public static UltimateOrb.UInt128 ISqrt(UltimateOrb.UInt128 radicand) {
             // return DoubleArithmetic.Sqrt_A_F2(radicand.GetLowPart(), radicand.GetHighPart());
             return DoubleArithmetic.BigSqrt(radicand.GetLowPart(), radicand.GetHighPart());
         }
@@ -186,7 +186,7 @@ namespace UltimateOrb.Mathematics.Elementary {
         [TargetedPatchingOptOutAttribute("")]
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         [PureAttribute()]
-        public static System.UInt128 Sqrt(System.UInt128 radicand) {
+        public static System.UInt128 ISqrt(System.UInt128 radicand) {
             //return DoubleArithmetic.Sqrt_A_F2(radicand.GetLowPart(), radicand.GetHighPart());
             return DoubleArithmetic.BigSqrt(radicand.GetLowPart(), radicand.GetHighPart());
         }
@@ -198,7 +198,7 @@ namespace UltimateOrb.Mathematics.Elementary {
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         [PureAttribute()]
         // ~34.9 Cyc
-        public static UInt64 Sqrt(UInt64 radicand) {
+        public static UInt64 ISqrt(UInt64 radicand) {
             return Sqrt_A_F(radicand);
         }
 
@@ -207,8 +207,30 @@ namespace UltimateOrb.Mathematics.Elementary {
         [TargetedPatchingOptOutAttribute("")]
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         [PureAttribute()]
-        public static UInt32 Sqrt(UInt32 radicand) {
+        public static UInt32 ISqrt(UInt32 radicand) {
             return Sqrt_A_F(radicand);
+        }
+
+        [Obsolete()]
+        public static UltimateOrb.UInt128 Sqrt(UltimateOrb.UInt128 radicand) {
+            return ISqrt(radicand);
+        }
+
+#if NET7_0_OR_GREATER
+        [Obsolete()]
+        public static System.UInt128 Sqrt(System.UInt128 radicand) {
+            return ISqrt(radicand);
+        }
+#endif
+
+        [Obsolete()]
+        public static UInt64 Sqrt(UInt64 radicand) {
+            return ISqrt(radicand);
+        }
+
+        [Obsolete()]
+        public static UInt32 Sqrt(UInt32 radicand) {
+            return ISqrt(radicand);
         }
 
         [CLSCompliantAttribute(false)]
