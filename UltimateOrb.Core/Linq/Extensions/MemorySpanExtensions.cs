@@ -11,7 +11,7 @@ namespace UltimateOrb.Linq.Extensions {
     public static class MemorySpanExtensions {
 
 #if NET7_0_OR_GREATER
-        [Obsolete("Use Span<T> constructor instead")]
+        [Obsolete("Use Span<TBase> constructor instead")]
 #endif
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public static Span<T> AsSingletonSpan<T>(ref T value) {
@@ -28,7 +28,7 @@ namespace UltimateOrb.Linq.Extensions {
         }
 
 #if NET7_0_OR_GREATER
-        [Obsolete("Use ReadOnlySpan<T> constructor instead")]
+        [Obsolete("Use ReadOnlySpan<TBase> constructor instead")]
 #endif
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public static ReadOnlySpan<T> AsSingletonReadOnlySpan<T>(in T value) {

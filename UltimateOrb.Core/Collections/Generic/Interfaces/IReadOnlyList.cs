@@ -57,11 +57,11 @@ namespace UltimateOrb.Collections.Generic.Interfaces.RefReturn {
             }
         }
         /*
-        struct Enumerator : IReadOnlyEnumerator<T> {
-            Func<int, T> GetValue;
+        struct Enumerator : IReadOnlyEnumerator<TBase> {
+            Func<int, TBase> GetValue;
         }
         
-        IReadOnlyEnumerator<T> IReadOnlyEnumerable<T>.GetEnumerator() {
+        IReadOnlyEnumerator<TBase> IReadOnlyEnumerable<TBase>.GetEnumerator() {
             return new Enumerator((int i) => ref this[i]);
         }
         */

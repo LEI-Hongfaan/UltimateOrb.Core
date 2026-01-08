@@ -514,14 +514,14 @@ namespace UltimateOrb.Numerics.Generic {
         /*
 
 
-        public static virtual void DivRemUnchecked(out T result_lo, out T result_hi, out T remainder_lo, out T remainder_hi, T dividend_lo, T dividend_hi, T divisor_lo, T divisor_hi) {
+        public static virtual void DivRemUnchecked(out TBase result_lo, out TBase result_hi, out TBase remainder_lo, out TBase remainder_hi, TBase dividend_lo, TBase dividend_hi, TBase divisor_lo, TBase divisor_hi) {
             unchecked {
                 if (TSelf.IsZero_Unlikely(divisor_hi)) {
                     if (TSelf.IsNegativeSigned(divisor_hi)) {
-                        T product_lo;
-                        T product_hi;
-                        T q_lo;
-                        T t;
+                        TBase product_lo;
+                        TBase product_hi;
+                        TBase q_lo;
+                        TBase t;
                         {
                             int cc;
                             cc = TSelf.CountLeadingZeros(divisor_hi);
@@ -561,7 +561,7 @@ namespace UltimateOrb.Numerics.Generic {
                         }
                     }
                 } else {
-                    T t;
+                    TBase t;
                     TSelf.DivRemUnchecked(out var highResult, out t, dividend_hi, divisor_lo);
                     highRemainder = 0u;
                     TSelf.BigDivRemInternal(out var q_lo, out lowRemainder, dividend_lo, t, divisor_lo);

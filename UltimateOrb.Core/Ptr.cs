@@ -157,7 +157,7 @@ namespace UltimateOrb {
             }
 
             // TODO:
-            throw new ArgumentException("Argument should be of type Ptr<T>.", nameof(obj));
+            throw new ArgumentException("Argument should be of type Ptr<TBase>.", nameof(obj));
         }
 
         public bool Equals(Ptr<T> other) {
@@ -451,7 +451,7 @@ namespace UltimateOrb {
             }
 
             // TODO:
-            throw new ArgumentException("Argument should be of type ReadOnlyPtr<T>.", nameof(obj));
+            throw new ArgumentException("Argument should be of type ReadOnlyPtr<TBase>.", nameof(obj));
         }
 
         public bool Equals(ReadOnlyPtr<T> other) {

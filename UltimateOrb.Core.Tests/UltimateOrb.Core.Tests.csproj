@@ -11,6 +11,7 @@
 	<StartupObject>UltimateOrb.Core.Tests.Program</StartupObject>
 	<!--<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
 	<CompilerGeneratedFilesOutputPath>generated</CompilerGeneratedFilesOutputPath>-->
+	<LangVersion>14</LangVersion>
   </PropertyGroup>
   
   <ItemGroup>

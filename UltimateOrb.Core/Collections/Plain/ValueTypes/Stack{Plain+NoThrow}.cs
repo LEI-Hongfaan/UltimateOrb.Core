@@ -23,11 +23,11 @@ namespace UltimateOrb.Plain.ValueTypes.NoThrow {
     /// <remarks>
     ///     <para>Value assignments of <see cref="Stack{T}"/> have move semantics.</para>
     /// </remarks>
-    //public partial struct Stack<T>
-    //    : IEnumerable<T, Stack<T>.Enumerator>
-    //    , IStack_2_A1_B1_1<T>, IStackEx<T>, IInitializable, IInitializable<int> {
+    //public partial struct Stack<TBase>
+    //    : IEnumerable<TBase, Stack<TBase>.Enumerator>
+    //    , IStack_2_A1_B1_1<TBase>, IStackEx<TBase>, IInitializable, IInitializable<int> {
 
-    //    public T[] buffer;
+    //    public TBase[] buffer;
 
     //    public int count0;
 
@@ -51,7 +51,7 @@ namespace UltimateOrb.Plain.ValueTypes.NoThrow {
     //            if (capacity > 0) {
     //                Array.Resize(ref buffer, capacity);
     //            } else {
-    //                buffer = Array_Empty<T>.Value;
+    //                buffer = Array_Empty<TBase>.Value;
     //            }
     //            if (capacity < count0) {
     //                count0 = capacity;
@@ -66,7 +66,7 @@ namespace UltimateOrb.Plain.ValueTypes.NoThrow {
     //    ///     <para>Increases the total number of elements the internal data structure can hold without resizing.</para>
     //    /// </summary>
     //    /// <exception cref="OverflowException">
-    //    ///     <para>The resulting number of elements contained in the <see cref="Stack{T}"/> can not be represented in the internal data type. -or- There is insufficient memory to satisfy the request.</para>
+    //    ///     <para>The resulting number of elements contained in the <see cref="Stack{TBase}"/> can not be represented in the internal data type. -or- There is insufficient memory to satisfy the request.</para>
     //    /// </exception>
     //    /// <exception cref="OutOfMemoryException">
     //    ///     <para>There is insufficient memory to satisfy the request.</para>
@@ -78,10 +78,10 @@ namespace UltimateOrb.Plain.ValueTypes.NoThrow {
     //    }
 
     //    /// <summary>
-    //    ///     <para>Initializes a new instance of the <see cref="Stack{T}"/> type that is empty and has an initial capacity at least the value specified.</para>
+    //    ///     <para>Initializes a new instance of the <see cref="Stack{TBase}"/> type that is empty and has an initial capacity at least the value specified.</para>
     //    /// </summary>
     //    /// <param name="capacity">
-    //    ///     <para>The initial number of elements that the <see cref="Stack{T}"/> can contain.</para>
+    //    ///     <para>The initial number of elements that the <see cref="Stack{TBase}"/> can contain.</para>
     //    /// </param>
     //    /// <exception cref="OutOfMemoryException">
     //    ///     <para>There is insufficient memory to satisfy the request.</para>
@@ -89,35 +89,35 @@ namespace UltimateOrb.Plain.ValueTypes.NoThrow {
     //    [ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
     //    [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
     //    public Stack(int capacity) {
-    //        this.buffer = capacity > 0 ? Array_Empty<T>.Value : new T[capacity];
+    //        this.buffer = capacity > 0 ? Array_Empty<TBase>.Value : new TBase[capacity];
     //        this.count0 = 0;
     //        return;
     //    }
 
     //    [ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
     //    [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
-    //    public Stack(T[] buffer, int count) {
+    //    public Stack(TBase[] buffer, int count) {
     //        this.buffer = buffer;
     //        this.count0 = count;
     //    }
 
     //    /// <summary>
-    //    ///     <para>Initializes a new instance of the <see cref="Stack{T}"/> type that is empty and has the default initial capacity.</para>
+    //    ///     <para>Initializes a new instance of the <see cref="Stack{TBase}"/> type that is empty and has the default initial capacity.</para>
     //    /// </summary>
     //    /// <exception cref="OutOfMemoryException">
     //    ///     <para>There is insufficient memory to satisfy the request.</para>
     //    /// </exception>
     //    [ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
     //    [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
-    //    public static Stack<T> Create() {
-    //        return new Stack<T>(20);
+    //    public static Stack<TBase> Create() {
+    //        return new Stack<TBase>(20);
     //    }
 
     //    /// <summary>
-    //    ///     <para>Initializes a new instance of the <see cref="Stack{T}"/> type that is empty and has an initial capacity at least the value specified.</para>
+    //    ///     <para>Initializes a new instance of the <see cref="Stack{TBase}"/> type that is empty and has an initial capacity at least the value specified.</para>
     //    /// </summary>
     //    /// <param name="capacity">
-    //    ///     <para>The initial number of elements that the <see cref="Stack{T}"/> can contain.</para>
+    //    ///     <para>The initial number of elements that the <see cref="Stack{TBase}"/> can contain.</para>
     //    /// </param>
     //    /// <exception cref="OutOfMemoryException">
     //    ///     <para>There is insufficient memory to satisfy the request.</para>
@@ -127,25 +127,25 @@ namespace UltimateOrb.Plain.ValueTypes.NoThrow {
     //    /// </remarks>
     //    [ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
     //    [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
-    //    public static Stack<T> Create(int capacity) {
-    //        return new Stack<T>(capacity);
+    //    public static Stack<TBase> Create(int capacity) {
+    //        return new Stack<TBase>(capacity);
     //    }
 
     //    /// <summary>
-    //    ///     <para>Inserts an object at the top of the <see cref="Stack{T}"/>.</para>
+    //    ///     <para>Inserts an object at the top of the <see cref="Stack{TBase}"/>.</para>
     //    /// </summary>
     //    /// <param name="item">
-    //    ///     <para>The object to push onto the <see cref="Stack{T}"/>. The value can be null for reference types.</para>
+    //    ///     <para>The object to push onto the <see cref="Stack{TBase}"/>. The value can be null for reference types.</para>
     //    /// </param>
     //    /// <exception cref="OverflowException">
-    //    ///     <para>The resulting number of elements contained in the <see cref="Stack{T}"/> can not be represented in the internal data type. -or- There is insufficient memory to satisfy the request.</para>
+    //    ///     <para>The resulting number of elements contained in the <see cref="Stack{TBase}"/> can not be represented in the internal data type. -or- There is insufficient memory to satisfy the request.</para>
     //    /// </exception>
     //    /// <exception cref="OutOfMemoryException">
     //    ///     <para>There is insufficient memory to satisfy the request.</para>
     //    /// </exception>
     //    [ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
     //    [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
-    //    public void Push(T item) {
+    //    public void Push(TBase item) {
     //        var @this = this;
     //        if (int.MaxValue > @this.count0) {
     //            var c = unchecked(@this.count0 + 1);
@@ -159,13 +159,13 @@ namespace UltimateOrb.Plain.ValueTypes.NoThrow {
     //    }
 
     //    /// <summary>
-    //    ///     <para>Inserts a dummy value of type <typeparamref name="T"/> at the top of <see cref="Stack{T}"/>.</para>
+    //    ///     <para>Inserts a dummy value of type <typeparamref name="TBase"/> at the top of <see cref="Stack{TBase}"/>.</para>
     //    /// </summary>
     //    /// <returns>
-    //    ///     <para>A value of type ref <typeparamref name="T"/> (managed pointer to type <typeparamref name="T"/>) can be used to store the object being insert.</para>
+    //    ///     <para>A value of type ref <typeparamref name="TBase"/> (managed pointer to type <typeparamref name="TBase"/>) can be used to store the object being insert.</para>
     //    /// </returns>
     //    /// <exception cref="OverflowException">
-    //    ///     <para>The resulting number of elements contained in the <see cref="Stack{T}"/> can not be represented in the internal data type. -or- There is insufficient memory to satisfy the request.</para>
+    //    ///     <para>The resulting number of elements contained in the <see cref="Stack{TBase}"/> can not be represented in the internal data type. -or- There is insufficient memory to satisfy the request.</para>
     //    /// </exception>
     //    /// <exception cref="OutOfMemoryException">
     //    ///     <para>There is insufficient memory to satisfy the request.</para>
@@ -175,7 +175,7 @@ namespace UltimateOrb.Plain.ValueTypes.NoThrow {
     //    /// </remarks>
     //    [ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
     //    [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
-    //    public ref T Push() {
+    //    public ref TBase Push() {
     //        var @this = this;
     //        if (int.MaxValue > @this.count0) {
     //            var c = unchecked(@this.count0 + 1);
@@ -186,21 +186,21 @@ namespace UltimateOrb.Plain.ValueTypes.NoThrow {
     //            this.count0 = c;
     //            return ref @this.buffer[@this.count0];
     //        }
-    //        return ref Dummy<T>.Value;
+    //        return ref Dummy<TBase>.Value;
     //    }
 
     //    /// <summary>
-    //    ///     <para>Removes and returns the object at the top of the <see cref="Stack{T}"/>.</para>
+    //    ///     <para>Removes and returns the object at the top of the <see cref="Stack{TBase}"/>.</para>
     //    /// </summary>
     //    /// <returns>
-    //    ///     <para>The object removed from the top of the <see cref="Stack{T}"/>.</para>
+    //    ///     <para>The object removed from the top of the <see cref="Stack{TBase}"/>.</para>
     //    /// </returns>
     //    /// <remarks>
     //    ///     <para>A dummy value is returned if the stack is empty. The value can be null for reference types.</para>
     //    /// </remarks>
     //    [ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
     //    [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
-    //    public T Pop() {
+    //    public TBase Pop() {
     //        var a = this.count0;
     //        if (0 < a) {
     //            unchecked {
@@ -213,24 +213,24 @@ namespace UltimateOrb.Plain.ValueTypes.NoThrow {
     //    }
 
     //    /// <summary>
-    //    ///     <para>Returns the object at the top of the <see cref="Stack{T}"/> without removing it.</para>
+    //    ///     <para>Returns the object at the top of the <see cref="Stack{TBase}"/> without removing it.</para>
     //    /// </summary>
     //    /// <returns>
-    //    ///     <para>The object at the top of the <see cref="Stack{T}"/>.</para>
+    //    ///     <para>The object at the top of the <see cref="Stack{TBase}"/>.</para>
     //    /// </returns>
     //    [ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
     //    [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
-    //    public ref T Peek() {
+    //    public ref TBase Peek() {
     //        var a = unchecked(this.count0 - 1);
     //        if (0 <= a) {
     //            return ref this.buffer[a];
     //        }
-    //        return ref Dummy<T>.Value;
+    //        return ref Dummy<TBase>.Value;
     //    }
 
     //    [ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
     //    [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
-    //    T UltimateOrb.Collections.Generic.IStack<T>.Peek() {
+    //    TBase UltimateOrb.Collections.Generic.IStack<TBase>.Peek() {
     //        var a = unchecked(this.count0 - 1);
     //        if (0 <= a) {
     //            return this.buffer[a];
@@ -240,7 +240,7 @@ namespace UltimateOrb.Plain.ValueTypes.NoThrow {
 
     //    [ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
     //    [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
-    //    public bool TryPush(T item) {
+    //    public bool TryPush(TBase item) {
     //        var c = checked(this.count0 + 1);
     //        var buffer = this.buffer;
     //        if (null == buffer || c > buffer.Length) {
@@ -259,7 +259,7 @@ namespace UltimateOrb.Plain.ValueTypes.NoThrow {
     //    }
 
     //    [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
-    //    public bool TryPeek(out T item) {
+    //    public bool TryPeek(out TBase item) {
     //        var a = unchecked(this.count0 - 1);
     //        if (0 <= a) {
     //            item = this.buffer[a];
@@ -270,7 +270,7 @@ namespace UltimateOrb.Plain.ValueTypes.NoThrow {
     //    }
 
     //    [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
-    //    public bool TryPop(out T item) {
+    //    public bool TryPop(out TBase item) {
     //        var a = this.count0;
     //        if (a > 0) {
     //            unchecked {
@@ -285,10 +285,10 @@ namespace UltimateOrb.Plain.ValueTypes.NoThrow {
     //    }
 
     //    /// <summary>
-    //    ///     <para>Gets the number of elements contained in the <see cref="Stack{T}"/>.</para>
+    //    ///     <para>Gets the number of elements contained in the <see cref="Stack{TBase}"/>.</para>
     //    /// </summary>
     //    /// <returns>
-    //    ///     <para>The number of elements contained in the <see cref="Stack{T}"/>.</para>
+    //    ///     <para>The number of elements contained in the <see cref="Stack{TBase}"/>.</para>
     //    /// </returns>
     //    /// <exception cref="OverflowException">
     //    ///     <para>The result can not be represented in the result type.</para>
@@ -303,10 +303,10 @@ namespace UltimateOrb.Plain.ValueTypes.NoThrow {
     //    }
 
     //    /// <summary>
-    //    ///     <para>Gets the number of elements contained in the <see cref="Stack{T}"/>.</para>
+    //    ///     <para>Gets the number of elements contained in the <see cref="Stack{TBase}"/>.</para>
     //    /// </summary>
     //    /// <returns>
-    //    ///     <para>The number of elements contained in the <see cref="Stack{T}"/>.</para>
+    //    ///     <para>The number of elements contained in the <see cref="Stack{TBase}"/>.</para>
     //    /// </returns>
     //    public long LongCount {
 
@@ -330,20 +330,20 @@ namespace UltimateOrb.Plain.ValueTypes.NoThrow {
     //        get => true;
     //    }
 
-    //    private partial struct MoveFunctor : IO.IFunc<T, T> {
+    //    private partial struct MoveFunctor : IO.IFunc<TBase, TBase> {
 
     //        [ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
     //        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
-    //        public T Invoke(T arg) {
+    //        public TBase Invoke(TBase arg) {
     //            return arg;
     //        }
     //    }
 
     //    [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
-    //    public Stack<T> Select() => Select<T, MoveFunctor>();
+    //    public Stack<TBase> Select() => Select<TBase, MoveFunctor>();
 
     //    [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
-    //    public Stack<TResult> Select<TResult, TSelector>(TSelector selector) where TSelector : IO.IFunc<T, TResult> {
+    //    public Stack<TResult> Select<TResult, TSelector>(TSelector selector) where TSelector : IO.IFunc<TBase, TResult> {
     //        var c = this.count0;
     //        var b = this.buffer;
     //        var a = new TResult[c];
@@ -354,13 +354,13 @@ namespace UltimateOrb.Plain.ValueTypes.NoThrow {
     //    }
 
     //    [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
-    //    public Stack<TResult> Select<TResult, TSelector>() where TSelector : IO.IFunc<T, TResult>, new() => this.Select<TResult, TSelector>(DefaultConstructor.Invoke<TSelector>());
+    //    public Stack<TResult> Select<TResult, TSelector>() where TSelector : IO.IFunc<TBase, TResult>, new() => this.Select<TResult, TSelector>(DefaultConstructor.Invoke<TSelector>());
 
     //    [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
-    //    public T[] ToArray() => ToArray<T, MoveFunctor>();
+    //    public TBase[] ToArray() => ToArray<TBase, MoveFunctor>();
 
     //    [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
-    //    public TResult[] ToArray<TResult, TSelector>(TSelector selector) where TSelector : IO.IFunc<T, TResult> {
+    //    public TResult[] ToArray<TResult, TSelector>(TSelector selector) where TSelector : IO.IFunc<TBase, TResult> {
     //        var a = this.buffer;
     //        if (null != a) {
     //            var c = this.count0;
@@ -379,11 +379,11 @@ namespace UltimateOrb.Plain.ValueTypes.NoThrow {
 
     //    [ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
     //    [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
-    //    public TResult[] ToArray<TResult, TSelector>() where TSelector : IO.IFunc<T, TResult>, new() => this.ToArray<TResult, TSelector>(DefaultConstructor.Invoke<TSelector>());
+    //    public TResult[] ToArray<TResult, TSelector>() where TSelector : IO.IFunc<TBase, TResult>, new() => this.ToArray<TResult, TSelector>(DefaultConstructor.Invoke<TSelector>());
 
     //    [ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
     //    [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
-    //    void Collections.Generic.IStack_A1<T>.Pop() {
+    //    void Collections.Generic.IStack_A1<TBase>.Pop() {
     //        var a = this.count0;
     //        if (0 < a) {
     //            unchecked {
@@ -395,13 +395,13 @@ namespace UltimateOrb.Plain.ValueTypes.NoThrow {
 
     //    [ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
     //    [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
-    //    public T PeekPop() {
+    //    public TBase PeekPop() {
     //        return this.Pop();
     //    }
 
     //    [ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
     //    [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
-    //    public void PopPush(T item) {
+    //    public void PopPush(TBase item) {
     //        var a = unchecked(this.count0 - 1);
     //        if (0 <= a) {
     //            this.buffer[a] = item;
@@ -410,7 +410,7 @@ namespace UltimateOrb.Plain.ValueTypes.NoThrow {
 
     //    [ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
     //    [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
-    //    public T PeekPopPush(T item) {
+    //    public TBase PeekPopPush(TBase item) {
     //        var a = unchecked(this.count0 - 1);
     //        if (0 <= a) {
     //            var b = this.buffer;
@@ -437,7 +437,7 @@ namespace UltimateOrb.Plain.ValueTypes.NoThrow {
 
     //    [ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
     //    [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
-    //    public bool TryPeekPop(out T result) {
+    //    public bool TryPeekPop(out TBase result) {
     //        var a = this.count0;
     //        if (0 < a) {
     //            unchecked {
@@ -453,7 +453,7 @@ namespace UltimateOrb.Plain.ValueTypes.NoThrow {
 
     //    [ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
     //    [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
-    //    public bool TryPopPush(T item) {
+    //    public bool TryPopPush(TBase item) {
     //        var a = unchecked(this.count0 - 1);
     //        if (0 <= a) {
     //            this.buffer[a] = item;
@@ -464,7 +464,7 @@ namespace UltimateOrb.Plain.ValueTypes.NoThrow {
 
     //    [ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
     //    [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
-    //    public bool TryPeekPopPush(T item, out T result) {
+    //    public bool TryPeekPopPush(TBase item, out TBase result) {
     //        var a = unchecked(this.count0 - 1);
     //        if (0 <= a) {
     //            var b = this.buffer;
@@ -494,12 +494,12 @@ namespace UltimateOrb.Plain.ValueTypes.NoThrow {
     //    [ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
     //    [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
     //    public void Initialize(int capacity) {
-    //        this = new Stack<T>(capacity);
+    //        this = new Stack<TBase>(capacity);
     //    }
 
     //    [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
     //    public bool TryInitialize(int capacity) {
-    //        var buffer = (T[])null;
+    //        var buffer = (TBase[])null;
     //        buffer = GetBuffer(capacity);
     //        if (null != buffer) {
     //            this.buffer = buffer;
@@ -510,9 +510,9 @@ namespace UltimateOrb.Plain.ValueTypes.NoThrow {
     //    }
 
     //    [MethodImplAttribute(MethodImplOptions.NoInlining)]
-    //    private static T[] GetBuffer(int capacity) {
+    //    private static TBase[] GetBuffer(int capacity) {
     //        try {
-    //            return capacity <= 0 ? Array_Empty<T>.Value : new T[capacity];
+    //            return capacity <= 0 ? Array_Empty<TBase>.Value : new TBase[capacity];
     //        } catch (OutOfMemoryException) {
     //            return null;
     //        }
@@ -522,11 +522,11 @@ namespace UltimateOrb.Plain.ValueTypes.NoThrow {
     //        return new Enumerator(this);
     //    }
 
-    //    System.Collections.Generic.IEnumerator<T> IEnumerable<T>.GetEnumerator() {
+    //    System.Collections.Generic.IEnumerator<TBase> IEnumerable<TBase>.GetEnumerator() {
     //        return new Enumerator(this);
     //    }
 
-    //    RefReturn.Collections.Generic.IEnumerator<T> RefReturn.Collections.Generic.IEnumerable<T>.GetEnumerator() {
+    //    RefReturn.Collections.Generic.IEnumerator<TBase> RefReturn.Collections.Generic.IEnumerable<TBase>.GetEnumerator() {
     //        return new Enumerator(this);
     //    }
 

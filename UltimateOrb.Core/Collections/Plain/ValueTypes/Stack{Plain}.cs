@@ -192,7 +192,7 @@ namespace UltimateOrb.Collections.Plain.ValueTypes {
 
         //[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
         //[MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
-        //T IStack<T>.Peek() {
+        //TBase IStack<TBase>.Peek() {
         //    var a = unchecked(this.m_count - 1);
         //    if (0 <= a) {
         //        return this.m_buffer[a];
@@ -247,7 +247,7 @@ namespace UltimateOrb.Collections.Plain.ValueTypes {
 
         //[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
         //[MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
-        //void Collections.Generic.IStack_A1<T>.Pop() {
+        //void Collections.Generic.IStack_A1<TBase>.Pop() {
         //    var a = this.m_count;
         //    if (0 < a) {
         //        unchecked {
@@ -332,7 +332,7 @@ namespace UltimateOrb.Collections.Plain.ValueTypes {
 
         //[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
         //[MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
-        //public Stack<T> Select() => this.Select<T, MoveFunctor>();
+        //public Stack<TBase> Select() => this.Select<TBase, MoveFunctor>();
 
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         public Stack<TResult> Select<TResult, TSelector>(TSelector selector) where TSelector : IO.IFunc<T, TResult> {
@@ -346,7 +346,7 @@ namespace UltimateOrb.Collections.Plain.ValueTypes {
         }
 
         //[MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
-        //public Stack<TResult> Select<TResult, TSelector>() where TSelector : IO.IFunc<T, TResult>, new() => this.Select<TResult, TSelector>(DefaultConstructor.Invoke<TSelector>());
+        //public Stack<TResult> Select<TResult, TSelector>() where TSelector : IO.IFunc<TBase, TResult>, new() => this.Select<TResult, TSelector>(DefaultConstructor.Invoke<TSelector>());
 
         /// <summary>
         ///     <para>Sets the total number of elements the internal data structure can hold without resizing.</para>
@@ -402,7 +402,7 @@ namespace UltimateOrb.Collections.Plain.ValueTypes {
         }
 
         //[MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
-        //public TResult[] ToArray<TResult, TSelector>() where TSelector : IO.IFunc<T, TResult>, new() => this.ToArray<TResult, TSelector>(DefaultConstructor.Invoke<TSelector>());
+        //public TResult[] ToArray<TResult, TSelector>() where TSelector : IO.IFunc<TBase, TResult>, new() => this.ToArray<TResult, TSelector>(DefaultConstructor.Invoke<TSelector>());
 
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]

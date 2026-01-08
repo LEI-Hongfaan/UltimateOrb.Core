@@ -311,6 +311,16 @@ namespace UltimateOrb.Runtime.CompilerServices {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         [ILMethodBody(@"
             ldarg.0
+            unbox !!0
+            ret
+        ")]
+        internal static ref T UnsafeUnbox<T>(object box) {
+            throw null!;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [ILMethodBody(@"
+            ldarg.0
             ldarg.1
             sizeof !!0
             conv.i

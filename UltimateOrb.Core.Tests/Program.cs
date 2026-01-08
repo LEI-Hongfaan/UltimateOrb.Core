@@ -18,6 +18,7 @@ namespace UltimateOrb.Numerics.Specialized {
 */
 
 namespace UltimateOrb.Core.Tests {
+    using System.Diagnostics;
     using System.Diagnostics.CodeAnalysis;
     using System.Numerics;
     using System.Runtime.CompilerServices;
@@ -113,9 +114,160 @@ namespace UltimateOrb.Core.Tests {
         }
 
 
+        struct asfa : ICloneableDerivedByNongeneric<asfa> {
+            public int a;
+            public int b;
 
+            public object Clone() {
+                var t = this;
+                ++b;
+                return t;
+            }
+
+            public override string ToString() {
+                return (a, b).ToString();
+            }
+        }
+        static T Clone1<T>(ref T @this) where T : struct, ICloneable<T> {
+            return @this.Clone();
+        }
+
+        static T Clone1b<T>(ref T @this) where T : ICloneable<T> {
+            return @this.Clone();
+        }
+
+        static T Clone0<T>(ref T @this) where T : struct, ICloneable {
+            return (T)@this.Clone();
+        }
+        static T Clone0a<T>(T @this) where T : struct, ICloneable {
+            return (T)@this.Clone();
+        }
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private static int Main(string[] args) {
+            if (false) {
+                asfa sadfa = new asfa() { a = 1919810, b = 114514 };
+                Console.WriteLine($"{nameof(sadfa)} = {sadfa}");
+                var t = Clone1(ref sadfa);
+                Console.WriteLine($"{nameof(t)} = {t}");
+                Console.WriteLine($"{nameof(sadfa)} = {sadfa}");
+                Console.WriteLine($"===");
+                var t2 = Clone1b(ref sadfa);
+                Console.WriteLine($"{nameof(t2)} = {t2}");
+
+
+
+                return 0;
+            }
+            {
+                Console.WriteLine(BigRational.Math.ILog10((BigRational)9.9));
+                Decimal128Bid a = Decimal128Bid.Pi;
+                var b = (BigRational)a;
+                var dsfa = (Decimal128Bid)b + Decimal128Bid.One;
+                var d = (BigRational)dsfa;
+                var dd = Decimal128Bid.Tau / 2;
+                var rr = (BigRational)dd;
+                var dd1 = -Decimal128Bid.MaxValue % Decimal128Bid.Tau;
+                var rTau = (BigRational)(-Decimal128Bid.Tau);
+                Console.WriteLine(rTau);
+                var rr1 = (BigRational)dd1;
+                var xx1 = (double)rr1;
+                Console.WriteLine(Decimal128Bid.Epsilon);
+                Console.WriteLine(Decimal128Bid.One / 1000);
+                Console.WriteLine(Decimal128Bid.Epsilon * 1000);
+                Console.WriteLine(Decimal128Bid.Epsilon * 1001);
+                Console.WriteLine(Decimal128Bid.Epsilon / 2);
+                Console.WriteLine(Decimal128Bid.Epsilon / 1.99999999);
+
+                Console.WriteLine(Decimal128Bid.Scale10(100000000, -7));
+
+
+                Console.WriteLine((Decimal128Bid)801E5M); // System.Decimal does not have strictly positive q
+                Console.WriteLine(Decimal128Bid.Scale10(801, 5));
+                Console.WriteLine(Decimal128Bid.Scale10(801, 5) / 10);
+                Console.WriteLine(Decimal128Bid.Scale10(801, 5) / Decimal128Bid.Scale10(1, 1));
+                Console.WriteLine(Decimal128Bid.Scale10(801, 5) / Decimal128Bid.Scale10(100, -1));
+                Console.WriteLine(Decimal128Bid.Scale10(801, 5) / Decimal128Bid.Scale10(100000000, -7));
+
+                Console.WriteLine(Decimal128Bid.Scale10(801000000, -1));
+                Console.WriteLine(Decimal128Bid.Scale10(801000000, -1) / 10);
+                Console.WriteLine(Decimal128Bid.Scale10(801000000, -1) / Decimal128Bid.Scale10(1, 1));
+                Console.WriteLine(Decimal128Bid.Scale10(801000000, -1) / Decimal128Bid.Scale10(100, -1));
+                Console.WriteLine(Decimal128Bid.Scale10(801000000, -1) / Decimal128Bid.Scale10(100000000, -7));
+
+
+
+
+
+                Console.WriteLine((Decimal128Bid)1234D);
+                Console.WriteLine((Decimal128Bid)1234E7D);
+                Console.WriteLine($"System.Decimal {(System.Decimal)1234E7D}");
+                Console.WriteLine((Decimal128Bid)1234E7D / 10);
+                Console.WriteLine($"System.Decimal {(System.Decimal)1234E7D / 10}");
+                Console.WriteLine((Decimal128Bid)1234E7D / 1E1M);
+                Console.WriteLine($"System.Decimal {(System.Decimal)1234E7D / 1E1M}");
+                Console.WriteLine((Decimal128Bid)1234E7D / 100E-1M);
+                Console.WriteLine($"System.Decimal {(System.Decimal)1234E7D / 100E-1M}");
+
+                Console.WriteLine((Decimal128Bid)(-1.25D));
+                Console.WriteLine((Decimal128Bid)4.2D);
+                Console.WriteLine((Decimal128Bid)(-4.20M));
+
+                Console.WriteLine((Decimal128Bid)1 / 0.1M);
+                Console.WriteLine((Decimal128Bid)1 % 0.1M);
+
+                Console.WriteLine((Decimal128Bid)1 / 0.1D);
+                Console.WriteLine((Decimal128Bid)1 % 0.1D);
+
+                Console.WriteLine(Decimal128Bid.Scale10(-9.05M, -33));
+                Console.WriteLine((1 + Decimal128Bid.Scale10(1, -32)) * (1 - Decimal128Bid.Scale10(1, -33)));
+
+                Console.WriteLine(Decimal128Bid.FusedMultiplyAdd(1 + Decimal128Bid.Scale10(1, -32), 1 - Decimal128Bid.Scale10(1, -33), Decimal128Bid.Scale10(-9.05M, -33)));
+                Console.WriteLine(Decimal128Bid.FusedMultiplyAdd(1 + Decimal128Bid.Scale10(1, -32), 1 - Decimal128Bid.Scale10(1, -33), Decimal128Bid.Scale10(-9.049999999999M, -33)));
+                Console.WriteLine(Decimal128Bid.Hypot(3, 4));
+                Console.WriteLine(Decimal128Bid.Hypot(30, 40));
+                Console.WriteLine(Decimal128Bid.Hypot(0, 1));
+                Console.WriteLine(Decimal128Bid.Hypot(Decimal128Bid.Scale10(1, 1), 1));
+                Console.WriteLine(Decimal128Bid.Hypot(Decimal128Bid.MinValue, Decimal128Bid.Scale10(9, 6127)));
+                Console.WriteLine(Decimal128Bid.Hypot(Decimal128Bid.MinValue, Decimal128Bid.Scale10(10, 6127)));
+                Console.WriteLine(Decimal128Bid.Hypot(Decimal128Bid.MinValue, Decimal128Bid.Scale10(Decimal128Bid.Scale10(1, 34) - 1, 6128 - 34)));
+                Console.WriteLine(Decimal128Bid.Scale10(10, 6127));
+                Console.WriteLine(Decimal128Bid.Scale10(1, 6128));
+                Console.WriteLine(Decimal128Bid.Scale10(Decimal128Bid.Scale10(1, 34) - 1, 6128 - 34));
+                Console.WriteLine(Decimal128Bid.Scale10(Decimal128Bid.Scale10(1, 34) - 1, 6128 - 34) + Decimal128Bid.Scale10(1, 6127 - 33));
+
+                Console.WriteLine(Decimal128Bid.Scale10((Decimal128Bid)(BigRational)BigInteger.Pow(10, 33), -6176));
+                Console.WriteLine($"0X{BitConverter.Decimal128ToUInt128Bits(Decimal128Bid.Scale10((Decimal128Bid)(BigRational)BigInteger.Pow(10, 33), -6176)):x32}");
+                Console.WriteLine(Decimal128Bid.Scale10(1, -6143));
+                Console.WriteLine($"0X{BitConverter.Decimal128ToUInt128Bits(Decimal128Bid.Scale10(1, -6143)):x32}");
+                Console.WriteLine(Decimal128Bid.Scale10(1, -6143) - Decimal128Bid.Scale10(1, -6176));
+                Console.WriteLine($"0X{BitConverter.Decimal128ToUInt128Bits(Decimal128Bid.Scale10(1, -6143) - Decimal128Bid.Scale10(1, -6176)):x32}");
+                Console.WriteLine(Decimal128Bid.Scale10(9, -6144));
+                Console.WriteLine($"0X{BitConverter.Decimal128ToUInt128Bits(Decimal128Bid.Scale10(9, -6144)):x32}");
+                Console.WriteLine(Decimal128Bid.Scale10(1, -6144));
+                Console.WriteLine($"0X{BitConverter.Decimal128ToUInt128Bits(Decimal128Bid.Scale10(1, -6144)):x32}");
+
+                Console.WriteLine(Decimal128Bid.Scale10(1, -6143));
+                Console.WriteLine(Decimal128Bid.IsSubnormal(Decimal128Bid.Scale10(1, -6143)));
+                Console.WriteLine(Decimal128Bid.Scale10(1, -6143) * Decimal128Bid.Scale10(1, -100));
+                Console.WriteLine(Decimal128Bid.IsSubnormal(Decimal128Bid.Scale10(1, -6143) * Decimal128Bid.Scale10(1, -100)));
+                Console.WriteLine(Decimal128Bid.Scale10(1, -6143) * .95D);
+                Console.WriteLine(Decimal128Bid.IsSubnormal(Decimal128Bid.Scale10(1, -6143) * .95D));
+                Console.WriteLine(Decimal128Bid.Scale10(1, -6143) * .95M);
+                Console.WriteLine(Decimal128Bid.IsSubnormal(Decimal128Bid.Scale10(1, -6143) * .95M));
+
+
+                Console.WriteLine(Decimal128Bid.Scale10((Decimal128Bid)(BigRational)BigInteger.Pow(10, 33), -6177));
+                Console.WriteLine(Decimal128Bid.Scale10(1, -6144));
+
+                Console.WriteLine(Decimal128Bid.Scale10((Decimal128Bid)(BigRational)BigInteger.Pow(10, 33), -6179));
+                Console.WriteLine(Decimal128Bid.Scale10(1, -6146));
+
+
+                Console.WriteLine((double)Decimal128Bid.MaxValue);
+
+
+                return 0;
+            }
             {
                 var d = (decimal)BigRational.FromFraction(22, 7);
                 Console.WriteLine(d);
@@ -156,7 +308,7 @@ namespace UltimateOrb.Core.Tests {
                 return 0;
             }
             {
-                
+
 
                 string output = $$$"""{{{3:V:<s:aaa>}}}""";
                 Console.WriteLine(output);
@@ -225,7 +377,7 @@ namespace UltimateOrb.Core.Tests {
                 }
                 Console.WriteLine(s);
             }
-            
+
 
             {
                 Console.WriteLine(RuntimeEnvironment.GetSystemVersion());
@@ -1084,7 +1236,7 @@ namespace UltimateOrb.Core.Tests {
 
             {
                 var vdsadf = new BigUIntegerBuilder(333);
-                vdsadf.MultiplyPow10(20);
+                vdsadf.MultiplyExp10(20);
                 vdsadf.Add(66666666);
                 vdsadf.Add(66666666);
                 vdsadf.Add(66666666);

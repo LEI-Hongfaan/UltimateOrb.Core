@@ -26,9 +26,9 @@ using global::System.Runtime.Versioning;
 
 namespace System {
 
-    // ByReference<T> is meant to be used to represent "ref T" fields. It is working
+    // ByReference<TBase> is meant to be used to represent "ref TBase" fields. It is working
     // around lack of first class support for byref fields in C# and IL. The JIT and
-    // type loader has special handling for it that turns it into a thin wrapper around ref T.
+    // type loader has special handling for it that turns it into a thin wrapper around ref TBase.
     [UltimateOrb.ForceDiscard]
     internal readonly ref struct ByReference<T> {
 #pragma warning disable CA1823, 169 // private field '{blah}' is never used

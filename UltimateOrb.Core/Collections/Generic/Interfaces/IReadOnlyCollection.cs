@@ -43,7 +43,7 @@ namespace UltimateOrb.Collections.Generic.Interfaces.RefReturn {
 
         void CopyTo(Span<T> buffer);
 
-        //void CopyTo(StridedMemorySpan<T> buffer) {
+        //void CopyTo(StridedMemorySpan<TBase> buffer) {
         //    CopyTo(buffer.Span);
         //}
     }

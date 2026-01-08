@@ -520,8 +520,9 @@ namespace UltimateOrb.Mathematics.Elementary {
             return value;
         }
 
+        #region ICbrt, CbrtRem
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static uint Cbrt(uint radicand) {
+        public static uint ICbrt(uint radicand) {
             return unchecked((uint)System.Math.Cbrt(radicand));
         }
 
@@ -535,7 +536,7 @@ namespace UltimateOrb.Mathematics.Elementary {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ulong Cbrt(ulong radicand) {
+        public static ulong ICbrt(ulong radicand) {
             unchecked {
                 var root = (ulong)(1e-8 + System.Math.Cbrt(radicand));
                 var p = root * root * root;
@@ -560,30 +561,131 @@ namespace UltimateOrb.Mathematics.Elementary {
             }
         }
 
+#if NET7_0_OR_GREATER
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt128 Cbrt(UInt128 radicand) {
+        public static System.UInt128 ICbrt(System.UInt128 radicand) {
             unchecked {
                 var root = (ulong)(1e-2 + System.Math.Cbrt((double)radicand));
-                var p = root * (UInt128)root * root;
+                var p = root * (System.UInt128)root * root;
                 return radicand >= p ? root : --root;
             }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UInt128 CbrtRem(UInt128 radicand, out UInt128 remainder) {
+        public static System.UInt128 CbrtRem(System.UInt128 radicand, out System.UInt128 remainder) {
             unchecked {
                 var root = (ulong)(1e-2 + System.Math.Cbrt((double)radicand));
-                var p = root * (UInt128)root * root;
+                var p = root * (System.UInt128)root * root;
                 var m = radicand - p;
-                if ((Int128)m >= 0) {
+                if ((System.Int128)m >= 0) {
                     remainder = m;
                     return root;
                 } else {
                     --root;
-                    remainder = radicand - root * (UInt128)root * root;
+                    remainder = radicand - root * (System.UInt128)root * root;
                     return root;
                 }
             }
         }
+#endif
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static UltimateOrb.UInt128 ICbrt(UltimateOrb.UInt128 radicand) {
+            unchecked {
+                var root = (ulong)(1e-2 + System.Math.Cbrt((double)radicand));
+                var p = root * (UltimateOrb.UInt128)root * root;
+                return radicand >= p ? root : --root;
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static UltimateOrb.UInt128 CbrtRem(UltimateOrb.UInt128 radicand, out UltimateOrb.UInt128 remainder) {
+            unchecked {
+                var root = (ulong)(1e-2 + System.Math.Cbrt((double)radicand));
+                var p = root * (UltimateOrb.UInt128)root * root;
+                var m = radicand - p;
+                if ((UltimateOrb.Int128)m >= 0) {
+                    remainder = m;
+                    return root;
+                } else {
+                    --root;
+                    remainder = radicand - root * (UltimateOrb.UInt128)root * root;
+                    return root;
+                }
+            }
+        }
+        #endregion
+
+        #region IRoot4D, Root4DRem
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint IRoot4D(uint radicand) {
+            return unchecked((uint)System.Math.Sqrt(System.Math.Sqrt(radicand)));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint Root4DRem(uint radicand, out uint remainder) {
+            unchecked {
+                var root = (uint)IRoot4D(radicand);
+                var s = root * root;
+                s *= s;
+                remainder = radicand - s;
+                return root;
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ulong IRoot4D(ulong radicand) {
+            return ISqrt((uint)ISqrt(radicand));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ulong Root4DRem(ulong radicand, out ulong remainder) {
+            unchecked {
+                var root = (uint)IRoot4D(radicand);
+                ulong s = root * root;
+                s *= s;
+                remainder = radicand - s;
+                return root;
+            }
+        }
+
+#if NET7_0_OR_GREATER
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static System.UInt128 IRoot4D(System.UInt128 radicand) {
+            unchecked {
+                return (UInt32)ISqrt((UInt64)ISqrt(radicand));
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static System.UInt128 Root4DRem(System.UInt128 radicand, out System.UInt128 remainder) {
+            unchecked {
+                var root = (UInt32)ISqrt((UInt64)ISqrt(radicand));
+                var s = (UInt64)root * root;
+                var lo = DoubleArithmetic.BigSquare(s, out var hi);
+                remainder = radicand - new System.UInt128(lower: lo, upper: hi);
+                return root;
+            }
+        }
+#endif
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static UltimateOrb.UInt128 IRoot4D(UltimateOrb.UInt128 radicand) {
+            unchecked {
+                return (UInt32)ISqrt((UInt64)ISqrt(radicand));
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static UltimateOrb.UInt128 Root4DRem(UltimateOrb.UInt128 radicand, out UltimateOrb.UInt128 remainder) {
+            unchecked {
+                var root = (UInt32)ISqrt((UInt64)ISqrt(radicand));
+                var s = (UInt64)root * root;
+                var lo = DoubleArithmetic.BigSquare(s, out var hi);
+                remainder = radicand - new UltimateOrb.UInt128(lo: lo, hi: hi);
+                return root;
+            }
+        }
+        #endregion
     }
 }

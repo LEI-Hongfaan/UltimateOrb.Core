@@ -4,11 +4,11 @@ using System.Runtime.ConstrainedExecution;
 namespace UltimateOrb.Plain.ValueTypes {
     using UltimateOrb.Collections.Generic.Interfaces.Typed_RefReturn_Wrapped_Huge;
 
-    //public partial struct FoldingStack<T, TAccumulate, TFunc, TStack>
-    //    : IStack<T>
+    //public partial struct FoldingStack<TBase, TAccumulate, TFunc, TStack>
+    //    : IStack<TBase>
     //    where TAccumulate : new()
-    //    where TFunc : struct, IO.IFunc<TAccumulate, T, TAccumulate>
-    //    where TStack : IStack<(T Item, TAccumulate Accumulate)> {
+    //    where TFunc : struct, IO.IFunc<TAccumulate, TBase, TAccumulate>
+    //    where TStack : IStack<(TBase Item, TAccumulate Accumulate)> {
 
     //    public TStack data;
 
@@ -22,23 +22,23 @@ namespace UltimateOrb.Plain.ValueTypes {
     //    }
 
     //    [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
-    //    public static FoldingStack<T, TAccumulate, TFunc, TStack> Create<TStackConstructor>(int capacity) where TStackConstructor : IO.IFunc<int, TStack>, new() {
-    //        return new FoldingStack<T, TAccumulate, TFunc, TStack>(DefaultConstructor.Invoke<TStackConstructor>().Invoke(capacity), DefaultConstructor.Invoke<TAccumulate>());
+    //    public static FoldingStack<TBase, TAccumulate, TFunc, TStack> Create<TStackConstructor>(int capacity) where TStackConstructor : IO.IFunc<int, TStack>, new() {
+    //        return new FoldingStack<TBase, TAccumulate, TFunc, TStack>(DefaultConstructor.Invoke<TStackConstructor>().Invoke(capacity), DefaultConstructor.Invoke<TAccumulate>());
     //    }
 
     //    [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
-    //    public static FoldingStack<T, TAccumulate, TFunc, TStack> Create<TStackConstructor>() where TStackConstructor : IO.IFunc<TStack>, new() {
-    //        return new FoldingStack<T, TAccumulate, TFunc, TStack>(DefaultConstructor.Invoke<TStackConstructor>().Invoke(), DefaultConstructor.Invoke<TAccumulate>());
+    //    public static FoldingStack<TBase, TAccumulate, TFunc, TStack> Create<TStackConstructor>() where TStackConstructor : IO.IFunc<TStack>, new() {
+    //        return new FoldingStack<TBase, TAccumulate, TFunc, TStack>(DefaultConstructor.Invoke<TStackConstructor>().Invoke(), DefaultConstructor.Invoke<TAccumulate>());
     //    }
 
     //    [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
-    //    public static FoldingStack<T, TAccumulate, TFunc, TStack> Create<TStackConstructor>(int capacity, TAccumulate accumulate) where TStackConstructor : IO.IFunc<int, TStack>, new() {
-    //        return new FoldingStack<T, TAccumulate, TFunc, TStack>(DefaultConstructor.Invoke<TStackConstructor>().Invoke(capacity), accumulate);
+    //    public static FoldingStack<TBase, TAccumulate, TFunc, TStack> Create<TStackConstructor>(int capacity, TAccumulate accumulate) where TStackConstructor : IO.IFunc<int, TStack>, new() {
+    //        return new FoldingStack<TBase, TAccumulate, TFunc, TStack>(DefaultConstructor.Invoke<TStackConstructor>().Invoke(capacity), accumulate);
     //    }
 
     //    [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
-    //    public static FoldingStack<T, TAccumulate, TFunc, TStack> Create<TStackConstructor>(TAccumulate accumulate) where TStackConstructor : IO.IFunc<TStack>, new() {
-    //        return new FoldingStack<T, TAccumulate, TFunc, TStack>(DefaultConstructor.Invoke<TStackConstructor>().Invoke(), accumulate);
+    //    public static FoldingStack<TBase, TAccumulate, TFunc, TStack> Create<TStackConstructor>(TAccumulate accumulate) where TStackConstructor : IO.IFunc<TStack>, new() {
+    //        return new FoldingStack<TBase, TAccumulate, TFunc, TStack>(DefaultConstructor.Invoke<TStackConstructor>().Invoke(), accumulate);
     //    }
 
     //    private TAccumulate accumulate {
@@ -63,27 +63,27 @@ namespace UltimateOrb.Plain.ValueTypes {
     //    }
 
     //    [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
-    //    public ref T Peek() {
+    //    public ref TBase Peek() {
     //        return ref this.data.Peek().Item;
     //    }
 
     //    [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
-    //    T Collections.Generic.IStack<T>.Peek() {
+    //    TBase Collections.Generic.IStack<TBase>.Peek() {
     //        return this.data.Peek().Item;
     //    }
 
     //    [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
-    //    public T Pop() {
+    //    public TBase Pop() {
     //        return this.data.Pop().Item;
     //    }
 
     //    [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
-    //    public void Push(T item) {
+    //    public void Push(TBase item) {
     //        this.data.Push((item, default(TFunc).Invoke(this.accumulate, item)));
     //    }
 
     //    [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
-    //    public bool TryPeek(out T item) {
+    //    public bool TryPeek(out TBase item) {
     //        if (this.data.TryPeek(out var t)) {
     //            item = t.Item;
     //            return true;
@@ -93,7 +93,7 @@ namespace UltimateOrb.Plain.ValueTypes {
     //    }
 
     //    [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
-    //    public bool TryPop(out T item) {
+    //    public bool TryPop(out TBase item) {
     //        if (this.data.TryPop(out var t)) {
     //            item = t.Item;
     //            return true;
@@ -103,7 +103,7 @@ namespace UltimateOrb.Plain.ValueTypes {
     //    }
 
     //    [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
-    //    public bool TryPush(T item) {
+    //    public bool TryPush(TBase item) {
     //        return this.data.TryPush((item, default(TFunc).Invoke(this.accumulate, item)));
     //    }
     //}

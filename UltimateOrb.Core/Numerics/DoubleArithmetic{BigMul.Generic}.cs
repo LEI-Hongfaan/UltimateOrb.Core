@@ -28,5 +28,20 @@ namespace UltimateOrb.Numerics {
             }
         }
 #endif
+
+#if STANDALONE_XINTN_LIBRARY
+#else
+#if NET8_0_OR_GREATER
+        [Experimental("UoWIP_GenericMath")]
+#endif
+        public static T BigSquare<T>(T value, out T highResult) where T : IBinaryInteger<T> {
+            unchecked {
+                // TODO:
+                StandardGenericMathArithmeticProvider<T>.BigMulUnsigned(out var lo, out var hi, value, value);
+                highResult = hi;
+                return lo;
+            }
+        }
+#endif
     }
 }

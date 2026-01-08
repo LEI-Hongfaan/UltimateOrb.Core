@@ -61,7 +61,7 @@ namespace UltimateOrb.CInterop {
             }
 
             // TODO:
-            throw new ArgumentException("Argument should be of type ActionPtr<T>.", nameof(obj));
+            throw new ArgumentException("Argument should be of type ActionPtr<TBase>.", nameof(obj));
         }
 
         public bool Equals(ActionPtr<T> other) {

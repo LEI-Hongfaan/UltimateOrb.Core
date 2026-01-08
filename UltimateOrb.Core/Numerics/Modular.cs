@@ -314,7 +314,7 @@ namespace UltimateOrb.Numerics
         }
 
         public int CompareTo(object? obj) {
-            return obj == null ? 1 : obj is Modular<T, ModulusT> other ? CompareTo(other) : throw new ArgumentException("Object must be of type Modular<T, ModulusT>.");
+            return obj == null ? 1 : obj is Modular<T, ModulusT> other ? CompareTo(other) : throw new ArgumentException("Object must be of type Modular<TBase, ModulusT>.");
         }
 
         public int CompareTo(Modular<T, ModulusT> other) {

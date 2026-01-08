@@ -83,7 +83,7 @@ namespace UltimateOrb.Numerics {
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         [PureAttribute()]
-        private BigRational(BigInteger denominator, BigInteger signedNumerator) {
+        internal BigRational(BigInteger denominator, BigInteger signedNumerator) {
             Debug.Assert(!signedNumerator.IsZero || denominator.IsZero);
             Debug.Assert(signedNumerator.IsZero || denominator.Sign > 0);
             Debug.Assert(signedNumerator.IsZero || BigInteger.GreatestCommonDivisor(denominator, signedNumerator).IsOne);
@@ -187,10 +187,102 @@ namespace UltimateOrb.Numerics {
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         [PureAttribute()]
         public static explicit operator Double(BigRational value) {
+            return ToIeee754InterchangeableBinary<Double, UInt64>(value);
+        }
+
+        internal static TFloat ToIeee754InterchangeableBinary<TFloat, TFloatUIntBits>(BigRational value)
+            where TFloat : unmanaged, IFloatingPointIeee754<TFloat>, IMinMaxValue<TFloat>
+            where TFloatUIntBits : unmanaged, IUnsignedNumber<TFloatUIntBits>, IBinaryInteger<TFloatUIntBits> {
             if (value.m_SignedNumerator.IsZero) {
-                return (Double)0;
+                return TFloat.Zero;
             }
-            return DivideToDoubleInternal(value.m_SignedNumerator, value.m_Denominator);
+            return DivideToIeee754InterchangeableBinaryInternal<TFloat, TFloatUIntBits>(value.m_SignedNumerator, value.m_Denominator);
+        }
+
+        static TFloat DivideToIeee754InterchangeableBinaryInternal<TFloat, TFloatUIntBits>(BigInteger signedNumerator, BigInteger denominator)
+            where TFloat : unmanaged, IFloatingPointIeee754<TFloat>, IMinMaxValue<TFloat>
+            where TFloatUIntBits : unmanaged, IUnsignedNumber<TFloatUIntBits>, IBinaryInteger<TFloatUIntBits> {
+
+            Debug.Assert(denominator.Sign > 0);
+            bool negative = BigInteger.IsNegative(signedNumerator);
+            BigInteger absDividend = BigInteger.Abs(signedNumerator);
+            BigInteger absDivisor = denominator;
+
+            // Check for overflow
+            var dividendBits = checked((int)absDividend.GetBitLength());
+            var divisorBits = checked((int)absDivisor.GetBitLength());
+            var o = BigInteger.TrailingZeroCount(absDividend);
+            var p = BigInteger.TrailingZeroCount(absDivisor);
+
+            var exponent = unchecked(dividendBits - divisorBits);
+            if (exponent >= 0) {
+                var t = absDividend >> exponent;
+                if (t < absDivisor) {
+                    unchecked {
+                        --exponent;
+                    }
+                }
+            } else {
+                var t = absDivisor >> unchecked(-exponent);
+                var a = absDividend.CompareTo(t);
+                if (a < 0 || (a == 0 && p < unchecked(-exponent))) {
+                    unchecked {
+                        --exponent;
+                    }
+                }
+            }
+            var FloatBitSize = 8 * Unsafe.SizeOf<TFloat>();
+            var SignificandBitLength = TFloat.MinValue.GetSignificandBitLength() - 1;
+            var ExponentBitLength = FloatBitSize - 1 - SignificandBitLength;
+            var ExponentBias = (1 << (ExponentBitLength - 1)) - 1;
+            var ExponentMinValue = -ExponentBias + 1;
+            var ExponentUnderflowZeroBoundExclusive = -ExponentBias - SignificandBitLength;
+
+
+            if (exponent > ExponentBias) {
+                return negative ? TFloat.NegativeInfinity : TFloat.PositiveInfinity;
+            }
+
+            // Check for underflow
+            if (exponent < ExponentUnderflowZeroBoundExclusive) {
+                return negative ? TFloat.NegativeZero : TFloat.Zero;
+            }
+
+            exponent = exponent < ExponentMinValue ? ExponentMinValue : exponent;
+
+            // Compute the scaled exponent
+            var e = unchecked((int)(exponent - (long)SignificandBitLength));
+            bool h = default!;
+            var f = unchecked(e - 1);
+            if (e > 0) {
+                h = !((BigInteger.One << f) & absDividend).IsZero;
+                absDividend >>= e;
+            } else {
+                absDividend <<= unchecked(-e);
+            }
+
+            var (q, r) = BigInteger.DivRem(absDividend, absDivisor);
+
+            int w = 0;
+            r <<= 1;
+            if (e > 0) {
+                if (h) {
+                    ++r;
+                }
+                w = (o == f) ? 0 : 1;
+            }
+            w |= r.CompareTo(absDivisor);
+            if (w > 0 || (w == 0 && !q.IsEven)) {
+                ++q;
+            }
+
+            // Construct the double
+            var biasedExponent = TFloatUIntBits.CreateTruncating(exponent + (ExponentBias - 1)) << SignificandBitLength;
+            var s = TFloatUIntBits.CreateTruncating(q);
+
+            var result = unchecked((TFloatUIntBits.CreateTruncating(negative ? 1u : 0u) << (FloatBitSize - 1)) + (biasedExponent + s));
+
+            return Unsafe.BitCast<TFloatUIntBits, TFloat>(result);
         }
 
         static double DivideToDoubleInternal(BigInteger signedNumerator, BigInteger denominator) {
@@ -294,7 +386,7 @@ namespace UltimateOrb.Numerics {
                 /*
                 h = !((BigInteger.One << f) & absDividend).IsZero;
                 absDividend >>= e;
-                q = UInt64.CreateTruncating(absDividend);
+                den = UInt64.CreateTruncating(absDividend);
                 */
                 // TODO: Cleanup this after BigInteger.TestBit is available.
                 absDividend >>= f;
@@ -305,7 +397,7 @@ namespace UltimateOrb.Numerics {
                 q = UInt64.CreateTruncating(absDividend) << unchecked(-e);
             }
 
-            //if (!h && ((e > 0 && o != f) || (((e > 0 && o == f) || e <= 0) && !q.IsEven))) {
+            //if (!h && ((e > 0 && o != f) || (((e > 0 && o == f) || e <= 0) && !den.IsEven))) {
             if (!h && (!(0 == (1 & q)) || (e > 0 && o != f))) {
                 ++q;
             }
@@ -525,8 +617,11 @@ namespace UltimateOrb.Numerics {
             return ToString(null, null);
         }
 
+        [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "get_DebuggerDisplay")]
+        static extern string GetDebuggerDisplay(in BigInteger value);
+
         string ToDebugDisplayString() {
-            return $@"{(double)SignedNumerator}/{(double)Denominator}";
+            return $@"({GetDebuggerDisplay(SignedNumerator)})/({GetDebuggerDisplay(Denominator)})";
         }
 
         public string ToString(IFormatProvider? formatProvider) {
@@ -560,9 +655,9 @@ namespace UltimateOrb.Numerics {
 
     public readonly partial struct BigRational {
 
-        public static implicit operator BigRational(Single value) => FromSingle(value);
+        public static explicit operator BigRational(Single value) => FromIeee754InterchangeableBinary<Single, UInt32>(value);
 
-        public static implicit operator BigRational(double value) => FromDouble(value);
+        public static explicit operator BigRational(double value) => FromIeee754InterchangeableBinary<double, UInt64>(value);
 
         public static BigRational FromSingle(Single value) {
             const int SingleExponentBias = 127;
@@ -617,6 +712,79 @@ namespace UltimateOrb.Numerics {
             throw new NotFiniteNumberException($"The float value {value} is not finite.");
         }
 
+        internal static BigRational FromIeee754InterchangeableBinary<TFloat, TFloatUIntBits>(TFloat value)
+            where TFloat : unmanaged, IFloatingPointIeee754<TFloat>, IMinMaxValue<TFloat>
+            where TFloatUIntBits : unmanaged, IUnsignedNumber<TFloatUIntBits>, IBinaryInteger<TFloatUIntBits> {
+            int FloatBitSize = 8 * Unsafe.SizeOf<TFloat>();
+            int SignificandBitLength = TFloat.MinValue.GetSignificandBitLength() - 1; // includes implicit bit
+            int ExponentBitLength = FloatBitSize - 1 - SignificandBitLength;
+            int ExponentBias = (1 << (ExponentBitLength - 1)) - 1;
+
+            // Raw bits as unsigned integer type
+            TFloatUIntBits bits = Unsafe.BitCast<TFloat, TFloatUIntBits>(value);
+
+            // Extract exponent field
+            var exponentAllOnes = (TFloatUIntBits.One << ExponentBitLength) - TFloatUIntBits.One;
+            var exponentMask = exponentAllOnes << SignificandBitLength;
+            var exponentFieldUInt = (bits >> SignificandBitLength) & exponentAllOnes;
+
+            // Check NaN/Infinity (all-ones exponent)
+            if (exponentFieldUInt == exponentAllOnes) {
+                ThrowNotFiniteNumberException(value);
+            }
+
+            // Sign
+            bool isNegative = !TFloatUIntBits.IsZero(bits & (TFloatUIntBits.One << (FloatBitSize - 1)));
+
+            // Mantissa (fraction) field
+            var mantissaMask = (TFloatUIntBits.One << SignificandBitLength) - TFloatUIntBits.One;
+            var mantissaUInt = bits & mantissaMask;
+
+            // Convert exponent field to int using generic CreateTruncating
+            int exponent = int.CreateTruncating(exponentFieldUInt);
+
+            if (exponent == 0) {
+                // Subnormal number or zero
+                if (TFloatUIntBits.IsZero(mantissaUInt)) {
+                    return default(BigRational);
+                }
+                // exponent = 1 - bias - mantissaBits
+                exponent = 1 - ExponentBias - SignificandBitLength;
+            } else {
+                // Normalized number
+                // Set implicit leading 1
+                mantissaUInt |= TFloatUIntBits.One << SignificandBitLength;
+
+                exponent -= ExponentBias + SignificandBitLength;
+            }
+
+            int trailingZeros = int.CreateTruncating(TFloatUIntBits.TrailingZeroCount(mantissaUInt));
+            mantissaUInt >>= trailingZeros;
+            exponent += trailingZeros;
+
+            BigInteger numerator = BigInteger.CreateTruncating(mantissaUInt);
+            BigInteger denominator;
+
+            if (exponent > 0) {
+                numerator <<= exponent;
+                denominator = BigInteger.One;
+            } else {
+                denominator = BigInteger.One << -exponent;
+            }
+
+            if (isNegative) {
+                numerator = BigInteger.Negate(numerator);
+            }
+
+            return new BigRational(denominator: denominator, signedNumerator: numerator);
+
+        }
+
+        static void ThrowNotFiniteNumberException<T>(T value) {
+            throw new NotFiniteNumberException($"The {typeof(T).FullName} value {value} is not finite.");
+        }
+
+        /*
         public static BigRational FromDouble(double value) {
             const int DoubleExponentBias = 1023;
             const int DoubleMantissaBits = 52;
@@ -664,6 +832,7 @@ namespace UltimateOrb.Numerics {
 
             return new BigRational(denominator, numerator);
         }
+        */
 
         [DoesNotReturn]
         static void ThrowNotFiniteNumberException(double value) {
@@ -795,33 +964,13 @@ namespace UltimateOrb.Numerics {
 
 namespace UltimateOrb.Numerics {
 
-    [StructLayout(LayoutKind.Sequential)]
-    readonly struct SystemDecimal {
-        public readonly int _flags;
-        public readonly uint _hi32;
-        public readonly ulong _lo64;
-
-
-        private readonly static BigInteger[] s_BigIntPow10 = GetPow10Table();
-
-        private static BigInteger[] GetPow10Table() {
-            return Enumerable.Range(0, 28).Select(exp => BigInteger.Pow(10, exp)).ToArray();
-        }
-
-        internal static ReadOnlySpan<BigInteger> BigIntPow10 => s_BigIntPow10.AsSpan();
-
-        internal static BigInteger GetPow10(ushort exp) {
-            return exp < BigIntPow10.Length ? BigIntPow10[unchecked((int)exp)] : BigInteger.Pow(10, exp);
-        }
-    }
-
     public readonly partial struct BigRational {
 
         public static implicit operator BigRational(decimal value) {
-            ref SystemDecimal v = ref Unsafe.As<decimal, SystemDecimal>(ref value);
+            ref Win32Decimal v = ref Unsafe.As<decimal, Win32Decimal>(ref value);
             var e = unchecked((byte)(v._flags >> 16));
             var m = new System.UInt128(upper: v._hi32, lower: v._lo64);
-            var q = SystemDecimal.GetPow10(e);
+            var q = BigIntegerSmallExp10Module.Exp10(e);
             var p = (BigInteger)m;
             var g = BigInteger.GreatestCommonDivisor(p, q);
             if (!g.IsOne) {
@@ -858,8 +1007,8 @@ namespace UltimateOrb.Numerics {
 
             // Try scales 0..28 (decimal supports up to 28 decimal places)
             for (int scale = 28; scale >= 0; --scale) {
-                var pow10 = SystemDecimal.GetPow10(unchecked((byte)scale));
-                var scaled = p * pow10;
+                var Exp10 = BigIntegerSmallExp10Module.Exp10(scale);
+                var scaled = p * Exp10;
 
                 // Division with remainder
                 BigInteger div = BigInteger.DivRem(scaled, q, out BigInteger rem);
@@ -901,6 +1050,38 @@ namespace UltimateOrb.Numerics {
 
         public static partial class Math {
 
+            public static int ILog10(BigRational value) {
+                var s = value.Sign;
+                if (s < 0) {
+                    return ILogSpecialResults.ILogNaN;
+                }
+                if (s == 0) {
+                    return ILogSpecialResults.ILog0;
+                }
+                var den = value.m_Denominator;
+                var num = value.m_SignedNumerator;
+                Debug.Assert(den > 0);
+                Debug.Assert(num > 0);
+                if (num >= den) {
+                    return BigIntegerMath.ILog10(num / den);
+                } else {
+                    var (q, r) = BigInteger.DivRem(den, num);
+                    // q = floor(den/num), r = den % num
+                    // q >= 1 because num < den
+                    var d = BigIntegerMath.ILog10(q); // floor(log10(q))
+                    if (d == ILogSpecialResults.ILogNaN) {
+                        // overflow
+                        return d;
+                    }
+                    Debug.Assert(d >= 0);
+                    // r != 0 ->den/num is strictly greater than q (non-integer), so ceil(log10(den/num)) == d+1
+                    // r == 0 -> den is divisible by num, t == q is an integer
+                    // If q is exactly 10^d then log10(t) == d and floor(log10(value)) == -d
+                    // otherwise log10(t) in (d, d+1) so floor(log10(value)) == -(d+1)
+                    return r.IsZero && BigIntegerSmallExp10Module.Exp10(d) == q ? unchecked(-d) : unchecked(-(d + 1));
+                }
+            }
+
             public static BigRational Floor(BigRational value) {
                 var quotient = BigInteger.DivRem(value.SignedNumerator, value.Denominator, out var remainder);
                 if (BigInteger.IsNegative(remainder)) {
@@ -916,11 +1097,12 @@ namespace UltimateOrb.Numerics {
                 // Scale numerator or denominator depending on decimals sign
                 BigInteger scaledNum = num;
                 BigInteger scaledDen = den;
-                if (decimals >= 0) {
-                    var factor = BigInteger.Pow(10, decimals);
+                if (decimals == 0) {
+                } else if (decimals >= 0) {
+                    var factor = BigIntegerSmallExp10Module.Exp10(decimals);
                     scaledNum = num * factor;
                 } else {
-                    var factor = BigInteger.Pow(10, -decimals);
+                    var factor = BigIntegerSmallExp10Module.Exp10(-decimals);
                     scaledDen = den * factor;
                 }
 
@@ -940,7 +1122,7 @@ namespace UltimateOrb.Numerics {
                   {
                     switch (mode) {
                     case MidpointRounding.ToEven:
-                        // increment if q is odd
+                        // increment if den is odd
                         increment = (q & 1) != 0;
                         break;
                     case MidpointRounding.AwayFromZero:
@@ -969,14 +1151,69 @@ namespace UltimateOrb.Numerics {
                 BigInteger resultNum, resultDen;
                 if (decimals >= 0) {
                     resultNum = q;
-                    resultDen = BigInteger.Pow(10, decimals);
+                    resultDen = BigIntegerSmallExp10Module.Exp10(decimals);
                 } else {
-                    var factor = BigInteger.Pow(10, -decimals);
+                    var factor = BigIntegerSmallExp10Module.Exp10(-decimals);
                     resultNum = q * factor;
                     resultDen = BigInteger.One;
                 }
 
                 return BigRational.FromFraction(resultNum, resultDen);
+            }
+
+            public static BigRational Round(BigRational value, MidpointRounding mode = MidpointRounding.ToEven) {
+                return RoundToBigInteger(value, mode);
+            }
+
+            public static BigInteger RoundToBigInteger(BigRational value, MidpointRounding mode = MidpointRounding.ToEven) {
+                BigInteger num = value.SignedNumerator;
+                if (IsInteger(value)) {
+                    return num;
+                }
+                BigInteger den = value.Denominator;
+
+                // integer division with remainder
+                BigInteger q = BigInteger.DivRem(num, den, out BigInteger r);
+
+                BigInteger absR = BigInteger.Abs(r);
+                BigInteger absDen = BigInteger.Abs(den);
+                int cmp = (absR * 2).CompareTo(absDen);
+
+                bool increment = false;
+                if (cmp > 0) {
+                    increment = true; // > 0.5
+                } else if (cmp < 0) {
+                    increment = false; // < 0.5
+                } else // tie: exactly .5
+                  {
+                    switch (mode) {
+                    case MidpointRounding.ToEven:
+                        // increment if den is odd
+                        increment = (q & 1) != 0;
+                        break;
+                    case MidpointRounding.AwayFromZero:
+                        increment = true;
+                        break;
+                    case MidpointRounding.ToZero:
+                        increment = false;
+                        break;
+                    case MidpointRounding.ToNegativeInfinity:
+                        increment = (num.Sign < 0);
+                        break;
+                    case MidpointRounding.ToPositiveInfinity:
+                        increment = (num.Sign > 0);
+                        break;
+                    default:
+                        ThrowHelper.ThrowArgumentException_InvalidEnumValue(mode);
+                        return default;
+                    }
+                }
+
+                if (increment) {
+                    q += num.Sign >= 0 ? BigInteger.One : BigInteger.MinusOne;
+                }
+
+                return q;
             }
         }
     }
@@ -1092,35 +1329,116 @@ namespace UltimateOrb.Numerics {
         }
 
         public static BigRational Parse(ReadOnlySpan<char> s, NumberStyles style, IFormatProvider? provider) {
-            throw new NotImplementedException();
+            var di = s.IndexOf('/');
+            var errDivByZero = false;
+            try {
+                if (di > 0) {
+                    var a = s.Slice(0, di);
+                    var b = s.Slice(di + 1);
+                    var parseResultA = BigInteger.Parse(a, provider);
+                    var parseResultB = BigInteger.Parse(b, provider);
+                    errDivByZero = parseResultB.IsZero;
+                    return BigRational.FromFraction(parseResultA, parseResultB);
+                } else {
+                    return BigInteger.Parse(s, provider);
+                }
+            } catch (FormatException) {
+            } catch (ArithmeticException) {
+                if (errDivByZero) {
+                    throw;
+                }
+            }
+            {
+                var parseResult = NumberLiteralParseModule.ParseNumberLiteral(s.ToString());
+                var kind = parseResult.Flags.GetKind();
+                if (kind == NumberLiteralFlags.Empty || kind == NumberLiteralFlags.Error) {
+                    throw new FormatException("Input string was not in a recognized format.");
+                }
+                if (kind != NumberLiteralFlags.IsFinite) {
+                    var sp = parseResult.Flags.GetSpecial();
+                    ThrowNotFiniteNumberException(sp == NumberLiteralFlags.SpecialInfinity ?
+                        (parseResult.Flags.HasFlag(NumberLiteralFlags.IsNegative) ? double.NegativeInfinity : double.PositiveInfinity) :
+                        double.NaN);
+                }
+                {
+                    if (parseResult.SignificandFractionalPart.IsZero ||
+                        parseResult.SignificandIntegralPart.IsZero) {
+                        return Zero;
+                    }
+                    BigInteger denominator;
+                    BigInteger numerator;
+                    if (parseResult.Flags.HasFlag(NumberLiteralFlags.Hex)) {
+                        Debug.Assert(parseResult.SignificandFractionalPartLength >= 0);
+                        int fracLen = (int)parseResult.SignificandFractionalPartLength;
+                        BigInteger pow16 = BigInteger.Pow(16, fracLen);
+                        numerator = parseResult.SignificandIntegralPart * pow16 + parseResult.SignificandFractionalPart;
+                        denominator = pow16;
+
+                        var exp = checked((int)parseResult.Exponent);
+                        if (exp >= 0) {
+                            numerator <<= exp;
+                        } else {
+                            denominator <<= checked(-exp);
+                        }
+
+                       
+                    } else {
+                        // Decimal path
+                        int fracLen = checked((int)parseResult.SignificandFractionalPartLength);
+                        BigInteger pow10 = BigInteger.Pow(10, fracLen);
+                        numerator = parseResult.SignificandIntegralPart * pow10 + parseResult.SignificandFractionalPart;
+                        denominator = pow10;
+
+                        var exp = checked((int)parseResult.Exponent);
+                        if (exp >= 0) {
+                            numerator *= BigIntegerSmallExp10Module.Exp10(exp);
+                        } else {
+                            denominator *= BigIntegerSmallExp10Module.Exp10(-exp);
+                        }
+                    }
+                    var br = BigRational.FromFraction(numerator, denominator);
+                    if (parseResult.Flags.HasFlag(NumberLiteralFlags.IsNegative)) br = -br;
+                    return br;
+                }
+            }
         }
 
         public static BigRational Parse(string s, NumberStyles style, IFormatProvider? provider) {
-            throw new NotImplementedException();
+            return Parse(s.AsSpan(), style, provider);
         }
 
         public static BigRational Parse(ReadOnlySpan<char> s, IFormatProvider? provider) {
-            throw new NotImplementedException();
+            return Parse(s, NumberStyles.Any, provider);
         }
 
         public static BigRational Parse(string s, IFormatProvider? provider) {
-            throw new NotImplementedException();
+            return Parse(s.AsSpan(), provider);
         }
 
         public static bool TryParse(ReadOnlySpan<char> s, NumberStyles style, IFormatProvider? provider, [MaybeNullWhen(false)] out BigRational result) {
-            throw new NotImplementedException();
+            // TODO: Implement proper TryParse logic
+            try {
+                result = Parse(s, style, provider);
+                return true;
+            } catch (FormatException) {
+                result = default;
+                return false;
+            } catch (ArithmeticException) {
+                result = default;
+                return false;
+            }
         }
 
         public static bool TryParse([NotNullWhen(true)] string? s, NumberStyles style, IFormatProvider? provider, [MaybeNullWhen(false)] out BigRational result) {
-            throw new NotImplementedException();
+            return TryParse(s, style, provider, out result);
         }
 
         public static bool TryParse(ReadOnlySpan<char> s, IFormatProvider? provider, [MaybeNullWhen(false)] out BigRational result) {
-            throw new NotImplementedException();
+            return TryParse(s, NumberStyles.Any, provider, out result);
         }
 
         public static bool TryParse([NotNullWhen(true)] string? s, IFormatProvider? provider, [MaybeNullWhen(false)] out BigRational result) {
-            throw new NotImplementedException();
+            return TryParse(s.AsSpan(), provider, out result);
         }
 
         static bool INumberBase<BigRational>.TryConvertFromChecked<TOther>(TOther value, out BigRational result) {
@@ -1157,7 +1475,9 @@ namespace UltimateOrb.Numerics {
 
         static bool INumberBase<BigRational>.TryConvertToTruncating<TOther>(BigRational value, out TOther result) {
             static BigInteger F(BigRational value) {
-                if (value.m_SignedNumerator.IsZero) {
+                Debug.Assert(value.m_Denominator >= BigInteger.Zero);
+                if (value.m_Denominator <= BigInteger.One) {
+                    Debug.Assert(value.m_Denominator.IsOne || value.m_SignedNumerator.IsZero);
                     return value.m_SignedNumerator;
                 }
                 return value.m_SignedNumerator / value.m_Denominator;
@@ -1269,7 +1589,16 @@ namespace UltimateOrb.Numerics {
         }
 
         public bool TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider) {
-            throw new NotImplementedException();
+            // TODO:
+            var s = ToString(format.ToString(), provider) ?? "";
+            if (s.Length <= destination.Length) {
+                s.AsSpan().CopyTo(destination);
+                charsWritten = s.Length;
+                return true;
+            } else {
+                charsWritten = 0;
+                return false;
+            }
         }
 
         public static BigRational operator ++(BigRational value) {
@@ -1302,6 +1631,9 @@ namespace UltimateOrb.Numerics {
                 return Zero;
             }
             var p = (first.m_SignedNumerator * second.Denominator) % (first.Denominator * second.m_SignedNumerator);
+            if (p.IsZero) {
+                return Zero;
+            }
             var q = first.Denominator * second.Denominator;
             var d = BigInteger.GreatestCommonDivisor(q, p);
             return new BigRational(q / d, p / d);
@@ -1341,6 +1673,84 @@ namespace UltimateOrb.Numerics {
                 return (Double)0;
             }
             return (double)value.m_SignedNumerator / (double)value.m_Denominator;
+        }
+    }
+}
+
+namespace UltimateOrb.Numerics {
+
+    partial struct BigRational : IConvertible {
+
+        TypeCode IConvertible.GetTypeCode() {
+            return TypeCode.Object;
+        }
+
+        bool IConvertible.ToBoolean(IFormatProvider? provider) {
+            return !IsZero(this);
+        }
+
+        byte IConvertible.ToByte(IFormatProvider? provider) {
+            return checked((byte)Math.Round(this).Numerator);
+        }
+
+        char IConvertible.ToChar(IFormatProvider? provider) {
+            throw new InvalidCastException(SR.Format(SR.InvalidCast_FromTo, nameof(BigInteger), nameof(Char)));
+        }
+
+        DateTime IConvertible.ToDateTime(IFormatProvider? provider) {
+            throw new InvalidCastException(SR.Format(SR.InvalidCast_FromTo, nameof(BigInteger), nameof(DateTime)));
+        }
+
+        decimal IConvertible.ToDecimal(IFormatProvider? provider) {
+            return checked((decimal)this);
+        }
+
+        double IConvertible.ToDouble(IFormatProvider? provider) {
+            return (double)this;
+        }
+
+        Int16 IConvertible.ToInt16(IFormatProvider? provider) {
+            return checked((Int16)Math.Round(this).Numerator);
+        }
+
+        Int32 IConvertible.ToInt32(IFormatProvider? provider) {
+            return checked((Int32)Math.Round(this).Numerator);
+        }
+
+        Int64 IConvertible.ToInt64(IFormatProvider? provider) {
+            return checked((Int64)Math.Round(this).Numerator);
+        }
+
+        sbyte IConvertible.ToSByte(IFormatProvider? provider) {
+            return checked((sbyte)Math.Round(this).Numerator);
+        }
+
+        Single IConvertible.ToSingle(IFormatProvider? provider) {
+            return (Single)this;
+        }
+
+        string IConvertible.ToString(IFormatProvider? provider) {
+            // TODO:
+            return ToString();
+        }
+
+        object IConvertible.ToType(Type conversionType, IFormatProvider? provider) {
+            if (typeof(BigInteger) == conversionType) {
+                return Math.Round(this).Numerator;
+            }
+            return ConvertInternal.DefaultToType<BigRational>(in this, conversionType, provider);
+        }
+
+        UInt16 IConvertible.ToUInt16(IFormatProvider? provider) {
+            return checked((UInt16)Math.Round(this).Numerator);
+        }
+
+        UInt32 IConvertible.ToUInt32(IFormatProvider? provider) {
+            return checked((UInt32)Math.Round(this).Numerator);
+        }
+
+        UInt64 IConvertible.ToUInt64(IFormatProvider? provider) {
+            return checked((UInt64)Math.Round(this).Numerator);
         }
     }
 }

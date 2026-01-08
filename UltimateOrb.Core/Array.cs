@@ -91,7 +91,7 @@ namespace UltimateOrb {
             internal Enumerator(NativeArray<T> array, nint length) {
                 // We allow passing null array in case of empty enumerator. 
                 Debug.Assert(array == null && length == -1,
-                   "Enumerator<T> only works on single dimension arrays w/ a lower bound of zero or with empty array for null enumerator.");
+                   "Enumerator<TBase> only works on single dimension arrays w/ a lower bound of zero or with empty array for null enumerator.");
                 m_KeepAlive = array!;
                 m_pData = array is null ? default : array.m_pData;
                 m_Index = -1;
@@ -304,7 +304,7 @@ namespace UltimateOrb {
     }
     */
 
-    public readonly struct Array<T> : ISZArray<T>/*, Local.IList<T, Array<T>.Enumerator>*/ {
+    public readonly struct Array<T> : ISZArray<T>/*, Local.IList<TBase, Array<TBase>.Enumerator>*/ {
 
         public readonly struct Enumerator : Local.IEnumerator<T> {
             public ref T Current => throw new NotImplementedException();

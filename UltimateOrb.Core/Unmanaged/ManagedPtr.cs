@@ -191,7 +191,7 @@ namespace UltimateOrb.Unmanaged {
     [CLSCompliant(false)]
     [Serializable]
     [StructLayout(LayoutKind.Sequential)]
-    public readonly ref struct ManagedPtr<T> : IComparable/*, IComparable<ManagedPtr<T>>, IEquatable<ManagedPtr<T>>*/, ISpanFormattable, IFormattable, ISerializable where T : unmanaged {
+    public readonly ref struct ManagedPtr<T> : IComparable/*, IComparable<ManagedPtr<TBase>>, IEquatable<ManagedPtr<TBase>>*/, ISpanFormattable, IFormattable, ISerializable where T : unmanaged {
 
         internal readonly ref T ref__;
 
@@ -219,6 +219,7 @@ namespace UltimateOrb.Unmanaged {
         }
 
 #pragma warning disable IDE1006 // Naming Styles
+        [SpecialName]
         public static ref T op_PointerDereference(ManagedPtr<T> value) {
             return ref value.ref__;
         }
@@ -236,7 +237,7 @@ namespace UltimateOrb.Unmanaged {
             }
 
             // TODO:
-            throw new ArgumentException("Argument should be of type ManagedPtr<T>.", nameof(obj));
+            throw new ArgumentException("Argument should be of type ManagedPtr<TBase>.", nameof(obj));
         }
 
         public bool Equals(ManagedPtr<T> other) {
@@ -667,7 +668,7 @@ namespace UltimateOrb.Unmanaged {
     [CLSCompliant(false)]
     [Serializable]
     [StructLayout(LayoutKind.Sequential)]
-    public unsafe readonly ref struct ReadOnlyManagedPtr<T> : IComparable/*, IComparable<ReadOnlyManagedPtr<T>>, IEquatable<ReadOnlyManagedPtr<T>>*/, ISpanFormattable, IFormattable, ISerializable where T : unmanaged {
+    public unsafe readonly ref struct ReadOnlyManagedPtr<T> : IComparable/*, IComparable<ReadOnlyManagedPtr<TBase>>, IEquatable<ReadOnlyManagedPtr<TBase>>*/, ISpanFormattable, IFormattable, ISerializable where T : unmanaged {
 
         readonly ref readonly T ref__;
 
@@ -712,7 +713,7 @@ namespace UltimateOrb.Unmanaged {
             }
 
             // TODO:
-            throw new ArgumentException("Argument should be of type ReadOnlyManagedPtr<T>.", nameof(obj));
+            throw new ArgumentException("Argument should be of type ReadOnlyManagedPtr<TBase>.", nameof(obj));
         }
 
         public bool Equals(ReadOnlyManagedPtr<T> other) {

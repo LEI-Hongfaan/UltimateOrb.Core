@@ -7,32 +7,32 @@ using System.Threading.Tasks;
 
 namespace UltimateOrb {
     /*
-    readonly struct NullableOptional_SqlNullable<T> {
+    readonly struct NullableOptional_SqlNullable<TBase> {
 
         readonly IntPtr IsNull;
     }
 
-    public readonly struct NullableOptional<T> {
+    public readonly struct NullableOptional<TBase> {
 
-        public readonly T ValueOrDefault;
+        public readonly TBase ValueOrDefault;
 
         public readonly bool HasValue;
 
-        public NullableOptional(T value) {
+        public NullableOptional(TBase value) {
             
 
-            if (typeof(T).IsValueType) {
-                if (typeof(System.Data.SqlTypes.INullable).IsAssignableFrom(typeof(T))) {
+            if (typeof(TBase).IsValueType) {
+                if (typeof(System.Data.SqlTypes.INullable).IsAssignableFrom(typeof(TBase))) {
                     System.Data.SqlTypes.SqlChars
                 }
             }
 
-            if (IsNullAssignable<T>.Value) {
-                if (IsStandardNullAssignable<T>.Value) {
+            if (IsNullAssignable<TBase>.Value) {
+                if (IsStandardNullAssignable<TBase>.Value) {
                     return null == value;
                 }
 
-                if (IsINullableReference<T>.Value) {
+                if (IsINullableReference<TBase>.Value) {
                     return ((INullableReference)value).IsNull();
                 }
 
@@ -41,7 +41,7 @@ namespace UltimateOrb {
             return false;
 
 
-            if (typeof(T).IsValueType) {
+            if (typeof(TBase).IsValueType) {
 
             }
             if (value is null) {
@@ -55,7 +55,7 @@ namespace UltimateOrb {
             }
         }
 
-        public T GetValueOrDefault() => ValueOrDefault;
+        public TBase GetValueOrDefault() => ValueOrDefault;
     }
     */
 }

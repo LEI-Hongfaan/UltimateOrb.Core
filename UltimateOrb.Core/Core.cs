@@ -1,4 +1,8 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
+using System.Numerics;
+using System.Runtime.CompilerServices;
 
 [assembly: CLSCompliantAttribute(true)]
 
@@ -40,23 +44,6 @@ namespace UltimateOrb {
             get {
                 return ilSourceCode;
             }
-        }
-    }
-}
-
-namespace UltimateOrb {
-
-    [ForceDiscard]
-    [AttributeUsage(AttributeTargets.Interface | AttributeTargets.Class | AttributeTargets.Struct, Inherited = false, AllowMultiple = true)]
-    sealed class GenerateInterfaceGenericExtensionsForAttribute : Attribute {
-
-        public GenerateInterfaceGenericExtensionsForAttribute(Type tInterface) {
-            this.InterfaceType = tInterface;
-        }
-
-        public Type InterfaceType {
-
-            get;
         }
     }
 }

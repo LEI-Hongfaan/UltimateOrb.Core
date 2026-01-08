@@ -486,7 +486,7 @@
         <member name="T:UltimateOrb.RowShiftCount`1">
             <summary>
             A strongly typed shift count for row shifts. This generic struct leverages
-            generic math (via INumber{T}) and allows for implicit conversion from the numeric type.
+            generic math (via INumber{TBase}) and allows for implicit conversion from the numeric type.
             </summary>
         </member>
         <member name="M:UltimateOrb.RowShiftCount`1.ToString">
@@ -695,6 +695,118 @@
             <devdoc>
                returns the raw data stored in this bit vector...
             </devdoc>
+        </member>
+        <member name="M:UltimateOrb.IInterfaceDerivedBaseFriend`2.FromBase(`1)">
+            <summary>
+            Converts the specified value to <typeparamref name="TSelf"/>.
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.IInterfaceDerivedBaseFriend`2.ToBase(`0)">
+            <summary>
+            Converts the specified value to <typeparamref name="TBase"/>.
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.IInterfaceDerivedBaseFriend`4.FromBase(`3)">
+            <summary>
+            Converts the specified value to <typeparamref name="TSelf"/>.
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.IInterfaceDerivedBaseFriend`4.ToBase(`2)">
+            <summary>
+            Converts the specified value to <typeparamref name="TBase"/>.
+            </summary>
+        </member>
+        <member name="T:UltimateOrb.IFloatingPointConstantsDerived`2">
+            <inheritdoc cref="T:System.Numerics.IFloatingPointConstants`1"/>
+            <typeparam name="TBase">
+            The source/base type supplying data or behavior that <typeparamref name="TSelf"/> adapts or forwards.
+            </typeparam>
+        </member>
+        <member name="T:UltimateOrb.IEqualityOperatorsDerived`6">
+            <inheritdoc cref="T:System.Numerics.IEqualityOperators`3"/>
+            <typeparam name="TBase">The source/base type supplying data or behavior that <typeparamref name="TSelf"/> adapts or forwards.</typeparam>
+            <typeparam name="TOtherBase">The source/base type supplying data or behavior that <typeparamref name="TOther"/> adapts or forwards.</typeparam>
+            <typeparam name="TResultBase">The source/base type supplying data or behavior that <typeparamref name="TResult"/> adapts or forwards.</typeparam>
+        </member>
+        <member name="T:UltimateOrb.IComparisonOperatorsDerived`6">
+            <inheritdoc cref="T:System.Numerics.IComparisonOperators`3"/>
+            <typeparam name="TBase">The source/base type supplying data or behavior that <typeparamref name="TSelf"/> adapts or forwards.</typeparam>
+            <typeparam name="TOtherBase">The source/base type supplying data or behavior that <typeparamref name="TOther"/> adapts or forwards.</typeparam>
+            <typeparam name="TResultBase">The source/base type supplying data or behavior that <typeparamref name="TResult"/> adapts or forwards.</typeparam>
+        </member>
+        <member name="T:UltimateOrb.IModulusOperatorsDerived`6">
+            <inheritdoc cref="T:System.Numerics.IModulusOperators`3"/>
+            <typeparam name="TBase">The source/base type supplying data or behavior that <typeparamref name="TSelf"/> adapts or forwards.</typeparam>
+            <typeparam name="TOtherBase">The source/base type supplying data or behavior that <typeparamref name="TOther"/> adapts or forwards.</typeparam>
+            <typeparam name="TResultBase">The source/base type supplying data or behavior that <typeparamref name="TResult"/> adapts or forwards.</typeparam>
+        </member>
+        <member name="T:UltimateOrb.INumberDerived`2">
+            <inheritdoc cref="T:System.Numerics.INumber`1"/>
+            <typeparam name="TBase">The source/base type supplying data or behavior that <typeparamref name="TSelf"/> adapts or forwards.</typeparam>
+        </member>
+        <member name="T:UltimateOrb.ISignedNumberDerived`2">
+            <inheritdoc cref="T:System.Numerics.ISignedNumber`1"/>
+            <typeparam name="TBase">The source/base type supplying data or behavior that <typeparamref name="TSelf"/> adapts or forwards.</typeparam>
+        </member>
+        <member name="T:UltimateOrb.ISignedNumberDerivedInitOnly`2">
+            <inheritdoc cref="T:UltimateOrb.ISignedNumberDerived`2"/>
+        </member>
+        <member name="T:UltimateOrb.IFloatingPointDerived`2">
+            <inheritdoc cref="T:System.Numerics.IFloatingPoint`1"/>
+            <typeparam name="TBase">The source/base type supplying data or behavior that <typeparamref name="TSelf"/> adapts or forwards.</typeparam>
+        </member>
+        <member name="T:UltimateOrb.IExponentialFunctionsDerived`2">
+            <inheritdoc cref="T:System.Numerics.IExponentialFunctions`1"/>
+            <typeparam name="TBase">The source/base type supplying data or behavior that <typeparamref name="TSelf"/> adapts or forwards.</typeparam>
+        </member>
+        <member name="T:UltimateOrb.IHyperbolicFunctionsDerived`2">
+            <inheritdoc cref="T:System.Numerics.IHyperbolicFunctions`1"/>
+            <typeparam name="TBase">The source/base type supplying data or behavior that <typeparamref name="TSelf"/> adapts or forwards.</typeparam>
+        </member>
+        <member name="T:UltimateOrb.ILogarithmicFunctionsDerived`2">
+            <inheritdoc cref="T:System.Numerics.ILogarithmicFunctions`1"/>
+            <typeparam name="TBase">The source/base type supplying data or behavior that <typeparamref name="TSelf"/> adapts or forwards.</typeparam>
+        </member>
+        <member name="T:UltimateOrb.IPowerFunctionsDerived`2">
+            <inheritdoc cref="T:System.Numerics.IPowerFunctions`1"/>
+            <typeparam name="TBase">The source/base type supplying data or behavior that <typeparamref name="TSelf"/> adapts or forwards.</typeparam>
+        </member>
+        <member name="T:UltimateOrb.IRootFunctionsDerived`2">
+            <inheritdoc cref="T:System.Numerics.IRootFunctions`1"/>
+            <typeparam name="TBase">The source/base type supplying data or behavior that <typeparamref name="TSelf"/> adapts or forwards.</typeparam>
+        </member>
+        <member name="T:UltimateOrb.ITrigonometricFunctionsDerived`2">
+            <inheritdoc cref="T:System.Numerics.ITrigonometricFunctions`1"/>
+            <typeparam name="TBase">The source/base type supplying data or behavior that <typeparamref name="TSelf"/> adapts or forwards.</typeparam>
+        </member>
+        <member name="T:UltimateOrb.IDecimalFloatingPointIeee754Derived`2">
+            <inheritdoc cref="T:UltimateOrb.IDecimalFloatingPointIeee754`1"/>
+            <typeparam name="TBase">The source/base type supplying data or behavior that <typeparamref name="TSelf"/> adapts or forwards.</typeparam>
+        </member>
+        <!-- Badly formed XML comment ignored for member "P:UltimateOrb.Decimal128Dpd.RawBiasedExponent" -->
+        <member name="T:UltimateOrb.IDecimalFloatingPointIeee754`1">
+            <summary>Defines an IEEE 754 floating-point type that is represented in a base-10 format.</summary>
+            <typeparam name="TSelf">The type that implements the interface.</typeparam>
+        </member>
+        <member name="M:UltimateOrb.IDecimalFloatingPointIeee754`1.ILog10(`0)">
+            <summary>Computes the integer logarithm (base 10) of a value.</summary>
+            <param name="x">The value whose integer logarithm is to be computed.</param>
+            <returns>The integer logarithm (base 10) of <paramref name="x" />.</returns>
+        </member>
+        <member name="M:UltimateOrb.IDecimalFloatingPointIeee754`1.Scale10(`0,System.Int32)">
+            <summary>Computes the product of a value and 10 raised to the specified power.</summary>
+            <param name="x">The value which 10 raised to the power of <paramref name="n" /> multiplies.</param>
+            <param name="n">The value to which 10 is raised before multipliying <paramref name="x" />.</param>
+            <returns>The product of <paramref name="x" /> and 10 raised to the power of <paramref name="n" />.</returns>
+        </member>
+        <member name="P:UltimateOrb.Decimal128Bid.Tau">
+            <inheritdoc cref="P:System.Numerics.IFloatingPointConstants`1.Tau"/>
+        </member>
+        <member name="M:UltimateOrb.Decimal128Bid.ILog10(UltimateOrb.Decimal128Bid)">
+            <inheritdoc cref="M:UltimateOrb.IDecimalFloatingPointIeee754`1.ILog10(`0)"/>
+        </member>
+        <member name="M:UltimateOrb.Decimal128Bid.ILogB(UltimateOrb.Decimal128Bid)">
+            <inheritdoc cref="M:System.Numerics.IFloatingPointIeee754`1.ILogB(`0)"/>
         </member>
         <member name="T:UltimateOrb.Default`1">
             <summary>
@@ -1083,6 +1195,48 @@
             <param name="exponent">The exponent value.</param>
             <returns>The result of (base ^ exponent) mod n.</returns>
         </member>
+        <member name="M:UltimateOrb.Mathematics.UInt16PrimeData.IsPrime(System.UInt16)">
+            <summary>
+            Returns true when <paramref name="value"/> is a prime (works for UInt16).
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.Mathematics.UInt16PrimeData.IsPrime(System.Int16)">
+            <summary>
+            Returns true when <paramref name="value"/> is a prime (works for Int16).
+            Negative values and 0/1 are not prime.
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.Mathematics.UInt16PrimeData.IsOddPrime(System.UInt16)">
+            <summary>
+            Returns true when the odd <paramref name="value"/> is an odd prime.
+            For even values this returns false.
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.Mathematics.UInt16PrimeData.IsOddPrime(System.Int16)">
+            <summary>
+            Returns true when the odd <paramref name="value"/> is an odd prime.
+            For even values or negative values this returns false.
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.Mathematics.UInt16PrimeData.NextPrime(System.UInt16)">
+            <summary>
+            Returns the smallest prime > <paramref name="value"/> for UInt16 inputs.
+            </summary>
+            <remarks>If the bitmap contains no prime > value, returns 65537 (the next prime above UInt16 range).</remarks>
+        </member>
+        <member name="M:UltimateOrb.Mathematics.UInt16PrimeData.NextPrime(System.Int16)">
+            <summary>
+            Returns the smallest prime > <paramref name="value"/> for Int16 inputs.
+            Negative values return 2.
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.Mathematics.UInt16PrimeData.NextOddPrime(System.UInt16)">
+            <summary>
+            Find next odd prime.
+            </summary>
+            <param name="value">The specified value.</param>
+            <returns>Next odd prime greater than the specified number.</returns>
+        </member>
         <member name="M:UltimateOrb.Extensions.MemorySpanRuntimeHelpers.DangerousGetPinnedObjectDataSize(System.Object)">
             <summary>
             Gets the total instance field size (including padding) in bytes.
@@ -1090,43 +1244,70 @@
             <param name="obj">The pinned object.</param>
             <returns></returns>
         </member>
+        <member name="T:UltimateOrb.FloatingPointRounding">
+            <summary>
+            Specifies the rounding mode used for floating-point operations.
+            </summary>
+        </member>
         <member name="F:UltimateOrb.FloatingPointRounding.ToNearestWithMidpointToEven">
             <summary>
-            The IEEE Std 754 <c>roundTiesToEven</c>.
+            The IEEE Std 754 <c>roundTiesToEven</c> mode: round to the nearest value;
+            if the value is exactly halfway between two representable values, choose the one with an even significand.
             </summary>
         </member>
         <member name="F:UltimateOrb.FloatingPointRounding.ToNearestWithMidpointAwayFromZero">
             <summary>
-            The IEEE Std 754 <c>roundTiesToAway</c>.
+            The IEEE Std 754 <c>roundTiesToAway</c> mode: round to the nearest value;
+            if the value is exactly halfway between two representable values, choose the one farther from zero.
             </summary>
         </member>
         <member name="F:UltimateOrb.FloatingPointRounding.Upward">
             <summary>
-            The IEEE Std 754 <c>roundTowardPositive</c>.
+            The IEEE Std 754 <c>roundTowardPositive</c> mode: round toward positive infinity.
             </summary>
         </member>
         <member name="F:UltimateOrb.FloatingPointRounding.Downward">
             <summary>
-            The IEEE Std 754 <c>roundTowardNegative</c>.
+            The IEEE Std 754 <c>roundTowardNegative</c> mode: round toward negative infinity.
             </summary>
         </member>
         <member name="F:UltimateOrb.FloatingPointRounding.TowardZero">
             <summary>
-            The IEEE Std 754 <c>roundTowardZero</c>.
+            The IEEE Std 754 <c>roundTowardZero</c> mode: round toward zero (truncate fractional bits).
             </summary>
         </member>
         <member name="F:UltimateOrb.FloatingPointRounding.ToOdd">
             <summary>
-            The sticky rounding, a.k.a. rounding to odd.
+            Sticky rounding, also known as rounding to odd.
             </summary>
             <remarks>
-            In binary arithmetic, this rounding is to round the result toward zero, and set the least significant bit to 1 if the rounded result is inexact.
-            Equivalently, it consists in returning the intermediate result when it is exactly representable, and the nearest floating-point number with an odd significand otherwise.
+            In binary arithmetic, this mode rounds the intermediate result toward zero and, when the result is inexact,
+            sets the least significant bit of the significand to 1. If the intermediate result is exactly representable,
+            it is returned unchanged; otherwise the nearest representable value with an odd significand is returned.
             </remarks>
         </member>
         <member name="F:UltimateOrb.FloatingPointRounding.ToNearestWithMidpointToOdd">
             <summary>
-            Similar to <see cref="F:UltimateOrb.FloatingPointRounding.ToNearestWithMidpointToEven"/> but round half to old. Only partially supported by UltimateOrb APIs.
+            Similar to <see cref="F:UltimateOrb.FloatingPointRounding.ToNearestWithMidpointToEven"/> but rounds half values to the nearest representable value
+            whose significand is odd. Support in UltimateOrb APIs is partial and may be limited.
+            </summary>
+        </member>
+        <member name="F:UltimateOrb.FloatingPointRounding.ToNearestWithMidpointUpward">
+            <summary>
+            Round to the nearest value; if the value is exactly halfway between two representable values,
+            choose the nearest value that is rounded upward (toward positive infinity). Support in UltimateOrb APIs is partial and may be limited.
+            </summary>
+        </member>
+        <member name="F:UltimateOrb.FloatingPointRounding.ToNearestWithMidpointDownward">
+            <summary>
+            Round to the nearest value; if the value is exactly halfway between two representable values,
+            choose the nearest value that is rounded downward (toward negative infinity). Support in UltimateOrb APIs is partial and may be limited.
+            </summary>
+        </member>
+        <member name="F:UltimateOrb.FloatingPointRounding.ToNearestWithMidpointTowardZero">
+            <summary>
+            Similar to <see cref="F:UltimateOrb.FloatingPointRounding.ToNearestWithMidpointAwayFromZero"/> but rounds half values toward zero.
+            Support in UltimateOrb APIs is partial and may be limited.
             </summary>
         </member>
         <member name="M:UltimateOrb.Int128.TryParseCStyleNormalizedI128(System.String,UltimateOrb.Int128@)">
@@ -1746,6 +1927,24 @@
         </member>
         <member name="M:UltimateOrb.NaNDefaultedDouble.System#Numerics#IUnaryPlusOperators{UltimateOrb#NaNDefaultedDouble,UltimateOrb#NaNDefaultedDouble}#op_UnaryPlus(UltimateOrb.NaNDefaultedDouble)">
             <inheritdoc cref="M:System.Numerics.IUnaryPlusOperators`2.op_UnaryPlus(`0)" />
+        </member>
+        <member name="T:UltimateOrb.NullPtrPlaceholderType">
+            <summary>
+            Represents a placeholder type used to express a null pointer value in APIs that require an argument type.
+            </summary>
+            <remarks>
+            This type is not instantiable and exists only as a sentinel for APIs that need a typed null placeholder.
+            </remarks>
+        </member>
+        <member name="F:UltimateOrb.NullPtrPlaceholderType.nullptr">
+            <summary>
+            A typed null. Use this field when you pass null/nullptr.
+            </summary>
+        </member>
+        <member name="F:UltimateOrb.NullPtrPlaceholderType.null">
+            <summary>
+            A typed null. Use this field when you pass null/nullptr.
+            </summary>
         </member>
         <member name="T:UltimateOrb.Numerics.Accelerated.QuaternionD">
             <summary>Represents a vector that is used to encode three-dimensional physical rotations.</summary>
@@ -3303,6 +3502,16 @@
         </member>
         <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.MultiplySigned(System.Numerics.BigInteger@,System.Numerics.BigInteger@,System.Numerics.BigInteger@)">
             <inheritdoc/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BigIntegerMath.ILog10(System.Numerics.BigInteger)">
+            <summary>
+            Integer base-10 logarithm: floor(log10(value)) for value > 0.
+            Returns FP_ILOGNAN for value &lt; 0 and FP_ILOG0 for value == 0.
+            Uses (int)BigInteger.ILog10(value) as an initial guess and refines it with exact comparisons.
+            </summary>
+            <remarks>
+            This routine should handle huge BigInteger which beyond current CoreCLR design.
+            </remarks>
         </member>
         <member name="M:UltimateOrb.Numerics.BigIntegerWrappers.BigIntegerExtensions.GetBitLength(System.Numerics.BigInteger)">
             <summary>
@@ -7810,6 +8019,27 @@
             <param name="right">The second value to multiply.</param>
             <returns>The higher part of the product.</returns>
         </member>
+        <member name="T:UltimateOrb.Numerics.ILogSpecialResults">
+            <summary>
+            Special return values used by ILog methods to indicate exceptional results.
+            </summary>
+        </member>
+        <member name="F:UltimateOrb.Numerics.ILogSpecialResults.ILogNaN">
+            <summary>
+            Returned when an ILog method receives a negative input.
+            </summary>
+            <remarks>
+            This constant equals <c>int.MinValue</c> and is used to signal argument-out-of-range for logarithm operations.
+            </remarks>
+        </member>
+        <member name="F:UltimateOrb.Numerics.ILogSpecialResults.ILog0">
+            <summary>
+            Returned when an ILog method receives an input of zero.
+            </summary>
+            <remarks>
+            This constant equals <c>int.MinValue + 1</c> and is used to signal the logarithm of zero.
+            </remarks>
+        </member>
         <member name="M:UltimateOrb.Numerics.Specialized.BitMatrix16x16.#ctor(System.Runtime.Intrinsics.Vector256{System.UInt16})">
             <summary>
             Initializes an instance with the provided SIMD vector.
@@ -7846,6 +8076,30 @@
             <inheritdoc />
         </member>
         <member name="M:UltimateOrb.Runtime.CompilerServices.Boxed`1.ToString">
+            <inheritdoc />
+        </member>
+        <member name="M:UltimateOrb.Runtime.CompilerServices.ReadOnlyBoxed`1.op_Explicit(UltimateOrb.Runtime.CompilerServices.ReadOnlyBoxed{`0})~System.ValueType">
+            <returns>Untyped reference to a boxed value.</returns>
+        </member>
+        <member name="M:UltimateOrb.Runtime.CompilerServices.ReadOnlyBoxed`1.Equals(System.Object)">
+            <inheritdoc />
+        </member>
+        <member name="M:UltimateOrb.Runtime.CompilerServices.ReadOnlyBoxed`1.GetHashCode">
+            <inheritdoc />
+        </member>
+        <member name="M:UltimateOrb.Runtime.CompilerServices.ReadOnlyBoxed`1.ToString">
+            <inheritdoc />
+        </member>
+        <member name="M:UltimateOrb.Runtime.CompilerServices.BoxedAny`1.UnsafeCopy">
+            <inheritdoc cref="M:System.Object.MemberwiseClone"/>
+        </member>
+        <member name="M:UltimateOrb.Runtime.CompilerServices.BoxedAny`1.Equals(System.Object)">
+            <inheritdoc />
+        </member>
+        <member name="M:UltimateOrb.Runtime.CompilerServices.BoxedAny`1.GetHashCode">
+            <inheritdoc />
+        </member>
+        <member name="M:UltimateOrb.Runtime.CompilerServices.BoxedAny`1.ToString">
             <inheritdoc />
         </member>
         <member name="T:UltimateOrb.Runtime.CompilerServices.IU">
@@ -7960,6 +8214,33 @@
         </member>
         <member name="M:UltimateOrb.Threading.AsyncOptions.UnsafeRegister(System.Action{System.Object},System.Object)">
             <inheritdoc cref="M:System.Threading.CancellationToken.UnsafeRegister(System.Action{System.Object},System.Object)"/>
+        </member>
+        <member name="M:UltimateOrb.Threading.MonitorExtensions.Enter(System.Object,System.Object,System.Boolean@)">
+            <inheritdoc cref="M:System.Threading.Monitor.Enter(System.Object,System.Boolean@)" />
+        </member>
+        <member name="M:UltimateOrb.Threading.MonitorExtensions.TryEnter(System.Object,System.Object)">
+            <inheritdoc cref="M:System.Threading.Monitor.TryEnter(System.Object)" />
+        </member>
+        <member name="M:UltimateOrb.Threading.MonitorExtensions.TryEnter(System.Object,System.Object,System.Boolean@)">
+            <inheritdoc cref="M:System.Threading.Monitor.TryEnter(System.Object,System.Boolean@)" />
+        </member>
+        <member name="M:UltimateOrb.Threading.MonitorExtensions.TryEnter(System.Object,System.Object,System.Int32)">
+            <inheritdoc cref="M:System.Threading.Monitor.TryEnter(System.Object,System.Int32)" />
+        </member>
+        <member name="M:UltimateOrb.Threading.MonitorExtensions.TryEnter(System.Object,System.Object,System.TimeSpan)">
+            <inheritdoc cref="M:System.Threading.Monitor.TryEnter(System.Object,System.TimeSpan)" />
+        </member>
+        <member name="M:UltimateOrb.Threading.MonitorExtensions.TryEnter(System.Object,System.Object,System.Int32,System.Boolean@)">
+            <inheritdoc cref="M:System.Threading.Monitor.TryEnter(System.Object,System.Int32,System.Boolean@)" />
+        </member>
+        <member name="M:UltimateOrb.Threading.MonitorExtensions.TryEnter(System.Object,System.Object,System.TimeSpan,System.Boolean@)">
+            <inheritdoc cref="M:System.Threading.Monitor.TryEnter(System.Object,System.TimeSpan,System.Boolean@)" />
+        </member>
+        <member name="M:UltimateOrb.Threading.MonitorExtensions.Enter(System.Object,System.Object)">
+            <inheritdoc cref="M:System.Threading.Monitor.Enter(System.Object)" />
+        </member>
+        <member name="M:UltimateOrb.Threading.MonitorExtensions.Exit(System.Object,System.Object)">
+            <inheritdoc cref="M:System.Threading.Monitor.Exit(System.Object)" />
         </member>
         <member name="M:UltimateOrb.UInt128.System#Numerics#INumberBase{UltimateOrb#UInt128}#TryConvertFromChecked``1(``0,UltimateOrb.UInt128@)">
             <inheritdoc cref="M:System.Numerics.INumberBase`1.TryConvertFromChecked``1(``0,`0@)" />

@@ -32,7 +32,7 @@ namespace UltimateOrb.Core.Tests {
         private const int BitsPerBlock = sizeof(int) * 8;
         private const int MaxBlockCount = (MaxBits + (BitsPerBlock - 1)) / BitsPerBlock;
 
-        private static readonly uint[] s_Pow10UInt32Table = new uint[] {
+        private static readonly uint[] s_Exp10UInt32Table = new uint[] {
                 1,          // 10^0
                 10,         // 10^1
                 100,        // 10^2
@@ -59,7 +59,7 @@ namespace UltimateOrb.Core.Tests {
             return a;
         }
         
-        private static readonly BigUIntegerBuilder[] s_Pow10BigNumTable = gggg();
+        private static readonly BigUIntegerBuilder[] s_Exp10BigNumTable = gggg();
 
 
         // MaxBlockCount
@@ -526,38 +526,38 @@ namespace UltimateOrb.Core.Tests {
             result._length = length;
         }
 
-        public static void Pow10(uint exponent, out BigUIntegerBuilder result) {
-            // We leverage two arrays - s_Pow10UInt32Table and s_Pow10BigNumTable to speed up the Pow10 calculation.
+        public static void Exp10(uint exponent, out BigUIntegerBuilder result) {
+            // We leverage two arrays - s_Exp10UInt32Table and s_Exp10BigNumTable to speed up the Exp10 calculation.
             //
-            // s_Pow10UInt32Table stores the results of 10^0 to 10^7.
-            // s_Pow10BigNumTable stores the results of 10^8, 10^16, 10^32, 10^64, 10^128, 10^256, and 10^512
+            // s_Exp10UInt32Table stores the results of 10^0 to 10^7.
+            // s_Exp10BigNumTable stores the results of 10^8, 10^16, 10^32, 10^64, 10^128, 10^256, and 10^512
             //
             // For example, let's say exp = 0b111111. We can split the exp to two parts, one is small exp,
             // which 10^smallExp can be represented as uint, another part is 10^bigExp, which must be represented as BigNum.
             // So the result should be 10^smallExp * 10^bigExp.
             //
-            // Calculating 10^smallExp is simple, we just lookup the 10^smallExp from s_Pow10UInt32Table.
+            // Calculating 10^smallExp is simple, we just lookup the 10^smallExp from s_Exp10UInt32Table.
             // But here's a bad news: although uint can represent 10^9, exp 9's binary representation is 1001.
             // That means 10^(1011), 10^(1101), 10^(1111) all cannot be stored as uint, we cannot easily say something like:
-            // "Any bits <= 3 is small exp, any bits > 3 is big exp". So instead of involving 10^8, 10^9 to s_Pow10UInt32Table,
-            // consider 10^8 and 10^9 as a bigNum, so they fall into s_Pow10BigNumTable. Now we can have a simple rule:
+            // "Any bits <= 3 is small exp, any bits > 3 is big exp". So instead of involving 10^8, 10^9 to s_Exp10UInt32Table,
+            // consider 10^8 and 10^9 as a bigNum, so they fall into s_Exp10BigNumTable. Now we can have a simple rule:
             // "Any bits <= 3 is small exp, any bits > 3 is big exp".
             //
             // For 0b111111, we first calculate 10^(smallExp), which is 10^(7), now we can shift right 3 bits, prepare to calculate the bigExp part,
             // the exp now becomes 0b000111.
             //
-            // Apparently the lowest bit of bigExp should represent 10^8 because we have already shifted 3 bits for smallExp, so s_Pow10BigNumTable[0] = 10^8.
+            // Apparently the lowest bit of bigExp should represent 10^8 because we have already shifted 3 bits for smallExp, so s_Exp10BigNumTable[0] = 10^8.
             // Now let's shift exp right 1 bit, the lowest bit should represent 10^(8 * 2) = 10^16, and so on...
             //
-            // That's why we just need the values of s_Pow10BigNumTable be power of 2.
+            // That's why we just need the values of s_Exp10BigNumTable be power of 2.
             //
             // More details of this implementation can be found at: https://github.com/dotnet/coreclr/pull/12894#discussion_r128890596
 
-            // Validate that `s_Pow10BigNumTable` has exactly enough trailing elements to fill a BigUIntegerBuilder (which contains MaxBlockCount + 1 elements)
+            // Validate that `s_Exp10BigNumTable` has exactly enough trailing elements to fill a BigUIntegerBuilder (which contains MaxBlockCount + 1 elements)
             // We validate here, since this is the only current consumer of the array
-            // Debug.Assert((s_Pow10BigNumTableIndices[^1] + MaxBlockCount + 2) == s_Pow10BigNumTable.Length);
+            // Debug.Assert((s_Exp10BigNumTableIndices[^1] + MaxBlockCount + 2) == s_Exp10BigNumTable.Length);
 
-            BigUIntegerBuilder temp1 = new BigUIntegerBuilder(s_Pow10UInt32Table[exponent & 0x7]);
+            BigUIntegerBuilder temp1 = new BigUIntegerBuilder(s_Exp10UInt32Table[exponent & 0x7]);
             ref BigUIntegerBuilder lhs = ref temp1;
 
             BigUIntegerBuilder temp2 = new BigUIntegerBuilder(0);
@@ -571,7 +571,7 @@ namespace UltimateOrb.Core.Tests {
                 if ((exponent & 1) != 0) {
                     // Multiply into the next temporary
                     {
-                        ref BigUIntegerBuilder rhs = ref s_Pow10BigNumTable[index];
+                        ref BigUIntegerBuilder rhs = ref s_Exp10BigNumTable[index];
                         Multiply(ref lhs, ref rhs, ref product);
                     }
 
@@ -758,12 +758,12 @@ namespace UltimateOrb.Core.Tests {
             }
         }
 
-        public void MultiplyPow10(uint exponent) {
+        public void MultiplyExp10(uint exponent) {
             if (IsZero()) {
                 return;
             }
 
-            Pow10(exponent, out BigUIntegerBuilder poweredValue);
+            Exp10(exponent, out BigUIntegerBuilder poweredValue);
 
             if (poweredValue._length == 1) {
                 Multiply(poweredValue._blocks[0]);

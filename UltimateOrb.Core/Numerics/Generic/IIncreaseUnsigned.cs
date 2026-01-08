@@ -112,7 +112,7 @@ namespace UltimateOrb.Numerics.Generic {
             return SubtractUnsignedNoThrow(false, in first, in second, out result);
         }
 
-        // public CanonicalIntegerBoolean ToIntegerUnsignedNoThrow(uint value, out T result);
+        // public CanonicalIntegerBoolean ToIntegerUnsignedNoThrow(uint value, out TBase result);
         public void ToIntegerUnchecked(uint value, out T result);
 
 
@@ -262,7 +262,7 @@ namespace UltimateOrb.Numerics.Generic {
         }
 
         public CanonicalIntegerBoolean AddUnsignedNoThrow(CanonicalIntegerBoolean carry, in TDouble first, in TDouble second, out TDouble result) {
-            // ((IDoubleArithmatic<Void, T>)this).AddUnsignedNoThrow(carry, in first.GetLoRef(), in first.GetHiRef(), in second.GetLoRef(), in second.GetHiRef(), out result);
+            // ((IDoubleArithmatic<Void, TBase>)this).AddUnsignedNoThrow(carry, in first.GetLoRef(), in first.GetHiRef(), in second.GetLoRef(), in second.GetHiRef(), out result);
             throw new NotImplementedException();
         }
 
@@ -284,7 +284,7 @@ namespace UltimateOrb.Numerics.Generic {
             Unsafe.SkipInit(out result);
             throw new NotImplementedException();
 
-            // ((IDoubleArithmatic<Void, T>)this).ExtendedShiftRightUnsigned(in value.GetLoRef(), in value.GetHiRef(), in second.GetLoRef(), in second.GetHiRef(), out result.GetLoRef(), out result.GetHiRef());
+            // ((IDoubleArithmatic<Void, TBase>)this).ExtendedShiftRightUnsigned(in value.GetLoRef(), in value.GetHiRef(), in second.GetLoRef(), in second.GetHiRef(), out result.GetLoRef(), out result.GetHiRef());
         }
 
         public void SubtractUnchecked(in T first, in T second, out T result) {
@@ -306,11 +306,11 @@ namespace UltimateOrb.Numerics.Generic {
             TDouble result_;
             throw new NotImplementedException();
             if (borrow) {
-                // b =((IDoubleArithmatic<Void, T>)this).DecreaseUnsignedNoThrow(first.GetLoRef(), in first.GetHiRef(), result.
+                // b =((IDoubleArithmatic<Void, TBase>)this).DecreaseUnsignedNoThrow(first.GetLoRef(), in first.GetHiRef(), result.
             }
 
 
-            // return ((IDoubleArithmatic<Void, T>)this).SubtractUnsignedNoThrow(in first.GetLoRef(), in first.GetHiRef(), in second.GetLoRef(), in second.GetHiRef(), out result.GetLoRef(), out result.GetHiRef());
+            // return ((IDoubleArithmatic<Void, TBase>)this).SubtractUnsignedNoThrow(in first.GetLoRef(), in first.GetHiRef(), in second.GetLoRef(), in second.GetHiRef(), out result.GetLoRef(), out result.GetHiRef());
         }
 
         public void ToIntegerUnchecked(uint value, out T result) {
@@ -691,19 +691,19 @@ namespace UltimateOrb.Numerics.Generic {
 
     public interface IIncreaseUnsignedNoThrow<T> {
         /*
-		public T IncreaseUnsigned(T value) {
+		public TBase IncreaseUnsigned(TBase value) {
 			IncreaseUnsignedInPlace(ref value);
 			return value;
 		}
 
-		public T IncreaseUnsigned(in T value) {
+		public TBase IncreaseUnsigned(in TBase value) {
 			IncreaseUnsigned(in value, out var result);
 			return result;
 		}
 
-		public void IncreaseUnsignedInPlace(ref T value);
+		public void IncreaseUnsignedInPlace(ref TBase value);
 
-		public void IncreaseUnsigned(in T value, out T result) {
+		public void IncreaseUnsigned(in TBase value, out TBase result) {
 			_ = checked(0 - unchecked((uint)(int)IncreaseUnsignedNoThrow(in value, out result)));
 		}
 		*/

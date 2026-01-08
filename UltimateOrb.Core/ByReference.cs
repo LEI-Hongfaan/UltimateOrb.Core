@@ -77,7 +77,7 @@ namespace UltimateOrb {
         }
     }
 
-    [Obsolete("Use ByReference<T> instead.")]
+    [Obsolete("Use ByReference<TBase> instead.")]
     public readonly ref struct ByReferenceFat<T> {
 
         private readonly Span<T> impl;
@@ -94,7 +94,7 @@ namespace UltimateOrb {
         }
     }
 
-    [Obsolete("Use ReadOnlyByReference<T> instead.")]
+    [Obsolete("Use ReadOnlyByReference<TBase> instead.")]
     public readonly ref struct ReadOnlyByReferenceFat<T> {
 
         private readonly ReadOnlySpan<T> impl;

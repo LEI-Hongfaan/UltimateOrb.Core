@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 namespace UltimateOrb {
 
     [SerializableAttribute()]
-    public readonly struct MemorySpan<T>/* : IMemorySpan, ISpanProvider<T>*/ {
+    public readonly struct MemorySpan<T>/* : IMemorySpan, ISpanProvider<TBase>*/ {
 
         public readonly nint ByteOffset;
 
@@ -27,9 +27,9 @@ namespace UltimateOrb {
         }
         /*
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
-        public static MemorySpan<T> DangerousCreate<TMemorySpan>(TMemorySpan value)
+        public static MemorySpan<TBase> DangerousCreate<TMemorySpan>(TMemorySpan value)
             where TMemorySpan : IMemorySpan {
-            return new MemorySpan<T>(value.Manager, value.ByteOffset, value.Count);
+            return new MemorySpan<TBase>(value.Manager, value.ByteOffset, value.Count);
         }
 
         object? IMemorySpan.Manager {

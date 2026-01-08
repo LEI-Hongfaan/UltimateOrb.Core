@@ -364,62 +364,62 @@ namespace UltimateOrb {
 
         [DiscardableAfterILLink]
         [Obsolete]
-        internal static void StubILLinkHint<T>() where T : INumberBase<T> {
+        internal static void StubILLinkHint<TBase>() where TBase : INumberBase<TBase> {
             // Properties
-            GC.KeepAlive(T.One);
-            GC.KeepAlive(T.Radix);
-            GC.KeepAlive(T.Zero);
+            GC.KeepAlive(TBase.One);
+            GC.KeepAlive(TBase.Radix);
+            GC.KeepAlive(TBase.Zero);
             // Methods
-            GC.KeepAlive((StubILLinkHintDelegates<T>.AbsFunc)T.Abs);
-            GC.KeepAlive((StubILLinkHintDelegates<T>.IsCanonicalFunc)T.IsCanonical);
-            GC.KeepAlive((StubILLinkHintDelegates<T>.IsComplexNumberFunc)T.IsComplexNumber);
-            GC.KeepAlive((StubILLinkHintDelegates<T>.IsEvenIntegerFunc)T.IsEvenInteger);
-            GC.KeepAlive((StubILLinkHintDelegates<T>.IsFiniteFunc)T.IsFinite);
-            GC.KeepAlive((StubILLinkHintDelegates<T>.IsImaginaryNumberFunc)T.IsImaginaryNumber);
-            GC.KeepAlive((StubILLinkHintDelegates<T>.IsInfinityFunc)T.IsInfinity);
-            GC.KeepAlive((StubILLinkHintDelegates<T>.IsIntegerFunc)T.IsInteger);
-            GC.KeepAlive((StubILLinkHintDelegates<T>.IsNaNFunc)T.IsNaN);
-            GC.KeepAlive((StubILLinkHintDelegates<T>.IsNegativeFunc)T.IsNegative);
-            GC.KeepAlive((StubILLinkHintDelegates<T>.IsNegativeInfinityFunc)T.IsNegativeInfinity);
-            GC.KeepAlive((StubILLinkHintDelegates<T>.IsNormalFunc)T.IsNormal);
-            GC.KeepAlive((StubILLinkHintDelegates<T>.IsOddIntegerFunc)T.IsOddInteger);
-            GC.KeepAlive((StubILLinkHintDelegates<T>.IsPositiveFunc)T.IsPositive);
-            GC.KeepAlive((StubILLinkHintDelegates<T>.IsPositiveInfinityFunc)T.IsPositiveInfinity);
-            GC.KeepAlive((StubILLinkHintDelegates<T>.IsRealNumberFunc)T.IsRealNumber);
-            GC.KeepAlive((StubILLinkHintDelegates<T>.IsSubnormalFunc)T.IsSubnormal);
-            GC.KeepAlive((StubILLinkHintDelegates<T>.IsZeroFunc)T.IsZero);
-            GC.KeepAlive((StubILLinkHintDelegates<T>.MaxMagnitudeFunc)T.MaxMagnitude);
-            GC.KeepAlive((StubILLinkHintDelegates<T>.MaxMagnitudeNumberFunc)T.MaxMagnitudeNumber);
-            GC.KeepAlive((StubILLinkHintDelegates<T>.MinMagnitudeFunc)T.MinMagnitude);
-            GC.KeepAlive((StubILLinkHintDelegates<T>.MinMagnitudeNumberFunc)T.MinMagnitudeNumber);
-            GC.KeepAlive((StubILLinkHintDelegates<T>.CreateCheckedFunc)T.CreateChecked<T>);
-            GC.KeepAlive((StubILLinkHintDelegates<T>.CreateSaturatingFunc)T.CreateSaturating<T>);
-            GC.KeepAlive((StubILLinkHintDelegates<T>.CreateTruncatingFunc)T.CreateTruncating<T>);
-            GC.KeepAlive((StubILLinkHintDelegates<T>.ParseStringFunc)T.Parse);
-            GC.KeepAlive((StubILLinkHintDelegates<T>.ParseSpanFunc)T.Parse);
-            GC.KeepAlive((StubILLinkHintDelegates<T>.TryParseStringFunc)T.TryParse);
-            GC.KeepAlive((StubILLinkHintDelegates<T>.TryParseSpanFunc)T.TryParse);
+            GC.KeepAlive((StubILLinkHintDelegates<TBase>.AbsFunc)TBase.Abs);
+            GC.KeepAlive((StubILLinkHintDelegates<TBase>.IsCanonicalFunc)TBase.IsCanonical);
+            GC.KeepAlive((StubILLinkHintDelegates<TBase>.IsComplexNumberFunc)TBase.IsComplexNumber);
+            GC.KeepAlive((StubILLinkHintDelegates<TBase>.IsEvenIntegerFunc)TBase.IsEvenInteger);
+            GC.KeepAlive((StubILLinkHintDelegates<TBase>.IsFiniteFunc)TBase.IsFinite);
+            GC.KeepAlive((StubILLinkHintDelegates<TBase>.IsImaginaryNumberFunc)TBase.IsImaginaryNumber);
+            GC.KeepAlive((StubILLinkHintDelegates<TBase>.IsInfinityFunc)TBase.IsInfinity);
+            GC.KeepAlive((StubILLinkHintDelegates<TBase>.IsIntegerFunc)TBase.IsInteger);
+            GC.KeepAlive((StubILLinkHintDelegates<TBase>.IsNaNFunc)TBase.IsNaN);
+            GC.KeepAlive((StubILLinkHintDelegates<TBase>.IsNegativeFunc)TBase.IsNegative);
+            GC.KeepAlive((StubILLinkHintDelegates<TBase>.IsNegativeInfinityFunc)TBase.IsNegativeInfinity);
+            GC.KeepAlive((StubILLinkHintDelegates<TBase>.IsNormalFunc)TBase.IsNormal);
+            GC.KeepAlive((StubILLinkHintDelegates<TBase>.IsOddIntegerFunc)TBase.IsOddInteger);
+            GC.KeepAlive((StubILLinkHintDelegates<TBase>.IsPositiveFunc)TBase.IsPositive);
+            GC.KeepAlive((StubILLinkHintDelegates<TBase>.IsPositiveInfinityFunc)TBase.IsPositiveInfinity);
+            GC.KeepAlive((StubILLinkHintDelegates<TBase>.IsRealNumberFunc)TBase.IsRealNumber);
+            GC.KeepAlive((StubILLinkHintDelegates<TBase>.IsSubnormalFunc)TBase.IsSubnormal);
+            GC.KeepAlive((StubILLinkHintDelegates<TBase>.IsZeroFunc)TBase.IsZero);
+            GC.KeepAlive((StubILLinkHintDelegates<TBase>.MaxMagnitudeFunc)TBase.MaxMagnitude);
+            GC.KeepAlive((StubILLinkHintDelegates<TBase>.MaxMagnitudeNumberFunc)TBase.MaxMagnitudeNumber);
+            GC.KeepAlive((StubILLinkHintDelegates<TBase>.MinMagnitudeFunc)TBase.MinMagnitude);
+            GC.KeepAlive((StubILLinkHintDelegates<TBase>.MinMagnitudeNumberFunc)TBase.MinMagnitudeNumber);
+            GC.KeepAlive((StubILLinkHintDelegates<TBase>.CreateCheckedFunc)TBase.CreateChecked<TBase>);
+            GC.KeepAlive((StubILLinkHintDelegates<TBase>.CreateSaturatingFunc)TBase.CreateSaturating<TBase>);
+            GC.KeepAlive((StubILLinkHintDelegates<TBase>.CreateTruncatingFunc)TBase.CreateTruncating<TBase>);
+            GC.KeepAlive((StubILLinkHintDelegates<TBase>.ParseStringFunc)TBase.Parse);
+            GC.KeepAlive((StubILLinkHintDelegates<TBase>.ParseSpanFunc)TBase.Parse);
+            GC.KeepAlive((StubILLinkHintDelegates<TBase>.TryParseStringFunc)TBase.TryParse);
+            GC.KeepAlive((StubILLinkHintDelegates<TBase>.TryParseSpanFunc)TBase.TryParse);
 
             {
                 
-                // _ = T.TryParse(default(ReadOnlySpan<byte>), default(NumberStyles), default(IFormatProvider)!, out _);
-                // T.Parse(default(ReadOnlySpan<byte>), default(NumberStyles), default(IFormatProvider)!);
+                // _ = TBase.TryParse(default(ReadOnlySpan<byte>), default(NumberStyles), default(IFormatProvider)!, out _);
+                // TBase.Parse(default(ReadOnlySpan<byte>), default(NumberStyles), default(IFormatProvider)!);
 
             }
 
 
 
-            GC.KeepAlive((StubILLinkHintDelegates<T>.TryConvertFromCheckedFunc)T.TryConvertFromChecked<T>);
-            GC.KeepAlive((StubILLinkHintDelegates<T>.TryConvertFromSaturatingFunc)T.TryConvertFromSaturating<T>);
-            GC.KeepAlive((StubILLinkHintDelegates<T>.TryConvertFromTruncatingFunc)T.TryConvertFromTruncating<T>);
-            GC.KeepAlive((StubILLinkHintDelegates<T>.TryConvertToCheckedFunc)T.TryConvertToChecked<T>);
-            GC.KeepAlive((StubILLinkHintDelegates<T>.TryConvertToSaturatingFunc)T.TryConvertToSaturating<T>);
-            GC.KeepAlive((StubILLinkHintDelegates<T>.TryConvertToTruncatingFunc)T.TryConvertToTruncating<T>);
+            GC.KeepAlive((StubILLinkHintDelegates<TBase>.TryConvertFromCheckedFunc)TBase.TryConvertFromChecked<TBase>);
+            GC.KeepAlive((StubILLinkHintDelegates<TBase>.TryConvertFromSaturatingFunc)TBase.TryConvertFromSaturating<TBase>);
+            GC.KeepAlive((StubILLinkHintDelegates<TBase>.TryConvertFromTruncatingFunc)TBase.TryConvertFromTruncating<TBase>);
+            GC.KeepAlive((StubILLinkHintDelegates<TBase>.TryConvertToCheckedFunc)TBase.TryConvertToChecked<TBase>);
+            GC.KeepAlive((StubILLinkHintDelegates<TBase>.TryConvertToSaturatingFunc)TBase.TryConvertToSaturating<TBase>);
+            GC.KeepAlive((StubILLinkHintDelegates<TBase>.TryConvertToTruncatingFunc)TBase.TryConvertToTruncating<TBase>);
 
-            GC.KeepAlive(T.AdditiveIdentity);
-            GC.KeepAlive(T.MultiplicativeIdentity);
+            GC.KeepAlive(TBase.AdditiveIdentity);
+            GC.KeepAlive(TBase.MultiplicativeIdentity);
             GC.KeepAlive(() => {
-                var t = default(T)!;
+                var t = default(TBase)!;
                 unchecked {
                     --t;
                     _ = t / t;
@@ -1528,33 +1528,33 @@ namespace UltimateOrb {
 
                 const double TwoPow52 = 4503599627370496.0;
                 const double TwoPow76 = 75557863725914323419136.0;
-                const double TwoPow104 = 20282409603651670423947251286016.0;
+                const double TwoExp104 = 20282409603651670423947251286016.0;
                 const double TwoPow128 = 340282366920938463463374607431768211456.0;
 
                 const ulong TwoPow52Bits = 0x4330000000000000;
                 const ulong TwoPow76Bits = 0x44B0000000000000;
-                const ulong TwoPow104Bits = 0x4670000000000000;
+                const ulong TwoExp104Bits = 0x4670000000000000;
                 const ulong TwoPow128Bits = 0x47F0000000000000;
 
                 var lo = value.lo;
                 var hi = value.hi;
-                if ((hi >> 24) == 0) {
-                    // value < (2^104)
+                if ((hi >> 40) == 0) {
+                    // value < (2^88)
 
                     // For values greater than ulong.MaxValue but less than 2^104 this takes advantage
                     // that we can represent both "halves" of the uint128 within the 52-bit mantissa of
                     // a pair of doubles.
 
                     double lower = BitConverter.UInt64BitsToDouble(TwoPow52Bits | ((lo << 12) >> 12)) - TwoPow52;
-                    double upper = BitConverter.UInt64BitsToDouble(TwoPow104Bits | UltimateOrb.Numerics.DoubleArithmetic.ShiftRightUnsigned(lo, hi, 52, out _)) - TwoPow104;
+                    double upper = BitConverter.UInt64BitsToDouble(TwoExp104Bits | UltimateOrb.Numerics.DoubleArithmetic.ShiftRightUnsigned(lo, hi, 52, out _)) - TwoExp104;
 
                     return lower + upper;
                 } else {
-                    // For values greater than 2^104 we basically do the same as before but we need to account
+                    // For values greater than 2^88 we basically do the same as before but we need to account
                     // for the precision loss that double will have. As such, the lower value effectively drops the
                     // lowest 24 bits and then or's them back to ensure rounding stays correct.
 
-                    double lower = BitConverter.UInt64BitsToDouble(TwoPow76Bits | (UltimateOrb.Numerics.DoubleArithmetic.ShiftRightUnsigned(lo, hi, 12, out _) >> 12) | ((0u != (0xFFFFFF & lo)) ? 1u : 0u)) - TwoPow76;
+                    double lower = BitConverter.UInt64BitsToDouble(TwoPow76Bits | (UltimateOrb.Numerics.DoubleArithmetic.ShiftRightUnsigned(lo, hi, 12, out _) >> 12) | 0xFFFFFF & lo) - TwoPow76;
                     double upper = BitConverter.UInt64BitsToDouble(TwoPow128Bits | UltimateOrb.Numerics.DoubleArithmetic.ShiftRightUnsigned(lo, hi, 76, out _)) - TwoPow128;
 
                     return lower + upper;

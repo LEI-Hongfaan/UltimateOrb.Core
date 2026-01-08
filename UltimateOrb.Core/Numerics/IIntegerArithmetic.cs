@@ -87,181 +87,181 @@ namespace UltimateOrb.Numerics {
         }
     }
 
-    //public interface IDouble<T>
-    //    : IReadOnlyDouble<T>
-    //    , IWriteOnlyDouble<T> {
+    //public interface IDouble<TBase>
+    //    : IReadOnlyDouble<TBase>
+    //    , IWriteOnlyDouble<TBase> {
     //}
 
-    //public interface IWriteOnlyDouble<T> {
+    //public interface IWriteOnlyDouble<TBase> {
 
-    //    void SetLow(in T value);
+    //    void SetLow(in TBase value);
 
-    //    void SetHigh(in T value);
+    //    void SetHigh(in TBase value);
     //}
 
-    //public interface IReadOnlyDouble<T> {
+    //public interface IReadOnlyDouble<TBase> {
 
-    //    void GetLow(out T result);
+    //    void GetLow(out TBase result);
 
-    //    void GetHigh(out T result);
+    //    void GetHigh(out TBase result);
     //}
 
 
-    // void (?<v>[A-Za-z]+)\(in T first, in T second, out T result\);
-    // T ${v}(T first, T second);
-    // void (?<v>[A-Za-z]+)\(in T value, long count, out T result\);
-    // T ${v}(T value, long count);
+    // void (?<v>[A-Za-z]+)\(in TBase first, in TBase second, out TBase result\);
+    // TBase ${v}(TBase first, TBase second);
+    // void (?<v>[A-Za-z]+)\(in TBase value, long count, out TBase result\);
+    // TBase ${v}(TBase value, long count);
 
-    // void (?<v>[A-Za-z]+)\(long value, out T result\);
-    // T ${v}(long value);
-    // void (?<v>[A-Za-z]+)\(in T value, out T result\);
-    // T ${v}(T value);
-    // long (?<v>[A-Za-z]+)\(in T value\);
-    // long ${v}(T value);
+    // void (?<v>[A-Za-z]+)\(long value, out TBase result\);
+    // TBase ${v}(long value);
+    // void (?<v>[A-Za-z]+)\(in TBase value, out TBase result\);
+    // TBase ${v}(TBase value);
+    // long (?<v>[A-Za-z]+)\(in TBase value\);
+    // long ${v}(TBase value);
     #region MyRegion
-    //public interface IIntegerArithmetic<T> {
+    //public interface IIntegerArithmetic<TBase> {
 
     //    int BitSize {
 
     //        get;
     //    }
 
-    //    T Zero {
+    //    TBase Zero {
 
     //        get;
     //    }
 
-    //    T One {
+    //    TBase One {
 
     //        get;
     //    }
 
-    //    bool GetHighestBit(T value);
+    //    bool GetHighestBit(TBase value);
 
-    //    T Copy(T value);
+    //    TBase Copy(TBase value);
 
-    //    T OnesComplement(T value);
+    //    TBase OnesComplement(TBase value);
 
-    //    T BitwiseAnd(T first, T second);
+    //    TBase BitwiseAnd(TBase first, TBase second);
 
-    //    T BitwiseOr(T first, T second);
+    //    TBase BitwiseOr(TBase first, TBase second);
 
-    //    T ExclusiveOr(T first, T second);
+    //    TBase ExclusiveOr(TBase first, TBase second);
 
-    //    T ShiftLeft(T value, long count);
+    //    TBase ShiftLeft(TBase value, long count);
 
-    //    T ShiftRightSigned(T value, long count);
+    //    TBase ShiftRightSigned(TBase value, long count);
 
-    //    T ShiftRightUnigned(T value, long count);
+    //    TBase ShiftRightUnigned(TBase value, long count);
 
-    //    void BigMulSigned(T first, T second, out T lowResult, out T highResult);
+    //    void BigMulSigned(TBase first, TBase second, out TBase lowResult, out TBase highResult);
 
-    //    void BigMulUnsigned(T first, T second, out T lowResult, out T highResult);
+    //    void BigMulUnsigned(TBase first, TBase second, out TBase lowResult, out TBase highResult);
 
-    //    T FromIntegerUnchecked(T value);
+    //    TBase FromIntegerUnchecked(TBase value);
 
-    //    T FromUIntegerUnchecked(T value);
+    //    TBase FromUIntegerUnchecked(TBase value);
 
-    //    T ToIntegerUnchecked(T value);
+    //    TBase ToIntegerUnchecked(TBase value);
 
-    //    T ToUIntegerUnchecked(T value);
+    //    TBase ToUIntegerUnchecked(TBase value);
 
-    //    T FromIntegerUnchecked(long value);
+    //    TBase FromIntegerUnchecked(long value);
 
-    //    T FromUIntegerUnchecked(long value);
+    //    TBase FromUIntegerUnchecked(long value);
 
-    //    long ToIntegerUnchecked(T value);
+    //    long ToIntegerUnchecked(TBase value);
 
-    //    long ToUIntegerUnchecked(T value);
+    //    long ToUIntegerUnchecked(TBase value);
 
-    //    T NegateUnchecked(T value);
+    //    TBase NegateUnchecked(TBase value);
 
-    //    T AddUnchecked(T first, T second);
+    //    TBase AddUnchecked(TBase first, TBase second);
 
-    //    T SubtractUnchecked(T first, T second);
+    //    TBase SubtractUnchecked(TBase first, TBase second);
 
-    //    T MultiplyUnchecked(T first, T second);
+    //    TBase MultiplyUnchecked(TBase first, TBase second);
 
-    //    T DivideUnchecked(T first, T second);
+    //    TBase DivideUnchecked(TBase first, TBase second);
 
-    //    T RemainderUnchecked(T first, T second);
+    //    TBase RemainderUnchecked(TBase first, TBase second);
 
-    //    T FromIntegerSigned(T value);
+    //    TBase FromIntegerSigned(TBase value);
 
-    //    T FromUIntegerSigned(T value);
+    //    TBase FromUIntegerSigned(TBase value);
 
-    //    T ToIntegerSigned(T value);
+    //    TBase ToIntegerSigned(TBase value);
 
-    //    T ToUIntegerSigned(T value);
+    //    TBase ToUIntegerSigned(TBase value);
 
-    //    T FromIntegerSigned(long value);
+    //    TBase FromIntegerSigned(long value);
 
-    //    T FromUIntegerSigned(long value);
+    //    TBase FromUIntegerSigned(long value);
 
-    //    long ToIntegerSigned(T value);
+    //    long ToIntegerSigned(TBase value);
 
-    //    long ToUIntegerSigned(T value);
+    //    long ToUIntegerSigned(TBase value);
 
-    //    T NegateSigned(T value);
+    //    TBase NegateSigned(TBase value);
 
-    //    T AddSigned(T first, T second);
+    //    TBase AddSigned(TBase first, TBase second);
 
-    //    T SubtractSigned(T first, T second);
+    //    TBase SubtractSigned(TBase first, TBase second);
 
-    //    T MultiplySigned(T first, T second);
+    //    TBase MultiplySigned(TBase first, TBase second);
 
-    //    T DivideSigned(T first, T second);
+    //    TBase DivideSigned(TBase first, TBase second);
 
-    //    T RemainderSigned(T first, T second);
+    //    TBase RemainderSigned(TBase first, TBase second);
 
-    //    T FromIntegerUnsigned(T value);
+    //    TBase FromIntegerUnsigned(TBase value);
 
-    //    T FromUIntegerUnsigned(T value);
+    //    TBase FromUIntegerUnsigned(TBase value);
 
-    //    T ToIntegerUnsigned(T value);
+    //    TBase ToIntegerUnsigned(TBase value);
 
-    //    T ToUIntegerUnsigned(T value);
+    //    TBase ToUIntegerUnsigned(TBase value);
 
-    //    T FromIntegerUnsigned(long value);
+    //    TBase FromIntegerUnsigned(long value);
 
-    //    T FromUIntegerUnsigned(long value);
+    //    TBase FromUIntegerUnsigned(long value);
 
-    //    long ToIntegerUnsigned(T value);
+    //    long ToIntegerUnsigned(TBase value);
 
-    //    long ToUIntegerUnsigned(T value);
+    //    long ToUIntegerUnsigned(TBase value);
 
-    //    T NegateUnsigned(T value);
+    //    TBase NegateUnsigned(TBase value);
 
-    //    T AddUnsignedWithOverflow(T first, T second);
+    //    TBase AddUnsignedWithOverflow(TBase first, TBase second);
 
-    //    T SubtractUnsigned(T first, T second);
+    //    TBase SubtractUnsigned(TBase first, TBase second);
 
-    //    T MultiplyUnsigned(T first, T second);
+    //    TBase MultiplyUnsigned(TBase first, TBase second);
 
-    //    T DivideUnsigned(T first, T second);
+    //    TBase DivideUnsigned(TBase first, TBase second);
 
-    //    T RemainderUnsigned(T first, T second);
+    //    TBase RemainderUnsigned(TBase first, TBase second);
 
-    //    bool LessThanUnsigned(T value, T second);
+    //    bool LessThanUnsigned(TBase value, TBase second);
 
-    //    T IncreaseUnchecked(T value);
+    //    TBase IncreaseUnchecked(TBase value);
 
-    //    T DecreaseUnchecked(T value);
+    //    TBase DecreaseUnchecked(TBase value);
 
-    //    T IncreaseSigned(T value);
+    //    TBase IncreaseSigned(TBase value);
 
-    //    T DecreaseSigned(T value);
+    //    TBase DecreaseSigned(TBase value);
 
-    //    T IncreaseUnsigned(T value);
+    //    TBase IncreaseUnsigned(TBase value);
 
-    //    T DecreaseUnsigned(T value);
+    //    TBase DecreaseUnsigned(TBase value);
 
 
 
-    //    bool IsZero(T value);
+    //    bool IsZero(TBase value);
 
     //    public TDouble IncreaseUnchecked<TDouble>(TDouble value)
-    //        where TDouble : IUnsafeDouble<T> {
+    //        where TDouble : IUnsafeDouble<TBase> {
     //        var result_lo_ = value.Low;
     //        result_lo_ = IncreaseUnchecked(result_lo_);
     //        var result_hi_ = value.High;
@@ -274,7 +274,7 @@ namespace UltimateOrb.Numerics {
     //    }
 
     //    //public void BigMulUnsigned<TDouble>(in TDouble first, in TDouble second, out TDouble result_lo, out TDouble result_hi)
-    //    //    where TDouble : IUnsafeDouble<T> {
+    //    //    where TDouble : IUnsafeDouble<TBase> {
     //    //    unchecked {
     //    //        ref readonly var fl = ref first.Low;
     //    //        ref readonly var fh = ref first.High;
@@ -479,7 +479,7 @@ namespace UltimateOrb.Numerics {
         }
 
         //public void BigMulUnsigned<TDouble>(in TDouble first, in TDouble second, out TDouble result_lo, out TDouble result_hi)
-        //    where TDouble : IUnsafeDouble<T> {
+        //    where TDouble : IUnsafeDouble<TBase> {
         //    unchecked {
         //        TDouble f;
         //        Unsafe.SkipInit(out f);

@@ -311,7 +311,7 @@ namespace UltimateOrb.Unmanaged {
 
 
     public readonly partial struct NativeArray<T> : IList<T>, IReadOnlyList<T> {
-        // implemented from ICollection<T>
+        // implemented from ICollection<TBase>
         public bool IsReadOnly => false;
 
         int ICollection<T>.Count => Length;
@@ -344,7 +344,7 @@ namespace UltimateOrb.Unmanaged {
             }
 
             if (array.Length - arrayIndex < Length) {
-                throw new ArgumentException("The number of elements in the source NativeArray<T> is greater than the available space from arrayIndex to the end of the destination array.");
+                throw new ArgumentException("The number of elements in the source NativeArray<TBase> is greater than the available space from arrayIndex to the end of the destination array.");
             }
 
             for (var i = 0; i < Length; i++) {
@@ -356,7 +356,7 @@ namespace UltimateOrb.Unmanaged {
             throw new NotSupportedException();
         }
 
-        // implemented from IEnumerable<T>
+        // implemented from IEnumerable<TBase>
         public IEnumerator<T> GetEnumerator() {
             for (int i = 0; i < Length; i++) {
                 yield return this[i];
@@ -367,7 +367,7 @@ namespace UltimateOrb.Unmanaged {
             return this.GetEnumerator();
         }
 
-        // implemented from IList<T>
+        // implemented from IList<TBase>
         public int IndexOf(T item) {
             for (int i = 0; i < Length; i++) {
                 if (EqualityComparer<T>.Default.Equals(this[i], item)) {

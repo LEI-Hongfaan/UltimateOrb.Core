@@ -1,20 +1,20 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
+using System.Numerics;
 using System.Runtime;
 using System.Runtime.CompilerServices;
+using UltimateOrb.Numerics;
 
 namespace UltimateOrb.Numerics {
 
-    using UInt = UInt32;
-    using ULong = UInt64;
     using Int = Int32;
     using Long = Int64;
-
-    using Misc = DoubleArithmetic.Misc32;
-
     using Math = System.Math;
     using MathEx = DoubleArithmetic;
+    using Misc = DoubleArithmetic.Misc32;
+    using UInt = UInt32;
+    using ULong = UInt64;
 
     public static partial class DoubleArithmetic {
 
@@ -212,6 +212,88 @@ namespace UltimateOrb.Numerics {
             }
         }
 
+        public static ULong BigSqrtRem(ULong lo, ULong hi, out ULong remainder_lo, out uint remainder_hi) {
+            unchecked {
+                if (0u == hi) {
+                    var root = Mathematics.Elementary.Math.SqrtRem(lo, out remainder_lo);
+                    remainder_hi = 0u;
+                    return root;
+                }
+                if (hi <= ~(ULong)0 >> 2) {
+                    var old = (ULong)Math.Sqrt((0.0 + ((ULong)1u << (Misc.ULong.BitSize - 1)) + ((ULong)1u << (Misc.ULong.BitSize - 1))) * hi + lo);
+                    ULong h;
+                    var l = MathEx.BigSquare(old, out h);
+                    l += lo;
+                    h += hi;
+                    if (l < lo) {
+                        ++h;
+                    }
+                    var @new = MathEx.BigDivNoThrowWhenOverflow(l, h, old) >> 1;
+                    l = MathEx.BigSquare(@new, out h);
+                    if ((h > hi) || ((h == hi) && (l > lo))) {
+                        l = SubtractUnchecked(l, h, @new, default, out h);
+                        --@new;
+                        l = SubtractUnchecked(l, h, @new, default, out h);
+                    } else {
+                    }
+                    var rem_lo = SubtractUnchecked(lo, hi, l, h, out var rem_hi);
+                    remainder_lo = rem_lo;
+                    remainder_hi = (uint)rem_hi;
+                    return @new;
+                }
+                {
+                    if (hi == ~(ULong)0) {
+                        remainder_lo = lo - 1;
+                        remainder_hi = lo >= 1 ? 1u : 0u;
+                        return ~(ULong)0;
+                    }
+                    var old = (ULong)(((ULong)1u << (Misc.UInt.BitSize - 1)) * Math.Sqrt(hi));
+                    var a = lo;
+                    lo = (lo >> 2) | (hi << (Misc.ULong.BitSize - 2));
+                    hi = hi >> 2;
+                    ULong h;
+                    var l = MathEx.BigSquare(old, out h);
+                    l += lo;
+                    h += hi;
+                    if (l < lo) {
+                        ++h;
+                    }
+                    var @new = MathEx.BigDivNoThrowWhenOverflow(l, h, old) >> 1;
+                    l = MathEx.BigSquare(@new, out h);
+
+                    if ((h > hi) || ((h == hi) && (l > lo))) {
+                        --@new;
+                        @new <<= 1;
+                        hi = (hi << 2) | (lo >> (Misc.ULong.BitSize - 2));
+                        lo = a;
+                        a = (@new << 1) + 1u;
+                        var b = l;
+                        l <<= 2;
+                        h = (h << 2) + (ULong)(((l < a) ? -1 : 0) + ((0 > (Long)@new) ? -1 : 0) + ((int)(b >> (Misc.ULong.BitSize - 2))));
+                        l -= a;
+                    } else {
+                        @new <<= 1;
+                        hi = (hi << 2) | (lo >> (Misc.ULong.BitSize - 2));
+                        lo = a;
+                        a = (@new << 1) + 1u;
+                        var b = l;
+                        l <<= 2;
+                        l += a;
+                        h = (h << 2) + (((l < a) ? 1u : 0u) + ((0 > (Long)@new) ? 1u : 0u) + ((uint)(b >> (Misc.ULong.BitSize - 2))));
+                    }
+                    if ((h > hi) || ((h == hi) && (l > lo))) {
+                    } else {
+                        l = AddUnchecked(l, h, @new, default, out h);
+                        ++@new;
+                        l = AddUnchecked(l, h, @new, default, out h);
+                    }
+                    var rem_lo = SubtractUnchecked(lo, hi, l, h, out var rem_hi);
+                    remainder_lo = rem_lo;
+                    remainder_hi = (uint)rem_hi;
+                    return @new;
+                }
+            }
+        }
 
         /// <summary>
         ///     <para>Returns the square root of a specified number.</para>
