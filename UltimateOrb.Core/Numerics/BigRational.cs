@@ -11,6 +11,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.ConstrainedExecution;
 using System.Runtime.InteropServices;
 using UltimateOrb.Mathematics.Exact;
+using UltimateOrb.Runtime.Caching;
 using UltimateOrb.Utilities;
 
 namespace UltimateOrb.Numerics {
@@ -125,7 +126,7 @@ namespace UltimateOrb.Numerics {
                     }
                 }
                 {
-                    var ignored = checked(0u - unchecked((uint)d.Sign));
+                    _ = checked(0u - unchecked((uint)d.Sign));
                 }
             }
             return default;
@@ -171,13 +172,61 @@ namespace UltimateOrb.Numerics {
             return 0u == value ? default : new BigRational(denominator: s_BigIntegerOne, signedNumerator: value);
         }
 
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator BigRational(byte value) {
+            return 0 == value ? default : new BigRational(denominator: s_BigIntegerOne, signedNumerator: value);
+        }
+
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator BigRational(sbyte value) {
+            return 0u == value ? default : new BigRational(denominator: s_BigIntegerOne, signedNumerator: value);
+        }
+
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator BigRational(short value) {
+            return 0 == value ? default : new BigRational(denominator: s_BigIntegerOne, signedNumerator: value);
+        }
+
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator BigRational(ushort value) {
+            return 0u == value ? default : new BigRational(denominator: s_BigIntegerOne, signedNumerator: value);
+        }
+
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator BigRational(char value) {
+            return 0u == value ? default : new BigRational(denominator: s_BigIntegerOne, signedNumerator: value);
+        }
+
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator BigRational(UltimateOrb.Int128 value) {
+            // TODO: Int128
+            return 0u == value ? default : new BigRational(denominator: s_BigIntegerOne, signedNumerator: (System.Int128)value);
+        }
+
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator BigRational(System.Int128 value) {
+            return 0u == value ? default : new BigRational(denominator: s_BigIntegerOne, signedNumerator: value);
+        }
+
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator BigRational(UltimateOrb.UInt128 value) {
+            return 0u == value ? default : new BigRational(denominator: s_BigIntegerOne, signedNumerator: value);
+        }
+
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator BigRational(System.UInt128 value) {
+            return 0u == value ? default : new BigRational(denominator: s_BigIntegerOne, signedNumerator: value);
+        }
+
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
         [TargetedPatchingOptOutAttribute("")]
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         [PureAttribute()]
         public static explicit operator BigInteger(BigRational value) {
-            if (value.m_SignedNumerator.IsZero) {
-                return default;
+            Debug.Assert(value.m_Denominator >= BigInteger.Zero);
+            if (value.m_Denominator.IsZero || value.m_Denominator.IsOne) {
+                Debug.Assert(!value.m_Denominator.IsZero || value.m_SignedNumerator.IsZero);
+                return value.m_SignedNumerator;
             }
             return value.m_SignedNumerator / value.m_Denominator;
         }
@@ -189,6 +238,20 @@ namespace UltimateOrb.Numerics {
         public static explicit operator Double(BigRational value) {
             return ToIeee754InterchangeableBinary<Double, UInt64>(value);
         }
+
+        public static explicit operator Single(BigRational value) {
+            return ToIeee754InterchangeableBinary<Single, UInt32>(value);
+        }
+
+        public static explicit operator Half(BigRational value) {
+            return ToIeee754InterchangeableBinary<Half, UInt16>(value);
+        }
+
+#if NET11_0_OR_GREATER
+        public static explicit operator BFloat16(BigRational value) {
+            return ToIeee754InterchangeableBinary<BFloat16, UInt16>(value);
+        }
+#endif
 
         internal static TFloat ToIeee754InterchangeableBinary<TFloat, TFloatUIntBits>(BigRational value)
             where TFloat : unmanaged, IFloatingPointIeee754<TFloat>, IMinMaxValue<TFloat>
@@ -238,7 +301,6 @@ namespace UltimateOrb.Numerics {
             var ExponentMinValue = -ExponentBias + 1;
             var ExponentUnderflowZeroBoundExclusive = -ExponentBias - SignificandBitLength;
 
-
             if (exponent > ExponentBias) {
                 return negative ? TFloat.NegativeInfinity : TFloat.PositiveInfinity;
             }
@@ -283,6 +345,239 @@ namespace UltimateOrb.Numerics {
             var result = unchecked((TFloatUIntBits.CreateTruncating(negative ? 1u : 0u) << (FloatBitSize - 1)) + (biasedExponent + s));
 
             return Unsafe.BitCast<TFloatUIntBits, TFloat>(result);
+        }
+
+        public static double ToDouble(BigRational value, MidpointRounding rounding = MidpointRounding.ToEven) {
+            return ToDouble(value, rounding.ToFloatingPointRounding());
+        }
+
+        public static double ToDouble(BigRational value, FloatingPointRounding rounding = FloatingPointRounding.ToNearestWithMidpointToEven) {
+            return ToIeee754InterchangeableBinary<double, UInt64>(value, rounding);
+        }
+
+        public static Single ToSingle(BigRational value, MidpointRounding rounding = MidpointRounding.ToEven) {
+            return ToSingle(value, rounding.ToFloatingPointRounding());
+        }
+
+        public static Single ToSingle(BigRational value, FloatingPointRounding rounding = FloatingPointRounding.ToNearestWithMidpointToEven) {
+            return ToIeee754InterchangeableBinary<Single, UInt32>(value, rounding);
+        }
+
+        public static Half ToHalf(BigRational value, MidpointRounding rounding = MidpointRounding.ToEven) {
+            return ToHalf(value, rounding.ToFloatingPointRounding());
+        }
+
+        public static Half ToHalf(BigRational value, FloatingPointRounding rounding = FloatingPointRounding.ToNearestWithMidpointToEven) {
+            return ToIeee754InterchangeableBinary<Half, UInt16>(value, rounding);
+        }
+
+#if NET11_0_OR_GREATER
+        public static BFloat16 ToBFloat16(BigRational value, MidpointRounding rounding = MidpointRounding.ToEven) {
+            return ToBFloat16(value, rounding.ToFloatingPointRounding());
+        }
+
+        public static BFloat16 ToBFloat16(BigRational value, FloatingPointRounding rounding = FloatingPointRounding.ToNearestWithMidpointToEven) {
+            // BFloat16 is not an IEEE interchangeable format, but the conversion algorithm works on it.
+            return ToIeee754InterchangeableBinary<BFloat16, UInt16>(value, rounding);
+        }
+#endif
+
+        static TFloat ToIeee754InterchangeableBinary<TFloat, TFloatUIntBits>(
+            BigRational value,
+            FloatingPointRounding rounding = FloatingPointRounding.ToNearestWithMidpointToEven)
+            where TFloat : unmanaged, IFloatingPointIeee754<TFloat>, IMinMaxValue<TFloat>
+            where TFloatUIntBits : unmanaged, IUnsignedNumber<TFloatUIntBits>, IBinaryInteger<TFloatUIntBits> {
+            var exactZeroNegative = rounding switch {
+                FloatingPointRounding.Downward => true,
+                FloatingPointRounding.ToNearestWithMidpointDownward => true,
+                FloatingPointRounding.ToNearestWithMidpointToEven => false,
+                FloatingPointRounding.ToNearestWithMidpointAwayFromZero => false,
+                FloatingPointRounding.Upward => false,
+                FloatingPointRounding.TowardZero => false,
+                FloatingPointRounding.ToOdd => false,
+                FloatingPointRounding.ToNearestWithMidpointToOdd => false,
+                FloatingPointRounding.ToNearestWithMidpointUpward => false,
+                FloatingPointRounding.ToNearestWithMidpointTowardZero => false,
+                _ => throw new NotSupportedException("Unknown rounding mode.")
+            };
+            if (IsZero(value)) {
+                return exactZeroNegative ? TFloat.NegativeZero : TFloat.Zero;
+            }
+            return DivideToIeee754InterchangeableBinaryInternal<TFloat, TFloatUIntBits>(value.m_SignedNumerator, value.m_Denominator, rounding);
+        }
+
+        static TFloat DivideToIeee754InterchangeableBinaryInternal<TFloat, TFloatUIntBits>(
+            BigInteger signedNumerator,
+            BigInteger denominator,
+            FloatingPointRounding rounding = FloatingPointRounding.ToNearestWithMidpointToEven)
+            where TFloat : unmanaged, IFloatingPointIeee754<TFloat>, IMinMaxValue<TFloat>
+            where TFloatUIntBits : unmanaged, IUnsignedNumber<TFloatUIntBits>, IBinaryInteger<TFloatUIntBits> {
+            Debug.Assert(!IsZero(signedNumerator));
+            Debug.Assert(denominator.Sign > 0);
+            bool negative = BigInteger.IsNegative(signedNumerator);
+            BigInteger absDividend = BigInteger.Abs(signedNumerator);
+            BigInteger absDivisor = denominator;
+
+            var dividendBits = checked((int)absDividend.GetBitLength());
+            var divisorBits = checked((int)absDivisor.GetBitLength());
+            var o = BigInteger.TrailingZeroCount(absDividend);
+            var p = BigInteger.TrailingZeroCount(absDivisor);
+
+            var exponent = unchecked(dividendBits - divisorBits);
+            if (exponent >= 0) {
+                var t = absDividend >> exponent;
+                if (t < absDivisor) unchecked { --exponent; }
+            } else {
+                var t = absDivisor >> unchecked(-exponent);
+                var a = absDividend.CompareTo(t);
+                if (a < 0 || (a == 0 && p < unchecked(-exponent))) unchecked { --exponent; }
+            }
+
+            var FloatBitSize = 8 * Unsafe.SizeOf<TFloat>();
+            var SignificandBitLength = TFloat.MinValue.GetSignificandBitLength() - 1;
+            var ExponentBitLength = FloatBitSize - 1 - SignificandBitLength;
+            var ExponentBias = (1 << (ExponentBitLength - 1)) - 1;
+            var ExponentMinValue = -ExponentBias + 1;
+            var ExponentUnderflowZeroBoundExclusive = -ExponentBias - SignificandBitLength;
+
+            if (exponent > ExponentBias) {
+                return ClampOverflowWithRoundingInternal(negative ? TFloat.NegativeInfinity : TFloat.PositiveInfinity, rounding);
+            }
+
+            if (exponent < ExponentUnderflowZeroBoundExclusive) {
+                return negative ? TFloat.NegativeZero : TFloat.Zero;
+            }
+
+            exponent = exponent < ExponentMinValue ? ExponentMinValue : exponent;
+
+            var e = unchecked((int)(exponent - (long)SignificandBitLength));
+            bool h = default;
+            var f = unchecked(e - 1);
+            if (e > 0) {
+                h = !((BigInteger.One << f) & absDividend).IsZero;
+                absDividend >>= e;
+            } else {
+                absDividend <<= unchecked(-e);
+            }
+
+            var (q, rem) = BigInteger.DivRem(absDividend, absDivisor);
+
+            // Validate rounding mode and decide whether tie detection is required.
+            bool needsTie = rounding switch {
+                FloatingPointRounding.ToNearestWithMidpointToEven => true,
+                FloatingPointRounding.ToNearestWithMidpointAwayFromZero => true,
+                FloatingPointRounding.ToNearestWithMidpointToOdd => true,
+                FloatingPointRounding.ToNearestWithMidpointUpward => true,
+                FloatingPointRounding.ToNearestWithMidpointDownward => true,
+                FloatingPointRounding.ToNearestWithMidpointTowardZero => true,
+                _ => false
+            };
+
+            int w = 0;
+            if (needsTie) {
+                var r = rem;
+                r <<= 1;
+                if (e > 0) {
+                    if (h) ++r;
+                    w = (o == f) ? 0 : 1;
+                }
+                w |= r.CompareTo(absDivisor);
+            } else {
+                w = rem != BigInteger.Zero ? 1 : 0;
+            }
+
+            bool incrementSignificand = false;
+
+            static bool IsTie(int v) => v == 0;
+            static bool IsUpper(int v) => v > 0;
+            static bool IsInexact(int v) => v > 0;
+
+            switch (rounding) {
+            case FloatingPointRounding.ToNearestWithMidpointToEven:
+                if (IsUpper(w) || (IsTie(w) && !q.IsEven)) incrementSignificand = true;
+                break;
+
+            case FloatingPointRounding.ToNearestWithMidpointAwayFromZero:
+                if (w >= 0) incrementSignificand = true;
+                break;
+
+            case FloatingPointRounding.ToNearestWithMidpointToOdd:
+                if (IsUpper(w) || (IsTie(w) && q.IsEven)) incrementSignificand = true;
+                break;
+
+            case FloatingPointRounding.ToNearestWithMidpointUpward:
+                if (IsUpper(w) || (IsTie(w) && !negative)) incrementSignificand = true;
+                break;
+
+            case FloatingPointRounding.ToNearestWithMidpointDownward:
+                if (IsUpper(w) || (IsTie(w) && negative)) incrementSignificand = true;
+                break;
+
+            case FloatingPointRounding.ToNearestWithMidpointTowardZero:
+                if (IsUpper(w)) incrementSignificand = true;
+                break;
+
+            case FloatingPointRounding.Upward:
+                if (IsInexact(w) && !negative) incrementSignificand = true;
+                break;
+
+            case FloatingPointRounding.Downward:
+                if (IsInexact(w) && negative) incrementSignificand = true;
+                break;
+
+            case FloatingPointRounding.TowardZero:
+                break;
+
+            case FloatingPointRounding.ToOdd:
+                if (IsInexact(w) && q.IsEven) incrementSignificand = true;
+                break;
+
+            case FloatingPointRounding.TowardInfinity:
+                if (IsInexact(w)) incrementSignificand = true;
+                break;
+
+            default:
+                Debug.Assert(false);
+                break;
+            }
+
+            if (incrementSignificand) ++q;
+
+            var biasedExponent = TFloatUIntBits.CreateTruncating(exponent + (ExponentBias - 1)) << SignificandBitLength;
+            var s = TFloatUIntBits.CreateTruncating(q);
+
+            var resultBits = unchecked(
+                (TFloatUIntBits.CreateTruncating(negative ? 1u : 0u) << (FloatBitSize - 1))
+                + (biasedExponent + s)
+            );
+
+            var result = Unsafe.BitCast<TFloatUIntBits, TFloat>(resultBits);
+            if (!needsTie &&
+                FloatingPointRounding.ToOdd != rounding && FloatingPointRounding.TowardInfinity != rounding &&
+                TFloat.IsInfinity(result)) {
+                return ClampOverflowWithRoundingInternal(result, rounding);
+            }
+            return result;
+        }
+
+        internal static TFloat ClampOverflowWithRoundingInternal<TFloat>(TFloat value, FloatingPointRounding rounding)
+            where TFloat : unmanaged, IFloatingPointIeee754<TFloat>, IMinMaxValue<TFloat> {
+            Debug.Assert(TFloat.IsInfinity(value));
+            switch (rounding) {
+            case FloatingPointRounding.Upward:
+                if (TFloat.IsNegative(value)) {
+                    return TFloat.MinValue;
+                }
+                break;
+            case FloatingPointRounding.Downward:
+                if (!TFloat.IsNegative(value)) {
+                    return TFloat.MaxValue;
+                }
+                break;
+            case FloatingPointRounding.TowardZero:
+                return TFloat.IsNegative(value) ? TFloat.MinValue : TFloat.MaxValue;
+            }
+            return value;
         }
 
         static double DivideToDoubleInternal(BigInteger signedNumerator, BigInteger denominator) {
@@ -659,6 +954,12 @@ namespace UltimateOrb.Numerics {
 
         public static explicit operator BigRational(double value) => FromIeee754InterchangeableBinary<double, UInt64>(value);
 
+        public static explicit operator BigRational(Half value) => FromIeee754InterchangeableBinary<Half, UInt16>(value);
+
+#if NET11_0_OR_GREATER
+        public static explicit operator BigRational(BFloat16 value) => FromIeee754InterchangeableBinary<BFloat16, UInt16>(value);
+#endif
+
         public static BigRational FromSingle(Single value) {
             const int SingleExponentBias = 127;
             const int SingleMantissaBits = 23;
@@ -777,7 +1078,6 @@ namespace UltimateOrb.Numerics {
             }
 
             return new BigRational(denominator: denominator, signedNumerator: numerator);
-
         }
 
         static void ThrowNotFiniteNumberException<T>(T value) {
@@ -839,6 +1139,24 @@ namespace UltimateOrb.Numerics {
             throw new NotFiniteNumberException($"The double value {value} is not finite.");
         }
 
+        internal static BigRational FromIeee754InterchangeableBinaryTruncating<TFloat, TFloatUIntBits>(TFloat value)
+            where TFloat : unmanaged, IFloatingPointIeee754<TFloat>, IMinMaxValue<TFloat>
+            where TFloatUIntBits : unmanaged, IUnsignedNumber<TFloatUIntBits>, IBinaryInteger<TFloatUIntBits> {
+            return !TFloat.IsFinite(value) ?
+                Zero :
+                FromIeee754InterchangeableBinary<TFloat, TFloatUIntBits>(value);
+        }
+
+        internal static BigRational FromIeee754InterchangeableBinarySaturating<TFloat, TFloatUIntBits>(TFloat value)
+            where TFloat : unmanaged, IFloatingPointIeee754<TFloat>, IMinMaxValue<TFloat>
+            where TFloatUIntBits : unmanaged, IUnsignedNumber<TFloatUIntBits>, IBinaryInteger<TFloatUIntBits> {
+            return !TFloat.IsFinite(value) ?
+                TFloat.IsNaN(value) ? Zero : (TFloat.IsNegative(value) ?
+                    MinMaxValueModule_PerType<TFloat, TFloatUIntBits>.MinValue :
+                    MinMaxValueModule_PerType<TFloat, TFloatUIntBits>.MaxValue) :
+                FromIeee754InterchangeableBinary<TFloat, TFloatUIntBits>(value);
+        }
+
         static BigRational ContinuedFraction(double value, int maxIterations) {
             Debug.Assert(value > 0);
             BigInteger d = 0;
@@ -872,7 +1190,7 @@ namespace UltimateOrb.Numerics {
         /// <param name="value"></param>
         /// <param name="maxIterations"></param>
         /// <exception cref="ArithmeticException"><paramref name="value"/> is not a finite number.</exception>
-        /// <exception cref="OutOfMemoryException">The denominator or numerator of the result goes too large.</exception>
+        /// <exception cref="OutOfMemoryException">The denominator or numerator of the resultBits goes too large.</exception>
         /// <returns></returns>
         public static BigRational FromSingleByContinuedFraction(Single value, int maxIterations = 12) {
             ArgumentOutOfRangeException.ThrowIfNegativeOrZero(maxIterations);
@@ -894,7 +1212,7 @@ namespace UltimateOrb.Numerics {
         /// <param name="value"></param>
         /// <param name="maxIterations"></param>
         /// <exception cref="ArithmeticException"><paramref name="value"/> is not a finite number.</exception>
-        /// <exception cref="OutOfMemoryException">The denominator or numerator of the result goes too large.</exception>
+        /// <exception cref="OutOfMemoryException">The denominator or numerator of the resultBits goes too large.</exception>
         /// <returns></returns>
         public static BigRational FromDoubleByContinuedFraction(double value, int maxIterations = 17) {
             ArgumentOutOfRangeException.ThrowIfNegativeOrZero(maxIterations);
@@ -945,7 +1263,7 @@ namespace UltimateOrb.Numerics {
         /// <param name="value"></param>
         /// <param name="maxIterations"></param>
         /// <exception cref="ArithmeticException"><paramref name="value"/> is not a finite number.</exception>
-        /// <exception cref="OutOfMemoryException">The denominator or numerator of the result goes too large.</exception>
+        /// <exception cref="OutOfMemoryException">The denominator or numerator of the resultBits goes too large.</exception>
         /// <returns></returns>
         public static BigRational FromRationalByContinuedFraction(BigRational value, int maxIterations = 17) {
             ArgumentOutOfRangeException.ThrowIfNegativeOrZero(maxIterations);
@@ -1147,7 +1465,7 @@ namespace UltimateOrb.Numerics {
                     q += scaledNum.Sign >= 0 ? BigInteger.One : BigInteger.Negate(BigInteger.One);
                 }
 
-                // Build result and reduce
+                // Build resultBits and reduce
                 BigInteger resultNum, resultDen;
                 if (decimals >= 0) {
                     resultNum = q;
@@ -1381,7 +1699,7 @@ namespace UltimateOrb.Numerics {
                             denominator <<= checked(-exp);
                         }
 
-                       
+
                     } else {
                         // Decimal path
                         int fracLen = checked((int)parseResult.SignificandFractionalPartLength);
@@ -1442,134 +1760,793 @@ namespace UltimateOrb.Numerics {
         }
 
         static bool INumberBase<BigRational>.TryConvertFromChecked<TOther>(TOther value, out BigRational result) {
-            throw new NotImplementedException();
+            return INumberBaseFriendInternal<BigRational>.TryConvertFromTruncating(value, out result);
         }
 
-        static bool INumberBase<BigRational>.TryConvertFromSaturating<TOther>(TOther value, out BigRational result) {
-            throw new NotImplementedException();
-        }
+        static class MinMaxValueModule_PerType<TFloat, TFloatUIntBits>
+            where TFloat : unmanaged, IFloatingPointIeee754<TFloat>, IMinMaxValue<TFloat>
+            where TFloatUIntBits : unmanaged, IUnsignedNumber<TFloatUIntBits>, IBinaryInteger<TFloatUIntBits> {
 
-        static bool INumberBase<BigRational>.TryConvertFromTruncating<TOther>(TOther value, out BigRational result) {
-            throw new NotImplementedException();
-        }
+            public static readonly BigRational MinValue = FromIeee754InterchangeableBinary<TFloat, TFloatUIntBits>(TFloat.MinValue);
+            public static readonly BigRational MaxValue = -MinValue;
 
-        static bool INumberBase<BigRational>.TryConvertToChecked<TOther>(BigRational value, out TOther result) {
-            throw new NotImplementedException();
-        }
-
-        static bool INumberBase<BigRational>.TryConvertToSaturating<TOther>(BigRational value, out TOther result) {
-            throw new NotImplementedException();
-        }
-
-        static readonly BigInteger s_UInt32MaxValueAsBigInteger = UInt32.MaxValue;
-
-        static readonly BigInteger s_UInt64MaxValueAsBigInteger = UInt64.MaxValue;
-
-        static readonly BigInteger s_UInt128MaxValueAsBigInteger = UInt128.MaxValue;
-
-        static readonly BigInteger s_UInt16MaxValueAsBigInteger = UInt16.MaxValue;
-
-        static readonly BigInteger s_ByteMaxValueAsBigInteger = byte.MaxValue;
-
-        static readonly BigInteger s_UIntPtrMaxValueAsBigInteger = UIntPtr.MaxValue;
-
-        static bool INumberBase<BigRational>.TryConvertToTruncating<TOther>(BigRational value, out TOther result) {
-            static BigInteger F(BigRational value) {
-                Debug.Assert(value.m_Denominator >= BigInteger.Zero);
-                if (value.m_Denominator <= BigInteger.One) {
-                    Debug.Assert(value.m_Denominator.IsOne || value.m_SignedNumerator.IsZero);
-                    return value.m_SignedNumerator;
-                }
-                return value.m_SignedNumerator / value.m_Denominator;
+            public static void EnsureInitialized() {
+                _ = MaxValue;
             }
-            if (typeof(TOther) == typeof(BigInteger)) {
-                result = (TOther)(object)F(value);
-                return true;
-            } else if (typeof(TOther) == typeof(Int32)) {
-                result = (TOther)(object)unchecked((Int32)(UInt32)(s_UInt32MaxValueAsBigInteger & F(value)));
-                return true;
-            } else if (typeof(TOther) == typeof(UInt32)) {
-                result = (TOther)(object)unchecked((UInt32)(s_UInt32MaxValueAsBigInteger & F(value)));
-                return true;
-            } else if (typeof(TOther) == typeof(Int64)) {
-                result = (TOther)(object)unchecked((Int64)(UInt64)(s_UInt64MaxValueAsBigInteger & F(value)));
-                return true;
-            } else if (typeof(TOther) == typeof(UInt64)) {
-                result = (TOther)(object)unchecked((UInt64)(s_UInt64MaxValueAsBigInteger & F(value)));
-                return true;
-            } else if (typeof(TOther) == typeof(System.Int128)) {
-                result = (TOther)(object)unchecked((Int32)(UInt32)(s_UInt32MaxValueAsBigInteger & F(value)));
-                return true;
-            } else if (typeof(TOther) == typeof(System.UInt128)) {
-                result = (TOther)(object)unchecked((UInt32)(s_UInt32MaxValueAsBigInteger & F(value)));
-                return true;
-            } else if (typeof(TOther) == typeof(UltimateOrb.Int128)) {
-                result = (TOther)(object)unchecked((Int32)(UInt32)(s_UInt32MaxValueAsBigInteger & F(value)));
-                return true;
-            } else if (typeof(TOther) == typeof(UltimateOrb.UInt128)) {
-                result = (TOther)(object)unchecked((UInt32)(s_UInt32MaxValueAsBigInteger & F(value)));
-                return true;
-            } else if (typeof(TOther) == typeof(nint)) {
-                result = (TOther)(object)unchecked((IntPtr)(UIntPtr)(s_UInt32MaxValueAsBigInteger & F(value)));
-                return true;
-            } else if (typeof(TOther) == typeof(nuint)) {
-                result = (TOther)(object)unchecked((UIntPtr)(s_UIntPtrMaxValueAsBigInteger & F(value)));
-                return true;
-            } else if (typeof(TOther) == typeof(Int16)) {
-                result = (TOther)(object)unchecked((Int16)(UInt16)(s_UInt16MaxValueAsBigInteger & F(value)));
-                return true;
-            } else if (typeof(TOther) == typeof(UInt16)) {
-                result = (TOther)(object)unchecked((UInt16)(s_UInt16MaxValueAsBigInteger & F(value)));
+        }
+
+        [ModuleInitializer]
+        internal static void MinMaxValueModule_Init() {
+            MinMaxValueModule_PerType<double, UInt64>.EnsureInitialized();
+            MinMaxValueModule_PerType<float, UInt32>.EnsureInitialized();
+            MinMaxValueModule_PerType<Half, UInt16>.EnsureInitialized();
+#if NET11_0_OR_GREATER
+            MinMaxValueModule_PerType<BFloat16, UInt16>.EnsureInitialized();
+#endif
+            MinMaxValueModule_PerType<System.Runtime.InteropServices.NFloat, nuint>.EnsureInitialized();
+        }
+
+        /// <inheritdoc cref="INumberBase{TSelf}.TryConvertFromSaturating{TOther}(TOther, out TSelf)"/>
+        /// <remarks>
+        /// Notes on conversion from floating-point types:<br/>
+        /// - If <see cref="INumberBase{TSelf}.TryConvertFromChecked{TOther}"/> returns <see langword="true"/>, the method
+        ///   returns <see langword="true"/> and <paramref name="result"/> equals that checked result.<br/>
+        /// - If the source value is NaN, <paramref name="result"/> is set to <c>default(BigRational)</c> (i.e., 0) and the method returns <see langword="true"/>.<br/>
+        /// - If the source value overflows the representable range of <see cref="BigRational"/> (i.e., +∞ or -∞),
+        ///   the method returns a saturated value that bounds all non‑overflowing results — typically
+        ///   <c>(BigRational)TOther.MinValue</c> for negative overflow or <c>(BigRational)TOther.MaxValue</c>
+        ///   for positive overflow.
+        /// </remarks>
+        static bool INumberBase<BigRational>.TryConvertFromSaturating<TOther>(TOther value, out BigRational result) {
+            if (typeof(TOther) == typeof(byte)) {
+                byte actualValue = (byte)(object)value;
+                result = actualValue;
                 return true;
             } else if (typeof(TOther) == typeof(char)) {
-                // sizeof(char) == 2
-                result = (TOther)(object)unchecked((char)(s_UInt16MaxValueAsBigInteger & F(value)));
+                char actualValue = (char)(object)value;
+                result = actualValue;
                 return true;
-            } else if (typeof(TOther) == typeof(sbyte)) {
-                result = (TOther)(object)unchecked((sbyte)(byte)(s_ByteMaxValueAsBigInteger & F(value)));
-                return true;
-            } else if (typeof(TOther) == typeof(byte)) {
-                result = (TOther)(object)unchecked((byte)(s_ByteMaxValueAsBigInteger & F(value)));
-                return true;
-            } else if (typeof(TOther) == typeof(float)) {
-                // TODO:
-                result = (TOther)(object)(float)((double)value.Numerator / (double)value.Denominator);
+            } else if (typeof(TOther) == typeof(decimal)) {
+                decimal actualValue = (decimal)(object)value;
+                result = (BigRational)actualValue;
                 return true;
             } else if (typeof(TOther) == typeof(double)) {
-                // TODO:
-                if (!value.m_SignedNumerator.IsZero) {
-                    var p = BigInteger.Abs(value.m_SignedNumerator);
-                    var a = p.GetBitLength();
-                    Debug.Assert(a > 0);
-                    var b = value.m_Denominator.GetBitLength();
-                    Debug.Assert(b > 0);
-                    var c = a - b;
-                    if (c > 1024) {
-                        result = (TOther)(object)(BigInteger.IsNegative(value.m_SignedNumerator) ? double.NegativeInfinity : double.PositiveInfinity);
-                        return true;
-                    }
-                    if (c < -1075) {
-                        result = (TOther)(object)(BigInteger.IsNegative(value.m_SignedNumerator) ? -0.0 : 0.0);
-                        return true;
-                    }
-                    var c0 = (int)c;
-                    var f = ((0 > c0) ?
-                        ((p << -c0) < b) :
-                        ((p >> c0) < b));
-                    c0 -= f ? 1 : 0;
-                    var c1 = c0 - 52;
-                    var (q, r) = 0 > c1 ?
-                        BigInteger.DivRem(p << -c1, value.m_Denominator) :
-                        BigInteger.DivRem(p, value.m_Denominator << c1);
-                    throw new NotImplementedException();
-                    if (c > 1022) {
-
-                    }
-                    result = (TOther)(object)((double)value.Numerator / (double)value.Denominator);
-                    return true;
-                }
-                result = (TOther)(object)0.0D;
+                double actualValue = (double)(object)value;
+                result = FromIeee754InterchangeableBinarySaturating<double, UInt64>(actualValue);
                 return true;
+            } else if (typeof(TOther) == typeof(Half)) {
+                Half actualValue = (Half)(object)value;
+                result = FromIeee754InterchangeableBinarySaturating<Half, UInt16>(actualValue);
+                return true;
+            }
+#if NET11_0_OR_GREATER
+            else if (typeof(TOther) == typeof(BFloat16)) {
+                BFloat16 actualValue = (BFloat16)(object)value;
+                result = FromIeee754InterchangeableBinarySaturating<BFloat16, UInt16>(actualValue);
+                return true;
+            }
+#endif
+            else if (typeof(TOther) == typeof(short)) {
+                short actualValue = (short)(object)value;
+                result = actualValue;
+                return true;
+            } else if (typeof(TOther) == typeof(int)) {
+                int actualValue = (int)(object)value;
+                result = actualValue;
+                return true;
+            } else if (typeof(TOther) == typeof(long)) {
+                long actualValue = (long)(object)value;
+                result = actualValue;
+                return true;
+            } else if (typeof(TOther) == typeof(UltimateOrb.Int128)) {
+                UltimateOrb.Int128 actualValue = (UltimateOrb.Int128)(object)value;
+                result = actualValue;
+                return true;
+            } else if (typeof(TOther) == typeof(System.Int128)) {
+                System.Int128 actualValue = (System.Int128)(object)value;
+                result = actualValue;
+                return true;
+            } else if (typeof(TOther) == typeof(nint)) {
+                nint actualValue = (nint)(object)value;
+                result = actualValue;
+                return true;
+            } else if (typeof(TOther) == typeof(sbyte)) {
+                sbyte actualValue = (sbyte)(object)value;
+                result = actualValue;
+                return true;
+            } else if (typeof(TOther) == typeof(float)) {
+                float actualValue = (float)(object)value;
+                result = FromIeee754InterchangeableBinarySaturating<float, UInt32>(actualValue);
+                return true;
+            } else if (typeof(TOther) == typeof(ushort)) {
+                ushort actualValue = (ushort)(object)value;
+                result = actualValue;
+                return true;
+            } else if (typeof(TOther) == typeof(uint)) {
+                uint actualValue = (uint)(object)value;
+                result = actualValue;
+                return true;
+            } else if (typeof(TOther) == typeof(ulong)) {
+                ulong actualValue = (ulong)(object)value;
+                result = actualValue;
+                return true;
+            } else if (typeof(TOther) == typeof(UltimateOrb.UInt128)) {
+                UltimateOrb.UInt128 actualValue = (UltimateOrb.UInt128)(object)value;
+                result = actualValue;
+                return true;
+            } else if (typeof(TOther) == typeof(System.UInt128)) {
+                System.UInt128 actualValue = (System.UInt128)(object)value;
+                result = actualValue;
+                return true;
+            } else if (typeof(TOther) == typeof(nuint)) {
+                nuint actualValue = (nuint)(object)value;
+                result = actualValue;
+                return true;
+            } else if (typeof(TOther) == typeof(BigInteger)) {
+                BigInteger actualValue = (BigInteger)(object)value;
+                result = actualValue;
+                return true;
+            } else if (typeof(TOther) == typeof(Rational64)) {
+                Rational64 actualValue = (Rational64)(object)value;
+                result = actualValue;
+                return true;
+            } else {
+                result = default;
+                return false;
+            }
+        }
+
+        /// <inheritdoc cref="INumberBase{TSelf}.TryConvertFromTruncating{TOther}(TOther, out TSelf)"/>
+        /// <remarks>
+        /// Notes on conversion from floating-point types:<br/>
+        /// - If <see cref="INumberBase{TSelf}.TryConvertFromChecked{TOther}"/> returns <see langword="true"/>, the method
+        ///   returns <see langword="true"/> and <paramref name="result"/> equals that checked result.<br/>
+        /// - If the source value is not finite, <paramref name="result"/> is set to <c>default(BigRational)</c> (i.e., 0) and the method returns <see langword="true"/>.<br/>
+        /// </remarks>
+        static bool INumberBase<BigRational>.TryConvertFromTruncating<TOther>(TOther value, out BigRational result) {
+            if (typeof(TOther) == typeof(byte)) {
+                byte actualValue = (byte)(object)value;
+                result = actualValue;
+                return true;
+            } else if (typeof(TOther) == typeof(char)) {
+                char actualValue = (char)(object)value;
+                result = actualValue;
+                return true;
+            } else if (typeof(TOther) == typeof(decimal)) {
+                decimal actualValue = (decimal)(object)value;
+                result = (BigRational)actualValue;
+                return true;
+            } else if (typeof(TOther) == typeof(double)) {
+                double actualValue = (double)(object)value;
+                result = FromIeee754InterchangeableBinaryTruncating<double, UInt64>(actualValue);
+                return true;
+            } else if (typeof(TOther) == typeof(Half)) {
+                Half actualValue = (Half)(object)value;
+                result = FromIeee754InterchangeableBinaryTruncating<Half, UInt16>(actualValue);
+                return true;
+            }
+#if NET11_0_OR_GREATER
+            else if (typeof(TOther) == typeof(BFloat16)) {
+                BFloat16 actualValue = (BFloat16)(object)value;
+                result = FromIeee754InterchangeableBinaryTruncating<BFloat16, UInt16>(actualValue);
+                return true;
+            }
+#endif
+            else if (typeof(TOther) == typeof(short)) {
+                short actualValue = (short)(object)value;
+                result = actualValue;
+                return true;
+            } else if (typeof(TOther) == typeof(int)) {
+                int actualValue = (int)(object)value;
+                result = actualValue;
+                return true;
+            } else if (typeof(TOther) == typeof(long)) {
+                long actualValue = (long)(object)value;
+                result = actualValue;
+                return true;
+            } else if (typeof(TOther) == typeof(UltimateOrb.Int128)) {
+                UltimateOrb.Int128 actualValue = (UltimateOrb.Int128)(object)value;
+                result = actualValue;
+                return true;
+            } else if (typeof(TOther) == typeof(System.Int128)) {
+                System.Int128 actualValue = (System.Int128)(object)value;
+                result = actualValue;
+                return true;
+            } else if (typeof(TOther) == typeof(nint)) {
+                nint actualValue = (nint)(object)value;
+                result = actualValue;
+                return true;
+            } else if (typeof(TOther) == typeof(sbyte)) {
+                sbyte actualValue = (sbyte)(object)value;
+                result = actualValue;
+                return true;
+            } else if (typeof(TOther) == typeof(float)) {
+                float actualValue = (float)(object)value;
+                result = FromIeee754InterchangeableBinaryTruncating<float, UInt32>(actualValue);
+                return true;
+            } else if (typeof(TOther) == typeof(ushort)) {
+                ushort actualValue = (ushort)(object)value;
+                result = actualValue;
+                return true;
+            } else if (typeof(TOther) == typeof(uint)) {
+                uint actualValue = (uint)(object)value;
+                result = actualValue;
+                return true;
+            } else if (typeof(TOther) == typeof(ulong)) {
+                ulong actualValue = (ulong)(object)value;
+                result = actualValue;
+                return true;
+            } else if (typeof(TOther) == typeof(UltimateOrb.UInt128)) {
+                UltimateOrb.UInt128 actualValue = (UltimateOrb.UInt128)(object)value;
+                result = actualValue;
+                return true;
+            } else if (typeof(TOther) == typeof(System.UInt128)) {
+                System.UInt128 actualValue = (System.UInt128)(object)value;
+                result = actualValue;
+                return true;
+            } else if (typeof(TOther) == typeof(nuint)) {
+                nuint actualValue = (nuint)(object)value;
+                result = actualValue;
+                return true;
+            } else if (typeof(TOther) == typeof(BigInteger)) {
+                BigInteger actualValue = (BigInteger)(object)value;
+                result = actualValue;
+                return true;
+            } else if (typeof(TOther) == typeof(Rational64)) {
+                Rational64 actualValue = (Rational64)(object)value;
+                result = actualValue;
+                return true;
+            } else {
+                result = default;
+                return false;
+            }
+        }
+        static bool INumberBase<BigRational>.TryConvertToChecked<TOther>(BigRational value, out TOther result) {
+            if (typeof(TOther) == typeof(byte)) {
+                result = (TOther)(object)ToStandardIntegerRoundedTowardZeroChecked<byte>(value);
+                return true;
+            } else if (typeof(TOther) == typeof(char)) {
+                result = (TOther)(object)ToStandardIntegerRoundedTowardZeroChecked<char>(value);
+                return true;
+            } else if (typeof(TOther) == typeof(decimal)) {
+                decimal actualResult =
+                    Abs(value) >= Win32DecimalNoOverflowUpperBoundExclusive ?
+                    (value.Sign >= 0 ? decimal.MaxValue : decimal.MinValue) :
+                    (decimal)value;
+                result = (TOther)(object)actualResult;
+                return true;
+            } else if (typeof(TOther) == typeof(double)) {
+                double actualResult = (double)value;
+                result = (TOther)(object)actualResult;
+                return true;
+            } else if (typeof(TOther) == typeof(Half)) {
+                Half actualResult = (Half)value;
+                result = (TOther)(object)actualResult;
+                return true;
+            }
+#if NET11_0_OR_GREATER
+            else if (typeof(BFloat16) == typeof(BFloat16)) {
+                BFloat16 actualResult = (BFloat16)value;
+                result = (TOther)(object)actualResult;
+                return true;
+            }
+#endif
+            else if (typeof(TOther) == typeof(short)) {
+                result = (TOther)(object)ToStandardIntegerRoundedTowardZeroChecked<short>(value);
+                return true;
+            } else if (typeof(TOther) == typeof(int)) {
+                result = (TOther)(object)ToStandardIntegerRoundedTowardZeroChecked<int>(value);
+                return true;
+            } else if (typeof(TOther) == typeof(long)) {
+                result = (TOther)(object)ToStandardIntegerRoundedTowardZeroChecked<long>(value);
+                return true;
+            } else if (typeof(TOther) == typeof(UltimateOrb.Int128)) {
+                // TODO: Enable when UltimateOrb.Int128 is ready.
+                // result = (TOther)(object)ToStandardIntegerRoundedTowardZeroChecked<UltimateOrb.Int128>(value);
+                result = (TOther)(object)(UltimateOrb.Int128)ToStandardIntegerRoundedTowardZeroChecked<System.Int128>(value);
+                return true;
+            } else if (typeof(TOther) == typeof(System.Int128)) {
+                result = (TOther)(object)ToStandardIntegerRoundedTowardZeroChecked<System.Int128>(value);
+                return true;
+            } else if (typeof(TOther) == typeof(nint)) {
+                result = (TOther)(object)ToStandardIntegerRoundedTowardZeroChecked<nint>(value);
+                return true;
+            } else if (typeof(TOther) == typeof(sbyte)) {
+                result = (TOther)(object)ToStandardIntegerRoundedTowardZeroChecked<sbyte>(value);
+                return true;
+            } else if (typeof(TOther) == typeof(float)) {
+                float actualResult = (float)value;
+                result = (TOther)(object)actualResult;
+                return true;
+            } else if (typeof(TOther) == typeof(ushort)) {
+                result = (TOther)(object)ToStandardIntegerRoundedTowardZeroChecked<ushort>(value);
+                return true;
+            } else if (typeof(TOther) == typeof(uint)) {
+                result = (TOther)(object)ToStandardIntegerRoundedTowardZeroChecked<uint>(value);
+                return true;
+            } else if (typeof(TOther) == typeof(ulong)) {
+                result = (TOther)(object)ToStandardIntegerRoundedTowardZeroChecked<ulong>(value);
+                return true;
+            } else if (typeof(TOther) == typeof(UltimateOrb.UInt128)) {
+                result = (TOther)(object)ToStandardIntegerRoundedTowardZeroChecked<UltimateOrb.UInt128>(value);
+                return true;
+            } else if (typeof(TOther) == typeof(System.UInt128)) {
+                result = (TOther)(object)ToStandardIntegerRoundedTowardZeroChecked<System.UInt128>(value);
+                return true;
+            } else if (typeof(TOther) == typeof(nuint)) {
+                result = (TOther)(object)ToStandardIntegerRoundedTowardZeroChecked<nuint>(value);
+                return true;
+            } else if (typeof(TOther) == typeof(BigInteger)) {
+                BigInteger actualResult = (BigInteger)value;
+                result = (TOther)(object)actualResult;
+                return true;
+            } else if (typeof(TOther) == typeof(Mathematics.Exact.Rational64)) {
+                // TODO: 
+                try {
+                    Mathematics.Exact.Rational64 actualResult = (Mathematics.Exact.Rational64)value;
+                    result = (TOther)(object)actualResult;
+                    return true;
+                } catch (ArithmeticException) {
+                    result = default!;
+                    return false;
+                }
+            } else {
+                result = default!;
+                return false;
+            }
+        }
+
+        internal static BigInteger DivideToBigIntegerInternal(BigInteger signedNumerator, BigInteger denominator) {
+            Debug.Assert(denominator > 0);
+            var isNegative = BigInteger.IsNegative(signedNumerator);
+            var (q, r) = BigInteger.DivRem(signedNumerator, denominator);
+            var ra = BigInteger.Abs(r);
+            var c = BigInteger.Compare(ra << 1, denominator);
+            if (c > 0 || (0 == c && !q.IsEven)) {
+                if (isNegative) {
+                    --q;
+                } else {
+                    ++q;
+                }
+            }
+            return q;
+        }
+
+        /// <summary>
+        /// Rounds the specified value to the nearest integer (ties to even).
+        /// </summary>
+        /// <param name="value">The specified value</param>
+        /// <returns>The rounded result.</returns>
+        /// <remarks>Note: Use <c>(BigRational)value</c> if the truncated result is desired.</remarks>
+        public static BigInteger ToBigInteger(BigRational value) {
+            if (value.m_SignedNumerator.IsZero) {
+                return BigInteger.Zero;
+            }
+            return DivideToBigIntegerInternal(value.m_SignedNumerator, value.m_Denominator);
+        }
+
+        static int CompareValueToHalfOf(BigInteger x, BigInteger y) {
+            return BigInteger.Compare(x << 1, y);
+        }
+
+        /// <summary>
+        /// Rounds the specified value to the nearest integer (ties to even).
+        /// Clamps the result to the range of <typeparamref name="T"/>.
+        /// </summary>
+        /// <param name="value">The specified value</param>
+        /// <returns>The rounded and clamped result.</returns>
+        internal static T ToStandardIntegerSaturating<T>(BigRational value)
+            where T : unmanaged, IBinaryInteger<T> {
+            int bitSize = 8 * Unsafe.SizeOf<T>();
+            bool isSigned = T.IsNegative(T.AllBitsSet);
+            var q = value.m_Denominator;
+            var p = value.m_SignedNumerator;
+            if (p.IsZero) {
+                return T.Zero;
+            }
+            var isNegative = BigInteger.IsNegative(p);
+            if (isSigned) {
+                return T.Zero;
+            }
+            int b;
+            if (isSigned) {
+                b = bitSize - 1;
+            } else {
+                b = bitSize;
+            }
+            p = isNegative ? -p : p;
+            var d = p.GetBitLength() - q.GetBitLength();
+            if (d < 0) {
+                if (d < -1) {
+                    return T.Zero;
+                }
+                if (CompareValueToHalfOf(p, q) > 0) {
+                    if (isSigned) {
+                        return T.One;
+                    } else {
+                        return isNegative ? -T.One : T.One;
+                    }
+                }
+                return T.Zero;
+            } else if (d >= b) {
+                // Example: d == 4
+                // 1000000000
+                //  ÷  111111 = (rounded)  1000
+                // 1111111111
+                //  ÷  100000 = (rounded) 10000
+                if (d > b || p >= q << b) {
+                    if (isSigned) {
+                        return isNegative ? ~(T.AllBitsSet >>> 1) : T.AllBitsSet >>> 1;
+                    } else {
+                        return T.AllBitsSet;
+                    }
+                }
+            }
+            return T.CreateSaturating(DivideToBigIntegerInternal(value.m_SignedNumerator, value.m_Denominator));
+        }
+
+        internal static T ToStandardIntegerRoundedTowardZeroSaturating<T>(BigRational value)
+            where T : unmanaged, IBinaryInteger<T> {
+            int bitSize = 8 * Unsafe.SizeOf<T>();
+            bool isSigned = T.IsNegative(T.AllBitsSet);
+            var q = value.m_Denominator;
+            var p = value.m_SignedNumerator;
+            if (p.IsZero) {
+                return T.Zero;
+            }
+            var isNegative = BigInteger.IsNegative(p);
+            if (isSigned) {
+                return T.Zero;
+            }
+            int b;
+            if (isSigned) {
+                b = bitSize - 1;
+            } else {
+                b = bitSize;
+            }
+            p = isNegative ? -p : p;
+            if (p < q) {
+                return T.Zero;
+            }
+            var d = p.GetBitLength() - q.GetBitLength();
+            if (d >= b) {
+                // Example: d == 4
+                // 1000000000
+                //  ÷  111111 = (rounded)  1000
+                // 1111111111
+                //  ÷  100000 = (rounded) 10000
+                if (d > b || p >= q << b) {
+                    if (isSigned) {
+                        return isNegative ? ~(T.AllBitsSet >>> 1) : T.AllBitsSet >>> 1;
+                    } else {
+                        return T.AllBitsSet;
+                    }
+                }
+            }
+            return T.CreateSaturating(value.m_SignedNumerator / value.m_Denominator);
+        }
+
+        internal static T ToStandardIntegerRoundedTowardZeroChecked<T>(BigRational value)
+           where T : unmanaged, IBinaryInteger<T> {
+            int bitSize = 8 * Unsafe.SizeOf<T>();
+            bool isSigned = T.IsNegative(T.AllBitsSet);
+            var q = value.m_Denominator;
+            var p = value.m_SignedNumerator;
+            if (p.IsZero) {
+                return T.Zero;
+            }
+            var isNegative = BigInteger.IsNegative(p);
+            if (isSigned) {
+                return T.Zero;
+            }
+            int b;
+            if (isSigned) {
+                b = bitSize - 1;
+            } else {
+                b = bitSize;
+            }
+            p = isNegative ? -p : p;
+            if (p < q) {
+                return T.Zero;
+            }
+            var d = p.GetBitLength() - q.GetBitLength();
+            if (d >= b) {
+                // Example: d == 4
+                // 1000000000
+                //  ÷  111111 = (rounded)  1000
+                // 1111111111
+                //  ÷  100000 = (rounded) 10000
+                if (d > b || p >= q << b) {
+                    if (isSigned) {
+                        return isNegative ? ~(T.AllBitsSet >>> 1) : T.AllBitsSet >>> 1;
+                    } else {
+                        return T.AllBitsSet;
+                    }
+                }
+            }
+            return T.CreateChecked(value.m_SignedNumerator / value.m_Denominator);
+        }
+
+        static class BigIntegerTruncateModule<T>
+            where T : unmanaged, IBinaryInteger<T> {
+
+            internal static int BitSize => 8 * Unsafe.SizeOf<T>();
+
+            internal static readonly bool IsSigned = T.IsNegative(T.AllBitsSet);
+
+            internal static readonly BigInteger ModulusMinusOne = (BigInteger.One << BitSize) - 1;
+
+            internal static readonly BigInteger NegativeHalfModulus = BigInteger.MinusOne << (BitSize - 1);
+
+            internal static BigInteger Truncate(BigInteger value) {
+                if (IsSigned) {
+                    return BigInteger.IsNegative(value) ? NegativeHalfModulus | value : ModulusMinusOne & value;
+                } else {
+                    return ModulusMinusOne & value;
+                }
+            }
+
+            internal static void EnsureInitialized() {
+                _ = IsSigned;
+            }
+        }
+
+        [ModuleInitializer]
+        internal static void BigIntegerTruncateModule_Init() {
+            BigIntegerTruncateModule<byte>.EnsureInitialized();
+            BigIntegerTruncateModule<sbyte>.EnsureInitialized();
+            BigIntegerTruncateModule<short>.EnsureInitialized();
+            BigIntegerTruncateModule<ushort>.EnsureInitialized();
+            BigIntegerTruncateModule<char>.EnsureInitialized();
+            BigIntegerTruncateModule<int>.EnsureInitialized();
+            BigIntegerTruncateModule<uint>.EnsureInitialized();
+            BigIntegerTruncateModule<nint>.EnsureInitialized();
+            BigIntegerTruncateModule<nuint>.EnsureInitialized();
+            BigIntegerTruncateModule<long>.EnsureInitialized();
+            BigIntegerTruncateModule<ulong>.EnsureInitialized();
+            // TODO: Enable when UltimateOrb.Int128 is ready.
+            // BigIntegerTruncateModule<UltimateOrb.Int128>.EnsureInitialized();
+            BigIntegerTruncateModule<UltimateOrb.UInt128>.EnsureInitialized();
+            BigIntegerTruncateModule<System.Int128>.EnsureInitialized();
+            BigIntegerTruncateModule<System.UInt128>.EnsureInitialized();
+        }
+
+        static class BigIntegerTruncateModule<T, TUInt>
+            where T : unmanaged, IBinaryInteger<T>
+            where TUInt : unmanaged, IBinaryInteger<TUInt>, IUnsignedNumber<TUInt> {
+
+            internal static int BitSize => 8 * Unsafe.SizeOf<T>();
+
+            internal static readonly BigInteger ModulusMinusOne = (BigInteger.One << BitSize) - 1;
+
+            internal static T FromBigIntegerTruncating(BigInteger value) {
+                return T.CreateTruncating(TUInt.CreateTruncating(BigIntegerTruncateModule<TUInt>.ModulusMinusOne & value));
+            }
+
+            internal static void EnsureInitialized() {
+                if (8 * Unsafe.SizeOf<TUInt>() != BitSize) {
+                    throw new InvalidOperationException();
+                }
+                BigIntegerTruncateModule<TUInt>.EnsureInitialized();
+            }
+        }
+
+        [ModuleInitializer]
+        internal static void BigIntegerTruncateModule2_Init() {
+            BigIntegerTruncateModule<byte, byte>.EnsureInitialized();
+            BigIntegerTruncateModule<sbyte, byte>.EnsureInitialized();
+            BigIntegerTruncateModule<short, ushort>.EnsureInitialized();
+            BigIntegerTruncateModule<ushort, ushort>.EnsureInitialized();
+            BigIntegerTruncateModule<char, ushort>.EnsureInitialized();
+            BigIntegerTruncateModule<int, uint>.EnsureInitialized();
+            BigIntegerTruncateModule<uint, uint>.EnsureInitialized();
+            BigIntegerTruncateModule<nint, nuint>.EnsureInitialized();
+            BigIntegerTruncateModule<nuint, nuint>.EnsureInitialized();
+            BigIntegerTruncateModule<long, ulong>.EnsureInitialized();
+            BigIntegerTruncateModule<ulong, ulong>.EnsureInitialized();
+            // TODO: Enable when UltimateOrb.Int128 is ready.
+            // BigIntegerTruncateModule<UltimateOrb.Int128, UltimateOrb.UInt128>.EnsureInitialized();
+            BigIntegerTruncateModule<UltimateOrb.UInt128, UltimateOrb.UInt128>.EnsureInitialized();
+            BigIntegerTruncateModule<System.Int128, System.UInt128>.EnsureInitialized();
+            BigIntegerTruncateModule<System.UInt128, System.UInt128>.EnsureInitialized();
+        }
+
+        internal static T ToStandardIntegerTruncating<T>(BigRational value)
+            where T : unmanaged, IBinaryInteger<T> {
+            var r = ToBigInteger(value);
+            return T.CreateTruncating(BigIntegerTruncateModule<T>.Truncate(r));
+        }
+
+        internal static T ToStandardIntegerRoundedTowardZeroTruncating<T>(BigRational value)
+            where T : unmanaged, IBinaryInteger<T> {
+            var r = (BigInteger)value;
+            return T.CreateTruncating(BigIntegerTruncateModule<T>.Truncate(r));
+        }
+
+        internal static T ToStandardIntegerRoundedTowardZeroTruncating<T, TUInt>(BigRational value)
+            where T : unmanaged, IBinaryInteger<T>
+            where TUInt : unmanaged, IBinaryInteger<TUInt>, IUnsignedNumber<TUInt> {
+            var r = (BigInteger)value;
+            return BigIntegerTruncateModule<T, TUInt>.FromBigIntegerTruncating(r);
+        }
+
+        public static BigRational OneHalf => new BigRational(BigInteger.Two, signedNumerator: BigInteger.One);
+
+        static readonly BigRational Win32DecimalNoOverflowUpperBoundExclusive
+            = (BigInteger)decimal.MaxValue + OneHalf;
+
+        static bool INumberBase<BigRational>.TryConvertToSaturating<TOther>(BigRational value, out TOther result) {
+            if (typeof(TOther) == typeof(byte)) {
+                result = (TOther)(object)ToStandardIntegerRoundedTowardZeroSaturating<byte>(value);
+                return true;
+            } else if (typeof(TOther) == typeof(char)) {
+                result = (TOther)(object)ToStandardIntegerRoundedTowardZeroSaturating<char>(value);
+                return true;
+            } else if (typeof(TOther) == typeof(decimal)) {
+                decimal actualResult =
+                    Abs(value) >= Win32DecimalNoOverflowUpperBoundExclusive ?
+                    (value.Sign >= 0 ? decimal.MaxValue : decimal.MinValue) :
+                    (decimal)value;
+                result = (TOther)(object)actualResult;
+                return true;
+            } else if (typeof(TOther) == typeof(double)) {
+                double actualResult = (double)value;
+                result = (TOther)(object)actualResult;
+                return true;
+            } else if (typeof(TOther) == typeof(Half)) {
+                Half actualResult = (Half)value;
+                result = (TOther)(object)actualResult;
+                return true;
+            }
+#if NET11_0_OR_GREATER
+            else if (typeof(BFloat16) == typeof(BFloat16)) {
+                BFloat16 actualResult = (BFloat16)value;
+                result = (TOther)(object)actualResult;
+                return true;
+            }
+#endif
+            else if (typeof(TOther) == typeof(short)) {
+                result = (TOther)(object)ToStandardIntegerRoundedTowardZeroSaturating<short>(value);
+                return true;
+            } else if (typeof(TOther) == typeof(int)) {
+                result = (TOther)(object)ToStandardIntegerRoundedTowardZeroSaturating<int>(value);
+                return true;
+            } else if (typeof(TOther) == typeof(long)) {
+                result = (TOther)(object)ToStandardIntegerRoundedTowardZeroSaturating<long>(value);
+                return true;
+            } else if (typeof(TOther) == typeof(UltimateOrb.Int128)) {
+                // TODO: Enable when UltimateOrb.Int128 is ready.
+                // result = (TOther)(object)ToStandardIntegerRoundedTowardZeroSaturating<UltimateOrb.Int128>(value);
+                result = (TOther)(object)(UltimateOrb.Int128)ToStandardIntegerRoundedTowardZeroSaturating<System.Int128>(value);
+                return true;
+            } else if (typeof(TOther) == typeof(System.Int128)) {
+                result = (TOther)(object)ToStandardIntegerRoundedTowardZeroSaturating<System.Int128>(value);
+                return true;
+            } else if (typeof(TOther) == typeof(nint)) {
+                result = (TOther)(object)ToStandardIntegerRoundedTowardZeroSaturating<nint>(value);
+                return true;
+            } else if (typeof(TOther) == typeof(sbyte)) {
+                result = (TOther)(object)ToStandardIntegerRoundedTowardZeroSaturating<sbyte>(value);
+                return true;
+            } else if (typeof(TOther) == typeof(float)) {
+                float actualResult = (float)value;
+                result = (TOther)(object)actualResult;
+                return true;
+            } else if (typeof(TOther) == typeof(ushort)) {
+                result = (TOther)(object)ToStandardIntegerRoundedTowardZeroSaturating<ushort>(value);
+                return true;
+            } else if (typeof(TOther) == typeof(uint)) {
+                result = (TOther)(object)ToStandardIntegerRoundedTowardZeroSaturating<uint>(value);
+                return true;
+            } else if (typeof(TOther) == typeof(ulong)) {
+                result = (TOther)(object)ToStandardIntegerRoundedTowardZeroSaturating<ulong>(value);
+                return true;
+            } else if (typeof(TOther) == typeof(UltimateOrb.UInt128)) {
+                result = (TOther)(object)ToStandardIntegerRoundedTowardZeroSaturating<UltimateOrb.UInt128>(value);
+                return true;
+            } else if (typeof(TOther) == typeof(System.UInt128)) {
+                result = (TOther)(object)ToStandardIntegerRoundedTowardZeroSaturating<System.UInt128>(value);
+                return true;
+            } else if (typeof(TOther) == typeof(nuint)) {
+                result = (TOther)(object)ToStandardIntegerRoundedTowardZeroSaturating<nuint>(value);
+                return true;
+            } else if (typeof(TOther) == typeof(BigInteger)) {
+                BigInteger actualResult = (BigInteger)value;
+                result = (TOther)(object)actualResult;
+                return true;
+            } else if (typeof(TOther) == typeof(Mathematics.Exact.Rational64)) {
+                // TODO: 
+                throw new NotImplementedException();
+            } else {
+                result = default!;
+                return false;
+            }
+        }
+
+        static bool INumberBase<BigRational>.TryConvertToTruncating<TOther>(BigRational value, out TOther result) {
+            if (typeof(TOther) == typeof(byte)) {
+                result = (TOther)(object)ToStandardIntegerRoundedTowardZeroTruncating<byte, byte>(value);
+                return true;
+            } else if (typeof(TOther) == typeof(char)) {
+                result = (TOther)(object)ToStandardIntegerRoundedTowardZeroTruncating<char, ushort>(value);
+                return true;
+            } else if (typeof(TOther) == typeof(decimal)) {
+                decimal actualResult =
+                    Abs(value) >= Win32DecimalNoOverflowUpperBoundExclusive ?
+                    (value.Sign >= 0 ? // rounded lower 96 bits
+                        (decimal)(ToStandardIntegerTruncating<UInt128>(value) << 32 >> 32) :
+                        -(decimal)(ToStandardIntegerTruncating<UInt128>(-value) << 32 >> 32)) :
+                    (decimal)value;
+                result = (TOther)(object)actualResult;
+                return true;
+            } else if (typeof(TOther) == typeof(double)) {
+                double actualResult = (double)value;
+                result = (TOther)(object)actualResult;
+                return true;
+            } else if (typeof(TOther) == typeof(Half)) {
+                Half actualResult = (Half)value;
+                result = (TOther)(object)actualResult;
+                return true;
+            }
+#if NET11_0_OR_GREATER
+            else if (typeof(BFloat16) == typeof(BFloat16)) {
+                BFloat16 actualResult = (BFloat16)value;
+                result = (TOther)(object)actualResult;
+                return true;
+            }
+#endif
+            else if (typeof(TOther) == typeof(short)) {
+                result = (TOther)(object)ToStandardIntegerRoundedTowardZeroTruncating<short, ushort>(value);
+                return true;
+            } else if (typeof(TOther) == typeof(int)) {
+                result = (TOther)(object)ToStandardIntegerRoundedTowardZeroTruncating<int, uint>(value);
+                return true;
+            } else if (typeof(TOther) == typeof(long)) {
+                result = (TOther)(object)ToStandardIntegerRoundedTowardZeroTruncating<long, ulong>(value);
+                return true;
+            } else if (typeof(TOther) == typeof(UltimateOrb.Int128)) {
+                // TODO: Enable when UltimateOrb.Int128 is ready.
+                // result = (TOther)(object)ToStandardIntegerRoundedTowardZeroTruncating<UltimateOrb.Int128, UltimateOrb.UInt128>(value);
+                result = (TOther)(object)(UltimateOrb.Int128)ToStandardIntegerRoundedTowardZeroTruncating<System.Int128, System.UInt128>(value);
+                return true;
+            } else if (typeof(TOther) == typeof(System.Int128)) {
+                result = (TOther)(object)ToStandardIntegerRoundedTowardZeroTruncating<System.Int128, System.UInt128>(value);
+                return true;
+            } else if (typeof(TOther) == typeof(nint)) {
+                result = (TOther)(object)ToStandardIntegerRoundedTowardZeroTruncating<nint, nuint>(value);
+                return true;
+            } else if (typeof(TOther) == typeof(sbyte)) {
+                result = (TOther)(object)ToStandardIntegerRoundedTowardZeroTruncating<sbyte, byte>(value);
+                return true;
+            } else if (typeof(TOther) == typeof(float)) {
+                float actualResult = (float)value;
+                result = (TOther)(object)actualResult;
+                return true;
+            } else if (typeof(TOther) == typeof(ushort)) {
+                result = (TOther)(object)ToStandardIntegerRoundedTowardZeroTruncating<ushort, ushort>(value);
+                return true;
+            } else if (typeof(TOther) == typeof(uint)) {
+                result = (TOther)(object)ToStandardIntegerRoundedTowardZeroTruncating<uint, uint>(value);
+                return true;
+            } else if (typeof(TOther) == typeof(ulong)) {
+                result = (TOther)(object)ToStandardIntegerRoundedTowardZeroTruncating<ulong, ulong>(value);
+                return true;
+            } else if (typeof(TOther) == typeof(UltimateOrb.UInt128)) {
+                result = (TOther)(object)ToStandardIntegerRoundedTowardZeroTruncating<UltimateOrb.UInt128, UltimateOrb.UInt128>(value);
+                return true;
+            } else if (typeof(TOther) == typeof(System.UInt128)) {
+                result = (TOther)(object)ToStandardIntegerRoundedTowardZeroTruncating<System.UInt128, System.UInt128>(value);
+                return true;
+            } else if (typeof(TOther) == typeof(nuint)) {
+                result = (TOther)(object)ToStandardIntegerRoundedTowardZeroTruncating<nuint, nuint>(value);
+                return true;
+            } else if (typeof(TOther) == typeof(BigInteger)) {
+                BigInteger actualResult = (BigInteger)value;
+                result = (TOther)(object)actualResult;
+                return true;
+            } else if (typeof(TOther) == typeof(Mathematics.Exact.Rational64)) {
+                // TODO: 
+                throw new NotImplementedException();
             } else {
                 result = default!;
                 return false;
@@ -1667,6 +2644,7 @@ namespace UltimateOrb.Numerics {
             return (Double)value;
         }
 
+        [Obsolete]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Double ToDoubleEstimate(this BigRational value) {
             if (value.m_SignedNumerator.IsZero) {
@@ -1730,8 +2708,7 @@ namespace UltimateOrb.Numerics {
         }
 
         string IConvertible.ToString(IFormatProvider? provider) {
-            // TODO:
-            return ToString();
+            return ToString(provider);
         }
 
         object IConvertible.ToType(Type conversionType, IFormatProvider? provider) {

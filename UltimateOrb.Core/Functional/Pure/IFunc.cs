@@ -16,7 +16,7 @@ namespace UltimateOrb.Functional.Pure {
 
     public partial interface IFunc<in T1, in T2, out TResult> : IO.IFunc<T1, T2, TResult> {
 
-        // TResult Invoke(T1 arg1, T2 arg2);
+        // TResult Invoke(TBase1 arg1, TBase2 arg2);
     }
 
     public partial interface IPredicate<in T> : IFunc<T, bool> {
@@ -75,7 +75,7 @@ namespace UltimateOrb.Functional.Pure {
         }
 
         /*
-        TResult IFunc<T1, T2, TResult>.Invoke(T1 arg1, T2 arg2) {
+        TResult IFunc<TBase1, TBase2, TResult>.Invoke(TBase1 arg1, TBase2 arg2) {
             return this.Invoke(arg1, arg2);
         }
         */

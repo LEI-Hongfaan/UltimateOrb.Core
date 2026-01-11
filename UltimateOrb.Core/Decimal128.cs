@@ -16,6 +16,7 @@ using UltimateOrb.Numerics;
 using UltimateOrb.Utilities;
 
 namespace UltimateOrb {
+
     public interface ITag { }
 
     public readonly struct Tag<T> : ITag
@@ -25,10 +26,10 @@ namespace UltimateOrb {
 #endif
         {
     }
-
-    public interface IInterfaceDerivedBase<TSelf, TBase>
-        : IInterfaceDerivedBase<TSelf, Tag<TBase>, TSelf, TBase>
-        where TSelf : IInterfaceDerivedBase<TSelf, TBase>?
+    
+    public interface IInterfaceDerivedSelfBase<TSelf, TBase>
+        : IInterfaceDerivedBase<TSelf, Tag<TSelf>, TSelf, TBase>
+        where TSelf : IInterfaceDerivedSelfBase<TSelf, TBase>?
 #if !NET9_0_OR_GREATER
 #else
         , allows ref struct
@@ -36,9 +37,9 @@ namespace UltimateOrb {
 #endif
         {
 
-        static TSelf? IInterfaceDerivedBase<TSelf, Tag<TBase>, TSelf, TBase>.FromBase(TBase? value) => TSelf.FromBase(value);
+        static TSelf? IInterfaceDerivedBase<TSelf, Tag<TSelf>, TSelf, TBase>.FromBase(TBase? value) => TSelf.FromBase(value);
 
-        static TBase? IInterfaceDerivedBase<TSelf, Tag<TBase>, TSelf, TBase>.ToBase(TSelf? value) => TSelf.ToBase(value);
+        static TBase? IInterfaceDerivedBase<TSelf, Tag<TSelf>, TSelf, TBase>.ToBase(TSelf? value) => TSelf.ToBase(value);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         [return: NotNullIfNotNull(nameof(value))]
@@ -49,9 +50,9 @@ namespace UltimateOrb {
         protected static abstract new TBase? ToBase(TSelf? value);
     }
 
-    public interface IInterfaceDerivedBaseFriend<TSelf, TBase>
-        : IInterfaceDerivedBase<TSelf, TBase>
-        where TSelf : IInterfaceDerivedBase<TSelf, TBase>?
+    public interface IInterfaceDerivedSelfBaseFriend<TSelf, TBase>
+        : IInterfaceDerivedSelfBase<TSelf, TBase>
+        where TSelf : IInterfaceDerivedSelfBase<TSelf, TBase>?
 #if !NET9_0_OR_GREATER
 #else
         , allows ref struct
@@ -104,7 +105,11 @@ namespace UltimateOrb {
 #if !NET9_0_OR_GREATER
 #else
         , allows ref struct
-        where Tag : struct, ITag, allows ref struct
+#endif
+        where Tag : struct, ITag
+#if !NET9_0_OR_GREATER
+#else
+        , allows ref struct
         where TDerived : allows ref struct
         where TBase : allows ref struct
 #endif
@@ -125,7 +130,11 @@ namespace UltimateOrb {
 #if !NET9_0_OR_GREATER
 #else
         , allows ref struct
-        where Tag : struct, ITag, allows ref struct
+#endif
+        where Tag : struct, ITag
+#if !NET9_0_OR_GREATER
+#else
+        , allows ref struct
         where TDerived : allows ref struct
         where TBase : allows ref struct
 #endif
@@ -150,8 +159,297 @@ namespace UltimateOrb {
         }
     }
 
+    [StructLayout(LayoutKind.Sequential)]
+    internal readonly
+#if !NET9_0_OR_GREATER
+#else
+       ref
+#endif
+       struct SequentialLayoutValueTuple<T1>
+#if !NET9_0_OR_GREATER
+#else
+       where T1 : allows ref struct
+#endif
+       {
+        public readonly T1 Item1;
+
+        public SequentialLayoutValueTuple(T1 item1) {
+            Item1 = item1;
+        }
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    internal readonly
+#if !NET9_0_OR_GREATER
+# else
+        ref
+#endif
+        struct SequentialLayoutValueTuple<T1, T2>
+#if !NET9_0_OR_GREATER
+#else
+        where T1 : allows ref struct
+        where T2 : allows ref struct
+#endif 
+        {
+        public readonly T1 Item1;
+        public readonly T2 Item2;
+
+        public SequentialLayoutValueTuple(T1 item1, T2 item2) {
+            Item1 = item1;
+            Item2 = item2;
+        }
+    }
+
+    public interface IInterfaceDerivedSelfBase<TSelf, TBase1, TBase2> : IInterfaceDerivedBase<TSelf, Tag<TSelf>, TSelf, TBase1, TBase2>
+        where TSelf : IInterfaceDerivedSelfBase<TSelf, TBase1, TBase2>?
+#if !NET9_0_OR_GREATER
+#else
+        , allows ref struct
+        where TBase1 : allows ref struct
+        where TBase2 : allows ref struct
+#endif
+        {
+
+        static TSelf? IInterfaceDerivedBase<TSelf, Tag<TSelf>, TSelf, TBase1, TBase2>.FromBase(TBase1? value1, TBase2? value2) => TSelf.FromBase(value1, value2);
+
+        static TBase1? IInterfaceDerivedBase<TSelf, Tag<TSelf>, TSelf, TBase1, TBase2>.ToBase1(TSelf? value) => TSelf.ToBase1(value);
+
+        static TBase2? IInterfaceDerivedBase<TSelf, Tag<TSelf>, TSelf, TBase1, TBase2>.ToBase2(TSelf? value) => TSelf.ToBase2(value);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [return: NotNullIfNotNull(nameof(value1))]
+        [return: NotNullIfNotNull(nameof(value2))]
+        protected static abstract new TSelf? FromBase(TBase1? value1, TBase2? value2);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [return: NotNullIfNotNull(nameof(value))]
+        protected static abstract new TBase1? ToBase1(TSelf? value);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [return: NotNullIfNotNull(nameof(value))]
+        protected static abstract new TBase2? ToBase2(TSelf? value);
+    }
+
+    public interface IInterfaceDerivedSelfBaseFriend<TSelf, TBase1, TBase2>
+        : IInterfaceDerivedSelfBase<TSelf, TBase1, TBase2>
+        where TSelf : IInterfaceDerivedSelfBase<TSelf, TBase1, TBase2>?
+#if !NET9_0_OR_GREATER
+#else
+        , allows ref struct
+        where TBase1 : allows ref struct
+        where TBase2 : allows ref struct
+#endif
+        {
+
+        /// <summary>
+        /// Converts the specified value to <typeparamref name="TSelf"/>.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [return: NotNullIfNotNull(nameof(value1))]
+        [return: NotNullIfNotNull(nameof(value2))]
+        public static new TSelf? FromBase(TBase1? value1, TBase2? value2) {
+            return TSelf.FromBase(value1, value2);
+        }
+
+        /// <summary>
+        /// Converts the specified value to <typeparamref name="TBase1"/>.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [return: NotNullIfNotNull(nameof(value))]
+        public static new TBase1? ToBase1(TSelf? value) {
+            return TSelf.ToBase1(value);
+        }
+
+        /// <summary>
+        /// Converts the specified value to <typeparamref name="TBase2"/>.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [return: NotNullIfNotNull(nameof(value))]
+        public static new TBase2? ToBase2(TSelf? value) {
+            return TSelf.ToBase2(value);
+        }
+    }
+
+    public static partial class InterfaceDerivedDefault<TDerived, TBase1, TBase2>
+#if !NET9_0_OR_GREATER
+#else
+        where TDerived : allows ref struct
+        where TBase1 : allows ref struct
+        where TBase2 : allows ref struct
+#endif
+        {
+
+        /*
+        [StructLayout(LayoutKind.Explicit)]
+        readonly
+#if !NET9_0_OR_GREATER
+# else
+            ref
+#endif
+            struct U {
+
+            [FieldOffset(0)]
+            public readonly SequentialLayoutValueTuple<TDerived> Item1;
+
+            [FieldOffset(0)]
+            public readonly SequentialLayoutValueTuple<TBase1, TBase2> Item2;
+        }
+
+        [StructLayout(LayoutKind.Explicit)]
+        readonly
+#if !NET9_0_OR_GREATER
+# else
+            ref
+#endif
+            struct U1 {
+
+            [FieldOffset(0)]
+            public readonly SequentialLayoutValueTuple<TDerived, byte>  Item1;
+
+            [FieldOffset(0)]
+            public readonly SequentialLayoutValueTuple<SequentialLayoutValueTuple<TBase1, TBase2>, byte> Item2;
+        }
+
+        static class aaaa {
+
+            internal static readonly bool ggg = Check();
+
+            private static bool Check() {
+                U1 u1 = default;
+                ref var b = ref Unsafe.As<U1, byte>(ref u1); 
+                if (Unsafe.ByteOffset(ref b, ref Unsafe.AsRef(in u1.Item1.Item2)) !=
+                    Unsafe.ByteOffset(ref b, ref Unsafe.AsRef(in u1.Item2.Item2))) {
+                    throw new InvalidOperationException();
+                }
+                return true;
+            }
+        }
+        */
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [return: NotNullIfNotNull(nameof(value1))]
+        [return: NotNullIfNotNull(nameof(value2))]
+        public static TDerived? FromBase(TBase1? value1, TBase2? value2) {
+            /*
+            if (aaaa.ggg) {
+                var t = new SequentialLayoutValueTuple<TBase1?, TBase2?>(value1, value2);
+                return Unsafe.As<SequentialLayoutValueTuple<TBase1?, TBase2?>, U>(ref t).Item1.Item1;
+            }
+            throw new InvalidOperationException();
+            */
+            var t = new SequentialLayoutValueTuple<TBase1?, TBase2?>(value1, value2);
+            return Unsafe.BitCast<SequentialLayoutValueTuple<TBase1?, TBase2?>, SequentialLayoutValueTuple<TDerived?>>(t).Item1;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [return: NotNullIfNotNull(nameof(value))]
+        public static TBase1? ToBase1(TDerived? value) {
+            /*
+            if (aaaa.ggg) {
+                return Unsafe.As<TDerived?, U>(ref value).Item2.Item1;
+            }
+            throw new InvalidOperationException();
+            */
+            var t = new SequentialLayoutValueTuple<TDerived?>(value);
+            return Unsafe.BitCast< SequentialLayoutValueTuple<TDerived?>, SequentialLayoutValueTuple<TBase1?, TBase2?>>(t).Item1;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [return: NotNullIfNotNull(nameof(value))]
+        public static TBase2? ToBase2(TDerived? value) {
+            /*
+            if (aaaa.ggg) {
+                return Unsafe.As<TDerived?, U>(ref value).Item2.Item2;
+            }
+            throw new InvalidOperationException();
+            */
+            var t = new SequentialLayoutValueTuple<TDerived?>(value);
+            return Unsafe.BitCast<SequentialLayoutValueTuple<TDerived?>, SequentialLayoutValueTuple<TBase1?, TBase2?>>(t).Item2;
+        }
+    }
+
+    public interface IInterfaceDerivedBase<TSelf, Tag, TDerived, TBase1, TBase2>
+        where TSelf : IInterfaceDerivedBase<TSelf, Tag, TDerived, TBase1, TBase2>?
+#if !NET9_0_OR_GREATER
+#else
+        , allows ref struct
+#endif
+        where Tag : struct, ITag
+#if !NET9_0_OR_GREATER
+#else
+        , allows ref struct
+        where TDerived : allows ref struct
+        where TBase1 : allows ref struct
+        where TBase2 : allows ref struct
+#endif
+        {
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [return: NotNullIfNotNull(nameof(value1))]
+        [return: NotNullIfNotNull(nameof(value2))]
+        protected static virtual TDerived? FromBase(TBase1? value1, TBase2? value2) => InterfaceDerivedDefault<TDerived, TBase1, TBase2>.FromBase(value1, value2);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [return: NotNullIfNotNull(nameof(value))]
+        protected static virtual TBase1? ToBase1(TDerived? value) => InterfaceDerivedDefault<TDerived, TBase1, TBase2>.ToBase1(value);
+       
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [return: NotNullIfNotNull(nameof(value))]
+        protected static virtual TBase2? ToBase2(TDerived? value) => InterfaceDerivedDefault<TDerived, TBase1, TBase2>.ToBase2(value);
+    }
+
+    public interface IInterfaceDerivedBaseFriend<TSelf, Tag, TDerived, TBase1, TBase2>
+        : IInterfaceDerivedBase<TSelf, Tag, TDerived, TBase1, TBase2>
+        where TSelf : IInterfaceDerivedBase<TSelf, Tag, TDerived, TBase1, TBase2>?
+#if !NET9_0_OR_GREATER
+#else
+        , allows ref struct
+#endif
+        where Tag : struct, ITag
+#if !NET9_0_OR_GREATER
+#else
+        , allows ref struct
+        where TDerived : allows ref struct
+        where TBase1 : allows ref struct
+        where TBase2 : allows ref struct
+#endif
+        {
+
+        /// <summary>
+        /// Converts the specified value to <typeparamref name="TSelf"/>.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [return: NotNullIfNotNull(nameof(value1))]
+        [return: NotNullIfNotNull(nameof(value2))]
+        public static new TDerived? FromBase(TBase1? value1, TBase2? value2) {
+            return TSelf.FromBase(value1, value2);
+        }
+
+        /// <summary>
+        /// Converts the specified value to <typeparamref name="TBase1"/>.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [return: NotNullIfNotNull(nameof(value))]
+        public static new TBase1? ToBase1(TDerived? value) {
+            return TSelf.ToBase1(value);
+        }
+
+        /// <summary>
+        /// Converts the specified value to <typeparamref name="TBase2"/>.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [return: NotNullIfNotNull(nameof(value))]
+        public static new TBase2? ToBase2(TDerived? value) {
+            return TSelf.ToBase2(value);
+        }
+    }
+
+}
+
+namespace UltimateOrb {
+
     public interface IComparableNongenericDerived<TSelf, TBase>
-            : IComparable, IInterfaceDerivedBase<TSelf, TBase>
+            : IComparable, IInterfaceDerivedSelfBase<TSelf, TBase>
             where TSelf : IComparableNongenericDerived<TSelf, TBase>?
             where TBase : IComparable? {
 
@@ -169,7 +467,7 @@ namespace UltimateOrb {
 
     [CLSCompliant(false)]
     public interface IConvertibleNongenericDerived<TSelf, TBase>
-        : IConvertible, IInterfaceDerivedBase<TSelf, TBase>
+        : IConvertible, IInterfaceDerivedSelfBase<TSelf, TBase>
         where TSelf : IConvertibleNongenericDerived<TSelf, TBase>?
         where TBase : IConvertible? {
 
@@ -220,7 +518,7 @@ namespace UltimateOrb {
     }
 
     public interface IComparableDerived<TSelf, TBase>
-        : IComparable<TSelf>, IInterfaceDerivedBase<TSelf, TBase>
+        : IComparable<TSelf>, IInterfaceDerivedSelfBase<TSelf, TBase>
         where TSelf : IComparableDerived<TSelf, TBase>?
         where TBase : IComparable<TBase>? {
 
@@ -228,15 +526,18 @@ namespace UltimateOrb {
     }
 
     public interface IEquatableDerived<TSelf, TBase>
-        : IEquatable<TSelf>, IInterfaceDerivedBase<TSelf, TBase>
+        : IEquatable<TSelf>, IInterfaceDerivedSelfBase<TSelf, TBase>
         where TSelf : IEquatableDerived<TSelf, TBase>?
         where TBase : IEquatable<TBase>? {
 
         bool IEquatable<TSelf>.Equals(TSelf? other) => TSelf.ToBase((TSelf)(object)this).Equals(TSelf.ToBase(other));
     }
+}
+
+namespace UltimateOrb.Numerics {
 
     public interface IMinMaxValueDerived<TSelf, TBase>
-        : IMinMaxValue<TSelf>, IInterfaceDerivedBase<TSelf, TBase>
+        : IMinMaxValue<TSelf>, IInterfaceDerivedSelfBase<TSelf, TBase>
         where TSelf : IMinMaxValueDerived<TSelf, TBase>?
         where TBase : IMinMaxValue<TBase>? {
 
@@ -257,7 +558,7 @@ namespace UltimateOrb {
 
     public partial interface INumberBaseDerived<TSelf, TBase>
         : INumberBase<TSelf>
-        , IInterfaceDerivedBase<TSelf, TBase>
+        , IInterfaceDerivedSelfBase<TSelf, TBase>
         , IEquatableDerived<TSelf, TBase>
         , IEqualityOperatorsDerived<TSelf, TBase, TSelf, TBase, bool, bool>
         where TSelf : INumberBaseDerived<TSelf, TBase>?
@@ -269,11 +570,11 @@ namespace UltimateOrb {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         [return: NotNullIfNotNull(nameof(value))]
-        protected static virtual new TSelf? FromBase(TBase? value) => IInterfaceDerivedBaseFriend<TSelf, TBase>.FromBase(value);
+        protected static virtual new TSelf? FromBase(TBase? value) => IInterfaceDerivedSelfBaseFriend<TSelf, TBase>.FromBase(value);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         [return: NotNullIfNotNull(nameof(value))]
-        protected static virtual new TBase? ToBase(TSelf? value) => IInterfaceDerivedBaseFriend<TSelf, TBase>.ToBase(value);
+        protected static virtual new TBase? ToBase(TSelf? value) => IInterfaceDerivedSelfBaseFriend<TSelf, TBase>.ToBase(value);
 
         static TSelf INumberBase<TSelf>.One { get => TSelf.FromBase(TBase.One)!; }
 
@@ -504,7 +805,7 @@ namespace UltimateOrb {
     /// <typeparam name="TResultBase">The source/base type supplying data or behavior that <typeparamref name="TResult"/> adapts or forwards.</typeparam>
     public interface IEqualityOperatorsDerived<TSelf, TBase, TOther, TOtherBase, TResult, TResultBase>
         : IEqualityOperators<TSelf, TOther, TResult>
-        , IInterfaceDerivedBase<TSelf, TBase>
+        , IInterfaceDerivedSelfBase<TSelf, TBase>
         , IInterfaceDerivedBase<TSelf, IEqualityOperatorsDerivedTags.Other, TOther, TOtherBase>
         , IInterfaceDerivedBase<TSelf, IEqualityOperatorsDerivedTags.Result, TResult, TResultBase>
         where TSelf : IEqualityOperatorsDerived<TSelf, TBase, TOther, TOtherBase, TResult, TResultBase>?
@@ -558,7 +859,7 @@ namespace UltimateOrb {
     /// <typeparam name="TResultBase">The source/base type supplying data or behavior that <typeparamref name="TResult"/> adapts or forwards.</typeparam>
     public interface IModulusOperatorsDerived<TSelf, TBase, TOther, TOtherBase, TResult, TResultBase>
         : IModulusOperators<TSelf, TOther, TResult>
-        , IInterfaceDerivedBase<TSelf, TBase>
+        , IInterfaceDerivedSelfBase<TSelf, TBase>
         , IInterfaceDerivedBase<TSelf, IModulusOperatorsDerivedTags.Other, TOther, TOtherBase>
         , IInterfaceDerivedBase<TSelf, IModulusOperatorsDerivedTags.Result, TResult, TResultBase>
         where TSelf : IModulusOperatorsDerived<TSelf, TBase, TOther, TOtherBase, TResult, TResultBase>?
@@ -589,11 +890,11 @@ namespace UltimateOrb {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         [return: NotNullIfNotNull(nameof(value))]
-        protected static virtual new TSelf? FromBase(TBase? value) => IInterfaceDerivedBaseFriend<TSelf, TBase>.FromBase(value);
+        protected static virtual new TSelf? FromBase(TBase? value) => IInterfaceDerivedSelfBaseFriend<TSelf, TBase>.FromBase(value);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         [return: NotNullIfNotNull(nameof(value))]
-        protected static virtual new TBase? ToBase(TSelf? value) => IInterfaceDerivedBaseFriend<TSelf, TBase>.ToBase(value);
+        protected static virtual new TBase? ToBase(TSelf? value) => IInterfaceDerivedSelfBaseFriend<TSelf, TBase>.ToBase(value);
     }
 
     /// <inheritdoc cref="ISignedNumber{TSelf}"/>
@@ -840,6 +1141,9 @@ namespace UltimateOrb {
 
         static int INumberBase<TSelf>.Radix => TBase.Radix;
     }
+}
+
+namespace UltimateOrb {
 
     // Wrapper. Same API shape as Decimal128Bid
     [Experimental("UoWIP")]
@@ -854,9 +1158,9 @@ namespace UltimateOrb {
 
         internal readonly Decimal128Bid value;
 
-        static Decimal128 IInterfaceDerivedBase<Decimal128, Decimal128Bid>.FromBase(Decimal128Bid value) => InterfaceDerivedDefault<Decimal128, Decimal128Bid>.FromBase(value);
+        static Decimal128 IInterfaceDerivedSelfBase<Decimal128, Decimal128Bid>.FromBase(Decimal128Bid value) => InterfaceDerivedDefault<Decimal128, Decimal128Bid>.FromBase(value);
 
-        static Decimal128Bid IInterfaceDerivedBase<Decimal128, Decimal128Bid>.ToBase(Decimal128 value) => InterfaceDerivedDefault<Decimal128, Decimal128Bid>.ToBase(value);
+        static Decimal128Bid IInterfaceDerivedSelfBase<Decimal128, Decimal128Bid>.ToBase(Decimal128 value) => InterfaceDerivedDefault<Decimal128, Decimal128Bid>.ToBase(value);
     }
 
     [Experimental("UoWIP")]
@@ -982,11 +1286,11 @@ namespace UltimateOrb {
 
         internal readonly UInt128 bits;
 
-        static Decimal128Dpd IInterfaceDerivedBase<Decimal128Dpd, Decimal128Bid>.FromBase(Decimal128Bid value) {
+        static Decimal128Dpd IInterfaceDerivedSelfBase<Decimal128Dpd, Decimal128Bid>.FromBase(Decimal128Bid value) {
             return value;
         }
 
-        static Decimal128Bid IInterfaceDerivedBase<Decimal128Dpd, Decimal128Bid>.ToBase(Decimal128Dpd value) {
+        static Decimal128Bid IInterfaceDerivedSelfBase<Decimal128Dpd, Decimal128Bid>.ToBase(Decimal128Dpd value) {
             return value;
         }
 
@@ -2409,12 +2713,12 @@ namespace UltimateOrb {
         }
 
         [return: NotNullIfNotNull(nameof(value))]
-        static Decimal128Bid IInterfaceDerivedBase<Decimal128Bid, BigRational>.FromBase(BigRational value) {
+        static Decimal128Bid IInterfaceDerivedSelfBase<Decimal128Bid, BigRational>.FromBase(BigRational value) {
             return (Decimal128Bid)value;
         }
 
         [return: NotNullIfNotNull(nameof(value))]
-        static BigRational IInterfaceDerivedBase<Decimal128Bid, BigRational>.ToBase(Decimal128Bid value) {
+        static BigRational IInterfaceDerivedSelfBase<Decimal128Bid, BigRational>.ToBase(Decimal128Bid value) {
             return (BigRational)value;
         }
 
@@ -3154,29 +3458,10 @@ namespace UltimateOrb {
     }
 }
 
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses target file to you under the MIT license.
-
-namespace System {
-    internal static partial class Obsoletions {
-        internal const string SharedUrlFormat = "https://aka.ms/dotnet-warnings/{0}";
-
-        // Please see docs\project\list-of-diagnostics.md for instructions on the steps required
-        // to introduce a new obsoletion, apply it to downlevel builds, claim a diagnostic id,
-        // and ensure the "aka.ms/dotnet-warnings/{0}" URL points to documentation for the obsoletion
-        // The diagnostic ids reserved for obsoletions are SYSLIB0### (SYSLIB0001 - SYSLIB0999).
-
-        internal const string LegacyFormatterMessage = "Formatter-based serialization is obsolete and should not be used.";
-        internal const string LegacyFormatterDiagId = "SYSLIB0050";
-
-        internal const string LegacyFormatterImplMessage = "This API supports obsolete formatter-based serialization. It should not be called or extended by application code.";
-        internal const string LegacyFormatterImplDiagId = "SYSLIB0051";
-    }
-}
 namespace UltimateOrb {
 
     public interface ISerializableDerived<TSelf, TBase>
-        : IInterfaceDerivedBase<TSelf, TBase>, ISerializable
+        : IInterfaceDerivedSelfBase<TSelf, TBase>, ISerializable
         where TSelf : ISerializableDerived<TSelf, TBase>?
         where TBase : ISerializable? {
 
@@ -3190,7 +3475,7 @@ namespace UltimateOrb {
     }
 
     public interface IDeserializationCallbackDerived<TSelf, TBase>
-        : IDeserializationCallback, IInterfaceDerivedBase<TSelf, TBase>
+        : IDeserializationCallback, IInterfaceDerivedSelfBase<TSelf, TBase>
         where TSelf : IDeserializationCallbackDerived<TSelf, TBase>?
         where TBase : IDeserializationCallback? {
 
@@ -3236,6 +3521,26 @@ namespace UltimateOrb {
                 */
             }
         }
+    }
+}
+
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses target file to you under the MIT license.
+
+namespace System {
+    internal static partial class Obsoletions {
+        internal const string SharedUrlFormat = "https://aka.ms/dotnet-warnings/{0}";
+
+        // Please see docs\project\list-of-diagnostics.md for instructions on the steps required
+        // to introduce a new obsoletion, apply it to downlevel builds, claim a diagnostic id,
+        // and ensure the "aka.ms/dotnet-warnings/{0}" URL points to documentation for the obsoletion
+        // The diagnostic ids reserved for obsoletions are SYSLIB0### (SYSLIB0001 - SYSLIB0999).
+
+        internal const string LegacyFormatterMessage = "Formatter-based serialization is obsolete and should not be used.";
+        internal const string LegacyFormatterDiagId = "SYSLIB0050";
+
+        internal const string LegacyFormatterImplMessage = "This API supports obsolete formatter-based serialization. It should not be called or extended by application code.";
+        internal const string LegacyFormatterImplDiagId = "SYSLIB0051";
     }
 }
 

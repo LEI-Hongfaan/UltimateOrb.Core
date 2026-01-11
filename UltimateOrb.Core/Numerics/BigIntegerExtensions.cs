@@ -22,4 +22,15 @@ namespace UltimateOrb.Numerics {
             return bitPosition >= int.MaxValue.ToUnsignedUnchecked() ? BigInteger.IsNegative(value) : !(value & (BigInteger.One << bitPosition.ToSignedUnchecked())).IsZero;
         }
     }
+
+    public static partial class BigIntegerExtensions {
+
+        extension(BigInteger) {
+
+            /// <summary>
+            /// Gets a BigInteger value that represents the number two.
+            /// </summary>
+            public static BigInteger Two => new BigInteger(2);
+        }
+    }
 }

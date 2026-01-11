@@ -259,7 +259,7 @@ namespace UltimateOrb.CInterop {
             }
 
             // TODO:
-            throw new ArgumentException("Argument should be of type ActionPtr<T1, T2>.", nameof(obj));
+            throw new ArgumentException("Argument should be of type ActionPtr<TBase1, TBase2>.", nameof(obj));
         }
 
         public bool Equals(ActionPtr<T1, T2> other) {
@@ -457,7 +457,7 @@ namespace UltimateOrb.CInterop {
             }
 
             // TODO:
-            throw new ArgumentException("Argument should be of type ActionPtr<T1, T2, T3>.", nameof(obj));
+            throw new ArgumentException("Argument should be of type ActionPtr<TBase1, TBase2, T3>.", nameof(obj));
         }
 
         public bool Equals(ActionPtr<T1, T2, T3> other) {
@@ -655,7 +655,7 @@ namespace UltimateOrb.CInterop {
             }
 
             // TODO:
-            throw new ArgumentException("Argument should be of type ActionPtr<T1, T2, T3, T4>.", nameof(obj));
+            throw new ArgumentException("Argument should be of type ActionPtr<TBase1, TBase2, T3, T4>.", nameof(obj));
         }
 
         public bool Equals(ActionPtr<T1, T2, T3, T4> other) {
@@ -853,7 +853,7 @@ namespace UltimateOrb.CInterop {
             }
 
             // TODO:
-            throw new ArgumentException("Argument should be of type ActionPtr<T1, T2, T3, T4, T5>.", nameof(obj));
+            throw new ArgumentException("Argument should be of type ActionPtr<TBase1, TBase2, T3, T4, T5>.", nameof(obj));
         }
 
         public bool Equals(ActionPtr<T1, T2, T3, T4, T5> other) {
@@ -1051,7 +1051,7 @@ namespace UltimateOrb.CInterop {
             }
 
             // TODO:
-            throw new ArgumentException("Argument should be of type ActionPtr<T1, T2, T3, T4, T5, T6>.", nameof(obj));
+            throw new ArgumentException("Argument should be of type ActionPtr<TBase1, TBase2, T3, T4, T5, T6>.", nameof(obj));
         }
 
         public bool Equals(ActionPtr<T1, T2, T3, T4, T5, T6> other) {
@@ -1249,7 +1249,7 @@ namespace UltimateOrb.CInterop {
             }
 
             // TODO:
-            throw new ArgumentException("Argument should be of type ActionPtr<T1, T2, T3, T4, T5, T6, T7>.", nameof(obj));
+            throw new ArgumentException("Argument should be of type ActionPtr<TBase1, TBase2, T3, T4, T5, T6, T7>.", nameof(obj));
         }
 
         public bool Equals(ActionPtr<T1, T2, T3, T4, T5, T6, T7> other) {
@@ -1447,7 +1447,7 @@ namespace UltimateOrb.CInterop {
             }
 
             // TODO:
-            throw new ArgumentException("Argument should be of type ActionPtr<T1, T2, T3, T4, T5, T6, T7, T8>.", nameof(obj));
+            throw new ArgumentException("Argument should be of type ActionPtr<TBase1, TBase2, T3, T4, T5, T6, T7, T8>.", nameof(obj));
         }
 
         public bool Equals(ActionPtr<T1, T2, T3, T4, T5, T6, T7, T8> other) {
@@ -1645,7 +1645,7 @@ namespace UltimateOrb.CInterop {
             }
 
             // TODO:
-            throw new ArgumentException("Argument should be of type ActionPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9>.", nameof(obj));
+            throw new ArgumentException("Argument should be of type ActionPtr<TBase1, TBase2, T3, T4, T5, T6, T7, T8, T9>.", nameof(obj));
         }
 
         public bool Equals(ActionPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9> other) {
@@ -1843,7 +1843,7 @@ namespace UltimateOrb.CInterop {
             }
 
             // TODO:
-            throw new ArgumentException("Argument should be of type ActionPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>.", nameof(obj));
+            throw new ArgumentException("Argument should be of type ActionPtr<TBase1, TBase2, T3, T4, T5, T6, T7, T8, T9, T10>.", nameof(obj));
         }
 
         public bool Equals(ActionPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> other) {
@@ -2041,7 +2041,7 @@ namespace UltimateOrb.CInterop {
             }
 
             // TODO:
-            throw new ArgumentException("Argument should be of type ActionPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>.", nameof(obj));
+            throw new ArgumentException("Argument should be of type ActionPtr<TBase1, TBase2, T3, T4, T5, T6, T7, T8, T9, T10, T11>.", nameof(obj));
         }
 
         public bool Equals(ActionPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> other) {
@@ -2239,7 +2239,7 @@ namespace UltimateOrb.CInterop {
             }
 
             // TODO:
-            throw new ArgumentException("Argument should be of type ActionPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>.", nameof(obj));
+            throw new ArgumentException("Argument should be of type ActionPtr<TBase1, TBase2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>.", nameof(obj));
         }
 
         public bool Equals(ActionPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> other) {
@@ -2437,7 +2437,7 @@ namespace UltimateOrb.CInterop {
             }
 
             // TODO:
-            throw new ArgumentException("Argument should be of type ActionPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>.", nameof(obj));
+            throw new ArgumentException("Argument should be of type ActionPtr<TBase1, TBase2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>.", nameof(obj));
         }
 
         public bool Equals(ActionPtr<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> other) {

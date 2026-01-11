@@ -16,6 +16,7 @@ namespace UltimateOrb.Numerics.Specialized {
     }
 }
 */
+using UltimateOrb.Numerics.Extensions;
 
 namespace UltimateOrb.Core.Tests {
     using System.Diagnostics;
@@ -144,6 +145,14 @@ namespace UltimateOrb.Core.Tests {
         }
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private static int Main(string[] args) {
+            {
+
+                Long<int, uint> v1 = Long<int, uint>.FromBase(0X1001U, 0X0100);
+                Long<int, uint> v2 = Long<int, uint>.FromBase(0X0001U, 0X0001);
+                var v3 = v1 | v2;
+
+
+            }
             if (false) {
                 asfa sadfa = new asfa() { a = 1919810, b = 114514 };
                 Console.WriteLine($"{nameof(sadfa)} = {sadfa}");
@@ -638,14 +647,14 @@ namespace UltimateOrb.Core.Tests {
                         var a = (10 * Math.PI * rr.NextDouble() - 5 * Math.PI).ToStandardF();
                         var aa = default(Matrix4x4D);
 
-                        UltimateOrb.Numerics.Extensions.ToMatrixFromAxisAngle(
+                        UltimateOrb.Numerics.SystemNumericsExtensions.ToMatrixFromAxisAngle(
                             x, y, z, a,
                             out aa.E00, out aa.E01, out aa.E02,
                             out aa.E10, out aa.E11, out aa.E12,
                             out aa.E20, out aa.E21, out aa.E22);
                         aa.E33 = 1.0;
                         var m0 = aa.ToStandardF();
-                        UltimateOrb.Numerics.Extensions.ToIntrinsicXYZEulerAnglesFromAxisAngle(
+                        UltimateOrb.Numerics.SystemNumericsExtensions.ToIntrinsicXYZEulerAnglesFromAxisAngle(
                             x, y, z, a,
                             out var a1, out var a2, out var a3);
                         var m1 = M0(Intrinsic, X, Y, Z, a1, a2, a3);
@@ -697,7 +706,7 @@ namespace UltimateOrb.Core.Tests {
 
                 {
                     var (x, y, z, angle) = (0.5, -1.5, 2.5, 2.0);
-                    UltimateOrb.Numerics.Extensions.ToExtrinsicXYZEulerAnglesFromAxisAngle(x, y, z, angle, out var a0, out var a1, out var a2);
+                    UltimateOrb.Numerics.SystemNumericsExtensions.ToExtrinsicXYZEulerAnglesFromAxisAngle(x, y, z, angle, out var a0, out var a1, out var a2);
                     Console.WriteLine($@"{a0:R}, {a1:R}, {a2:R}");
 
                     var m0 = System.Numerics.Matrix4x4.CreateFromAxisAngle(
@@ -723,7 +732,7 @@ namespace UltimateOrb.Core.Tests {
                     // var (x, y, z, angle) = (1.0, 1.0, 1.0, 2.0 / 3.0 * Math.PI);
                     // var (x, y, z, angle) = (1.0, 1.0, 1.0, -Math.PI);
                     var (x, y, z, angle) = (0.5, -1.5, 2.5, 2.0);
-                    UltimateOrb.Numerics.Extensions.ToIntrinsicXYZEulerAnglesFromAxisAngle(x, y, z, angle, out var a0, out var a1, out var a2);
+                    UltimateOrb.Numerics.SystemNumericsExtensions.ToIntrinsicXYZEulerAnglesFromAxisAngle(x, y, z, angle, out var a0, out var a1, out var a2);
                     Console.WriteLine($@"{a0:R}, {a1:R}, {a2:R}");
 
                     var m0 = System.Numerics.Matrix4x4.CreateFromAxisAngle(
@@ -761,7 +770,7 @@ namespace UltimateOrb.Core.Tests {
                         var a = (10 * Math.PI * rr.NextDouble() - 5 * Math.PI).ToStandardF();
                         var aa = default(Matrix4x4D);
 
-                        UltimateOrb.Numerics.Extensions.ToMatrixFromAxisAngle(
+                        UltimateOrb.Numerics.SystemNumericsExtensions.ToMatrixFromAxisAngle(
                             x, y, z, a,
                             out aa.E00, out aa.E01, out aa.E02,
                             out aa.E10, out aa.E11, out aa.E12,
@@ -812,7 +821,7 @@ namespace UltimateOrb.Core.Tests {
                     // var (x, y, z, angle) = (1.0, 1.0, 1.0, 2.0 / 3.0 * Math.PI);
                     // var (x, y, z, angle) = (1.0, 1.0, 1.0, -Math.PI);
                     var (x, y, z, angle) = (0.5, -1.5, 2.5, 2.0);
-                    UltimateOrb.Numerics.Extensions.ToIntrinsicXYZEulerAnglesFromAxisAngle(x, y, z, angle, out var a0, out var a1, out var a2);
+                    UltimateOrb.Numerics.SystemNumericsExtensions.ToIntrinsicXYZEulerAnglesFromAxisAngle(x, y, z, angle, out var a0, out var a1, out var a2);
                     Console.WriteLine($@"{a0:R}, {a1:R}, {a2:R}");
 
                     var m0 = System.Numerics.Matrix4x4.CreateFromAxisAngle(
@@ -834,7 +843,7 @@ namespace UltimateOrb.Core.Tests {
                 {
                     var (x, y, z, angle) = (0.5, -1.5, 2.5, 2.0);
 
-                    UltimateOrb.Numerics.Extensions.ToIntrinsicXYZEulerAnglesFromAxisAngle(x, y, z, angle, out var a0, out var a1, out var a2);
+                    UltimateOrb.Numerics.SystemNumericsExtensions.ToIntrinsicXYZEulerAnglesFromAxisAngle(x, y, z, angle, out var a0, out var a1, out var a2);
 
                     Console.WriteLine($@"{a0:R}, {a1:R}, {a2:R}");
 
@@ -982,18 +991,18 @@ namespace UltimateOrb.Core.Tests {
 
                     if (true) {
 
-                        sss(Extrinsic, X, Y, Z, UltimateOrb.Numerics.Extensions.ToAxisAngleFromExtrinsicXYZEulerAngles);
-                        sss(Intrinsic, X, Y, Z, UltimateOrb.Numerics.Extensions.ToAxisAngleFromIntrinsicXYZEulerAngles);
-                        sss(Extrinsic, X, Z, Y, UltimateOrb.Numerics.Extensions.ToAxisAngleFromExtrinsicXZYEulerAngles);
-                        sss(Intrinsic, X, Z, Y, UltimateOrb.Numerics.Extensions.ToAxisAngleFromIntrinsicXZYEulerAngles);
-                        sss(Extrinsic, Y, X, Z, UltimateOrb.Numerics.Extensions.ToAxisAngleFromExtrinsicYXZEulerAngles);
-                        sss(Intrinsic, Y, X, Z, UltimateOrb.Numerics.Extensions.ToAxisAngleFromIntrinsicYXZEulerAngles);
-                        sss(Extrinsic, Y, Z, X, UltimateOrb.Numerics.Extensions.ToAxisAngleFromExtrinsicYZXEulerAngles);
-                        sss(Intrinsic, Y, Z, X, UltimateOrb.Numerics.Extensions.ToAxisAngleFromIntrinsicYZXEulerAngles);
-                        sss(Extrinsic, Z, X, Y, UltimateOrb.Numerics.Extensions.ToAxisAngleFromExtrinsicZXYEulerAngles);
-                        sss(Intrinsic, Z, X, Y, UltimateOrb.Numerics.Extensions.ToAxisAngleFromIntrinsicZXYEulerAngles);
-                        sss(Extrinsic, Z, Y, X, UltimateOrb.Numerics.Extensions.ToAxisAngleFromExtrinsicZYXEulerAngles);
-                        sss(Intrinsic, Z, Y, X, UltimateOrb.Numerics.Extensions.ToAxisAngleFromIntrinsicZYXEulerAngles);
+                        sss(Extrinsic, X, Y, Z, UltimateOrb.Numerics.SystemNumericsExtensions.ToAxisAngleFromExtrinsicXYZEulerAngles);
+                        sss(Intrinsic, X, Y, Z, UltimateOrb.Numerics.SystemNumericsExtensions.ToAxisAngleFromIntrinsicXYZEulerAngles);
+                        sss(Extrinsic, X, Z, Y, UltimateOrb.Numerics.SystemNumericsExtensions.ToAxisAngleFromExtrinsicXZYEulerAngles);
+                        sss(Intrinsic, X, Z, Y, UltimateOrb.Numerics.SystemNumericsExtensions.ToAxisAngleFromIntrinsicXZYEulerAngles);
+                        sss(Extrinsic, Y, X, Z, UltimateOrb.Numerics.SystemNumericsExtensions.ToAxisAngleFromExtrinsicYXZEulerAngles);
+                        sss(Intrinsic, Y, X, Z, UltimateOrb.Numerics.SystemNumericsExtensions.ToAxisAngleFromIntrinsicYXZEulerAngles);
+                        sss(Extrinsic, Y, Z, X, UltimateOrb.Numerics.SystemNumericsExtensions.ToAxisAngleFromExtrinsicYZXEulerAngles);
+                        sss(Intrinsic, Y, Z, X, UltimateOrb.Numerics.SystemNumericsExtensions.ToAxisAngleFromIntrinsicYZXEulerAngles);
+                        sss(Extrinsic, Z, X, Y, UltimateOrb.Numerics.SystemNumericsExtensions.ToAxisAngleFromExtrinsicZXYEulerAngles);
+                        sss(Intrinsic, Z, X, Y, UltimateOrb.Numerics.SystemNumericsExtensions.ToAxisAngleFromIntrinsicZXYEulerAngles);
+                        sss(Extrinsic, Z, Y, X, UltimateOrb.Numerics.SystemNumericsExtensions.ToAxisAngleFromExtrinsicZYXEulerAngles);
+                        sss(Intrinsic, Z, Y, X, UltimateOrb.Numerics.SystemNumericsExtensions.ToAxisAngleFromIntrinsicZYXEulerAngles);
 
 
 
@@ -1035,7 +1044,7 @@ namespace UltimateOrb.Core.Tests {
                 {
                     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
                     static void aaaa() {
-                        var sdfa = UltimateOrb.Numerics.Extensions.ToAxisAngleFromExtrinsicXYZEulerAngles(7, 8, 9);
+                        var sdfa = UltimateOrb.Numerics.SystemNumericsExtensions.ToAxisAngleFromExtrinsicXYZEulerAngles(7, 8, 9);
                         Console.WriteLine(sdfa);
                         Console.WriteLine(sdfa.E012.GetNormalized());
                     }
@@ -1045,7 +1054,7 @@ namespace UltimateOrb.Core.Tests {
                 {
                     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
                     static void aaaa() {
-                        var sdfa = UltimateOrb.Numerics.Extensions.ToAxisAngleFromExtrinsicZYXEulerAngles(7, 8, 9);
+                        var sdfa = UltimateOrb.Numerics.SystemNumericsExtensions.ToAxisAngleFromExtrinsicZYXEulerAngles(7, 8, 9);
                         Console.WriteLine(sdfa);
                         Console.WriteLine(sdfa.E012.GetNormalized());
                     }
@@ -1054,7 +1063,7 @@ namespace UltimateOrb.Core.Tests {
                 {
                     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
                     static void aaaa() {
-                        var sdfa = UltimateOrb.Numerics.Extensions.ToAxisAngleFromExtrinsicZYXEulerAngles(0.6, -1.3, 0.9);
+                        var sdfa = UltimateOrb.Numerics.SystemNumericsExtensions.ToAxisAngleFromExtrinsicZYXEulerAngles(0.6, -1.3, 0.9);
                         Console.WriteLine(sdfa);
                         Console.WriteLine(sdfa.E012.GetNormalized());
                     }
@@ -1063,7 +1072,7 @@ namespace UltimateOrb.Core.Tests {
                 {
                     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
                     static void aaaa() {
-                        var sdfa = UltimateOrb.Numerics.Extensions.ToAxisAngleFromIntrinsicYZXEulerAngles(0.6, -1.3, 0.9);
+                        var sdfa = UltimateOrb.Numerics.SystemNumericsExtensions.ToAxisAngleFromIntrinsicYZXEulerAngles(0.6, -1.3, 0.9);
                         Console.WriteLine(sdfa);
                         Console.WriteLine(sdfa.E012.GetNormalized());
                     }

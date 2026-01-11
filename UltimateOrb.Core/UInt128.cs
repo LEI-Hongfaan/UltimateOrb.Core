@@ -21,6 +21,9 @@ namespace UltimateOrb {
     using static UltimateOrb.Utilities.Extensions.BooleanIntegerExtensions;
     using static UltimateOrb.Utilities.ThrowHelper;
     using static UltimateOrb.XInt128Helpers;
+#if NET7_0_OR_GREATER
+    using SystemXInt128 = System.UInt128;
+#endif
     using HInt64 = UInt64;
     using MathEx = UltimateOrb.Numerics.DoubleArithmetic;
     using OInt128 = Int128;
@@ -47,19 +50,15 @@ namespace UltimateOrb {
 #endif
     {
 
-#if NET10_0_OR_GREATER
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        private readonly UInt64 d0;
-
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        private readonly UInt64 d1;
+#if NET7_0_OR_GREATER
+        private readonly SystemXInt128 bits;
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         [UnscopedRef]
         private readonly ref readonly UInt64 lo {
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => ref BitConverter.IsLittleEndian ? ref d0 : ref d1;
+            get => ref bits.lo;
         }
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
@@ -67,14 +66,22 @@ namespace UltimateOrb {
         private readonly ref readonly HInt64 hi {
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => ref Unsafe.As<UInt64, HInt64>(ref Unsafe.AsRef(in BitConverter.IsLittleEndian ? ref d1 : ref d0));
+            get => ref bits.hi;
         }
+#else
+#if BIGENDIAN
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        private readonly HInt64 hi;
+
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        private readonly UInt64 lo;
 #else
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private readonly UInt64 lo;
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private readonly HInt64 hi;
+#endif
 #endif
 
         [System.Diagnostics.Contracts.PureAttribute()]
@@ -106,9 +113,8 @@ namespace UltimateOrb {
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         [System.Diagnostics.Contracts.PureAttribute()]
         internal UInt128(UInt64 lo, HInt64 hi) {
-#if NET10_0_OR_GREATER
-            this.d0 = BitConverter.IsLittleEndian ? lo : unchecked((UInt64)hi);
-            this.d1 = BitConverter.IsLittleEndian ? unchecked((UInt64)hi) : lo;
+#if NET7_0_OR_GREATER
+            this.bits = new (lower: lo, upper: unchecked((UInt64)hi));
 #else
             this.lo = lo;
             this.hi = hi;
@@ -3169,18 +3175,185 @@ namespace UltimateOrb {
 namespace UltimateOrb {
 
 #if NET8_0_OR_GREATER
-    static class UInt32UnsafeAccessors {
+    [Discardable]
+    static class SystemInt128UnsafeAccessors {
 
         [UnsafeAccessor(UnsafeAccessorKind.Field, Name = "_lower")]
-        public extern static UInt64 GetLowerUInt64(in System.UInt128 value);
+        internal extern static ref readonly UInt64 GetLowerUInt64Ref(in System.Int128 value);
 
         [UnsafeAccessor(UnsafeAccessorKind.Field, Name = "_upper")]
-        public extern static UInt64 GetUpperUInt64(in System.UInt128 value);
+        internal extern static ref readonly UInt64 GetUpperUInt64Ref(in System.Int128 value);
+
+        [UnsafeAccessor(UnsafeAccessorKind.Field, Name = "_lower")]
+        internal extern static ref readonly UInt64 GetLowerUInt64Ref(in System.UInt128 value);
+
+        [UnsafeAccessor(UnsafeAccessorKind.Field, Name = "_upper")]
+        internal extern static ref readonly UInt64 GetUpperUInt64Ref(in System.UInt128 value);
     }
 #endif
-}
 
-namespace UltimateOrb {
+#if NET7_0_OR_GREATER
+    [Discardable]
+    static class SystemInt128Extensions {
+
+        extension(System.Int128 @this) {
+
+            internal UInt64 LoUInt64Bits {
+
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#if NET8_0_OR_GREATER
+                get => SystemInt128UnsafeAccessors.GetLowerUInt64Ref(in @this);
+#else
+                get => unchecked((UInt64)@this);
+#endif
+            }
+
+            internal UInt64 HiUInt64Bits {
+
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#if NET8_0_OR_GREATER
+                get => SystemInt128UnsafeAccessors.GetUpperUInt64Ref(in @this);
+#else
+                get => unchecked((UInt64)(@this >>> 64));
+#endif
+            }
+
+            internal Int64 LoInt64Bits {
+
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#if NET8_0_OR_GREATER
+                get => unchecked((Int64)SystemInt128UnsafeAccessors.GetLowerUInt64Ref(in @this));
+#else
+                get => unchecked((Int64)@this);
+#endif
+            }
+
+            internal Int64 HiInt64Bits {
+
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#if NET8_0_OR_GREATER
+                get => unchecked((Int64)SystemInt128UnsafeAccessors.GetUpperUInt64Ref(in @this));
+#else
+                get => unchecked((Int64)(@this >>> 64));
+#endif
+            }
+        }
+
+        extension(System.UInt128 @this) {
+
+            internal UInt64 LoUInt64Bits {
+
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#if NET8_0_OR_GREATER
+                get => SystemInt128UnsafeAccessors.GetLowerUInt64Ref(in @this);
+#else
+                get => unchecked((UInt64)@this);
+#endif
+            }
+
+            internal UInt64 HiUInt64Bits {
+
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#if NET8_0_OR_GREATER
+                get => SystemInt128UnsafeAccessors.GetUpperUInt64Ref(in @this);
+#else
+                get => unchecked((UInt64)(@this >>> 64));
+#endif
+            }
+
+            internal Int64 LoInt64Bits {
+
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#if NET8_0_OR_GREATER
+                get => unchecked((Int64)SystemInt128UnsafeAccessors.GetLowerUInt64Ref(in @this));
+#else
+                get => unchecked((Int64)@this);
+#endif
+            }
+
+            internal Int64 HiInt64Bits {
+
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#if NET8_0_OR_GREATER
+                get => unchecked((Int64)SystemInt128UnsafeAccessors.GetUpperUInt64Ref(in @this));
+#else
+                get => unchecked((Int64)(@this >>> 64));
+#endif
+            }
+        }
+
+#if NET8_0_OR_GREATER
+#else
+        readonly struct SystemInt128Layout {
+            internal readonly UInt64 d0;
+            internal readonly UInt64 d1;
+        }
+#endif
+
+        extension(in System.Int128 @this) {
+
+            [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+            internal ref readonly UInt64 lo {
+
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#if NET8_0_OR_GREATER
+                get => ref SystemInt128UnsafeAccessors.GetLowerUInt64Ref(in @this);
+#else
+                get {
+                    ref readonly var t = ref Unsafe.As<System.Int128, SystemInt128Layout>(ref Unsafe.AsRef(in @this));
+                    return ref (BitConverter.IsLittleEndian ? ref t.d0 : ref t.d1);
+                }
+#endif
+            }
+
+            internal ref readonly Int64 hi {
+
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#if NET8_0_OR_GREATER
+                get => ref Unsafe.As<UInt64, Int64>(ref Unsafe.AsRef(in SystemInt128UnsafeAccessors.GetUpperUInt64Ref(in @this)));
+#else
+                get {
+                    ref readonly var t = ref Unsafe.As<System.Int128, SystemInt128Layout>(ref Unsafe.AsRef(in @this));
+                    return ref Unsafe.As<UInt64, Int64>(ref Unsafe.AsRef(in (BitConverter.IsLittleEndian ? ref t.d0 : ref t.d1)));
+                }
+#endif
+            }
+        }
+
+        extension(in System.UInt128 @this) {
+
+            [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+            internal ref readonly UInt64 lo {
+
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#if NET8_0_OR_GREATER
+                get => ref SystemInt128UnsafeAccessors.GetLowerUInt64Ref(in @this);
+#else
+                get {
+                    ref readonly var t = ref Unsafe.As<System.UInt128, SystemInt128Layout>(ref Unsafe.AsRef(in @this));
+                    return ref (BitConverter.IsLittleEndian ? ref t.d0 : ref t.d1);
+                }
+#endif
+            }
+
+            internal ref readonly UInt64 hi {
+
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#if NET8_0_OR_GREATER
+                get => ref SystemInt128UnsafeAccessors.GetUpperUInt64Ref(in @this);
+#else
+                get {
+                    ref readonly var t = ref Unsafe.As<System.UInt128, SystemInt128Layout>(ref Unsafe.AsRef(in @this));
+                    return ref (BitConverter.IsLittleEndian ? ref t.d1 : ref t.d0);
+                }
+#endif
+            }
+        }
+    }
+#endif
+    }
+
+    namespace UltimateOrb {
     using Internal;
     using UltimateOrb.Runtime.CompilerServices;
     using static UltimateOrb.Utilities.ThrowHelper;

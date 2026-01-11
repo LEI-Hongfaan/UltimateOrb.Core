@@ -72,6 +72,13 @@ namespace UltimateOrb {
         /// </summary>
         [Experimental("UoWIP")]
         ToNearestWithMidpointTowardZero,
+
+        /// <summary>
+        /// Round away from zero.
+        /// Support in UltimateOrb APIs is partial and may be limited.
+        /// </summary>
+        [Experimental("UoWIP")]
+        TowardInfinity,
     }
 
     [Experimental("UoWIP")]
@@ -79,14 +86,14 @@ namespace UltimateOrb {
 
         extension(System.MidpointRounding @this) {
 
-            public static FloatingPointRounding ToFloatingPointRounding(System.MidpointRounding value) {
-                return value switch {
+            public FloatingPointRounding ToFloatingPointRounding() {
+                return @this switch {
                     System.MidpointRounding.ToEven => FloatingPointRounding.ToNearestWithMidpointToEven,
                     System.MidpointRounding.AwayFromZero => FloatingPointRounding.ToNearestWithMidpointAwayFromZero,
                     System.MidpointRounding.ToZero => FloatingPointRounding.ToNearestWithMidpointTowardZero,
                     System.MidpointRounding.ToNegativeInfinity => FloatingPointRounding.ToNearestWithMidpointDownward,
                     System.MidpointRounding.ToPositiveInfinity => FloatingPointRounding.ToNearestWithMidpointUpward,
-                    _ => throw new NotSupportedException($"The specified {nameof(System.MidpointRounding)} value '{value}' is not supported."),
+                    _ => throw new NotSupportedException($"The specified {nameof(System.MidpointRounding)} value '{@this}' is not supported."),
                 };
             }
         }

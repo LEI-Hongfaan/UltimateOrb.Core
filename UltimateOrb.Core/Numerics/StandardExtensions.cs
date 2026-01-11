@@ -582,7 +582,7 @@ namespace UltimateOrb.Numerics {
         }
     }
 
-    public static partial class Extensions {
+    public static partial class SystemNumericsExtensions {
 
         public static void ToMatrixFromAxisAngle(
             double x, double y, double z, double angle,
