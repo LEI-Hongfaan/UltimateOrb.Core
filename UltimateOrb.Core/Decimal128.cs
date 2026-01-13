@@ -26,9 +26,17 @@ namespace UltimateOrb {
 #endif
         {
     }
-    
+
+    public readonly struct Tag<T, BaseTag> : ITag
+#if !NET9_0_OR_GREATER
+#else
+        where T : allows ref struct
+#endif
+        where BaseTag : struct, ITag {
+    }
+
     public interface IInterfaceDerivedSelfBase<TSelf, TBase>
-        : IInterfaceDerivedBase<TSelf, Tag<TSelf>, TSelf, TBase>
+        : IInterfaceDerivedTaggedSelfBase<TSelf, Tag<TSelf>, TBase>
         where TSelf : IInterfaceDerivedSelfBase<TSelf, TBase>?
 #if !NET9_0_OR_GREATER
 #else
@@ -37,9 +45,9 @@ namespace UltimateOrb {
 #endif
         {
 
-        static TSelf? IInterfaceDerivedBase<TSelf, Tag<TSelf>, TSelf, TBase>.FromBase(TBase? value) => TSelf.FromBase(value);
+        static TSelf? IInterfaceDerivedTaggedSelfBase<TSelf, Tag<TSelf>, TBase>.FromBase(TBase? value) => TSelf.FromBase(value);
 
-        static TBase? IInterfaceDerivedBase<TSelf, Tag<TSelf>, TSelf, TBase>.ToBase(TSelf? value) => TSelf.ToBase(value);
+        static TBase? IInterfaceDerivedTaggedSelfBase<TSelf, Tag<TSelf>, TBase>.ToBase(TSelf? value) => TSelf.ToBase(value);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         [return: NotNullIfNotNull(nameof(value))]
@@ -79,24 +87,66 @@ namespace UltimateOrb {
         }
     }
 
-    public static partial class InterfaceDerivedDefault<TDerived, TBase>
+    public interface IInterfaceDerivedTaggedSelfBase<TSelf, Tag, TBase>
+        : IInterfaceDerivedBase<TSelf, Tag, TSelf, TBase>
+        where TSelf : IInterfaceDerivedTaggedSelfBase<TSelf, Tag, TBase>?
 #if !NET9_0_OR_GREATER
 #else
-        where TDerived : allows ref struct
+        , allows ref struct
+#endif
+        where Tag : struct, ITag
+#if !NET9_0_OR_GREATER
+#else
+        , allows ref struct
         where TBase : allows ref struct
 #endif
         {
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        [return: NotNullIfNotNull(nameof(value))]
-        public static TDerived? FromBase(TBase? value) {
-            return Unsafe.As<TBase?, TDerived?>(ref value);
-        }
+        static TSelf? IInterfaceDerivedBase<TSelf, Tag, TSelf, TBase>.FromBase(TBase? value) => TSelf.FromBase(value);
+
+        static TBase? IInterfaceDerivedBase<TSelf, Tag, TSelf, TBase>.ToBase(TSelf? value) => TSelf.ToBase(value);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         [return: NotNullIfNotNull(nameof(value))]
-        public static TBase? ToBase(TDerived? value) {
-            return Unsafe.As<TDerived?, TBase?>(ref value);
+        protected static abstract new TSelf? FromBase(TBase? value);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [return: NotNullIfNotNull(nameof(value))]
+        protected static abstract new TBase? ToBase(TSelf? value);
+    }
+
+
+    public interface IInterfaceDerivedTaggedSelfBaseFriend<TSelf, Tag, TBase>
+        : IInterfaceDerivedTaggedSelfBase<TSelf, Tag, TBase>
+        where TSelf : IInterfaceDerivedTaggedSelfBase<TSelf, Tag, TBase>?
+#if !NET9_0_OR_GREATER
+#else
+        , allows ref struct
+#endif
+        where Tag : struct, ITag
+#if !NET9_0_OR_GREATER
+#else
+        , allows ref struct
+        where TBase : allows ref struct
+#endif
+        {
+
+        /// <summary>
+        /// Converts the specified value to <typeparamref name="TSelf"/>.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [return: NotNullIfNotNull(nameof(value))]
+        public static new TSelf? FromBase(TBase? value) {
+            return TSelf.FromBase(value);
+        }
+
+        /// <summary>
+        /// Converts the specified value to <typeparamref name="TBase"/>.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [return: NotNullIfNotNull(nameof(value))]
+        public static new TBase? ToBase(TSelf? value) {
+            return TSelf.ToBase(value);
         }
     }
 
@@ -159,6 +209,27 @@ namespace UltimateOrb {
         }
     }
 
+    public static partial class InterfaceDerivedDefault<TDerived, TBase>
+#if !NET9_0_OR_GREATER
+#else
+        where TDerived : allows ref struct
+        where TBase : allows ref struct
+#endif
+        {
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [return: NotNullIfNotNull(nameof(value))]
+        public static TDerived? FromBase(TBase? value) {
+            return Unsafe.As<TBase?, TDerived?>(ref value);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [return: NotNullIfNotNull(nameof(value))]
+        public static TBase? ToBase(TDerived? value) {
+            return Unsafe.As<TDerived?, TBase?>(ref value);
+        }
+    }
+
     [StructLayout(LayoutKind.Sequential)]
     internal readonly
 #if !NET9_0_OR_GREATER
@@ -199,8 +270,8 @@ namespace UltimateOrb {
             Item2 = item2;
         }
     }
-
-    public interface IInterfaceDerivedSelfBase<TSelf, TBase1, TBase2> : IInterfaceDerivedBase<TSelf, Tag<TSelf>, TSelf, TBase1, TBase2>
+    public interface IInterfaceDerivedSelfBase<TSelf, TBase1, TBase2>
+        : IInterfaceDerivedTaggedSelfBase<TSelf, Tag<TSelf>, TBase1, TBase2>
         where TSelf : IInterfaceDerivedSelfBase<TSelf, TBase1, TBase2>?
 #if !NET9_0_OR_GREATER
 #else
@@ -210,11 +281,11 @@ namespace UltimateOrb {
 #endif
         {
 
-        static TSelf? IInterfaceDerivedBase<TSelf, Tag<TSelf>, TSelf, TBase1, TBase2>.FromBase(TBase1? value1, TBase2? value2) => TSelf.FromBase(value1, value2);
+        static TSelf? IInterfaceDerivedTaggedSelfBase<TSelf, Tag<TSelf>, TBase1, TBase2>.FromBase(TBase1? value1, TBase2? value2) => TSelf.FromBase(value1, value2);
 
-        static TBase1? IInterfaceDerivedBase<TSelf, Tag<TSelf>, TSelf, TBase1, TBase2>.ToBase1(TSelf? value) => TSelf.ToBase1(value);
+        static TBase1? IInterfaceDerivedTaggedSelfBase<TSelf, Tag<TSelf>, TBase1, TBase2>.ToBase1(TSelf? value) => TSelf.ToBase1(value);
 
-        static TBase2? IInterfaceDerivedBase<TSelf, Tag<TSelf>, TSelf, TBase1, TBase2>.ToBase2(TSelf? value) => TSelf.ToBase2(value);
+        static TBase2? IInterfaceDerivedTaggedSelfBase<TSelf, Tag<TSelf>, TBase1, TBase2>.ToBase2(TSelf? value) => TSelf.ToBase2(value);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         [return: NotNullIfNotNull(nameof(value1))]
@@ -266,6 +337,163 @@ namespace UltimateOrb {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         [return: NotNullIfNotNull(nameof(value))]
         public static new TBase2? ToBase2(TSelf? value) {
+            return TSelf.ToBase2(value);
+        }
+    }
+
+    public interface IInterfaceDerivedTaggedSelfBase<TSelf, Tag, TBase1, TBase2>
+        : IInterfaceDerivedBase<TSelf, Tag, TSelf, TBase1, TBase2>
+        where TSelf : IInterfaceDerivedTaggedSelfBase<TSelf, Tag, TBase1, TBase2>?
+#if !NET9_0_OR_GREATER
+#else
+        , allows ref struct
+#endif
+        where Tag : struct, ITag
+#if !NET9_0_OR_GREATER
+#else
+        , allows ref struct
+        where TBase1 : allows ref struct
+        where TBase2 : allows ref struct
+#endif
+        {
+
+        static TSelf? IInterfaceDerivedBase<TSelf, Tag, TSelf, TBase1, TBase2>.FromBase(TBase1? value1, TBase2? value2) => TSelf.FromBase(value1, value2);
+
+        static TBase1? IInterfaceDerivedBase<TSelf, Tag, TSelf, TBase1, TBase2>.ToBase1(TSelf? value) => TSelf.ToBase1(value);
+
+        static TBase2? IInterfaceDerivedBase<TSelf, Tag, TSelf, TBase1, TBase2>.ToBase2(TSelf? value) => TSelf.ToBase2(value);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [return: NotNullIfNotNull(nameof(value1))]
+        [return: NotNullIfNotNull(nameof(value2))]
+        protected static abstract new TSelf? FromBase(TBase1? value1, TBase2? value2);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [return: NotNullIfNotNull(nameof(value))]
+        protected static abstract new TBase1? ToBase1(TSelf? value);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [return: NotNullIfNotNull(nameof(value))]
+        protected static abstract new TBase2? ToBase2(TSelf? value);
+    }
+
+    public interface IInterfaceDerivedTaggedSelfBaseFriend<TSelf, Tag, TBase1, TBase2>
+        : IInterfaceDerivedTaggedSelfBase<TSelf, Tag, TBase1, TBase2>
+        where TSelf : IInterfaceDerivedTaggedSelfBase<TSelf, Tag, TBase1, TBase2>?
+#if !NET9_0_OR_GREATER
+#else
+        , allows ref struct
+#endif
+        where Tag : struct, ITag
+#if !NET9_0_OR_GREATER
+#else
+        , allows ref struct
+        where TBase1 : allows ref struct
+        where TBase2 : allows ref struct
+#endif
+        {
+
+        /// <summary>
+        /// Converts the specified value to <typeparamref name="TSelf"/>.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [return: NotNullIfNotNull(nameof(value1))]
+        [return: NotNullIfNotNull(nameof(value2))]
+        public static new TSelf? FromBase(TBase1? value1, TBase2? value2) {
+            return TSelf.FromBase(value1, value2);
+        }
+
+        /// <summary>
+        /// Converts the specified value to <typeparamref name="TBase1"/>.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [return: NotNullIfNotNull(nameof(value))]
+        public static new TBase1? ToBase1(TSelf? value) {
+            return TSelf.ToBase1(value);
+        }
+
+        /// <summary>
+        /// Converts the specified value to <typeparamref name="TBase2"/>.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [return: NotNullIfNotNull(nameof(value))]
+        public static new TBase2? ToBase2(TSelf? value) {
+            return TSelf.ToBase2(value);
+        }
+    }
+
+    public interface IInterfaceDerivedBase<TSelf, Tag, TDerived, TBase1, TBase2>
+        where TSelf : IInterfaceDerivedBase<TSelf, Tag, TDerived, TBase1, TBase2>?
+#if !NET9_0_OR_GREATER
+#else
+        , allows ref struct
+#endif
+        where Tag : struct, ITag
+#if !NET9_0_OR_GREATER
+#else
+        , allows ref struct
+        where TDerived : allows ref struct
+        where TBase1 : allows ref struct
+        where TBase2 : allows ref struct
+#endif
+        {
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [return: NotNullIfNotNull(nameof(value1))]
+        [return: NotNullIfNotNull(nameof(value2))]
+        protected static virtual TDerived? FromBase(TBase1? value1, TBase2? value2) => InterfaceDerivedDefault<TDerived, TBase1, TBase2>.FromBase(value1, value2);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [return: NotNullIfNotNull(nameof(value))]
+        protected static virtual TBase1? ToBase1(TDerived? value) => InterfaceDerivedDefault<TDerived, TBase1, TBase2>.ToBase1(value);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [return: NotNullIfNotNull(nameof(value))]
+        protected static virtual TBase2? ToBase2(TDerived? value) => InterfaceDerivedDefault<TDerived, TBase1, TBase2>.ToBase2(value);
+    }
+
+    public interface IInterfaceDerivedBaseFriend<TSelf, Tag, TDerived, TBase1, TBase2>
+        : IInterfaceDerivedBase<TSelf, Tag, TDerived, TBase1, TBase2>
+        where TSelf : IInterfaceDerivedBase<TSelf, Tag, TDerived, TBase1, TBase2>?
+#if !NET9_0_OR_GREATER
+#else
+        , allows ref struct
+#endif
+        where Tag : struct, ITag
+#if !NET9_0_OR_GREATER
+#else
+        , allows ref struct
+        where TDerived : allows ref struct
+        where TBase1 : allows ref struct
+        where TBase2 : allows ref struct
+#endif
+        {
+
+        /// <summary>
+        /// Converts the specified value to <typeparamref name="TSelf"/>.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [return: NotNullIfNotNull(nameof(value1))]
+        [return: NotNullIfNotNull(nameof(value2))]
+        public static new TDerived? FromBase(TBase1? value1, TBase2? value2) {
+            return TSelf.FromBase(value1, value2);
+        }
+
+        /// <summary>
+        /// Converts the specified value to <typeparamref name="TBase1"/>.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [return: NotNullIfNotNull(nameof(value))]
+        public static new TBase1? ToBase1(TDerived? value) {
+            return TSelf.ToBase1(value);
+        }
+
+        /// <summary>
+        /// Converts the specified value to <typeparamref name="TBase2"/>.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [return: NotNullIfNotNull(nameof(value))]
+        public static new TBase2? ToBase2(TDerived? value) {
             return TSelf.ToBase2(value);
         }
     }
@@ -351,7 +579,7 @@ namespace UltimateOrb {
             throw new InvalidOperationException();
             */
             var t = new SequentialLayoutValueTuple<TDerived?>(value);
-            return Unsafe.BitCast< SequentialLayoutValueTuple<TDerived?>, SequentialLayoutValueTuple<TBase1?, TBase2?>>(t).Item1;
+            return Unsafe.BitCast<SequentialLayoutValueTuple<TDerived?>, SequentialLayoutValueTuple<TBase1?, TBase2?>>(t).Item1;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -368,90 +596,21 @@ namespace UltimateOrb {
         }
     }
 
-    public interface IInterfaceDerivedBase<TSelf, Tag, TDerived, TBase1, TBase2>
-        where TSelf : IInterfaceDerivedBase<TSelf, Tag, TDerived, TBase1, TBase2>?
-#if !NET9_0_OR_GREATER
-#else
-        , allows ref struct
-#endif
-        where Tag : struct, ITag
-#if !NET9_0_OR_GREATER
-#else
-        , allows ref struct
-        where TDerived : allows ref struct
-        where TBase1 : allows ref struct
-        where TBase2 : allows ref struct
-#endif
-        {
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        [return: NotNullIfNotNull(nameof(value1))]
-        [return: NotNullIfNotNull(nameof(value2))]
-        protected static virtual TDerived? FromBase(TBase1? value1, TBase2? value2) => InterfaceDerivedDefault<TDerived, TBase1, TBase2>.FromBase(value1, value2);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        [return: NotNullIfNotNull(nameof(value))]
-        protected static virtual TBase1? ToBase1(TDerived? value) => InterfaceDerivedDefault<TDerived, TBase1, TBase2>.ToBase1(value);
-       
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        [return: NotNullIfNotNull(nameof(value))]
-        protected static virtual TBase2? ToBase2(TDerived? value) => InterfaceDerivedDefault<TDerived, TBase1, TBase2>.ToBase2(value);
-    }
-
-    public interface IInterfaceDerivedBaseFriend<TSelf, Tag, TDerived, TBase1, TBase2>
-        : IInterfaceDerivedBase<TSelf, Tag, TDerived, TBase1, TBase2>
-        where TSelf : IInterfaceDerivedBase<TSelf, Tag, TDerived, TBase1, TBase2>?
-#if !NET9_0_OR_GREATER
-#else
-        , allows ref struct
-#endif
-        where Tag : struct, ITag
-#if !NET9_0_OR_GREATER
-#else
-        , allows ref struct
-        where TDerived : allows ref struct
-        where TBase1 : allows ref struct
-        where TBase2 : allows ref struct
-#endif
-        {
-
-        /// <summary>
-        /// Converts the specified value to <typeparamref name="TSelf"/>.
-        /// </summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        [return: NotNullIfNotNull(nameof(value1))]
-        [return: NotNullIfNotNull(nameof(value2))]
-        public static new TDerived? FromBase(TBase1? value1, TBase2? value2) {
-            return TSelf.FromBase(value1, value2);
-        }
-
-        /// <summary>
-        /// Converts the specified value to <typeparamref name="TBase1"/>.
-        /// </summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        [return: NotNullIfNotNull(nameof(value))]
-        public static new TBase1? ToBase1(TDerived? value) {
-            return TSelf.ToBase1(value);
-        }
-
-        /// <summary>
-        /// Converts the specified value to <typeparamref name="TBase2"/>.
-        /// </summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        [return: NotNullIfNotNull(nameof(value))]
-        public static new TBase2? ToBase2(TDerived? value) {
-            return TSelf.ToBase2(value);
-        }
-    }
 
 }
 
 namespace UltimateOrb {
 
     public interface IComparableNongenericDerived<TSelf, TBase>
-            : IComparable, IInterfaceDerivedSelfBase<TSelf, TBase>
-            where TSelf : IComparableNongenericDerived<TSelf, TBase>?
-            where TBase : IComparable? {
+        : IComparableNongenericDerivedTagged<TSelf, TSelf, TBase>
+        where TSelf : IComparableNongenericDerived<TSelf, TBase>?
+        where TBase : IComparable? {
+    }
+
+    public interface IComparableNongenericDerivedTagged<TSelf, Tag, TBase>
+        : IComparable, IInterfaceDerivedTaggedSelfBase<TSelf, Tag<Tag>, TBase>
+        where TSelf : IComparableNongenericDerivedTagged<TSelf, Tag, TBase>?
+        where TBase : IComparable? {
 
         int IComparable.CompareTo(object? obj) {
             var this__ = TSelf.ToBase((TSelf)(object)this);
@@ -459,7 +618,7 @@ namespace UltimateOrb {
                 return this__.CompareTo((object?)TSelf.ToBase(other__));
             }
             //if (obj is TBase other) {
-            //    return CompareTo((object?)TSelf.FromBase(other));
+            //    return CompareTo((object?)T.FromBase(other));
             //}
             return this__.CompareTo(obj);
         }
@@ -467,8 +626,15 @@ namespace UltimateOrb {
 
     [CLSCompliant(false)]
     public interface IConvertibleNongenericDerived<TSelf, TBase>
-        : IConvertible, IInterfaceDerivedSelfBase<TSelf, TBase>
-        where TSelf : IConvertibleNongenericDerived<TSelf, TBase>?
+       : IConvertibleNongenericDerivedTagged<TSelf, TSelf, TBase>
+       where TSelf : IConvertibleNongenericDerived<TSelf, TBase>?
+       where TBase : IConvertible? {
+    }
+
+    [CLSCompliant(false)]
+    public interface IConvertibleNongenericDerivedTagged<TSelf, Tag, TBase>
+        : IConvertible, IInterfaceDerivedTaggedSelfBase<TSelf, Tag<Tag>, TBase>
+        where TSelf : IConvertibleNongenericDerivedTagged<TSelf, Tag, TBase>?
         where TBase : IConvertible? {
 
         TypeCode IConvertible.GetTypeCode() => TSelf.ToBase((TSelf)(object)this).GetTypeCode();
@@ -500,7 +666,7 @@ namespace UltimateOrb {
         object IConvertible.ToType(Type conversionType, IFormatProvider? provider) {
             var this__ = TSelf.ToBase((TSelf)(object)this);
             if (typeof(TSelf) == conversionType) {
-                //return (TSelf)(object)target;
+                //return (T)(object)target;
                 var t = this__.ToType(typeof(TBase), provider);
                 if (t is TBase v) {
                     return TSelf.FromBase(v);
@@ -518,16 +684,28 @@ namespace UltimateOrb {
     }
 
     public interface IComparableDerived<TSelf, TBase>
-        : IComparable<TSelf>, IInterfaceDerivedSelfBase<TSelf, TBase>
-        where TSelf : IComparableDerived<TSelf, TBase>?
+       : IComparableDerivedTagged<TSelf, TSelf, TBase>
+       where TSelf : IComparableDerived<TSelf, TBase>?
+       where TBase : IComparable<TBase>? {
+    }
+
+    public interface IComparableDerivedTagged<TSelf, Tag, TBase>
+        : IComparable<TSelf>, IInterfaceDerivedTaggedSelfBase<TSelf, Tag<Tag>, TBase>
+        where TSelf : IComparableDerivedTagged<TSelf, Tag, TBase>?
         where TBase : IComparable<TBase>? {
 
         int IComparable<TSelf>.CompareTo(TSelf? other) => TSelf.ToBase((TSelf)(object)this).CompareTo(TSelf.ToBase(other));
     }
 
     public interface IEquatableDerived<TSelf, TBase>
-        : IEquatable<TSelf>, IInterfaceDerivedSelfBase<TSelf, TBase>
-        where TSelf : IEquatableDerived<TSelf, TBase>?
+       : IEquatableDerivedTagged<TSelf, TSelf, TBase>
+       where TSelf : IEquatableDerived<TSelf, TBase>?
+       where TBase : IEquatable<TBase>? {
+    }
+
+    public interface IEquatableDerivedTagged<TSelf, Tag, TBase>
+        : IEquatable<TSelf>, IInterfaceDerivedTaggedSelfBase<TSelf, Tag<Tag>, TBase>
+        where TSelf : IEquatableDerivedTagged<TSelf, Tag, TBase>?
         where TBase : IEquatable<TBase>? {
 
         bool IEquatable<TSelf>.Equals(TSelf? other) => TSelf.ToBase((TSelf)(object)this).Equals(TSelf.ToBase(other));
@@ -537,8 +715,15 @@ namespace UltimateOrb {
 namespace UltimateOrb.Numerics {
 
     public interface IMinMaxValueDerived<TSelf, TBase>
-        : IMinMaxValue<TSelf>, IInterfaceDerivedSelfBase<TSelf, TBase>
+        : IMinMaxValueDerivedTagged<TSelf, TSelf, TBase>
         where TSelf : IMinMaxValueDerived<TSelf, TBase>?
+        where TBase : IMinMaxValue<TBase>? {
+    }
+
+    public interface IMinMaxValueDerivedTagged<TSelf, Tag, TBase>
+        : IMinMaxValue<TSelf>
+        , IInterfaceDerivedTaggedSelfBase<TSelf, Tag<Tag>, TBase>
+        where TSelf : IMinMaxValueDerivedTagged<TSelf, Tag, TBase>?
         where TBase : IMinMaxValue<TBase>? {
 
         static TSelf IMinMaxValue<TSelf>.MaxValue { get => TSelf.FromBase(TBase.MaxValue)!; }
@@ -547,8 +732,14 @@ namespace UltimateOrb.Numerics {
     }
 
     public interface IMinMaxValueDerivedInitOnly<TSelf, TBase>
-        : IMinMaxValueDerived<TSelf, TBase>
+        : IMinMaxValueDerivedInitOnlyTagged<TSelf, TSelf, TBase>
         where TSelf : IMinMaxValueDerivedInitOnly<TSelf, TBase>?
+        where TBase : IMinMaxValue<TBase>? {
+    }
+
+    public interface IMinMaxValueDerivedInitOnlyTagged<TSelf, Tag, TBase>
+        : IMinMaxValueDerivedTagged<TSelf, Tag, TBase>
+        where TSelf : IMinMaxValueDerivedInitOnlyTagged<TSelf, Tag, TBase>?
         where TBase : IMinMaxValue<TBase>? {
 
         static TSelf IMinMaxValue<TSelf>.MaxValue { get; } = TSelf.FromBase(TBase.MaxValue)!;
@@ -556,26 +747,36 @@ namespace UltimateOrb.Numerics {
         static TSelf IMinMaxValue<TSelf>.MinValue { get; } = TSelf.FromBase(TBase.MinValue)!;
     }
 
-    public partial interface INumberBaseDerived<TSelf, TBase>
-        : INumberBase<TSelf>
-        , IInterfaceDerivedSelfBase<TSelf, TBase>
-        , IEquatableDerived<TSelf, TBase>
-        , IEqualityOperatorsDerived<TSelf, TBase, TSelf, TBase, bool, bool>
+    public interface INumberBaseDerived<TSelf, TBase>
+        : INumberBaseDerivedTagged<TSelf, TSelf, TBase>
         where TSelf : INumberBaseDerived<TSelf, TBase>?
         where TBase : INumberBase<TBase>? {
+    }
 
-        static TSelf? IInterfaceDerivedBase<TSelf, IEqualityOperatorsDerivedTags.Other, TSelf, TBase>.FromBase(TBase? value) => TSelf.FromBase(value);
+    public partial interface INumberBaseDerivedTagged<TSelf, Tag, TBase>
+        : INumberBase<TSelf>
+        , IInterfaceDerivedTaggedSelfBase<TSelf, Tag<Tag>, TBase>
+        , IEquatableDerivedTagged<TSelf, Tag, TBase>
+        , IEqualityOperatorsDerivedTagged<TSelf, Tag, TBase, TSelf, TBase, bool, bool>
+        where TSelf : INumberBaseDerivedTagged<TSelf, Tag, TBase>?
+        where TBase : INumberBase<TBase>? {
 
-        static TBase? IInterfaceDerivedBase<TSelf, IEqualityOperatorsDerivedTags.Other, TSelf, TBase>.ToBase(TSelf? value) => TSelf.ToBase(value);
+        static TSelf? IInterfaceDerivedBase<TSelf, Tag<TSelf, IEqualityOperatorsDerivedTags.Other>, TSelf, TBase>.FromBase(TBase? value) => TSelf.FromBase(value);
+
+        static TBase? IInterfaceDerivedBase<TSelf, Tag<TSelf, IEqualityOperatorsDerivedTags.Other>, TSelf, TBase>.ToBase(TSelf? value) => TSelf.ToBase(value);
+
+        // static bool IInterfaceDerivedBase<TSelf, Tag<bool, IEqualityOperatorsDerivedTags.Result>, bool, bool>.FromBase(bool value) => value;
+
+        // static bool IInterfaceDerivedBase<TSelf, Tag<bool, IEqualityOperatorsDerivedTags.Result>, bool, bool>.ToBase(bool value) => value;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         [return: NotNullIfNotNull(nameof(value))]
-        protected static virtual new TSelf? FromBase(TBase? value) => IInterfaceDerivedSelfBaseFriend<TSelf, TBase>.FromBase(value);
+        protected static virtual new TSelf? FromBase(TBase? value) => IInterfaceDerivedTaggedSelfBaseFriend<TSelf, Tag<Tag>, TBase>.FromBase(value);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         [return: NotNullIfNotNull(nameof(value))]
-        protected static virtual new TBase? ToBase(TSelf? value) => IInterfaceDerivedSelfBaseFriend<TSelf, TBase>.ToBase(value);
-
+        protected static virtual new TBase? ToBase(TSelf? value) => IInterfaceDerivedTaggedSelfBaseFriend<TSelf, Tag<Tag>, TBase>.ToBase(value);
+        
         static TSelf INumberBase<TSelf>.One { get => TSelf.FromBase(TBase.One)!; }
 
         static int INumberBase<TSelf>.Radix => TBase.Radix;
@@ -774,13 +975,19 @@ namespace UltimateOrb.Numerics {
         static bool IEqualityOperators<TSelf, TSelf, bool>.operator !=(TSelf? left, TSelf? right) => TSelf.ToBase(left) != TSelf.ToBase(right);
     }
 
+    public interface IFloatingPointConstantsDerived<TSelf, TBase>
+        : IFloatingPointConstantsDerivedTagged<TSelf, TSelf, TBase>
+        where TSelf : IFloatingPointConstantsDerived<TSelf, TBase>?
+        where TBase : IFloatingPointConstants<TBase>? {
+    }
+
     /// <inheritdoc cref="IFloatingPointConstants{TSelf}"/>
     /// <typeparam name="TBase">
     /// The source/base type supplying data or behavior that <typeparamref name="TSelf"/> adapts or forwards.
     /// </typeparam>
-    public interface IFloatingPointConstantsDerived<TSelf, TBase>
-        : IFloatingPointConstants<TSelf>, INumberBaseDerived<TSelf, TBase>
-        where TSelf : IFloatingPointConstantsDerived<TSelf, TBase>?
+    public interface IFloatingPointConstantsDerivedTagged<TSelf, Tag, TBase>
+        : IFloatingPointConstants<TSelf>, INumberBaseDerivedTagged<TSelf, Tag, TBase>
+        where TSelf : IFloatingPointConstantsDerivedTagged<TSelf, Tag, TBase>?
         where TBase : IFloatingPointConstants<TBase>? {
 
         static TSelf IFloatingPointConstants<TSelf>.E { get => TSelf.FromBase(TBase.E)!; }
@@ -799,16 +1006,22 @@ namespace UltimateOrb.Numerics {
         }
     }
 
+    public interface IEqualityOperatorsDerived<TSelf, TBase, TOther, TOtherBase, TResult, TResultBase>
+        : IEqualityOperatorsDerivedTagged<TSelf, TSelf, TBase, TOther, TOtherBase, TResult, TResultBase>
+        where TSelf : IEqualityOperatorsDerived<TSelf, TBase, TOther, TOtherBase, TResult, TResultBase>?
+        where TBase : IEqualityOperators<TBase, TOtherBase, TResultBase>? {
+    }
+
     /// <inheritdoc cref="IEqualityOperators{TSelf,TOther,TResult}"/>
     /// <typeparam name="TBase">The source/base type supplying data or behavior that <typeparamref name="TSelf"/> adapts or forwards.</typeparam>
     /// <typeparam name="TOtherBase">The source/base type supplying data or behavior that <typeparamref name="TOther"/> adapts or forwards.</typeparam>
     /// <typeparam name="TResultBase">The source/base type supplying data or behavior that <typeparamref name="TResult"/> adapts or forwards.</typeparam>
-    public interface IEqualityOperatorsDerived<TSelf, TBase, TOther, TOtherBase, TResult, TResultBase>
+    public interface IEqualityOperatorsDerivedTagged<TSelf, Tag, TBase, TOther, TOtherBase, TResult, TResultBase>
         : IEqualityOperators<TSelf, TOther, TResult>
-        , IInterfaceDerivedSelfBase<TSelf, TBase>
-        , IInterfaceDerivedBase<TSelf, IEqualityOperatorsDerivedTags.Other, TOther, TOtherBase>
-        , IInterfaceDerivedBase<TSelf, IEqualityOperatorsDerivedTags.Result, TResult, TResultBase>
-        where TSelf : IEqualityOperatorsDerived<TSelf, TBase, TOther, TOtherBase, TResult, TResultBase>?
+        , IInterfaceDerivedTaggedSelfBase<TSelf, Tag<Tag>, TBase>
+        , IInterfaceDerivedBase<TSelf, Tag<TOther, IEqualityOperatorsDerivedTags.Other>, TOther, TOtherBase>
+        , IInterfaceDerivedBase<TSelf, Tag<TResult, IEqualityOperatorsDerivedTags.Result>, TResult, TResultBase>
+        where TSelf : IEqualityOperatorsDerivedTagged<TSelf, Tag, TBase, TOther, TOtherBase, TResult, TResultBase>?
         where TBase : IEqualityOperators<TBase, TOtherBase, TResultBase>? {
 
         static TResult IEqualityOperators<TSelf, TOther, TResult>.operator ==(TSelf? left, TOther? right) => TSelf.FromBase(TSelf.ToBase(left) == TSelf.ToBase(right))!;
@@ -825,14 +1038,20 @@ namespace UltimateOrb.Numerics {
         }
     }
 
+    public interface IComparisonOperatorssDerived<TSelf, TBase, TOther, TOtherBase, TResult, TResultBase>
+        : IComparisonOperatorsDerivedTagged<TSelf, TSelf, TBase, TOther, TOtherBase, TResult, TResultBase>
+        where TSelf : IComparisonOperatorssDerived<TSelf, TBase, TOther, TOtherBase, TResult, TResultBase>?
+        where TBase : IComparisonOperators<TBase, TOtherBase, TResultBase>? {
+    }
+
     /// <inheritdoc cref="IComparisonOperators{TSelf,TOther,TResult}"/>
     /// <typeparam name="TBase">The source/base type supplying data or behavior that <typeparamref name="TSelf"/> adapts or forwards.</typeparam>
     /// <typeparam name="TOtherBase">The source/base type supplying data or behavior that <typeparamref name="TOther"/> adapts or forwards.</typeparam>
     /// <typeparam name="TResultBase">The source/base type supplying data or behavior that <typeparamref name="TResult"/> adapts or forwards.</typeparam>
-    public interface IComparisonOperatorsDerived<TSelf, TBase, TOther, TOtherBase, TResult, TResultBase>
+    public interface IComparisonOperatorsDerivedTagged<TSelf, Tag, TBase, TOther, TOtherBase, TResult, TResultBase>
         : IComparisonOperators<TSelf, TOther, TResult>
-        , IEqualityOperatorsDerived<TSelf, TBase, TOther, TOtherBase, TResult, TResultBase>
-        where TSelf : IComparisonOperatorsDerived<TSelf, TBase, TOther, TOtherBase, TResult, TResultBase>?
+        , IEqualityOperatorsDerivedTagged<TSelf, Tag, TBase, TOther, TOtherBase, TResult, TResultBase>
+        where TSelf : IComparisonOperatorsDerivedTagged<TSelf, Tag, TBase, TOther, TOtherBase, TResult, TResultBase>?
         where TBase : IComparisonOperators<TBase, TOtherBase, TResultBase>? {
 
         static TResult IComparisonOperators<TSelf, TOther, TResult>.operator <(TSelf left, TOther right) => TSelf.FromBase(TSelf.ToBase(left)! < TSelf.ToBase(right)!)!;
@@ -853,78 +1072,108 @@ namespace UltimateOrb.Numerics {
         }
     }
 
+    public interface IModulusOperatorsDerived<TSelf, TBase, TOther, TOtherBase, TResult, TResultBase>
+        : IModulusOperatorsDerivedTagged<TSelf, TSelf, TBase, TOther, TOtherBase, TResult, TResultBase>
+        where TSelf : IModulusOperatorsDerived<TSelf, TBase, TOther, TOtherBase, TResult, TResultBase>?
+        where TBase : IModulusOperators<TBase, TOtherBase, TResultBase>? {
+    }
+
     /// <inheritdoc cref="IModulusOperators{TSelf,TOther,TResult}"/>
     /// <typeparam name="TBase">The source/base type supplying data or behavior that <typeparamref name="TSelf"/> adapts or forwards.</typeparam>
     /// <typeparam name="TOtherBase">The source/base type supplying data or behavior that <typeparamref name="TOther"/> adapts or forwards.</typeparam>
     /// <typeparam name="TResultBase">The source/base type supplying data or behavior that <typeparamref name="TResult"/> adapts or forwards.</typeparam>
-    public interface IModulusOperatorsDerived<TSelf, TBase, TOther, TOtherBase, TResult, TResultBase>
+    public interface IModulusOperatorsDerivedTagged<TSelf, Tag, TBase, TOther, TOtherBase, TResult, TResultBase>
         : IModulusOperators<TSelf, TOther, TResult>
-        , IInterfaceDerivedSelfBase<TSelf, TBase>
-        , IInterfaceDerivedBase<TSelf, IModulusOperatorsDerivedTags.Other, TOther, TOtherBase>
-        , IInterfaceDerivedBase<TSelf, IModulusOperatorsDerivedTags.Result, TResult, TResultBase>
-        where TSelf : IModulusOperatorsDerived<TSelf, TBase, TOther, TOtherBase, TResult, TResultBase>?
+        , IInterfaceDerivedTaggedSelfBase<TSelf, Tag<Tag>, TBase>
+        , IInterfaceDerivedBase<TSelf, Tag<TOther, IModulusOperatorsDerivedTags.Other>, TOther, TOtherBase>
+        , IInterfaceDerivedBase<TSelf, Tag<TResult, IModulusOperatorsDerivedTags.Result>, TResult, TResultBase>
+        where TSelf : IModulusOperatorsDerivedTagged<TSelf, Tag, TBase, TOther, TOtherBase, TResult, TResultBase>?
         where TBase : IModulusOperators<TBase, TOtherBase, TResultBase>? {
 
         static TResult IModulusOperators<TSelf, TOther, TResult>.operator %(TSelf left, TOther right) => TSelf.FromBase(TSelf.ToBase(left)! % TSelf.ToBase(right)!)!;
     }
 
-    /// <inheritdoc cref="INumber{TSelf}"/>
-    /// <typeparam name="TBase">The source/base type supplying data or behavior that <typeparamref name="TSelf"/> adapts or forwards.</typeparam>
     public interface INumberDerived<TSelf, TBase>
-        : INumber<TSelf>
-        , IComparableNongenericDerived<TSelf, TBase>
-        , IComparableDerived<TSelf, TBase>
-        , IComparisonOperatorsDerived<TSelf, TBase, TSelf, TBase, bool, bool>
-        , IModulusOperatorsDerived<TSelf, TBase, TSelf, TBase, TSelf, TBase>
-        , INumberBaseDerived<TSelf, TBase>
+        : INumberDerivedTagged<TSelf, TSelf, TBase>
         where TSelf : INumberDerived<TSelf, TBase>?
         where TBase : INumber<TBase>? {
+    }
 
-        static TSelf? IInterfaceDerivedBase<TSelf, IEqualityOperatorsDerivedTags.Other, TSelf, TBase>.FromBase(TBase? value) => TSelf.FromBase(value);
+    /// <inheritdoc cref="INumber{TSelf}"/>
+    /// <typeparam name="TBase">The source/base type supplying data or behavior that <typeparamref name="TSelf"/> adapts or forwards.</typeparam>
+    public interface INumberDerivedTagged<TSelf, Tag, TBase>
+        : INumber<TSelf>
+        , IComparableNongenericDerivedTagged<TSelf, Tag, TBase>
+        , IComparableDerivedTagged<TSelf, Tag, TBase>
+        , IComparisonOperatorsDerivedTagged<TSelf, Tag, TBase, TSelf, TBase, bool, bool>
+        , IModulusOperatorsDerivedTagged<TSelf, Tag, TBase, TSelf, TBase, TSelf, TBase>
+        , INumberBaseDerivedTagged<TSelf, Tag, TBase>
+        where TSelf : INumberDerivedTagged<TSelf, Tag, TBase>?
+        where TBase : INumber<TBase>? {
 
-        static TBase? IInterfaceDerivedBase<TSelf, IEqualityOperatorsDerivedTags.Other, TSelf, TBase>.ToBase(TSelf? value) => TSelf.ToBase(value);
+        static TSelf? IInterfaceDerivedBase<TSelf, Tag<TSelf, IModulusOperatorsDerivedTags.Other>, TSelf, TBase>.FromBase(TBase? value) => TSelf.FromBase(value);
 
-        static TSelf? IInterfaceDerivedBase<TSelf, IModulusOperatorsDerivedTags.Other, TSelf, TBase>.FromBase(TBase? value) => TSelf.FromBase(value);
+        static TBase? IInterfaceDerivedBase<TSelf, Tag<TSelf, IModulusOperatorsDerivedTags.Other>, TSelf, TBase>.ToBase(TSelf? value) => TSelf.ToBase(value);
+       
+        static TSelf? IInterfaceDerivedBase<TSelf, Tag<TSelf, IModulusOperatorsDerivedTags.Result>, TSelf, TBase>.FromBase(TBase? value) => TSelf.FromBase(value);
 
-        static TBase? IInterfaceDerivedBase<TSelf, IModulusOperatorsDerivedTags.Other, TSelf, TBase>.ToBase(TSelf? value) => TSelf.ToBase(value);
+        static TBase? IInterfaceDerivedBase<TSelf, Tag<TSelf, IModulusOperatorsDerivedTags.Result>, TSelf, TBase>.ToBase(TSelf? value) => TSelf.ToBase(value);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         [return: NotNullIfNotNull(nameof(value))]
-        protected static virtual new TSelf? FromBase(TBase? value) => IInterfaceDerivedSelfBaseFriend<TSelf, TBase>.FromBase(value);
+        protected static virtual new TSelf? FromBase(TBase? value) => IInterfaceDerivedTaggedSelfBaseFriend<TSelf, Tag<Tag>, TBase>.FromBase(value);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         [return: NotNullIfNotNull(nameof(value))]
-        protected static virtual new TBase? ToBase(TSelf? value) => IInterfaceDerivedSelfBaseFriend<TSelf, TBase>.ToBase(value);
+        protected static virtual new TBase? ToBase(TSelf? value) => IInterfaceDerivedTaggedSelfBaseFriend<TSelf, Tag<Tag>, TBase>.ToBase(value);
+    }
+
+    public interface ISignedNumberDerived<TSelf, TBase>
+       : ISignedNumberDerivedTagged<TSelf, TSelf, TBase>
+       where TSelf : ISignedNumberDerived<TSelf, TBase>?
+       where TBase : ISignedNumber<TBase>? {
     }
 
     /// <inheritdoc cref="ISignedNumber{TSelf}"/>
     /// <typeparam name="TBase">The source/base type supplying data or behavior that <typeparamref name="TSelf"/> adapts or forwards.</typeparam>
-    public interface ISignedNumberDerived<TSelf, TBase>
+    public interface ISignedNumberDerivedTagged<TSelf, Tag, TBase>
         : ISignedNumber<TSelf>
-        , INumberBaseDerived<TSelf, TBase>
-        where TSelf : ISignedNumberDerived<TSelf, TBase>?
+        , INumberBaseDerivedTagged<TSelf, Tag, TBase>
+        where TSelf : ISignedNumberDerivedTagged<TSelf, Tag, TBase>?
         where TBase : ISignedNumber<TBase>? {
 
         static TSelf ISignedNumber<TSelf>.NegativeOne { get => TSelf.FromBase(TBase.NegativeOne)!; }
     }
 
-    /// <inheritdoc cref="ISignedNumberDerived{TSelf,TBase}"/>
     public interface ISignedNumberDerivedInitOnly<TSelf, TBase>
-        : ISignedNumberDerived<TSelf, TBase>
-        where TSelf : ISignedNumberDerivedInitOnly<TSelf, TBase>?
+       : ISignedNumberDerivedInitOnlyTagged<TSelf, TSelf, TBase>
+       where TSelf : ISignedNumberDerivedInitOnly<TSelf, TBase>?
+       where TBase : ISignedNumber<TBase>? {
+    }
+
+    /// <inheritdoc cref="ISignedNumberDerived{TSelf,TBase}"/>
+    public interface ISignedNumberDerivedInitOnlyTagged<TSelf, Tag, TBase>
+        : ISignedNumberDerivedTagged<TSelf, Tag, TBase>
+        where TSelf : ISignedNumberDerivedInitOnlyTagged<TSelf, Tag, TBase>?
         where TBase : ISignedNumber<TBase>? {
 
         static TSelf ISignedNumber<TSelf>.NegativeOne { get; } = TSelf.FromBase(TBase.NegativeOne)!;
     }
 
+    public interface IFloatingPointDerived<TSelf, TBase>
+      : IFloatingPointDerivedTagged<TSelf, TSelf, TBase>
+      where TSelf : IFloatingPointDerived<TSelf, TBase>?
+      where TBase : IFloatingPoint<TBase>? {
+    }
+
     /// <inheritdoc cref="IFloatingPoint{TSelf}"/>
     /// <typeparam name="TBase">The source/base type supplying data or behavior that <typeparamref name="TSelf"/> adapts or forwards.</typeparam>
-    public interface IFloatingPointDerived<TSelf, TBase>
+    public interface IFloatingPointDerivedTagged<TSelf, Tag, TBase>
         : IFloatingPoint<TSelf>
-        , IFloatingPointConstantsDerived<TSelf, TBase>
-        , INumberDerived<TSelf, TBase>
-        , ISignedNumberDerived<TSelf, TBase>
-        where TSelf : IFloatingPointDerived<TSelf, TBase>?
+        , IFloatingPointConstantsDerivedTagged<TSelf, Tag, TBase>
+        , INumberDerivedTagged<TSelf, Tag, TBase>
+        , ISignedNumberDerivedTagged<TSelf, Tag, TBase>
+        where TSelf : IFloatingPointDerivedTagged<TSelf, Tag, TBase>?
         where TBase : IFloatingPoint<TBase>? {
 
         static TSelf IFloatingPoint<TSelf>.Round(TSelf x, int digits, MidpointRounding mode) => TSelf.FromBase(TBase.Round(TSelf.ToBase(x)!, digits, mode))!;
@@ -946,12 +1195,18 @@ namespace UltimateOrb.Numerics {
         bool IFloatingPoint<TSelf>.TryWriteSignificandLittleEndian(Span<byte> destination, out int bytesWritten) => TSelf.ToBase((TSelf)(object)this).TryWriteSignificandLittleEndian(destination, out bytesWritten);
     }
 
+    public interface IExponentialFunctionsDerived<TSelf, TBase>
+        : IExponentialFunctionsDerivedTagged<TSelf, TSelf, TBase>
+        where TSelf : IExponentialFunctionsDerived<TSelf, TBase>?
+        where TBase : IExponentialFunctions<TBase>? {
+    }
+
     /// <inheritdoc cref="IExponentialFunctions{TSelf}"/>
     /// <typeparam name="TBase">The source/base type supplying data or behavior that <typeparamref name="TSelf"/> adapts or forwards.</typeparam>
-    public interface IExponentialFunctionsDerived<TSelf, TBase>
+    public interface IExponentialFunctionsDerivedTagged<TSelf, Tag, TBase>
         : IExponentialFunctions<TSelf>
-        , IFloatingPointConstantsDerived<TSelf, TBase>
-        where TSelf : IExponentialFunctionsDerived<TSelf, TBase>?
+        , IFloatingPointConstantsDerivedTagged<TSelf, Tag, TBase>
+        where TSelf : IExponentialFunctionsDerivedTagged<TSelf, Tag, TBase>?
         where TBase : IExponentialFunctions<TBase>? {
 
         static TSelf IExponentialFunctions<TSelf>.Exp(TSelf x) => TSelf.FromBase(TBase.Exp(TSelf.ToBase(x)!))!;
@@ -967,12 +1222,18 @@ namespace UltimateOrb.Numerics {
         static TSelf IExponentialFunctions<TSelf>.Exp10M1(TSelf x) => TSelf.FromBase(TBase.Exp10M1(TSelf.ToBase(x)!))!;
     }
 
+    public interface IHyperbolicFunctionsDerived<TSelf, TBase>
+       : IHyperbolicFunctionsDerivedTagged<TSelf, TSelf, TBase>
+       where TSelf : IHyperbolicFunctionsDerived<TSelf, TBase>?
+       where TBase : IHyperbolicFunctions<TBase>? {
+    }
+
     /// <inheritdoc cref="IHyperbolicFunctions{TSelf}"/>
     /// <typeparam name="TBase">The source/base type supplying data or behavior that <typeparamref name="TSelf"/> adapts or forwards.</typeparam>
-    public interface IHyperbolicFunctionsDerived<TSelf, TBase>
+    public interface IHyperbolicFunctionsDerivedTagged<TSelf, Tag, TBase>
         : IHyperbolicFunctions<TSelf>
-        , IFloatingPointConstantsDerived<TSelf, TBase>
-        where TSelf : IHyperbolicFunctionsDerived<TSelf, TBase>?
+        , IFloatingPointConstantsDerivedTagged<TSelf, Tag, TBase>
+        where TSelf : IHyperbolicFunctionsDerivedTagged<TSelf, Tag, TBase>?
         where TBase : IHyperbolicFunctions<TBase>? {
 
         static TSelf IHyperbolicFunctions<TSelf>.Acosh(TSelf x) => TSelf.FromBase(TBase.Acosh(TSelf.ToBase(x)!))!;
@@ -988,12 +1249,18 @@ namespace UltimateOrb.Numerics {
         static TSelf IHyperbolicFunctions<TSelf>.Tanh(TSelf x) => TSelf.FromBase(TBase.Tanh(TSelf.ToBase(x)!))!;
     }
 
+    public interface ILogarithmicFunctionsDerived<TSelf, TBase>
+       : ILogarithmicFunctionsDerivedTagged<TSelf, TSelf, TBase>
+       where TSelf : ILogarithmicFunctionsDerived<TSelf, TBase>?
+       where TBase : ILogarithmicFunctions<TBase>? {
+    }
+
     /// <inheritdoc cref="ILogarithmicFunctions{TSelf}"/>
     /// <typeparam name="TBase">The source/base type supplying data or behavior that <typeparamref name="TSelf"/> adapts or forwards.</typeparam>
-    public interface ILogarithmicFunctionsDerived<TSelf, TBase>
+    public interface ILogarithmicFunctionsDerivedTagged<TSelf, Tag, TBase>
         : ILogarithmicFunctions<TSelf>
-        , IFloatingPointConstantsDerived<TSelf, TBase>
-        where TSelf : ILogarithmicFunctionsDerived<TSelf, TBase>?
+        , IFloatingPointConstantsDerivedTagged<TSelf, Tag, TBase>
+        where TSelf : ILogarithmicFunctionsDerivedTagged<TSelf, Tag, TBase>?
         where TBase : ILogarithmicFunctions<TBase>? {
 
         static TSelf ILogarithmicFunctions<TSelf>.Log(TSelf x) => TSelf.FromBase(TBase.Log(TSelf.ToBase(x)!))!;
@@ -1011,23 +1278,35 @@ namespace UltimateOrb.Numerics {
         static TSelf ILogarithmicFunctions<TSelf>.Log10P1(TSelf x) => TSelf.FromBase(TBase.Log10P1(TSelf.ToBase(x)!))!;
     }
 
+    public interface IPowerFunctionsDerived<TSelf, TBase>
+      : IPowerFunctionsDerivedTagged<TSelf, TSelf, TBase>
+      where TSelf : IPowerFunctionsDerived<TSelf, TBase>?
+      where TBase : IPowerFunctions<TBase>? {
+    }
+
     /// <inheritdoc cref="IPowerFunctions{TSelf}"/>
     /// <typeparam name="TBase">The source/base type supplying data or behavior that <typeparamref name="TSelf"/> adapts or forwards.</typeparam>
-    public interface IPowerFunctionsDerived<TSelf, TBase>
+    public interface IPowerFunctionsDerivedTagged<TSelf, Tag, TBase>
         : IPowerFunctions<TSelf>
-        , INumberBaseDerived<TSelf, TBase>
-        where TSelf : IPowerFunctionsDerived<TSelf, TBase>?
+        , INumberBaseDerivedTagged<TSelf, Tag, TBase>
+        where TSelf : IPowerFunctionsDerivedTagged<TSelf, Tag, TBase>?
         where TBase : IPowerFunctions<TBase>? {
 
         static TSelf IPowerFunctions<TSelf>.Pow(TSelf x, TSelf y) => TSelf.FromBase(TBase.Pow(TSelf.ToBase(x)!, TSelf.ToBase(y)!))!;
     }
 
+    public interface IRootFunctionsDerived<TSelf, TBase>
+        : IRootFunctionsDerivedTagged<TSelf, TSelf, TBase>
+        where TSelf : IRootFunctionsDerived<TSelf, TBase>?
+        where TBase : IRootFunctions<TBase>? {
+    }
+
     /// <inheritdoc cref="IRootFunctions{TSelf}"/>
     /// <typeparam name="TBase">The source/base type supplying data or behavior that <typeparamref name="TSelf"/> adapts or forwards.</typeparam>
-    public interface IRootFunctionsDerived<TSelf, TBase>
+    public interface IRootFunctionsDerivedTagged<TSelf, Tag, TBase>
         : IRootFunctions<TSelf>
-        , IFloatingPointConstantsDerived<TSelf, TBase>
-        where TSelf : IRootFunctionsDerived<TSelf, TBase>?
+        , IFloatingPointConstantsDerivedTagged<TSelf, Tag, TBase>
+        where TSelf : IRootFunctionsDerivedTagged<TSelf, Tag, TBase>?
         where TBase : IRootFunctions<TBase>? {
 
         static TSelf IRootFunctions<TSelf>.Cbrt(TSelf x) => TSelf.FromBase(TBase.Cbrt(TSelf.ToBase(x)!))!;
@@ -1039,12 +1318,18 @@ namespace UltimateOrb.Numerics {
         static TSelf IRootFunctions<TSelf>.Sqrt(TSelf x) => TSelf.FromBase(TBase.Sqrt(TSelf.ToBase(x)!))!;
     }
 
+    public interface ITrigonometricFunctionsDerived<TSelf, TBase>
+        : ITrigonometricFunctionsDerivedTagged<TSelf, TSelf, TBase>
+        where TSelf : ITrigonometricFunctionsDerived<TSelf, TBase>?
+        where TBase : ITrigonometricFunctions<TBase>? {
+    }
+
     /// <inheritdoc cref="ITrigonometricFunctions{TSelf}"/>
     /// <typeparam name="TBase">The source/base type supplying data or behavior that <typeparamref name="TSelf"/> adapts or forwards.</typeparam>
-    public interface ITrigonometricFunctionsDerived<TSelf, TBase>
+    public interface ITrigonometricFunctionsDerivedTagged<TSelf, Tag, TBase>
         : ITrigonometricFunctions<TSelf>
-        , IFloatingPointConstantsDerived<TSelf, TBase>
-        where TSelf : ITrigonometricFunctionsDerived<TSelf, TBase>?
+        , IFloatingPointConstantsDerivedTagged<TSelf, Tag, TBase>
+        where TSelf : ITrigonometricFunctionsDerivedTagged<TSelf, Tag, TBase>?
         where TBase : ITrigonometricFunctions<TBase>? {
 
         static TSelf ITrigonometricFunctions<TSelf>.Acos(TSelf x) => TSelf.FromBase(TBase.Acos(TSelf.ToBase(x)!))!;
@@ -1087,15 +1372,21 @@ namespace UltimateOrb.Numerics {
     }
 
     public interface IFloatingPointIeee754Derived<TSelf, TBase>
-        : IFloatingPointIeee754<TSelf>
-        , IExponentialFunctionsDerived<TSelf, TBase>
-        , IFloatingPointDerived<TSelf, TBase>
-        , IHyperbolicFunctionsDerived<TSelf, TBase>
-        , ILogarithmicFunctionsDerived<TSelf, TBase>
-        , IPowerFunctionsDerived<TSelf, TBase>
-        , IRootFunctionsDerived<TSelf, TBase>
-        , ITrigonometricFunctionsDerived<TSelf, TBase>
+        : IFloatingPointIeee754DerivedTagged<TSelf, TSelf, TBase>
         where TSelf : IFloatingPointIeee754Derived<TSelf, TBase>?
+        where TBase : IFloatingPointIeee754<TBase>? {
+    }
+
+    public interface IFloatingPointIeee754DerivedTagged<TSelf, Tag, TBase>
+        : IFloatingPointIeee754<TSelf>
+        , IExponentialFunctionsDerivedTagged<TSelf, Tag, TBase>
+        , IFloatingPointDerivedTagged<TSelf, Tag, TBase>
+        , IHyperbolicFunctionsDerivedTagged<TSelf, Tag, TBase>
+        , ILogarithmicFunctionsDerivedTagged<TSelf, Tag, TBase>
+        , IPowerFunctionsDerivedTagged<TSelf, Tag, TBase>
+        , IRootFunctionsDerivedTagged<TSelf, Tag, TBase>
+        , ITrigonometricFunctionsDerivedTagged<TSelf, Tag, TBase>
+        where TSelf : IFloatingPointIeee754DerivedTagged<TSelf, Tag, TBase>?
         where TBase : IFloatingPointIeee754<TBase>? {
 
         static TSelf IFloatingPointIeee754<TSelf>.Epsilon => TSelf.FromBase(TBase.Epsilon)!;
@@ -1131,12 +1422,18 @@ namespace UltimateOrb.Numerics {
         static TSelf IFloatingPointIeee754<TSelf>.ScaleB(TSelf x, int n) => TSelf.FromBase(TBase.ScaleB(TSelf.ToBase(x)!, n))!;
     }
 
+    public interface IDecimalFloatingPointIeee754Derived<TSelf, TBase>
+        : IDecimalFloatingPointIeee754DerivedTagged<TSelf, TSelf, TBase>
+        where TSelf : IDecimalFloatingPointIeee754Derived<TSelf, TBase>?
+        where TBase : IDecimalFloatingPointIeee754<TBase>? {
+    }
+
     /// <inheritdoc cref="IDecimalFloatingPointIeee754{TSelf}"/>
     /// <typeparam name="TBase">The source/base type supplying data or behavior that <typeparamref name="TSelf"/> adapts or forwards.</typeparam>
-    public interface IDecimalFloatingPointIeee754Derived<TSelf, TBase>
-        : IFloatingPointIeee754Derived<TSelf, TBase>
+    public interface IDecimalFloatingPointIeee754DerivedTagged<TSelf, Tag, TBase>
+        : IFloatingPointIeee754DerivedTagged<TSelf, Tag, TBase>
         , IDecimalFloatingPointIeee754<TSelf>
-        where TSelf : IDecimalFloatingPointIeee754Derived<TSelf, TBase>?
+        where TSelf : IDecimalFloatingPointIeee754DerivedTagged<TSelf, Tag, TBase>?
         where TBase : IDecimalFloatingPointIeee754<TBase>? {
 
         static int INumberBase<TSelf>.Radix => TBase.Radix;
@@ -1148,6 +1445,7 @@ namespace UltimateOrb {
     // Wrapper. Same API shape as Decimal128Bid
     [Experimental("UoWIP")]
     public readonly struct Decimal128 :
+        IInterfaceDerivedSelfBase<Decimal128, Decimal128Bid>,
         IComparable, IComparableNongenericDerived<Decimal128, Decimal128Bid>,
         IConvertible, IConvertibleNongenericDerived<Decimal128, Decimal128Bid>,
         IComparable<Decimal128>, IComparableDerived<Decimal128, Decimal128Bid>,
@@ -1276,13 +1574,14 @@ namespace UltimateOrb {
 
     [Experimental("UoWIP")]
     public readonly partial struct Decimal128Dpd :
-            IComparable, IComparableNongenericDerived<Decimal128Dpd, Decimal128Bid>,
-            IConvertible, IConvertibleNongenericDerived<Decimal128Dpd, Decimal128Bid>,
-            IComparable<Decimal128Dpd>, IComparableDerived<Decimal128Dpd, Decimal128Bid>,
-            IEquatable<Decimal128Dpd>, IEquatableDerived<Decimal128Dpd, Decimal128Bid>,
-            IDecimalFloatingPointIeee754<Decimal128Dpd>, IDecimalFloatingPointIeee754Derived<Decimal128Dpd, Decimal128Bid>,
-            IMinMaxValue<Decimal128Dpd>, IMinMaxValueDerivedInitOnly<Decimal128Dpd, Decimal128Bid>,
-            IUtf8SpanFormattable {
+        IInterfaceDerivedSelfBase<Decimal128Dpd, Decimal128Bid>,
+        IComparable, IComparableNongenericDerived<Decimal128Dpd, Decimal128Bid>,
+        IConvertible, IConvertibleNongenericDerived<Decimal128Dpd, Decimal128Bid>,
+        IComparable<Decimal128Dpd>, IComparableDerived<Decimal128Dpd, Decimal128Bid>,
+        IEquatable<Decimal128Dpd>, IEquatableDerived<Decimal128Dpd, Decimal128Bid>,
+        IDecimalFloatingPointIeee754<Decimal128Dpd>, IDecimalFloatingPointIeee754Derived<Decimal128Dpd, Decimal128Bid>,
+        IMinMaxValue<Decimal128Dpd>, IMinMaxValueDerivedInitOnly<Decimal128Dpd, Decimal128Bid>,
+        IUtf8SpanFormattable {
 
         internal readonly UInt128 bits;
 
@@ -1491,7 +1790,7 @@ namespace UltimateOrb {
     public readonly partial struct Decimal128Bid :
         ISpanFormattable,
         IComparable,
-        IConvertible, IConvertibleNongenericDerived<Decimal128Bid, BigRational>,
+        IConvertible, IConvertibleNongenericDerived<Decimal128Bid, BigRational>, IInterfaceDerivedSelfBase<Decimal128Bid, BigRational>,
         IComparable<Decimal128Bid>,
         IEquatable<Decimal128Bid>,
         IFloatingPointIeee754<Decimal128Bid>,

@@ -185,29 +185,29 @@ namespace UltimateOrb.Numerics.Generic {
             result_hi_hi = hhh;
             /*
 
-            TSelf.BigMul(out var lll, out var llh, first_lo, second_lo);
-            TSelf.BigMul(out var hhl, out var hhh, first_hi, second_hi);
-            var fc = CheckUInt1(TSelf.AddUnsignedNoThrow(out var fm, first_hi, first_lo));
-            var sc = CheckUInt1(TSelf.AddUnsignedNoThrow(out var sm, second_hi, second_lo));
-            TSelf.AddUnchecked(out var tl, out var th, hhl, hhh, lll, llh);
+            T.BigMul(out var lll, out var llh, first_lo, second_lo);
+            T.BigMul(out var hhl, out var hhh, first_hi, second_hi);
+            var fc = CheckUInt1(T.AddUnsignedNoThrow(out var fm, first_hi, first_lo));
+            var sc = CheckUInt1(T.AddUnsignedNoThrow(out var sm, second_hi, second_lo));
+            T.AddUnchecked(out var tl, out var th, hhl, hhh, lll, llh);
             var dh = unchecked((uint)fc + (uint)sc);
-            TSelf.BigMul(out var mml, out var mmh, fm, sm);
+            T.BigMul(out var mml, out var mmh, fm, sm);
             if (0 != fc) {
-                TSelf.AddUnchecked(out mmh, mmh, sm);
+                T.AddUnchecked(out mmh, mmh, sm);
             }
             if (0 != sc) {
-                TSelf.AddUnchecked(out mmh, mmh, fm);
+                T.AddUnchecked(out mmh, mmh, fm);
             }
-            TSelf.SubtractUnchecked(out mml, out mmh, mml, mmh, tl, th);
-            var mc = CheckUInt1(TSelf.AddUnsignedNoThrow(out var dl, fm, sm));
+            T.SubtractUnchecked(out mml, out mmh, mml, mmh, tl, th);
+            var mc = CheckUInt1(T.AddUnsignedNoThrow(out var dl, fm, sm));
             unchecked {
                 dh += (uint)mc;
             }
-            TSelf.ConditionalIncreaseUnchecked(out hhl, out hhh, hhl, hhh, CheckUInt1(TSelf.AddUnsignedNoThrow(out llh, llh, mml)));
-            TSelf.AddUnchecked(out hhl, out hhh, hhl, hhh, mmh, default(ZeroT));
-            TSelf.ExtendedShiftRightUnsigned(out dl, out dh, dl, dh);
-            TSelf.ExtendedSubtractUnchecked(out dl, out dh, dl, dh, mmh, default(ZeroT));
-            TSelf.AddUnchecked(out hhh, hhh, dh);
+            T.ConditionalIncreaseUnchecked(out hhl, out hhh, hhl, hhh, CheckUInt1(T.AddUnsignedNoThrow(out llh, llh, mml)));
+            T.AddUnchecked(out hhl, out hhh, hhl, hhh, mmh, default(ZeroT));
+            T.ExtendedShiftRightUnsigned(out dl, out dh, dl, dh);
+            T.ExtendedSubtractUnchecked(out dl, out dh, dl, dh, mmh, default(ZeroT));
+            T.AddUnchecked(out hhh, hhh, dh);
             result_lo_lo = lll;
             result_lo_hi = llh;
             result_hi_lo = hhl;
@@ -516,17 +516,17 @@ namespace UltimateOrb.Numerics.Generic {
 
         public static virtual void DivRemUnchecked(out TBase result_lo, out TBase result_hi, out TBase remainder_lo, out TBase remainder_hi, TBase dividend_lo, TBase dividend_hi, TBase divisor_lo, TBase divisor_hi) {
             unchecked {
-                if (TSelf.IsZero_Unlikely(divisor_hi)) {
-                    if (TSelf.IsNegativeSigned(divisor_hi)) {
+                if (T.IsZero_Unlikely(divisor_hi)) {
+                    if (T.IsNegativeSigned(divisor_hi)) {
                         TBase product_lo;
                         TBase product_hi;
                         TBase q_lo;
                         TBase t;
                         {
                             int cc;
-                            cc = TSelf.CountLeadingZeros(divisor_hi);
+                            cc = T.CountLeadingZeros(divisor_hi);
                             t = divisor_hi << cc;
-                            q_lo = TSelf.BigDivInternal(
+                            q_lo = T.BigDivInternal(
                                 dividend_lo >> (BitSize_Checked - cc) | (dividend_hi << cc),
                                 dividend_hi >> (BitSize_Checked - cc),
                                 (divisor_lo >> (BitSize_Checked - cc)) | t);
@@ -562,9 +562,9 @@ namespace UltimateOrb.Numerics.Generic {
                     }
                 } else {
                     TBase t;
-                    TSelf.DivRemUnchecked(out var highResult, out t, dividend_hi, divisor_lo);
+                    T.DivRemUnchecked(out var highResult, out t, dividend_hi, divisor_lo);
                     highRemainder = 0u;
-                    TSelf.BigDivRemInternal(out var q_lo, out lowRemainder, dividend_lo, t, divisor_lo);
+                    T.BigDivRemInternal(out var q_lo, out lowRemainder, dividend_lo, t, divisor_lo);
                 }
             }
         }

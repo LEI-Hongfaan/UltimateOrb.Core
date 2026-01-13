@@ -147,10 +147,10 @@ namespace UltimateOrb.Core.Tests {
         private static int Main(string[] args) {
             {
 
-                Long<int, uint> v1 = Long<int, uint>.FromBase(0X1001U, 0X0100);
-                Long<int, uint> v2 = Long<int, uint>.FromBase(0X0001U, 0X0001);
+                var v1 = Unsafe.BitCast<Int64, Long<int, uint>>(0X0700002000000100L);
+                var v2 = Unsafe.BitCast<Int64, Long<int, uint>>(0X0001001000000100L);
                 var v3 = v1 | v2;
-
+                Console.WriteLine(Unsafe.BitCast<Long<int, uint>, Int64>(v3));
 
             }
             if (false) {

@@ -328,44 +328,44 @@ namespace UltimateOrb {
         /*
         [DiscardableAfterILLink]
         [Obsolete]
-        internal static partial class StubILLinkHintDelegates<TSelf> where TSelf : INumberBase<TSelf> {
-            public delegate bool TryParseSpanFunc(ReadOnlySpan<char> s, NumberStyles style, IFormatProvider? provider, [MaybeNullWhen(false)] out TSelf result);
-            public delegate TSelf ParseStringFunc(string s, NumberStyles style, IFormatProvider? provider);
-            public delegate TSelf ParseSpanFunc(ReadOnlySpan<char> s, NumberStyles style, IFormatProvider? provider);
-            public delegate TSelf ParseUtf8SpanFunc(ReadOnlySpan<byte> s, NumberStyles style, IFormatProvider? provider);
-            public delegate bool TryParseStringFunc([NotNullWhen(true)] string? s, NumberStyles style, IFormatProvider? provider, [MaybeNullWhen(false)] out TSelf result);
-            public delegate bool TryParseUtf8SpanFunc(ReadOnlySpan<byte> utf8Text, NumberStyles style, IFormatProvider? provider, [MaybeNullWhen(false)] out TSelf result);
-            public delegate TSelf AbsFunc(TSelf value);
-            public delegate bool IsCanonicalFunc(TSelf value);
-            public delegate bool IsComplexNumberFunc(TSelf value);
-            public delegate bool IsEvenIntegerFunc(TSelf value);
-            public delegate bool IsFiniteFunc(TSelf value);
-            public delegate bool IsImaginaryNumberFunc(TSelf value);
-            public delegate bool IsInfinityFunc(TSelf value);
-            public delegate bool IsIntegerFunc(TSelf value);
-            public delegate bool IsNaNFunc(TSelf value);
-            public delegate bool IsNegativeFunc(TSelf value);
-            public delegate bool IsNegativeInfinityFunc(TSelf value);
-            public delegate bool IsNormalFunc(TSelf value);
-            public delegate bool IsOddIntegerFunc(TSelf value);
-            public delegate bool IsPositiveFunc(TSelf value);
-            public delegate bool IsPositiveInfinityFunc(TSelf value);
-            public delegate bool IsRealNumberFunc(TSelf value);
-            public delegate bool IsSubnormalFunc(TSelf value);
-            public delegate bool IsZeroFunc(TSelf value);
-            public delegate TSelf MaxMagnitudeFunc(TSelf x, TSelf y);
-            public delegate TSelf MaxMagnitudeNumberFunc(TSelf x, TSelf y);
-            public delegate TSelf MinMagnitudeFunc(TSelf x, TSelf y);
-            public delegate TSelf MinMagnitudeNumberFunc(TSelf x, TSelf y);
-            public delegate TSelf CreateCheckedFunc(TSelf value);
-            public delegate TSelf CreateSaturatingFunc(TSelf value);
-            public delegate TSelf CreateTruncatingFunc(TSelf value);
-            public delegate bool TryConvertFromCheckedFunc(TSelf value, [MaybeNullWhen(false)] out TSelf result);
-            public delegate bool TryConvertFromSaturatingFunc(TSelf value, [MaybeNullWhen(false)] out TSelf result);
-            public delegate bool TryConvertFromTruncatingFunc(TSelf value, [MaybeNullWhen(false)] out TSelf result);
-            public delegate bool TryConvertToCheckedFunc(TSelf value, [MaybeNullWhen(false)] out TSelf result);
-            public delegate bool TryConvertToSaturatingFunc(TSelf value, [MaybeNullWhen(false)] out TSelf result);
-            public delegate bool TryConvertToTruncatingFunc(TSelf value, [MaybeNullWhen(false)] out TSelf result);
+        internal static partial class StubILLinkHintDelegates<T> where T : INumberBase<T> {
+            public delegate bool TryParseSpanFunc(ReadOnlySpan<char> s, NumberStyles style, IFormatProvider? provider, [MaybeNullWhen(false)] out T result);
+            public delegate T ParseStringFunc(string s, NumberStyles style, IFormatProvider? provider);
+            public delegate T ParseSpanFunc(ReadOnlySpan<char> s, NumberStyles style, IFormatProvider? provider);
+            public delegate T ParseUtf8SpanFunc(ReadOnlySpan<byte> s, NumberStyles style, IFormatProvider? provider);
+            public delegate bool TryParseStringFunc([NotNullWhen(true)] string? s, NumberStyles style, IFormatProvider? provider, [MaybeNullWhen(false)] out T result);
+            public delegate bool TryParseUtf8SpanFunc(ReadOnlySpan<byte> utf8Text, NumberStyles style, IFormatProvider? provider, [MaybeNullWhen(false)] out T result);
+            public delegate T AbsFunc(T value);
+            public delegate bool IsCanonicalFunc(T value);
+            public delegate bool IsComplexNumberFunc(T value);
+            public delegate bool IsEvenIntegerFunc(T value);
+            public delegate bool IsFiniteFunc(T value);
+            public delegate bool IsImaginaryNumberFunc(T value);
+            public delegate bool IsInfinityFunc(T value);
+            public delegate bool IsIntegerFunc(T value);
+            public delegate bool IsNaNFunc(T value);
+            public delegate bool IsNegativeFunc(T value);
+            public delegate bool IsNegativeInfinityFunc(T value);
+            public delegate bool IsNormalFunc(T value);
+            public delegate bool IsOddIntegerFunc(T value);
+            public delegate bool IsPositiveFunc(T value);
+            public delegate bool IsPositiveInfinityFunc(T value);
+            public delegate bool IsRealNumberFunc(T value);
+            public delegate bool IsSubnormalFunc(T value);
+            public delegate bool IsZeroFunc(T value);
+            public delegate T MaxMagnitudeFunc(T x, T y);
+            public delegate T MaxMagnitudeNumberFunc(T x, T y);
+            public delegate T MinMagnitudeFunc(T x, T y);
+            public delegate T MinMagnitudeNumberFunc(T x, T y);
+            public delegate T CreateCheckedFunc(T value);
+            public delegate T CreateSaturatingFunc(T value);
+            public delegate T CreateTruncatingFunc(T value);
+            public delegate bool TryConvertFromCheckedFunc(T value, [MaybeNullWhen(false)] out T result);
+            public delegate bool TryConvertFromSaturatingFunc(T value, [MaybeNullWhen(false)] out T result);
+            public delegate bool TryConvertFromTruncatingFunc(T value, [MaybeNullWhen(false)] out T result);
+            public delegate bool TryConvertToCheckedFunc(T value, [MaybeNullWhen(false)] out T result);
+            public delegate bool TryConvertToSaturatingFunc(T value, [MaybeNullWhen(false)] out T result);
+            public delegate bool TryConvertToTruncatingFunc(T value, [MaybeNullWhen(false)] out T result);
         }
 
         [DiscardableAfterILLink]

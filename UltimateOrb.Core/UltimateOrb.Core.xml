@@ -706,6 +706,16 @@
             Converts the specified value to <typeparamref name="TBase"/>.
             </summary>
         </member>
+        <member name="M:UltimateOrb.IInterfaceDerivedTaggedSelfBaseFriend`3.FromBase(`2)">
+            <summary>
+            Converts the specified value to <typeparamref name="TSelf"/>.
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.IInterfaceDerivedTaggedSelfBaseFriend`3.ToBase(`0)">
+            <summary>
+            Converts the specified value to <typeparamref name="TBase"/>.
+            </summary>
+        </member>
         <member name="M:UltimateOrb.IInterfaceDerivedBaseFriend`4.FromBase(`3)">
             <summary>
             Converts the specified value to <typeparamref name="TSelf"/>.
@@ -731,6 +741,21 @@
             Converts the specified value to <typeparamref name="TBase2"/>.
             </summary>
         </member>
+        <member name="M:UltimateOrb.IInterfaceDerivedTaggedSelfBaseFriend`4.FromBase(`2,`3)">
+            <summary>
+            Converts the specified value to <typeparamref name="TSelf"/>.
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.IInterfaceDerivedTaggedSelfBaseFriend`4.ToBase1(`0)">
+            <summary>
+            Converts the specified value to <typeparamref name="TBase1"/>.
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.IInterfaceDerivedTaggedSelfBaseFriend`4.ToBase2(`0)">
+            <summary>
+            Converts the specified value to <typeparamref name="TBase2"/>.
+            </summary>
+        </member>
         <member name="M:UltimateOrb.IInterfaceDerivedBaseFriend`5.FromBase(`3,`4)">
             <summary>
             Converts the specified value to <typeparamref name="TSelf"/>.
@@ -746,96 +771,72 @@
             Converts the specified value to <typeparamref name="TBase2"/>.
             </summary>
         </member>
-        <member name="T:UltimateOrb.Numerics.IFloatingPointConstantsDerived`2">
+        <member name="T:UltimateOrb.Numerics.IFloatingPointConstantsDerivedTagged`3">
             <inheritdoc cref="T:System.Numerics.IFloatingPointConstants`1"/>
             <typeparam name="TBase">
             The source/base type supplying data or behavior that <typeparamref name="TSelf"/> adapts or forwards.
             </typeparam>
         </member>
-        <member name="T:UltimateOrb.Numerics.IEqualityOperatorsDerived`6">
+        <member name="T:UltimateOrb.Numerics.IEqualityOperatorsDerivedTagged`7">
             <inheritdoc cref="T:System.Numerics.IEqualityOperators`3"/>
             <typeparam name="TBase">The source/base type supplying data or behavior that <typeparamref name="TSelf"/> adapts or forwards.</typeparam>
             <typeparam name="TOtherBase">The source/base type supplying data or behavior that <typeparamref name="TOther"/> adapts or forwards.</typeparam>
             <typeparam name="TResultBase">The source/base type supplying data or behavior that <typeparamref name="TResult"/> adapts or forwards.</typeparam>
         </member>
-        <member name="T:UltimateOrb.Numerics.IComparisonOperatorsDerived`6">
+        <member name="T:UltimateOrb.Numerics.IComparisonOperatorsDerivedTagged`7">
             <inheritdoc cref="T:System.Numerics.IComparisonOperators`3"/>
             <typeparam name="TBase">The source/base type supplying data or behavior that <typeparamref name="TSelf"/> adapts or forwards.</typeparam>
             <typeparam name="TOtherBase">The source/base type supplying data or behavior that <typeparamref name="TOther"/> adapts or forwards.</typeparam>
             <typeparam name="TResultBase">The source/base type supplying data or behavior that <typeparamref name="TResult"/> adapts or forwards.</typeparam>
         </member>
-        <member name="T:UltimateOrb.Numerics.IModulusOperatorsDerived`6">
+        <member name="T:UltimateOrb.Numerics.IModulusOperatorsDerivedTagged`7">
             <inheritdoc cref="T:System.Numerics.IModulusOperators`3"/>
             <typeparam name="TBase">The source/base type supplying data or behavior that <typeparamref name="TSelf"/> adapts or forwards.</typeparam>
             <typeparam name="TOtherBase">The source/base type supplying data or behavior that <typeparamref name="TOther"/> adapts or forwards.</typeparam>
             <typeparam name="TResultBase">The source/base type supplying data or behavior that <typeparamref name="TResult"/> adapts or forwards.</typeparam>
         </member>
-        <member name="T:UltimateOrb.Numerics.INumberDerived`2">
+        <member name="T:UltimateOrb.Numerics.INumberDerivedTagged`3">
             <inheritdoc cref="T:System.Numerics.INumber`1"/>
             <typeparam name="TBase">The source/base type supplying data or behavior that <typeparamref name="TSelf"/> adapts or forwards.</typeparam>
         </member>
-        <member name="T:UltimateOrb.Numerics.ISignedNumberDerived`2">
+        <member name="T:UltimateOrb.Numerics.ISignedNumberDerivedTagged`3">
             <inheritdoc cref="T:System.Numerics.ISignedNumber`1"/>
             <typeparam name="TBase">The source/base type supplying data or behavior that <typeparamref name="TSelf"/> adapts or forwards.</typeparam>
         </member>
-        <member name="T:UltimateOrb.Numerics.ISignedNumberDerivedInitOnly`2">
+        <member name="T:UltimateOrb.Numerics.ISignedNumberDerivedInitOnlyTagged`3">
             <inheritdoc cref="T:UltimateOrb.Numerics.ISignedNumberDerived`2"/>
         </member>
-        <member name="T:UltimateOrb.Numerics.IFloatingPointDerived`2">
+        <member name="T:UltimateOrb.Numerics.IFloatingPointDerivedTagged`3">
             <inheritdoc cref="T:System.Numerics.IFloatingPoint`1"/>
             <typeparam name="TBase">The source/base type supplying data or behavior that <typeparamref name="TSelf"/> adapts or forwards.</typeparam>
         </member>
-        <member name="T:UltimateOrb.Numerics.IExponentialFunctionsDerived`2">
+        <member name="T:UltimateOrb.Numerics.IExponentialFunctionsDerivedTagged`3">
             <inheritdoc cref="T:System.Numerics.IExponentialFunctions`1"/>
             <typeparam name="TBase">The source/base type supplying data or behavior that <typeparamref name="TSelf"/> adapts or forwards.</typeparam>
         </member>
-        <member name="T:UltimateOrb.Numerics.IHyperbolicFunctionsDerived`2">
+        <member name="T:UltimateOrb.Numerics.IHyperbolicFunctionsDerivedTagged`3">
             <inheritdoc cref="T:System.Numerics.IHyperbolicFunctions`1"/>
             <typeparam name="TBase">The source/base type supplying data or behavior that <typeparamref name="TSelf"/> adapts or forwards.</typeparam>
         </member>
-        <member name="T:UltimateOrb.Numerics.ILogarithmicFunctionsDerived`2">
+        <member name="T:UltimateOrb.Numerics.ILogarithmicFunctionsDerivedTagged`3">
             <inheritdoc cref="T:System.Numerics.ILogarithmicFunctions`1"/>
             <typeparam name="TBase">The source/base type supplying data or behavior that <typeparamref name="TSelf"/> adapts or forwards.</typeparam>
         </member>
-        <member name="T:UltimateOrb.Numerics.IPowerFunctionsDerived`2">
+        <member name="T:UltimateOrb.Numerics.IPowerFunctionsDerivedTagged`3">
             <inheritdoc cref="T:System.Numerics.IPowerFunctions`1"/>
             <typeparam name="TBase">The source/base type supplying data or behavior that <typeparamref name="TSelf"/> adapts or forwards.</typeparam>
         </member>
-        <member name="T:UltimateOrb.Numerics.IRootFunctionsDerived`2">
+        <member name="T:UltimateOrb.Numerics.IRootFunctionsDerivedTagged`3">
             <inheritdoc cref="T:System.Numerics.IRootFunctions`1"/>
             <typeparam name="TBase">The source/base type supplying data or behavior that <typeparamref name="TSelf"/> adapts or forwards.</typeparam>
         </member>
-        <member name="T:UltimateOrb.Numerics.ITrigonometricFunctionsDerived`2">
+        <member name="T:UltimateOrb.Numerics.ITrigonometricFunctionsDerivedTagged`3">
             <inheritdoc cref="T:System.Numerics.ITrigonometricFunctions`1"/>
             <typeparam name="TBase">The source/base type supplying data or behavior that <typeparamref name="TSelf"/> adapts or forwards.</typeparam>
         </member>
-        <member name="T:UltimateOrb.Numerics.IDecimalFloatingPointIeee754Derived`2">
+        <member name="T:UltimateOrb.Numerics.IDecimalFloatingPointIeee754DerivedTagged`3">
             <inheritdoc cref="T:UltimateOrb.IDecimalFloatingPointIeee754`1"/>
             <typeparam name="TBase">The source/base type supplying data or behavior that <typeparamref name="TSelf"/> adapts or forwards.</typeparam>
-        </member>
-        <member name="M:UltimateOrb.Numerics.Extensions.BinaryNumberExtensions.op_BitwiseAnd``1(``0,``0)">
-            <inheritdoc cref="M:UltimateOrb.Numerics.Extensions.BinaryNumberExtensions.&lt;G&gt;$BFFAF386DCBEA71032CABD4F220B4749`1.op_BitwiseAnd(`0,`0)"/>
-        </member>
-        <member name="M:UltimateOrb.Numerics.Extensions.BinaryNumberExtensions.op_BitwiseOr``1(``0,``0)">
-            <inheritdoc cref="M:UltimateOrb.Numerics.Extensions.BinaryNumberExtensions.&lt;G&gt;$BFFAF386DCBEA71032CABD4F220B4749`1.op_BitwiseOr(`0,`0)"/>
-        </member>
-        <member name="M:UltimateOrb.Numerics.Extensions.BinaryNumberExtensions.op_ExclusiveOr``1(``0,``0)">
-            <inheritdoc cref="M:UltimateOrb.Numerics.Extensions.BinaryNumberExtensions.&lt;G&gt;$BFFAF386DCBEA71032CABD4F220B4749`1.op_ExclusiveOr(`0,`0)"/>
-        </member>
-        <member name="M:UltimateOrb.Numerics.Extensions.BinaryNumberExtensions.op_OnesComplement``1(``0)">
-            <inheritdoc cref="M:UltimateOrb.Numerics.Extensions.BinaryNumberExtensions.&lt;G&gt;$BFFAF386DCBEA71032CABD4F220B4749`1.op_OnesComplement(`0)"/>
-        </member>
-        <member name="M:UltimateOrb.Numerics.Extensions.BinaryNumberExtensions.&lt;G&gt;$BFFAF386DCBEA71032CABD4F220B4749`1.op_BitwiseAnd(`0,`0)">
-            <inheritdoc cref="M:System.Numerics.IBitwiseOperators`3.op_BitwiseAnd(`0,`1)"/>
-        </member>
-        <member name="M:UltimateOrb.Numerics.Extensions.BinaryNumberExtensions.&lt;G&gt;$BFFAF386DCBEA71032CABD4F220B4749`1.op_BitwiseOr(`0,`0)">
-            <inheritdoc cref="M:System.Numerics.IBitwiseOperators`3.op_BitwiseOr(`0,`1)"/>
-        </member>
-        <member name="M:UltimateOrb.Numerics.Extensions.BinaryNumberExtensions.&lt;G&gt;$BFFAF386DCBEA71032CABD4F220B4749`1.op_ExclusiveOr(`0,`0)">
-            <inheritdoc cref="M:System.Numerics.IBitwiseOperators`3.op_ExclusiveOr(`0,`1)"/>
-        </member>
-        <member name="M:UltimateOrb.Numerics.Extensions.BinaryNumberExtensions.&lt;G&gt;$BFFAF386DCBEA71032CABD4F220B4749`1.op_OnesComplement(`0)">
-            <inheritdoc cref="M:System.Numerics.IBitwiseOperators`3.op_OnesComplement(`0)"/>
         </member>
         <member name="T:UltimateOrb.Numerics.Accelerated.QuaternionD">
             <summary>Represents a vector that is used to encode three-dimensional physical rotations.</summary>
@@ -6893,6 +6894,30 @@
                 </para>
             </returns>
         </member>
+        <member name="M:UltimateOrb.Numerics.Extensions.BinaryNumberExtensions.op_BitwiseAnd``1(``0,``0)">
+            <inheritdoc cref="M:UltimateOrb.Numerics.Extensions.BinaryNumberExtensions.&lt;G&gt;$BFFAF386DCBEA71032CABD4F220B4749`1.op_BitwiseAnd(`0,`0)"/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Extensions.BinaryNumberExtensions.op_BitwiseOr``1(``0,``0)">
+            <inheritdoc cref="M:UltimateOrb.Numerics.Extensions.BinaryNumberExtensions.&lt;G&gt;$BFFAF386DCBEA71032CABD4F220B4749`1.op_BitwiseOr(`0,`0)"/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Extensions.BinaryNumberExtensions.op_ExclusiveOr``1(``0,``0)">
+            <inheritdoc cref="M:UltimateOrb.Numerics.Extensions.BinaryNumberExtensions.&lt;G&gt;$BFFAF386DCBEA71032CABD4F220B4749`1.op_ExclusiveOr(`0,`0)"/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Extensions.BinaryNumberExtensions.op_OnesComplement``1(``0)">
+            <inheritdoc cref="M:UltimateOrb.Numerics.Extensions.BinaryNumberExtensions.&lt;G&gt;$BFFAF386DCBEA71032CABD4F220B4749`1.op_OnesComplement(`0)"/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Extensions.BinaryNumberExtensions.&lt;G&gt;$BFFAF386DCBEA71032CABD4F220B4749`1.op_BitwiseAnd(`0,`0)">
+            <inheritdoc cref="M:System.Numerics.IBitwiseOperators`3.op_BitwiseAnd(`0,`1)"/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Extensions.BinaryNumberExtensions.&lt;G&gt;$BFFAF386DCBEA71032CABD4F220B4749`1.op_BitwiseOr(`0,`0)">
+            <inheritdoc cref="M:System.Numerics.IBitwiseOperators`3.op_BitwiseOr(`0,`1)"/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Extensions.BinaryNumberExtensions.&lt;G&gt;$BFFAF386DCBEA71032CABD4F220B4749`1.op_ExclusiveOr(`0,`0)">
+            <inheritdoc cref="M:System.Numerics.IBitwiseOperators`3.op_ExclusiveOr(`0,`1)"/>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Extensions.BinaryNumberExtensions.&lt;G&gt;$BFFAF386DCBEA71032CABD4F220B4749`1.op_OnesComplement(`0)">
+            <inheritdoc cref="M:System.Numerics.IBitwiseOperators`3.op_OnesComplement(`0)"/>
+        </member>
         <member name="T:UltimateOrb.Numerics.IDoubleArithmeticBigDivRemFunctions`1">
             <summary>
             Defines methods for performing division and remainder operations on types that support double-width arithmetic.
@@ -7536,12 +7561,80 @@
             <param name="value">The specified value.</param>
             <returns>Next odd prime greater than the specified number.</returns>
         </member>
+        <member name="M:UltimateOrb.Extensions.ComparableExtensions.CompareTo``1(``0,System.Object)">
+            <inheritdoc cref="M:UltimateOrb.Extensions.ComparableExtensions.&lt;G&gt;$899E157B20B0A1E8683B806C048A3B9B`1.CompareTo(System.Object)"/>
+        </member>
+        <member name="M:UltimateOrb.Extensions.ComparableExtensions.CompareTo``1(``0,``0)">
+            <inheritdoc cref="M:UltimateOrb.Extensions.ComparableExtensions.&lt;G&gt;$E725505F0A27D63E453277C0C551DC0B`1.CompareTo(`0)"/>
+        </member>
+        <member name="M:UltimateOrb.Extensions.ComparableExtensions.&lt;G&gt;$899E157B20B0A1E8683B806C048A3B9B`1.CompareTo(System.Object)">
+            <inheritdoc cref="M:System.IComparable.CompareTo(System.Object)"/>
+        </member>
+        <member name="M:UltimateOrb.Extensions.ComparableExtensions.&lt;G&gt;$E725505F0A27D63E453277C0C551DC0B`1.CompareTo(`0)">
+            <inheritdoc cref="M:System.IComparable`1.CompareTo(`0)"/>
+        </member>
         <member name="M:UltimateOrb.Extensions.MemorySpanRuntimeHelpers.DangerousGetPinnedObjectDataSize(System.Object)">
             <summary>
             Gets the total instance field size (including padding) in bytes.
             </summary>
             <param name="obj">The pinned object.</param>
             <returns></returns>
+        </member>
+        <member name="M:UltimateOrb.Runtime.CompilerServices.Boxed`1.op_Implicit(UltimateOrb.Runtime.CompilerServices.Boxed{`0})~System.ValueType">
+            <returns>Untyped reference to a boxed value.</returns>
+        </member>
+        <member name="M:UltimateOrb.Runtime.CompilerServices.Boxed`1.Equals(System.Object)">
+            <inheritdoc />
+        </member>
+        <member name="M:UltimateOrb.Runtime.CompilerServices.Boxed`1.GetHashCode">
+            <inheritdoc />
+        </member>
+        <member name="M:UltimateOrb.Runtime.CompilerServices.Boxed`1.ToString">
+            <inheritdoc />
+        </member>
+        <member name="M:UltimateOrb.Runtime.CompilerServices.ReadOnlyBoxed`1.op_Explicit(UltimateOrb.Runtime.CompilerServices.ReadOnlyBoxed{`0})~System.ValueType">
+            <returns>Untyped reference to a boxed value.</returns>
+        </member>
+        <member name="M:UltimateOrb.Runtime.CompilerServices.ReadOnlyBoxed`1.Equals(System.Object)">
+            <inheritdoc />
+        </member>
+        <member name="M:UltimateOrb.Runtime.CompilerServices.ReadOnlyBoxed`1.GetHashCode">
+            <inheritdoc />
+        </member>
+        <member name="M:UltimateOrb.Runtime.CompilerServices.ReadOnlyBoxed`1.ToString">
+            <inheritdoc />
+        </member>
+        <member name="M:UltimateOrb.Runtime.CompilerServices.BoxedAny`1.UnsafeCopy">
+            <inheritdoc cref="M:System.Object.MemberwiseClone"/>
+        </member>
+        <member name="M:UltimateOrb.Runtime.CompilerServices.BoxedAny`1.Equals(System.Object)">
+            <inheritdoc />
+        </member>
+        <member name="M:UltimateOrb.Runtime.CompilerServices.BoxedAny`1.GetHashCode">
+            <inheritdoc />
+        </member>
+        <member name="M:UltimateOrb.Runtime.CompilerServices.BoxedAny`1.ToString">
+            <inheritdoc />
+        </member>
+        <member name="T:UltimateOrb.Runtime.CompilerServices.IU">
+            <summary>
+            Defines a common interface for discriminated unions.
+            </summary>
+        </member>
+        <member name="P:UltimateOrb.Runtime.CompilerServices.IU.Value">
+            <summary>
+            Returns the value in a discriminated union.
+            </summary>
+        </member>
+        <member name="P:UltimateOrb.Runtime.CompilerServices.IU.Case">
+            <summary>
+            Returns the number that presents of which case the value is in a discriminated union.
+            </summary>
+        </member>
+        <member name="P:UltimateOrb.Runtime.CompilerServices.IU.CaseCount">
+            <summary>
+            Returns the case count of a discriminated union.
+            </summary>
         </member>
         <member name="T:UltimateOrb.FloatingPointRounding">
             <summary>
@@ -8267,62 +8360,6 @@
         <member name="F:UltimateOrb.NullPtrPlaceholderType.null">
             <summary>
             A typed null. Use this field when you pass null/nullptr.
-            </summary>
-        </member>
-        <member name="M:UltimateOrb.Runtime.CompilerServices.Boxed`1.op_Implicit(UltimateOrb.Runtime.CompilerServices.Boxed{`0})~System.ValueType">
-            <returns>Untyped reference to a boxed value.</returns>
-        </member>
-        <member name="M:UltimateOrb.Runtime.CompilerServices.Boxed`1.Equals(System.Object)">
-            <inheritdoc />
-        </member>
-        <member name="M:UltimateOrb.Runtime.CompilerServices.Boxed`1.GetHashCode">
-            <inheritdoc />
-        </member>
-        <member name="M:UltimateOrb.Runtime.CompilerServices.Boxed`1.ToString">
-            <inheritdoc />
-        </member>
-        <member name="M:UltimateOrb.Runtime.CompilerServices.ReadOnlyBoxed`1.op_Explicit(UltimateOrb.Runtime.CompilerServices.ReadOnlyBoxed{`0})~System.ValueType">
-            <returns>Untyped reference to a boxed value.</returns>
-        </member>
-        <member name="M:UltimateOrb.Runtime.CompilerServices.ReadOnlyBoxed`1.Equals(System.Object)">
-            <inheritdoc />
-        </member>
-        <member name="M:UltimateOrb.Runtime.CompilerServices.ReadOnlyBoxed`1.GetHashCode">
-            <inheritdoc />
-        </member>
-        <member name="M:UltimateOrb.Runtime.CompilerServices.ReadOnlyBoxed`1.ToString">
-            <inheritdoc />
-        </member>
-        <member name="M:UltimateOrb.Runtime.CompilerServices.BoxedAny`1.UnsafeCopy">
-            <inheritdoc cref="M:System.Object.MemberwiseClone"/>
-        </member>
-        <member name="M:UltimateOrb.Runtime.CompilerServices.BoxedAny`1.Equals(System.Object)">
-            <inheritdoc />
-        </member>
-        <member name="M:UltimateOrb.Runtime.CompilerServices.BoxedAny`1.GetHashCode">
-            <inheritdoc />
-        </member>
-        <member name="M:UltimateOrb.Runtime.CompilerServices.BoxedAny`1.ToString">
-            <inheritdoc />
-        </member>
-        <member name="T:UltimateOrb.Runtime.CompilerServices.IU">
-            <summary>
-            Defines a common interface for discriminated unions.
-            </summary>
-        </member>
-        <member name="P:UltimateOrb.Runtime.CompilerServices.IU.Value">
-            <summary>
-            Returns the value in a discriminated union.
-            </summary>
-        </member>
-        <member name="P:UltimateOrb.Runtime.CompilerServices.IU.Case">
-            <summary>
-            Returns the number that presents of which case the value is in a discriminated union.
-            </summary>
-        </member>
-        <member name="P:UltimateOrb.Runtime.CompilerServices.IU.CaseCount">
-            <summary>
-            Returns the case count of a discriminated union.
             </summary>
         </member>
         <member name="T:UltimateOrb.RefAction`1">
