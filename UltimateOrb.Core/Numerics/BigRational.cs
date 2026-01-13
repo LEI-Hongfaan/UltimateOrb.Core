@@ -236,33 +236,33 @@ namespace UltimateOrb.Numerics {
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         [PureAttribute()]
         public static explicit operator Double(BigRational value) {
-            return ToIeee754InterchangeableBinary<Double, UInt64>(value);
+            return ToIeee754InterchangeBinary<Double, UInt64>(value);
         }
 
         public static explicit operator Single(BigRational value) {
-            return ToIeee754InterchangeableBinary<Single, UInt32>(value);
+            return ToIeee754InterchangeBinary<Single, UInt32>(value);
         }
 
         public static explicit operator Half(BigRational value) {
-            return ToIeee754InterchangeableBinary<Half, UInt16>(value);
+            return ToIeee754InterchangeBinary<Half, UInt16>(value);
         }
 
 #if NET11_0_OR_GREATER
         public static explicit operator BFloat16(BigRational value) {
-            return ToIeee754InterchangeableBinary<BFloat16, UInt16>(value);
+            return ToIeee754InterchangeBinary<BFloat16, UInt16>(value);
         }
 #endif
 
-        internal static TFloat ToIeee754InterchangeableBinary<TFloat, TFloatUIntBits>(BigRational value)
+        internal static TFloat ToIeee754InterchangeBinary<TFloat, TFloatUIntBits>(BigRational value)
             where TFloat : unmanaged, IFloatingPointIeee754<TFloat>, IMinMaxValue<TFloat>
             where TFloatUIntBits : unmanaged, IUnsignedNumber<TFloatUIntBits>, IBinaryInteger<TFloatUIntBits> {
             if (value.m_SignedNumerator.IsZero) {
                 return TFloat.Zero;
             }
-            return DivideToIeee754InterchangeableBinaryInternal<TFloat, TFloatUIntBits>(value.m_SignedNumerator, value.m_Denominator);
+            return DivideToIeee754InterchangeBinaryInternal<TFloat, TFloatUIntBits>(value.m_SignedNumerator, value.m_Denominator);
         }
 
-        static TFloat DivideToIeee754InterchangeableBinaryInternal<TFloat, TFloatUIntBits>(BigInteger signedNumerator, BigInteger denominator)
+        static TFloat DivideToIeee754InterchangeBinaryInternal<TFloat, TFloatUIntBits>(BigInteger signedNumerator, BigInteger denominator)
             where TFloat : unmanaged, IFloatingPointIeee754<TFloat>, IMinMaxValue<TFloat>
             where TFloatUIntBits : unmanaged, IUnsignedNumber<TFloatUIntBits>, IBinaryInteger<TFloatUIntBits> {
 
@@ -352,7 +352,7 @@ namespace UltimateOrb.Numerics {
         }
 
         public static double ToDouble(BigRational value, FloatingPointRounding rounding = FloatingPointRounding.ToNearestWithMidpointToEven) {
-            return ToIeee754InterchangeableBinary<double, UInt64>(value, rounding);
+            return ToIeee754InterchangeBinary<double, UInt64>(value, rounding);
         }
 
         public static Single ToSingle(BigRational value, MidpointRounding rounding = MidpointRounding.ToEven) {
@@ -360,7 +360,7 @@ namespace UltimateOrb.Numerics {
         }
 
         public static Single ToSingle(BigRational value, FloatingPointRounding rounding = FloatingPointRounding.ToNearestWithMidpointToEven) {
-            return ToIeee754InterchangeableBinary<Single, UInt32>(value, rounding);
+            return ToIeee754InterchangeBinary<Single, UInt32>(value, rounding);
         }
 
         public static Half ToHalf(BigRational value, MidpointRounding rounding = MidpointRounding.ToEven) {
@@ -368,7 +368,7 @@ namespace UltimateOrb.Numerics {
         }
 
         public static Half ToHalf(BigRational value, FloatingPointRounding rounding = FloatingPointRounding.ToNearestWithMidpointToEven) {
-            return ToIeee754InterchangeableBinary<Half, UInt16>(value, rounding);
+            return ToIeee754InterchangeBinary<Half, UInt16>(value, rounding);
         }
 
 #if NET11_0_OR_GREATER
@@ -377,12 +377,12 @@ namespace UltimateOrb.Numerics {
         }
 
         public static BFloat16 ToBFloat16(BigRational value, FloatingPointRounding rounding = FloatingPointRounding.ToNearestWithMidpointToEven) {
-            // BFloat16 is not an IEEE interchangeable format, but the conversion algorithm works on it.
-            return ToIeee754InterchangeableBinary<BFloat16, UInt16>(value, rounding);
+            // BFloat16 is not an IEEE Interchange format, but the conversion algorithm works on it.
+            return ToIeee754InterchangeBinary<BFloat16, UInt16>(value, rounding);
         }
 #endif
 
-        static TFloat ToIeee754InterchangeableBinary<TFloat, TFloatUIntBits>(
+        static TFloat ToIeee754InterchangeBinary<TFloat, TFloatUIntBits>(
             BigRational value,
             FloatingPointRounding rounding = FloatingPointRounding.ToNearestWithMidpointToEven)
             where TFloat : unmanaged, IFloatingPointIeee754<TFloat>, IMinMaxValue<TFloat>
@@ -403,10 +403,10 @@ namespace UltimateOrb.Numerics {
             if (IsZero(value)) {
                 return exactZeroNegative ? TFloat.NegativeZero : TFloat.Zero;
             }
-            return DivideToIeee754InterchangeableBinaryInternal<TFloat, TFloatUIntBits>(value.m_SignedNumerator, value.m_Denominator, rounding);
+            return DivideToIeee754InterchangeBinaryInternal<TFloat, TFloatUIntBits>(value.m_SignedNumerator, value.m_Denominator, rounding);
         }
 
-        static TFloat DivideToIeee754InterchangeableBinaryInternal<TFloat, TFloatUIntBits>(
+        static TFloat DivideToIeee754InterchangeBinaryInternal<TFloat, TFloatUIntBits>(
             BigInteger signedNumerator,
             BigInteger denominator,
             FloatingPointRounding rounding = FloatingPointRounding.ToNearestWithMidpointToEven)
@@ -950,14 +950,14 @@ namespace UltimateOrb.Numerics {
 
     public readonly partial struct BigRational {
 
-        public static explicit operator BigRational(Single value) => FromIeee754InterchangeableBinary<Single, UInt32>(value);
+        public static explicit operator BigRational(Single value) => FromIeee754InterchangeBinary<Single, UInt32>(value);
 
-        public static explicit operator BigRational(double value) => FromIeee754InterchangeableBinary<double, UInt64>(value);
+        public static explicit operator BigRational(double value) => FromIeee754InterchangeBinary<double, UInt64>(value);
 
-        public static explicit operator BigRational(Half value) => FromIeee754InterchangeableBinary<Half, UInt16>(value);
+        public static explicit operator BigRational(Half value) => FromIeee754InterchangeBinary<Half, UInt16>(value);
 
 #if NET11_0_OR_GREATER
-        public static explicit operator BigRational(BFloat16 value) => FromIeee754InterchangeableBinary<BFloat16, UInt16>(value);
+        public static explicit operator BigRational(BFloat16 value) => FromIeee754InterchangeBinary<BFloat16, UInt16>(value);
 #endif
 
         public static BigRational FromSingle(Single value) {
@@ -1013,7 +1013,7 @@ namespace UltimateOrb.Numerics {
             throw new NotFiniteNumberException($"The float value {value} is not finite.");
         }
 
-        internal static BigRational FromIeee754InterchangeableBinary<TFloat, TFloatUIntBits>(TFloat value)
+        internal static BigRational FromIeee754InterchangeBinary<TFloat, TFloatUIntBits>(TFloat value)
             where TFloat : unmanaged, IFloatingPointIeee754<TFloat>, IMinMaxValue<TFloat>
             where TFloatUIntBits : unmanaged, IUnsignedNumber<TFloatUIntBits>, IBinaryInteger<TFloatUIntBits> {
             int FloatBitSize = 8 * Unsafe.SizeOf<TFloat>();
@@ -1139,22 +1139,22 @@ namespace UltimateOrb.Numerics {
             throw new NotFiniteNumberException($"The double value {value} is not finite.");
         }
 
-        internal static BigRational FromIeee754InterchangeableBinaryTruncating<TFloat, TFloatUIntBits>(TFloat value)
+        internal static BigRational FromIeee754InterchangeBinaryTruncating<TFloat, TFloatUIntBits>(TFloat value)
             where TFloat : unmanaged, IFloatingPointIeee754<TFloat>, IMinMaxValue<TFloat>
             where TFloatUIntBits : unmanaged, IUnsignedNumber<TFloatUIntBits>, IBinaryInteger<TFloatUIntBits> {
             return !TFloat.IsFinite(value) ?
                 Zero :
-                FromIeee754InterchangeableBinary<TFloat, TFloatUIntBits>(value);
+                FromIeee754InterchangeBinary<TFloat, TFloatUIntBits>(value);
         }
 
-        internal static BigRational FromIeee754InterchangeableBinarySaturating<TFloat, TFloatUIntBits>(TFloat value)
+        internal static BigRational FromIeee754InterchangeBinarySaturating<TFloat, TFloatUIntBits>(TFloat value)
             where TFloat : unmanaged, IFloatingPointIeee754<TFloat>, IMinMaxValue<TFloat>
             where TFloatUIntBits : unmanaged, IUnsignedNumber<TFloatUIntBits>, IBinaryInteger<TFloatUIntBits> {
             return !TFloat.IsFinite(value) ?
                 TFloat.IsNaN(value) ? Zero : (TFloat.IsNegative(value) ?
                     MinMaxValueModule_PerType<TFloat, TFloatUIntBits>.MinValue :
                     MinMaxValueModule_PerType<TFloat, TFloatUIntBits>.MaxValue) :
-                FromIeee754InterchangeableBinary<TFloat, TFloatUIntBits>(value);
+                FromIeee754InterchangeBinary<TFloat, TFloatUIntBits>(value);
         }
 
         static BigRational ContinuedFraction(double value, int maxIterations) {
@@ -1767,7 +1767,7 @@ namespace UltimateOrb.Numerics {
             where TFloat : unmanaged, IFloatingPointIeee754<TFloat>, IMinMaxValue<TFloat>
             where TFloatUIntBits : unmanaged, IUnsignedNumber<TFloatUIntBits>, IBinaryInteger<TFloatUIntBits> {
 
-            public static readonly BigRational MinValue = FromIeee754InterchangeableBinary<TFloat, TFloatUIntBits>(TFloat.MinValue);
+            public static readonly BigRational MinValue = FromIeee754InterchangeBinary<TFloat, TFloatUIntBits>(TFloat.MinValue);
             public static readonly BigRational MaxValue = -MinValue;
 
             public static void EnsureInitialized() {
@@ -1812,17 +1812,17 @@ namespace UltimateOrb.Numerics {
                 return true;
             } else if (typeof(TOther) == typeof(double)) {
                 double actualValue = (double)(object)value;
-                result = FromIeee754InterchangeableBinarySaturating<double, UInt64>(actualValue);
+                result = FromIeee754InterchangeBinarySaturating<double, UInt64>(actualValue);
                 return true;
             } else if (typeof(TOther) == typeof(Half)) {
                 Half actualValue = (Half)(object)value;
-                result = FromIeee754InterchangeableBinarySaturating<Half, UInt16>(actualValue);
+                result = FromIeee754InterchangeBinarySaturating<Half, UInt16>(actualValue);
                 return true;
             }
 #if NET11_0_OR_GREATER
             else if (typeof(TOther) == typeof(BFloat16)) {
                 BFloat16 actualValue = (BFloat16)(object)value;
-                result = FromIeee754InterchangeableBinarySaturating<BFloat16, UInt16>(actualValue);
+                result = FromIeee754InterchangeBinarySaturating<BFloat16, UInt16>(actualValue);
                 return true;
             }
 #endif
@@ -1856,7 +1856,7 @@ namespace UltimateOrb.Numerics {
                 return true;
             } else if (typeof(TOther) == typeof(float)) {
                 float actualValue = (float)(object)value;
-                result = FromIeee754InterchangeableBinarySaturating<float, UInt32>(actualValue);
+                result = FromIeee754InterchangeBinarySaturating<float, UInt32>(actualValue);
                 return true;
             } else if (typeof(TOther) == typeof(ushort)) {
                 ushort actualValue = (ushort)(object)value;
@@ -1918,17 +1918,17 @@ namespace UltimateOrb.Numerics {
                 return true;
             } else if (typeof(TOther) == typeof(double)) {
                 double actualValue = (double)(object)value;
-                result = FromIeee754InterchangeableBinaryTruncating<double, UInt64>(actualValue);
+                result = FromIeee754InterchangeBinaryTruncating<double, UInt64>(actualValue);
                 return true;
             } else if (typeof(TOther) == typeof(Half)) {
                 Half actualValue = (Half)(object)value;
-                result = FromIeee754InterchangeableBinaryTruncating<Half, UInt16>(actualValue);
+                result = FromIeee754InterchangeBinaryTruncating<Half, UInt16>(actualValue);
                 return true;
             }
 #if NET11_0_OR_GREATER
             else if (typeof(TOther) == typeof(BFloat16)) {
                 BFloat16 actualValue = (BFloat16)(object)value;
-                result = FromIeee754InterchangeableBinaryTruncating<BFloat16, UInt16>(actualValue);
+                result = FromIeee754InterchangeBinaryTruncating<BFloat16, UInt16>(actualValue);
                 return true;
             }
 #endif
@@ -1962,7 +1962,7 @@ namespace UltimateOrb.Numerics {
                 return true;
             } else if (typeof(TOther) == typeof(float)) {
                 float actualValue = (float)(object)value;
-                result = FromIeee754InterchangeableBinaryTruncating<float, UInt32>(actualValue);
+                result = FromIeee754InterchangeBinaryTruncating<float, UInt32>(actualValue);
                 return true;
             } else if (typeof(TOther) == typeof(ushort)) {
                 ushort actualValue = (ushort)(object)value;

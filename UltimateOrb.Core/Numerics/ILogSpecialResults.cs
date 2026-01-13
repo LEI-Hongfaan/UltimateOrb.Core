@@ -26,5 +26,10 @@ namespace UltimateOrb.Numerics {
         /// This constant equals <c>int.MinValue + 1</c> and is used to signal the logarithm of zero.
         /// </remarks>
         public const int ILog0 = int.MinValue + 1;
+
+        /// <summary>
+        /// Returned when an ILog method receives an input of infinity.
+        /// </summary>
+        public const int ILogInfinity = ILog0;
     }
 }

@@ -1,16 +1,16 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
-using System.Runtime.CompilerServices;
+using System.Globalization;
+using System.Numerics;
 using System.Runtime;
+using System.Runtime.CompilerServices;
 using System.Runtime.ConstrainedExecution;
 using System.Runtime.InteropServices;
-using UltimateOrb.Utilities;
 using UltimateOrb.Mathematics.NumberTheory;
-using static UltimateOrb.Utilities.ThrowHelper;
-using System.Numerics;
-using System.Globalization;
 using UltimateOrb.Numerics;
+using UltimateOrb.Utilities;
+using static UltimateOrb.Utilities.ThrowHelper;
 
 namespace UltimateOrb.Mathematics.Exact {
 
@@ -20,12 +20,12 @@ namespace UltimateOrb.Mathematics.Exact {
     public readonly partial struct Rational64 :
         IComparable<Rational64>,
         IEquatable<Rational64>,
-        // ISpanFormattable,
+        ISpanFormattable,
         IMinMaxValue<Rational64>,
-        // IUtf8SpanFormattable,
-        // IParsable<Rational64>,
-        // ISpanParsable<Rational64>,
-        // IUtf8SpanParsable<Rational64>,
+        IUtf8SpanFormattable,
+        IParsable<Rational64>,
+        ISpanParsable<Rational64>,
+        IUtf8SpanParsable<Rational64>,
         IAdditionOperators<Rational64, Rational64, Rational64>,
         IAdditiveIdentity<Rational64, Rational64>,
         IComparisonOperators<Rational64, Rational64, bool>,
@@ -41,7 +41,7 @@ namespace UltimateOrb.Mathematics.Exact {
         // INumber<Rational64>,
         INumberBase<Rational64>,
         // IPowerFunctions<Rational64>,
-        // IRootFunctions<Rational64>,
+        IRootFunctions<Rational64>,
         ISignedNumber<Rational64>,
         ISubtractionOperators<Rational64, Rational64, Rational64>,
         IUnaryNegationOperators<Rational64, Rational64>,
@@ -238,6 +238,12 @@ namespace UltimateOrb.Mathematics.Exact {
         }
 
         static int INumberBase<Rational64>.Radix => throw new NotSupportedException();
+
+        static Rational64 IFloatingPointConstants<Rational64>.E => throw new OverflowException();
+
+        static Rational64 IFloatingPointConstants<Rational64>.Pi => throw new OverflowException();
+
+        static Rational64 IFloatingPointConstants<Rational64>.Tau => throw new OverflowException();
 
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
         [TargetedPatchingOptOutAttribute("")]
@@ -623,7 +629,7 @@ namespace UltimateOrb.Mathematics.Exact {
 
             // Calculate the quotient and remainder using Math.DivRem
             Int64 quotient = Math.DivRem(dividendNumerator * divisorDenominator, dividendDenominator * divisorNumerator, out Int64 remainderNumerator);
-            
+
             if (0 > remainderNumerator) {
                 remainderNumerator = -remainderNumerator;
                 remainderDenominator = -remainderDenominator;
@@ -1540,6 +1546,36 @@ namespace UltimateOrb.Mathematics.Exact {
             var n = unchecked((UInt32)value.bits);
             var r = n % m1;
             return 0 == r ? default : new Rational64(unchecked(r | ((UInt64)m << 32)));
+        }
+
+        public static Rational64 Cbrt(Rational64 x) {
+            if (IsZero(x)) {
+                return x;
+            }
+            var n = UltimateOrb.Mathematics.Elementary.Math.CbrtRem(unchecked((UInt32)x.Numerator), out var r);
+            _ = 0u - r.ToUnsignedUnchecked();
+            var sd = unchecked((Int32)x.SignedDenominator);
+            if (Int32.MinValue == sd) {
+                _ = -sd;
+            }
+            var d = UltimateOrb.Mathematics.Elementary.Math.CbrtRem(sd, out var s);
+            _ = 0u - r.ToUnsignedUnchecked();
+            unchecked {
+                d -= d > 0 ? 1 : 0;
+            }
+            return new Rational64(unchecked(n | ((UInt64)d << 32)));
+        }
+
+        static Rational64 IRootFunctions<Rational64>.Hypot(Rational64 x, Rational64 y) {
+            throw new NotImplementedException();
+        }
+
+        static Rational64 IRootFunctions<Rational64>.RootN(Rational64 x, int n) {
+            throw new NotImplementedException();
+        }
+
+        static Rational64 IRootFunctions<Rational64>.Sqrt(Rational64 x) {
+            throw new NotImplementedException();
         }
     }
 }

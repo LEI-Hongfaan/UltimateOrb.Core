@@ -7002,6 +7002,11 @@
             This constant equals <c>int.MinValue + 1</c> and is used to signal the logarithm of zero.
             </remarks>
         </member>
+        <member name="F:UltimateOrb.Numerics.ILogSpecialResults.ILogInfinity">
+            <summary>
+            Returned when an ILog method receives an input of infinity.
+            </summary>
+        </member>
         <member name="M:UltimateOrb.Numerics.NumberLiteralRegexFactory.NumberLiteralRegex">
             <remarks>
             Pattern:<br/>
@@ -7131,6 +7136,9 @@
         </member>
         <member name="M:UltimateOrb.Decimal128Bid.ILogB(UltimateOrb.Decimal128Bid)">
             <inheritdoc cref="M:System.Numerics.IFloatingPointIeee754`1.ILogB(`0)"/>
+        </member>
+        <member name="M:UltimateOrb.Decimal128Bid.IsCanonical(UltimateOrb.Decimal128Bid)">
+            <inheritdoc cref="M:System.Numerics.INumberBase`1.IsCanonical(`0)"/>
         </member>
         <member name="T:UltimateOrb.Default`1">
             <summary>

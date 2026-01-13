@@ -669,8 +669,8 @@ namespace UltimateOrb.Numerics {
     }
 
     public readonly struct UInt128_Alt
-        : IBinaryInteger<UInt128_Alt>, IUnsignedNumber<UInt128_Alt>
-        , IBinaryIntegerDerived<UInt128_Alt, ULong<Int64, UInt64>> {
+        : IBinaryInteger<UInt128_Alt>, IBinaryIntegerDerived<UInt128_Alt, ULong<Int64, UInt64>>
+        , IUnsignedNumber<UInt128_Alt> {
 
         readonly ULong<Int64, UInt64> value__;
 
@@ -684,9 +684,6 @@ namespace UltimateOrb.Numerics {
             return InterfaceDerivedDefault<UInt128_Alt, ULong<Int64, UInt64>>.ToBase(value);
         }
     }
-
-
-
 
     public readonly struct ULong<TInt, TUInt>
         : IBinaryInteger<ULong<TInt, TUInt>>, IUnsignedNumber<ULong<TInt, TUInt>>

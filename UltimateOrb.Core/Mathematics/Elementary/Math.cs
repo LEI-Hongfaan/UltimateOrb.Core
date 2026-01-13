@@ -1,10 +1,11 @@
 ﻿using System;
+using System.Diagnostics.Contracts;
+using System.Numerics;
 using System.Runtime;
 using System.Runtime.CompilerServices;
 using System.Runtime.ConstrainedExecution;
-using System.Diagnostics.Contracts;
-using static UltimateOrb.Utilities.Extensions.BooleanIntegerExtensions;
 using UltimateOrb.Numerics;
+using static UltimateOrb.Utilities.Extensions.BooleanIntegerExtensions;
 
 namespace UltimateOrb.Mathematics.Elementary {
 
@@ -520,10 +521,116 @@ namespace UltimateOrb.Mathematics.Elementary {
             return value;
         }
 
+#if NET7_0_OR_GREATER
+        public static System.UInt128 AbsAsUnsigned(System.Int128 value) {
+            return unchecked(0 > value ? unchecked((System.UInt128)(-value)) : unchecked((System.UInt128)value));
+        }
+
+        public static System.UInt128 AbsAsUnsigned(System.UInt128 value) {
+            return value;
+        }
+#endif
+
+        public static UltimateOrb.UInt128 AbsAsUnsigned(UltimateOrb.Int128 value) {
+            return unchecked(0 > value ? unchecked((UltimateOrb.UInt128)(-value)) : unchecked((UltimateOrb.UInt128)value));
+        }
+
+        public static UltimateOrb.UInt128 AbsAsUnsigned(UltimateOrb.UInt128 value) {
+            return value;
+        }
+
+        public static int CopySignUncheckedAsSigned(uint value, int sign) {
+            return unchecked(0 > sign ? -(int)value : (int)value);
+        }
+
+        static Int32 SignZeroToOne(Int32 value) {
+            return (value >> (32 - 2)) | 1;
+        }
+
+        public static int CopySign(int value, int sign) {
+            return checked(value * SignZeroToOne(value ^ sign));
+        }
+
+        public static int CopySignUnchecked(int value, int sign) {
+            return value * SignZeroToOne(value ^ sign);
+        }
+
+        public static int CopySignUncheckedAsSigned(int value, int sign) {
+            return CopySignUnchecked(value, sign);
+        }
+
+        public static long CopySignUncheckedAsSigned(ulong value, long sign) {
+            return unchecked(sign > 0 ? -(long)value : (long)value);
+        }
+
+        static Int64 SignZeroToOne(Int64 value) {
+            return (value >> (64 - 2)) | 1;
+        }
+
+        public static long CopySign(long value, long sign) {
+            return checked(value * SignZeroToOne(value ^ sign));
+        }
+
+        public static long CopySignUnchecked(long value, long sign) {
+            return value * SignZeroToOne(value ^ sign);
+        }
+
+        public static long CopySignUncheckedAsSigned(long value, long sign) {
+            return CopySignUnchecked(value, sign);
+        }
+
+#if NET7_0_OR_GREATER
+        public static System.Int128 CopySignUncheckedAsSigned(System.UInt128 value, System.Int128 sign) {
+            return unchecked(sign > 0 ? -(System.Int128)value : (System.Int128)value);
+        }
+
+        static System.Int128 SignZeroToOne(System.Int128 value) {
+            return (value >> (128 - 2)) | 1;
+        }
+
+        public static System.Int128 CopySign(System.Int128 value, System.Int128 sign) {
+            return checked(value * SignZeroToOne(value ^ sign));
+        }
+
+        public static System.Int128 CopySignUnchecked(System.Int128 value, System.Int128 sign) {
+            return value * SignZeroToOne(value ^ sign);
+        }
+
+        public static System.Int128 CopySignUncheckedAsSigned(System.Int128 value, System.Int128 sign) {
+            return CopySignUnchecked(value, sign);
+        }
+#endif
+
+        public static UltimateOrb.Int128 CopySignUncheckedAsSigned(UltimateOrb.UInt128 value, UltimateOrb.Int128 sign) {
+            return unchecked(sign > 0 ? -(UltimateOrb.Int128)value : (UltimateOrb.Int128)value);
+        }
+
+        static UltimateOrb.Int128 SignZeroToOne(UltimateOrb.Int128 value) {
+            return (value >> (128 - 2)) | 1;
+        }
+
+        public static UltimateOrb.Int128 CopySign(UltimateOrb.Int128 value, UltimateOrb.Int128 sign) {
+            return checked(value * SignZeroToOne(value ^ sign));
+        }
+
+        public static UltimateOrb.Int128 CopySignUnchecked(UltimateOrb.Int128 value, UltimateOrb.Int128 sign) {
+            return value * SignZeroToOne(value ^ sign);
+        }
+
+        public static UltimateOrb.Int128 CopySignUncheckedAsSigned(UltimateOrb.Int128 value, UltimateOrb.Int128 sign) {
+            return CopySignUnchecked(value, sign);
+        }
+
         #region ICbrt, CbrtRem
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static uint ICbrt(uint radicand) {
             return unchecked((uint)System.Math.Cbrt(radicand));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int ICbrt(int radicand) {
+            var rad = AbsAsUnsigned(radicand);
+            return CopySignUncheckedAsSigned(ICbrt(rad), radicand);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -536,12 +643,26 @@ namespace UltimateOrb.Mathematics.Elementary {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int CbrtRem(int radicand, out int remainder) {
+            var rad = AbsAsUnsigned(radicand);
+            var root = CbrtRem(rad, out var rem);
+            remainder = CopySignUncheckedAsSigned(rem, radicand);
+            return CopySignUncheckedAsSigned(root, radicand);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ulong ICbrt(ulong radicand) {
             unchecked {
                 var root = (ulong)(1e-8 + System.Math.Cbrt(radicand));
                 var p = root * root * root;
                 return radicand >= p ? root : --root;
             }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static long ICbrt(long radicand) {
+            var rad = AbsAsUnsigned(radicand);
+            return CopySignUncheckedAsSigned(ICbrt(rad), radicand);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -561,6 +682,14 @@ namespace UltimateOrb.Mathematics.Elementary {
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static long CbrtRem(long radicand, out long remainder) {
+            var rad = AbsAsUnsigned(radicand);
+            var root = CbrtRem(rad, out var rem);
+            remainder = CopySignUncheckedAsSigned(rem, radicand);
+            return CopySignUncheckedAsSigned(root, radicand);
+        }
+
 #if NET7_0_OR_GREATER
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static System.UInt128 ICbrt(System.UInt128 radicand) {
@@ -569,6 +698,12 @@ namespace UltimateOrb.Mathematics.Elementary {
                 var p = root * (System.UInt128)root * root;
                 return radicand >= p ? root : --root;
             }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static System.Int128 ICbrt(System.Int128 radicand) {
+            var rad = AbsAsUnsigned(radicand);
+            return CopySignUncheckedAsSigned(ICbrt(rad), radicand);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -587,6 +722,14 @@ namespace UltimateOrb.Mathematics.Elementary {
                 }
             }
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static System.Int128 CbrtRem(System.Int128 radicand, out System.Int128 remainder) {
+            var rad = AbsAsUnsigned(radicand);
+            var root = CbrtRem(rad, out var rem);
+            remainder = CopySignUncheckedAsSigned(rem, radicand);
+            return CopySignUncheckedAsSigned(root, radicand);
+        }
 #endif
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -596,6 +739,12 @@ namespace UltimateOrb.Mathematics.Elementary {
                 var p = root * (UltimateOrb.UInt128)root * root;
                 return radicand >= p ? root : --root;
             }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static UltimateOrb.Int128 ICbrt(UltimateOrb.Int128 radicand) {
+            var rad = AbsAsUnsigned(radicand);
+            return CopySignUncheckedAsSigned(ICbrt(rad), radicand);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -613,6 +762,14 @@ namespace UltimateOrb.Mathematics.Elementary {
                     return root;
                 }
             }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static UltimateOrb.Int128 CbrtRem(UltimateOrb.Int128 radicand, out UltimateOrb.Int128 remainder) {
+            var rad = AbsAsUnsigned(radicand);
+            var root = CbrtRem(rad, out var rem);
+            remainder = CopySignUncheckedAsSigned(rem, radicand);
+            return CopySignUncheckedAsSigned(root, radicand);
         }
         #endregion
 

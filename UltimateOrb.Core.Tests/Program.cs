@@ -27,6 +27,7 @@ namespace UltimateOrb.Core.Tests {
     using System.Runtime.Intrinsics;
     using System.Text.RegularExpressions;
     using System.Threading;
+    using UltimateOrb.Mathematics.Exact;
     using UltimateOrb.Mathematics.Geometry;
     using UltimateOrb.Numerics;
     using UltimateOrb.Numerics.Specialized;
@@ -146,27 +147,43 @@ namespace UltimateOrb.Core.Tests {
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private static int Main(string[] args) {
             {
+                Console.WriteLine($"Decimal128(-0E-3M) = {(Decimal128Bid)(-0E-3M)}");
+                Console.WriteLine($"Quantum(Decimal128(-0E-900M)) = {Decimal128Bid.Quantum((Decimal128Bid)(-0E-900M))}");
 
-                var v1 = Unsafe.BitCast<Int64, Long<int, uint>>(0X0700002000000100L);
-                var v2 = Unsafe.BitCast<Int64, Long<int, uint>>(0X0001001000000100L);
-                var v3 = v1 | v2;
-                Console.WriteLine(Unsafe.BitCast<Long<int, uint>, Int64>(v3));
+                Console.WriteLine($"Zero - 0E-3 = {Decimal128Bid.Zero - Decimal128Bid.Scale10(0, -3)}");
+                Console.WriteLine($"Zero + AdditiveIdentity = {Decimal128Bid.Zero + Decimal128Bid.AdditiveIdentity}");
 
-            }
-            if (false) {
-                asfa sadfa = new asfa() { a = 1919810, b = 114514 };
-                Console.WriteLine($"{nameof(sadfa)} = {sadfa}");
-                var t = Clone1(ref sadfa);
-                Console.WriteLine($"{nameof(t)} = {t}");
-                Console.WriteLine($"{nameof(sadfa)} = {sadfa}");
-                Console.WriteLine($"===");
-                var t2 = Clone1b(ref sadfa);
-                Console.WriteLine($"{nameof(t2)} = {t2}");
+                Console.WriteLine($"Zero = {Decimal128Bid.Zero}");
+                Console.WriteLine($"NegativeZero = {Decimal128Bid.NegativeZero}");
+                Console.WriteLine($"AdditiveIdentity = {Decimal128Bid.AdditiveIdentity}");
+                Console.WriteLine($"BitIncrement({-Decimal128Bid.Epsilon}) = {Decimal128Bid.BitIncrement(-Decimal128Bid.Epsilon)}");
 
+                Console.WriteLine($"BitDecrement({Decimal128Bid.Epsilon}) = {Decimal128Bid.BitDecrement(Decimal128Bid.Epsilon)}");
+                Console.WriteLine($"BitDecrement(-1) = {Decimal128Bid.BitDecrement(-1)}");
+                Console.WriteLine($"BitDecrement({Decimal128Bid.MinValue}) = {Decimal128Bid.BitDecrement(Decimal128Bid.MinValue)}");
 
+                Console.WriteLine($"AtanPi({Decimal128Bid.MaxValue}) = {Decimal128Bid.AtanPi(Decimal128Bid.MaxValue)}");
+                Console.WriteLine($"AtanPi({Decimal128Bid.NegativeInfinity}) = {Decimal128Bid.AtanPi(Decimal128Bid.NegativeInfinity)}");
+                Console.WriteLine($"AtanPi(1) = {Decimal128Bid.AtanPi(1)}");
+                Console.WriteLine($"Atan(-1E-10M) = {Decimal128Bid.Atan(-1E-10M)}");
+                Console.WriteLine();
 
+                Console.WriteLine($"Decimal128(0.1D) = {(Decimal128Bid)0.1D}");
+                Console.WriteLine($"Decimal128(0.1M) = {(Decimal128Bid)0.1M}");
+                Console.WriteLine($"Atan(0.1D) = {Decimal128Bid.Atan(0.1D)}");
+                Console.WriteLine($"Atan(0.1M) = {Decimal128Bid.Atan(0.1M)}");
+                Console.WriteLine();
+
+                for (Decimal128Bid x = 0.1M; x <= 0.9M; x+= 0.1M) {
+                    Console.WriteLine($"Atan({x}) = {Decimal128Bid.Atan(x)}");
+                }
+
+                Console.WriteLine();
+                Console.WriteLine($"4 * Atan(1) = {4 * Decimal128Bid.Atan(1)}");
+                Console.WriteLine($"Pi = {Decimal128Bid.Pi}");
                 return 0;
             }
+
             {
                 Console.WriteLine(BigRational.Math.ILog10((BigRational)9.9));
                 Decimal128Bid a = Decimal128Bid.Pi;
@@ -277,6 +294,40 @@ namespace UltimateOrb.Core.Tests {
 
                 return 0;
             }
+
+
+
+
+
+
+            {
+                var sdfad = Rational64.FromFraction(27, -512);
+                var sdfasdad = Rational64.Cbrt(sdfad);
+                Console.WriteLine(sdfasdad);
+            }
+            {
+
+                var v1 = Unsafe.BitCast<Int64, Long<int, uint>>(0X0700002000000100L);
+                var v2 = Unsafe.BitCast<Int64, Long<int, uint>>(0X0001001000000100L);
+                var v3 = v1 | v2;
+                Console.WriteLine(Unsafe.BitCast<Long<int, uint>, Int64>(v3));
+
+            }
+            if (false) {
+                asfa sadfa = new asfa() { a = 1919810, b = 114514 };
+                Console.WriteLine($"{nameof(sadfa)} = {sadfa}");
+                var t = Clone1(ref sadfa);
+                Console.WriteLine($"{nameof(t)} = {t}");
+                Console.WriteLine($"{nameof(sadfa)} = {sadfa}");
+                Console.WriteLine($"===");
+                var t2 = Clone1b(ref sadfa);
+                Console.WriteLine($"{nameof(t2)} = {t2}");
+
+
+
+                return 0;
+            }
+            
             {
                 var d = (decimal)BigRational.FromFraction(22, 7);
                 Console.WriteLine(d);
