@@ -1439,7 +1439,90 @@ namespace UltimateOrb.Numerics {
         static int INumberBase<TSelf>.Radix => TBase.Radix;
     }
 }
+namespace UltimateOrb {
 
+    partial class Decimal128Extensions {
+
+
+        extension(System.BitConverter) {
+
+            public static System.Int128 Decimal128ToInt128Bits(Decimal128Bid value) {
+                return unchecked((System.Int128)value.bits);
+            }
+
+            public static System.UInt128 Decimal128ToUInt128Bits(Decimal128Bid value) {
+                return unchecked((System.UInt128)value.bits);
+            }
+
+            public static System.Int128 Decimal128ToInt128Bits(Decimal128Dpd value) {
+                return unchecked((System.Int128)value.bits);
+            }
+
+            public static System.UInt128 Decimal128ToUInt128Bits(Decimal128Dpd value) {
+                return unchecked((System.UInt128)value.bits);
+            }
+
+            public static System.Int128 Decimal128ToInt128Bits(Decimal128 value) {
+                return unchecked((System.Int128)value.value.bits);
+            }
+
+            public static System.UInt128 Decimal128ToUInt128Bits(Decimal128 value) {
+                return unchecked((System.UInt128)value.value.bits);
+            }
+        }
+    }
+}
+
+namespace UltimateOrb {
+
+    [Experimental("UoWIP")]
+    public static partial class Decimal128Extensions {
+    }
+}
+namespace UltimateOrb {
+
+    partial class Decimal128Extensions {
+
+#if DEBUG
+        extension(Decimal128Bid @this) {
+
+            public string ToStringWithSignAndNaNPayload() {
+                return $"{(Decimal128Bid.IsNegative(@this) ? "-" : "+")}{(Decimal128Bid.IsSignalingNaN(@this) ? "s" : "")}{(Decimal128Bid.IsQuietNaN(@this) ? "q" : "")}{Decimal128Bid.Abs(@this)}{(Decimal128Bid.IsNaN(@this) ? $"({((UInt128.One << 110) - 1) & @this.bits})" : "")}";
+            }
+        }
+#endif
+    }
+}
+namespace UltimateOrb {
+    partial class Decimal128Extensions {
+
+        extension(Decimal128Bid @this) {
+
+            public static (Int64 D2, UInt64 D1, UInt64 D0) TotalOrderIeee754_192BitsKeySelector(Decimal128Bid value) {
+                var x = unchecked((System.Int128)(Decimal128Bid.IsZero(value) ? Decimal128Bid.CopySign(default, value) : Decimal128Bid.ToFinestCohort(value)).bits);
+                Debug.Assert(System.Int128.IsNegative(x) == Decimal128Bid.IsNegative(value));
+                if (Decimal128Bid.IsNaN(value)) {
+                    var x1 = new Decimal128Bid(unchecked((UInt128)x), default);
+                    x ^= (System.Int128)new UltimateOrb.Int128(lo: 0u, hi: unchecked((Int64)0X_02000000_00000000L));
+                }
+                x = System.Int128.IsNegative(x) ? unchecked(System.Int128.MaxValue - x) : x;
+                var exp = unchecked((Int32)value.ExtractRawBiasedExponentAndRawSignificand(out _));
+                Debug.Assert(exp >= 0);
+                if (exp >= Decimal128Bid.MaxBiasedExponent) {
+                    exp = Decimal128Bid.MaxBiasedExponent;
+                }
+                exp = System.Int128.IsNegative(x) ? unchecked(Decimal128Bid.MaxBiasedExponent - exp) : exp;
+                return (x.GetHighPart(), x.GetLowPart(), unchecked((UInt64)(Int64)exp));
+            }
+
+            public static System.Int128 TotalOrderDefaultSystemInt128KeySelector(Decimal128Bid value) {
+                var x = unchecked((System.Int128)(Decimal128Bid.IsZero(value) ? Decimal128Bid.CopySign(default, value) : Decimal128Bid.ToFinestCohort(value, resetNaNSignAndPayload: true)).bits);
+                return System.Int128.IsNegative(x) ? unchecked(System.Int128.MinValue - x) : x;
+            }
+        }
+    }
+
+}
 namespace UltimateOrb {
 
     // Wrapper. Same API shape as Decimal128Bid
@@ -1752,41 +1835,6 @@ namespace UltimateOrb {
     }
 
     [Experimental("UoWIP")]
-    public static partial class Decimal128BidExtensions {
-
-    }
-
-    partial class Decimal128BidExtensions {
-
-        extension(BitConverter) {
-
-            public static System.UInt128 Decimal128ToUInt128Bits(Decimal128 value) {
-                return Decimal128ToUInt128Bits(value.value);
-            }
-
-            public static System.UInt128 Decimal128ToUInt128Bits(Decimal128Bid value) {
-                return value.bits;
-            }
-
-            public static System.UInt128 Decimal128ToUInt128Bits(Decimal128Dpd value) {
-                return value.bits;
-            }
-
-            public static System.Int128 Decimal128ToInt128Bits(Decimal128 value) {
-                return unchecked((System.Int128)Decimal128ToUInt128Bits(value));
-            }
-
-            public static System.Int128 Decimal128ToInt128Bits(Decimal128Bid value) {
-                return unchecked((System.Int128)Decimal128ToUInt128Bits(value));
-            }
-
-            public static System.Int128 Decimal128ToInt128Bits(Decimal128Dpd value) {
-                return unchecked((System.Int128)Decimal128ToUInt128Bits(value));
-            }
-        }
-    }
-
-    [Experimental("UoWIP")]
     public readonly partial struct Decimal128Bid :
         ISpanFormattable,
         IComparable,
@@ -1803,7 +1851,7 @@ namespace UltimateOrb {
         internal readonly struct ConstructorInternalFromBitsTag {
         }
 
-        static readonly ConstructorInternalFromBitsTag CtorFromBits;
+        internal static readonly ConstructorInternalFromBitsTag CtorFromBits;
 
         internal Decimal128Bid(UInt128 bits, ConstructorInternalFromBitsTag _) {
             this.bits = bits;
@@ -1890,7 +1938,7 @@ namespace UltimateOrb {
                 return PositiveInfinity;
             }
             var exp = unchecked((uint)value.RawBiasedExponent);
-            return new (1u, exp, 0u, CtorFromPartsCanonical);
+            return new(1u, exp, 0u, CtorFromPartsCanonical);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1946,9 +1994,9 @@ namespace UltimateOrb {
 
         public static Decimal128Bid PositiveQuietNaN => new(0u | ((UInt128)0X7C00000000000000UL << 64), CtorFromBits);
 
-        public static Decimal128Bid NegativeNaN => NegativeSignalingNaN;
+        public static Decimal128Bid NegativeNaN => NegativeQuietNaN;
 
-        public static Decimal128Bid PositiveNaN => PositiveSignalingNaN;
+        public static Decimal128Bid PositiveNaN => PositiveQuietNaN;
 
         public static Decimal128Bid NaN => NegativeNaN;
 
@@ -2175,7 +2223,7 @@ namespace UltimateOrb {
         static readonly Decimal128Bid RI8_q8 = new Decimal128Bid(
             System.UInt128.Parse("1848333818752314191599926383248147"), -37 + EXP_BIAS, 0, CtorFromPartsCanonical);
 
-        // Evaluate P(x)/Q(x) with Horner's method. x is expected to be small (x = original^2).
+        // Evaluate P(value)/Q(value) with Horner's method. value is expected to be small (value = original^2).
         public static Decimal128Bid AtanInternal_RI8(Decimal128Bid x) {
             Debug.Assert(0 <= x);
             Debug.Assert(x < 0.0875 * 0.0875);
@@ -2492,7 +2540,7 @@ namespace UltimateOrb {
         /// <inheritdoc cref="INumberBase{Decimal128Bid}.IsCanonical(Decimal128Bid)"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsCanonical(Decimal128Bid value) {
-            var x = Abs (value);
+            var x = Abs(value);
             if (IsFinite(x)) {
                 x.ExtractRawBiasedExponentAndRawSignificand(out var significand);
                 return significand <= MaxSignificandAsUInt128;
@@ -2625,8 +2673,8 @@ namespace UltimateOrb {
         }
 
         public static bool IsZero(Decimal128Bid value) {
-            value.ExtractRawBiasedExponentAndRawSignificand(out var m);
-            return m.IsZero || m > MaxSignificandAsUInt128;
+            var e = value.ExtractRawBiasedExponentAndRawSignificand(out var m);
+            return e <= MaxBiasedExponent && (m.IsZero || m > MaxSignificandAsUInt128);
         }
 
         public static Decimal128Bid Log(Decimal128Bid x) {
@@ -2660,21 +2708,87 @@ namespace UltimateOrb {
         public static Decimal128Bid MinMagnitudeNumber(Decimal128Bid x, Decimal128Bid y) {
             throw new NotImplementedException();
         }
+        static readonly BigInteger MaxNaNPayloadAsBigInteger = (BigInteger.One << 110) - 1;
 
         public static Decimal128Bid Parse(ReadOnlySpan<char> s, NumberStyles style, IFormatProvider? provider) {
-            throw new NotImplementedException();
+            var parseResult = NumberLiteralParseModule.ParseNumberLiteral(s.ToString());
+            var kind = parseResult.Flags.GetKind();
+            if (kind == NumberLiteralFlags.Empty || kind == NumberLiteralFlags.Error) {
+                return decimal.Parse(s, provider);
+                throw new FormatException("Input string was not in a recognized format.");
+            }
+            if (kind != NumberLiteralFlags.IsFinite) {
+                var sp = parseResult.Flags.GetSpecial();
+                if (sp == NumberLiteralFlags.SpecialInfinity) {
+                    return parseResult.Flags.HasFlag(NumberLiteralFlags.IsNegative) ? NegativeInfinity : PositiveInfinity;
+                }
+                var payload = (UltimateOrb.UInt128)System.UInt128.CreateTruncating(MaxNaNPayloadAsBigInteger & parseResult.SignificandIntegralPart);
+                // traat unspecified NaN as SignalingNaN
+                var ccc = sp == NumberLiteralFlags.SpecialQuietNaN ? 0B_011_1110_0000_0000 : 0B_011_1111_0000_0000;
+                ccc += parseResult.Flags.GetSign() == NumberLiteralFlags.SignPositive ? 0 : 0B_100_0000_0000_0000;
+                return new Decimal128Bid(payload + ((UInt128)ccc << 113), CtorFromBits);
+            }
+            {
+                BigRational r = 0;
+                var preferredBiasedExponent = checked((int)(parseResult.Exponent - parseResult.SignificandFractionalPartLength + EXP_BIAS));
+                var preferredSignBit = parseResult.Flags.HasFlag(NumberLiteralFlags.IsNegative) ? unchecked((UInt64)Int64.MinValue) : 0;
+                if (parseResult.SignificandFractionalPart.IsZero &&
+                    parseResult.SignificandIntegralPart.IsZero) {
+                } else {
+                    BigInteger denominator;
+                    BigInteger numerator;
+                    if (parseResult.Flags.HasFlag(NumberLiteralFlags.Hex)) {
+                        Debug.Assert(parseResult.SignificandFractionalPartLength >= 0);
+                        int fracLen = (int)parseResult.SignificandFractionalPartLength;
+                        BigInteger pow16 = BigInteger.Pow(16, fracLen);
+                        numerator = parseResult.SignificandIntegralPart * pow16 + parseResult.SignificandFractionalPart;
+                        denominator = pow16;
+
+                        var exp = checked((int)parseResult.Exponent);
+                        if (exp >= 0) {
+                            numerator <<= exp;
+                        } else {
+                            denominator <<= checked(-exp);
+                        }
+
+
+                    } else {
+                        // Decimal path
+                        int fracLen = checked((int)parseResult.SignificandFractionalPartLength);
+                        BigInteger pow10 = BigInteger.Pow(10, fracLen);
+                        numerator = parseResult.SignificandIntegralPart * pow10 + parseResult.SignificandFractionalPart;
+                        denominator = pow10;
+
+                        var exp = checked((int)parseResult.Exponent);
+                        if (exp >= 0) {
+                            numerator *= BigIntegerSmallExp10Module.Exp10(exp);
+                        } else {
+                            denominator *= BigIntegerSmallExp10Module.Exp10(-exp);
+                        }
+                    }
+                    r = BigRational.FromFraction(numerator, denominator);
+                    if (parseResult.Flags.HasFlag(NumberLiteralFlags.IsNegative)) r = -r;
+                }
+                var res = (Decimal128Bid)r;
+                preferredBiasedExponent = Math.Clamp(preferredBiasedExponent, 0, MaxBiasedExponent);
+                return AdjustSignBitAndBiasedExponent(res, preferredSignBit, preferredBiasedExponent);
+            }
         }
 
         public static Decimal128Bid Parse(string s, NumberStyles style, IFormatProvider? provider) {
-            throw new NotImplementedException();
+            return Parse(s.AsSpan(), style, provider);
         }
 
         public static Decimal128Bid Parse(ReadOnlySpan<char> s, IFormatProvider? provider) {
-            throw new NotImplementedException();
+            return Parse(s, NumberStyles.Float, provider);
         }
 
         public static Decimal128Bid Parse(string s, IFormatProvider? provider) {
-            throw new NotImplementedException();
+            return Parse(s.AsSpan(), NumberStyles.Float, provider);
+        }
+
+        public static Decimal128Bid Parse(string s) {
+            return Parse(s, null);
         }
 
         public static Decimal128Bid Pow(Decimal128Bid x, Decimal128Bid y) {
@@ -2935,7 +3049,9 @@ namespace UltimateOrb {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal uint ExtractRawBiasedExponentAndRawSignificandForCanonical(out UInt128 significand) {
-            return ExtractRawBiasedExponentAndRawSignificandForCanonical(this.bits, out significand);
+            var t = this;
+            Debug.Assert(IsCanonical(t));
+            return ExtractRawBiasedExponentAndRawSignificandForCanonical(t.bits, out significand);
         }
 
         public int CompareTo(object? obj) {
@@ -2948,11 +3064,17 @@ namespace UltimateOrb {
                 if (Decimal128Bid.IsNaN(this)) {
                     return Decimal128Bid.IsNaN(other) ? 0 : -1;
                 }
+                if (Decimal128Bid.IsNaN(other)) {
+                    return 1;
+                }
                 if (Decimal128Bid.IsNegativeInfinity(this)) {
                     return Decimal128Bid.IsNegativeInfinity(other) ? 0 : -1;
                 }
-                Debug.Assert(Decimal128Bid.IsPositiveInfinity(this));
-                return Decimal128Bid.IsPositiveInfinity(other) ? 0 : 1;
+                if (Decimal128Bid.IsPositiveInfinity(this)) {
+                    return Decimal128Bid.IsPositiveInfinity(other) ? 0 : 1;
+                }
+                Debug.Assert(Decimal128Bid.IsInfinity(other));
+                return Decimal128Bid.IsPositiveInfinity(other) ? -1 : 1;
             }
             Debug.Assert(Decimal128Bid.IsFinite(this));
             Debug.Assert(Decimal128Bid.IsFinite(other));
@@ -3226,26 +3348,7 @@ namespace UltimateOrb {
             return AdjustSignBitAndBiasedExponentPartial(value, preferredSignBit, preferredBiasedExponent);
         }
 
-        internal static Decimal128Bid AdjustSignBitAndBiasedExponentPartial(Decimal128Bid value, ulong preferredSignBit, int preferredBiasedExponent) {
-            Debug.Assert(preferredBiasedExponent >= 0);
-            Debug.Assert(preferredBiasedExponent <= MaxBiasedExponent);
-
-            // Caller handled NaN
-            Debug.Assert(!Decimal128Bid.IsNaN(value));
-
-            // Infinity: do not change sign or exponent
-            if (Decimal128Bid.IsInfinity(value)) {
-                return value;
-            }
-
-            // Zero: set sign and biased exponent to preferred (clamp preferred into valid range),
-            // keep significand = 0
-            if (Decimal128Bid.IsZero(value)) {
-                ulong packedHi = (ulong)preferredSignBit | ((ulong)preferredBiasedExponent << Hi64BiasedExponentShift);
-                ulong packedLo = 0UL;
-                var newBits128 = ((UInt128)packedHi << 64) | (UInt128)packedLo;
-                return new(newBits128, CtorFromBits);
-            }
+        internal static Decimal128Bid AdjustSignBitAndBiasedExponentPartial0(Decimal128Bid value, ulong preferredSignBit, int preferredBiasedExponent) {
 
             // IMPORTANT: we do NOT clamp the working biasedExp after adjustments — that would change the numeric value.
 
@@ -3309,6 +3412,31 @@ namespace UltimateOrb {
             var newBitsFinal = ((UInt128)hi << 64) | (UInt128)lo;
 
             return new(newBitsFinal, CtorFromBits);
+        }
+
+
+        internal static Decimal128Bid AdjustSignBitAndBiasedExponentPartial(Decimal128Bid value, ulong preferredSignBit, int preferredBiasedExponent) {
+            Debug.Assert(preferredBiasedExponent >= 0);
+            Debug.Assert(preferredBiasedExponent <= MaxBiasedExponent);
+
+            // Caller handled NaN
+            Debug.Assert(!Decimal128Bid.IsNaN(value));
+
+            // Infinity: do not change sign or exponent
+            if (Decimal128Bid.IsInfinity(value)) {
+                return value;
+            }
+
+            // Zero: set sign and biased exponent to preferred (clamp preferred into valid range),
+            // keep significand = 0
+            if (Decimal128Bid.IsZero(value)) {
+                ulong packedHi = (ulong)preferredSignBit | ((ulong)preferredBiasedExponent << Hi64BiasedExponentShift);
+                ulong packedLo = 0UL;
+                var newBits128 = ((UInt128)packedHi << 64) | (UInt128)packedLo;
+                return new(newBits128, CtorFromBits);
+            }
+
+            return AdjustSignBitAndBiasedExponentPartial0(value, preferredSignBit, preferredBiasedExponent);
         }
 
         internal static Decimal128Bid AdjustExponent0Partial(Decimal128Bid value) {
@@ -3631,6 +3759,17 @@ namespace UltimateOrb {
 }
 namespace UltimateOrb {
 
+    public static partial class Decimal128Extensions {
+
+    }
+
+    partial class Decimal128Extensions {
+
+
+    }
+}
+namespace UltimateOrb {
+
     partial struct Decimal128Bid {
 
         public static explicit operator BigRational(Decimal128Bid value) {
@@ -3689,6 +3828,51 @@ namespace UltimateOrb {
             }
 
             return est;
+        }
+
+        public static Decimal128Bid ToCohort(Decimal128Bid x, int qExponent) {
+            return ToCohortInternal(x, unchecked((int)Math.Clamp(qExponent + (long)EXP_BIAS, 0, MaxBiasedExponent)));
+        }
+
+        public static Decimal128Bid ToCohortInternal(Decimal128Bid x, int preferredBiasedExponent, bool resetNaNSignAndPayload = false) {
+            if (IsFinite(x)) {
+                if (!IsZero(x)) {
+                    return AdjustSignBitAndBiasedExponentPartial0(x, unchecked((UInt64)Int64.MinValue) & x.bits.GetHighPart(), preferredBiasedExponent);
+                }
+                preferredBiasedExponent = Math.Clamp(preferredBiasedExponent, 0, MaxBiasedExponent);
+                ulong packedHi = (unchecked((UInt64)Int64.MinValue) & x.bits.GetHighPart()) | ((UInt64)(uint)preferredBiasedExponent << Hi64BiasedExponentShift);
+                return new(new UInt128(lo: 0u, hi: packedHi), CtorFromBits);
+            }
+            return CanonicalizeNaNOrInfinity(x, resetNaNSignAndPayload);
+        }
+
+        public static Decimal128Bid ToFinestCohort(Decimal128Bid x) {
+            return ToFinestCohort(x, false);
+        }
+
+        internal static Decimal128Bid ToFinestCohort(Decimal128Bid x, bool resetNaNSignAndPayload) {
+            return ToCohortInternal(x, 0, resetNaNSignAndPayload);
+        }
+
+        private static Decimal128Bid CanonicalizeNaNOrInfinity(Decimal128Bid x, bool resetNaNSignAndPayload = false) {
+            if (IsInfinity(x)) {
+                return CopySign(PositiveInfinity, x);
+            } else {
+                Debug.Assert(IsNaN(x));
+                if (!resetNaNSignAndPayload) {
+                    var b = x.bits;
+                    b &= new UInt128(lo: UInt64.MaxValue, hi: 0X_FE003FFF_FFFFFFFFUL);
+                    return new(b, CtorFromBits);
+                }
+                return NegativeSignalingNaN;
+            }
+        }
+        public static Decimal128Bid ToCoarsestCohort(Decimal128Bid x) {
+            return ToCoarsestCohort(x, false);
+        }
+
+        internal static Decimal128Bid ToCoarsestCohort(Decimal128Bid x, bool resetNaNSignAndPayload) {
+            return ToCohortInternal(x, MaxBiasedExponent, resetNaNSignAndPayload);
         }
 
         // Returns floor(log10(numerator/denominator)) for positive numerator and denominator

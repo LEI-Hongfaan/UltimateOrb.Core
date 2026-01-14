@@ -1657,8 +1657,6 @@ namespace UltimateOrb.Numerics {
                     var parseResultB = BigInteger.Parse(b, provider);
                     errDivByZero = parseResultB.IsZero;
                     return BigRational.FromFraction(parseResultA, parseResultB);
-                } else {
-                    return BigInteger.Parse(s, provider);
                 }
             } catch (FormatException) {
             } catch (ArithmeticException) {
@@ -1670,6 +1668,7 @@ namespace UltimateOrb.Numerics {
                 var parseResult = NumberLiteralParseModule.ParseNumberLiteral(s.ToString());
                 var kind = parseResult.Flags.GetKind();
                 if (kind == NumberLiteralFlags.Empty || kind == NumberLiteralFlags.Error) {
+                    return BigInteger.Parse(s, provider);
                     throw new FormatException("Input string was not in a recognized format.");
                 }
                 if (kind != NumberLiteralFlags.IsFinite) {
@@ -1679,7 +1678,7 @@ namespace UltimateOrb.Numerics {
                         double.NaN);
                 }
                 {
-                    if (parseResult.SignificandFractionalPart.IsZero ||
+                    if (parseResult.SignificandFractionalPart.IsZero &&
                         parseResult.SignificandIntegralPart.IsZero) {
                         return Zero;
                     }

@@ -1,5 +1,4 @@
-﻿
-#pragma warning disable UoWIP // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+﻿#pragma warning disable UoWIP // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
 
 using System;
 /*
@@ -32,6 +31,7 @@ namespace UltimateOrb.Core.Tests {
     using UltimateOrb.Numerics;
     using UltimateOrb.Numerics.Specialized;
     using UltimateOrb.Plain.ValueTypes;
+    using UltimateOrb.Utilities.InterfaceExtensions.System;
 
     // using UltimateOrb.Runtime.CompilerServices.Tests;
 
@@ -146,7 +146,144 @@ namespace UltimateOrb.Core.Tests {
         }
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private static int Main(string[] args) {
+
+
+
             {
+                Console.WriteLine($"Scale10(0, -7) = {Decimal128Bid.Scale10(0, -7)}");
+                Console.WriteLine($"Scale10(0, +7) = {Decimal128Bid.Scale10(0, +7)}");
+                Console.WriteLine($"Scale10(0, +7000) = {Decimal128Bid.Scale10(0, +7000)}");
+                Console.WriteLine($"Scale10(0, -7000) = {Decimal128Bid.Scale10(0, -7000)}");
+
+                Console.WriteLine($"IsNegative(-0) = {Decimal128Bid.IsNegative(Decimal128Bid.Parse("-0"))}");
+
+
+                Decimal128Bid[] testData1 = [
+                    Decimal128Bid.Parse("+qNaN(0x4000000000000000000000000009)"),
+                    Decimal128Bid.Parse("+qNaN(0X3ffffffffffffffffffffffffffF)"),
+                    Decimal128Bid.Parse("sNaN(111)"),
+                    Decimal128Bid.Parse("qNaN(222)"),
+                    Decimal128Bid.Parse("NaN(333)"),
+                    Decimal128Bid.Parse("+sNaN(444)"),
+                    Decimal128Bid.Parse("+qNaN(555)"),
+                    Decimal128Bid.Parse("+NaN(666)"),
+                    Decimal128Bid.Parse("-sNaN(777)"),
+                    Decimal128Bid.Parse("-qNaN(888)"),
+                    Decimal128Bid.Parse("-NaN(999)"),
+
+                    Decimal128Bid.Parse("+inF"),
+                    Decimal128Bid.Parse("-∞"),
+                    Decimal128Bid.Parse("Infinity"),
+                    Decimal128Bid.Parse("1919810"),
+                    Decimal128Bid.ToCoarsestCohort(Decimal128Bid.Parse("1919810")),
+                    Decimal128Bid.ToFinestCohort(Decimal128Bid.Parse("1919810")),
+
+                    Decimal128Bid.Parse("-10100"),
+                    Decimal128Bid.ToCoarsestCohort(Decimal128Bid.Parse("-10100")),
+                    Decimal128Bid.ToFinestCohort(Decimal128Bid.Parse("-10100")),
+                    Decimal128Bid.ToCohort(Decimal128Bid.Parse("-10100"), qExponent: 1),
+                    Decimal128Bid.Pi,
+                    Decimal128Bid.Tau,
+                    Decimal128Bid.Epsilon,
+                    -Decimal128Bid.Epsilon,
+                    -Decimal128Bid.AdditiveIdentity,
+                    Decimal128Bid.AdditiveIdentity,
+                    Decimal128Bid.BitDecrement(Decimal128Bid.Epsilon),
+                    Decimal128Bid.BitIncrement(Decimal128Bid.Epsilon),
+                    Decimal128Bid.BitDecrement(-Decimal128Bid.Epsilon),
+                    Decimal128Bid.BitIncrement(-Decimal128Bid.Epsilon),
+
+                    Decimal128Bid.Parse("-0"),
+                    Decimal128Bid.Parse("+0"),
+                    Decimal128Bid.Parse("-.0E-9000"),
+
+                    Decimal128Bid.Parse("-∞"),
+                    Decimal128Bid.Parse("Infinity"), ];
+
+                foreach (var item in testData1.OrderBy(x => x, new TotalOrderIeee754Comparer<Decimal128Bid>())) {
+                    Console.Write(item.ToStringWithSignAndNaNPayload());
+                    Console.Write(' ');
+                }
+                Console.WriteLine();
+                foreach (var item in testData1.OrderBy(Decimal128Extensions.TotalOrderIeee754_192BitsKeySelector)) {
+                    Console.Write(item.ToStringWithSignAndNaNPayload());
+                    Console.Write(' ');
+                }
+                Console.WriteLine();
+                foreach (var item in testData1.OrderBy(x => x)) {
+                    Console.Write(item.ToStringWithSignAndNaNPayload());
+                    Console.Write(' ');
+                }
+                Console.WriteLine();
+                foreach (var item in testData1.OrderBy(Decimal128Extensions.TotalOrderDefaultSystemInt128KeySelector)) {
+                    Console.Write(item.ToStringWithSignAndNaNPayload());
+                    Console.Write(' ');
+                }
+                Console.WriteLine();
+            }
+            {
+                Decimal128Bid.IsZero(Decimal128Bid.Parse("+sNaN"));
+                Decimal128Bid.TotalOrderIeee754_192BitsKeySelector(Decimal128Bid.Parse("+sNaN"));
+                Console.WriteLine($"IsSignalingNaN(+sNaN) = {Decimal128Bid.IsSignalingNaN(Decimal128Bid.Parse("+sNaN"))}");
+                Console.WriteLine($"IsQuietNaN(+sNaN) = {Decimal128Bid.IsQuietNaN(Decimal128Bid.Parse("+sNaN"))}");
+                Console.WriteLine($"IsNegative(+sNaN) = {Decimal128Bid.IsNegative(Decimal128Bid.Parse("+sNaN"))}");
+                Console.WriteLine($"IsSignalingNaN(+qNaN(0x4243)) = {Decimal128Bid.IsSignalingNaN(Decimal128Bid.Parse("+qNaN(0x4243)"))}");
+                Console.WriteLine($"IsQuietNaN(+qNaN(0x4243)) = {Decimal128Bid.IsQuietNaN(Decimal128Bid.Parse("+qNaN(0x4243)"))}");
+                Console.WriteLine($"IsNegative(+qNaN(0x4243)) = {Decimal128Bid.IsNegative(Decimal128Bid.Parse("+qNaN(0x4243)"))}");
+
+                Console.WriteLine($"Decimal128Bid(1919810) = {(Decimal128Bid)1919810}");
+                Console.WriteLine($"CoarsestCohort(1919810) = {Decimal128Bid.ToCoarsestCohort(1919810)}");
+                Console.WriteLine($"FinestCohort(1919810) = {Decimal128Bid.ToFinestCohort(1919810)}");
+
+            }
+            {
+                var comparer = new TotalOrderIeee754Comparer<Decimal128Bid>();
+
+                Console.WriteLine($"TotalOrderIeee754(+sNaN, +qNaN(0x4243)) = {int.Sign(comparer.Compare(
+                    Decimal128Bid.Parse("+sNaN"), Decimal128Bid.Parse("+qNaN(0x4243)")))}");
+                Console.WriteLine($"TotalOrderIeee754(+sNaN, +qNaN(0x4243)) = {int.Sign(
+                    Decimal128Bid.TotalOrderIeee754_192BitsKeySelector(Decimal128Bid.Parse("+sNaN")).CompareTo(
+                    Decimal128Bid.TotalOrderIeee754_192BitsKeySelector(Decimal128Bid.Parse("+qNaN(0x4243)"))))}");
+
+                Console.WriteLine($"TotalOrderIeee754(sNaN, qNaN(0x4243)) = {int.Sign(comparer.Compare(
+                    Decimal128Bid.Parse("sNaN"), Decimal128Bid.Parse("qNaN(0x4243)")))}");
+                Console.WriteLine($"TotalOrderIeee754(sNaN, qNaN(0x4243)) = {int.Sign(
+                    Decimal128Bid.TotalOrderIeee754_192BitsKeySelector(Decimal128Bid.Parse("sNaN")).CompareTo(
+                    Decimal128Bid.TotalOrderIeee754_192BitsKeySelector(Decimal128Bid.Parse("qNaN(0x4243)"))))}");
+
+                Console.WriteLine($"TotalOrderIeee754(-sNaN, -qNaN(0x4243)) = {int.Sign(comparer.Compare(Decimal128Bid.Parse("-sNaN"), Decimal128Bid.Parse("-qNaN(0x4243)")))}");
+                Console.WriteLine($"TotalOrderIeee754(+sNaN(10), +sNaN(0X10)) = {int.Sign(comparer.Compare(Decimal128Bid.Parse("+sNaN(10)"), Decimal128Bid.Parse("+sNaN(0X10)")))}");
+
+            }
+            {
+                Console.WriteLine($"{Decimal128Bid.Parse("7.102030405E13")}");
+                Console.WriteLine($"{Decimal128Bid.Parse("sNaN")}");
+                Console.WriteLine($"{Decimal128Bid.Parse("qNaN(0x4243)")}");
+                Console.WriteLine($"{Decimal128Bid.Parse("Inf")}");
+                Console.WriteLine($"{Decimal128Bid.Parse("-Inf")}");
+                Console.WriteLine($"{Decimal128Bid.Parse("-0E-444")}");
+                Console.WriteLine($"{Decimal128Bid.Parse("-1000E-444")}");
+                Console.WriteLine();
+
+            }
+            {
+                Console.WriteLine($"{BigRational.Parse("7.102030405E13", null)}");
+
+                Console.WriteLine($"{BigRational.Parse(".1", null)}");
+
+                var sdfs = BigRational.Parse("423123.23423423567657657657567657657657657991112E-32", null);
+
+                Console.WriteLine($"{sdfs}");
+                Console.WriteLine();
+
+            }
+            {
+                Console.WriteLine($"default(Decimal128) = {default(Decimal128)}");
+                Console.WriteLine($"Decimal128Bid(Double.MaxValue) = {(Decimal128Bid)double.MaxValue}");
+
+
+
+
                 Console.WriteLine($"Decimal128(-0E-3M) = {(Decimal128Bid)(-0E-3M)}");
                 Console.WriteLine($"Quantum(Decimal128(-0E-900M)) = {Decimal128Bid.Quantum((Decimal128Bid)(-0E-900M))}");
 
@@ -174,7 +311,7 @@ namespace UltimateOrb.Core.Tests {
                 Console.WriteLine($"Atan(0.1M) = {Decimal128Bid.Atan(0.1M)}");
                 Console.WriteLine();
 
-                for (Decimal128Bid x = 0.1M; x <= 0.9M; x+= 0.1M) {
+                for (Decimal128Bid x = 0.1M; x <= 0.9M; x += 0.1M) {
                     Console.WriteLine($"Atan({x}) = {Decimal128Bid.Atan(x)}");
                 }
 
@@ -207,7 +344,7 @@ namespace UltimateOrb.Core.Tests {
                 Console.WriteLine(Decimal128Bid.Scale10(100000000, -7));
 
 
-                Console.WriteLine((Decimal128Bid)801E5M); // System.Decimal does not have strictly positive q
+                Console.WriteLine((Decimal128Bid)801E5M); // System.Decimal does not have strictly positive qExponent
                 Console.WriteLine(Decimal128Bid.Scale10(801, 5));
                 Console.WriteLine(Decimal128Bid.Scale10(801, 5) / 10);
                 Console.WriteLine(Decimal128Bid.Scale10(801, 5) / Decimal128Bid.Scale10(1, 1));
@@ -327,7 +464,7 @@ namespace UltimateOrb.Core.Tests {
 
                 return 0;
             }
-            
+
             {
                 var d = (decimal)BigRational.FromFraction(22, 7);
                 Console.WriteLine(d);
