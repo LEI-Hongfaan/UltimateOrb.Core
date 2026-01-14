@@ -156,8 +156,7 @@ namespace UltimateOrb.Core.Tests {
                 Console.WriteLine($"Scale10(0, -7000) = {Decimal128Bid.Scale10(0, -7000)}");
 
                 Console.WriteLine($"IsNegative(-0) = {Decimal128Bid.IsNegative(Decimal128Bid.Parse("-0"))}");
-
-
+                
                 Decimal128Bid[] testData1 = [
                     Decimal128Bid.Parse("+qNaN(0x4000000000000000000000000009)"),
                     Decimal128Bid.Parse("+qNaN(0X3ffffffffffffffffffffffffffF)"),
@@ -200,12 +199,12 @@ namespace UltimateOrb.Core.Tests {
                     Decimal128Bid.Parse("-∞"),
                     Decimal128Bid.Parse("Infinity"), ];
 
-                foreach (var item in testData1.OrderBy(x => x, new TotalOrderIeee754Comparer<Decimal128Bid>())) {
+                foreach (var item in testData1.OrderBy(Decimal128Extensions.TotalOrderIeee754_192BitsKeySelector)) {
                     Console.Write(item.ToStringWithSignAndNaNPayload());
                     Console.Write(' ');
                 }
                 Console.WriteLine();
-                foreach (var item in testData1.OrderBy(Decimal128Extensions.TotalOrderIeee754_192BitsKeySelector)) {
+                foreach (var item in testData1.OrderBy(x => x, new TotalOrderIeee754Comparer<Decimal128Bid>())) {
                     Console.Write(item.ToStringWithSignAndNaNPayload());
                     Console.Write(' ');
                 }

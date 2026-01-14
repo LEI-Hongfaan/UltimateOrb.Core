@@ -12,8 +12,10 @@ using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
+using UltimateOrb.Mathematics.Exact;
 using UltimateOrb.Numerics;
 using UltimateOrb.Utilities;
+using Debug = System.Diagnostics.Debug;
 
 namespace UltimateOrb {
 
@@ -2901,16 +2903,168 @@ namespace UltimateOrb {
         }
 
         public static bool TryConvertFromChecked<TOther>(TOther value, [MaybeNullWhen(false)] out Decimal128Bid result) where TOther : INumberBase<TOther> {
-            throw new NotImplementedException();
+            return INumberBaseFriendInternal<Decimal128Bid>.TryConvertFromTruncating(value, out result);
         }
 
         public static bool TryConvertFromSaturating<TOther>(TOther value, [MaybeNullWhen(false)] out Decimal128Bid result) where TOther : INumberBase<TOther> {
-            throw new NotImplementedException();
+            return INumberBaseFriendInternal<Decimal128Bid>.TryConvertFromTruncating(value, out result);
+        }
+
+        const UInt64 SignBitUInt64 = unchecked((UInt64)UInt64.MinValue);
+
+        internal static Decimal128Bid FromIeee754InterchangeBinary<TFloat, TFloatUIntBits>(TFloat value)
+            where TFloat : unmanaged, IFloatingPointIeee754<TFloat>, IMinMaxValue<TFloat>
+            where TFloatUIntBits : unmanaged, IUnsignedNumber<TFloatUIntBits>, IBinaryInteger<TFloatUIntBits> {
+            if (TFloat.IsFinite(value)) {
+                var r = (Decimal128Bid)BigRational.FromIeee754InterchangeBinary<TFloat, TFloatUIntBits>(value);
+                var c = value.GetExponentByteCount();
+                if (c > sizeof(UInt64)) {
+                    throw new NotImplementedException();
+                }
+                Span<byte> exp = stackalloc byte[sizeof(Int64)];
+                if (!value.TryWriteExponentLittleEndian(exp, out var cc)) {
+                    throw new InvalidOperationException();
+                }
+                Debug.Assert(0 < cc);
+                Debug.Assert(cc <= exp.Length);
+                var z = 8 * (exp.Length - cc);
+                var e = BinaryPrimitives.ReadInt64LittleEndian(exp);
+                e <<= z;
+                e >>= z;
+                e += EXP_BIAS;
+                var e1 = unchecked((int)Math.Clamp(e, 0, MaxBiasedExponent));
+                return AdjustSignBitAndBiasedExponent(r, TFloat.IsNegative(value) ? SignBitUInt64 : 0u, e1);
+            }
+            if (TFloat.IsInfinity(value)) {
+                return TFloat.IsNegative(value) ? NegativeInfinity : PositiveInfinity;
+            }
+            Debug.Assert(TFloat.IsNaN(value));
+            {
+                var BitSize = 8 * Unsafe.SizeOf<TFloat>();
+                //  k – round(4 × log2 (k)) + 13
+                var Precision = BitSize - (int)Math.Round(4 * Math.Log2(BitSize), MidpointRounding.ToEven) + 13;
+                var payloadBits = Precision - 2;
+                var bits = Unsafe.BitCast<TFloat, TFloatUIntBits>(value);
+                var isQuiet = TFloatUIntBits.IsOddInteger(bits >>> payloadBits);
+                UltimateOrb.UInt128 payload;
+                if (payloadBits > 110) {
+                    bits &= (TFloatUIntBits.One << 110) - TFloatUIntBits.One;
+                    payload = (UltimateOrb.UInt128)System.UInt128.CreateTruncating(bits);
+                } else {
+                    bits &= (TFloatUIntBits.One << payloadBits) - TFloatUIntBits.One;
+                    var shift = 110 - payloadBits;
+                    payload = (UltimateOrb.UInt128)System.UInt128.CreateTruncating(bits);
+                    payload <<= shift;
+                }
+                payload |= isQuiet ? PositiveQuietNaN.bits : PositiveSignalingNaN.bits;
+                payload |= TFloat.IsNegative(value) ? (-default(Decimal128Bid)).bits : default;
+                return new Decimal128Bid(payload, CtorFromBits);
+            }
         }
 
         public static bool TryConvertFromTruncating<TOther>(TOther value, [MaybeNullWhen(false)] out Decimal128Bid result) where TOther : INumberBase<TOther> {
-            throw new NotImplementedException();
+            if (typeof(TOther) == typeof(byte)) {
+                byte actualValue = (byte)(object)value;
+                result = actualValue;
+                return true;
+            } else if (typeof(TOther) == typeof(char)) {
+                char actualValue = (char)(object)value;
+                result = actualValue;
+                return true;
+            } else if (typeof(TOther) == typeof(decimal)) {
+                decimal actualValue = (decimal)(object)value;
+                result = (Decimal128Bid)actualValue;
+                return true;
+            } else if (typeof(TOther) == typeof(double)) {
+                double actualValue = (double)(object)value;
+                result = FromIeee754InterchangeBinary<double, UInt64>(actualValue);
+                return true;
+            } else if (typeof(TOther) == typeof(Half)) {
+                Half actualValue = (Half)(object)value;
+                result = FromIeee754InterchangeBinary<Half, UInt16>(actualValue);
+                return true;
+            }
+#if NET11_0_OR_GREATER
+            else if (typeof(TOther) == typeof(BFloat16)) {
+                BFloat16 actualValue = (BFloat16)(object)value;
+                result = FromIeee754InterchangeBinary<BFloat16, UInt16>(actualValue);
+                return true;
+            }
+#endif
+            else if (typeof(TOther) == typeof(short)) {
+                short actualValue = (short)(object)value;
+                result = actualValue;
+                return true;
+            } else if (typeof(TOther) == typeof(int)) {
+                int actualValue = (int)(object)value;
+                result = actualValue;
+                return true;
+            } else if (typeof(TOther) == typeof(long)) {
+                long actualValue = (long)(object)value;
+                result = actualValue;
+                return true;
+            } else if (typeof(TOther) == typeof(UltimateOrb.Int128)) {
+                UltimateOrb.Int128 actualValue = (UltimateOrb.Int128)(object)value;
+                result = (Decimal128Bid)actualValue;
+                return true;
+            } else if (typeof(TOther) == typeof(System.Int128)) {
+                System.Int128 actualValue = (System.Int128)(object)value;
+                result = (Decimal128Bid)actualValue;
+                return true;
+            } else if (typeof(TOther) == typeof(nint)) {
+                nint actualValue = (nint)(object)value;
+                result = actualValue;
+                return true;
+            } else if (typeof(TOther) == typeof(sbyte)) {
+                sbyte actualValue = (sbyte)(object)value;
+                result = actualValue;
+                return true;
+            } else if (typeof(TOther) == typeof(float)) {
+                float actualValue = (float)(object)value;
+                result = FromIeee754InterchangeBinary<float, UInt32>(actualValue);
+                return true;
+            } else if (typeof(TOther) == typeof(ushort)) {
+                ushort actualValue = (ushort)(object)value;
+                result = actualValue;
+                return true;
+            } else if (typeof(TOther) == typeof(uint)) {
+                uint actualValue = (uint)(object)value;
+                result = actualValue;
+                return true;
+            } else if (typeof(TOther) == typeof(ulong)) {
+                ulong actualValue = (ulong)(object)value;
+                result = actualValue;
+                return true;
+            } else if (typeof(TOther) == typeof(UltimateOrb.UInt128)) {
+                UltimateOrb.UInt128 actualValue = (UltimateOrb.UInt128)(object)value;
+                result = (Decimal128Bid)actualValue;
+                return true;
+            } else if (typeof(TOther) == typeof(System.UInt128)) {
+                System.UInt128 actualValue = (System.UInt128)(object)value;
+                result = (Decimal128Bid)actualValue;
+                return true;
+            } else if (typeof(TOther) == typeof(nuint)) {
+                nuint actualValue = (nuint)(object)value;
+                result = actualValue;
+                return true;
+            } else if (typeof(TOther) == typeof(BigInteger)) {
+                BigInteger actualValue = (BigInteger)(object)value;
+                result = (Decimal128Bid)actualValue;
+                return true;
+            } else if (typeof(TOther) == typeof(Rational64)) {
+                Rational64 actualValue = (Rational64)(object)value;
+                result = (Decimal128Bid)actualValue;
+                return true;
+            } else {
+                result = default;
+                return false;
+            }
         }
+
+
+
+
+
 
         public static bool TryConvertToChecked<TOther>(Decimal128Bid value, [MaybeNullWhen(false)] out TOther result) where TOther : INumberBase<TOther> {
             throw new NotImplementedException();
@@ -3265,9 +3419,23 @@ namespace UltimateOrb {
             }
         }
 
+        static readonly UInt128 NaNMaxPayloadAsUInt128 = (UInt128.One << 110) - 1;
+
+        internal UInt128 GetSignificandOrPayload() {
+            var exp = this.ExtractRawBiasedExponentAndRawSignificand(out var significand);
+            if (exp <= MaxBiasedExponent) {
+                if (significand > MaxSignificandAsUInt128) {
+                    significand = 0;
+                }
+            } else {
+                significand &= NaNMaxPayloadAsUInt128;
+            }
+            return significand;
+        }
+
         public bool TryWriteSignificandBigEndian(Span<byte> destination, out int bytesWritten) {
             if (destination.Length >= Unsafe.SizeOf<UInt128>()) {
-                this.ExtractRawBiasedExponentAndRawSignificand(out var significand);
+                var significand = this.GetSignificandOrPayload();
 
                 if (BitConverter.IsLittleEndian) {
                     significand = BinaryPrimitives.ReverseEndianness(significand);
@@ -3285,12 +3453,12 @@ namespace UltimateOrb {
 
         public bool TryWriteSignificandLittleEndian(Span<byte> destination, out int bytesWritten) {
             if (destination.Length >= Unsafe.SizeOf<UInt128>()) {
-                this.ExtractRawBiasedExponentAndRawSignificand(out var significand);
+                var significand = this.GetSignificandOrPayload();
 
                 if (!BitConverter.IsLittleEndian) {
                     significand = BinaryPrimitives.ReverseEndianness(significand);
                 }
-
+                double a;
                 Unsafe.WriteUnaligned(ref MemoryMarshal.GetReference(destination), significand);
 
                 bytesWritten = Unsafe.SizeOf<UInt128>();
@@ -3970,6 +4138,10 @@ namespace UltimateOrb {
         [DoesNotReturn]
         static void ThrowNotFiniteNumberException(Decimal128Bid value) {
             throw new NotFiniteNumberException($"The Decimal128 value {value} is not finite.");
+        }
+
+        public static explicit operator Decimal128Bid(Rational64 value) {
+            return (Decimal128Bid)(BigRational)value;
         }
     }
 }

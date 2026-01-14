@@ -7016,7 +7016,7 @@
             ○ Match if at the beginning of the string.<br/>
             ○ Optional (greedy).<br/>
                 ○ "sign" capture group.<br/>
-                    ○ Match a character in the set [+\-].<br/>
+                    ○ Match a character in the set [+-].<br/>
             ○ Match with 4 alternative expressions.<br/>
                 ○ "hex" capture group.<br/>
                     ○ Match '0'.<br/>
@@ -7025,16 +7025,17 @@
                         ○ Match with 2 alternative expressions.<br/>
                             ○ Match a sequence of expressions.<br/>
                                 ○ Match '.'.<br/>
-                                ○ Match a hexadecimal digit atomically at least once.<br/>
+                                ○ Match a character in the set [0-9A-Fa-f] atomically at least once.<br/>
                             ○ Match a sequence of expressions.<br/>
-                                ○ Match a hexadecimal digit greedily at least once.<br/>
+                                ○ Match a character in the set [0-9A-Fa-f] greedily at least once.<br/>
                                 ○ Optional (greedy).<br/>
                                     ○ Match '.'.<br/>
-                                    ○ Optional (greedy).<br/>
-                                        ○ Match a hexadecimal digit atomically at least once.<br/>
+                                    ○ Match with 2 alternative expressions.<br/>
+                                        ○ Match a character in the set [0-9A-Fa-f] greedily at least once.<br/>
+                                        ○ Match an empty string.<br/>
                     ○ Match a character in the set [Pp].<br/>
                     ○ "hexExpSign" capture group.<br/>
-                        ○ Match a character in the set [+\-] atomically, optionally.<br/>
+                        ○ Match a character in the set [+-] atomically, optionally.<br/>
                     ○ "hexExp" capture group.<br/>
                         ○ Match a character in the set [0-9] atomically at least once.<br/>
                 ○ "dec" capture group.<br/>
@@ -7047,14 +7048,15 @@
                                 ○ Match a character in the set [0-9] greedily at least once.<br/>
                                 ○ Optional (greedy).<br/>
                                     ○ Match '.'.<br/>
-                                    ○ Optional (greedy).<br/>
+                                    ○ Match with 2 alternative expressions.<br/>
                                         ○ Match a character in the set [0-9] greedily at least once.<br/>
+                                        ○ Match an empty string.<br/>
                     ○ Optional (greedy).<br/>
                         ○ Match a character in the set [Ee].<br/>
                         ○ "decExpSign" capture group.<br/>
-                            ○ Match a character in the set [+\-] atomically, optionally.<br/>
+                            ○ Match a character in the set [+-] atomically, optionally.<br/>
                         ○ "decExp" capture group.<br/>
-                            ○ Match a character in the set [0-9] atomically at least once.<br/>
+                            ○ Match a character in the set [0-9] greedily at least once.<br/>
                 ○ "nan" capture group.<br/>
                     ○ "nanPrefix" capture group.<br/>
                         ○ Match a character in the set [QSqs] atomically, optionally.<br/>
@@ -7069,7 +7071,7 @@
                                 ○ Match a sequence of expressions.<br/>
                                     ○ Match '0'.<br/>
                                     ○ Match a character in the set [Xx].<br/>
-                                    ○ Match a hexadecimal digit atomically at least once.<br/>
+                                    ○ Match a character in the set [0-9A-Fa-f] atomically at least once.<br/>
                                 ○ Match a character in the set [0-9] atomically at least once.<br/>
                         ○ Match ')'.<br/>
                 ○ "inf" capture group.<br/>
