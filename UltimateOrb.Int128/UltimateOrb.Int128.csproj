@@ -24,8 +24,8 @@
     <Copyright>Copyright © 2017, 2018, 2020, 2022, 2024 LEI Hongfaan. Distributed under the MIT License.</Copyright>
     <Description>Provides Int128 and UInt128.</Description>
     <Authors>LEI Hongfaan</Authors>
-		<PackageReadmeFile>README.md</PackageReadmeFile>
-		<EnablePreviewFeatures>true</EnablePreviewFeatures>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <EnablePreviewFeatures>true</EnablePreviewFeatures>
   </PropertyGroup>
 
   <PropertyGroup>

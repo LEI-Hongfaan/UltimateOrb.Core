@@ -1539,6 +1539,30 @@ namespace UltimateOrb.Numerics {
 
 namespace UltimateOrb.Numerics {
 
+    public readonly partial struct BigRational {
+
+        public static BigRational Pow(BigRational @base, uint exponent) {
+            var (q, p) = NumberBaseExtensions.Pow((@base.m_Denominator, @base.m_SignedNumerator), exponent);
+            return new BigRational(denominator: q, signedNumerator: p);
+        }
+
+        public static BigRational Pow(BigRational @base, int exponent) {
+            if (0 <= exponent) {
+                var (q, p) = NumberBaseExtensions.Pow((@base.m_Denominator, @base.m_SignedNumerator), exponent.ToUnsignedUnchecked());
+                return new BigRational(denominator: q, signedNumerator: p);
+            } else {
+                var (q, p) = NumberBaseExtensions.Pow((@base.m_SignedNumerator, @base.m_Denominator), unchecked(-exponent).ToUnsignedUnchecked());
+                if (BigInteger.IsNegative(q)) {
+                    (q, p) = (-q, -p);
+                }
+                return new BigRational(denominator: q, signedNumerator: p);
+            }
+        }
+    }
+}
+
+namespace UltimateOrb.Numerics {
+
     public readonly partial struct BigRational
         : INumber<BigRational> {
 
