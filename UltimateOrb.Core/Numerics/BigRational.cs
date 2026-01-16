@@ -2924,11 +2924,215 @@ namespace UltimateOrb.Numerics {
                 qPrev1 = q;
             }
 
-            if (q.IsZero) {
-                throw new DivideByZeroException("Continued fraction produced zero denominator.");
+            return BigRational.FromFractionReduced(p, q);
+        }
+
+        public static BigRational FromContinuedFraction<T>(params IEnumerable<T> coefficients)
+            where T : IBinaryInteger<T> {
+
+            // If caller passed nothing or null, treat as empty -> zero
+            if (coefficients is null) {
+                return BigRational.Zero;
+            }
+
+            BigInteger pPrev2 = BigInteger.Zero;
+            BigInteger pPrev1 = BigInteger.One;
+            BigInteger qPrev2 = BigInteger.One;
+            BigInteger qPrev1 = BigInteger.Zero;
+
+            BigInteger p = BigInteger.Zero;
+            BigInteger q = BigInteger.One;
+
+            foreach (var t in coefficients) {
+                BigInteger a = BigInteger.CreateChecked(t);
+                p = a * pPrev1 + pPrev2;
+                q = a * qPrev1 + qPrev2;
+
+                pPrev2 = pPrev1;
+                pPrev1 = p;
+                qPrev2 = qPrev1;
+                qPrev1 = q;
             }
 
             return BigRational.FromFractionReduced(p, q);
+        }
+
+        public static BigRational FromContinuedFraction<T>(params ReadOnlySpan<BigRational> coefficients)
+            where T : IBinaryInteger<T> {
+
+            var pPrev2 = BigRational.Zero;
+            var pPrev1 = BigRational.One;
+            var qPrev2 = BigRational.One;
+            var qPrev1 = BigRational.Zero;
+
+            var p = BigRational.Zero;
+            var q = BigRational.One;
+
+            foreach (var t in coefficients) {
+                p = t * pPrev1 + pPrev2;
+                q = t * qPrev1 + qPrev2;
+
+                pPrev2 = pPrev1;
+                pPrev1 = p;
+                qPrev2 = qPrev1;
+                qPrev1 = q;
+            }
+
+            return p / q;
+        }
+
+        public static BigRational FromContinuedFraction<T>(params IEnumerable<BigRational> coefficients)
+            where T : IBinaryInteger<T> {
+
+            var pPrev2 = BigRational.Zero;
+            var pPrev1 = BigRational.One;
+            var qPrev2 = BigRational.One;
+            var qPrev1 = BigRational.Zero;
+
+            var p = BigRational.Zero;
+            var q = BigRational.One;
+
+            foreach (var t in coefficients) {
+                p = t * pPrev1 + pPrev2;
+                q = t * qPrev1 + qPrev2;
+
+                pPrev2 = pPrev1;
+                pPrev1 = p;
+                qPrev2 = qPrev1;
+                qPrev1 = q;
+            }
+
+            return p / q;
+        }
+
+        /// <summary>
+        /// Constructs a <see cref="BigRational"/> from a finite generalized continued fraction given by
+        /// alternating partial denominators and numerators.
+        /// </summary>
+        /// <typeparam name="T">An integer type implementing <see cref="System.Numerics.IBinaryInteger{T}"/>.</typeparam>
+        /// <param name="alternatingCoefficients">
+        /// The coefficients in the order: b0, a1, b1, a2, b2, ..., a_n, b_n.
+        /// The span may be empty (in which case the method returns <see cref="BigRational.Zero"/>),
+        /// and it may end with an unpaired coefficient. If the last coefficient is unpaired it is
+        /// treated as a trailing partial numerator <c>a_n</c> with an implicit <c>b_n = 0</c>.
+        /// </param>
+        /// <returns>
+        /// A <see cref="BigRational"/> equal to the rational represented by the finite generalized
+        /// continued fraction. The numerator and denominator are not guaranteed to be coprime in the
+        /// generalized case.
+        /// </returns>
+        /// <exception cref="System.DivideByZeroException">
+        /// Thrown when the recurrence produces a zero denominator. Ill-formed inputs can cause this.
+        /// </exception>
+        /// <exception cref="System.OverflowException">
+        /// Thrown if conversion from <typeparamref name="T"/> to <see cref="System.Numerics.BigInteger"/>
+        /// or intermediate big-integer arithmetic overflows the checked conversion.
+        /// </exception>
+        /// <remarks>
+        /// Uses the standard recurrence for generalized continued fractions:
+        /// <c>p_{-1} = 1, p_0 = b0; q_{-1} = 0, q_0 = 1;</c>
+        /// <c>p_k = b_k * p_{k-1} + a_k * p_{k-2};</c>
+        /// <c>q_k = b_k * q_{k-1} + a_k * q_{k-2};</c>
+        /// Input may be empty (returns zero) and may contain an unpaired trailing <c>a_k</c>,
+        /// which is interpreted with <c>b_k = 0</c>.
+        /// </remarks>
+        public static BigRational FromGeneralizedContinuedFraction<T>(params ReadOnlySpan<T> alternatingCoefficients)
+            where T : IBinaryInteger<T> {
+
+            // p_{-1} = 1, p_0 = b0
+            BigInteger pPrev2 = BigInteger.One;
+            BigInteger pPrev1 = BigInteger.CreateChecked(alternatingCoefficients[0]);
+
+            // q_{-1} = 0, q_0 = 1
+            BigInteger qPrev2 = BigInteger.Zero;
+            BigInteger qPrev1 = BigInteger.One;
+
+            BigInteger p = pPrev1;
+            BigInteger q = qPrev1;
+
+            // iterate pairs (a_k, b_k) starting at index 1
+            int i = 1;
+            while (i < alternatingCoefficients.Length) {
+                // a_k is at i
+                BigInteger a = BigInteger.CreateChecked(alternatingCoefficients[i]);
+
+                // if there's a paired b_k at i+1 use it, otherwise treat b_k = 0 (unpaired trailing numerator)
+                BigInteger b = (i + 1 < alternatingCoefficients.Length)
+                    ? BigInteger.CreateChecked<T>(alternatingCoefficients[i + 1])
+                    : BigInteger.Zero;
+
+                // p_k = b * p_{k-1} + a * p_{k-2}
+                p = b * pPrev1 + a * pPrev2;
+                // q_k = b * q_{k-1} + a * q_{k-2}
+                q = b * qPrev1 + a * qPrev2;
+
+                // shift
+                pPrev2 = pPrev1;
+                pPrev1 = p;
+                qPrev2 = qPrev1;
+                qPrev1 = q;
+
+                i += 2;
+            }
+
+            return BigRational.FromFraction(p, q);
+        }
+
+        public static BigRational FromGeneralizedContinuedFraction<T>(params IEnumerable<T> alternatingCoefficients)
+            where T : IBinaryInteger<T> {
+
+            // If caller passed nothing or null, treat as empty -> zero
+            if (alternatingCoefficients is null) {
+                return BigRational.Zero;
+            }
+
+            using var e = alternatingCoefficients.GetEnumerator();
+
+            // empty -> zero
+            if (!e.MoveNext()) {
+                return BigRational.Zero;
+            }
+
+            // p_{-1} = 1, p_0 = b0
+            BigInteger pPrev2 = BigInteger.One;
+            BigInteger pPrev1 = BigInteger.CreateChecked<T>(e.Current);
+
+            // q_{-1} = 0, q_0 = 1
+            BigInteger qPrev2 = BigInteger.Zero;
+            BigInteger qPrev1 = BigInteger.One;
+
+            BigInteger p = pPrev1;
+            BigInteger q = qPrev1;
+
+            // process remaining elements as (a_k, b_k) pairs; if b_k missing, treat b_k = 0
+            while (true) {
+                // read a_k
+                if (!e.MoveNext()) {
+                    break;
+                }
+                BigInteger a = BigInteger.CreateChecked<T>(e.Current);
+
+                // read b_k if present
+                BigInteger b;
+                if (e.MoveNext()) {
+                    b = BigInteger.CreateChecked<T>(e.Current);
+                } else {
+                    b = BigInteger.Zero;
+                }
+
+                // recurrence: p_k = b * p_{k-1} + a * p_{k-2}
+                p = b * pPrev1 + a * pPrev2;
+                // recurrence: q_k = b * q_{k-1} + a * q_{k-2}
+                q = b * qPrev1 + a * qPrev2;
+
+                // shift
+                pPrev2 = pPrev1;
+                pPrev1 = p;
+                qPrev2 = qPrev1;
+                qPrev1 = q;
+            }
+
+            return BigRational.FromFraction(p, q);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -2983,7 +3187,7 @@ namespace UltimateOrb.Numerics {
         }
 
         byte IConvertible.ToByte(IFormatProvider? provider) {
-            return checked((byte)Math.Round(this).Numerator);
+            return checked((byte)ToBigInteger(this));
         }
 
         char IConvertible.ToChar(IFormatProvider? provider) {
@@ -3003,19 +3207,19 @@ namespace UltimateOrb.Numerics {
         }
 
         Int16 IConvertible.ToInt16(IFormatProvider? provider) {
-            return checked((Int16)Math.Round(this).Numerator);
+            return checked((Int16)ToBigInteger(this));
         }
 
         Int32 IConvertible.ToInt32(IFormatProvider? provider) {
-            return checked((Int32)Math.Round(this).Numerator);
+            return checked((Int32)ToBigInteger(this));
         }
 
         Int64 IConvertible.ToInt64(IFormatProvider? provider) {
-            return checked((Int64)Math.Round(this).Numerator);
+            return checked((Int64)ToBigInteger(this));
         }
 
         sbyte IConvertible.ToSByte(IFormatProvider? provider) {
-            return checked((sbyte)Math.Round(this).Numerator);
+            return checked((sbyte)ToBigInteger(this));
         }
 
         Single IConvertible.ToSingle(IFormatProvider? provider) {
@@ -3028,21 +3232,21 @@ namespace UltimateOrb.Numerics {
 
         object IConvertible.ToType(Type conversionType, IFormatProvider? provider) {
             if (typeof(BigInteger) == conversionType) {
-                return Math.Round(this).Numerator;
+                return ToBigInteger(this);
             }
             return ConvertInternal.DefaultToType<BigRational>(in this, conversionType, provider);
         }
 
         UInt16 IConvertible.ToUInt16(IFormatProvider? provider) {
-            return checked((UInt16)Math.Round(this).Numerator);
+            return checked((UInt16)ToBigInteger(this));
         }
 
         UInt32 IConvertible.ToUInt32(IFormatProvider? provider) {
-            return checked((UInt32)Math.Round(this).Numerator);
+            return checked((UInt32)ToBigInteger(this));
         }
 
         UInt64 IConvertible.ToUInt64(IFormatProvider? provider) {
-            return checked((UInt64)Math.Round(this).Numerator);
+            return checked((UInt64)ToBigInteger(this));
         }
     }
 }
