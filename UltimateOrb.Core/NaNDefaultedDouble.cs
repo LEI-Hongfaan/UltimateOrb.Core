@@ -848,7 +848,7 @@ namespace UltimateOrb {
         /// <inheritdoc cref="IFloatingPointIeee754{TSelf}.ScaleB(TSelf, int)" />
         public static NaNDefaultedDouble ScaleB(NaNDefaultedDouble x, int n) => Math.ScaleB(x, n);
 
-        // /// <inheritdoc cref="IFloatingPointIeee754{T}.Compound(T, T)" />
+        // /// <inheritdoc cref="IFloatingPointIeee754{TSelf}.Compound(TSelf, TSelf)" />
         // public static NaNDefaultedDouble Compound(NaNDefaultedDouble x, NaNDefaultedDouble n) => Math.Compound(x, n);
 
         //

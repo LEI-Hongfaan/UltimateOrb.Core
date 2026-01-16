@@ -129,7 +129,7 @@ namespace UltimateOrb.Numerics {
                     }
                 }
                 {
-                    var ignored = checked(0u - unchecked((uint)d.Sign));
+                    _ = checked(0u - unchecked((uint)d.Sign));
                 }
             }
             return default;
@@ -244,7 +244,7 @@ namespace UltimateOrb.Numerics {
         [PureAttribute()]
         public static BigDecimal operator /(BigDecimal first, BigDecimal second) {
             if (second.m_SignedSignificand.IsZero) {
-                var ignored = Default<int>.Value / 0;
+                _ = Miscellaneous.HighestBitSetInternal<int>() / 0;
             }
             if (first.m_SignedSignificand.IsZero) {
                 return default;
@@ -267,7 +267,7 @@ namespace UltimateOrb.Numerics {
         public static BigDecimal Invert(BigDecimal value) {
             var s = value.m_SignedSignificand.Sign;
             if (0 == s) {
-                var ignored = Default<int>.Value / 0;
+                _ = Miscellaneous.HighestBitSetInternal<int>() / 0;
             }
             if (value.m_SignedSignificand.IsZero) {
                 return default;
@@ -281,7 +281,7 @@ namespace UltimateOrb.Numerics {
         [PureAttribute()]
         public static BigDecimal FromFraction(long numerator, long denominator) {
             if (0 == denominator) {
-                var ignored = Default<int>.Value / 0;
+                _ = Miscellaneous.HighestBitSetInternal<int>() / 0;
             }
             if (0 == numerator) {
                 return default;
@@ -300,7 +300,7 @@ namespace UltimateOrb.Numerics {
         public static BigDecimal FromFraction(BigInteger numerator, BigInteger denominator) {
             var s = denominator.Sign;
             if (0 == s) {
-                var ignored = Default<int>.Value / 0;
+                _ = Miscellaneous.HighestBitSetInternal<int>() / 0;
             }
             if (numerator.IsZero) {
                 return default;
@@ -896,7 +896,7 @@ namespace UltimateOrb.Numerics {
 
         public static BigDecimal DivideEuclidean(BigDecimal first, BigDecimal second) {
             if (second.m_SignedSignificand.IsZero) {
-                _ = Default<int>.Value / 0;
+                _ = Miscellaneous.HighestBitSetInternal<int>() / 0;
             }
             if (first.m_SignedSignificand.IsZero) {
                 return Zero;
@@ -906,7 +906,7 @@ namespace UltimateOrb.Numerics {
 
         public static BigDecimal operator %(BigDecimal first, BigDecimal second) {
             if (second.m_SignedSignificand.IsZero) {
-                _ = Default<int>.Value / 0;
+                _ = Miscellaneous.HighestBitSetInternal<int>() / 0;
             }
             if (first.m_SignedSignificand.IsZero) {
                 return Zero;

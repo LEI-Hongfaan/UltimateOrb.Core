@@ -226,11 +226,11 @@ namespace UltimateOrb.Numerics {
 				result_hi_ = unchecked(unchecked((IntT)first_hi) - unchecked((IntT)second_hi) - 1);
 				if (unchecked((IntT)first_hi) <= 0) {
 					if (0 <= unchecked((IntT)second_hi)) {
-						var ignored = checked((UIntT)(~result_hi_));
+						_ = checked((UIntT)(~result_hi_));
 					}
 				} else {
 					if (0 > unchecked((IntT)second_hi)) {
-						var ignored = checked((UIntT)result_hi_);
+						_ = checked((UIntT)result_hi_);
 					}
 				}
 			} else {
@@ -754,11 +754,11 @@ namespace UltimateOrb.Numerics {
 				result_hi_ = unchecked(unchecked((IntT)first_hi) - unchecked((IntT)second_hi) - 1);
 				if (unchecked((IntT)first_hi) <= 0) {
 					if (0 <= unchecked((IntT)second_hi)) {
-						var ignored = checked((UIntT)(~result_hi_));
+						_ = checked((UIntT)(~result_hi_));
 					}
 				} else {
 					if (0 > unchecked((IntT)second_hi)) {
-						var ignored = checked((UIntT)result_hi_);
+						_ = checked((UIntT)result_hi_);
 					}
 				}
 			} else {
@@ -1282,11 +1282,11 @@ namespace UltimateOrb.Numerics {
 				result_hi_ = unchecked(unchecked((IntT)first_hi) - unchecked((IntT)second_hi) - 1);
 				if (unchecked((IntT)first_hi) <= 0) {
 					if (0 <= unchecked((IntT)second_hi)) {
-						var ignored = checked((UIntT)(~result_hi_));
+						_ = checked((UIntT)(~result_hi_));
 					}
 				} else {
 					if (0 > unchecked((IntT)second_hi)) {
-						var ignored = checked((UIntT)result_hi_);
+						_ = checked((UIntT)result_hi_);
 					}
 				}
 			} else {
@@ -1810,11 +1810,11 @@ namespace UltimateOrb.Numerics {
 				result_hi_ = unchecked(unchecked((IntT)first_hi) - unchecked((IntT)second_hi) - 1);
 				if (unchecked((IntT)first_hi) <= 0) {
 					if (0 <= unchecked((IntT)second_hi)) {
-						var ignored = checked((UIntT)(~result_hi_));
+						_ = checked((UIntT)(~result_hi_));
 					}
 				} else {
 					if (0 > unchecked((IntT)second_hi)) {
-						var ignored = checked((UIntT)result_hi_);
+						_ = checked((UIntT)result_hi_);
 					}
 				}
 			} else {
@@ -2339,11 +2339,11 @@ namespace UltimateOrb.Numerics {
 				result_hi_ = unchecked(unchecked((IntT)first_hi) - unchecked((IntT)second_hi) - 1);
 				if (unchecked((IntT)first_hi) <= 0) {
 					if (0 <= unchecked((IntT)second_hi)) {
-						var ignored = checked((UIntT)(~result_hi_));
+						_ = checked((UIntT)(~result_hi_));
 					}
 				} else {
 					if (0 > unchecked((IntT)second_hi)) {
-						var ignored = checked((UIntT)result_hi_);
+						_ = checked((UIntT)result_hi_);
 					}
 				}
 			} else {
@@ -2869,11 +2869,11 @@ namespace UltimateOrb.Numerics {
 				result_hi_ = unchecked(unchecked((IntT)first_hi) - unchecked((IntT)second_hi) - 1);
 				if (unchecked((IntT)first_hi) <= 0) {
 					if (0 <= unchecked((IntT)second_hi)) {
-						var ignored = checked((UIntT)(~result_hi_));
+						_ = checked((UIntT)(~result_hi_));
 					}
 				} else {
 					if (0 > unchecked((IntT)second_hi)) {
-						var ignored = checked((UIntT)result_hi_);
+						_ = checked((UIntT)result_hi_);
 					}
 				}
 			} else {
@@ -3399,11 +3399,11 @@ namespace UltimateOrb.Numerics {
 				result_hi_ = unchecked(unchecked((IntT)first_hi) - unchecked((IntT)second_hi) - 1);
 				if (unchecked((IntT)first_hi) <= 0) {
 					if (0 <= unchecked((IntT)second_hi)) {
-						var ignored = checked((UIntT)(~result_hi_));
+						_ = checked((UIntT)(~result_hi_));
 					}
 				} else {
 					if (0 > unchecked((IntT)second_hi)) {
-						var ignored = checked((UIntT)result_hi_);
+						_ = checked((UIntT)result_hi_);
 					}
 				}
 			} else {
@@ -3929,11 +3929,11 @@ namespace UltimateOrb.Numerics {
 				result_hi_ = unchecked(unchecked((IntT)first_hi) - unchecked((IntT)second_hi) - 1);
 				if (unchecked((IntT)first_hi) <= 0) {
 					if (0 <= unchecked((IntT)second_hi)) {
-						var ignored = checked((UIntT)(~result_hi_));
+						_ = checked((UIntT)(~result_hi_));
 					}
 				} else {
 					if (0 > unchecked((IntT)second_hi)) {
-						var ignored = checked((UIntT)result_hi_);
+						_ = checked((UIntT)result_hi_);
 					}
 				}
 			} else {
@@ -4458,11 +4458,11 @@ namespace UltimateOrb.Numerics {
 				result_hi_ = unchecked(unchecked((IntT)first_hi) - unchecked((IntT)second_hi) - 1);
 				if (unchecked((IntT)first_hi) <= 0) {
 					if (0 <= unchecked((IntT)second_hi)) {
-						var ignored = checked((UIntT)(~result_hi_));
+						_ = checked((UIntT)(~result_hi_));
 					}
 				} else {
 					if (0 > unchecked((IntT)second_hi)) {
-						var ignored = checked((UIntT)result_hi_);
+						_ = checked((UIntT)result_hi_);
 					}
 				}
 			} else {
@@ -4986,11 +4986,11 @@ namespace UltimateOrb.Numerics {
 				result_hi_ = unchecked(unchecked((IntT)first_hi) - unchecked((IntT)second_hi) - 1);
 				if (unchecked((IntT)first_hi) <= 0) {
 					if (0 <= unchecked((IntT)second_hi)) {
-						var ignored = checked((UIntT)(~result_hi_));
+						_ = checked((UIntT)(~result_hi_));
 					}
 				} else {
 					if (0 > unchecked((IntT)second_hi)) {
-						var ignored = checked((UIntT)result_hi_);
+						_ = checked((UIntT)result_hi_);
 					}
 				}
 			} else {
@@ -5514,11 +5514,11 @@ namespace UltimateOrb.Numerics {
 				result_hi_ = unchecked(unchecked((IntT)first_hi) - unchecked((IntT)second_hi) - 1);
 				if (unchecked((IntT)first_hi) <= 0) {
 					if (0 <= unchecked((IntT)second_hi)) {
-						var ignored = checked((UIntT)(~result_hi_));
+						_ = checked((UIntT)(~result_hi_));
 					}
 				} else {
 					if (0 > unchecked((IntT)second_hi)) {
-						var ignored = checked((UIntT)result_hi_);
+						_ = checked((UIntT)result_hi_);
 					}
 				}
 			} else {
@@ -6042,11 +6042,11 @@ namespace UltimateOrb.Numerics {
 				result_hi_ = unchecked(unchecked((IntT)first_hi) - unchecked((IntT)second_hi) - 1);
 				if (unchecked((IntT)first_hi) <= 0) {
 					if (0 <= unchecked((IntT)second_hi)) {
-						var ignored = checked((UIntT)(~result_hi_));
+						_ = checked((UIntT)(~result_hi_));
 					}
 				} else {
 					if (0 > unchecked((IntT)second_hi)) {
-						var ignored = checked((UIntT)result_hi_);
+						_ = checked((UIntT)result_hi_);
 					}
 				}
 			} else {

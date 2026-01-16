@@ -1894,7 +1894,7 @@ namespace UltimateOrb {
                         // TODO: ...
                         try {
                             {
-                                var ignored = checked(0 - unchecked(hi >> (128 - 4)));
+                                _ = checked(0 - unchecked(hi >> (128 - 4)));
                             }
                             lo = Numerics.DoubleArithmetic.ShiftLeft(lo, hi, 4, out hi);
                             lo = Numerics.DoubleArithmetic.AddUnsigned(lo, hi, unchecked((uint)d), 0, out hi);

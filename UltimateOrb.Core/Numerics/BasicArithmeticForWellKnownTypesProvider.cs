@@ -101,16 +101,16 @@ namespace UltimateOrb.Numerics.Generic {
         /*
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static virtual void BigMulUnsigned_A_Naive(out TInt result_lo_lo, out TInt result_lo_hi, out TInt result_hi_lo, out TInt result_hi_hi, TInt first_lo, TInt first_hi, TInt second_lo, TInt second_hi) {
-            T.BigMulUnsigned(out var lll, out var llh, first_lo, second_lo);
-            T.BigMulUnsigned(out var hll, out var hlh, first_hi, second_lo);
-            T.AddUnchecked(out hll, out hlh, hll, hlh, llh, default(ZeroT));
-            T.BigMulUnsigned(out var lhl, out var lhh, first_lo, second_hi);
-            T.AddUnchecked(out lhl, out lhh, lhl, lhh, hll, default(ZeroT));
-            T.BigMulUnsigned(out var hhl, out var hhh, first_hi, second_hi);
-            var c = T.AddUnsignedNoThrow(out var th, hlh, lhh);
+            TSelf.BigMulUnsigned(out var lll, out var llh, first_lo, second_lo);
+            TSelf.BigMulUnsigned(out var hll, out var hlh, first_hi, second_lo);
+            TSelf.AddUnchecked(out hll, out hlh, hll, hlh, llh, default(ZeroT));
+            TSelf.BigMulUnsigned(out var lhl, out var lhh, first_lo, second_hi);
+            TSelf.AddUnchecked(out lhl, out lhh, lhl, lhh, hll, default(ZeroT));
+            TSelf.BigMulUnsigned(out var hhl, out var hhh, first_hi, second_hi);
+            var c = TSelf.AddUnsignedNoThrow(out var th, hlh, lhh);
             Debug.Assert(0 == c || 1 == c);
-            T.AddUnchecked(out hhl, out hhh, hhl, hhh, th, default(ZeroT));
-            T.ConditionalIncreaseUnchecked(out hhh, hhh, c);
+            TSelf.AddUnchecked(out hhl, out hhh, hhl, hhh, th, default(ZeroT));
+            TSelf.ConditionalIncreaseUnchecked(out hhh, hhh, c);
             result_lo_lo = lll;
             result_lo_hi = lhl;
             result_hi_lo = hhl;

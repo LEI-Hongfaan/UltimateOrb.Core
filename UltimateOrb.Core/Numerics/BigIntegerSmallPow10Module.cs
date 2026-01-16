@@ -1,12 +1,125 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using UltimateOrb.Runtime.CompilerServices.TypeTokens;
 
 namespace UltimateOrb.Numerics {
+
+    partial class NumberBaseExtensions {
+
+        extension<TSelf>(TSelf)
+            where TSelf : INumberBase<TSelf>? {
+
+            public static bool IsOne(TSelf value) {
+                return TSelf.One == value;
+            }
+
+            internal static bool IsTen(TSelf value) {
+                return TSelf.CreateChecked((byte)10) == value;
+            }
+        }
+    }
+
+    internal static partial class BigIntegerSmallPowModule {
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static BigInteger Pow(BigInteger value, int exponent) {
+            if (exponent < 0) {
+                throw new ArgumentOutOfRangeException(nameof(exponent));
+            }
+            if (exponent == 0) {
+                return BigInteger.One;
+            }
+            var n = BigInteger.IsNegative(value);
+            var a = BigInteger.Abs(value);
+            if (a.IsZero) {
+                return BigInteger.Zero;
+            }
+            BigInteger p;
+            if (a.IsOne) {
+                p = BigInteger.One;
+            } else if (a == 10) {
+                p = BigIntegerSmallExp10Module.Exp10(exponent);
+            } else if (BigInteger.IsPow2(a)) {
+                var c = checked((int)BigInteger.TrailingZeroCount(a));
+                p = BigInteger.One << checked(c * exponent);
+            } else {
+                return BigInteger.Pow(value, exponent);
+            }
+            return n && int.IsOddInteger(exponent) ? -p : p;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static BigInteger Pow([ConstantExpected(Min = 2)] int value, int exponent) {
+            ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(value, 1);
+            if (exponent < 0) {
+                throw new ArgumentOutOfRangeException(nameof(exponent));
+            }
+            if (exponent == 0) {
+                return BigInteger.One;
+            }
+            var n = int.IsNegative(value);
+            var a = int.Abs(value);
+            if (0 == a) {
+                return BigInteger.Zero;
+            }
+            BigInteger p;
+            if (1 == a) {
+                p = BigInteger.One;
+            } else if (a == 10) {
+                p = BigIntegerSmallExp10Module.Exp10(exponent);
+            } else if (int.IsPow2(a)) {
+                var c = int.TrailingZeroCount(a);
+                p = BigInteger.One << checked(c * exponent);
+            } else {
+                return BigInteger.Pow(value, exponent);
+            }
+            return n && int.IsOddInteger(exponent) ? -p : p;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static BigInteger Pow<T>([ConstantExpected(Min = 2)] T value, int exponent)
+            where T: IBinaryInteger<T>?, ISignedNumber<T>? {
+            if (value == null) {
+                throw new ArgumentNullException(nameof(value));
+            }
+            if (value <= T.One) {
+                throw new ArgumentOutOfRangeException(nameof(value));
+            }
+            if (exponent < 0) {
+                throw new ArgumentOutOfRangeException(nameof(exponent));
+            }
+            if (exponent == 0) {
+                return BigInteger.One;
+            }
+            var n = T.IsNegative(value);
+            var a = T.CopySign(value, T.One);
+            if (T.IsZero(a)) {
+                return BigInteger.Zero;
+            }
+            BigInteger p;
+            if (NumberBaseExtensions.IsOne(a)) {
+                p = BigInteger.One;
+            } else if (NumberBaseExtensions.IsTen(a)) {
+                p = BigIntegerSmallExp10Module.Exp10(exponent);
+            } else if (T.IsPow2(a)) {
+#pragma warning disable CS8631 // The type cannot be used as type parameter in the generic type or method. Nullability of type argument doesn't match constraint type.
+                var c = int.CreateChecked(T.TrailingZeroCount(a));
+#pragma warning restore CS8631 // The type cannot be used as type parameter in the generic type or method. Nullability of type argument doesn't match constraint type.
+                p = BigInteger.One << checked(c * exponent);
+            } else {
+#pragma warning disable CS8631 // The type cannot be used as type parameter in the generic type or method. Nullability of type argument doesn't match constraint type.
+                return BigInteger.Pow(BigInteger.CreateChecked(value), exponent);
+#pragma warning restore CS8631 // The type cannot be used as type parameter in the generic type or method. Nullability of type argument doesn't match constraint type.
+            }
+            return n && int.IsOddInteger(exponent) ? -p : p;
+        }
+    }
 
     internal static partial class BigIntegerSmallExp10Module {
 

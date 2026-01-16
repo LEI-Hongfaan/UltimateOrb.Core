@@ -781,7 +781,7 @@ namespace UltimateOrb.Numerics {
         [PureAttribute()]
         public static BigRational operator /(BigRational first, BigRational second) {
             if (second.m_SignedNumerator.IsZero) {
-                var ignored = Default<int>.Value / 0;
+                _ = Miscellaneous.HighestBitSetInternal<int>() / 0;
             }
             if (first.m_SignedNumerator.IsZero) {
                 return default;
@@ -804,7 +804,7 @@ namespace UltimateOrb.Numerics {
         public static BigRational Invert(BigRational value) {
             var s = value.m_SignedNumerator.Sign;
             if (0 == s) {
-                _ = Default<int>.Value / 0;
+                _ = Miscellaneous.HighestBitSetInternal<int>() / 0;
             }
             if (value.m_SignedNumerator.IsZero) {
                 return default;
@@ -818,7 +818,7 @@ namespace UltimateOrb.Numerics {
         [PureAttribute()]
         public static BigRational FromFraction(long numerator, long denominator) {
             if (0 == denominator) {
-                var ignored = Default<int>.Value / 0;
+                _ = Miscellaneous.HighestBitSetInternal<int>() / 0;
             }
             if (0 == numerator) {
                 return default;
@@ -837,7 +837,7 @@ namespace UltimateOrb.Numerics {
         public static BigRational FromFraction(BigInteger numerator, BigInteger denominator) {
             var s = denominator.Sign;
             if (0 == s) {
-                var ignored = Default<int>.Value / 0;
+                _ = Miscellaneous.HighestBitSetInternal<int>() / 0;
             }
             if (numerator.IsZero) {
                 return default;
@@ -1408,7 +1408,8 @@ namespace UltimateOrb.Numerics {
                 return quotient;
             }
 
-            public static BigRational Round(BigRational value, int decimals, MidpointRounding mode = MidpointRounding.ToEven) {
+            [Obsolete]
+            public static BigRational Round_A_Legacy(BigRational value, int decimals, MidpointRounding mode = MidpointRounding.ToEven) {
                 BigInteger num = value.SignedNumerator;
                 BigInteger den = value.Denominator;
 
@@ -1477,6 +1478,200 @@ namespace UltimateOrb.Numerics {
                 }
 
                 return BigRational.FromFraction(resultNum, resultDen);
+            }
+
+            public static BigRational Round(BigRational value, int decimals, FloatingPointRounding mode = FloatingPointRounding.ToNearestWithMidpointToEven) {
+                return Round(value, 10, decimals, mode);
+            }
+
+            public static BigRational Round(BigRational value, int decimals, MidpointRounding mode = MidpointRounding.ToEven) {
+                return Round(value, decimals, mode.ToFloatingPointRounding());
+            }
+
+            public static BigRational Round(BigRational value, [ConstantExpected(Min = 2)] int radix, int digits, FloatingPointRounding mode = FloatingPointRounding.ToNearestWithMidpointToEven) {
+                ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(radix, 1);
+                if (digits == 0) {
+                    if (mode.TryToMidpointRounding(out var m)) {
+                        return Round(value, m);
+                    }
+                    goto L_1;
+                }
+            L_1:;
+                var (q, factor) = RoundToScaledIntegerInternal2(value, radix, digits, mode);
+
+                // Build resultBits and reduce
+                BigInteger resultNum = q;
+                if (digits >= 0) {
+                    BigInteger resultDen;
+                    if (!int.IsPow2(radix)) {
+                        resultDen = factor;
+                    } else {
+                        var c = int.TrailingZeroCount(radix);
+                        resultDen = BigInteger.One << checked(c * digits);
+                    }
+                    return BigRational.FromFraction(resultNum, resultDen);
+                } else {
+                    if (!int.IsPow2(radix)) {
+                        resultNum *= factor;
+                    } else {
+                        var c = int.TrailingZeroCount(radix);
+                        resultNum <<= checked(c * digits);
+                    }
+                    return resultNum;
+                }
+            }
+
+            public static BigRational Round(BigRational value, [ConstantExpected(Min = 2)] int radix, int digits, MidpointRounding mode = MidpointRounding.ToEven) {
+                return Round(value, radix, digits, mode.ToFloatingPointRounding());
+            }
+
+            public static BigInteger RoundToScaledInteger(BigRational value, int decimals, FloatingPointRounding mode = FloatingPointRounding.ToNearestWithMidpointToEven) {
+                return RoundToScaledInteger(value, 10, decimals, mode);
+            }
+
+            public static BigInteger RoundToScaledInteger(BigRational value, int decimals, MidpointRounding mode = MidpointRounding.ToEven) {
+                return RoundToScaledInteger(value, decimals, mode.ToFloatingPointRounding());
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static BigInteger RoundToScaledInteger(BigRational value, [ConstantExpected(Min = 2)] int radix, int digits, FloatingPointRounding mode = FloatingPointRounding.ToNearestWithMidpointToEven) {
+                ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(radix, 1);
+
+                if (digits == 0) {
+                    if (mode.TryToMidpointRounding(out var m)) {
+                        return RoundToBigInteger(value, m);
+                    }
+                    // fall through for non-midpoint modes
+                }
+
+                return RoundToScaledIntegerInternal2(value, radix, digits, mode).Result;
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            static (BigInteger Result, BigInteger Factor) RoundToScaledIntegerInternal2(BigRational value, [ConstantExpected(Min = 2)] int radix, int digits, FloatingPointRounding mode = FloatingPointRounding.ToNearestWithMidpointToEven) {
+                ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(radix, 1);
+
+                if (digits == 0) {
+                    if (mode.TryToMidpointRounding(out var m)) {
+                        return (RoundToBigInteger(value, m), default);
+                    }
+                    // fall through for non-midpoint modes
+                }
+
+                var num = value.SignedNumerator;
+                var den = value.Denominator;
+
+                BigInteger scaledNum = num;
+                BigInteger scaledDen = den;
+                BigInteger factor = BigInteger.One;
+                if (digits > 0) {
+                    if (!int.IsPow2(radix)) {
+                        factor = BigIntegerSmallPowModule.Pow(radix, digits);
+                        scaledNum = num * factor;
+                    } else {
+                        var c = int.TrailingZeroCount(radix);
+                        scaledNum = num << checked(c * digits);
+                    }
+                } else if (digits < 0) {
+                    if (!int.IsPow2(radix)) {
+                        factor = BigIntegerSmallPowModule.Pow(radix, -digits);
+                        scaledDen = den * factor;
+                    } else {
+                        var c = int.TrailingZeroCount(radix);
+                        scaledDen = den << checked(c * -digits);
+                    }
+                }
+
+                // DivRem: q and rem are the exact inputs the helper expects.
+                BigInteger q = BigInteger.DivRem(scaledNum, scaledDen, out BigInteger rem);
+
+                // Pass absolute denominator to helper (no new quantum variable in this method)
+                bool negative = scaledNum.Sign < 0;
+                bool increment = DecideIncrementForRounding(mode, q, rem, BigInteger.Abs(scaledDen), negative);
+
+                if (increment) {
+                    q += negative ? BigInteger.MinusOne : BigInteger.One;
+                }
+
+                return (q, factor);
+            }
+
+            public static BigInteger RoundToScaledInteger(BigRational value, [ConstantExpected(Min = 2)] int radix, int digits, MidpointRounding mode = MidpointRounding.ToEven) {
+                return RoundToScaledInteger(value, radix, digits, mode.ToFloatingPointRounding());
+            }
+
+            static bool DecideIncrementForRounding(
+                FloatingPointRounding mode,
+                BigInteger q,            // quotient from DivRem(scaledNum, scaledDen)
+                BigInteger rem,          // remainder from DivRem
+                BigInteger quantum,      // non-negative denominator (abs(scaledDen))
+                bool negative)           // true if numerator is negative
+                {
+
+                Debug.Assert(quantum.Sign >= 0);
+
+                static bool IsTie(int v) => v == 0;
+                static bool IsUpper(int v) => v > 0;
+                static bool IsInexact(int v) => v > 0;
+
+                bool needsTie = mode switch {
+                    FloatingPointRounding.ToNearestWithMidpointToEven => true,
+                    FloatingPointRounding.ToNearestWithMidpointAwayFromZero => true,
+                    FloatingPointRounding.ToNearestWithMidpointToOdd => true,
+                    FloatingPointRounding.ToNearestWithMidpointUpward => true,
+                    FloatingPointRounding.ToNearestWithMidpointDownward => true,
+                    FloatingPointRounding.ToNearestWithMidpointTowardZero => true,
+                    _ => false
+                };
+
+                int w;
+                if (needsTie) {
+                    var absRem = BigInteger.Abs(rem);
+                    // quantum is already non-negative; use it directly
+                    // TODO: CompareToShifted/Scaled
+                    w = (absRem << 1).CompareTo(quantum); // -1 => lower, 0 => tie, +1 => upper
+                } else {
+                    w = rem != BigInteger.Zero ? 1 : 0; // 0 => exact, 1 => inexact
+                }
+
+                switch (mode) {
+                case FloatingPointRounding.ToNearestWithMidpointToEven:
+                    return IsUpper(w) || (IsTie(w) && !q.IsEven);
+
+                case FloatingPointRounding.ToNearestWithMidpointAwayFromZero:
+                    return IsUpper(w) || IsTie(w);
+
+                case FloatingPointRounding.ToNearestWithMidpointToOdd:
+                    return IsUpper(w) || (IsTie(w) && q.IsEven);
+
+                case FloatingPointRounding.ToNearestWithMidpointUpward:
+                    return IsUpper(w) || (IsTie(w) && !negative);
+
+                case FloatingPointRounding.ToNearestWithMidpointDownward:
+                    return IsUpper(w) || (IsTie(w) && negative);
+
+                case FloatingPointRounding.ToNearestWithMidpointTowardZero:
+                    return IsUpper(w);
+
+                case FloatingPointRounding.Upward:
+                    return IsInexact(w) && !negative;
+
+                case FloatingPointRounding.Downward:
+                    return IsInexact(w) && negative;
+
+                case FloatingPointRounding.TowardZero:
+                    return false;
+
+                case FloatingPointRounding.ToOdd:
+                    return IsInexact(w) && q.IsEven;
+
+                case FloatingPointRounding.TowardInfinity:
+                    return IsInexact(w);
+
+                default:
+                    ThrowHelper.ThrowArgumentException_InvalidEnumValue(mode);
+                    return false;
+                }
             }
 
             public static BigRational Round(BigRational value, MidpointRounding mode = MidpointRounding.ToEven) {
@@ -2615,7 +2810,7 @@ namespace UltimateOrb.Numerics {
 
         public static BigRational DivideEuclidean(BigRational first, BigRational second) {
             if (second.m_SignedNumerator.IsZero) {
-                _ = Default<int>.Value / 0;
+                _ = Miscellaneous.HighestBitSetInternal<int>() / 0;
             }
             if (first.m_SignedNumerator.IsZero) {
                 return Zero;
@@ -2625,7 +2820,7 @@ namespace UltimateOrb.Numerics {
 
         public static BigRational operator %(BigRational first, BigRational second) {
             if (second.m_SignedNumerator.IsZero) {
-                _ = Default<int>.Value / 0;
+                _ = Miscellaneous.HighestBitSetInternal<int>() / 0;
             }
             if (first.m_SignedNumerator.IsZero) {
                 return Zero;
@@ -2653,6 +2848,103 @@ namespace UltimateOrb.Numerics {
 
         public static bool operator >=(BigRational first, BigRational second) {
             return first.CompareTo(second) >= 0;
+        }
+    }
+}
+
+namespace UltimateOrb.Numerics {
+
+    partial struct BigRational {
+
+        /// <summary>
+        /// Constructs a <see cref="BigRational"/> from a finite continued fraction given by its partial quotients.
+        /// </summary>
+        /// <typeparam name="T">An integer type implementing <see cref="System.Numerics.IBinaryInteger{T}"/>.</typeparam>
+        /// <param name="coefficients">
+        /// The partial quotients of the continued fraction in order:
+        /// the value represents a0 + 1/(a1 + 1/(a2 + ...)).
+        /// If the span is empty the method returns <see cref="BigRational.Zero"/>.
+        /// </param>
+        /// <returns>
+        /// A <see cref="BigRational"/> equal to the rational represented by the finite continued fraction.
+        /// When the continued fraction is well-formed the returned numerator and denominator are coprime.
+        /// If <paramref name="coefficients"/> is empty the method returns <see cref="BigRational.Zero"/>.
+        /// </returns>
+        /// <exception cref="System.DivideByZeroException">
+        /// Thrown when the recurrence produces a zero denominator. This can occur for ill-formed inputs
+        /// such as partial quotients that cause the denominator recurrence to vanish. For simple continued
+        /// fractions where all partial quotients after the first are positive this will not occur.
+        /// </exception>
+        /// <exception cref="System.OverflowException">
+        /// Thrown if conversion from <typeparamref name="T"/> to <see cref="System.Numerics.BigInteger"/>
+        /// or intermediate big-integer arithmetic overflows the checked conversion.
+        /// </exception>
+        /// <remarks>
+        /// The implementation uses the standard convergent recurrence:
+        /// <c>p_k = a_k * p_{k-1} + p_{k-2}</c> and <c>q_k = a_k * q_{k-1} + q_{k-2}</c>
+        /// with initial values <c>p_{-2}=0, p_{-1}=1, q_{-2}=1, q_{-1}=0</c>.
+        /// Each <typeparamref name="T"/> is converted to <see cref="System.Numerics.BigInteger"/>
+        /// (for example via <c>BigInteger.CreateChecked&lt;T&gt;(value)</c>) and the final rational is
+        /// constructed as <c>new BigRational(p, q)</c>.
+        /// </remarks>
+        /// <example>
+        /// <code language="csharp"><![CDATA[
+        /// // continued fraction [1; 2, 2] = 1 + 1/(2 + 1/2) = 7/5
+        /// var coeffs = new int[] { 1, 2, 2 };
+        /// var r = BigRationalExtensions.FromContinuedFraction<int>(coeffs);
+        /// Debug.Assert(r.Numerator == new BigInteger(7));
+        /// Debug.Assert(r.Denominator == new BigInteger(5));
+        ///
+        /// // empty input returns zero
+        /// var empty = Array.Empty<int>();
+        /// var z = BigRationalExtensions.FromContinuedFraction<int>(empty);
+        /// Debug.Assert(z == BigRational.Zero);
+        /// ]]></code>
+        /// </example>
+        /// <seealso cref="System.Numerics.IBinaryInteger{T}"/>
+        public static BigRational FromContinuedFraction<T>(params ReadOnlySpan<T> coefficients)
+            where T : IBinaryInteger<T> {
+
+            BigInteger pPrev2 = BigInteger.Zero;
+            BigInteger pPrev1 = BigInteger.One;
+            BigInteger qPrev2 = BigInteger.One;
+            BigInteger qPrev1 = BigInteger.Zero;
+
+            BigInteger p = BigInteger.Zero;
+            BigInteger q = BigInteger.One;
+
+            foreach (var t in coefficients) {
+                BigInteger a = BigInteger.CreateChecked(t);
+                p = a * pPrev1 + pPrev2;
+                q = a * qPrev1 + qPrev2;
+
+                pPrev2 = pPrev1;
+                pPrev1 = p;
+                qPrev2 = qPrev1;
+                qPrev1 = q;
+            }
+
+            if (q.IsZero) {
+                throw new DivideByZeroException("Continued fraction produced zero denominator.");
+            }
+
+            return BigRational.FromFractionReduced(p, q);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static BigRational FromFractionReduced(BigInteger numerator, BigInteger denominator) {
+            var s = denominator.Sign;
+            if (0 == s) {
+                _ = Miscellaneous.HighestBitSetInternal<int>() / 0;
+            }
+            if (numerator.IsZero) {
+                return default;
+            }
+            if (0 > s) {
+                denominator = -denominator;
+                numerator = -numerator;
+            }
+            return new BigRational(denominator, numerator);
         }
     }
 }

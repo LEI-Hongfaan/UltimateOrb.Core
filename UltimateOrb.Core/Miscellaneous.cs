@@ -1,4 +1,6 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 
 namespace UltimateOrb {
@@ -66,5 +68,12 @@ namespace UltimateOrb {
         public static void IgnoreParameter<T>(T value) {
 #pragma warning restore IDE0060 // Remove unused parameter
         }
+
+#if NET7_0_OR_GREATER
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
+        internal static T HighestBitSetInternal<T>() where T : IBinaryInteger<T> {
+            return ~(T.AllBitsSet >>> 1);
+        }
+#endif
     }
 }

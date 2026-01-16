@@ -171,7 +171,7 @@ namespace ThisAssembly {
                                         Console.Out.WriteLine($@"Done.");
 
                                         if (null != ilg) {
-                                            var ignored = 0;
+                                            _ = 0;
                                         }
                                     }
 

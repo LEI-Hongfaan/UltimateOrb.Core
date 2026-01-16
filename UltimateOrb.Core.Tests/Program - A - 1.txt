@@ -526,7 +526,7 @@ namespace UltimateOrb.Core.Tests {
                 var a = new BitArrayUnchecked(count);
                 var n = (long)0;
                 var p = (long)0;
-                var ignored = collection.All((x) => {
+                _ = collection.All((x) => {
                     ref var o = ref (0 > x ? ref n : ref p);
                     unchecked {
                         o += x;
@@ -2816,7 +2816,7 @@ namespace UltimateOrb.Core.Tests {
                     for (var i = 0; 10000000 > i; ++i) {
                         var Head = List<int>.Head_.Value.Invoke(adfsa);
                         if (0 == i % 4000) {
-                            var ignored = Head.Value;
+                            _ = Head.Value;
                         }
                         adfsa = List<int>.Tail_.Value.Invoke(adfsa);
                     }

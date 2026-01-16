@@ -135,7 +135,7 @@ namespace UltimateOrb.Runtime.CompilerServices {
             _ => throw new ArgumentException("Type mismatched.", nameof(boxed)),
         };
 
-        // public static implicit operator DualPtr<T>(BoxedAny<T> boxed) => new(ref boxed.Value);
+        // public static implicit operator DualPtr<TSelf>(BoxedAny<TSelf> boxed) => new(ref boxed.Value);
 
         [return: NotNullIfNotNull(nameof(boxed))]
         public static explicit operator T(BoxedAny<T> boxed) => !typeof(T).IsValueType ? Unsafe1.BitCast<Wrapper<BoxedAny<T>?>, Wrapper<T?>>(boxed).Value! : Unsafe1.As<StrongBox<T>>(boxed)!.Value!;

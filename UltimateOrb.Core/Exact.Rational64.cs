@@ -254,7 +254,7 @@ namespace UltimateOrb.Mathematics.Exact {
             var c = unchecked((Int32)(value.bits >> 32));
             if (0 != d) {
                 {
-                    var ignored = checked(d - unchecked((UInt32)Int32.MinValue));
+                    _ = checked(d - unchecked((UInt32)Int32.MinValue));
                 }
                 if (0 <= c) {
                     unchecked {
@@ -271,7 +271,7 @@ namespace UltimateOrb.Mathematics.Exact {
                 return new Rational64(unchecked((UInt64)(((Int64)c << 32) | (Int64)(Int32)d)));
             }
             {
-                var ignored = c / unchecked((Int32)d);
+                _ = c / unchecked((Int32)d);
             }
             return default(Rational64);
         }

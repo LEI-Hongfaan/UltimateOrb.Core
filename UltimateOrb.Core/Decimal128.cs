@@ -620,7 +620,7 @@ namespace UltimateOrb {
                 return this__.CompareTo((object?)TSelf.ToBase(other__));
             }
             //if (obj is TBase other) {
-            //    return CompareTo((object?)T.FromBase(other));
+            //    return CompareTo((object?)TSelf.FromBase(other));
             //}
             return this__.CompareTo(obj);
         }
@@ -668,7 +668,7 @@ namespace UltimateOrb {
         object IConvertible.ToType(Type conversionType, IFormatProvider? provider) {
             var this__ = TSelf.ToBase((TSelf)(object)this);
             if (typeof(TSelf) == conversionType) {
-                //return (T)(object)target;
+                //return (TSelf)(object)target;
                 var t = this__.ToType(typeof(TBase), provider);
                 if (t is TBase v) {
                     return TSelf.FromBase(v);

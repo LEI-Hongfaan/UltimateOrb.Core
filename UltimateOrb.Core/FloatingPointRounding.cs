@@ -97,5 +97,21 @@ namespace UltimateOrb {
                 };
             }
         }
+
+        extension(FloatingPointRounding @this) {
+
+            internal bool TryToMidpointRounding(out System.MidpointRounding result) {
+                (System.MidpointRounding Result, bool Success) r = @this switch {
+                    FloatingPointRounding.ToNearestWithMidpointToEven => (System.MidpointRounding.ToEven, true),
+                    FloatingPointRounding.ToNearestWithMidpointAwayFromZero => (System.MidpointRounding.AwayFromZero, true),
+                    FloatingPointRounding.ToNearestWithMidpointTowardZero => (System.MidpointRounding.ToZero, true),
+                    FloatingPointRounding.ToNearestWithMidpointDownward => (System.MidpointRounding.ToNegativeInfinity, true),
+                    FloatingPointRounding.ToNearestWithMidpointUpward => (System.MidpointRounding.ToPositiveInfinity, true),
+                    _ => (default, false),
+                };
+                result = r.Result;
+                return r.Success;
+            }
+        }
     }
 }
