@@ -67,7 +67,7 @@ namespace UltimateOrb.Numerics {
             get {
                 var q = m_Denominator;
                 var p = m_SignedNumerator.Sign;
-                return p == 0 ? 1 : (0 > m_SignedNumerator.Sign ? -q : q);
+                return p == 0 ? default : (0 > m_SignedNumerator.Sign ? -q : q);
             }
         }
 
@@ -1157,31 +1157,9 @@ namespace UltimateOrb.Numerics {
                 FromIeee754InterchangeBinary<TFloat, TFloatUIntBits>(value);
         }
 
-        static BigRational ContinuedFraction(double value, int maxIterations) {
+        static BigRational FromDoubleByContinuedFractionInternal(double value, int maxIterations) {
             Debug.Assert(value > 0);
-            BigInteger d = 0;
-            BigInteger n = 1;
-            BigInteger prevD = 1;
-            BigInteger prevN = 0;
-            int i = 0;
-            for (; i < maxIterations; i++) {
-                if (!double.IsFinite(value)) {
-                    break;
-                }
-
-                BigInteger integerPart = (BigInteger)value;
-                value -= (double)integerPart;
-                value = 1.0 / value;
-
-                BigInteger tempD = d;
-                d = integerPart * d + prevD;
-                prevD = tempD;
-
-                BigInteger tempN = n;
-                n = integerPart * n + prevN;
-                prevN = tempN;
-            }
-            return BigRational.FromFraction(n, d);
+            return FromRationalByContinuedFraction((BigRational)value, maxIterations);
         }
 
         /// <summary>
@@ -1199,7 +1177,7 @@ namespace UltimateOrb.Numerics {
             if (isNegative) {
                 value = -value;
             }
-            BigRational result = ContinuedFraction(value, maxIterations);
+            BigRational result = FromDoubleByContinuedFractionInternal(value, maxIterations);
             if (isNegative) {
                 result = -result;
             }
@@ -1221,14 +1199,14 @@ namespace UltimateOrb.Numerics {
             if (isNegative) {
                 value = -value;
             }
-            BigRational result = ContinuedFraction(value, maxIterations);
+            BigRational result = FromDoubleByContinuedFractionInternal(value, maxIterations);
             if (isNegative) {
                 result = -result;
             }
             return result;
         }
 
-        static BigRational ContinuedFraction(BigRational value, int maxIterations) {
+        static BigRational FromRationalByContinuedFractionInternal(BigRational value, int maxIterations) {
             Debug.Assert(value > 0);
             BigInteger d = 0;
             BigInteger n = 1;
@@ -1271,7 +1249,7 @@ namespace UltimateOrb.Numerics {
             if (isNegative) {
                 value = -value;
             }
-            BigRational result = ContinuedFraction(value, maxIterations);
+            BigRational result = FromRationalByContinuedFractionInternal(value, maxIterations);
             if (isNegative) {
                 result = -result;
             }
@@ -1759,11 +1737,13 @@ namespace UltimateOrb.Numerics {
 namespace UltimateOrb.Numerics {
 
     public readonly partial struct BigRational
-        : INumber<BigRational> {
+        : INumber<BigRational>, ISignedNumber<BigRational> {
 
         public static BigRational One => new BigRational(BigInteger.One, BigInteger.One);
 
-        public static BigRational MinusOne => new BigRational(BigInteger.One, BigInteger.MinusOne);
+        public static BigRational NegativeOne => new BigRational(BigInteger.One, signedNumerator: BigInteger.MinusOne);
+
+        public static BigRational MinusOne => NegativeOne;
 
         public static int Radix => throw new NotSupportedException();
 

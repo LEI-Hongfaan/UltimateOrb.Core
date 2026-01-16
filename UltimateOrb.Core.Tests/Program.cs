@@ -1693,4 +1693,23 @@ namespace UltimateOrb.Plain.ValueTypes {
         }
     }
 }
+
+
+
+
+
+namespace UltimateOrb {
+
+    static partial class Decimal128ExtensionsA {
+
+        extension(Decimal128Bid @this) {
+
+            public string ToStringWithSignAndNaNPayload() {
+                return $"{(Decimal128Bid.IsNegative(@this) ? "-" : "+")}{(Decimal128Bid.IsSignalingNaN(@this) ? "s" : "")}{(Decimal128Bid.IsQuietNaN(@this) ? "q" : "")}{Decimal128Bid.Abs(@this)}{(Decimal128Bid.IsNaN(@this) ? $"({((UInt128.One << 110) - 1) & (UInt128)BitConverter.Decimal128ToUInt128Bits(@this)})" : "")}";
+            }
+        }
+    }
+}
+
+
 #pragma warning restore UoWIP // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.

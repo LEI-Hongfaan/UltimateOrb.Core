@@ -1481,20 +1481,7 @@ namespace UltimateOrb {
     public static partial class Decimal128Extensions {
     }
 }
-namespace UltimateOrb {
 
-    partial class Decimal128Extensions {
-
-#if DEBUG
-        extension(Decimal128Bid @this) {
-
-            public string ToStringWithSignAndNaNPayload() {
-                return $"{(Decimal128Bid.IsNegative(@this) ? "-" : "+")}{(Decimal128Bid.IsSignalingNaN(@this) ? "s" : "")}{(Decimal128Bid.IsQuietNaN(@this) ? "q" : "")}{Decimal128Bid.Abs(@this)}{(Decimal128Bid.IsNaN(@this) ? $"({((UInt128.One << 110) - 1) & @this.bits})" : "")}";
-            }
-        }
-#endif
-    }
-}
 namespace UltimateOrb {
     partial class Decimal128Extensions {
 
@@ -3349,10 +3336,6 @@ namespace UltimateOrb {
                 }
             }
             return sb.ToString();
-        }
-
-        string IConvertible.ToString(IFormatProvider? provider) {
-            return ToString(provider);
         }
 
         public string ToString(IFormatProvider? provider) {

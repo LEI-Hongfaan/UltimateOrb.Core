@@ -2221,7 +2221,7 @@ namespace UltimateOrb {
         }
 
         static bool INumberBase<XInt128>.IsNormal(XInt128 value) {
-            return true;
+            return !value.IsZero;
         }
 
         static bool INumberBase<XInt128>.IsOddInteger(XInt128 value) {
@@ -2229,7 +2229,7 @@ namespace UltimateOrb {
         }
 
         static bool INumberBase<XInt128>.IsPositive(XInt128 value) {
-            return !value.IsZero;
+            return true;
         }
 
         static bool INumberBase<XInt128>.IsPositiveInfinity(XInt128 value) {

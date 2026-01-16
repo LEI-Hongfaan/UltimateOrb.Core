@@ -2536,6 +2536,39 @@
              </example>
              <seealso cref="T:System.Numerics.IBinaryInteger`1"/>
         </member>
+        <member name="M:UltimateOrb.Numerics.BigRational.FromGeneralizedContinuedFraction``1(System.ReadOnlySpan{``0})">
+            <summary>
+            Constructs a <see cref="T:UltimateOrb.Numerics.BigRational"/> from a finite generalized continued fraction given by
+            alternating partial denominators and numerators.
+            </summary>
+            <typeparam name="T">An integer type implementing <see cref="T:System.Numerics.IBinaryInteger`1"/>.</typeparam>
+            <param name="alternatingCoefficients">
+            The coefficients in the order: b0, a1, b1, a2, b2, ..., a_n, b_n.
+            The span may be empty (in which case the method returns <see cref="P:UltimateOrb.Numerics.BigRational.Zero"/>),
+            and it may end with an unpaired coefficient. If the last coefficient is unpaired it is
+            treated as a trailing partial numerator <c>a_n</c> with an implicit <c>b_n = 0</c>.
+            </param>
+            <returns>
+            A <see cref="T:UltimateOrb.Numerics.BigRational"/> equal to the rational represented by the finite generalized
+            continued fraction. The numerator and denominator are not guaranteed to be coprime in the
+            generalized case.
+            </returns>
+            <exception cref="T:System.DivideByZeroException">
+            Thrown when the recurrence produces a zero denominator. Ill-formed inputs can cause this.
+            </exception>
+            <exception cref="T:System.OverflowException">
+            Thrown if conversion from <typeparamref name="T"/> to <see cref="T:System.Numerics.BigInteger"/>
+            or intermediate big-integer arithmetic overflows the checked conversion.
+            </exception>
+            <remarks>
+            Uses the standard recurrence for generalized continued fractions:
+            <c>p_{-1} = 1, p_0 = b0; q_{-1} = 0, q_0 = 1;</c>
+            <c>p_k = b_k * p_{k-1} + a_k * p_{k-2};</c>
+            <c>q_k = b_k * q_{k-1} + a_k * q_{k-2};</c>
+            Input may be empty (returns zero) and may contain an unpaired trailing <c>a_k</c>,
+            which is interpreted with <c>b_k = 0</c>.
+            </remarks>
+        </member>
         <member name="T:UltimateOrb.Numerics.DoubleArithmetic">
             <summary>
                 <para>
