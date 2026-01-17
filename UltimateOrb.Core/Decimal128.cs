@@ -2518,7 +2518,7 @@ namespace UltimateOrb {
             if (m.IsZero) {
                 return ILogSpecialResults.ILog0;
             }
-            return EXP_BIAS + exp + UInt128Exp10Module.ILog10(m);
+            return exp - EXP_BIAS + UInt128Exp10Module.ILog10(m);
         }
 
         /// <inheritdoc cref="IFloatingPointIeee754{Decimal128Bid}.ILogB(Decimal128Bid)"/>
@@ -3782,7 +3782,7 @@ namespace UltimateOrb {
                 if (Decimal128Bid.IsFinite(left)) {
                     Debug.Assert(Decimal128Bid.IsInfinity(right));
                     // TODO: Canonicalization
-                    return new(left.bits | ~(UInt128.MaxValue >>> 1) & left.bits, CtorFromBits);
+                    return left * MultiplicativeIdentity;
                 }
                 Debug.Assert(Decimal128Bid.IsInfinity(left));
                 /*
