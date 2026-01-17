@@ -146,8 +146,90 @@ namespace UltimateOrb.Core.Tests {
         }
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private static int Main(string[] args) {
+            {
+                Console.WriteLine($"Hypot(-3.0, -4) = {Decimal128Bid.Hypot(-3.0M, -4M)}");
+
+                Console.WriteLine($"Hypot(1E-6176, -1E-6176) = {Decimal128Bid.Hypot(Decimal128Bid.Epsilon, -Decimal128Bid.Epsilon)}");
+
+                Console.WriteLine($"Hypot(-3E-6176, 2E-6176) = {Decimal128Bid.Hypot(-3 * Decimal128Bid.Epsilon, 2 * Decimal128Bid.Epsilon)}");
+
+                Console.WriteLine($"Sqrt(NaN) = {Decimal128Bid.Sqrt(Decimal128Bid.NaN)}");
+
+                Console.WriteLine($"Sqrt(∞) = {Decimal128Bid.Sqrt(Decimal128Bid.PositiveInfinity)}");
 
 
+                Console.WriteLine($"Hypot(Decimal128Bid.MaxValue, 42) = {Decimal128Bid.Hypot(Decimal128Bid.MaxValue, 42)}");
+
+                Console.WriteLine($"Sqrt(10) = {Decimal128Bid.Sqrt(10)}");
+
+                Console.WriteLine($"Sqrt(0.1M) = {Decimal128Bid.Sqrt(0.1M)}");
+                Console.WriteLine($"Sqrt(6.25E-6174) = {Decimal128Bid.Sqrt(625 * Decimal128Bid.Epsilon)}");
+                Console.WriteLine($"Sqrt(6.00E-6174) = {Decimal128Bid.Sqrt(600 * Decimal128Bid.Epsilon)}");
+
+                Console.WriteLine($"Sqrt(2E-6176) = {Decimal128Bid.Sqrt(2 * Decimal128Bid.Epsilon)}");
+                Console.WriteLine($"Sqrt(3E-6176) = {Decimal128Bid.Sqrt(3 * Decimal128Bid.Epsilon)}");
+                Console.WriteLine($"Sqrt(-0) = {Decimal128Bid.Sqrt(-Decimal128Bid.Zero)}");
+                Console.WriteLine($"Sqrt(-1E-6176) = {Decimal128Bid.Sqrt(-Decimal128Bid.Epsilon)}");
+                Console.WriteLine($"Sqrt(10) = {Decimal128Bid.Sqrt(10)}");
+                Console.WriteLine($"Round(Sqrt(2), 14) = {Decimal128Bid.Round(Decimal128Bid.Sqrt(2), 14)}");
+
+                Console.WriteLine($"Round(123.45M, 1) = {Decimal128Bid.Round(123.45M, 1)}");
+
+            }
+
+            {
+                Console.WriteLine($"Exp(0) = {Decimal128Bid.Exp(0)}");
+                Console.WriteLine($"Exp(1) = {Decimal128Bid.Exp(1)}");
+                Console.WriteLine($"Exp(7) = {Decimal128Bid.Exp(7)}");
+                Console.WriteLine($"Exp(0.5) = {Decimal128Bid.Exp(0.5)}");
+                Console.WriteLine($"Exp(-123.456M) = {Decimal128Bid.Exp(-123.456M)}");
+                Console.WriteLine($"Exp(0.1M) = {Decimal128Bid.Exp(0.1M)}");
+                Console.WriteLine($"Exp(-0.1M) = {Decimal128Bid.Exp(-0.1M)}");
+                Console.WriteLine($"Exp(7) = {Decimal128Bid.Exp(7)}");
+                Console.WriteLine($"Exp(3.5) = {Decimal128Bid.Exp(3.5)}");
+                Console.WriteLine($"Exp(-8) = {Decimal128Bid.Exp(-8)}");
+                Console.WriteLine($"Exp(-8.5) = {Decimal128Bid.Exp(-8.5)}");
+                Console.WriteLine($"Exp(-8.000M) = {Decimal128Bid.Exp(-8.000M)}");
+            }
+
+            {
+                Console.WriteLine($"E = {Decimal128Bid.E}");
+                Console.WriteLine($"Exp(0) = {Decimal128Bid.Exp(0)}");
+                Console.WriteLine($"Exp(1) = {Decimal128Bid.Exp(1)}");
+                Console.WriteLine($"Exp(7) = {Decimal128Bid.Exp(7)}");
+                Console.WriteLine($"Exp(0.5) = {Decimal128Bid.Exp(0.5)}");
+                Console.WriteLine($"Exp(-123.456M) = {Decimal128Bid.Exp(-123.456M)}");
+                Console.WriteLine($"Exp(0.1M) = {Decimal128Bid.Exp(0.1M)}");
+                Console.WriteLine($"Exp(-0.1M) = {Decimal128Bid.Exp(-0.1M)}");
+                Console.WriteLine($"Exp(7) = {Decimal128Bid.Exp(7)}");
+                Console.WriteLine($"Exp(3.5) = {Decimal128Bid.Exp(3.5)}");
+                Console.WriteLine($"Exp(-8) = {Decimal128Bid.Exp(-8)}");
+                Console.WriteLine($"Exp(-8.5) = {Decimal128Bid.Exp(-8.5)}");
+                Console.WriteLine($"Exp(-8.000M) = {Decimal128Bid.Exp(-8.000M)}");
+            }
+            {
+                Console.WriteLine($"Exp2(7) = {Decimal128Bid.Exp2(7)}");
+                Console.WriteLine($"Exp2(0.5) = {Decimal128Bid.Exp2(0.5)}");
+                Console.WriteLine($"Exp2(-123.456M) = {Decimal128Bid.Exp2(-123.456M)}");
+                Console.WriteLine($"Exp2(0.1M) = {Decimal128Bid.Exp2(0.1M)}");
+                Console.WriteLine($"Exp2(-0.1M) = {Decimal128Bid.Exp2(-0.1M)}");
+                Console.WriteLine($"Exp2(7) = {Decimal128Bid.Exp2(7)}");
+                Console.WriteLine($"Exp2(3.5) = {Decimal128Bid.Exp2(3.5)}");
+                Console.WriteLine($"Exp2(-8) = {Decimal128Bid.Exp2(-8)}");
+                Console.WriteLine($"Exp2(-8.5) = {Decimal128Bid.Exp2(-8.5)}");
+                Console.WriteLine($"Exp2(-8.000M) = {Decimal128Bid.Exp2(-8.000M)}");
+            }
+            {
+                Console.WriteLine($"Exp10(0.5) = {Decimal128Bid.Exp10(0.5)}");
+                Console.WriteLine($"Exp10(-123.456M) = {Decimal128Bid.Exp10(-123.456M)}");
+                Console.WriteLine($"Exp10(0.1M) = {Decimal128Bid.Exp10(0.1M)}");
+                Console.WriteLine($"Exp10(-0.1M) = {Decimal128Bid.Exp10(-0.1M)}");
+                Console.WriteLine($"Exp10(7) = {Decimal128Bid.Exp10(7)}");
+                Console.WriteLine($"Exp10(3.5) = {Decimal128Bid.Exp10(3.5)}");
+                Console.WriteLine($"Exp10(-8) = {Decimal128Bid.Exp10(-8)}");
+                Console.WriteLine($"Exp10(-8.5) = {Decimal128Bid.Exp10(-8.5)}");
+                Console.WriteLine($"Exp10(-8.000M) = {Decimal128Bid.Exp10(-8.000M)}");
+            }
 
             {
                 Console.WriteLine($"Scale10(0, -7) = {Decimal128Bid.Scale10(0, -7)}");
@@ -310,7 +392,7 @@ namespace UltimateOrb.Core.Tests {
                 Console.WriteLine($"Atan(0.1M) = {Decimal128Bid.Atan(0.1M)}");
                 Console.WriteLine();
 
-                for (Decimal128Bid x = 0.1M; x <= 0.9M; x += 0.1M) {
+                for (Decimal128Bid x = 0.0M; x <= 1.0M; x += 0.05M) {
                     Console.WriteLine($"Atan({x}) = {Decimal128Bid.Atan(x)}");
                 }
 

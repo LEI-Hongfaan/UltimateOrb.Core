@@ -1973,6 +1973,224 @@ namespace UltimateOrb {
             bits = UInt128.FromBits(lo: unchecked((long)lowWord), hi: unchecked((long)highWord));
         }
 
+    }
+}
+
+
+namespace UltimateOrb {
+
+    partial struct Decimal128Bid {
+
+        public static explicit operator BigRational(Decimal128Bid value) {
+            if (!Decimal128Bid.IsFinite(value)) {
+                ThrowNotFiniteNumberException(value);
+            }
+            var e = unchecked((int)value.ExtractRawBiasedExponentAndRawSignificand(out var m) - 6176);
+            if (m.IsZero || m > MaxSignificandAsUInt128) {
+                return default;
+            }
+            var q = BigIntegerSmallExp10Module.Exp10(unchecked((ushort)UltimateOrb.Mathematics.Elementary.Math.AbsAsUnsigned(e)));
+            var p = (BigInteger)m;
+            if (0 > value.bits.HiInt64Bits) {
+                p = -p;
+            }
+            if (e >= 0) {
+                if (e > 0) {
+                    p *= q;
+                }
+                q = BigInteger.One;
+            } else {
+                var g = BigInteger.GreatestCommonDivisor(p, q);
+                if (!g.IsOne) {
+                    q /= g;
+                    p /= g;
+                }
+            }
+            return new BigRational(denominator: q, signedNumerator: p);
+        }
+
+        // Returns floor(log10(value)) for value > 0
+        public static int ILog10(BigInteger value) {
+            if (value <= 0) return int.MinValue;
+
+            // Fast initial estimate from bit length: log10(value) ≈ (bitLength-1) * log10(2)
+            var bitLen = (int)value.GetBitLength(); // .NET 7+ / .NET 10
+            const double Log10Of2 = 0.3010299956639811952137388947244930267682; // high-precision constant
+            var est = (int)((bitLen - 1) * Log10Of2);
+
+            // Build 10^est and adjust up or down by at most a few steps
+            BigInteger Exp10 = BigIntegerSmallExp10Module.Exp10(est);
+            // If est was 0 we already have Exp10 = 1
+
+            // If Exp10 <= value, try to increase until Exp10*10 > value
+            for (; Exp10 <= value;) {
+                BigInteger next = Exp10 * 10;
+                if (next > value) break;
+                Exp10 = next;
+                est++;
+            }
+
+            // If Exp10 > value, decrease until Exp10 <= value
+            for (; Exp10 > value;) {
+                Exp10 /= 10;
+                est--;
+            }
+
+            return est;
+        }
+
+        public static Decimal128Bid ToCohort(Decimal128Bid x, int qExponent) {
+            return ToCohortInternal(x, unchecked((int)Math.Clamp(qExponent + (long)EXP_BIAS, 0, MaxBiasedExponent)));
+        }
+
+        public static Decimal128Bid ToCohortInternal(Decimal128Bid x, int preferredBiasedExponent, bool resetNaNSignAndPayload = false) {
+            if (IsFinite(x)) {
+                if (!IsZero(x)) {
+                    return AdjustSignBitAndBiasedExponentPartial0(x, unchecked((UInt64)Int64.MinValue) & x.bits.GetHighPart(), preferredBiasedExponent);
+                }
+                preferredBiasedExponent = Math.Clamp(preferredBiasedExponent, 0, MaxBiasedExponent);
+                ulong packedHi = (unchecked((UInt64)Int64.MinValue) & x.bits.GetHighPart()) | ((UInt64)(uint)preferredBiasedExponent << Hi64BiasedExponentShift);
+                return new(new UInt128(lo: 0u, hi: packedHi), CtorFromBits);
+            }
+            return CanonicalizeNaNOrInfinity(x, resetNaNSignAndPayload);
+        }
+
+        public static Decimal128Bid ToFinestCohort(Decimal128Bid x) {
+            return ToFinestCohort(x, false);
+        }
+
+        internal static Decimal128Bid ToFinestCohort(Decimal128Bid x, bool resetNaNSignAndPayload) {
+            return ToCohortInternal(x, 0, resetNaNSignAndPayload);
+        }
+
+        private static Decimal128Bid CanonicalizeNaNOrInfinity(Decimal128Bid x, bool resetNaNSignAndPayload = false) {
+            if (IsInfinity(x)) {
+                return CopySign(PositiveInfinity, x);
+            } else {
+                Debug.Assert(IsNaN(x));
+                if (!resetNaNSignAndPayload) {
+                    var b = x.bits;
+                    b &= new UInt128(lo: UInt64.MaxValue, hi: 0X_FE003FFF_FFFFFFFFUL);
+                    return new(b, CtorFromBits);
+                }
+                return NegativeSignalingNaN;
+            }
+        }
+        public static Decimal128Bid ToCoarsestCohort(Decimal128Bid x) {
+            return ToCoarsestCohort(x, false);
+        }
+
+        internal static Decimal128Bid ToCoarsestCohort(Decimal128Bid x, bool resetNaNSignAndPayload) {
+            return ToCohortInternal(x, MaxBiasedExponent, resetNaNSignAndPayload);
+        }
+
+        // Returns floor(log10(numerator/denominator)) for positive numerator and denominator
+        static int ILog10OfFraction(BigInteger numerator, BigInteger denominator) {
+            Debug.Assert(numerator > 0);
+            Debug.Assert(denominator > 0);
+
+            // Quick path when numerator == denominator
+            if (numerator == denominator) return 0;
+
+            // Use difference of floor logs as initial exponent
+            int lp = ILog10(numerator);
+            int lq = ILog10(denominator);
+            int e = lp - lq;
+
+            if (e >= 0) {
+                BigInteger scaledQ = denominator * BigIntegerSmallExp10Module.Exp10(e);
+                return (numerator >= scaledQ) ? e : e - 1;
+            } else {
+                BigInteger scaledP = numerator * BigIntegerSmallExp10Module.Exp10(-e);
+                return (scaledP >= denominator) ? e : e - 1;
+            }
+        }
+
+        static readonly BigInteger MaxSignificandAsBigInteger = BigInteger.Pow(10, 34) - 1;
+        static readonly UInt128 MaxSignificandAsUInt128 = (UInt128)MaxSignificandAsBigInteger;
+        static readonly UInt128 Exp10_34AsUInt128 = (UInt128)BigInteger.Pow(10, 34);
+        static readonly UInt128 MaxExp10SignificandAsUInt128 = (UInt128)BigInteger.Pow(10, 33);
+        static readonly UInt128 MaxSignificandOverTenAsUInt128 = MaxSignificandAsUInt128 / 10;
+        static readonly BigRational boundExclusive = BigInteger.Pow(10, 6144) * (BigRational.FromFraction(1, 2) + MaxSignificandAsBigInteger);
+
+        const int PREC = 34;
+        const int G = 3; // guard digits
+        const int PREC_G = PREC + G;
+        const int EMIN = -6143;
+        const int EMAX = 6144;
+        static readonly BigInteger TEN = new BigInteger(10);
+
+        // BID packing constants (BID-style layout used here)
+        const int EXP_BITS = 14;
+        const int COEFF_BITS = 113; // must hold up to 10^34-1 (~113 bits)
+        const int SIGN_SHIFT = 127;
+        const int EXP_SHIFT = COEFF_BITS;
+        const int EXP_BIAS = 6176; // decimal128 bias
+
+        public static explicit operator Decimal128Bid(BigRational value) {
+            var s = value.Sign;
+            if (s == 0) {
+                return Zero;
+            }
+            var a = BigRational.Abs(value);
+            if (a >= boundExclusive) {
+                return BigRational.IsNegative(value) ? NegativeInfinity : PositiveInfinity;
+            }
+            // 1.                                           ×10^−6176
+            // 0.000 000 000 000 000 000 000 000 000 000 001×10^−6143
+            // 0 000 000 000 000 000 000 000 000 000 000 001×10^−6176
+            // 0 000 000 000 000 000 000 000 000 000 000 001, 0
+            // 9.999 999 999 999 999 999 999 999 999 999 999×10^6144
+            // 9 999 999 999 999 999 999 999 999 999 999 999×10^6111
+            // 9 999 999 999 999 999 999 999 999 999 999 999, 12287 == 0B_0010_1111_1111_1111
+            var e = BigRational.Math.ILog10(a) - 33;
+            if (e > 6111) {
+                goto L_Inf;
+            }
+            if (e < -6176 - 33 - 1) {
+                goto L_Zero;
+            }
+            e = System.Math.Max(-EXP_BIAS, e);
+            if (0 <= e) {
+                a /= BigIntegerSmallExp10Module.Exp10(e);
+            } else {
+                a *= BigIntegerSmallExp10Module.Exp10(-e);
+            }
+            bool exact = BigRational.IsInteger(a); // preferred exponent is 0 if true
+            var t = unchecked((UInt128)BigRational.Math.RoundToBigInteger(a));
+            if (Miscellaneous.Unlikely(t == Exp10_34AsUInt128)) {
+                Debug.Assert(!exact);
+                if (e == 6111) {
+                    goto L_Inf;
+                }
+                t = MaxExp10SignificandAsUInt128;
+                ++e;
+            } else {
+                Debug.Assert(t <= MaxSignificandAsUInt128);
+            }
+            var v = new Decimal128Bid(t, unchecked((uint)(EXP_BIAS + e)), 0 > s ? 0X8000000000000000UL : 0u, CtorFromPartsCanonical);
+            return Miscellaneous.Unlikely(exact) ? AdjustExponent0Partial(v) : v;
+        L_Inf:;
+            return 0 > s ? NegativeInfinity : PositiveInfinity;
+        L_Zero:;
+            return new Decimal128Bid(0u, 0, 0 > s ? 0X8000000000000000UL : 0u, CtorFromPartsCanonical);
+        }
+
+        [DoesNotReturn]
+        static void ThrowNotFiniteNumberException(Decimal128Bid value) {
+            throw new NotFiniteNumberException($"The Decimal128 value {value} is not finite.");
+        }
+
+        public static explicit operator Decimal128Bid(Rational64 value) {
+            return (Decimal128Bid)(BigRational)value;
+        }
+    }
+}
+
+namespace UltimateOrb {
+
+    partial struct Decimal128Bid {
+
         public static Decimal128Bid Epsilon => new(1u, CtorFromBits);
 
         public static Decimal128Bid NegativeSignalingNaN => new(0u | ((UInt128)0XFE00000000000000UL << 64), CtorFromBits);
@@ -2005,6 +2223,10 @@ namespace UltimateOrb {
         public static Decimal128Bid Tau => new(0X757caac9cde73f1eUL | ((UInt128)0X000135c8f2af2d4fUL << 64), -33 + EXP_BIAS, 0u, CtorFromPartsCanonical);
 
         public static Decimal128Bid One => new(1u | ((UInt128)EXP_BIAS << COEFF_BITS), CtorFromBits);
+
+        static Decimal128Bid One_Finest => new(MaxExp10SignificandAsUInt128 | ((UInt128)(-33 + EXP_BIAS) << COEFF_BITS), CtorFromBits);
+
+        public static Decimal128Bid OneHalf => new(5u | ((UInt128)(-1 + EXP_BIAS) << COEFF_BITS), CtorFromBits);
 
         public static int Radix => 10;
 
@@ -2172,79 +2394,110 @@ namespace UltimateOrb {
 
             return result;
         }
+        // Numerator coefficients:
+        static readonly Decimal128Bid AtanInternal_A3_RI8_P8 = new(UInt128.FromLoHi(0X6f6666f5d0275cccUL, 0X2ff8c444e744e16cUL), CtorFromBits); // 0.003980811371675454576777904129531084
+        static readonly Decimal128Bid AtanInternal_A3_RI8_P7 = new(UInt128.FromLoHi(0X2ac0f261c592be41UL, 0X2ff642428239183bUL), CtorFromBits); // 1.343908394641428421372356875959873E-4
+        static readonly Decimal128Bid AtanInternal_A3_RI8_P6 = new(UInt128.FromLoHi(0X0825fb7876b24adeUL, 0X2ffc4ecac49ed6c5UL), CtorFromBits); // 0.1598092888999137195075107244100318
+        static readonly Decimal128Bid AtanInternal_A3_RI8_P5 = new(UInt128.FromLoHi(0X2542ea73a51d70eaUL, 0X2ff8992f3715f016UL), CtorFromBits); // 0.003106949441193634853841265284182250
+        static readonly Decimal128Bid AtanInternal_A3_RI8_P4 = new(UInt128.FromLoHi(0X238056b1c37b023bUL, 0X2ffdd69aaf45d619UL), CtorFromBits); // 0.9544987895047132250116910413972027
+        static readonly Decimal128Bid AtanInternal_A3_RI8_P3 = new(UInt128.FromLoHi(0Xfc901325284ec802UL, 0X2ffa317f1d0c7abaUL), CtorFromBits); // 0.01003909037370216080405289717647362
+        static readonly Decimal128Bid AtanInternal_A3_RI8_P2 = new(UInt128.FromLoHi(0X33882eb0f619c328UL, 0X2ffe5721fe75176eUL), CtorFromBits); // 1.767262915628128850806407582827304
+        static readonly Decimal128Bid AtanInternal_A3_RI8_P1 = new(UInt128.FromLoHi(0X17699a92e44626ceUL, 0X2ff9817325ba85ceUL), CtorFromBits); // 0.007817850612532475808681856705373902
+        static readonly Decimal128Bid AtanInternal_A3_RI8_P0 = new(UInt128.FromLoHi(0X38c15b0a00000001UL, 0X2ffe314dc6448d93UL), CtorFromBits); // 1.000000000000000000000000000000001
 
-        // --- RI8 coefficients ---
-        // Numerator coefficients p0..p8
-        static readonly Decimal128Bid RI8_p0 = One;
-        static readonly Decimal128Bid RI8_p1 = new Decimal128Bid(
-            System.UInt128.Parse("3783816602808923750940071754272776"), -33 + EXP_BIAS, 0, CtorFromPartsCanonical);
-        static readonly Decimal128Bid RI8_p2 = new Decimal128Bid(
-            System.UInt128.Parse("5792388444499369993488815484379872"), -33 + EXP_BIAS, 0, CtorFromPartsCanonical);
-        static readonly Decimal128Bid RI8_p3 = new Decimal128Bid(
-            System.UInt128.Parse("4595218755807507692642213417324550"), -33 + EXP_BIAS, 0, CtorFromPartsCanonical);
-        static readonly Decimal128Bid RI8_p4 = new Decimal128Bid(
-            System.UInt128.Parse("2008272567867298490253362406478234"), -33 + EXP_BIAS, 0, CtorFromPartsCanonical);
-        static readonly Decimal128Bid RI8_p5 = new Decimal128Bid(
-            System.UInt128.Parse("4734731350051822383133090212547496"), -34 + EXP_BIAS, 0, CtorFromPartsCanonical);
-        static readonly Decimal128Bid RI8_p6 = new Decimal128Bid(
-            System.UInt128.Parse("5438366663293799536208014995538011"), -35 + EXP_BIAS, 0, CtorFromPartsCanonical);
-        static readonly Decimal128Bid RI8_p7 = new Decimal128Bid(
-            System.UInt128.Parse("2356682281538930081075813725784138"), -36 + EXP_BIAS, 0, CtorFromPartsCanonical);
-        static readonly Decimal128Bid RI8_p8 = new Decimal128Bid(
-            System.UInt128.Parse("1655312253676857892130090424754009"), -38 + EXP_BIAS, 0, CtorFromPartsCanonical);
+        // Denominator coefficients:
+        static readonly Decimal128Bid AtanInternal_A3_RI8_Q8 = new(UInt128.FromLoHi(0Xfe662d03b8bcdd68UL, 0X2ffa78c82e6354dbUL), CtorFromBits); // 0.02449749141335898195015848435703144
+        static readonly Decimal128Bid AtanInternal_A3_RI8_Q7 = new(UInt128.FromLoHi(0X707e5c70f7a357ffUL, 0X2ff73c5fc1bf7882UL), CtorFromBits); // 6.416828072273600192723113574881279E-4
+        static readonly Decimal128Bid AtanInternal_A3_RI8_Q6 = new(UInt128.FromLoHi(0Xef6e15f129a99d80UL, 0X2ffcb52a40496240UL), CtorFromBits); // 0.3674463616842754606559000143699328
+        static readonly Decimal128Bid AtanInternal_A3_RI8_Q5 = new(UInt128.FromLoHi(0X5b8e8dee80dff48bUL, 0X2ff91be922c88e5cUL), CtorFromBits); // 0.005758392844647023907683369985504395
+        static readonly Decimal128Bid AtanInternal_A3_RI8_Q4 = new(UInt128.FromLoHi(0Xfbc57c67a5699d67UL, 0X2ffe47b8dd418541UL), CtorFromBits); // 1.454697539158533953058463925509479
+        static readonly Decimal128Bid AtanInternal_A3_RI8_Q3 = new(UInt128.FromLoHi(0X63be42e7f9b0c201UL, 0X2ffa3e5848f918caUL), CtorFromBits); // 0.01264504057787965274027954371871233
+        static readonly Decimal128Bid AtanInternal_A3_RI8_Q2 = new(UInt128.FromLoHi(0Xf11df7b44b7a764bUL, 0X2ffe6791408bf149UL), CtorFromBits); // 2.100596248961462184139740916905547
+        static readonly Decimal128Bid AtanInternal_A3_RI8_Q1 = new(UInt128.FromLoHi(0X17699a92e44db57dUL, 0X2ff9817325ba85ceUL), CtorFromBits); // 0.007817850612532475808681856705869181
+                                                                                                                                                // static readonly Decimal128Bid AtanInternal_A3_RI8_Q0 = new (UInt128.FromLoHi(0X0000000000000001UL, 0X3040000000000000UL), CtorFromBits); // 1
 
-        // Denominator coefficients q0..q8
-        static readonly Decimal128Bid RI8_q0 = One;
-        static readonly Decimal128Bid RI8_q1 = new Decimal128Bid(
-            System.UInt128.Parse("4117149936142257084273405087606110"), -33 + EXP_BIAS, 0, CtorFromPartsCanonical);
-        static readonly Decimal128Bid RI8_q2 = new Decimal128Bid(
-            System.UInt128.Parse("6964771756546789021579950513581908"), -33 + EXP_BIAS, 0, CtorFromPartsCanonical);
-        static readonly Decimal128Bid RI8_q3 = new Decimal128Bid(
-            System.UInt128.Parse("6236236496951795473457039713854441"), -33 + EXP_BIAS, 0, CtorFromPartsCanonical);
-        static readonly Decimal128Bid RI8_q4 = new Decimal128Bid(
-            System.UInt128.Parse("3171116881022512411350998966926904"), -33 + EXP_BIAS, 0, CtorFromPartsCanonical);
-        static readonly Decimal128Bid RI8_q5 = new Decimal128Bid(
-            System.UInt128.Parse("9116801766413436121203767934319902"), -34 + EXP_BIAS, 0, CtorFromPartsCanonical);
-        static readonly Decimal128Bid RI8_q6 = new Decimal128Bid(
-            System.UInt128.Parse("1384443631810260761904584368298337"), -34 + EXP_BIAS, 0, CtorFromPartsCanonical);
-        static readonly Decimal128Bid RI8_q7 = new Decimal128Bid(
-            System.UInt128.Parse("9394193176500706108626090246148502"), -36 + EXP_BIAS, 0, CtorFromPartsCanonical);
-        static readonly Decimal128Bid RI8_q8 = new Decimal128Bid(
-            System.UInt128.Parse("1848333818752314191599926383248147"), -37 + EXP_BIAS, 0, CtorFromPartsCanonical);
+        // Numerator coefficients:
+        static readonly Decimal128Bid AtanInternal_A2_RI8_P8 = new(UInt128.FromLoHi(0X46f91a626d195dfdUL, 0X2ff4519cef3fb416UL), CtorFromBits); // 1.655308815178121387631403083587069E-5
+        static readonly Decimal128Bid AtanInternal_A2_RI8_P7 = new(UInt128.FromLoHi(0Xe50970f37164db5bUL, 0X2ff8743176ddffb1UL), CtorFromBits); // 0.002356678481598042805950428414794587
+        static readonly Decimal128Bid AtanInternal_A2_RI8_P6 = new(UInt128.FromLoHi(0X017f034a6e3a3d2cUL, 0X2ffb0c21c09a5512UL), CtorFromBits); // 0.05438359910839813615910319264775468
+        static readonly Decimal128Bid AtanInternal_A2_RI8_P5 = new(UInt128.FromLoHi(0Xfea062cadd78d8ffUL, 0X2ffce970a7bc5c3dUL), CtorFromBits); // 0.4734726903562732382352957343586559
+        static readonly Decimal128Bid AtanInternal_A2_RI8_P4 = new(UInt128.FromLoHi(0X049334d8bac3c2f9UL, 0X2ffe6303f22e7557UL), CtorFromBits); // 2.008271186786144707658596342809337
+        static readonly Decimal128Bid AtanInternal_A2_RI8_P3 = new(UInt128.FromLoHi(0X9722050071de2499UL, 0X2ffee28fc989eb3dUL), CtorFromBits); // 4.595216570885520958786177502946457
+        static readonly Decimal128Bid AtanInternal_A2_RI8_P2 = new(UInt128.FromLoHi(0Xa65116dc468c9e96UL, 0X2fff1d9632fd0828UL), CtorFromBits); // 5.792386741565117937229739934391958
+        static readonly Decimal128Bid AtanInternal_A2_RI8_P1 = new(UInt128.FromLoHi(0Xacadeb9b9079b611UL, 0X2ffeba8e792a58f5UL), CtorFromBits); // 3.783816084237409187011199506167313
+                                                                                                                                                // static readonly Decimal128Bid AtanInternal_A2_RI8_P0 = new (UInt128.FromLoHi(0X38c15b0a00000000UL, 0X2ffe314dc6448d93UL), CtorFromBits); // 1.000000000000000000000000000000000
 
-        // Evaluate P(value)/Q(value) with Horner's method. value is expected to be small (value = original^2).
-        public static Decimal128Bid AtanInternal_RI8(Decimal128Bid x) {
-            Debug.Assert(0 <= x);
-            Debug.Assert(x < 0.0875 * 0.0875);
+        // Denominator coefficients:
+        static readonly Decimal128Bid AtanInternal_A2_RI8_Q8 = new(UInt128.FromLoHi(0X898aa42731c10886UL, 0X2ff65b2135af5345UL), CtorFromBits); // 1.848330417956050849902219543775366E-4
+        static readonly Decimal128Bid AtanInternal_A2_RI8_Q7 = new(UInt128.FromLoHi(0X82fb5ad01953d394UL, 0X2ff9cf2b378ad346UL), CtorFromBits); // 0.009394179646983860091809654426030996
+        static readonly Decimal128Bid AtanInternal_A2_RI8_Q6 = new(UInt128.FromLoHi(0X05f610e46eff214dUL, 0X2ffc44421da4a0efUL), CtorFromBits); // 0.1384442085863362109557912236925261
+        static readonly Decimal128Bid AtanInternal_A2_RI8_Q5 = new(UInt128.FromLoHi(0X6271a879eb01bcc1UL, 0X2ffdc17e1e3fc315UL), CtorFromBits); // 0.9116794022150274542384060504849601
+        static readonly Decimal128Bid AtanInternal_A2_RI8_Q4 = new(UInt128.FromLoHi(0X5f58fabf81bac380UL, 0X2ffe9c5918dc8407UL), CtorFromBits); // 3.171114898860834513145905553261440
+        static readonly Decimal128Bid AtanInternal_A2_RI8_Q3 = new(UInt128.FromLoHi(0Xdf64a53ae1dbbac8UL, 0X2fff33785626d558UL), CtorFromBits); // 6.236233790480303793197211704867528
+        static readonly Decimal128Bid AtanInternal_A2_RI8_Q2 = new(UInt128.FromLoHi(0Xbe631eb9e87c4d0eUL, 0X2fff5763c138410cUL), CtorFromBits); // 6.964769880755365444011250880892174
+        static readonly Decimal128Bid AtanInternal_A2_RI8_Q1 = new(UInt128.FromLoHi(0X6a43b49ee5cf0b67UL, 0X2ffecafdbb4132d1UL), CtorFromBits); // 4.117149417570742520344532839500647
+                                                                                                                                                // static readonly Decimal128Bid AtanInternal_A2_RI8_Q0 = new (UInt128.FromLoHi(0X0000000000000001UL, 0X3040000000000000UL), CtorFromBits); // 1
+
+        static Decimal128Bid AtanInternal_A2_RI8(Decimal128Bid x) {
+            Debug.Assert(0 <= x && x < 0.0875 * 0.0875);
 
             // Horner for numerator
-            Decimal128Bid px = RI8_p8;
-            px = FusedMultiplyAdd(px, x, RI8_p7);
-            px = FusedMultiplyAdd(px, x, RI8_p6);
-            px = FusedMultiplyAdd(px, x, RI8_p5);
-            px = FusedMultiplyAdd(px, x, RI8_p4);
-            px = FusedMultiplyAdd(px, x, RI8_p3);
-            px = FusedMultiplyAdd(px, x, RI8_p2);
-            px = FusedMultiplyAdd(px, x, RI8_p1);
-            px = FusedMultiplyAdd(px, x, RI8_p0);
+            Decimal128Bid px = AtanInternal_A2_RI8_P8;
+            px = FusedMultiplyAdd(px, x, AtanInternal_A2_RI8_P7);
+            px = FusedMultiplyAdd(px, x, AtanInternal_A2_RI8_P6);
+            px = FusedMultiplyAdd(px, x, AtanInternal_A2_RI8_P5);
+            px = FusedMultiplyAdd(px, x, AtanInternal_A2_RI8_P4);
+            px = FusedMultiplyAdd(px, x, AtanInternal_A2_RI8_P3);
+            px = FusedMultiplyAdd(px, x, AtanInternal_A2_RI8_P2);
+            px = FusedMultiplyAdd(px, x, AtanInternal_A2_RI8_P1);
+            px = FusedMultiplyAdd(px, x, One);
 
             // Horner for denominator
-            Decimal128Bid qx = RI8_q8;
-            qx = FusedMultiplyAdd(qx, x, RI8_q7);
-            qx = FusedMultiplyAdd(qx, x, RI8_q6);
-            qx = FusedMultiplyAdd(qx, x, RI8_q5);
-            qx = FusedMultiplyAdd(qx, x, RI8_q4);
-            qx = FusedMultiplyAdd(qx, x, RI8_q3);
-            qx = FusedMultiplyAdd(qx, x, RI8_q2);
-            qx = FusedMultiplyAdd(qx, x, RI8_q1);
-            qx = FusedMultiplyAdd(qx, x, RI8_q0);
+            Decimal128Bid qx = AtanInternal_A2_RI8_Q8;
+            qx = FusedMultiplyAdd(qx, x, AtanInternal_A2_RI8_Q7);
+            qx = FusedMultiplyAdd(qx, x, AtanInternal_A2_RI8_Q6);
+            qx = FusedMultiplyAdd(qx, x, AtanInternal_A2_RI8_Q5);
+            qx = FusedMultiplyAdd(qx, x, AtanInternal_A2_RI8_Q4);
+            qx = FusedMultiplyAdd(qx, x, AtanInternal_A2_RI8_Q3);
+            qx = FusedMultiplyAdd(qx, x, AtanInternal_A2_RI8_Q2);
+            qx = FusedMultiplyAdd(qx, x, AtanInternal_A2_RI8_Q1);
+            qx = FusedMultiplyAdd(qx, x, One);
+
+            return px / qx;
+        }
+
+        static Decimal128Bid AtanInternal_A3_RI8(Decimal128Bid x) {
+            Debug.Assert(0 <= x && x < 0.0875);
+
+            // Horner for numerator
+            Decimal128Bid px = AtanInternal_A3_RI8_P8;
+            px = FusedMultiplyAdd(px, x, AtanInternal_A3_RI8_P7);
+            px = FusedMultiplyAdd(px, x, AtanInternal_A3_RI8_P6);
+            px = FusedMultiplyAdd(px, x, AtanInternal_A3_RI8_P5);
+            px = FusedMultiplyAdd(px, x, AtanInternal_A3_RI8_P4);
+            px = FusedMultiplyAdd(px, x, AtanInternal_A3_RI8_P3);
+            px = FusedMultiplyAdd(px, x, AtanInternal_A3_RI8_P2);
+            px = FusedMultiplyAdd(px, x, AtanInternal_A3_RI8_P1);
+            px = FusedMultiplyAdd(px, x, AtanInternal_A3_RI8_P0);
+
+            // Horner for denominator
+            Decimal128Bid qx = AtanInternal_A3_RI8_Q8;
+            qx = FusedMultiplyAdd(qx, x, AtanInternal_A3_RI8_Q7);
+            qx = FusedMultiplyAdd(qx, x, AtanInternal_A3_RI8_Q6);
+            qx = FusedMultiplyAdd(qx, x, AtanInternal_A3_RI8_Q5);
+            qx = FusedMultiplyAdd(qx, x, AtanInternal_A3_RI8_Q4);
+            qx = FusedMultiplyAdd(qx, x, AtanInternal_A3_RI8_Q3);
+            qx = FusedMultiplyAdd(qx, x, AtanInternal_A3_RI8_Q2);
+            qx = FusedMultiplyAdd(qx, x, AtanInternal_A3_RI8_Q1);
+            qx = FusedMultiplyAdd(qx, x, One);
 
             return px / qx;
         }
 
         static Decimal128Bid AtanInternal4(Decimal128Bid x) {
-            Debug.Assert(x < 0.0875);
-            return x * AtanInternal_RI8(x * x);
+            Debug.Assert(0 <= x && x < 0.0875);
+            return x * AtanInternal_A2_RI8(x * x);
+            // return x * AtanInternal_A3_RI8(x);
         }
 
         static readonly Decimal128Bid Tan_PiOver36 = new Decimal128Bid(
@@ -2406,27 +2659,15 @@ namespace UltimateOrb {
         }
 
         public static Decimal128Bid Cos(Decimal128Bid x) {
-            throw new NotImplementedException();
+            return SinCos(x).Cos;
         }
 
         public static Decimal128Bid Cosh(Decimal128Bid x) {
-            throw new NotImplementedException();
+            return Hypot(One, Sinh(x));
         }
 
         public static Decimal128Bid CosPi(Decimal128Bid x) {
-            throw new NotImplementedException();
-        }
-
-        public static Decimal128Bid Exp(Decimal128Bid x) {
-            throw new NotImplementedException();
-        }
-
-        public static Decimal128Bid Exp10(Decimal128Bid x) {
-            throw new NotImplementedException();
-        }
-
-        public static Decimal128Bid Exp2(Decimal128Bid x) {
-            throw new NotImplementedException();
+            return SinCosPi(x).CosPi;
         }
 
         public static Decimal128Bid FusedMultiplyAdd(Decimal128Bid left, Decimal128Bid right, Decimal128Bid addend) {
@@ -2788,8 +3029,13 @@ namespace UltimateOrb {
             throw new NotImplementedException();
         }
 
-        public static Decimal128Bid Round(Decimal128Bid x, int digits, MidpointRounding mode) {
-            throw new NotImplementedException();
+        public static Decimal128Bid Round(Decimal128Bid x, int digits, MidpointRounding mode = MidpointRounding.ToEven) {
+            if (!IsFinite(x)) {
+                return x * MultiplicativeIdentity; // Conan
+            }
+            var preferredBiasedExponent = checked((int)Math.Clamp((long)EXP_BIAS - digits, 0, MaxBiasedExponent));
+            var r = BigRational.Math.Round((BigRational)x, digits, mode);
+            return AdjustSignBitAndBiasedExponentPartial((Decimal128Bid)r, IsNegative(x) ? 0X8000000000000000UL : 0u, preferredBiasedExponent);
         }
 
         public static Decimal128Bid Scale10(Decimal128Bid x, int n) {
@@ -2826,7 +3072,7 @@ namespace UltimateOrb {
         }
 
         public static Decimal128Bid Sin(Decimal128Bid x) {
-            throw new NotImplementedException();
+            return SinCos(x).Sin;
         }
 
         public static (Decimal128Bid Sin, Decimal128Bid Cos) SinCos(Decimal128Bid x) {
@@ -2842,7 +3088,7 @@ namespace UltimateOrb {
         }
 
         public static Decimal128Bid SinPi(Decimal128Bid x) {
-            throw new NotImplementedException();
+            return SinCosPi(x).SinPi;
         }
 
         public static Decimal128Bid Sqrt(Decimal128Bid x) {
@@ -2858,9 +3104,12 @@ namespace UltimateOrb {
             }
             Debug.Assert(IsFinite(x));
             var exp = unchecked((int)x.ExtractRawBiasedExponentAndRawSignificand(out var significand));
+            if (int.IsOddInteger(exp)) {
+                significand *= 10;
+            }
             var a = (BigInteger)significand;
-            a *= a;
-            var s = a << 2 * 114;
+            
+            var s = a << (2 * 114);
             var d = GenericMath.ISqrt(s);
             var e = s - d * d;
             if (e > d) {
@@ -2868,9 +3117,9 @@ namespace UltimateOrb {
             }
             BigRational v = BigRational.FromFraction(d, (UInt128)1 << 114);
             if (exp >= EXP_BIAS) {
-                v *= BigIntegerSmallExp10Module.Exp10(exp - EXP_BIAS);
+                v *= BigIntegerSmallExp10Module.Exp10((exp - EXP_BIAS) >> 1);
             } else {
-                v /= BigIntegerSmallExp10Module.Exp10(EXP_BIAS - exp);
+                v /= BigIntegerSmallExp10Module.Exp10((EXP_BIAS + 1 - exp) >> 1);
             }
             var result = (Decimal128Bid)v;
             var preferredBiasedExponent = EXP_BIAS + ((exp - EXP_BIAS) >> 1);
@@ -3919,215 +4168,7 @@ namespace UltimateOrb {
 
     }
 }
-namespace UltimateOrb {
 
-    partial struct Decimal128Bid {
-
-        public static explicit operator BigRational(Decimal128Bid value) {
-            if (!Decimal128Bid.IsFinite(value)) {
-                ThrowNotFiniteNumberException(value);
-            }
-            var e = unchecked((int)value.ExtractRawBiasedExponentAndRawSignificand(out var m) - 6176);
-            if (m.IsZero || m > MaxSignificandAsUInt128) {
-                return default;
-            }
-            var q = BigIntegerSmallExp10Module.Exp10(unchecked((ushort)UltimateOrb.Mathematics.Elementary.Math.AbsAsUnsigned(e)));
-            var p = (BigInteger)m;
-            if (0 > value.bits.HiInt64Bits) {
-                p = -p;
-            }
-            if (e >= 0) {
-                if (e > 0) {
-                    p *= q;
-                }
-                q = BigInteger.One;
-            } else {
-                var g = BigInteger.GreatestCommonDivisor(p, q);
-                if (!g.IsOne) {
-                    q /= g;
-                    p /= g;
-                }
-            }
-            return new BigRational(denominator: q, signedNumerator: p);
-        }
-
-        // Returns floor(log10(value)) for value > 0
-        public static int ILog10(BigInteger value) {
-            if (value <= 0) return int.MinValue;
-
-            // Fast initial estimate from bit length: log10(value) ≈ (bitLength-1) * log10(2)
-            var bitLen = (int)value.GetBitLength(); // .NET 7+ / .NET 10
-            const double Log10Of2 = 0.3010299956639811952137388947244930267682; // high-precision constant
-            var est = (int)((bitLen - 1) * Log10Of2);
-
-            // Build 10^est and adjust up or down by at most a few steps
-            BigInteger Exp10 = BigIntegerSmallExp10Module.Exp10(est);
-            // If est was 0 we already have Exp10 = 1
-
-            // If Exp10 <= value, try to increase until Exp10*10 > value
-            for (; Exp10 <= value;) {
-                BigInteger next = Exp10 * 10;
-                if (next > value) break;
-                Exp10 = next;
-                est++;
-            }
-
-            // If Exp10 > value, decrease until Exp10 <= value
-            for (; Exp10 > value;) {
-                Exp10 /= 10;
-                est--;
-            }
-
-            return est;
-        }
-
-        public static Decimal128Bid ToCohort(Decimal128Bid x, int qExponent) {
-            return ToCohortInternal(x, unchecked((int)Math.Clamp(qExponent + (long)EXP_BIAS, 0, MaxBiasedExponent)));
-        }
-
-        public static Decimal128Bid ToCohortInternal(Decimal128Bid x, int preferredBiasedExponent, bool resetNaNSignAndPayload = false) {
-            if (IsFinite(x)) {
-                if (!IsZero(x)) {
-                    return AdjustSignBitAndBiasedExponentPartial0(x, unchecked((UInt64)Int64.MinValue) & x.bits.GetHighPart(), preferredBiasedExponent);
-                }
-                preferredBiasedExponent = Math.Clamp(preferredBiasedExponent, 0, MaxBiasedExponent);
-                ulong packedHi = (unchecked((UInt64)Int64.MinValue) & x.bits.GetHighPart()) | ((UInt64)(uint)preferredBiasedExponent << Hi64BiasedExponentShift);
-                return new(new UInt128(lo: 0u, hi: packedHi), CtorFromBits);
-            }
-            return CanonicalizeNaNOrInfinity(x, resetNaNSignAndPayload);
-        }
-
-        public static Decimal128Bid ToFinestCohort(Decimal128Bid x) {
-            return ToFinestCohort(x, false);
-        }
-
-        internal static Decimal128Bid ToFinestCohort(Decimal128Bid x, bool resetNaNSignAndPayload) {
-            return ToCohortInternal(x, 0, resetNaNSignAndPayload);
-        }
-
-        private static Decimal128Bid CanonicalizeNaNOrInfinity(Decimal128Bid x, bool resetNaNSignAndPayload = false) {
-            if (IsInfinity(x)) {
-                return CopySign(PositiveInfinity, x);
-            } else {
-                Debug.Assert(IsNaN(x));
-                if (!resetNaNSignAndPayload) {
-                    var b = x.bits;
-                    b &= new UInt128(lo: UInt64.MaxValue, hi: 0X_FE003FFF_FFFFFFFFUL);
-                    return new(b, CtorFromBits);
-                }
-                return NegativeSignalingNaN;
-            }
-        }
-        public static Decimal128Bid ToCoarsestCohort(Decimal128Bid x) {
-            return ToCoarsestCohort(x, false);
-        }
-
-        internal static Decimal128Bid ToCoarsestCohort(Decimal128Bid x, bool resetNaNSignAndPayload) {
-            return ToCohortInternal(x, MaxBiasedExponent, resetNaNSignAndPayload);
-        }
-
-        // Returns floor(log10(numerator/denominator)) for positive numerator and denominator
-        static int ILog10OfFraction(BigInteger numerator, BigInteger denominator) {
-            Debug.Assert(numerator > 0);
-            Debug.Assert(denominator > 0);
-
-            // Quick path when numerator == denominator
-            if (numerator == denominator) return 0;
-
-            // Use difference of floor logs as initial exponent
-            int lp = ILog10(numerator);
-            int lq = ILog10(denominator);
-            int e = lp - lq;
-
-            if (e >= 0) {
-                BigInteger scaledQ = denominator * BigIntegerSmallExp10Module.Exp10(e);
-                return (numerator >= scaledQ) ? e : e - 1;
-            } else {
-                BigInteger scaledP = numerator * BigIntegerSmallExp10Module.Exp10(-e);
-                return (scaledP >= denominator) ? e : e - 1;
-            }
-        }
-
-        static readonly BigInteger MaxSignificandAsBigInteger = BigInteger.Pow(10, 34) - 1;
-        static readonly UInt128 MaxSignificandAsUInt128 = (UInt128)MaxSignificandAsBigInteger;
-        static readonly UInt128 Exp10_34AsUInt128 = (UInt128)BigInteger.Pow(10, 34);
-        static readonly UInt128 MaxExp10SignificandAsUInt128 = (UInt128)BigInteger.Pow(10, 33);
-        static readonly UInt128 MaxSignificandOverTenAsUInt128 = MaxSignificandAsUInt128 / 10;
-        static readonly BigRational boundExclusive = BigInteger.Pow(10, 6144) * (BigRational.FromFraction(1, 2) + MaxSignificandAsBigInteger);
-
-        const int PREC = 34;
-        const int G = 3; // guard digits
-        const int PREC_G = PREC + G;
-        const int EMIN = -6143;
-        const int EMAX = 6144;
-        static readonly BigInteger TEN = new BigInteger(10);
-
-        // BID packing constants (BID-style layout used here)
-        const int EXP_BITS = 14;
-        const int COEFF_BITS = 113; // must hold up to 10^34-1 (~113 bits)
-        const int SIGN_SHIFT = 127;
-        const int EXP_SHIFT = COEFF_BITS;
-        const int EXP_BIAS = 6176; // decimal128 bias
-
-        public static explicit operator Decimal128Bid(BigRational value) {
-            var s = value.Sign;
-            if (s == 0) {
-                return Zero;
-            }
-            var a = BigRational.Abs(value);
-            if (a >= boundExclusive) {
-                return BigRational.IsNegative(value) ? NegativeInfinity : PositiveInfinity;
-            }
-            // 1.                                           ×10^−6176
-            // 0.000 000 000 000 000 000 000 000 000 000 001×10^−6143
-            // 0 000 000 000 000 000 000 000 000 000 000 001×10^−6176
-            // 0 000 000 000 000 000 000 000 000 000 000 001, 0
-            // 9.999 999 999 999 999 999 999 999 999 999 999×10^6144
-            // 9 999 999 999 999 999 999 999 999 999 999 999×10^6111
-            // 9 999 999 999 999 999 999 999 999 999 999 999, 12287 == 0B_0010_1111_1111_1111
-            var e = BigRational.Math.ILog10(a) - 33;
-            if (e > 6111) {
-                goto L_Inf;
-            }
-            if (e < -6176 - 33 - 1) {
-                goto L_Zero;
-            }
-            e = System.Math.Max(-EXP_BIAS, e);
-            if (0 <= e) {
-                a /= BigIntegerSmallExp10Module.Exp10(e);
-            } else {
-                a *= BigIntegerSmallExp10Module.Exp10(-e);
-            }
-            bool exact = BigRational.IsInteger(a); // preferred exponent is 0 if true
-            var t = unchecked((UInt128)BigRational.Math.RoundToBigInteger(a));
-            if (Miscellaneous.Unlikely(t == Exp10_34AsUInt128)) {
-                Debug.Assert(!exact);
-                if (e == 6111) {
-                    goto L_Inf;
-                }
-                t = MaxExp10SignificandAsUInt128;
-                ++e;
-            } else {
-                Debug.Assert(t <= MaxSignificandAsUInt128);
-            }
-            var v = new Decimal128Bid(t, unchecked((uint)(EXP_BIAS + e)), 0 > s ? 0X8000000000000000UL : 0u, CtorFromPartsCanonical);
-            return Miscellaneous.Unlikely(exact) ? AdjustExponent0Partial(v) : v;
-        L_Inf:;
-            return 0 > s ? NegativeInfinity : PositiveInfinity;
-        L_Zero:;
-            return new Decimal128Bid(0u, 0, 0 > s ? 0X8000000000000000UL : 0u, CtorFromPartsCanonical);
-        }
-
-        [DoesNotReturn]
-        static void ThrowNotFiniteNumberException(Decimal128Bid value) {
-            throw new NotFiniteNumberException($"The Decimal128 value {value} is not finite.");
-        }
-
-        public static explicit operator Decimal128Bid(Rational64 value) {
-            return (Decimal128Bid)(BigRational)value;
-        }
-    }
-}
 namespace UltimateOrb {
 
     partial struct Decimal128Bid {

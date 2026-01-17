@@ -1714,22 +1714,44 @@ namespace UltimateOrb.Numerics {
 
     public readonly partial struct BigRational {
 
+        public static BigRational Exp2(int exponent) {
+            if (0 <= exponent) {
+                return new BigRational(denominator: BigInteger.One, signedNumerator: BigInteger.One << exponent);
+            } else {
+                return new BigRational(denominator: BigInteger.One << unchecked(-exponent), signedNumerator: BigInteger.One);
+            }
+        }
+
+        public static BigRational Exp2(uint exponent) {
+            if (exponent <= (uint)int.MaxValue) {
+                return new BigRational(denominator: BigInteger.One, signedNumerator: BigInteger.One << unchecked((int)exponent));
+            } else {
+                var t = uint.IsEvenInteger(exponent)? BigInteger.One : BigInteger.Two;
+                exponent >>= 1;
+                t <<= unchecked((int)exponent);
+                t <<= unchecked((int)exponent);
+                return new BigRational(denominator: BigInteger.One, signedNumerator: t);
+            }
+        }
+
         public static BigRational Pow(BigRational @base, uint exponent) {
             var (q, p) = NumberBaseExtensions.Pow((@base.m_Denominator, @base.m_SignedNumerator), exponent);
             return new BigRational(denominator: q, signedNumerator: p);
         }
 
         public static BigRational Pow(BigRational @base, int exponent) {
+            BigInteger q;
+            BigInteger p;
             if (0 <= exponent) {
-                var (q, p) = NumberBaseExtensions.Pow((@base.m_Denominator, @base.m_SignedNumerator), exponent.ToUnsignedUnchecked());
+                (q, p) = NumberBaseExtensions.Pow((@base.m_Denominator, @base.m_SignedNumerator), exponent.ToUnsignedUnchecked());
                 return new BigRational(denominator: q, signedNumerator: p);
             } else {
-                var (q, p) = NumberBaseExtensions.Pow((@base.m_SignedNumerator, @base.m_Denominator), unchecked(-exponent).ToUnsignedUnchecked());
+                (q, p) = NumberBaseExtensions.Pow((@base.m_SignedNumerator, @base.m_Denominator), unchecked(-exponent).ToUnsignedUnchecked());
                 if (BigInteger.IsNegative(q)) {
                     (q, p) = (-q, -p);
                 }
-                return new BigRational(denominator: q, signedNumerator: p);
             }
+            return new BigRational(denominator: q, signedNumerator: p);
         }
     }
 }
@@ -1752,6 +1774,8 @@ namespace UltimateOrb.Numerics {
         static BigRational IAdditiveIdentity<BigRational, BigRational>.AdditiveIdentity => One;
 
         static BigRational IMultiplicativeIdentity<BigRational, BigRational>.MultiplicativeIdentity => default;
+        
+        internal static BigRational Two => new BigRational(BigInteger.One, BigInteger.Two);
 
         public static BigRational Abs(BigRational value) {
             return new BigRational(value.m_Denominator, BigInteger.Abs(value.m_SignedNumerator));
