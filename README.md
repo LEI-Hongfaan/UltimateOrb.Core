@@ -3,46 +3,52 @@
 
 [![Join the chat at https://gitter.im/UltimateOrb-Working-Group/PublicMain](https://badges.gitter.im/UltimateOrb-Working-Group/PublicMain.svg)](https://gitter.im/UltimateOrb-Working-Group/PublicMain?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-This repo contains the code to build the UltimateOrb Core libraries, as well as the sources to related tools and unit tests.
+This repository contains the source code for building the UltimateOrb Core Libraries, along with related tools and unit tests.
 
-[Old version v2](https://github.com/LEI-Hongfaan/UltimateOrb.Core.v2)
+For the previous generation of the libraries, see the **[v2 legacy version](https://github.com/LEI-Hongfaan/UltimateOrb.Core.v2)**.
 
 ## UltimateOrb.Core
 
 [![Version](https://img.shields.io/nuget/vpre/UltimateOrb.Core.svg)](https://www.nuget.org/packages/UltimateOrb.Core)
 [![NuGet download count](https://img.shields.io/nuget/dt/UltimateOrb.Core.svg)](https://www.nuget.org/packages/UltimateOrb.Core)
 
-This is the Core part of the UltimateOrb Libraries' adjustment of the Base Class Libraries.
+**UltimateOrb.Core** provides the foundational components of the UltimateOrb library suite. It extends and refines parts of the .NET Base Class Libraries to support advanced numeric and low‑level programming scenarios.
+
+Work in progress:
+- (U)Int256
+- Quadruple‑precision floating‑point (IEEE 754 binary256)
+- IEEE 754 decimal floating‑point types
+
+### What’s New
+
+- **Unified codebase** — UltimateOrb.Int128 now shares the exact same codebase as UltimateOrb.Core.
+- **Trimmable assemblies** — All libraries support trimming for AOT.
+- **More hardware intrinsics** — Additional intrinsics are used to further accelerate numeric operations.
 
 ## UltimateOrb.Int128
 
 [![Version](https://img.shields.io/nuget/vpre/UltimateOrb.Int128.svg)](https://www.nuget.org/packages/UltimateOrb.Int128)
 [![NuGet download count](https://img.shields.io/nuget/dt/UltimateOrb.Int128.svg)](https://www.nuget.org/packages/UltimateOrb.Int128)
 
-This independent library provides Int128 and UInt128.
+This standalone library offers implementations of **Int128** and **UInt128**.
 
-Version 2.1.x is built against .NET 6.0.
-Version 3.x.x is built against .NET 6.0 to .NET 10.0.
+- Version **2.1.x** targets **.NET 6.0**
+- Version **3.x.x** targets **.NET 6.0 or newer**
 
-[WIP] (U)Int256
-[WIP] Quadruple (IEEE binary256)
+### UltimateOrb.XIntN
 
-### What's new ###
+Planned future name for the extended integer library.
 
-* Now UltimateOrb.Int128 uses exactly the same codebase as UltimateOrb.Core. 
-* The libraries are trimmable.
-* More intrinsics are utilized to accelerate the computations.
-
-### UltimateOrb.XIntN ###
-The future name of this library.
-
-Plans:
-* It will contains other bigger integer types.
-* Special code paths to perform better on Browser (WASM).
-* The structure layout byte orders of fixed-size integer types will be compile-time configurable.
+Planned features:
+- Additional large integer types
+- Optimized execution paths for browser/WASM environments
+- Compile‑time configurable byte order for fixed‑size integer types
 
 ## License
 
 UltimateOrb.Core and UltimateOrb.Int128 are licensed under the [MIT license](LICENSE).
 
-Some portions of UltimateOrb Core Libraries use source code form [.NET Runtime](https://github.com/dotnet/runtime), [ASP.NET Core](https://github.com/dotnet/aspnetcore) and [ASP.NET Core](https://github.com/dotnet/aspnetcore). See [Third party notices](THIRD-PARTY-NOTICES.TXT).
+Some portions of the UltimateOrb Core Libraries include source code from
+[.NET Runtime](https://github.com/dotnet/runtime) and
+[ASP.NET Core](https://github.com/dotnet/aspnetcore).
+See [Third party notices](THIRD-PARTY-NOTICES.TXT) for details.
