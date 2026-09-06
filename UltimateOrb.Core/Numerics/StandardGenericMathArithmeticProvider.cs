@@ -81,6 +81,7 @@ namespace UltimateOrb.Numerics {
                 result_hi = result_lo < T.AdditiveIdentity ? -T.MultiplicativeIdentity : T.Zero;
                 return;
             }
+
             unchecked {
                 var bits = checked((int)BinaryIntegerTypeTraitHelpers.GetBitSize<T>());
 

@@ -41,7 +41,7 @@ namespace UltimateOrb.Numerics {
             }
             try {
                 var m2 = checked(a + a);
-                m2 = SpecializedArithmeticHelpers.PowChecked(m2, 20);
+                m2 = SpecializedArithmeticHelpers.PowChecked(m2, 0X01000000);
                 // Good guess
                 return true;
             } catch (ArithmeticException) {

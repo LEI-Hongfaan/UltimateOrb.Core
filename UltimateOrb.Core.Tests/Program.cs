@@ -147,6 +147,14 @@ namespace UltimateOrb.Core.Tests {
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private static int Main(string[] args) {
             {
+#pragma warning disable UoWIP_GenericMath // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+                var aa = DoubleArithmetic.BigMulUnsigned<nuint>(unchecked((nuint)0x8000000000000000), 2, out var hi);
+#pragma warning restore UoWIP_GenericMath // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+                Console.WriteLine(aa);
+                Console.WriteLine(hi);
+                return 0;
+            }
+            {
                 Console.WriteLine($"Hypot(-3.0, -4) = {Decimal128Bid.Hypot(-3.0M, -4M)}");
 
                 Console.WriteLine($"Hypot(1E-6176, -1E-6176) = {Decimal128Bid.Hypot(Decimal128Bid.Epsilon, -Decimal128Bid.Epsilon)}");
