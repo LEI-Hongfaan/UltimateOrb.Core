@@ -16,7 +16,7 @@ namespace UltimateOrb {
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        protected InvalidOperationException ThrowInvalidOperationException() {
+        protected static InvalidOperationException ThrowInvalidOperationException() {
             _ = default(int?)!.Value;
             throw null!;
         }
