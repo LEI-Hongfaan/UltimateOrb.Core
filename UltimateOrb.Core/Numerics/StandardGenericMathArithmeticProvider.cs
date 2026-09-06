@@ -81,33 +81,35 @@ namespace UltimateOrb.Numerics {
                 result_hi = result_lo < T.AdditiveIdentity ? -T.MultiplicativeIdentity : T.Zero;
                 return;
             }
-            var bits = checked((int)BinaryIntegerTypeTraitHelpers.GetBitSize<T>());
+            unchecked {
+                var bits = checked((int)BinaryIntegerTypeTraitHelpers.GetBitSize<T>());
 
-            // Otherwise, split the operands into two halves
-            var half = bits / 2;
-            var mask = ~T.AdditiveIdentity >>> half;
+                // Otherwise, split the operands into two halves
+                var half = bits / 2;
+                var mask = ~T.AdditiveIdentity >>> half;
 
-            var x1 = first >>> half;
-            var x0 = first & mask;
-            var y1 = second >>> half;
-            var y0 = second & mask;
+                var x1 = first >>> half;
+                var x0 = first & mask;
+                var y1 = second >>> half;
+                var y0 = second & mask;
 
-            // Compute the subproducts
-            var z2 = x1 * y1;
-            var z0 = x0 * y0;
-            var xSum = x1 + x0;
-            var ySum = y1 + y0;
-            var z1 = xSum * ySum - z2 - z0;
+                // Compute the subproducts
+                var z2 = x1 * y1;
+                var z0 = x0 * y0;
+                var xSum = x1 + x0;
+                var ySum = y1 + y0;
+                var z1 = xSum * ySum - z2 - z0;
 
-            // Split z1 into two halves
-            var t1 = z1 >>> half;
-            var t0 = z1 << half;
+                // Split z1 into two halves
+                var t1 = z1 >>> half;
+                var t0 = z1 << half;
 
-            // Combine the subproducts to get the final product
-            var q0 = z0 + t0;
-            var q1 = z2 + t1 + (q0 < t0 ? T.MultiplicativeIdentity : T.AdditiveIdentity) + (((xSum + ySum) >>> 1) - t1 & mask << half);
-            result_lo = q0;
-            result_hi = q1;
+                // Combine the subproducts to get the final product
+                var q0 = z0 + t0;
+                var q1 = z2 + t1 + (q0 < t0 ? T.MultiplicativeIdentity : T.AdditiveIdentity) + (((xSum + ySum) >>> 1) - t1 & mask << half);
+                result_lo = q0;
+                result_hi = q1;
+            }
         }
     }
 }
