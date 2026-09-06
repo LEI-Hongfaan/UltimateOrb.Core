@@ -7,6 +7,7 @@ using UltimateOrb.Utilities;
 using static UltimateOrb.Utilities.UnsafeParameterHelpers;
 
 namespace UltimateOrb.Numerics {
+
     [Experimental("UoWIP_GenericMath")]
     public readonly partial struct BasicArithmeticForWellKnownTypesProvider :
         IBinaryIntegerBigMulUnsignedProvider<BasicArithmeticForWellKnownTypesProvider, uint>,
@@ -25,8 +26,6 @@ namespace UltimateOrb.Numerics {
             (result_lo, result_hi) = (unchecked((uint)result), unchecked((uint)(result >> 32)));
         }
 
-
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void BigMulUnsigned(out int result_lo, out int result_hi, in int first, in int second) {
             BigMulUnsigned(out UnsafeAsForOut<int, uint>(out result_lo), out UnsafeAsForOut<int, uint>(out result_hi),
@@ -35,7 +34,7 @@ namespace UltimateOrb.Numerics {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void BigMulUnsigned(out ulong result_lo, out ulong result_hi, in ulong first, in ulong second) {
-            var lo = DoubleArithmetic.BigMulUnsigned(first, second, out var hi);
+            var lo = DoubleArithmetic.BigMul(first, second, out var hi);
             (result_lo, result_hi) = (lo, hi);
         }
 
@@ -47,7 +46,7 @@ namespace UltimateOrb.Numerics {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void BigMulUnsigned(out System.UInt128 result_lo, out System.UInt128 result_hi, in System.UInt128 first, in System.UInt128 second) {
-            var lo = DoubleArithmetic.BigMulUnsigned(first, second, out var hi);
+            var lo = DoubleArithmetic.BigMul(first, second, out var hi);
             (result_lo, result_hi) = (lo, hi);
         }
 
@@ -59,7 +58,7 @@ namespace UltimateOrb.Numerics {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void BigMulUnsigned(out UInt128 result_lo, out UInt128 result_hi, in UInt128 first, in UInt128 second) {
-            var lo = DoubleArithmetic.BigMulUnsigned(first, second, out var hi);
+            var lo = DoubleArithmetic.BigMul(first, second, out var hi);
             (result_lo, result_hi) = (lo, hi);
         }
 
