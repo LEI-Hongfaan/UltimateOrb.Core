@@ -8,7 +8,7 @@ using static UltimateOrb.Utilities.ThrowHelper;
 
 namespace UltimateOrb.Numerics {
 
-    [Experimental("UoWIP_F128")]
+    [Experimental("UoWIP")]
     public static partial class Binary128Arithmetic {
 
         public const int FractionBitCount = 112;
