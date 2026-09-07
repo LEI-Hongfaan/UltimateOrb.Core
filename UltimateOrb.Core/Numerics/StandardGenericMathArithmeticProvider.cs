@@ -39,6 +39,16 @@ namespace UltimateOrb.Numerics {
                     out UnsafeAsForOut<T, int>(out result_lo), out UnsafeAsForOut<T, int>(out result_hi),
                     in UnsafeAsForIn<T, int>(in first), in UnsafeAsForIn<T, int>(in second));
                 return;
+            } else if (typeof(T) == typeof(nuint)) {
+                BasicArithmeticForWellKnownTypesProvider.BigMulUnsigned(
+                    out UnsafeAsForOut<T, nuint>(out result_lo), out UnsafeAsForOut<T, nuint>(out result_hi),
+                    in UnsafeAsForIn<T, nuint>(in first), in UnsafeAsForIn<T, nuint>(in second));
+                return;
+            } else if (typeof(T) == typeof(nint)) {
+                BasicArithmeticForWellKnownTypesProvider.BigMulUnsigned(
+                    out UnsafeAsForOut<T, nint>(out result_lo), out UnsafeAsForOut<T, nint>(out result_hi),
+                    in UnsafeAsForIn<T, nint>(in first), in UnsafeAsForIn<T, nint>(in second));
+                return;
             } else if (typeof(T) == typeof(ulong)) {
                 BasicArithmeticForWellKnownTypesProvider.BigMulUnsigned(
                     out UnsafeAsForOut<T, ulong>(out result_lo), out UnsafeAsForOut<T, ulong>(out result_hi),

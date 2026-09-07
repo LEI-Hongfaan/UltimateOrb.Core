@@ -33,6 +33,18 @@ namespace UltimateOrb.Numerics {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void BigMulUnsigned(out nuint result_lo, out nuint result_hi, in nuint first, in nuint second) {
+            var lo = DoubleArithmetic.BigMul(first, second, out var hi);
+            (result_lo, result_hi) = (lo, hi);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void BigMulUnsigned(out nint result_lo, out nint result_hi, in nint first, in nint second) {
+            BigMulUnsigned(out UnsafeAsForOut<nint, nuint>(out result_lo), out UnsafeAsForOut<nint, nuint>(out result_hi),
+                in UnsafeAsForIn<nint, nuint>(in first), in UnsafeAsForIn<nint, nuint>(in first));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void BigMulUnsigned(out ulong result_lo, out ulong result_hi, in ulong first, in ulong second) {
             var lo = DoubleArithmetic.BigMul(first, second, out var hi);
             (result_lo, result_hi) = (lo, hi);

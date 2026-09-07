@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 
@@ -73,6 +74,19 @@ namespace UltimateOrb {
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         internal static T HighestBitSetInternal<T>() where T : IBinaryInteger<T> {
             return ~(T.AllBitsSet >>> 1);
+        }
+#endif
+
+#if !STANDALONE_XINTN_LIBRARY
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static T MulSaturating<T>(T first, [ConstantExpected] T second)
+            where T : unmanaged, IBinaryInteger<T>, IUnsignedNumber<T>, IMinMaxValue<T> {
+            var bound = T.One << (4 * Unsafe.SizeOf<T>());
+            return ((second >= bound) || (first >= bound))
+                && (second > T.Zero)
+                && ((T.MaxValue / second) < first)
+                ? T.MaxValue
+                : (first * second);
         }
 #endif
     }

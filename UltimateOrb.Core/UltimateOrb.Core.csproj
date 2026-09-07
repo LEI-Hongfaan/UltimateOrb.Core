@@ -7,7 +7,7 @@
     <!--<EnablePreviewFeatures>true</EnablePreviewFeatures>-->
     <FileVersion>1.3.0.0</FileVersion>
     <AssemblyVersion>1.3.0.0</AssemblyVersion>
-    <Version>3.6.4-beta.5</Version>
+    <Version>3.6.4-beta.6</Version>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Authors>LEI Hongfaan</Authors>
     <Product>UltimateOrb Libraries</Product>
@@ -39,6 +39,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Collections\Generic\NativeList.cs" />
     <Compile Remove="Numerics\BigDecimal.cs" />
     <Compile Remove="Numerics\BigFloat.cs" />
     <Compile Remove="Numerics\BigIntegerWrappers\IntX.cs" />
@@ -56,6 +57,7 @@
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
+    <None Include="Collections\Generic\NativeList.cs" />
     <None Include="Numerics\BigDecimal.cs" />
     <None Include="Numerics\BigFloat.cs" />
     <None Include="Numerics\BigIntegerWrappers\IntX.cs" />
