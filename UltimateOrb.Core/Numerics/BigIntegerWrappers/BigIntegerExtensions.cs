@@ -29,18 +29,19 @@ namespace UltimateOrb.Numerics.BigIntegerWrappers {
         [UnsafeAccessor(UnsafeAccessorKind.Field, Name = "_sign")]
         internal extern static ref readonly int GetSignField(this ref readonly System.Numerics.BigInteger obj);
 
+#if NET11_0_OR_GREATER
+        [UnsafeAccessor(UnsafeAccessorKind.Field, Name = "_bits")]
+        internal extern static ref readonly nuint[] GetBitsField(this ref readonly System.Numerics.BigInteger obj);
+        
+        [UnsafeAccessor(UnsafeAccessorKind.Constructor)]
+        internal extern static System.Numerics.BigInteger CreateBigIntegerInternal(int sign, nuint[]? bits);
+#else
         [UnsafeAccessor(UnsafeAccessorKind.Field, Name = "_bits")]
         internal extern static ref readonly uint[] GetBitsField(this ref readonly System.Numerics.BigInteger obj);
 
-        /*
-        [UnsafeAccessor(UnsafeAccessorKind.Field, Name = "_sign")]
-        internal extern static int GetSignField(this System.Numerics.BigInteger obj);
-
-        [UnsafeAccessor(UnsafeAccessorKind.Field, Name = "_bits")]
-        internal extern static uint[] GetBitsField(this System.Numerics.BigInteger obj);
-        */
         [UnsafeAccessor(UnsafeAccessorKind.Constructor)]
         internal extern static System.Numerics.BigInteger CreateBigIntegerInternal(int sign, uint[]? bits);
+#endif
 #endif
 
         private static FieldInfo GetFieldInfo(string name) {
@@ -51,6 +52,7 @@ namespace UltimateOrb.Numerics.BigIntegerWrappers {
             return r;
         }
 
+        [Obsolete]
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private static void GetInternalFields(this BigInteger value, out int sign, out uint[]? bits) {
             sign = Unsafe.As<BigInteger, int>(ref Unsafe.AddByteOffset(ref value, SignFieldOffset));

@@ -10,6 +10,25 @@ using UltimateOrb.Runtime.CompilerServices.TypeTokens;
 
 namespace UltimateOrb.Numerics {
 
+    static partial class NumberBaseTypeTraits<TSelf> where TSelf : INumberBase<TSelf>? {
+
+        internal static readonly bool HasTen = ((Func<bool>)(() => {
+            try {
+                TSelf.CreateChecked(10);
+                return true;
+            } catch (OverflowException) {
+                return false;
+            }
+        }))();
+
+        internal static readonly TSelf? TenOrDefault = ((Func<TSelf?>)(() => {
+            if (HasTen) {
+                return TSelf.CreateChecked(10);
+            }
+            return default;
+        }))();
+    }
+
     partial class NumberBaseExtensions {
 
         extension<TSelf>(TSelf)
@@ -20,7 +39,7 @@ namespace UltimateOrb.Numerics {
             }
 
             internal static bool IsTen(TSelf value) {
-                return TSelf.CreateChecked((byte)10) == value;
+                return NumberBaseTypeTraits<TSelf>.HasTen && NumberBaseTypeTraits<TSelf>.TenOrDefault == value;
             }
         }
     }
@@ -84,7 +103,7 @@ namespace UltimateOrb.Numerics {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static BigInteger Pow<T>([ConstantExpected(Min = 2)] T value, int exponent)
-            where T: IBinaryInteger<T>?, ISignedNumber<T>? {
+            where T : IBinaryInteger<T>?, ISignedNumber<T>? {
             if (value == null) {
                 throw new ArgumentNullException(nameof(value));
             }

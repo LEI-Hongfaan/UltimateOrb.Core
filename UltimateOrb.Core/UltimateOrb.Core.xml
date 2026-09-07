@@ -2395,6 +2395,56 @@
         <member name="M:UltimateOrb.Numerics.BasicArithmeticForWellKnownTypesProvider.MultiplySigned(System.Numerics.BigInteger@,System.Numerics.BigInteger@,System.Numerics.BigInteger@)">
             <inheritdoc/>
         </member>
+        <member name="T:UltimateOrb.Numerics.Generic.IntArithmetic`3">
+            <summary>
+            requires:<br/>
+              default(T) == T.Zero<br/>
+              default(TInt) == TInt.Zero<br/>
+              default(TUInt) == TUInt.Zero<br/>
+              default(TInt) == TInt.Zero<br/>
+              default(TUInt) == TUInt.Zero<br/>
+              T.MinValue ^ T.MaxValue == T.AllBitsSet<br/>
+              TInt.MinValue ^ TInt.MaxValue == TInt.AllBitsSet<br/>
+              TUInt.MinValue ^ TUInt.MaxValue == TUInt.AllBitsSet<br/>
+              bitWidth(T) == T.PopCount(T.AllBitsSet)<br/>
+              bitWidth(TInt) == TInt.PopCount(TInt.AllBitsSet)<br/>
+              bitWidth(TUInt) == TInt.PopCount(TUInt.AllBitsSet)<br/>
+              bitWidth(TInt) == bitSize(TInt)<br/>
+              bitWidth(TUInt) == bitSize(TUInt)<br/>
+              bitWidth(TUInt) == bitWidth(TInt)<br/>
+              bitWidth(TInt) >= bitWidth(T)<br/>
+            </summary>
+            <typeparam name="T"></typeparam>
+            <typeparam name="TInt"></typeparam>
+            <typeparam name="TUInt"></typeparam>
+        </member>
+        <member name="T:UltimateOrb.Numerics.Generic.LongArithmetic`5">
+            <summary>
+            requires:<br/>
+              default(T) == T.Zero<br/>
+              default(TInt) == TInt.Zero<br/>
+              default(TUInt) == TUInt.Zero<br/>
+              default(TInt) == TInt.Zero<br/>
+              default(TUInt) == TUInt.Zero<br/>
+              T.MinValue ^ T.MaxValue == T.AllBitsSet<br/>
+              TInt.MinValue ^ TInt.MaxValue == TInt.AllBitsSet<br/>
+              TUInt.MinValue ^ TUInt.MaxValue == TUInt.AllBitsSet<br/>
+              bitWidth(T) == T.PopCount(T.AllBitsSet)<br/>
+              bitWidth(TInt) == TInt.PopCount(TInt.AllBitsSet)<br/>
+              bitWidth(TUInt) == TInt.PopCount(TUInt.AllBitsSet)<br/>
+              bitWidth(TInt) == bitSize(TInt)<br/>
+              bitWidth(TUInt) == bitSize(TUInt)<br/>
+              bitWidth(TUInt) == bitWidth(TInt)<br/>
+              bitWidth(TULong) == bitWidth(TLong)<br/>
+              bitWidth(TInt) >= bitWidth(T)<br/>
+              bitWidth(TLong) >= 2 * bitWidth(TInt)<br/>
+            </summary>
+            <typeparam name="T"></typeparam>
+            <typeparam name="TInt"></typeparam>
+            <typeparam name="TUInt"></typeparam>
+            <typeparam name="TLong"></typeparam>
+            <typeparam name="TULong"></typeparam>
+        </member>
         <member name="M:UltimateOrb.Numerics.BigIntegerExtensions.get_Two">
             <inheritdoc cref="P:UltimateOrb.Numerics.BigIntegerExtensions.&lt;G&gt;$9CFAEDA43E3429DBE35978030E0B8E1A.Two"/>
         </member>
@@ -7097,7 +7147,7 @@
             ○ Match if at the beginning of the string.<br/>
             ○ Optional (greedy).<br/>
                 ○ "sign" capture group.<br/>
-                    ○ Match a character in the set [+\-].<br/>
+                    ○ Match a character in the set [+-].<br/>
             ○ Match with 4 alternative expressions.<br/>
                 ○ "hex" capture group.<br/>
                     ○ Match '0'.<br/>
@@ -7106,16 +7156,17 @@
                         ○ Match with 2 alternative expressions.<br/>
                             ○ Match a sequence of expressions.<br/>
                                 ○ Match '.'.<br/>
-                                ○ Match a hexadecimal digit atomically at least once.<br/>
+                                ○ Match a character in the set [0-9A-Fa-f] atomically at least once.<br/>
                             ○ Match a sequence of expressions.<br/>
-                                ○ Match a hexadecimal digit greedily at least once.<br/>
+                                ○ Match a character in the set [0-9A-Fa-f] greedily at least once.<br/>
                                 ○ Optional (greedy).<br/>
                                     ○ Match '.'.<br/>
-                                    ○ Optional (greedy).<br/>
-                                        ○ Match a hexadecimal digit atomically at least once.<br/>
+                                    ○ Match with 2 alternative expressions.<br/>
+                                        ○ Match a character in the set [0-9A-Fa-f] greedily at least once.<br/>
+                                        ○ Match an empty string.<br/>
                     ○ Match a character in the set [Pp].<br/>
                     ○ "hexExpSign" capture group.<br/>
-                        ○ Match a character in the set [+\-] atomically, optionally.<br/>
+                        ○ Match a character in the set [+-] atomically, optionally.<br/>
                     ○ "hexExp" capture group.<br/>
                         ○ Match a character in the set [0-9] atomically at least once.<br/>
                 ○ "dec" capture group.<br/>
@@ -7128,14 +7179,15 @@
                                 ○ Match a character in the set [0-9] greedily at least once.<br/>
                                 ○ Optional (greedy).<br/>
                                     ○ Match '.'.<br/>
-                                    ○ Optional (greedy).<br/>
+                                    ○ Match with 2 alternative expressions.<br/>
                                         ○ Match a character in the set [0-9] greedily at least once.<br/>
+                                        ○ Match an empty string.<br/>
                     ○ Optional (greedy).<br/>
                         ○ Match a character in the set [Ee].<br/>
                         ○ "decExpSign" capture group.<br/>
-                            ○ Match a character in the set [+\-] atomically, optionally.<br/>
+                            ○ Match a character in the set [+-] atomically, optionally.<br/>
                         ○ "decExp" capture group.<br/>
-                            ○ Match a character in the set [0-9] atomically at least once.<br/>
+                            ○ Match a character in the set [0-9] greedily at least once.<br/>
                 ○ "nan" capture group.<br/>
                     ○ "nanPrefix" capture group.<br/>
                         ○ Match a character in the set [QSqs] atomically, optionally.<br/>
@@ -7150,7 +7202,7 @@
                                 ○ Match a sequence of expressions.<br/>
                                     ○ Match '0'.<br/>
                                     ○ Match a character in the set [Xx].<br/>
-                                    ○ Match a hexadecimal digit atomically at least once.<br/>
+                                    ○ Match a character in the set [0-9A-Fa-f] atomically at least once.<br/>
                                 ○ Match a character in the set [0-9] atomically at least once.<br/>
                         ○ Match ')'.<br/>
                 ○ "inf" capture group.<br/>
