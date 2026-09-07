@@ -81,7 +81,7 @@ namespace UltimateOrb.Numerics {
 #endif
     }
 }
-namespace UltimateOrb {
+namespace UltimateOrb.Numerics {
 
 #if NET7_0_OR_GREATER
     public static partial class BinaryIntegerMath {

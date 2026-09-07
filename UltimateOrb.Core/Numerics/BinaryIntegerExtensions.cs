@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 
-namespace UltimateOrb {
+namespace UltimateOrb.Numerics {
 
     public static partial class BinaryIntegerExtensions {
 

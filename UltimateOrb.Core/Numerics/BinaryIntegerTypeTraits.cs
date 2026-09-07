@@ -3,7 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Numerics;
 
-namespace UltimateOrb {
+namespace UltimateOrb.Numerics {
 
     internal static partial class BinaryIntegerTypeTraits<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)] T> where T : IBinaryInteger<T>? {
 

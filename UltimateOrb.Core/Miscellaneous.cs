@@ -71,6 +71,7 @@ namespace UltimateOrb {
         }
 
 #if NET7_0_OR_GREATER
+        [Obsolete]
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         internal static T HighestBitSetInternal<T>() where T : IBinaryInteger<T> {
             return ~(T.AllBitsSet >>> 1);
