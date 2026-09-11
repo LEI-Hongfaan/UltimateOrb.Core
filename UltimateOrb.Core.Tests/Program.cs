@@ -147,6 +147,15 @@ namespace UltimateOrb.Core.Tests {
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private static int Main(string[] args) {
             {
+
+                var sfads = BigRational.Parse("21827907538883637012326748457700300661358717434156476363", null);
+
+                var sdfas = (Quadruple)sfads;
+                var sdfadsf = (BigRational)sdfas;
+                Console.WriteLine(sdfadsf.ToString());
+                return 0;
+            }
+            {
 #pragma warning disable UoWIP_GenericMath // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
                 var aa = DoubleArithmetic.BigMulUnsigned<nuint>(unchecked((nuint)0x8000000000000000), 2, out var hi);
 #pragma warning restore UoWIP_GenericMath // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.

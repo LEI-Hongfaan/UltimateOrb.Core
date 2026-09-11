@@ -7049,6 +7049,158 @@
         <member name="M:UltimateOrb.Numerics.Extensions.BinaryNumberExtensions.&lt;G&gt;$BFFAF386DCBEA71032CABD4F220B4749`1.op_OnesComplement(`0)">
             <inheritdoc cref="M:System.Numerics.IBitwiseOperators`3.op_OnesComplement(`0)"/>
         </member>
+        <member name="T:UltimateOrb.Numerics.FloatingPointIeee754InterchageTypeTraits`1">
+            <summary>
+            Provides compile-time (static) metadata describing the IEEE 754 interchange
+            format represented by <typeparamref name="T"/>, such as storage width,
+            precision, maximum exponent, and field widths.
+            </summary>
+            <typeparam name="T">
+            An unmanaged IEEE 754 floating-point type implementing
+            <see cref="T:System.Numerics.IFloatingPointIeee754`1"/> (for example
+            <see cref="T:System.Half"/>, <see cref="T:System.Single"/>, <see cref="T:System.Double"/>,
+            or a decimal floating-point type).
+            </typeparam>
+            <remarks>
+            <para>
+            Only the interchange formats defined by IEEE 754 are supported:
+            </para>
+            <list type="bullet">
+              <item>
+                <description>
+                Binary (radix 2): <c>k = 16</c>, <c>32</c>, <c>64</c>, or
+                <c>k &gt;= 128</c> with <c>k % 32 == 0</c>.
+                </description>
+              </item>
+              <item>
+                <description>
+                Decimal (radix 10): <c>k &gt;= 32</c> with <c>k % 32 == 0</c>.
+                </description>
+              </item>
+            </list>
+            <para>
+            All derived values are computed exactly once per closed generic type and
+            cached in <see langword="static"/> <see langword="readonly"/> fields. The
+            type intentionally has <em>no</em> explicit static constructor, so the
+            compiler keeps the <c>beforefieldinit</c> flag on it; the runtime is then
+            free to run the initializers eagerly (off the hot path), and the JIT can
+            fold accesses to the cached values.
+            </para>
+            <para>
+            Use <see cref="P:UltimateOrb.Numerics.FloatingPointIeee754InterchageTypeTraits`1.IsSupported"/> to test whether <typeparamref name="T"/> is a
+            supported interchange format without triggering an exception. Every other
+            public member throws <see cref="T:System.NotSupportedException"/> when the format is
+            not supported.
+            </para>
+            </remarks>
+        </member>
+        <member name="P:UltimateOrb.Numerics.FloatingPointIeee754InterchageTypeTraits`1.StorageBitWidth">
+            <summary>
+            Gets the storage size, in bits, of <typeparamref name="T"/>
+            (that is, <c>8 * sizeof(T)</c>).
+            </summary>
+            <value>
+            The bit width of the underlying storage, for example 16, 32, 64, or 128.
+            </value>
+            <remarks>
+            This member never throws, even when <typeparamref name="T"/> is not a
+            supported interchange format, so it can be used to inspect arbitrary
+            types.
+            </remarks>
+        </member>
+        <member name="P:UltimateOrb.Numerics.FloatingPointIeee754InterchageTypeTraits`1.IsSupported">
+            <summary>
+            Gets a value indicating whether <typeparamref name="T"/> is a supported
+            IEEE 754 interchange format.
+            </summary>
+            <value>
+            <see langword="true"/> if <typeparamref name="T"/> has radix 2 or 10 and
+            a supported storage bit width; otherwise <see langword="false"/>.
+            </value>
+            <remarks>
+            <para>Supported formats are:</para>
+            <list type="bullet">
+              <item>
+                <description>
+                Binary (radix 2): <c>k = 16</c>, <c>32</c>, <c>64</c>, or
+                <c>k &gt;= 128</c> with <c>k % 32 == 0</c>.
+                </description>
+              </item>
+              <item>
+                <description>
+                Decimal (radix 10): <c>k &gt;= 32</c> with <c>k % 32 == 0</c>.
+                </description>
+              </item>
+            </list>
+            <para>This member never throws.</para>
+            </remarks>
+        </member>
+        <member name="P:UltimateOrb.Numerics.FloatingPointIeee754InterchageTypeTraits`1.Precision">
+            <summary>
+            Gets the precision <c>p</c> of the interchange format represented by
+            <typeparamref name="T"/> (the number of significant digits in the
+            significand).
+            </summary>
+            <value>
+            For radix 2, the number of significant bits (for example 11 for
+            binary16, 24 for binary32, 53 for binary64). For radix 10, the number
+            of significant decimal digits (for example 7 for decimal32, 16 for
+            decimal64, 34 for decimal128).
+            </value>
+            <exception cref="T:System.NotSupportedException">
+            <typeparamref name="T"/> is not a supported IEEE 754 interchange format.
+            See <see cref="P:UltimateOrb.Numerics.FloatingPointIeee754InterchageTypeTraits`1.IsSupported"/>.
+            </exception>
+        </member>
+        <member name="P:UltimateOrb.Numerics.FloatingPointIeee754InterchageTypeTraits`1.MaxExponent">
+            <summary>
+            Gets the maximum exponent <c>emax</c> of the interchange format
+            represented by <typeparamref name="T"/>.
+            </summary>
+            <value>
+            The largest finite exponent representable by the format, for example
+            15 for binary16, 127 for binary32, 1023 for binary64, and 96 for
+            decimal32.
+            </value>
+            <exception cref="T:System.NotSupportedException">
+            <typeparamref name="T"/> is not a supported IEEE 754 interchange format.
+            See <see cref="P:UltimateOrb.Numerics.FloatingPointIeee754InterchageTypeTraits`1.IsSupported"/>.
+            </exception>
+        </member>
+        <member name="P:UltimateOrb.Numerics.FloatingPointIeee754InterchageTypeTraits`1.ExponentOrCombinationFieldBitWidth">
+            <summary>
+            Gets the width, in bits, of the exponent field for binary formats, or
+            of the combination field for decimal formats, of the interchange format
+            represented by <typeparamref name="T"/>.
+            </summary>
+            <value>
+            For binary formats, the exponent field width <c>w</c> (for example 5
+            for binary16, 8 for binary32, 11 for binary64). For decimal formats,
+            the combination field width (for example 11 for decimal32, 13 for
+            decimal64, 17 for decimal128).
+            </value>
+            <exception cref="T:System.NotSupportedException">
+            <typeparamref name="T"/> is not a supported IEEE 754 interchange format.
+            See <see cref="P:UltimateOrb.Numerics.FloatingPointIeee754InterchageTypeTraits`1.IsSupported"/>.
+            </exception>
+        </member>
+        <member name="P:UltimateOrb.Numerics.FloatingPointIeee754InterchageTypeTraits`1.TrailingSignificandFieldBitWidth">
+            <summary>
+            Gets the width, in bits, of the trailing significand field of the
+            interchange format represented by <typeparamref name="T"/>.
+            </summary>
+            <value>
+            For binary formats, the trailing significand field width
+            <c>t = k - w - 1</c> (for example 10 for binary16, 23 for binary32,
+            52 for binary64). For decimal formats, the trailing significand field
+            width (for example 20 for decimal32, 50 for decimal64, 110 for
+            decimal128).
+            </value>
+            <exception cref="T:System.NotSupportedException">
+            <typeparamref name="T"/> is not a supported IEEE 754 interchange format.
+            See <see cref="P:UltimateOrb.Numerics.FloatingPointIeee754InterchageTypeTraits`1.IsSupported"/>.
+            </exception>
+        </member>
         <member name="T:UltimateOrb.Numerics.IDoubleArithmeticBigDivRemFunctions`1">
             <summary>
             Defines methods for performing division and remainder operations on types that support double-width arithmetic.
@@ -7147,7 +7299,7 @@
             ○ Match if at the beginning of the string.<br/>
             ○ Optional (greedy).<br/>
                 ○ "sign" capture group.<br/>
-                    ○ Match a character in the set [+-].<br/>
+                    ○ Match a character in the set [+\-].<br/>
             ○ Match with 4 alternative expressions.<br/>
                 ○ "hex" capture group.<br/>
                     ○ Match '0'.<br/>
@@ -7156,17 +7308,16 @@
                         ○ Match with 2 alternative expressions.<br/>
                             ○ Match a sequence of expressions.<br/>
                                 ○ Match '.'.<br/>
-                                ○ Match a character in the set [0-9A-Fa-f] atomically at least once.<br/>
+                                ○ Match a hexadecimal digit atomically at least once.<br/>
                             ○ Match a sequence of expressions.<br/>
-                                ○ Match a character in the set [0-9A-Fa-f] greedily at least once.<br/>
+                                ○ Match a hexadecimal digit greedily at least once.<br/>
                                 ○ Optional (greedy).<br/>
                                     ○ Match '.'.<br/>
-                                    ○ Match with 2 alternative expressions.<br/>
-                                        ○ Match a character in the set [0-9A-Fa-f] greedily at least once.<br/>
-                                        ○ Match an empty string.<br/>
+                                    ○ Optional (greedy).<br/>
+                                        ○ Match a hexadecimal digit atomically at least once.<br/>
                     ○ Match a character in the set [Pp].<br/>
                     ○ "hexExpSign" capture group.<br/>
-                        ○ Match a character in the set [+-] atomically, optionally.<br/>
+                        ○ Match a character in the set [+\-] atomically, optionally.<br/>
                     ○ "hexExp" capture group.<br/>
                         ○ Match a character in the set [0-9] atomically at least once.<br/>
                 ○ "dec" capture group.<br/>
@@ -7179,15 +7330,14 @@
                                 ○ Match a character in the set [0-9] greedily at least once.<br/>
                                 ○ Optional (greedy).<br/>
                                     ○ Match '.'.<br/>
-                                    ○ Match with 2 alternative expressions.<br/>
+                                    ○ Optional (greedy).<br/>
                                         ○ Match a character in the set [0-9] greedily at least once.<br/>
-                                        ○ Match an empty string.<br/>
                     ○ Optional (greedy).<br/>
                         ○ Match a character in the set [Ee].<br/>
                         ○ "decExpSign" capture group.<br/>
-                            ○ Match a character in the set [+-] atomically, optionally.<br/>
+                            ○ Match a character in the set [+\-] atomically, optionally.<br/>
                         ○ "decExp" capture group.<br/>
-                            ○ Match a character in the set [0-9] greedily at least once.<br/>
+                            ○ Match a character in the set [0-9] atomically at least once.<br/>
                 ○ "nan" capture group.<br/>
                     ○ "nanPrefix" capture group.<br/>
                         ○ Match a character in the set [QSqs] atomically, optionally.<br/>
@@ -7202,7 +7352,7 @@
                                 ○ Match a sequence of expressions.<br/>
                                     ○ Match '0'.<br/>
                                     ○ Match a character in the set [Xx].<br/>
-                                    ○ Match a character in the set [0-9A-Fa-f] atomically at least once.<br/>
+                                    ○ Match a hexadecimal digit atomically at least once.<br/>
                                 ○ Match a character in the set [0-9] atomically at least once.<br/>
                         ○ Match ')'.<br/>
                 ○ "inf" capture group.<br/>
@@ -7880,6 +8030,9 @@
             <typeparam name="T">
             The type to get the alignment for.
             </typeparam>
+        </member>
+        <member name="M:UltimateOrb.Runtime.CompilerServices.Unsafe.BitCast``2(``0)">
+            <inheritdoc cref="M:System.Runtime.CompilerServices.Unsafe.BitCast``2(``0)"/>
         </member>
         <member name="T:UltimateOrb.Runtime.CompilerServices.IU">
             <summary>
@@ -8626,6 +8779,320 @@
             <summary>
             A typed null. Use this field when you pass null/nullptr.
             </summary>
+        </member>
+        <member name="M:UltimateOrb.Quadruple.GetFloatingPointClass(UltimateOrb.Quadruple)">
+            <summary>
+            The IEEE Std 754 <c>class</c>.
+            class(x) tells which of the following ten classes x falls into... <see cref="T:UltimateOrb.FloatingPointClass"/>
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.Quadruple.IsNegative(UltimateOrb.Quadruple)">
+            <summary>
+                The IEEE Std 754 <c>isSignMinus</c>.
+            </summary>
+            <param name="value">The specified value.</param>
+            <returns>True if and only if <paramref name="value"/> has negative sign.</returns>
+            <remarks>Applies to zeros and NaNs as well.</remarks>
+        </member>
+        <member name="M:UltimateOrb.Quadruple.IsNormal(UltimateOrb.Quadruple)">
+            <summary>
+                The IEEE Std 754 <c>isNormal</c>.
+            </summary>
+            <param name="value">The specified value.</param>
+            <returns>True if and only if x is normal (not zero, subnormal, infinite, or NaN).</returns>
+        </member>
+        <member name="M:UltimateOrb.Quadruple.IsFinite(UltimateOrb.Quadruple)">
+            <summary>
+                The IEEE Std 754 <c>isFinite</c>.
+            </summary>
+            <param name="value">The specified value.</param>
+            <returns>True if and only if x is zero, subnormal or normal (not infinite or NaN).</returns>
+        </member>
+        <member name="M:UltimateOrb.Quadruple.IsZero(UltimateOrb.Quadruple)">
+            <summary>
+                The IEEE Std 754 <c>isZero</c>.
+            </summary>
+            <param name="value">The specified value.</param>
+            <returns>True if and only if x is ±0.</returns>
+        </member>
+        <member name="M:UltimateOrb.Quadruple.IsSubnormal(UltimateOrb.Quadruple)">
+            <summary>
+                The IEEE Std 754 <c>isSubnormal</c>.
+            </summary>
+            <param name="value">The specified value.</param>
+            <returns>True if and only if x is subnormal.</returns>
+        </member>
+        <member name="M:UltimateOrb.Quadruple.IsInfinity(UltimateOrb.Quadruple)">
+            <summary>
+                The IEEE Std 754 <c>isInfinite</c>.
+            </summary>
+            <param name="value">The specified value.</param>
+            <returns>True if and only if x is infinite.</returns>
+        </member>
+        <member name="M:UltimateOrb.Quadruple.IsNaN(UltimateOrb.Quadruple)">
+            <summary>
+                The IEEE Std 754 <c>isInfinite</c>.
+            </summary>
+            <param name="value">The specified value.</param>
+            <returns>True if and only if x is a NaN.</returns>
+        </member>
+        <member name="M:UltimateOrb.Quadruple.IsSignalingNaN(UltimateOrb.Quadruple)">
+            <summary>
+                The IEEE Std 754 <c>isSignaling</c>.
+            </summary>
+            <param name="value">The specified value.</param>
+            <returns>True if and only if x is a signaling NaN.</returns>
+        </member>
+        <member name="M:UltimateOrb.Quadruple.IsCanonical(UltimateOrb.Quadruple)">
+            <summary>
+                The IEEE Std 754 <c>isCanonical</c>.
+            </summary>
+            <param name="value">The specified value.</param>
+            <returns>True if and only if x is a finite number, infinity, or NaN that is canonical.</returns>
+        </member>
+        <member name="M:UltimateOrb.Quadruple.IsLessThanIEEETotalOrder(UltimateOrb.Quadruple,UltimateOrb.Quadruple)">
+            <summary>
+                The IEEE Std 754 <c>totalOrder</c>.
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.Quadruple.IsLessThanIEEETotalOrderMagnitude(UltimateOrb.Quadruple,UltimateOrb.Quadruple)">
+            <summary>
+                The IEEE Std 754 <c>totalOrderMag</c>.
+            </summary>
+            <returns>totalOrder(abs(x), abs(y))</returns>
+        </member>
+        <member name="M:UltimateOrb.Quadruple.FromIeee754InterchangeBinary``2(``0)">
+            <summary>
+            Converts a value of an IEEE 754 binary interchange format to
+            <see cref="T:UltimateOrb.Quadruple"/> (binary128).
+            </summary>
+            <typeparam name="TFloat">
+            A radix-2 IEEE 754 interchange floating-point type. Supported storage
+            widths are 16, 32, 64, 128, 160, 192, 224, and 256 bits.
+            </typeparam>
+            <typeparam name="TFloatUIntBits">
+            An unsigned integer type with the same storage size as
+            <typeparamref name="TFloat"/>. Used to inspect the raw bit pattern.
+            </typeparam>
+            <remarks>
+            <para>
+            <b>Supported source formats.</b> binary16, binary32, binary64,
+            binary128, and the <c>k &gt;= 128, k % 32 == 0</c> family
+            (binary160, binary192, binary224, binary256). Format parameters come
+            from <see cref="T:UltimateOrb.Numerics.FloatingPointIeee754InterchageTypeTraits`1"/>.
+            </para>
+            <para>
+            <b>Widening (source &lt;= binary128).</b> Exact. No rounding occurs
+            because the target has at least as much precision as the source.
+            </para>
+            <para>
+            <b>Narrowing (source &gt; binary128).</b> Round-to-nearest, ties-to-even
+            on the discarded significand bits, with a single renormalization on
+            carry. Overflow yields <c>±∞</c>. Values rounding into the target
+            subnormal range are handled with a second round-to-nearest, ties-to-even
+            on the extra bits, including promotion to the smallest normal when the
+            subnormal rounds up.
+            </para>
+            <para>
+            <b>NaN payload handling — two modes.</b> The signaling/quiet bit is
+            always at the MSB of the fraction field and is never treated as part of
+            the payload.
+            </para>
+            <list type="bullet">
+              <item>
+                <description>
+                <b>Legacy mode</b> (<c>NAN_PAYLOAD_LEGACY</c> defined).
+                MSB-aligns the source fraction to the target, then folds a scatter
+                of the dropped bits back into the low positions via a bitwise OR,
+                using fold parameters that mirror the existing
+                <c>Quadruple → Double</c> converter (<c>foldShift = dstFracBits / 4</c>).
+                No class-change guard is needed: the OR is sufficient to keep the
+                destination nonzero whenever the source fraction was nonzero.
+                </description>
+              </item>
+              <item>
+                <description>
+                <b>Modern mode</b> (default; <c>NAN_PAYLOAD_LEGACY</c> not defined).
+                Treats the payload as an unsigned integer excluding the quiet bit
+                and LSB-aligns it across formats. Widening zero-extends. Narrowing
+                keeps the low bits of the source payload and jams the MSB of the
+                target payload to 1 iff any source payload bit at or above that
+                position was nonzero; this MSB is the payload-overflow indicator
+                for the concrete binary interchange format. The quiet bit is copied
+                verbatim. No class-change guard is needed: a signaling NaN source
+                necessarily has a nonzero payload (otherwise it would be an
+                infinity), so both widening and narrowing keep the destination
+                fraction nonzero.
+                </description>
+              </item>
+            </list>
+            <para>
+            <b>Permissive NaN.</b> When <c>NAN_PERMISSIVE</c> is defined, the
+            caller promises not to observe <em>which</em> NaN is produced, and the
+            implementation is therefore free to return any NaN without inspecting
+            the source. This permits a fast path that skips payload extraction,
+            sign preservation, and the quiet/signaling classification. The
+            particular NaN returned is not part of the contract: it may be
+            positive or negative, quiet or signaling, with any payload, and may
+            vary between runs, target frameworks, or generic instantiations of
+            this method. Code that needs a specific sign, payload, or signaling
+            class must leave this macro undefined and rely on one of the payload
+            modes above. This option takes precedence over both modes.
+            </para>
+            <para>
+            <b>Preconditions.</b> Internal method. Callers must ensure
+            <typeparamref name="TFloat"/> is a supported radix-2 IEEE 754 binary
+            interchange format and <typeparamref name="TFloatUIntBits"/> has the
+            same storage size. Violations are caught by <see cref="M:System.Diagnostics.Debug.Assert(System.Boolean)"/>
+            in debug builds and produce undefined results in release builds.
+            </para>
+            </remarks>
+        </member>
+        <member name="P:UltimateOrb.Quadruple.Tau">
+            <inheritdoc cref="P:System.Numerics.IFloatingPointConstants`1.Tau"/>
+        </member>
+        <member name="M:UltimateOrb.Quadruple.ILogB(UltimateOrb.Quadruple)">
+            <inheritdoc cref="M:System.Numerics.IFloatingPointIeee754`1.ILogB(`0)"/>
+        </member>
+        <member name="M:UltimateOrb.Quadruple.ExtractRawBiasedExponentAndRawSignificand(System.UInt64,System.UInt64,System.UInt64@,System.UInt64@)">
+            <summary>
+            Extracts the raw biased exponent and trailing significand field of a
+            binary128 value supplied as two 64-bit halves.
+            </summary>
+            <remarks>
+            <para>
+            Binary128 (<see cref="T:UltimateOrb.Quadruple"/>) bit layout:
+            <code>
+              bit  127       : sign
+              bits 126 .. 112: biased exponent           (15 bits)
+              bits 111 ..   0: trailing significand field (112 bits)
+            </code>
+            </para>
+            <para>
+            <paramref name="significandHi"/> receives bits 111..64 (48 bits, already
+            masked); <paramref name="significandLo"/> receives bits 63..0 (64 bits,
+            full). Together they are the <i>trailing significand field</i>, not the
+            significand — the implicit integer bit is not materialized here and must be
+            added by the caller for normal values.
+            </para>
+            <para>
+            The sign bit is <b>not</b> returned; it is bit 63 of <paramref name="hi"/>.
+            This is deliberate: callers that must preserve <c>−0</c>, <c>−subnormal</c>,
+            <c>−∞</c> or a signed NaN need to read it from the raw <c>hi</c> word
+            themselves, since an intermediary that "helpfully" discards it will
+            silently lose those cases.
+            </para>
+            <para>
+            This routine is <b>binary128</b>-only. It has nothing to do with
+            decimal128, whose 128-bit encoding (sign : 1 / combination : 5 /
+            exponent continuation : 12 / coefficient continuation : 110) does not share
+            this layout.
+            </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Quadruple.ExtractRawBiasedExponentAndRawSignificand(UltimateOrb.UInt128,UltimateOrb.UInt128@)">
+            <summary>
+            <see cref="T:UltimateOrb.UInt128"/>-packed overload. The trailing significand is returned
+            zero-extended in the low 112 bits of <paramref name="significand"/>; the
+            top 16 bits are guaranteed zero.
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.Quadruple.ExtractRawBiasedExponentAndRawSignificand(UltimateOrb.UInt128@)">
+            <summary>
+            Convenience overload operating on <c>this</c>.
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.Quadruple.op_Explicit(System.Numerics.BigInteger)~UltimateOrb.Quadruple">
+            <summary>
+            Converts a <see cref="T:System.Numerics.BigInteger"/> to <see cref="T:UltimateOrb.Quadruple"/>
+            (binary128) with round-to-nearest, ties-to-even.
+            </summary>
+            <param name="value">The integer to convert.</param>
+            <returns>
+            The correctly-rounded binary128 representation of
+            <paramref name="value"/>, or <c>±∞</c> if the value's magnitude
+            exceeds the finite binary128 range.
+            </returns>
+            <remarks>
+            <para>
+            <b>Rounding.</b> Values that fit in 113 bits are converted exactly.
+            Otherwise the value is rounded to the nearest 113-bit significand,
+            with ties resolved to even. Rounding may carry, in which case the
+            significand is renormalized and the exponent incremented by one.
+            </para>
+            <para>
+            <b>Overflow.</b> Any magnitude with 16385 bits or more is guaranteed
+            to overflow and returns <see cref="P:UltimateOrb.Quadruple.PositiveInfinity"/> or
+            <see cref="P:UltimateOrb.Quadruple.NegativeInfinity"/>. Magnitudes with 16384 bits
+            may overflow if rounding carries at the top of the range; that case
+            is handled by the ordinary renormalization plus the
+            <c>biased &gt;= QuadExpMax</c> check.
+            </para>
+            <para>
+            <b>Sign and zero.</b> Zero converts to <c>+0.0</c>. The sign is
+            preserved for all other values, including values that overflow to
+            infinity.
+            </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Quadruple.op_Explicit(UltimateOrb.Quadruple)~System.Decimal">
+            <summary>
+            Converts <paramref name="value"/> to <see cref="T:System.Decimal"/>.
+            </summary>
+            <remarks>
+            <para>
+            The result is the nearest representable <see cref="T:System.Decimal"/> to
+            <paramref name="value"/> under round-half-to-even, in the same sense as
+            <see cref="M:System.Convert.ToDecimal(System.Double)"/>: the closest <see cref="T:System.Decimal"/>
+            value, using the full 28-digit precision decimal can hold.
+            </para>
+            <para>
+            NaN and ±∞ throw <see cref="T:System.OverflowException"/>.  Values exceeding
+            <see cref="F:System.Decimal.MaxValue"/> throw.  Values that round to zero
+            (including all subnormals, and normals with |value| &lt; 0.5·10⁻²⁸) return
+            signed zero preserving the input's sign bit.
+            </para>
+            <para>
+            Note: unlike <c>(decimal)double</c>, this does <i>not</i> produce the
+            shortest round-trippable decimal.  E.g. <c>(decimal)(Quadruple)(1.0/3.0)</c>
+            yields twenty-eight 3s, not sixteen.
+            </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Quadruple.ToIeee754InterchangeBinaryNarrowing``2(UltimateOrb.Quadruple)">
+            <summary>
+            Converts a <see cref="T:UltimateOrb.Quadruple"/> (binary128) to an IEEE 754 binary
+            interchange format <typeparamref name="TFloat"/>.
+            </summary>
+            <remarks>
+            <para>
+            <b>Widening (target ≥ binary128).</b> Exact. The significand is left-shifted
+            and the exponent re-biased.
+            </para>
+            <para>
+            <b>Narrowing (target &lt; binary128).</b> Round-to-nearest, ties-to-even on
+            the discarded significand bits, with a single renormalization on carry.
+            Overflow yields <c>±∞</c>; this relies on the renormalized biased exponent
+            naturally reaching <c>expMax</c>, matching the <c>From</c> direction. Values
+            rounding into the target subnormal range get a second round-to-nearest,
+            ties-to-even pass, including promotion to the smallest normal.
+            </para>
+            <para>
+            <b>NaN payload handling.</b> Same three modes as
+            <c>FromIeee754InterchangeBinary</c>:
+            <list type="bullet">
+              <item><description><c>NAN_PERMISSIVE</c>: caller does not observe which NaN; any NaN is returned.</description></item>
+              <item><description><c>NAN_PAYLOAD_LEGACY</c>: MSB-align + scatter-fold, mirroring the existing <c>Quadruple → Double</c> converter.</description></item>
+              <item><description>default (modern): LSB-align the payload excluding the quiet bit; widening zero-extends; narrowing keeps low bits and jams the MSB of the target payload as overflow indicator; quiet bit copied verbatim.</description></item>
+            </list>
+            </para>
+            <para>
+            <b>Preconditions.</b> Internal method. <typeparamref name="TFloat"/> must be a
+            supported radix-2 binary interchange format and <typeparamref name="TFloatUIntBits"/>
+            must have identical storage size. Violations are caught by
+            <see cref="M:System.Diagnostics.Debug.Assert(System.Boolean)"/> in Debug builds.
+            </para>
+            </remarks>
         </member>
         <member name="T:UltimateOrb.Ref`1">
              <summary>

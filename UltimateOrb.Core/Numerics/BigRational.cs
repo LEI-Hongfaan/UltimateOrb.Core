@@ -253,6 +253,10 @@ namespace UltimateOrb.Numerics {
         }
 #endif
 
+        public static explicit operator Quadruple(BigRational value) {
+            return ToIeee754InterchangeBinary<Quadruple, System.UInt128>(value);
+        }
+
         internal static TFloat ToIeee754InterchangeBinary<TFloat, TFloatUIntBits>(BigRational value)
             where TFloat : unmanaged, IFloatingPointIeee754<TFloat>, IMinMaxValue<TFloat>
             where TFloatUIntBits : unmanaged, IUnsignedNumber<TFloatUIntBits>, IBinaryInteger<TFloatUIntBits> {
@@ -959,6 +963,8 @@ namespace UltimateOrb.Numerics {
 #if NET11_0_OR_GREATER
         public static explicit operator BigRational(BFloat16 value) => FromIeee754InterchangeBinary<BFloat16, UInt16>(value);
 #endif
+
+        public static explicit operator BigRational(Quadruple value) => FromIeee754InterchangeBinary<Quadruple, System.UInt128>(value);
 
         public static BigRational FromSingle(Single value) {
             const int SingleExponentBias = 127;
@@ -3251,6 +3257,558 @@ namespace UltimateOrb.Numerics {
 
         UInt64 IConvertible.ToUInt64(IFormatProvider? provider) {
             return checked((UInt64)ToBigInteger(this));
+        }
+    }
+}
+
+namespace UltimateOrb.Numerics {
+
+    public readonly partial struct BigRational {
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [Pure]
+        public static BigRational operator &(BigRational first, BigRational second) {
+            return BitwiseBinaryFixedPoint(first, second, BitwiseOperation.And);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [Pure]
+        public static BigRational operator |(BigRational first, BigRational second) {
+            return BitwiseBinaryFixedPoint(first, second, BitwiseOperation.Or);
+        }
+
+        private enum BitwiseOperation : byte {
+            And,
+            Or,
+        }
+
+        private readonly struct BinaryRemainderPair : IEquatable<BinaryRemainderPair> {
+
+            public readonly BigInteger First;
+
+            public readonly BigInteger Second;
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public BinaryRemainderPair(BigInteger first, BigInteger second) {
+                First = first;
+                Second = second;
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public bool Equals(BinaryRemainderPair other) {
+                return First == other.First && Second == other.Second;
+            }
+
+            public override bool Equals(object? obj) {
+                return obj is BinaryRemainderPair other && Equals(other);
+            }
+
+            public override int GetHashCode() {
+                return First.GetHashCode() ^ Second.GetHashCode();
+            }
+        }
+
+        private static BigRational BitwiseBinaryFixedPoint(
+            BigRational first,
+            BigRational second,
+            BitwiseOperation operation) {
+
+            /*
+             * Decompose:
+             *
+             *     x = floor(x) + frac(x)
+             *
+             * The integer portion is interpreted as an infinite two's-complement
+             * integer. BigInteger's bitwise operators therefore have exactly the
+             * required semantics for all bits at and to the left of the binary
+             * point.
+             */
+
+            var firstInteger = FloorToBigInteger(first);
+            var secondInteger = FloorToBigInteger(second);
+
+            var integerResult = operation switch {
+                BitwiseOperation.And => firstInteger & secondInteger,
+                BitwiseOperation.Or => firstInteger | secondInteger,
+                _ => throw new InvalidOperationException(),
+            };
+
+            /*
+             * Obtain:
+             *
+             *     firstFraction  = firstNumerator / firstDenominator
+             *     secondFraction = secondNumerator / secondDenominator
+             *
+             * where both fractions are in [0, 1).
+             */
+
+            GetFractionalPart(
+                first,
+                firstInteger,
+                out var firstFractionNumerator,
+                out var firstFractionDenominator);
+
+            GetFractionalPart(
+                second,
+                secondInteger,
+                out var secondFractionNumerator,
+                out var secondFractionDenominator);
+
+            /*
+             * Put both fractions over a common denominator:
+             *
+             *     A / D
+             *     B / D
+             *
+             * We deliberately do not require the fractions themselves to remain
+             * reduced here.
+             */
+
+            var denominatorGcd = BigInteger.GreatestCommonDivisor(
+                firstFractionDenominator,
+                secondFractionDenominator);
+
+            var firstScale =
+                secondFractionDenominator / denominatorGcd;
+
+            var secondScale =
+                firstFractionDenominator / denominatorGcd;
+
+            var denominator =
+                firstFractionDenominator * firstScale;
+
+            var firstRemainder =
+                firstFractionNumerator * firstScale;
+
+            var secondRemainder =
+                secondFractionNumerator * secondScale;
+
+            Debug.Assert(denominator.Sign > 0);
+            Debug.Assert(firstRemainder.Sign >= 0);
+            Debug.Assert(secondRemainder.Sign >= 0);
+            Debug.Assert(firstRemainder < denominator);
+            Debug.Assert(secondRemainder < denominator);
+
+            /*
+             * Find the eventual period of the pair:
+             *
+             *     (r0, r1)
+             *         ->
+             *     (2*r0 mod D, 2*r1 mod D)
+             *
+             * Floyd cycle detection requires O(1) memory.
+             */
+
+            var initialState = new BinaryRemainderPair(
+                firstRemainder,
+                secondRemainder);
+
+            FindBinaryRemainderCycle(
+                initialState,
+                denominator,
+                out var prefixLength,
+                out var periodLength);
+
+            Debug.Assert(prefixLength >= 0);
+            Debug.Assert(periodLength > 0);
+
+            /*
+             * Build:
+             *
+             *     prefixBits + repeating(periodBits)
+             *
+             * directly as BigIntegers.
+             *
+             * No individual operand expansion is materialized.
+             */
+
+            const int BlockBitCount = 1024;
+
+            var prefixBits = ExtractBitwiseBits(
+                ref firstRemainder,
+                ref secondRemainder,
+                denominator,
+                prefixLength,
+                operation,
+                BlockBitCount);
+
+            var periodBits = ExtractBitwiseBits(
+                ref firstRemainder,
+                ref secondRemainder,
+                denominator,
+                periodLength,
+                operation,
+                BlockBitCount);
+
+            var fractionalResult = FromBinaryPrefixAndPeriod(
+                prefixBits,
+                prefixLength,
+                periodBits,
+                periodLength);
+
+            if (fractionalResult.m_SignedNumerator.IsZero) {
+                return integerResult.IsZero ?
+                    default :
+                    (BigRational)integerResult;
+            }
+
+            /*
+             * integerResult + fractionalResult
+             */
+
+            var resultNumerator =
+                integerResult * fractionalResult.m_Denominator +
+                fractionalResult.m_SignedNumerator;
+
+            return FromFraction(
+                resultNumerator,
+                fractionalResult.m_Denominator);
+        }
+
+        /*
+         * Returns floor(value).
+         *
+         * BigInteger division truncates toward zero, so negative non-integral
+         * values require an adjustment.
+         */
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static BigInteger FloorToBigInteger(BigRational value) {
+
+            var numerator = value.m_SignedNumerator;
+
+            if (numerator.IsZero) {
+                return BigInteger.Zero;
+            }
+
+            var denominator = value.m_Denominator;
+
+            if (denominator.IsOne) {
+                return numerator;
+            }
+
+            var quotient = BigInteger.DivRem(
+                numerator,
+                denominator,
+                out var remainder);
+
+            if (remainder.Sign < 0) {
+                --quotient;
+            }
+
+            return quotient;
+        }
+
+        /*
+         * Computes:
+         *
+         *     value = floor + numerator / denominator
+         *
+         * with:
+         *
+         *     0 <= numerator < denominator
+         *
+         * Zero is represented as 0/1 here, independently of BigRational's
+         * internal default representation.
+         */
+
+        private static void GetFractionalPart(
+            BigRational value,
+            BigInteger floor,
+            out BigInteger numerator,
+            out BigInteger denominator) {
+
+            if (value.m_SignedNumerator.IsZero) {
+                numerator = BigInteger.Zero;
+                denominator = BigInteger.One;
+                return;
+            }
+
+            denominator = value.m_Denominator;
+
+            numerator =
+                value.m_SignedNumerator -
+                floor * denominator;
+
+            Debug.Assert(numerator.Sign >= 0);
+            Debug.Assert(numerator < denominator);
+        }
+
+        /*
+         * Floyd's cycle detection.
+         *
+         * Finds:
+         *
+         *     mu     = number of states before the cycle
+         *     lambda = cycle length
+         */
+
+        private static void FindBinaryRemainderCycle(
+            BinaryRemainderPair initial,
+            BigInteger denominator,
+            out int prefixLength,
+            out int periodLength) {
+
+            /*
+             * Phase 1:
+             * Find a state inside the cycle.
+             */
+
+            var tortoise = AdvanceBinaryRemainderPair(
+                initial,
+                denominator);
+
+            var hare = AdvanceBinaryRemainderPair(
+                AdvanceBinaryRemainderPair(
+                    initial,
+                    denominator),
+                denominator);
+
+            while (!tortoise.Equals(hare)) {
+
+                tortoise = AdvanceBinaryRemainderPair(
+                    tortoise,
+                    denominator);
+
+                hare = AdvanceBinaryRemainderPair(
+                    AdvanceBinaryRemainderPair(
+                        hare,
+                        denominator),
+                    denominator);
+            }
+
+            /*
+             * Phase 2:
+             * Find mu, the cycle entry.
+             */
+
+            prefixLength = 0;
+
+            tortoise = initial;
+
+            while (!tortoise.Equals(hare)) {
+
+                tortoise = AdvanceBinaryRemainderPair(
+                    tortoise,
+                    denominator);
+
+                hare = AdvanceBinaryRemainderPair(
+                    hare,
+                    denominator);
+
+                prefixLength = checked(prefixLength + 1);
+            }
+
+            /*
+             * Phase 3:
+             * Find lambda.
+             */
+
+            periodLength = 1;
+
+            hare = AdvanceBinaryRemainderPair(
+                tortoise,
+                denominator);
+
+            while (!tortoise.Equals(hare)) {
+
+                hare = AdvanceBinaryRemainderPair(
+                    hare,
+                    denominator);
+
+                periodLength = checked(periodLength + 1);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static BinaryRemainderPair AdvanceBinaryRemainderPair(
+            BinaryRemainderPair value,
+            BigInteger denominator) {
+
+            return new BinaryRemainderPair(
+                AdvanceBinaryRemainder(
+                    value.First,
+                    denominator),
+
+                AdvanceBinaryRemainder(
+                    value.Second,
+                    denominator));
+        }
+
+        /*
+         * Advances:
+         *
+         *     remainder -> (2 * remainder) mod denominator
+         */
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static BigInteger AdvanceBinaryRemainder(
+            BigInteger remainder,
+            BigInteger denominator) {
+
+            remainder <<= 1;
+
+            if (remainder >= denominator) {
+                remainder -= denominator;
+            }
+
+            return remainder;
+        }
+
+        /*
+         * Extracts `bitCount` consecutive bits beginning at the current
+         * remainder.
+         *
+         * For:
+         *
+         *     r / D
+         *
+         * the next n binary digits are:
+         *
+         *     floor((r << n) / D)
+         *
+         * and the new remainder is:
+         *
+         *     (r << n) % D
+         *
+         * This is exactly binary long division performed in one BigInteger
+         * division.
+         */
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static BigInteger ExtractBinaryBlock(
+            ref BigInteger remainder,
+            BigInteger denominator,
+            int bitCount) {
+
+            Debug.Assert(bitCount >= 0);
+
+            if (bitCount == 0) {
+                return BigInteger.Zero;
+            }
+
+            var scaled = remainder << bitCount;
+
+            var result = BigInteger.DivRem(
+                scaled,
+                denominator,
+                out remainder);
+
+            return result;
+        }
+
+        /*
+         * Extracts `bitCount` result bits.
+         *
+         * The result is packed MSB-first into a BigInteger:
+         *
+         *     b0 b1 b2 ... bn
+         *
+         * becomes:
+         *
+         *     binary integer b0b1b2...bn
+         */
+
+        private static BigInteger ExtractBitwiseBits(
+            ref BigInteger firstRemainder,
+            ref BigInteger secondRemainder,
+            BigInteger denominator,
+            int bitCount,
+            BitwiseOperation operation,
+            int blockBitCount) {
+
+            Debug.Assert(bitCount >= 0);
+            Debug.Assert(blockBitCount > 0);
+
+            BigInteger result = BigInteger.Zero;
+
+            var remaining = bitCount;
+
+            while (remaining > 0) {
+
+                var count = System.Math.Min(
+                    remaining,
+                    blockBitCount);
+
+                var firstBits = ExtractBinaryBlock(
+                    ref firstRemainder,
+                    denominator,
+                    count);
+
+                var secondBits = ExtractBinaryBlock(
+                    ref secondRemainder,
+                    denominator,
+                    count);
+
+                var blockResult = operation switch {
+                    BitwiseOperation.And => firstBits & secondBits,
+                    BitwiseOperation.Or => firstBits | secondBits,
+                    _ => throw new InvalidOperationException(),
+                };
+
+                result <<= count;
+                result |= blockResult;
+
+                remaining -= count;
+            }
+
+            return result;
+        }
+
+        /*
+         * Converts:
+         *
+         *     0.prefix(period)(period)(period)...
+         *
+         * into a BigRational.
+         *
+         * prefixLength = P
+         * periodLength = Q
+         *
+         * value =
+         *
+         *     prefixBits / 2^P
+         *
+         *     +
+         *
+         *     periodBits /
+         *         (2^P * (2^Q - 1))
+         *
+         * =
+         *
+         *     (prefixBits * (2^Q - 1) + periodBits)
+         *     -------------------------------------
+         *          2^P * (2^Q - 1)
+         */
+
+        private static BigRational FromBinaryPrefixAndPeriod(
+            BigInteger prefixBits,
+            int prefixLength,
+            BigInteger periodBits,
+            int periodLength) {
+
+            Debug.Assert(prefixLength >= 0);
+            Debug.Assert(periodLength > 0);
+
+            var periodMask =
+                (BigInteger.One << periodLength) -
+                BigInteger.One;
+
+            var denominator =
+                (BigInteger.One << prefixLength) *
+                periodMask;
+
+            var numerator =
+                prefixBits * periodMask +
+                periodBits;
+
+            if (numerator.IsZero) {
+                return default;
+            }
+
+            return FromFraction(
+                numerator,
+                denominator);
         }
     }
 }

@@ -4,8 +4,6 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
-using UltimateOrb.Mathematics.NumberTheory;
-using UltimateOrb.Runtime.CompilerServices.TypeTokens;
 
 namespace UltimateOrb.Numerics {
 

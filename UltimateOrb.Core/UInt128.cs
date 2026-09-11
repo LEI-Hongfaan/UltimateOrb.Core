@@ -55,18 +55,18 @@ namespace UltimateOrb {
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         [UnscopedRef]
-        private readonly ref readonly UInt64 lo {
+        private readonly UInt64 lo {
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => ref bits.lo;
+            get => bits.lo;
         }
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         [UnscopedRef]
-        private readonly ref readonly HInt64 hi {
+        private  readonly HInt64 hi {
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => ref bits.hi;
+            get => bits.hi;
         }
 #else
 #if BIGENDIAN
@@ -3351,9 +3351,9 @@ namespace UltimateOrb {
         }
     }
 #endif
-    }
+}
 
-    namespace UltimateOrb {
+namespace UltimateOrb {
     using Internal;
     using UltimateOrb.Runtime.CompilerServices;
     using static UltimateOrb.Utilities.ThrowHelper;

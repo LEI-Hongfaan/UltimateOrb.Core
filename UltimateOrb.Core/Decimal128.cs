@@ -2414,7 +2414,7 @@ namespace UltimateOrb {
         static readonly Decimal128Bid AtanInternal_A3_RI8_Q3 = new(UInt128.FromLoHi(0X63be42e7f9b0c201UL, 0X2ffa3e5848f918caUL), CtorFromBits); // 0.01264504057787965274027954371871233
         static readonly Decimal128Bid AtanInternal_A3_RI8_Q2 = new(UInt128.FromLoHi(0Xf11df7b44b7a764bUL, 0X2ffe6791408bf149UL), CtorFromBits); // 2.100596248961462184139740916905547
         static readonly Decimal128Bid AtanInternal_A3_RI8_Q1 = new(UInt128.FromLoHi(0X17699a92e44db57dUL, 0X2ff9817325ba85ceUL), CtorFromBits); // 0.007817850612532475808681856705869181
-                                                                                                                                                // static readonly Decimal128Bid AtanInternal_A3_RI8_Q0 = new (UInt128.FromLoHi(0X0000000000000001UL, 0X3040000000000000UL), CtorFromBits); // 1
+        // static readonly Decimal128Bid AtanInternal_A3_RI8_Q0 = new (UInt128.FromLoHi(0X0000000000000001UL, 0X3040000000000000UL), CtorFromBits); // 1
 
         // Numerator coefficients:
         static readonly Decimal128Bid AtanInternal_A2_RI8_P8 = new(UInt128.FromLoHi(0X46f91a626d195dfdUL, 0X2ff4519cef3fb416UL), CtorFromBits); // 1.655308815178121387631403083587069E-5
@@ -2425,7 +2425,7 @@ namespace UltimateOrb {
         static readonly Decimal128Bid AtanInternal_A2_RI8_P3 = new(UInt128.FromLoHi(0X9722050071de2499UL, 0X2ffee28fc989eb3dUL), CtorFromBits); // 4.595216570885520958786177502946457
         static readonly Decimal128Bid AtanInternal_A2_RI8_P2 = new(UInt128.FromLoHi(0Xa65116dc468c9e96UL, 0X2fff1d9632fd0828UL), CtorFromBits); // 5.792386741565117937229739934391958
         static readonly Decimal128Bid AtanInternal_A2_RI8_P1 = new(UInt128.FromLoHi(0Xacadeb9b9079b611UL, 0X2ffeba8e792a58f5UL), CtorFromBits); // 3.783816084237409187011199506167313
-                                                                                                                                                // static readonly Decimal128Bid AtanInternal_A2_RI8_P0 = new (UInt128.FromLoHi(0X38c15b0a00000000UL, 0X2ffe314dc6448d93UL), CtorFromBits); // 1.000000000000000000000000000000000
+        // static readonly Decimal128Bid AtanInternal_A2_RI8_P0 = new (UInt128.FromLoHi(0X38c15b0a00000000UL, 0X2ffe314dc6448d93UL), CtorFromBits); // 1.000000000000000000000000000000000
 
         // Denominator coefficients:
         static readonly Decimal128Bid AtanInternal_A2_RI8_Q8 = new(UInt128.FromLoHi(0X898aa42731c10886UL, 0X2ff65b2135af5345UL), CtorFromBits); // 1.848330417956050849902219543775366E-4
@@ -2436,7 +2436,7 @@ namespace UltimateOrb {
         static readonly Decimal128Bid AtanInternal_A2_RI8_Q3 = new(UInt128.FromLoHi(0Xdf64a53ae1dbbac8UL, 0X2fff33785626d558UL), CtorFromBits); // 6.236233790480303793197211704867528
         static readonly Decimal128Bid AtanInternal_A2_RI8_Q2 = new(UInt128.FromLoHi(0Xbe631eb9e87c4d0eUL, 0X2fff5763c138410cUL), CtorFromBits); // 6.964769880755365444011250880892174
         static readonly Decimal128Bid AtanInternal_A2_RI8_Q1 = new(UInt128.FromLoHi(0X6a43b49ee5cf0b67UL, 0X2ffecafdbb4132d1UL), CtorFromBits); // 4.117149417570742520344532839500647
-                                                                                                                                                // static readonly Decimal128Bid AtanInternal_A2_RI8_Q0 = new (UInt128.FromLoHi(0X0000000000000001UL, 0X3040000000000000UL), CtorFromBits); // 1
+        // static readonly Decimal128Bid AtanInternal_A2_RI8_Q0 = new (UInt128.FromLoHi(0X0000000000000001UL, 0X3040000000000000UL), CtorFromBits); // 1
 
         static Decimal128Bid AtanInternal_A2_RI8(Decimal128Bid x) {
             Debug.Assert(0 <= x && x < 0.0875 * 0.0875);

@@ -270,12 +270,12 @@ namespace UltimateOrb.Utilities {
         }
 
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
-        public static void ThrowOnTrue(bool value) {
+        public static void ThrowOnTrue([DoesNotReturnIf(true)] bool value) {
             _ = checked(0u - BooleanIntegerExtensions.AsUIntegerUnsafe(value));
         }
 
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
-        public static void ThrowOnFalse(bool value) {
+        public static void ThrowOnFalse([DoesNotReturnIf(false)] bool value) {
             _ = checked(~0u + BooleanIntegerExtensions.AsUIntegerUnsafe(value));
         }
 

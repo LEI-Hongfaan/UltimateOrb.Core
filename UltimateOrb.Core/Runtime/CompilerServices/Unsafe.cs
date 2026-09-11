@@ -54,7 +54,11 @@ namespace UltimateOrb.Runtime.CompilerServices {
             ldobj !!0
             ret
         ")]
-        public static unsafe T ReadUnaligned<T>(ref byte source) {
+        public static unsafe T ReadUnaligned<T>(ref byte source)
+#if NET9_0_OR_GREATER
+            where T : allows ref struct
+#endif
+            {
             throw null!;
         }
 
@@ -294,7 +298,12 @@ namespace UltimateOrb.Runtime.CompilerServices {
             ldarg.0
             ret
         ")]
-        public static ref TTo As<TFrom, TTo>(ref TFrom source) {
+        public static ref TTo As<TFrom, TTo>(ref TFrom source)
+#if NET9_0_OR_GREATER
+            where TFrom : allows ref struct
+            where TTo : allows ref struct
+#endif
+            {
             throw null!;
         }
 
@@ -539,6 +548,29 @@ namespace UltimateOrb.Runtime.CompilerServices {
         ")]
         public static ref T NullRef<T>() {
             throw null!;
+        }
+
+#if NET8_0_OR_GREATER
+        /// <inheritdoc cref="System.Runtime.CompilerServices.Unsafe.BitCast{TFrom, TTo}(TFrom)"/>
+#else
+#endif
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static TTo BitCast<TFrom, TTo>(TFrom source)
+#if NET9_0_OR_GREATER
+            where TFrom : allows ref struct
+            where TTo : allows ref struct
+#endif
+            {
+#pragma warning disable CS8500 // This takes the address of, gets the size of, or declares a pointer to a managed type
+            if (sizeof(TFrom) != sizeof(TTo) || !typeof(TFrom).IsValueType || !typeof(TTo).IsValueType) {
+                UltimateOrb.Utilities.ThrowHelper.Throw<NotSupportedException>();
+            }
+#pragma warning restore CS8500 // This takes the address of, gets the size of, or declares a pointer to a managed type
+            unsafe {
+#pragma warning disable CS9087 // This returns a parameter by reference but it is not a ref parameter
+                return ReadUnaligned<TTo>(ref As<TFrom, byte>(ref source));
+#pragma warning restore CS9087 // This returns a parameter by reference but it is not a ref parameter
+            }
         }
 #pragma warning restore IDE0060 // Remove unused parameter
     }

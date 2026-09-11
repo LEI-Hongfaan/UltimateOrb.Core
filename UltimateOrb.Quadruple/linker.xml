@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<linker>
+  <assembly fullname="UltimateOrb.Quadruple">
+    <type fullname="UltimateOrb.Quadruple" preserve="all" ></type>
+    <type fullname="UltimateOrb.Numerics.DoubleArithmetic" preserve="all" ></type>
+	<type fullname="UltimateOrb.Numerics.DoubleArithmetic" preserve="all" ></type>
+  </assembly>
+</linker>

@@ -12,6 +12,8 @@ namespace UltimateOrb.Numerics {
     public readonly partial struct BasicArithmeticForWellKnownTypesProvider :
         IBinaryIntegerBigMulUnsignedProvider<BasicArithmeticForWellKnownTypesProvider, uint>,
         IBinaryIntegerBigMulUnsignedProvider<BasicArithmeticForWellKnownTypesProvider, int>,
+        IBinaryIntegerBigMulUnsignedProvider<BasicArithmeticForWellKnownTypesProvider, nuint>,
+        IBinaryIntegerBigMulUnsignedProvider<BasicArithmeticForWellKnownTypesProvider, nint>,
         IBinaryIntegerBigMulUnsignedProvider<BasicArithmeticForWellKnownTypesProvider, ulong>,
         IBinaryIntegerBigMulUnsignedProvider<BasicArithmeticForWellKnownTypesProvider, long>,
         IBinaryIntegerBigMulUnsignedProvider<BasicArithmeticForWellKnownTypesProvider, UInt128>,
@@ -109,6 +111,7 @@ namespace UltimateOrb.Numerics.Generic {
         public static virtual void BigMulUnsigned(out TInt result_lo, out TInt result_hi, in TInt first, in TInt second) {
             TIntArithmeticProvider.BigMulUnsigned(out result_lo, out result_hi, first, second);
         }
+
         /*
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static virtual void BigMulUnsigned_A_Naive(out TInt result_lo_lo, out TInt result_lo_hi, out TInt result_hi_lo, out TInt result_hi_hi, TInt first_lo, TInt first_hi, TInt second_lo, TInt second_hi) {
@@ -128,6 +131,7 @@ namespace UltimateOrb.Numerics.Generic {
             result_hi_hi = hhh;
         }
         */
+
         static void IBinaryIntegerBigMulUnsignedProvider<TSelf, TLong>.BigMulUnsigned(out TLong result_lo, out TLong result_hi, in TLong first, in TLong second) {
             throw new NotImplementedException();
         }

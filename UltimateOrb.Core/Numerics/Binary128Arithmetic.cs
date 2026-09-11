@@ -8,7 +8,9 @@ using static UltimateOrb.Utilities.ThrowHelper;
 
 namespace UltimateOrb.Numerics {
 
+#if NET8_0_OR_GREATER
     [Experimental("UoWIP")]
+#endif
     public static partial class Binary128Arithmetic {
 
         public const int FractionBitCount = 112;
@@ -510,6 +512,47 @@ namespace UltimateOrb.Numerics {
         public static UInt64 GetNaN(out UInt64 result_hi) {
             result_hi = 0xFFFF800000000000u;
             return 0;
+        }
+
+        public static int Compare(
+            UInt64 first_lo, UInt64 first_hi,
+            UInt64 second_lo, UInt64 second_hi) {
+            // NaN: exponent all ones (15 bits) AND mantissa nonzero
+            bool isNaN1 = ((first_hi >> 48) & 0x7FFFu) == 0x7FFFu
+                       && ((first_hi & 0x0000_FFFF_FFFF_FFFFUL) != 0UL || first_lo != 0UL);
+            bool isNaN2 = ((second_hi >> 48) & 0x7FFFu) == 0x7FFFu
+                       && ((second_hi & 0x0000_FFFF_FFFF_FFFFUL) != 0UL || second_lo != 0UL);
+
+            if (isNaN1) return isNaN2 ? 0 : -1;
+            if (isNaN2) return 1;
+
+            // Sign bits (bit 127 = bit 63 of hi)
+            bool neg1 = (first_hi & 0x8000_0000_0000_0000UL) != 0;
+            bool neg2 = (second_hi & 0x8000_0000_0000_0000UL) != 0;
+
+            // Magnitudes: clear the sign bit
+            UInt64 mag1_hi = first_hi & 0x7FFF_FFFF_FFFF_FFFFUL;
+            UInt64 mag2_hi = second_hi & 0x7FFF_FFFF_FFFF_FFFFUL;
+
+            // Compare magnitudes as unsigned 128-bit integers
+            int cmp = mag1_hi.CompareTo(mag2_hi);
+            if (cmp == 0) cmp = first_lo.CompareTo(second_lo);
+
+            if (cmp == 0) {
+                // Equal magnitude
+                if (mag1_hi == 0 && first_lo == 0) return 0; // both are zero -> -0 == +0
+                if (neg1 == neg2) return 0;                  // same sign, equal non-zero
+                return neg1 ? -1 : 1;                        // different signs, non-zero: negative < positive
+            } else {
+                // Different magnitudes
+                if (neg1 == neg2) {
+                    // Same sign: larger magnitude means more negative if negative, more positive if positive
+                    return neg1 ? -cmp : cmp;
+                } else {
+                    // Different signs: negative is always less than positive
+                    return neg1 ? -1 : 1;
+                }
+            }
         }
 
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
