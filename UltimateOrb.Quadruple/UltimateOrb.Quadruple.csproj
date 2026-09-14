@@ -117,11 +117,12 @@
 	<Compile Include="..\UltimateOrb.Core\FloatingPointRounding.cs" Link="FloatingPointRounding.cs" />  
 	<Compile Include="..\UltimateOrb.Core\FloatingPointClass.cs" Link="FloatingPointClass.cs" />  
 	<Compile Include="..\UltimateOrb.Core\Numerics\Binary128Arithmetic.cs" Link="Numerics\Binary128Arithmetic.cs" />
+	<Compile Include="..\UltimateOrb.Core\Numerics\BinaryFloatingPointIeee754Arithmetic.cs" Link="Numerics\BinaryFloatingPointIeee754Arithmetic.cs" />
 	<Compile Include="..\UltimateOrb.Core\Numerics\Win32Decimal.cs" Link="Numerics\Win32Decimal.cs" />
 	<Compile Include="..\UltimateOrb.Core\Numerics\FloatingPointIeee754InterchageTypeTraits.cs" Link="Numerics\FloatingPointIeee754InterchageTypeTraits.cs" />
 	<Compile Include="..\UltimateOrb.Core\Numerics\SR.cs" Link="Numerics\SR.cs" />
 	<Compile Include="..\UltimateOrb.Core\Numerics\NumberBaseExtensions.cs" Link="Numerics\NumberBaseExtensions.cs" />
-	<Compile Include="..\UltimateOrb.Core\Numerics\BinaryIntegerTypeTraits.cs" Link="Numerics\BinaryIntegerTypeTraits.cs" />
+	<Compile Include="..\UltimateOrb.Core\Numerics\BinaryFloatingPointIeee754TypeTraitsInternal.cs" Link="Numerics\BinaryFloatingPointIeee754TypeTraitsInternal.cs" />
 	<Compile Include="..\UltimateOrb.Core\System\Diagnostics\CodeAnalysis\ConstantExpectedAttribute.cs" Link="System\Diagnostics\CodeAnalysis\ConstantExpectedAttribute.cs" />
 	<Compile Include="..\UltimateOrb.Core\System\Diagnostics\CodeAnalysis\ExperimentalAttribute.cs" Link="System\Diagnostics\CodeAnalysis\ExperimentalAttribute.cs" />
   </ItemGroup>

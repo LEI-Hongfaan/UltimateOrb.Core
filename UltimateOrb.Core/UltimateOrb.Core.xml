@@ -2470,6 +2470,52 @@
             <returns>The minimum non-negative number of bits in two's complement notation without the sign bit.</returns>
             <remarks>This method returns 0 iff the value of current object is equal to <see cref="!:Zero"/> or <see cref="!:MinusOne"/>. For positive integers the return value is equal to the ordinary binary representation string length.</remarks>
         </member>
+        <member name="M:UltimateOrb.Numerics.BigIntegerWrappers.BigIntegerExtensions.GetMagnitudeBitsAsSpan(System.Numerics.BigInteger,System.UIntPtr@)">
+            <summary>
+            Gets the unsigned magnitude representation of a <see cref="T:System.Numerics.BigInteger"/> as a span of
+            native unsigned integers.
+            </summary>
+            <param name="value">
+            The <see cref="T:System.Numerics.BigInteger"/> value whose magnitude bits are retrieved.
+            The sign is ignored; the returned representation is always non-negative.
+            </param>
+            <param name="buffer">
+            Storage used when <paramref name="value"/> can be represented by a single native word.
+            When used, the returned span references this variable directly.
+            </param>
+            <returns>
+            A read-only span containing the magnitude limbs of <paramref name="value"/> in little-endian
+            order, where each element contains <see cref="T:System.UIntPtr"/> bits.
+            </returns>
+            <remarks>
+            <para>
+            This method avoids allocations by returning a span over the internal magnitude storage of
+            <paramref name="value"/> whenever possible.
+            </para>
+            <para>
+            For values that fit in a single machine word, the magnitude is written to
+            <paramref name="buffer"/> and a one-element span referencing that storage is returned.
+            </para>
+            <para>
+            The internal representation of <see cref="T:System.Numerics.BigInteger"/> differs between runtime versions.
+            This method supports runtimes exposing either <c>uint</c>-based or <c>nuint</c>-based
+            magnitude storage. Unsupported layouts cause a <see cref="T:System.NotSupportedException"/> to be thrown.
+            </para>
+            <para>
+            On 64-bit systems using <c>uint</c>-based storage, two consecutive 32-bit limbs are combined
+            into a single <see cref="T:System.UIntPtr"/> value. This requires a little-endian architecture.
+            </para>
+            <para>
+            The returned span may reference memory owned by <paramref name="value"/> or the supplied
+            <paramref name="buffer"/>. The span must not be used after the lifetime of the referenced
+            storage has ended.
+            </para>
+            </remarks>
+            <exception cref="T:System.NotSupportedException">
+            Thrown when the current runtime's <see cref="T:System.Numerics.BigInteger"/> internal representation is not
+            supported, or when a supported representation requires an unsupported endianness.
+            </exception>
+        </member>
         <member name="M:UltimateOrb.Numerics.BigRational.FromSingleByContinuedFraction(System.Single,System.Int32)">
             <summary>
             Finds a rational value close to the specified value.
@@ -2617,6 +2663,197 @@
             <c>q_k = b_k * q_{k-1} + a_k * q_{k-2};</c>
             Input may be empty (returns zero) and may contain an unpaired trailing <c>a_k</c>,
             which is interpreted with <c>b_k = 0</c>.
+            </remarks>
+        </member>
+        <member name="T:UltimateOrb.Numerics.BinaryFloatingPointIeee754TypeTraitsInternal`1">
+            <summary>
+            Compile-time metadata for an IEEE-style binary floating-point format
+            represented by <typeparamref name="T"/>, derived exclusively from the
+            elementary arithmetic behaviour of
+            <see cref="T:System.Numerics.IBinaryFloatingPointIeee754`1"/>.
+            </summary>
+            <typeparam name="T">
+            Any type implementing <see cref="T:System.Numerics.IBinaryFloatingPointIeee754`1"/> — a
+            value type or a heap-allocated class. The physical storage width is
+            never observed: only the arithmetic is.
+            </typeparam>
+            <remarks>
+            <para>
+            Only <c>T.Zero</c>, <c>T.One</c> and the operators <c>+ - * /</c> are
+            used. No <c>sizeof</c>, no <c>ILogB</c>, no <c>BitIncrement</c>, no
+            <c>MaxMagnitude</c>, no <c>Precision</c>. This makes the class safe to
+            use as a building block while authoring <typeparamref name="T"/> itself.
+            </para>
+            <list type="number">
+              <item><description>
+              <b>precision <c>p</c></b> — halve <c>u</c> from <c>1</c> until
+              <c>1 + u == 1</c>. The ULP at <c>1</c> is <c>2^(1-p)</c>, so the loop
+              count equals <c>p</c>.
+              </description></item>
+              <item><description>
+              <b>maximum exponent <c>emax</c></b> — exponential search followed by
+              binary search on the exponent, using the finiteness test
+              <c>x + x != x</c>. Runs in <c>O(log emax)</c> evaluations of
+              <c>2^e</c>, each of which is <c>O(log e)</c> multiplications by
+              squaring.
+              </description></item>
+              <item><description>
+              <b>underflow depth</b> — verified by checking
+              <c>2^-(emax+p-2) > 0</c> and <c>2^-(emax+p-1) == 0</c> with an
+              exponentiation-by-squaring helper. <c>O(log(emax+p))</c>.
+              </description></item>
+            </list>
+            <para>
+            The standard IEEE bias <c>emax = 2^(w-1) - 1</c> yields
+            <c>w = log2(emax + 1) + 1</c>. The implicit-leading-bit convention gives
+            <c>t = p - 1</c> and the logical width <c>k = w + p</c>. No constraint is
+            placed on <c>k</c>: widths of 8, 19, 24, 80, 128, etc. are all
+            supported.
+            </para>
+            <para>
+            A type is accepted iff <c>p ≥ 2</c>, <c>w ≥ 1</c>, <c>t ≥ 1</c>, the
+            standard-bias check succeeds, and the underflow check confirms
+            <c>2^(2-emax-p)</c> is the smallest positive value.
+            </para>
+            <para>
+            All derived values are computed once per closed generic type and cached in
+            a single <see langword="static"/> <see langword="readonly"/> tuple. There
+            is no explicit static constructor, so the type keeps the
+            <c>beforefieldinit</c> flag and the runtime may run the (non-throwing)
+            initializer eagerly. Validation lives on the public getters; use
+            <see cref="P:UltimateOrb.Numerics.BinaryFloatingPointIeee754TypeTraitsInternal`1.IsSupported"/> to probe a type without triggering an exception.
+            </para>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BinaryFloatingPointIeee754TypeTraitsInternal`1.Pow2(System.Int32)">
+            <summary>
+            Computes <c>2^e</c> by exponentiation by squaring. Overflow to
+            <c>+∞</c> is handled naturally by <typeparamref name="T"/>'s own
+            arithmetic.
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BinaryFloatingPointIeee754TypeTraitsInternal`1.Pow2Neg(System.Int32)">
+            <summary>
+            Computes <c>2^-e</c> by exponentiation by squaring, starting from
+            <c>0.5</c>. Underflow to <c>0</c> is handled naturally by
+            <typeparamref name="T"/>'s own arithmetic (including in the denormal
+            range).
+            </summary>
+        </member>
+        <member name="P:UltimateOrb.Numerics.BinaryFloatingPointIeee754TypeTraitsInternal`1.IsSupported">
+            <summary>
+            Gets a value indicating whether <typeparamref name="T"/> is a supported
+            IEEE-style binary floating-point format.
+            </summary>
+            <remarks>This member never throws.</remarks>
+        </member>
+        <member name="P:UltimateOrb.Numerics.BinaryFloatingPointIeee754TypeTraitsInternal`1.Precision">
+            <summary>
+            Gets the precision <c>p</c> of <typeparamref name="T"/> — the number of
+            significant bits, including the implicit leading 1.
+            </summary>
+            <exception cref="T:System.NotSupportedException">
+            <typeparamref name="T"/> is not a supported IEEE-style binary format.
+            </exception>
+        </member>
+        <member name="P:UltimateOrb.Numerics.BinaryFloatingPointIeee754TypeTraitsInternal`1.MaxExponent">
+            <summary>
+            Gets the maximum exponent <c>emax</c> of <typeparamref name="T"/>.
+            </summary>
+            <exception cref="T:System.NotSupportedException">
+            <typeparamref name="T"/> is not a supported IEEE-style binary format.
+            </exception>
+        </member>
+        <member name="P:UltimateOrb.Numerics.BinaryFloatingPointIeee754TypeTraitsInternal`1.ExponentFieldBitWidth">
+            <summary>
+            Gets the width, in bits, of the exponent field <c>w</c> of
+            <typeparamref name="T"/>.
+            </summary>
+            <exception cref="T:System.NotSupportedException">
+            <typeparamref name="T"/> is not a supported IEEE-style binary format.
+            </exception>
+        </member>
+        <member name="P:UltimateOrb.Numerics.BinaryFloatingPointIeee754TypeTraitsInternal`1.TrailingSignificandFieldBitWidth">
+            <summary>
+            Gets the width, in bits, of the trailing significand field <c>t</c> of
+            <typeparamref name="T"/>.
+            </summary>
+            <exception cref="T:System.NotSupportedException">
+            <typeparamref name="T"/> is not a supported IEEE-style binary format.
+            </exception>
+        </member>
+        <member name="P:UltimateOrb.Numerics.BinaryFloatingPointIeee754TypeTraitsInternal`1.StorageBitWidth">
+            <summary>
+            Gets the logical storage width <c>k = w + p</c> of the format
+            represented by <typeparamref name="T"/> under the IEEE
+            implicit-leading-bit convention. For a value-type storage this equals
+            <c>8 * sizeof(T)</c>; for a heap-allocated wrapper it is the width of
+            the format being emulated.
+            </summary>
+            <exception cref="T:System.NotSupportedException">
+            <typeparamref name="T"/> is not a supported IEEE-style binary format.
+            </exception>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BinaryFloatingPointIeee754TypeTraitsInternal`1.ComputeHasSupportedStructLayout">
+            <summary>
+            Computes <c>true</c> iff <typeparamref name="T"/> has a physical bit
+            layout that exactly matches the logical IEEE-style format reported by
+            this class, so bit-level tricks are safe.
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BinaryFloatingPointIeee754TypeTraitsInternal`1.GetBit(`0,System.Int32,System.Int32)">
+            <summary>
+            Reads the bit at <paramref name="bitIndex"/> of the <paramref name="k"/>-bit
+            integer representation of <paramref name="value"/>, where bit <c>0</c>
+            is the LSB of the trailing significand field. Memory endianness is
+            taken into account.
+            </summary>
+        </member>
+        <member name="P:UltimateOrb.Numerics.BinaryFloatingPointIeee754TypeTraitsInternal`1.HasSupportedStructLayout">
+            <summary>
+            Gets a value indicating whether <typeparamref name="T"/> has a
+            supported basic struct layout — that is, whether its physical bit
+            representation is a direct image of the logical IEEE-style format
+            reported by this class, so that bit-level optimizations are safe.
+            </summary>
+            <remarks>
+            <para>
+            <see langword="true"/> iff all of the following hold:
+            </para>
+            <list type="number">
+              <item><description>
+              <typeparamref name="T"/> is unmanaged (contains no references).
+              </description></item>
+              <item><description>
+              <c>8 * sizeof(T)</c> equals the detected logical storage width
+              <see cref="P:UltimateOrb.Numerics.BinaryFloatingPointIeee754TypeTraitsInternal`1.StorageBitWidth"/>.
+              </description></item>
+              <item><description>
+              The sign bit is the most significant bit.
+              </description></item>
+              <item><description>
+              There are no padding bits: the exponent field occupies exactly
+              <see cref="P:UltimateOrb.Numerics.BinaryFloatingPointIeee754TypeTraitsInternal`1.ExponentFieldBitWidth"/> bits immediately below the sign
+              bit, and the trailing significand field occupies exactly
+              <see cref="P:UltimateOrb.Numerics.BinaryFloatingPointIeee754TypeTraitsInternal`1.TrailingSignificandFieldBitWidth"/> bits below that.
+              </description></item>
+              <item><description>
+              The values <c>+1</c>, <c>-1</c>, <c>+2</c>, <c>+0.5</c>,
+              <c>+1.5</c>, <c>+0</c>, and <c>-0</c> round-trip through their
+              physical bit patterns exactly as the standard IEEE bias and
+              implicit-leading-bit convention predict.
+              </description></item>
+            </list>
+            <para>
+            When <see langword="true"/>, consumers can safely reinterpret values
+            of <typeparamref name="T"/> as raw bytes of width <c>sizeof(T)</c> and
+            apply bit-level tricks (sign extraction by shifting, exponent
+            adjustment by integer addition, classification by masking, and so
+            on). When <see langword="false"/>, bit-level access is not portable
+            and the logical parameters should be used through ordinary
+            arithmetic.
+            </para>
+            <para>This member never throws.</para>
             </remarks>
         </member>
         <member name="T:UltimateOrb.Numerics.DoubleArithmetic">
@@ -7299,7 +7536,7 @@
             ○ Match if at the beginning of the string.<br/>
             ○ Optional (greedy).<br/>
                 ○ "sign" capture group.<br/>
-                    ○ Match a character in the set [+\-].<br/>
+                    ○ Match a character in the set [+-].<br/>
             ○ Match with 4 alternative expressions.<br/>
                 ○ "hex" capture group.<br/>
                     ○ Match '0'.<br/>
@@ -7308,16 +7545,17 @@
                         ○ Match with 2 alternative expressions.<br/>
                             ○ Match a sequence of expressions.<br/>
                                 ○ Match '.'.<br/>
-                                ○ Match a hexadecimal digit atomically at least once.<br/>
+                                ○ Match a character in the set [0-9A-Fa-f] atomically at least once.<br/>
                             ○ Match a sequence of expressions.<br/>
-                                ○ Match a hexadecimal digit greedily at least once.<br/>
+                                ○ Match a character in the set [0-9A-Fa-f] greedily at least once.<br/>
                                 ○ Optional (greedy).<br/>
                                     ○ Match '.'.<br/>
-                                    ○ Optional (greedy).<br/>
-                                        ○ Match a hexadecimal digit atomically at least once.<br/>
+                                    ○ Match with 2 alternative expressions.<br/>
+                                        ○ Match a character in the set [0-9A-Fa-f] greedily at least once.<br/>
+                                        ○ Match an empty string.<br/>
                     ○ Match a character in the set [Pp].<br/>
                     ○ "hexExpSign" capture group.<br/>
-                        ○ Match a character in the set [+\-] atomically, optionally.<br/>
+                        ○ Match a character in the set [+-] atomically, optionally.<br/>
                     ○ "hexExp" capture group.<br/>
                         ○ Match a character in the set [0-9] atomically at least once.<br/>
                 ○ "dec" capture group.<br/>
@@ -7330,14 +7568,15 @@
                                 ○ Match a character in the set [0-9] greedily at least once.<br/>
                                 ○ Optional (greedy).<br/>
                                     ○ Match '.'.<br/>
-                                    ○ Optional (greedy).<br/>
+                                    ○ Match with 2 alternative expressions.<br/>
                                         ○ Match a character in the set [0-9] greedily at least once.<br/>
+                                        ○ Match an empty string.<br/>
                     ○ Optional (greedy).<br/>
                         ○ Match a character in the set [Ee].<br/>
                         ○ "decExpSign" capture group.<br/>
-                            ○ Match a character in the set [+\-] atomically, optionally.<br/>
+                            ○ Match a character in the set [+-] atomically, optionally.<br/>
                         ○ "decExp" capture group.<br/>
-                            ○ Match a character in the set [0-9] atomically at least once.<br/>
+                            ○ Match a character in the set [0-9] greedily at least once.<br/>
                 ○ "nan" capture group.<br/>
                     ○ "nanPrefix" capture group.<br/>
                         ○ Match a character in the set [QSqs] atomically, optionally.<br/>
@@ -7352,7 +7591,7 @@
                                 ○ Match a sequence of expressions.<br/>
                                     ○ Match '0'.<br/>
                                     ○ Match a character in the set [Xx].<br/>
-                                    ○ Match a hexadecimal digit atomically at least once.<br/>
+                                    ○ Match a character in the set [0-9A-Fa-f] atomically at least once.<br/>
                                 ○ Match a character in the set [0-9] atomically at least once.<br/>
                         ○ Match ')'.<br/>
                 ○ "inf" capture group.<br/>
@@ -8879,7 +9118,7 @@
             <b>Supported source formats.</b> binary16, binary32, binary64,
             binary128, and the <c>k &gt;= 128, k % 32 == 0</c> family
             (binary160, binary192, binary224, binary256). Format parameters come
-            from <see cref="T:UltimateOrb.Numerics.FloatingPointIeee754InterchageTypeTraits`1"/>.
+            from <see cref="T:UltimateOrb.Numerics.BinaryFloatingPointIeee754TypeTraitsInternal`1"/>.
             </para>
             <para>
             <b>Widening (source &lt;= binary128).</b> Exact. No rounding occurs
@@ -9305,6 +9544,25 @@
             <remarks>
                 <para>The Number must be in format <c>[1-9][0-9]*</c>.</para>
             </remarks>
+        </member>
+        <member name="M:UltimateOrb.MathExtensions.BigMul(System.UInt64,System.UInt64)">
+            <inheritdoc cref="M:UltimateOrb.MathExtensions.&lt;G&gt;$853505F4C6E4266CC0CF997A13BEC9E3.BigMul(System.UInt64,System.UInt64)"/>
+        </member>
+        <member name="M:UltimateOrb.MathExtensions.BigMul(UltimateOrb.UInt128,UltimateOrb.UInt128,UltimateOrb.UInt128@)">
+            <inheritdoc cref="M:UltimateOrb.MathExtensions.&lt;G&gt;$853505F4C6E4266CC0CF997A13BEC9E3.BigMul(UltimateOrb.UInt128,UltimateOrb.UInt128,UltimateOrb.UInt128@)"/>
+        </member>
+        <member name="M:UltimateOrb.MathExtensions.&lt;G&gt;$853505F4C6E4266CC0CF997A13BEC9E3.BigMul(System.UInt64,System.UInt64)">
+            <summary>Produces the full product of two unsigned 64-bit numbers.</summary>
+            <param name="a">The first number to multiply.</param>
+            <param name="b">The second number to multiply.</param>
+            <returns>The full product of the specified numbers.</returns>
+        </member>
+        <member name="M:UltimateOrb.MathExtensions.&lt;G&gt;$853505F4C6E4266CC0CF997A13BEC9E3.BigMul(UltimateOrb.UInt128,UltimateOrb.UInt128,UltimateOrb.UInt128@)">
+            <summary>Produces the full product of two unsigned 64-bit numbers.</summary>
+            <param name="a">The first number to multiply.</param>
+            <param name="b">The second number to multiply.</param>
+            <param name="low">The low 64-bit of the product of the specified numbers.</param>
+            <returns>The high 64-bit of the product of the specified numbers.</returns>
         </member>
         <member name="M:UltimateOrb.UInt256.TryParseCStyleNormalizedU256(System.String,UltimateOrb.UInt256@)">
             <summary>

@@ -3380,8 +3380,8 @@ namespace UltimateOrb {
             [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             [System.Diagnostics.Contracts.PureAttribute()]
             public static XInt128 DivRem(XInt128 dividend, XInt128 divisor, out XInt128 remainder) {
-                Unsafe.SkipInit(out remainder);
-                var lo = Numerics.DoubleArithmetic.DivRem(dividend.lo, dividend.hi, divisor.lo, divisor.hi, out Unsafe.AsRef(in remainder.lo), out Unsafe.AsRef(in remainder.hi), out HInt64 hi);
+                var lo = Numerics.DoubleArithmetic.DivRem(dividend.lo, dividend.hi, divisor.lo, divisor.hi, out var remainder_lo, out var remainder_hi, out HInt64 hi);
+                remainder = new XInt128(lo, hi);
                 return new XInt128(lo, hi);
             }
 
@@ -3905,6 +3905,36 @@ namespace Internal.System {
                 return unchecked((Single)BitConverter.Int64BitsToDouble(unchecked((Int64)s)));
             }
             return default;
+        }
+    }
+}
+
+namespace UltimateOrb {
+
+    public static partial class MathExtensions {
+
+        extension(System.Math) {
+
+            /// <summary>Produces the full product of two unsigned 64-bit numbers.</summary>
+            /// <param name="a">The first number to multiply.</param>
+            /// <param name="b">The second number to multiply.</param>
+            /// <returns>The full product of the specified numbers.</returns>
+            [CLSCompliant(false)]
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static UInt128 BigMul(UInt64 a, UInt64 b) => UInt128.Math.BigMul(a, b);
+
+            /// <summary>Produces the full product of two unsigned 64-bit numbers.</summary>
+            /// <param name="a">The first number to multiply.</param>
+            /// <param name="b">The second number to multiply.</param>
+            /// <param name="low">The low 64-bit of the product of the specified numbers.</param>
+            /// <returns>The high 64-bit of the product of the specified numbers.</returns>
+            [CLSCompliant(false)]
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static UInt128 BigMul(UInt128 a, UInt128 b, out UInt128 low) {
+                var lo = UInt128.DoubleArithmetic.BigMul(a, b, out var hi);
+                low = lo;
+                return hi;
+            }
         }
     }
 }

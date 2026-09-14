@@ -1,6 +1,5 @@
 ﻿#pragma warning disable UoWIP // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
 
-using System;
 /*
 namespace UltimateOrb.Numerics.Specialized {
 
@@ -17,8 +16,9 @@ namespace UltimateOrb.Numerics.Specialized {
 */
 using UltimateOrb.Numerics.Extensions;
 
+[assembly: System.Runtime.CompilerServices.IgnoresAccessChecksToAttribute("UltimateOrb.Core")]
+
 namespace UltimateOrb.Core.Tests {
-    using System.Diagnostics;
     using System.Diagnostics.CodeAnalysis;
     using System.Numerics;
     using System.Runtime.CompilerServices;
@@ -30,8 +30,8 @@ namespace UltimateOrb.Core.Tests {
     using UltimateOrb.Mathematics.Geometry;
     using UltimateOrb.Numerics;
     using UltimateOrb.Numerics.Specialized;
+    using UltimateOrb.Numerics.Tests;
     using UltimateOrb.Plain.ValueTypes;
-    using UltimateOrb.Utilities.InterfaceExtensions.System;
 
     // using UltimateOrb.Runtime.CompilerServices.Tests;
 
@@ -144,15 +144,84 @@ namespace UltimateOrb.Core.Tests {
         static T Clone0a<T>(T @this) where T : struct, ICloneable {
             return (T)@this.Clone();
         }
+
+        struct Bits24 {
+            byte a;
+            byte b;
+            byte c;
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private static int Main(string[] args) {
+            {
+                {
+                    var asdfas = checked(unchecked((System.UInt128)System.Int128.MinValue) / unchecked(-System.UInt128.One));
+
+                    Console.WriteLine($@"{asdfas}");
+                }
+
+                {
+                    var asdfas = checked(unchecked((Unsigned<System.Int128>)System.Int128.MinValue) / unchecked(-Unsigned<System.Int128>.One));
+
+                    Console.WriteLine($@"{asdfas}");
+                }
+
+                {
+                    var asdfas = checked(unchecked((System.UInt128)System.Int128.MinValue) / System.UInt128.One);
+
+                    Console.WriteLine($@"{asdfas}");
+                }
+
+                {
+                    var asdfas = checked(unchecked((Unsigned<System.Int128>)System.Int128.MinValue) / Unsigned<System.Int128>.One);
+
+                    Console.WriteLine($@"{asdfas}");
+                }
+
+
+                return 0;
+
+            }
+            {
+                var sdfa = BitPatternGenerator.GenerateQuadruple().LongCount();
+                Console.WriteLine(sdfa);
+                var asd = new BinaryFloatingPointIeee754ArithmeticTests();
+                asd.QuadrupleIsOddIntegerTest();
+                Console.WriteLine("Done.");
+                return 0;
+            }
+            {
+                var t = BinaryFloatingPointIeee754Arithmetic.IsInteger<Single, UInt32>(1);
+
+                var sdfa = BitPatternGenerator.GenerateSingle().LongCount();
+                Console.WriteLine(sdfa);
+                var asd = new BinaryFloatingPointIeee754ArithmeticTests();
+                asd.SingleIsIntegerTest();
+                Console.WriteLine("Done.");
+                return 0;
+            }
+            {
+                var sdfasd = Math.BigMul(4UL, 2UL);
+
+            }
             {
 
                 var sfads = BigRational.Parse("21827907538883637012326748457700300661358717434156476363", null);
 
                 var sdfas = (Quadruple)sfads;
+                var sdfa = BFloat16.CreateChecked(sdfas);
+
+
                 var sdfadsf = (BigRational)sdfas;
                 Console.WriteLine(sdfadsf.ToString());
+                return 0;
+            }
+            if (false) {
+
+
+                var sdfasf = Vector128<Bits24>.IsSupported;
+                Console.WriteLine(sdfasf);
+                Console.WriteLine("Done.");
                 return 0;
             }
             {
@@ -255,7 +324,7 @@ namespace UltimateOrb.Core.Tests {
                 Console.WriteLine($"Scale10(0, -7000) = {Decimal128Bid.Scale10(0, -7000)}");
 
                 Console.WriteLine($"IsNegative(-0) = {Decimal128Bid.IsNegative(Decimal128Bid.Parse("-0"))}");
-                
+
                 Decimal128Bid[] testData1 = [
                     Decimal128Bid.Parse("+qNaN(0x4000000000000000000000000009)"),
                     Decimal128Bid.Parse("+qNaN(0X3ffffffffffffffffffffffffffF)"),

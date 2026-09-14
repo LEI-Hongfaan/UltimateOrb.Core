@@ -210,10 +210,8 @@ namespace UltimateOrb.Numerics {
         /// <typeparamref name="T"/> is not a supported IEEE 754 interchange format.
         /// See <see cref="IsSupported"/>.
         /// </exception>
-        public static int Precision {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => s_isSupported ? s_data.Precision : ThrowUnsupported();
-        }
+        public static int Precision { get; } =
+            s_isSupported ? s_data.Precision : ThrowUnsupported();
 
         /// <summary>
         /// Gets the maximum exponent <c>emax</c> of the interchange format
@@ -228,10 +226,8 @@ namespace UltimateOrb.Numerics {
         /// <typeparamref name="T"/> is not a supported IEEE 754 interchange format.
         /// See <see cref="IsSupported"/>.
         /// </exception>
-        public static int MaxExponent {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => s_isSupported ? s_data.MaxExponent : ThrowUnsupported();
-        }
+        public static int MaxExponent { get; } =
+            s_isSupported ? s_data.MaxExponent : ThrowUnsupported();
 
         /// <summary>
         /// Gets the width, in bits, of the exponent field for binary formats, or
@@ -248,10 +244,8 @@ namespace UltimateOrb.Numerics {
         /// <typeparamref name="T"/> is not a supported IEEE 754 interchange format.
         /// See <see cref="IsSupported"/>.
         /// </exception>
-        public static int ExponentOrCombinationFieldBitWidth {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => s_isSupported ? s_data.ExponentOrCombinationFieldBitWidth : ThrowUnsupported();
-        }
+        public static int ExponentOrCombinationFieldBitWidth { get; } =
+            s_isSupported ? s_data.ExponentOrCombinationFieldBitWidth : ThrowUnsupported();
 
         /// <summary>
         /// Gets the width, in bits, of the trailing significand field of the
@@ -268,10 +262,8 @@ namespace UltimateOrb.Numerics {
         /// <typeparamref name="T"/> is not a supported IEEE 754 interchange format.
         /// See <see cref="IsSupported"/>.
         /// </exception>
-        public static int TrailingSignificandFieldBitWidth {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => s_isSupported ? s_data.TrailingSignificandFieldBitWidth : ThrowUnsupported();
-        }
+        public static int TrailingSignificandFieldBitWidth { get; }
+            = s_isSupported ? s_data.TrailingSignificandFieldBitWidth : ThrowUnsupported();
 
         // ---- Cold path ------------------------------------------------------
 
@@ -293,6 +285,7 @@ namespace UltimateOrb.Numerics {
                     : "Supported decimal widths: k >= 32 with k % 32 == 0."));
         }
     }
+
 
     //public interface IDecimalFloatingPointIeee754DerivedIeee754Interchage<TSelf,
     //    TBitsInt, TBitsUInt, TExponentInt, TExponentUInt, TBitsShort, TBitsUShort>

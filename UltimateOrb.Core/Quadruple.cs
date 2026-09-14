@@ -543,7 +543,7 @@ namespace UltimateOrb {
         /// <b>Supported source formats.</b> binary16, binary32, binary64,
         /// binary128, and the <c>k &gt;= 128, k % 32 == 0</c> family
         /// (binary160, binary192, binary224, binary256). Format parameters come
-        /// from <see cref="FloatingPointIeee754InterchageTypeTraits{TFloat}"/>.
+        /// from <see cref="BinaryFloatingPointIeee754TypeTraitsInternal{TFloat}"/>.
         /// </para>
         /// <para>
         /// <b>Widening (source &lt;= binary128).</b> Exact. No rounding occurs
@@ -619,261 +619,265 @@ namespace UltimateOrb {
             const int QuadBias = 16383;
             const int QuadExpMax = 0x7FFF;
             const int QuadPayloadBits = QuadFracBits - 1;    // 111, excludes the quiet bit
+#pragma warning disable CS0219 // Variable is assigned but its value is never used
             const int QuadFoldShift = QuadFracBits / 4;    // 28; see XML remarks
+#pragma warning restore CS0219 // Variable is assigned but its value is never used
 
             // ---- Guard rails (internal method: fail fast in Debug) ----
             Debug.Assert(Unsafe.SizeOf<TFloat>() == Unsafe.SizeOf<TFloatUIntBits>(),
                 "TFloat and TFloatUIntBits must have identical storage size.");
             Debug.Assert(TFloat.Radix == 2,
                 "Only radix-2 (binary) interchange formats can be converted to binary128.");
-            Debug.Assert(FloatingPointIeee754InterchageTypeTraits<TFloat>.IsSupported,
+            Debug.Assert(BinaryFloatingPointIeee754TypeTraitsInternal<TFloat>.IsSupported,
                 $"'{typeof(TFloat).FullName}' is not a supported IEEE 754 interchange format.");
+            unchecked {
+                // ---- Source format parameters ----
+                int srcFracBits = BinaryFloatingPointIeee754TypeTraitsInternal<TFloat>.TrailingSignificandFieldBitWidth;   // t
+                int srcExpBits = BinaryFloatingPointIeee754TypeTraitsInternal<TFloat>.ExponentFieldBitWidth; // w
+                int srcBias = BinaryFloatingPointIeee754TypeTraitsInternal<TFloat>.MaxExponent;
+                int srcExpMax = (1 << srcExpBits) - 1;
 
-            // ---- Source format parameters ----
-            int srcFracBits = FloatingPointIeee754InterchageTypeTraits<TFloat>.TrailingSignificandFieldBitWidth;   // t
-            int srcExpBits = FloatingPointIeee754InterchageTypeTraits<TFloat>.ExponentOrCombinationFieldBitWidth; // w
-            int srcBias = FloatingPointIeee754InterchageTypeTraits<TFloat>.MaxExponent;
-            int srcExpMax = (1 << srcExpBits) - 1;
+                Debug.Assert(srcFracBits > 0 && srcExpBits > 0);
+                Debug.Assert(srcExpBits + srcFracBits + 1 == 8 * Unsafe.SizeOf<TFloat>());
 
-            Debug.Assert(srcFracBits > 0 && srcExpBits > 0);
-            Debug.Assert(srcExpBits + srcFracBits + 1 == 8 * Unsafe.SizeOf<TFloat>());
+                // ---- Extract raw fields ----
+                TFloatUIntBits bits = UltimateOrb.Runtime.CompilerServices.Unsafe
+                    .BitCast<TFloat, TFloatUIntBits>(value);
 
-            // ---- Extract raw fields ----
-            TFloatUIntBits bits = UltimateOrb.Runtime.CompilerServices.Unsafe
-                .BitCast<TFloat, TFloatUIntBits>(value);
+                TFloatUIntBits fracMask = (TFloatUIntBits.One << srcFracBits) - TFloatUIntBits.One;
+                TFloatUIntBits expMask = (TFloatUIntBits.One << srcExpBits) - TFloatUIntBits.One;
 
-            TFloatUIntBits fracMask = (TFloatUIntBits.One << srcFracBits) - TFloatUIntBits.One;
-            TFloatUIntBits expMask = (TFloatUIntBits.One << srcExpBits) - TFloatUIntBits.One;
+                int srcExp = int.CreateTruncating((bits >> srcFracBits) & expMask);
+                TFloatUIntBits srcFrac = bits & fracMask;
 
-            int srcExp = int.CreateTruncating((bits >> srcFracBits) & expMask);
-            TFloatUIntBits srcFrac = bits & fracMask;
+                bool negative = TFloat.IsNegative(value);
+                UInt64 signHi = negative ? (1UL << 63) : 0UL;
+                UInt64 infNanHi = signHi | ((UInt64)QuadExpMax << 48);
 
-            bool negative = TFloat.IsNegative(value);
-            UInt64 signHi = negative ? (1UL << 63) : 0UL;
-            UInt64 infNanHi = signHi | ((UInt64)QuadExpMax << 48);
+                // =================================================================
+                // ±Infinity
+                // =================================================================
+                if (srcExp == srcExpMax && srcFrac == TFloatUIntBits.Zero) {
+                    return new Quadruple(0UL, infNanHi);
+                }
 
-            // =================================================================
-            // ±Infinity
-            // =================================================================
-            if (srcExp == srcExpMax && srcFrac == TFloatUIntBits.Zero) {
-                return new Quadruple(0UL, infNanHi);
-            }
-
-            // =================================================================
-            // NaN
-            // =================================================================
-            if (srcExp == srcExpMax) {
+                // =================================================================
+                // NaN
+                // =================================================================
+                if (srcExp == srcExpMax) {
 #if NAN_PERMISSIVE
-                // ----------------------------------------------------------------
-                // Permissive NaN: the caller does not observe which NaN is
-                // produced, so we skip payload and sign extraction entirely and
-                // return a precomputed NaN. Any other NaN would also satisfy the
-                // contract; this one was chosen because it is the cheapest to
-                // materialize as a constant on every supported target.
-                // ----------------------------------------------------------------
-                return NaN;
+                    // ----------------------------------------------------------------
+                    // Permissive NaN: the caller does not observe which NaN is
+                    // produced, so we skip payload and sign extraction entirely and
+                    // return a precomputed NaN. Any other NaN would also satisfy the
+                    // contract; this one was chosen because it is the cheapest to
+                    // materialize as a constant on every supported target.
+                    // ----------------------------------------------------------------
+                    return NaN;
 #else
 #if NAN_PAYLOAD_LEGACY
 
-                // ----------------------------------------------------------------
-                // Legacy convention: MSB-align + scatter-fold.
-                //
-                //   - Top QuadFracBits positions hold the MSB-aligned source
-                //     fraction (narrowing) or the zero-extended source fraction
-                //     (widening).
-                //   - Dropped bits are OR-folded back in as two disjoint chunks:
-                //       fold1: droppedBits >> foldShift   (high part of dropped)
-                //       fold2: droppedBits & foldMask     (low  part of dropped)
-                //     with foldShift = QuadFracBits / 4, matching the existing
-                //     Quadruple → Double converter's foldShift = 52 / 4 = 13.
-                //   - No class-change guard: for any NaN source, srcFrac != 0,
-                //     and the union of {MSB-align, fold1, fold2} covers every
-                //     dropped bit, so the destination fraction is guaranteed
-                //     nonzero.
-                // ----------------------------------------------------------------
-                UInt128 destFrac;
-                if (srcFracBits <= QuadFracBits) {
-                    // Widening: exact, nothing dropped.
-                    destFrac = UInt128.CreateTruncating(srcFrac) << (QuadFracBits - srcFracBits);
-                } else {
-                    int drop = srcFracBits - QuadFracBits;
+                    // ----------------------------------------------------------------
+                    // Legacy convention: MSB-align + scatter-fold.
+                    //
+                    //   - Top QuadFracBits positions hold the MSB-aligned source
+                    //     fraction (narrowing) or the zero-extended source fraction
+                    //     (widening).
+                    //   - Dropped bits are OR-folded back in as two disjoint chunks:
+                    //       fold1: droppedBits >> foldShift   (high part of dropped)
+                    //       fold2: droppedBits & foldMask     (low  part of dropped)
+                    //     with foldShift = QuadFracBits / 4, matching the existing
+                    //     Quadruple → Double converter's foldShift = 52 / 4 = 13.
+                    //   - No class-change guard: for any NaN source, srcFrac != 0,
+                    //     and the union of {MSB-align, fold1, fold2} covers every
+                    //     dropped bit, so the destination fraction is guaranteed
+                    //     nonzero.
+                    // ----------------------------------------------------------------
+                    UInt128 destFrac;
+                    if (srcFracBits <= QuadFracBits) {
+                        // Widening: exact, nothing dropped.
+                        destFrac = UInt128.CreateTruncating(srcFrac) << (QuadFracBits - srcFracBits);
+                    } else {
+                        int drop = srcFracBits - QuadFracBits;
 
-                    TFloatUIntBits dropMask = (TFloatUIntBits.One << drop) - TFloatUIntBits.One;
+                        TFloatUIntBits dropMask = (TFloatUIntBits.One << drop) - TFloatUIntBits.One;
 
-                    UInt128 shifted     = UInt128.CreateTruncating(srcFrac >> drop);
-                    UInt128 droppedBits = UInt128.CreateTruncating(srcFrac & dropMask);
+                        UInt128 shifted     = UInt128.CreateTruncating(srcFrac >> drop);
+                        UInt128 droppedBits = UInt128.CreateTruncating(srcFrac & dropMask);
 
-                    UInt128 fold1 = droppedBits >> QuadFoldShift;
-                    UInt128 fold2 = droppedBits & (((UInt128)1 << QuadFoldShift) - 1);
+                        UInt128 fold1 = droppedBits >> QuadFoldShift;
+                        UInt128 fold2 = droppedBits & (((UInt128)1 << QuadFoldShift) - 1);
 
-                    destFrac = shifted | fold1 | fold2;
-                }
+                        destFrac = shifted | fold1 | fold2;
+                    }
 
-                UInt64 legacyFracLo = (UInt64)destFrac;
-                UInt64 legacyFracHi = (UInt64)(destFrac >> 64) & 0x0000_FFFF_FFFF_FFFFUL;
-                return new Quadruple(legacyFracLo, infNanHi | legacyFracHi);
+                    UInt64 legacyFracLo = (UInt64)destFrac;
+                    UInt64 legacyFracHi = (UInt64)(destFrac >> 64) & 0x0000_FFFF_FFFF_FFFFUL;
+                    return new Quadruple(legacyFracLo, infNanHi | legacyFracHi);
 #else
 
-                // ----------------------------------------------------------------
-                // Modern convention: payload is an unsigned integer excluding the
-                // quiet bit; LSB-aligned across formats; narrowing jams the MSB
-                // of the target payload to 1 as the payload-overflow indicator.
-                // ----------------------------------------------------------------
-                int srcPayloadBits = srcFracBits - 1;
+                    // ----------------------------------------------------------------
+                    // Modern convention: payload is an unsigned integer excluding the
+                    // quiet bit; LSB-aligned across formats; narrowing jams the MSB
+                    // of the target payload to 1 as the payload-overflow indicator.
+                    // ----------------------------------------------------------------
+                    int srcPayloadBits = srcFracBits - 1;
 
-                bool isQuiet = (srcFrac & (TFloatUIntBits.One << (srcFracBits - 1)))
-                               != TFloatUIntBits.Zero;
+                    bool isQuiet = (srcFrac & (TFloatUIntBits.One << (srcFracBits - 1)))
+                                   != TFloatUIntBits.Zero;
 
-                UInt128 srcPayload = System.UInt128.CreateTruncating(
-                    srcFrac & ((TFloatUIntBits.One << (srcFracBits - 1)) - TFloatUIntBits.One));
+                    UInt128 srcPayload = System.UInt128.CreateTruncating(
+                        srcFrac & ((TFloatUIntBits.One << (srcFracBits - 1)) - TFloatUIntBits.One));
 
-                UInt128 dstPayload;
-                if (srcPayloadBits <= QuadPayloadBits) {
-                    // Widening / equal: integer value preserved, zero-extended.
-                    dstPayload = srcPayload;
-                } else {
-                    // Narrowing: low bits kept; high bits set the overflow flag.
-                    UInt128 lowMask = ((UInt128)1 << (QuadPayloadBits - 1)) - 1;
-                    UInt128 lowBits = srcPayload & lowMask;
-                    UInt128 highBits = srcPayload >> (QuadPayloadBits - 1);
+                    UInt128 dstPayload;
+                    if (srcPayloadBits <= QuadPayloadBits) {
+                        // Widening / equal: integer value preserved, zero-extended.
+                        dstPayload = srcPayload;
+                    } else {
+                        // Narrowing: low bits kept; high bits set the overflow flag.
+                        UInt128 lowMask = ((UInt128)1 << (QuadPayloadBits - 1)) - 1;
+                        UInt128 lowBits = srcPayload & lowMask;
+                        UInt128 highBits = srcPayload >> (QuadPayloadBits - 1);
 
-                    dstPayload = lowBits;
-                    if (highBits != UInt128.Zero) {
-                        dstPayload |= (UInt128)1 << (QuadPayloadBits - 1);
+                        dstPayload = lowBits;
+                        if (highBits != UInt128.Zero) {
+                            dstPayload |= (UInt128)1 << (QuadPayloadBits - 1);
+                        }
                     }
-                }
 
-                UInt128 destFrac = dstPayload;
-                if (isQuiet) {
-                    destFrac |= (UInt128)1 << (QuadFracBits - 1);
-                }
-                // No class-change guard: sNaN ⇒ payload ≠ 0; qNaN ⇒ quiet bit set.
+                    UInt128 destFrac = dstPayload;
+                    if (isQuiet) {
+                        destFrac |= (UInt128)1 << (QuadFracBits - 1);
+                    }
+                    // No class-change guard: sNaN ⇒ payload ≠ 0; qNaN ⇒ quiet bit set.
 
-                UInt64 modernFracLo = (UInt64)destFrac;
-                UInt64 modernFracHi = (UInt64)(destFrac >> 64) & 0x0000_FFFF_FFFF_FFFFUL;
-                return new Quadruple(modernFracLo, infNanHi | modernFracHi);
+                    UInt64 modernFracLo = (UInt64)destFrac;
+                    UInt64 modernFracHi = (UInt64)(destFrac >> 64) & 0x0000_FFFF_FFFF_FFFFUL;
+                    return new Quadruple(modernFracLo, infNanHi | modernFracHi);
 
 #endif // NAN_PAYLOAD_LEGACY
 #endif // !NAN_PERMISSIVE
-            }
-
-            // =================================================================
-            // ±0
-            // =================================================================
-            if (srcExp == 0 && srcFrac == TFloatUIntBits.Zero) {
-                return new Quadruple(0UL, signHi);
-            }
-
-            // =================================================================
-            // Finite nonzero: build the source significand with implicit 1 at
-            // bit srcFracBits, plus the unbiased exponent.
-            // =================================================================
-            TFloatUIntBits sig;
-            int unbiased;
-
-            if (srcExp == 0) {
-                // Source subnormal → normalize.
-                int totalBits = 8 * Unsafe.SizeOf<TFloatUIntBits>();
-                int lz = int.CreateTruncating(TFloatUIntBits.LeadingZeroCount(srcFrac)) - (totalBits - srcFracBits);
-                sig = srcFrac << (lz + 1);
-                unbiased = -srcBias - lz;
-            } else {
-                sig = (TFloatUIntBits.One << srcFracBits) | srcFrac;
-                unbiased = srcExp - srcBias;
-            }
-
-            // =================================================================
-            // Align MSB of sig with the target's implicit-1 position (bit 112).
-            //   shift <= 0 : widening (exact).
-            //   shift >  0 : narrowing (round-half-to-even on discarded bits).
-            // =================================================================
-            int shift = srcFracBits - QuadFracBits;
-            UInt128 sig128;
-
-            if (shift <= 0) {
-                sig128 = System.UInt128.CreateTruncating(sig) << (-shift);
-            } else {
-                TFloatUIntBits mask = (TFloatUIntBits.One << shift) - TFloatUIntBits.One;
-                TFloatUIntBits dropped = sig & mask;
-                TFloatUIntBits top = sig >> shift;
-                TFloatUIntBits half = TFloatUIntBits.One << (shift - 1);
-
-                if (dropped > half ||
-                    (dropped == half && (top & TFloatUIntBits.One) != TFloatUIntBits.Zero)) {
-                    top = top + TFloatUIntBits.One;
-
-                    // Renormalize if the carry reached bit 113. When the exponent
-                    // is already at emax, the resulting biased exponent becomes
-                    // 0x7FFF (all ones) and is caught by the
-                    // `biased >= QuadExpMax` test below — the infinity case needs
-                    // no special treatment here.
-                    if (top >= (TFloatUIntBits.One << (QuadFracBits + 1))) {
-                        top = top >> 1;
-                        unbiased += 1;
-                    }
                 }
-                sig128 = System.UInt128.CreateTruncating(top);
-            }
 
-            int biased = unbiased + QuadBias;
-
-            // =================================================================
-            // Overflow → ±Infinity.
-            //
-            // Reached either when the source exponent was already above binary128's
-            // range, or when rounding carried the significand past emax. In both
-            // cases the value's exponent field becomes all ones (0x7FFF), so this
-            // single comparison produces the correct ±∞.
-            // =================================================================
-            if (biased >= QuadExpMax) {
-                return new Quadruple(0UL, infNanHi);
-            }
-
-            // =================================================================
-            // Target subnormal: extra right shift with round-half-to-even.
-            // Only reachable for source formats wider than binary128.
-            // =================================================================
-            if (biased <= 0) {
-                int drop = 1 - biased;
-                if (drop > 128) {
+                // =================================================================
+                // ±0
+                // =================================================================
+                if (srcExp == 0 && srcFrac == TFloatUIntBits.Zero) {
                     return new Quadruple(0UL, signHi);
                 }
 
-                UInt128 top, dropped, half;
-                if (drop == 128) {
-                    top = UInt128.Zero;
-                    dropped = sig128;
-                    half = (UInt128)1 << 127;
+                // =================================================================
+                // Finite nonzero: build the source significand with implicit 1 at
+                // bit srcFracBits, plus the unbiased exponent.
+                // =================================================================
+                TFloatUIntBits sig;
+                int unbiased;
+
+                if (srcExp == 0) {
+                    // Source subnormal → normalize.
+                    int totalBits = 8 * Unsafe.SizeOf<TFloatUIntBits>();
+                    int lz = int.CreateTruncating(TFloatUIntBits.LeadingZeroCount(srcFrac)) - (totalBits - srcFracBits);
+                    sig = srcFrac << (lz + 1);
+                    unbiased = -srcBias - lz;
                 } else {
-                    top = sig128 >> drop;
-                    dropped = sig128 & (((UInt128)1 << drop) - 1);
-                    half = (UInt128)1 << (drop - 1);
+                    sig = (TFloatUIntBits.One << srcFracBits) | srcFrac;
+                    unbiased = srcExp - srcBias;
                 }
 
-                if (dropped > half || (dropped == half && (top & 1) != 0)) {
-                    top++;
+                // =================================================================
+                // Align MSB of sig with the target's implicit-1 position (bit 112).
+                //   shift <= 0 : widening (exact).
+                //   shift >  0 : narrowing (round-half-to-even on discarded bits).
+                // =================================================================
+                int shift = srcFracBits - QuadFracBits;
+                UInt128 sig128;
+
+                if (shift <= 0) {
+                    sig128 = System.UInt128.CreateTruncating(sig) << (-shift);
+                } else {
+                    TFloatUIntBits mask = (TFloatUIntBits.One << shift) - TFloatUIntBits.One;
+                    TFloatUIntBits dropped = sig & mask;
+                    TFloatUIntBits top = sig >> shift;
+                    TFloatUIntBits half = TFloatUIntBits.One << (shift - 1);
+
+                    if (dropped > half ||
+                        (dropped == half && (top & TFloatUIntBits.One) != TFloatUIntBits.Zero)) {
+                        top = top + TFloatUIntBits.One;
+
+                        // Renormalize if the carry reached bit 113. When the exponent
+                        // is already at emax, the resulting biased exponent becomes
+                        // 0x7FFF (all ones) and is caught by the
+                        // `biased >= QuadExpMax` test below — the infinity case needs
+                        // no special treatment here.
+                        if (top >= (TFloatUIntBits.One << (QuadFracBits + 1))) {
+                            top = top >> 1;
+                            unbiased += 1;
+                        }
+                    }
+                    sig128 = System.UInt128.CreateTruncating(top);
                 }
 
-                // Subnormal rounding may promote to the smallest normal:
-                // exponent field = 1, fraction = 0.
-                if (top == ((UInt128)1 << QuadFracBits)) {
-                    return new Quadruple(0UL, signHi | (1UL << 48));
+                int biased = unbiased + QuadBias;
+
+                // =================================================================
+                // Overflow → ±Infinity.
+                //
+                // Reached either when the source exponent was already above binary128's
+                // range, or when rounding carried the significand past emax. In both
+                // cases the value's exponent field becomes all ones (0x7FFF), so this
+                // single comparison produces the correct ±∞.
+                // =================================================================
+                if (biased >= QuadExpMax) {
+                    return new Quadruple(0UL, infNanHi);
                 }
 
-                UInt64 fracLo = (UInt64)top;
-                UInt64 fracHi = (UInt64)(top >> 64) & 0x0000_FFFF_FFFF_FFFFUL;
-                return new Quadruple(fracLo, signHi | fracHi);
+                // =================================================================
+                // Target subnormal: extra right shift with round-half-to-even.
+                // Only reachable for source formats wider than binary128.
+                // =================================================================
+                if (biased <= 0) {
+                    int drop = 1 - biased;
+                    if (drop > 128) {
+                        return new Quadruple(0UL, signHi);
+                    }
+
+                    UInt128 top, dropped, half;
+                    if (drop == 128) {
+                        top = UInt128.Zero;
+                        dropped = sig128;
+                        half = (UInt128)1 << 127;
+                    } else {
+                        top = sig128 >> drop;
+                        dropped = sig128 & (((UInt128)1 << drop) - 1);
+                        half = (UInt128)1 << (drop - 1);
+                    }
+
+                    if (dropped > half || (dropped == half && (top & 1) != 0)) {
+                        top++;
+                    }
+
+                    // Subnormal rounding may promote to the smallest normal:
+                    // exponent field = 1, fraction = 0.
+                    if (top == ((UInt128)1 << QuadFracBits)) {
+                        return new Quadruple(0UL, signHi | (1UL << 48));
+                    }
+
+                    UInt64 fracLo = (UInt64)top;
+                    UInt64 fracHi = (UInt64)(top >> 64) & 0x0000_FFFF_FFFF_FFFFUL;
+                    return new Quadruple(fracLo, signHi | fracHi);
+                }
+
+                // =================================================================
+                // Target normal
+                // =================================================================
+                {
+                    UInt128 frac = sig128 & (((UInt128)1 << QuadFracBits) - 1);
+                    UInt64 fracLo = (UInt64)frac;
+                    UInt64 fracHi = (UInt64)(frac >> 64) & 0x0000_FFFF_FFFF_FFFFUL;
+                    return new Quadruple(fracLo, signHi | ((UInt64)biased << 48) | fracHi);
+                }
             }
-
-            // =================================================================
-            // Target normal
-            // =================================================================
-            {
-                UInt128 frac = sig128 & (((UInt128)1 << QuadFracBits) - 1);
-                UInt64 fracLo = (UInt64)frac;
-                UInt64 fracHi = (UInt64)(frac >> 64) & 0x0000_FFFF_FFFF_FFFFUL;
-                return new Quadruple(fracLo, signHi | ((UInt64)biased << 48) | fracHi);
-            }
+           
         }
 
         [System.Runtime.TargetedPatchingOptOutAttribute("")]
@@ -1870,64 +1874,18 @@ namespace UltimateOrb {
 
         private const int EXP_BIAS = 16383;
 
-        private static bool IsIntegerCore(Quadruple value, int requiredTrailingZeros) {
-            const UInt64 ExponentMask = 0x7FFF000000000000UL;
-            const UInt64 FractionHighMask = 0x0000FFFFFFFFFFFFUL;
-
-            UInt64 hi = value._Hi64Bits;
-            UInt64 lo = value._Lo64Bits;
-
-            int exponent = (int)((hi & ExponentMask) >> 48);
-
-            // NaN and infinity are not integers.
-            if (exponent == 0x7FFF) {
-                return false;
-            }
-
-            // Zero is an integer and is even.
-            // All other subnormal values are not integers.
-            if (exponent == 0) {
-                return lo == 0 && (hi & FractionHighMask) == 0;
-            }
-
-            // |value| < 1, so only ±0 could satisfy either predicate.
-            if (exponent < EXP_BIAS) {
-                return false;
-            }
-
-            // Once the exponent is sufficiently large, all representable values
-            // necessarily have the required number of trailing zero bits.
-            if (exponent >= EXP_BIAS + 112 + requiredTrailingZeros) {
-                return true;
-            }
-
-            // Number of fraction/significand bits that must be zero.
-            int requiredZeroBits = EXP_BIAS + 112 + requiredTrailingZeros - exponent;
-
-            if (requiredZeroBits >= 64) {
-                // All low 64 bits must be zero.
-                if (lo != 0) {
-                    return false;
-                }
-
-                int highRequiredZeroBits = requiredZeroBits - 64;
-
-                return (hi & ((1UL << highRequiredZeroBits) - 1)) == 0;
-            } else {
-                return (lo & ((1UL << requiredZeroBits) - 1)) == 0;
-            }
-
-        }
+        public static bool IsInteger(Quadruple value)
+            => BinaryFloatingPointIeee754Arithmetic.IsInteger<Quadruple, System.UInt128>(value);
 
         public static bool IsEvenInteger(Quadruple value)
-            => IsIntegerCore(value, requiredTrailingZeros: 1);
+            => BinaryFloatingPointIeee754Arithmetic.IsEvenInteger<Quadruple, System.UInt128>(value);
+
+        public static bool IsOddInteger(Quadruple value)
+            => BinaryFloatingPointIeee754Arithmetic.IsOddInteger<Quadruple, System.UInt128>(value);
 
         public static bool IsImaginaryNumber(Quadruple value) {
             return false;
         }
-
-        public static bool IsInteger(Quadruple value)
-            => IsIntegerCore(value, requiredTrailingZeros: 0);
 
         public static bool IsQuietNaN(Quadruple value) {
             UInt64 hi = value._Hi64Bits;
@@ -1935,72 +1893,6 @@ namespace UltimateOrb {
 
             return (hi & 0x7FFF800000000000UL) == 0x7FFF800000000000UL
                 && ((hi & 0x00007FFFFFFFFFFFUL) != 0 || lo != 0);
-        }
-
-        public static bool IsOddInteger(Quadruple value) {
-            const UInt64 ExponentMask = 0x7FFF000000000000UL;
-            const UInt64 FractionHighMask = 0x0000FFFFFFFFFFFFUL;
-
-            UInt64 hi = value._Hi64Bits;
-            UInt64 lo = value._Lo64Bits;
-
-            int exponent = (int)((hi & ExponentMask) >> 48);
-
-            // NaN and infinity.
-            if (exponent == 0x7FFF) {
-                return false;
-            }
-
-            // Zero and subnormals cannot be odd integers.
-            if (exponent == 0) {
-                return false;
-            }
-
-            // Unbiased exponent.
-            int e = exponent - EXP_BIAS;
-
-            // |value| < 1.
-            if (e < 0) {
-                return false;
-            }
-
-            // Every integer with e > 112 is a multiple of 2.
-            if (e > 112) {
-                return false;
-            }
-
-            // Number of significand bits below the units bit.
-            int requiredZeroBits = 112 - e;
-
-            // Check that all bits below the units bit are zero.
-            if (requiredZeroBits >= 64) {
-                if (lo != 0) {
-                    return false;
-                }
-
-                int highRequiredZeroBits = requiredZeroBits - 64;
-
-                if (highRequiredZeroBits != 0 &&
-                    (hi & ((1UL << highRequiredZeroBits) - 1)) != 0) {
-                    return false;
-                }
-            } else if (requiredZeroBits != 0) {
-                if ((lo & ((1UL << requiredZeroBits) - 1)) != 0) {
-                    return false;
-                }
-            }
-
-            // The units bit must be one.
-            if (requiredZeroBits == 112) {
-                // Units bit is the implicit leading 1.
-                return true;
-            }
-
-            if (requiredZeroBits < 64) {
-                return ((lo >> requiredZeroBits) & 1) != 0;
-            }
-
-            return ((hi >> (requiredZeroBits - 64)) & 1) != 0;
         }
 
         public static bool IsPositive(Quadruple value) {
@@ -3500,7 +3392,7 @@ namespace UltimateOrb {
         /// </para>
         /// </remarks>
         internal static TFloat ToIeee754InterchangeBinaryNarrowing<TFloat, TFloatUIntBits>(Quadruple value)
-            where TFloat : unmanaged, IFloatingPointIeee754<TFloat>, IMinMaxValue<TFloat>
+            where TFloat : unmanaged, IBinaryFloatingPointIeee754<TFloat>, IMinMaxValue<TFloat>
             where TFloatUIntBits : unmanaged, IUnsignedNumber<TFloatUIntBits>, IBinaryInteger<TFloatUIntBits>, IMinMaxValue<TFloatUIntBits> {
             // ---- Source (binary128) constants ----
             const int QuadFracBits = 112;
@@ -3514,13 +3406,13 @@ namespace UltimateOrb {
                 "TFloat and TFloatUIntBits must have identical storage size.");
             Debug.Assert(TFloat.Radix == 2,
                 "Only radix-2 (binary) interchange formats can be produced from binary128.");
-            Debug.Assert(FloatingPointIeee754InterchageTypeTraits<TFloat>.IsSupported,
+            Debug.Assert(BinaryFloatingPointIeee754TypeTraitsInternal<TFloat>.IsSupported,
                 $"'{typeof(TFloat).FullName}' is not a supported IEEE 754 interchange format.");
 
             // ---- Target format parameters ----
-            int dstFracBits = FloatingPointIeee754InterchageTypeTraits<TFloat>.TrailingSignificandFieldBitWidth;   // t
-            int dstExpBits = FloatingPointIeee754InterchageTypeTraits<TFloat>.ExponentOrCombinationFieldBitWidth; // w
-            int dstBias = FloatingPointIeee754InterchageTypeTraits<TFloat>.MaxExponent;
+            int dstFracBits = BinaryFloatingPointIeee754TypeTraitsInternal<TFloat>.TrailingSignificandFieldBitWidth;   // t
+            int dstExpBits = BinaryFloatingPointIeee754TypeTraitsInternal<TFloat>.ExponentFieldBitWidth; // w
+            int dstBias = BinaryFloatingPointIeee754TypeTraitsInternal<TFloat>.MaxExponent;
             int dstExpMax = (1 << dstExpBits) - 1;
 
             Debug.Assert(dstFracBits > 0 && dstExpBits > 0);
@@ -3737,5 +3629,56 @@ namespace UltimateOrb {
         }
 #endif
 
+    }
+}
+
+namespace UltimateOrb {
+
+    public static partial class BitConverterExtensions {
+
+        extension(System.BitConverter) {
+
+#if !NET7_0_OR_GREATER
+            [Experimental("UoWIP")]
+            public static Int128 QuadrupleToInt128Bits(Quadruple value) {
+                 return Quadruple.BitConverter.QuadrupleToInt128Bits(value);
+            }
+
+            [Experimental("UoWIP")]
+            public static Quadruple Int128BitsToQuadruple(Int128 bits) {
+                return Quadruple.BitConverter.Int128BitsToQuadruple(bits);
+            }
+
+            [Experimental("UoWIP")]
+            public static UInt128 QuadrupleToUInt128Bits(Quadruple value) {
+                return Quadruple.BitConverter.QuadrupleToUInt128Bits(value);
+            }
+
+            [Experimental("UoWIP")]
+            public static Quadruple UInt128BitsToQuadruple(UInt128 bits) {
+                return Quadruple.BitConverter.UInt128BitsToQuadruple(bits);
+            }
+#else
+            [Experimental("UoWIP")]
+            public static System.Int128 QuadrupleToInt128Bits(Quadruple value) {
+                return Quadruple.BitConverter.QuadrupleToInt128Bits(value);
+            }
+
+            [Experimental("UoWIP")]
+            public static Quadruple Int128BitsToQuadruple(System.Int128 bits) {
+                return Quadruple.BitConverter.Int128BitsToQuadruple(bits);
+            }
+
+            [Experimental("UoWIP")]
+            public static System.UInt128 QuadrupleToUInt128Bits(Quadruple value) {
+                return Quadruple.BitConverter.QuadrupleToUInt128Bits(value);
+            }
+
+            [Experimental("UoWIP")]
+            public static Quadruple UInt128BitsToQuadruple(System.UInt128 bits) {
+                return Quadruple.BitConverter.UInt128BitsToQuadruple(bits);
+            }
+#endif
+        }
     }
 }

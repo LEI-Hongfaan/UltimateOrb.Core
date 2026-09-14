@@ -7,6 +7,7 @@ using System.Runtime.CompilerServices;
 [assembly: CLSCompliantAttribute(true)]
 
 [assembly: System.Runtime.CompilerServices.IgnoresAccessChecksToAttribute("System.Private.CoreLib")]
+[assembly: InternalsVisibleTo("UltimateOrb.Core.Tests", AllInternalsVisible = true)]
 
 namespace UltimateOrb {
 
