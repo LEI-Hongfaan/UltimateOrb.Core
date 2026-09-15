@@ -8,6 +8,28 @@ namespace UltimateOrb.Numerics {
 
     internal static partial class BinaryFloatingPointIeee754Arithmetic {
 
+        static partial class Constants<T> where T : IBinaryFloatingPointIeee754<T> {
+            public static T Two { get; } = T.One + T.One;
+            public static T Half { get; } = T.One / Two;
+        }
+
+        internal static bool IsInteger<TFloat>(TFloat value)
+            where TFloat : unmanaged, IBinaryFloatingPointIeee754<TFloat> {
+            return TFloat.IsZero(value - TFloat.Truncate(value));
+        }
+
+
+        internal static bool IsEvenInteger<TFloat>(TFloat value)
+            where TFloat : unmanaged, IBinaryFloatingPointIeee754<TFloat> {
+            return TFloat.IsZero(value - (TFloat.Truncate(value * Constants<TFloat>.Half) * Constants<TFloat>.Two));
+        }
+
+        internal static bool IsOddInteger<TFloat>(TFloat value)
+            where TFloat : unmanaged, IBinaryFloatingPointIeee754<TFloat> {
+            TFloat half = value * Constants<TFloat>.Half;
+            return TFloat.Abs(half - TFloat.Truncate(half)) == Constants<TFloat>.Half;
+        }
+
         private enum IntegerKind {
 
             NotInteger = 0,

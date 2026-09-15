@@ -44,6 +44,7 @@
     <Compile Remove="Numerics\BigFloat.cs" />
     <Compile Remove="Numerics\BigIntegerWrappers\IntX.cs" />
     <Compile Remove="Numerics\BigIntegerWrappers\UIntX.cs" />
+    <Compile Remove="Numerics\Binary128Arithmetic{Acos}.cs" />
     <Compile Remove="Numerics\Complex.cs" />
   </ItemGroup>
 
@@ -62,6 +63,7 @@
     <None Include="Numerics\BigFloat.cs" />
     <None Include="Numerics\BigIntegerWrappers\IntX.cs" />
     <None Include="Numerics\BigIntegerWrappers\UIntX.cs" />
+    <None Include="Numerics\Binary128Arithmetic{Acos}.cs" />
     <None Include="Numerics\Complex.cs" />
   </ItemGroup>
 

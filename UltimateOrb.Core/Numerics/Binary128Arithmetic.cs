@@ -430,6 +430,53 @@ namespace UltimateOrb.Numerics {
             }
         }
 
+        public static UInt64 Truncate(UInt64 lo, UInt64 hi, out UInt64 result_hi) {
+            unchecked {
+                var s = GetRawSignFromHi64Bits(hi);
+                var e = GetRawExponentFromHi64Bits(hi);
+                var f_hi = GetRawFractionHiFromHi64Bits(hi);
+
+                if (e == 0x7FFF) {
+                    // NaN / Inf
+                    if (0 != (f_hi | lo)) {
+                        return GetNaN(lo, hi, out result_hi);   // quiet NaN
+                    }
+                    result_hi = hi;                             // ±Inf unchanged
+                    return lo;
+                }
+
+                if (e < 0x3FFF) {
+                    // |value| < 1 — includes ±0, subnormals, and normalized values in (-1, 1).
+                    // Truncate toward zero => ±0.0 with the original sign.
+                    result_hi = (UInt64)s << (64 - 1);
+                    return 0;
+                }
+
+                if (e >= 0x406F) {
+                    // |value| >= 2^112 — every bit of the 113-bit significand sits at or
+                    // above the 1's place; nothing to clear.
+                    result_hi = hi;
+                    return lo;
+                }
+
+                // 0x3FFF <= e <= 0x406E.  Clear the low (0x406F - e) bits of the
+                // significand, where bit 112 is the implicit bit and bits 0..111
+                // are the fraction (lo = 0..63, f_hi = 64..111).
+                int n = 0x406F - e;                              // 1 .. 112
+                if (n < 64) {
+                    lo &= ~((1UL << n) - 1);
+                } else {
+                    lo = 0;
+                    int nh = n - 64;                             // 0 .. 48
+                    f_hi &= ~((1UL << nh) - 1);
+                }
+
+                result_hi = GetHi64BitsFromRawParts(s, e, f_hi);
+                return lo;
+            }
+        }
+
+
         /*
         public static UInt64 Sqrt(UInt64 value_lo, UInt64 value_hi, out UInt64 result_hi) {
             if (0 > unchecked(value_hi)) {

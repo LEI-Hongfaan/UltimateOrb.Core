@@ -1023,7 +1023,7 @@ namespace UltimateOrb.Numerics {
             where TFloat : unmanaged, IFloatingPointIeee754<TFloat>, IMinMaxValue<TFloat>
             where TFloatUIntBits : unmanaged, IUnsignedNumber<TFloatUIntBits>, IBinaryInteger<TFloatUIntBits> {
             int FloatBitSize = 8 * Unsafe.SizeOf<TFloat>();
-            int SignificandBitLength = TFloat.MinValue.GetSignificandBitLength() - 1; // includes implicit bit
+            int SignificandBitLength = TFloat.MinValue.GetSignificandBitLength() - 1; // GetSignificandBitLength includes implicit bit
             int ExponentBitLength = FloatBitSize - 1 - SignificandBitLength;
             int ExponentBias = (1 << (ExponentBitLength - 1)) - 1;
 
@@ -1047,8 +1047,8 @@ namespace UltimateOrb.Numerics {
             var mantissaMask = (TFloatUIntBits.One << SignificandBitLength) - TFloatUIntBits.One;
             var mantissaUInt = bits & mantissaMask;
 
-            // Convert exponent field to int using generic CreateTruncating
-            int exponent = int.CreateTruncating(exponentFieldUInt);
+            // Convert exponent field to int using generic CreateChecked
+            int exponent = int.CreateChecked(exponentFieldUInt);
 
             if (exponent == 0) {
                 // Subnormal number or zero

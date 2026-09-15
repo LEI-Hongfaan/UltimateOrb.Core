@@ -18,6 +18,7 @@ using UltimateOrb.Numerics;
 using UltimateOrb.Utilities;
 
 
+
 #pragma warning disable UoWIP // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
 using static UltimateOrb.Numerics.Binary128Arithmetic;
 #pragma warning restore UoWIP // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
@@ -625,7 +626,7 @@ namespace UltimateOrb {
 
             // ---- Guard rails (internal method: fail fast in Debug) ----
             Debug.Assert(Unsafe.SizeOf<TFloat>() == Unsafe.SizeOf<TFloatUIntBits>(),
-                "TFloat and TFloatUIntBits must have identical storage size.");
+                "T and TFloatUIntBits must have identical storage size.");
             Debug.Assert(TFloat.Radix == 2,
                 "Only radix-2 (binary) interchange formats can be converted to binary128.");
             Debug.Assert(BinaryFloatingPointIeee754TypeTraitsInternal<TFloat>.IsSupported,
@@ -877,7 +878,7 @@ namespace UltimateOrb {
                     return new Quadruple(fracLo, signHi | ((UInt64)biased << 48) | fracHi);
                 }
             }
-           
+
         }
 
         [System.Runtime.TargetedPatchingOptOutAttribute("")]
@@ -1835,7 +1836,13 @@ namespace UltimateOrb {
         }
 
         public static Quadruple Cbrt(Quadruple x) {
-            throw new NotImplementedException();
+            var lo = Binary128Arithmetic.Cbrt(x._Lo64Bits, x._Hi64Bits, out var hi);
+            return new Quadruple(lo, hi);
+        }
+
+        public static Quadruple Cbrt(Quadruple x, MidpointRounding mode) {
+            var lo = Binary128Arithmetic.Cbrt(x._Lo64Bits, x._Hi64Bits, mode, out var hi);
+            return new Quadruple(lo, hi);
         }
 
         public static Quadruple Cos(Quadruple x) {
@@ -1875,7 +1882,7 @@ namespace UltimateOrb {
         private const int EXP_BIAS = 16383;
 
         public static bool IsInteger(Quadruple value)
-            => BinaryFloatingPointIeee754Arithmetic.IsInteger<Quadruple, System.UInt128>(value);
+            => BinaryFloatingPointIeee754Arithmetic.IsInteger<Quadruple>(value);
 
         public static bool IsEvenInteger(Quadruple value)
             => BinaryFloatingPointIeee754Arithmetic.IsEvenInteger<Quadruple, System.UInt128>(value);
@@ -2028,9 +2035,20 @@ namespace UltimateOrb {
         }
 
         public static Quadruple Round(Quadruple x, int digits, MidpointRounding mode = MidpointRounding.ToEven) {
-            throw new NotImplementedException();
+            if (0 == digits) {
+                var lo = Binary128Arithmetic.Round(x._Lo64Bits, x._Hi64Bits,
+                    mode.ToFloatingPointRounding(), out var hi);
+                return new Quadruple(lo, hi);
+            }
+            {
+                throw new NotImplementedException();
+            }
         }
 
+        public static Quadruple Truncate(Quadruple value) {
+            var lo = Binary128Arithmetic.Truncate(value._Lo64Bits, value._Hi64Bits, out var hi);
+            return new Quadruple(lo, hi);
+        }
 
         public static Quadruple ScaleB(Quadruple x, int n) {
             throw new NotImplementedException();
@@ -2326,7 +2344,7 @@ namespace UltimateOrb {
         }
 
         public int GetSignificandBitLength() {
-            return 112;
+            return 112 + 1;
         }
 
         public int GetSignificandByteCount() {
@@ -2396,7 +2414,7 @@ namespace UltimateOrb {
             return true;
         }
         internal static bool TryConvertToPlainIntegerSigned<TInt>(Quadruple value, out TInt result)
-    where TInt : unmanaged, IBinaryInteger<TInt>, IMinMaxValue<TInt> {
+            where TInt : unmanaged, IBinaryInteger<TInt>, IMinMaxValue<TInt> {
             result = default;
 
             if (!TryExtractComponents(value, out bool negative, out UInt128 M, out int e)) {
@@ -2519,7 +2537,7 @@ namespace UltimateOrb {
             return true;
         }
         internal static bool TryRoundToPlainIntegerSigned<TInt>(Quadruple value, out TInt result)
-    where TInt : unmanaged, IBinaryInteger<TInt>, IMinMaxValue<TInt> {
+            where TInt : unmanaged, IBinaryInteger<TInt>, IMinMaxValue<TInt> {
             result = default;
 
             if (!TryExtractComponents(value, out bool negative, out UInt128 M, out int e)) {
@@ -2638,7 +2656,7 @@ namespace UltimateOrb {
             return true;
         }
         internal static bool TryRoundToPlainIntegerUnsigned<TInt>(Quadruple value, out TInt result)
-    where TInt : unmanaged, IBinaryInteger<TInt>, IMinMaxValue<TInt> {
+            where TInt : unmanaged, IBinaryInteger<TInt>, IMinMaxValue<TInt> {
             result = default;
 
             if (!TryExtractComponents(value, out bool negative, out UInt128 M, out int e)) {
@@ -3403,7 +3421,7 @@ namespace UltimateOrb {
 
             // ---- Guard rails (internal method: fail fast in Debug) ----
             Debug.Assert(Unsafe.SizeOf<TFloat>() == Unsafe.SizeOf<TFloatUIntBits>(),
-                "TFloat and TFloatUIntBits must have identical storage size.");
+                "T and TFloatUIntBits must have identical storage size.");
             Debug.Assert(TFloat.Radix == 2,
                 "Only radix-2 (binary) interchange formats can be produced from binary128.");
             Debug.Assert(BinaryFloatingPointIeee754TypeTraitsInternal<TFloat>.IsSupported,

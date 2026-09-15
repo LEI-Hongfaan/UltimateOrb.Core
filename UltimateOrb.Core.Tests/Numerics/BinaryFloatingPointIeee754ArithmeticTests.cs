@@ -13,7 +13,7 @@ namespace UltimateOrb.Numerics.Tests {
         public void SingleIsIntegerTest() {
             foreach (var item in BitPatternGenerator.GenerateSingle()) {
                 var s = Single.IsInteger(item);
-                var t = BinaryFloatingPointIeee754Arithmetic.IsInteger<Single, UInt32>(item);
+                var t = BinaryFloatingPointIeee754Arithmetic.IsInteger<Single>(item);
                 if (s != t) {
                     Assert.That(t, Is.EqualTo(s), $"Mismatch for value {item} (0x{BitConverter.SingleToInt32Bits(item):X8})");
                 }
@@ -24,7 +24,7 @@ namespace UltimateOrb.Numerics.Tests {
         public void DoubleIsIntegerTest() {
             foreach (var item in BitPatternGenerator.GenerateDouble()) {
                 var s = Double.IsInteger(item);
-                var t = BinaryFloatingPointIeee754Arithmetic.IsInteger<Double, UInt64>(item);
+                var t = BinaryFloatingPointIeee754Arithmetic.IsInteger<Double>(item);
                 if (s != t) {
                     Assert.That(t, Is.EqualTo(s), $"Mismatch for value {item} (0x{BitConverter.DoubleToInt64Bits(item):X16})");
                 }
@@ -37,7 +37,18 @@ namespace UltimateOrb.Numerics.Tests {
             foreach (var item in BitPatternGenerator.GenerateQuadruple()) {
                 var s = QuadrupleLib.Float128<QuadrupleLib.Accelerators.DefaultAccelerator>.IsInteger(
                     Unsafe.BitCast<Quadruple, Float128<QuadrupleLib.Accelerators.DefaultAccelerator>>(item));
-                var t = BinaryFloatingPointIeee754Arithmetic.IsInteger<Quadruple, System.UInt128>(item);
+                var t = BinaryFloatingPointIeee754Arithmetic.IsInteger<Quadruple>(item);
+                if (s != t) {
+                    Assert.That(t, Is.EqualTo(s), $"Mismatch for value {(double)item} (0x{BitConverter.QuadrupleToInt128Bits(item):X32})");
+                }
+            }
+        }
+
+        [Test]
+        public void QuadrupleIsIntegerTest0() {
+            foreach (var item in BitPatternGenerator.GenerateQuadruple()) {
+                var s = BinaryFloatingPointIeee754Arithmetic.IsInteger<Quadruple, System.UInt128>(item);
+                var t = BinaryFloatingPointIeee754Arithmetic.IsInteger<Quadruple>(item);
                 if (s != t) {
                     Assert.That(t, Is.EqualTo(s), $"Mismatch for value {(double)item} (0x{BitConverter.QuadrupleToInt128Bits(item):X32})");
                 }
@@ -49,7 +60,7 @@ namespace UltimateOrb.Numerics.Tests {
         public void SingleIsEvenIntegerTest() {
             foreach (var item in BitPatternGenerator.GenerateSingle()) {
                 var s = Single.IsEvenInteger(item);
-                var t = BinaryFloatingPointIeee754Arithmetic.IsEvenInteger<Single, UInt32>(item);
+                var t = BinaryFloatingPointIeee754Arithmetic.IsEvenInteger<Single>(item);
                 if (s != t) {
                     Assert.That(t, Is.EqualTo(s), $"Mismatch for value {item} (0x{BitConverter.SingleToInt32Bits(item):X8})");
                 }
@@ -60,7 +71,7 @@ namespace UltimateOrb.Numerics.Tests {
         public void DoubleIsEvenIntegerTest() {
             foreach (var item in BitPatternGenerator.GenerateDouble()) {
                 var s = Double.IsEvenInteger(item);
-                var t = BinaryFloatingPointIeee754Arithmetic.IsEvenInteger<Double, UInt64>(item);
+                var t = BinaryFloatingPointIeee754Arithmetic.IsEvenInteger<Double>(item);
                 if (s != t) {
                     Assert.That(t, Is.EqualTo(s), $"Mismatch for value {item} (0x{BitConverter.DoubleToInt64Bits(item):X16})");
                 }
@@ -73,7 +84,18 @@ namespace UltimateOrb.Numerics.Tests {
             foreach (var item in BitPatternGenerator.GenerateQuadruple()) {
                 var s = QuadrupleLib.Float128<QuadrupleLib.Accelerators.DefaultAccelerator>.IsEvenInteger(
                     Unsafe.BitCast<Quadruple, Float128<QuadrupleLib.Accelerators.DefaultAccelerator>>(item));
-                var t = BinaryFloatingPointIeee754Arithmetic.IsEvenInteger<Quadruple, System.UInt128>(item);
+                var t = BinaryFloatingPointIeee754Arithmetic.IsEvenInteger<Quadruple>(item);
+                if (s != t) {
+                    Assert.That(t, Is.EqualTo(s), $"Mismatch for value {(double)item} (0x{BitConverter.QuadrupleToInt128Bits(item):X32})");
+                }
+            }
+        }
+
+        [Test]
+        public void QuadrupleIsEvenIntegerTest0() {
+            foreach (var item in BitPatternGenerator.GenerateQuadruple()) {
+                var s = BinaryFloatingPointIeee754Arithmetic.IsEvenInteger<Quadruple, System.UInt128>(item);
+                var t = BinaryFloatingPointIeee754Arithmetic.IsEvenInteger<Quadruple>(item);
                 if (s != t) {
                     Assert.That(t, Is.EqualTo(s), $"Mismatch for value {(double)item} (0x{BitConverter.QuadrupleToInt128Bits(item):X32})");
                 }
@@ -85,7 +107,7 @@ namespace UltimateOrb.Numerics.Tests {
         public void SingleIsOddIntegerTest() {
             foreach (var item in BitPatternGenerator.GenerateSingle()) {
                 var s = Single.IsOddInteger(item);
-                var t = BinaryFloatingPointIeee754Arithmetic.IsOddInteger<Single, UInt32>(item);
+                var t = BinaryFloatingPointIeee754Arithmetic.IsOddInteger<Single>(item);
                 if (s != t) {
                     Assert.That(t, Is.EqualTo(s), $"Mismatch for value {item} (0x{BitConverter.SingleToInt32Bits(item):X8})");
                 }
@@ -96,7 +118,7 @@ namespace UltimateOrb.Numerics.Tests {
         public void DoubleIsOddIntegerTest() {
             foreach (var item in BitPatternGenerator.GenerateDouble()) {
                 var s = Double.IsOddInteger(item);
-                var t = BinaryFloatingPointIeee754Arithmetic.IsOddInteger<Double, UInt64>(item);
+                var t = BinaryFloatingPointIeee754Arithmetic.IsOddInteger<Double>(item);
                 if (s != t) {
                     Assert.That(t, Is.EqualTo(s), $"Mismatch for value {item} (0x{BitConverter.DoubleToInt64Bits(item):X16})");
                 }
@@ -109,7 +131,19 @@ namespace UltimateOrb.Numerics.Tests {
             foreach (var item in BitPatternGenerator.GenerateQuadruple()) {
                 var s = QuadrupleLib.Float128<QuadrupleLib.Accelerators.DefaultAccelerator>.IsOddInteger(
                     Unsafe.BitCast<Quadruple, Float128<QuadrupleLib.Accelerators.DefaultAccelerator>>(item));
-                var t = BinaryFloatingPointIeee754Arithmetic.IsOddInteger<Quadruple, System.UInt128>(item);
+                //var t = BinaryFloatingPointIeee754Arithmetic.IsOddInteger<Quadruple, System.UInt128>(item);
+                var t = BinaryFloatingPointIeee754Arithmetic.IsOddInteger<Quadruple>(item);
+                if (s != t) {
+                    Assert.That(t, Is.EqualTo(s), $"Mismatch for value {(double)item} (0x{BitConverter.QuadrupleToInt128Bits(item):X32})");
+                }
+            }
+        }
+
+        [Test]
+        public void QuadrupleIsOddIntegerTest0() {
+            foreach (var item in BitPatternGenerator.GenerateQuadruple()) {
+                var s = BinaryFloatingPointIeee754Arithmetic.IsOddInteger<Quadruple, System.UInt128>(item);
+                var t = BinaryFloatingPointIeee754Arithmetic.IsOddInteger<Quadruple>(item);
                 if (s != t) {
                     Assert.That(t, Is.EqualTo(s), $"Mismatch for value {(double)item} (0x{BitConverter.QuadrupleToInt128Bits(item):X32})");
                 }

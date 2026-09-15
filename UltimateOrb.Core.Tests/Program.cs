@@ -26,12 +26,14 @@ namespace UltimateOrb.Core.Tests {
     using System.Runtime.Intrinsics;
     using System.Text.RegularExpressions;
     using System.Threading;
+    using UltimateOrb.Collections.Generic.Interfaces.RefReturn_Huge;
     using UltimateOrb.Mathematics.Exact;
     using UltimateOrb.Mathematics.Geometry;
     using UltimateOrb.Numerics;
     using UltimateOrb.Numerics.Specialized;
     using UltimateOrb.Numerics.Tests;
     using UltimateOrb.Plain.ValueTypes;
+    using UltimateOrb.Unmanaged;
 
     // using UltimateOrb.Runtime.CompilerServices.Tests;
 
@@ -151,8 +153,44 @@ namespace UltimateOrb.Core.Tests {
             byte c;
         }
 
+        readonly ref struct u13x64_ref {
+
+            readonly ref InlineArray13<UInt64> dataRef;
+
+            public ref UInt64 this[int index] => ref dataRef[index];
+        }
+
+        readonly ref struct u13x64_ref_readonly {
+
+            readonly ref readonly InlineArray13<UInt64> dataRef;
+
+            public ref readonly UInt64 this[int index] => ref dataRef[index];
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private static int Main(string[] args) {
+            {
+
+                
+                Console.WriteLine($@"{((double)(Quadruple)3.0).ToString()}");
+                Console.WriteLine($@"{((BigRational)3.0).ToString()}");
+                Console.WriteLine($@"{((BigRational)(Quadruple)3.0).ToString()}");
+
+                {
+                    var sfas0 = Quadruple.Cbrt(3.0);
+                    var sfas1 = QuadrupleLib.Float128<QuadrupleLib.Accelerators.DefaultAccelerator>.Cbrt(3.0);
+                    Console.WriteLine($@"{((BigRational)sfas0).ToString()}");
+                    Console.WriteLine($@"{sfas1}");
+                }
+                {
+                    var sfas0 = Quadruple.Sqrt(3.0);
+                    var sfas1 = QuadrupleLib.Float128<QuadrupleLib.Accelerators.DefaultAccelerator>.Sqrt(3.0);
+                    Console.WriteLine($@"{((BigRational)sfas0).ToString()}");
+                    Console.WriteLine($@"{sfas1}");
+                }
+
+                return 0;
+            }
             {
                 {
                     var asdfas = checked(unchecked((System.UInt128)System.Int128.MinValue) / unchecked(-System.UInt128.One));
@@ -177,7 +215,7 @@ namespace UltimateOrb.Core.Tests {
 
                     Console.WriteLine($@"{asdfas}");
                 }
-
+                
 
                 return 0;
 
@@ -191,7 +229,7 @@ namespace UltimateOrb.Core.Tests {
                 return 0;
             }
             {
-                var t = BinaryFloatingPointIeee754Arithmetic.IsInteger<Single, UInt32>(1);
+                var t = BinaryFloatingPointIeee754Arithmetic.IsInteger<Single>(1);
 
                 var sdfa = BitPatternGenerator.GenerateSingle().LongCount();
                 Console.WriteLine(sdfa);
