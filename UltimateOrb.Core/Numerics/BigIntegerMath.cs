@@ -55,5 +55,28 @@ namespace UltimateOrb.Numerics {
             Debug.Assert(g >= 0);
             return g > int.MaxValue ? ILogSpecialResults.ILogNaN : unchecked((int)g);
         }
+
+        internal static int ILog10(BigInteger num, BigInteger den) {
+            Debug.Assert(den > 0);
+            Debug.Assert(num > 0);
+            if (num >= den) {
+                return BigIntegerMath.ILog10(num / den);
+            } else {
+                var (q, r) = BigInteger.DivRem(den, num);
+                // q = floor(den/num), r = den % num
+                // q >= 1 because num < den
+                var d = BigIntegerMath.ILog10(q); // floor(log10(q))
+                if (d == ILogSpecialResults.ILogNaN) {
+                    // overflow
+                    return d;
+                }
+                Debug.Assert(d >= 0);
+                // r != 0 ->den/num is strictly greater than q (non-integer), so ceil(log10(den/num)) == d+1
+                // r == 0 -> den is divisible by num, t == q is an integer
+                // If q is exactly 10^d then log10(t) == d and floor(log10(value)) == -d
+                // otherwise log10(t) in (d, d+1) so floor(log10(value)) == -(d+1)
+                return r.IsZero && BigIntegerSmallExp10Module.Exp10(d) == q ? unchecked(-d) : unchecked(-(d + 1));
+            }
+        }
     }
 }

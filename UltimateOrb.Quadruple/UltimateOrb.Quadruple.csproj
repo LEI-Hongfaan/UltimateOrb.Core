@@ -115,7 +115,8 @@
 	<Compile Include="..\UltimateOrb.Core\Quadruple.cs" Link="Quadruple.cs" />
 	<Compile Include="..\UltimateOrb.Core\INumberBaseFriendInternal.cs" Link="INumberBaseFriendInternal.cs" />
 	<Compile Include="..\UltimateOrb.Core\FloatingPointRounding.cs" Link="FloatingPointRounding.cs" />  
-	<Compile Include="..\UltimateOrb.Core\FloatingPointClass.cs" Link="FloatingPointClass.cs" />  
+	<Compile Include="..\UltimateOrb.Core\FloatingPointClass.cs" Link="FloatingPointClass.cs" />
+	<Compile Include="..\UltimateOrb.Core\Numerics\FloatingPointExceptionFlags.cs" Link="Numerics\FloatingPointExceptionFlags.cs" />
 	<Compile Include="..\UltimateOrb.Core\Numerics\Binary128Arithmetic.cs" Link="Numerics\Binary128Arithmetic.cs" />
 	<Compile Include="..\UltimateOrb.Core\Numerics\Binary128Arithmetic{Cbrt}.cs" Link="Numerics\Binary128Arithmetic{Cbrt}.cs" />
 	<Compile Include="..\UltimateOrb.Core\Numerics\BinaryFloatingPointIeee754Arithmetic.cs" Link="Numerics\BinaryFloatingPointIeee754Arithmetic.cs" />

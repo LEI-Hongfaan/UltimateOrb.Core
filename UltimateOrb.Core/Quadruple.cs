@@ -3,6 +3,7 @@
 #define NAN_PERMISSIVE
 #endif
 using System;
+using System.Buffers;
 using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -12,6 +13,7 @@ using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Intrinsics;
+using System.Runtime.Serialization;
 using System.Text;
 using UltimateOrb.Mathematics;
 using UltimateOrb.Numerics;
@@ -1153,40 +1155,57 @@ namespace UltimateOrb {
             return (Quadruple)(int)value;
         }
 
-        public override string ToString() {
-            var f_lo = this.RawFractionLo;
-            var f_hi = this.RawFractionHi;
-            var n = 0 != this.RawSign;
-            var e = this.RawExponent;
-            if (0X7fff == e) {
-                if (0 == (f_lo | f_hi)) {
-                    return n ? "-Infinity" : "Infinity";
+        public string ToString(string? format) => ToString(format, null);
+
+        public string ToString(string? format, IFormatProvider? provider) {
+            var @this = this;
+
+            foreach (var i in (ReadOnlySpan<int>)[64, 256]) {
+                var (flowControl, value) = TryToStringLocal(@this, format, provider, i);
+                if (!flowControl) {
+                    return value!;
                 }
-                return "NaN";
             }
-            if (0 == e) {
-                e += 1;
-            } else {
-                f_hi += 0x0001000000000000;
+
+            for (int i = 1024; i < Array.MaxLength; i *= 4) {
+                var (flowControl, value) = TryToStringArrayPool(@this, format, provider, i);
+                if (!flowControl) {
+                    return value!;
+                }
             }
-            e -= FractionBitCount + 0x3fff;
-            var p = f_lo | ((BigInteger)f_hi << 64);
-            var q = (BigInteger)(n ? -1 : 1);
-            if (0 > e) {
-                q <<= -e;
-            } else {
-                p <<= e;
+            {
+                var i = Array.MaxLength;
+                var (flowControl, value) = TryToStringArrayPool(@this, format, provider, i);
+                if (!flowControl) {
+                    return value!;
+                }
+                throw new FormatException("The format produced too large.");
             }
-#if STANDALONE_BINARYN_LIBRARY
-            // TODO: Fix ToString
-            return ((double)this).ToString();
-#else
-#pragma warning disable UoWIP // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
-            return BigRational.FromFraction(p, q).ToString();
-#pragma warning restore UoWIP // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
-#endif
-            return base.ToString();
+
+            static (bool flowControl, string? value) TryToStringLocal(Quadruple @this, string? format, IFormatProvider? provider, int bufferSize) {
+                Span<char> stack = stackalloc char[bufferSize];
+                if (@this.TryFormat(stack, out int n, format.AsSpan(), provider)) return (flowControl: false, value: new string(stack[..n]));
+                return (flowControl: true, value: null);
+            }
+
+            static (bool flowControl, string? value) TryToStringArrayPool(Quadruple @this, string? format, IFormatProvider? provider, int bufferSize) {
+                var heap = ArrayPool<char>.Shared.Rent(bufferSize);
+                try {
+                    if (@this.TryFormat(heap, out int n, format.AsSpan(), provider)) {
+                        return (flowControl: false, value: new string(heap, 0, n));
+                    }
+                    return (flowControl: true, value: null);
+                } finally {
+                    ArrayPool<char>.Shared.Return(heap);
+                }
+            }
         }
+
+
+
+        public string ToString(IFormatProvider? provider) => ToString(null, provider);
+
+        public override string ToString() => ToString(null, null);
         #endregion
 
         public static bool IsPow2(Quadruple value) {
@@ -2359,30 +2378,6 @@ namespace UltimateOrb {
             throw new InvalidCastException(SR.Format(SR.InvalidCast_FromTo, nameof(Quadruple), nameof(DateTime)));
         }
 
-        public string ToString(string? format, IFormatProvider? formatProvider) {
-            var @this = this;
-            if (IsNaN(@this)) {
-                return "NaN";
-            }
-            if (IsPositiveInfinity(@this)) {
-                return "∞";
-            }
-            if (IsNegativeInfinity(@this)) {
-                return "-∞";
-            }
-            var sb = new StringBuilder();
-            if (IsNegative(@this)) {
-                sb.Append('-');
-            }
-            throw new NotImplementedException();
-
-            return sb.ToString();
-        }
-
-        public string ToString(IFormatProvider? provider) {
-            return ToString(null, provider);
-        }
-
         // value = (-1)^negative * M * 2^e,  M ∈ [2^112, 2^113) for normals.
         // For ±0 and subnormals: M = 0, e = 0, negative = false (they round to +0).
         private static bool TryExtractComponents(
@@ -2815,19 +2810,6 @@ namespace UltimateOrb {
             return ConvertInternal.DefaultToType(in this, conversionType, provider);
         }
 
-        public bool TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider) {
-            // TODO: implement properly
-            var s = ToString(format.ToString(), provider);
-            if (s.Length <= destination.Length) {
-                s.AsSpan().CopyTo(destination);
-                charsWritten = s.Length;
-                return true;
-            } else {
-                charsWritten = 0;
-                return false;
-            }
-        }
-
         public bool TryWriteExponentBigEndian(Span<byte> destination, out int bytesWritten) {
             if (destination.Length >= sizeof(Int16)) {
                 var exponent = unchecked((Int16)(this.ExtractRawBiasedExponentAndRawSignificand(out _) - EXP_BIAS));
@@ -3254,6 +3236,930 @@ namespace UltimateOrb {
                 Debug.Assert(v.GetBitLength() <= 128);
                 return unchecked((UltimateOrb.UInt128)v);
             }
+        }
+    }
+}
+
+namespace UltimateOrb {
+    public readonly partial struct Quadruple {
+
+        public bool TryFormat(Span<char> destination, out int charsWritten,
+                              ReadOnlySpan<char> format, IFormatProvider? provider)
+            => QuadrupleFormatter.TryFormat(_Lo64Bits, _Hi64Bits,
+                                            destination, out charsWritten, format, provider);
+
+        // ----------------------------------------------------------------------------
+        // Bit decomposition:  |v| = Significand · 2^Exp2
+        //   normal:    sig ∈ [2^112, 2^113), exp2 ∈ [-16494, 16271]
+        //   subnormal: sig ∈ [1, 2^112),   exp2 = -16494
+        // ----------------------------------------------------------------------------
+        internal readonly struct Decoded {
+            public readonly bool IsNegative, IsNaN, IsPosInf, IsNegInf, IsZero;
+            public readonly BigInteger Significand;
+            public readonly int Exp2;
+
+            private Decoded(bool neg, bool nan, bool posinf, bool neginf, bool zero,
+                            BigInteger sig, int e2) {
+                IsNegative = neg; IsNaN = nan; IsPosInf = posinf; IsNegInf = neginf;
+                IsZero = zero; Significand = sig; Exp2 = e2;
+            }
+
+            public static Decoded Decode(ulong lo, ulong hi) {
+                bool neg = (hi >> 63) != 0;
+                int biased = (int)((hi >> 48) & 0x7FFF);
+                ulong hiMant = hi & 0x0000_FFFF_FFFF_FFFFUL;
+                BigInteger fr = ((BigInteger)hiMant << 64) | lo;
+
+                if (biased == 0x7FFF)
+                    return fr.IsZero
+                        ? (neg ? new Decoded(true, false, false, true, false, default, 0)
+                               : new Decoded(false, false, true, false, false, default, 0))
+                        : new Decoded(neg, true, false, false, false, default, 0);
+
+                if (biased == 0)
+                    return fr.IsZero
+                        ? new Decoded(neg, false, false, false, true, default, 0)
+                        : new Decoded(neg, false, false, false, false, fr, -16494);
+
+                return new Decoded(neg, false, false, false, false,
+                                   fr | (BigInteger.One << 112), biased - 16495);
+            }
+        }
+
+        // ----------------------------------------------------------------------------
+        // Small helpers
+        // ----------------------------------------------------------------------------
+        internal static class BigIntLog {
+            // floor(log2(x)) for x > 0.  Trivial because BigInteger gives us bit length.
+            public static int ILog2(BigInteger x) {
+                Debug.Assert(x.Sign > 0);
+                return (int)(x.GetBitLength() - 1);
+            }
+        }
+
+        internal ref struct Writer {
+            public Span<char> Buf; public int Pos;
+            public Writer(Span<char> buf) { Buf = buf; Pos = 0; }
+            public bool TryAppend(char c) { if (Pos >= Buf.Length) return false; Buf[Pos++] = c; return true; }
+            public bool TryAppend(scoped ReadOnlySpan<char> s) { if (s.Length > Buf.Length - Pos) return false; s.CopyTo(Buf[Pos..]); Pos += s.Length; return true; }
+            public bool TryAppend(string s) => TryAppend(s.AsSpan());
+            public bool TryAppendZeros(int n) { if (n > Buf.Length - Pos) return false; Buf.Slice(Pos, n).Fill('0'); Pos += n; return true; }
+        }
+
+        internal readonly struct Ratio {
+            public readonly BigInteger Num, Den;
+            private Ratio(BigInteger n, BigInteger d) { Num = n; Den = d; }
+            public static Ratio FromSigExp2(BigInteger sig, int exp2)
+                => exp2 >= 0 ? new Ratio(sig << exp2, BigInteger.One)
+                             : new Ratio(sig, BigInteger.One << -exp2);
+            public static Ratio FromDec(BigInteger dNum, int dExp)
+                => dExp >= 0 ? new Ratio(dNum * BigInteger.Pow(10, dExp), BigInteger.One)
+                             : new Ratio(dNum, BigInteger.Pow(10, -dExp));
+            public static Ratio Half(in Ratio a) => new Ratio(a.Num, a.Den << 1);
+            public static Ratio Midpoint(in Ratio a, in Ratio b)
+                => new Ratio(a.Num * b.Den + b.Num * a.Den, (a.Den * b.Den) << 1);
+            public static int Compare(in Ratio a, in Ratio b)
+                => (a.Num * b.Den).CompareTo(b.Num * a.Den);
+        }
+
+        // ----------------------------------------------------------------------------
+        // Exact decimal digit extraction
+        // ----------------------------------------------------------------------------
+        internal static class DecimalDigits {
+            private const double Log10Of2 = 0.30102999566398119521;
+            // Any Quadruple's exact decimal has at most ~11,600 significant digits
+            // and at most 16,494 fractional positions.  Cap above both.
+            public const int MaxSignificantComputed = 11_563 + 4;
+            public const int MaxFractionalComputed = 16_494 + 4;
+
+            // sign(sig · 2^exp2  −  10^E), exact.
+            public static int CompareSigExp2To10Pow(BigInteger sig, int exp2, int E) {
+                if (E >= 0) {
+                    int d = exp2 - E;
+                    BigInteger p5 = BigInteger.Pow(5, E);
+                    return d >= 0 ? (sig << d).CompareTo(p5) : sig.CompareTo(p5 << -d);
+                } else {
+                    int ne = -E, d = exp2 + ne;
+                    BigInteger p5 = BigInteger.Pow(5, ne);
+                    return d >= 0 ? ((sig << d) * p5).CompareTo(BigInteger.One)
+                                  : (sig * p5).CompareTo(BigInteger.One << -d);
+                }
+            }
+
+            // floor(log10(|v|)),  exact.
+            public static int DecimalExponent(BigInteger sig, int exp2) {
+                Debug.Assert(sig.Sign > 0);
+                long log2v = (long)BigIntLog.ILog2(sig) + exp2;
+                int E = (int)System.Math.Floor(log2v * Log10Of2);
+
+                // At most ±1 correction.
+                while (CompareSigExp2To10Pow(sig, exp2, E) < 0) E--;
+                while (CompareSigExp2To10Pow(sig, exp2, E + 1) >= 0) E++;
+                return E;
+            }
+
+            // round-half-to-even(sig · 2^exp2 · 10^k), exact.
+            public static BigInteger RoundToScale(BigInteger sig, int exp2, int k) {
+                int e2 = exp2 + k;
+                BigInteger num = sig, den = BigInteger.One;
+                if (e2 >= 0) num <<= e2; else den <<= -e2;
+                if (k >= 0) num *= BigInteger.Pow(5, k);
+                else den *= BigInteger.Pow(5, -k);
+
+                BigInteger q = BigInteger.DivRem(num, den, out BigInteger r);
+                BigInteger twice = r << 1;
+                int c = twice.CompareTo(den);
+                if (c > 0 || (c == 0 && !q.IsEven)) q += BigInteger.One;
+                return q;
+            }
+            public static void GetSignificant(BigInteger sig, int exp2, int N,
+                                                out string digits, out int decExp) {
+                // N is the logical digit count.  We compute at most
+                // MaxSignificantComputed and pad with zeros in the writer.
+                int compute = N > MaxSignificantComputed ? MaxSignificantComputed : N;
+                if (sig.IsZero) { digits = "0"; decExp = 1; return; }
+
+                int E = DecimalExponent(sig, exp2);
+                BigInteger q = RoundToScale(sig, exp2, compute - 1 - E);
+                string s = q.ToString();
+                if (s.Length == compute + 1) { s = s[..compute]; E++; }
+                digits = s; decExp = E + 1;
+            }
+
+            public static void GetFixed(BigInteger sig, int exp2, int fracDigits,
+                                        out string digits, out int decExp) {
+                int compute = fracDigits > MaxFractionalComputed
+                            ? MaxFractionalComputed : fracDigits;
+                if (sig.IsZero) {
+                    digits = new string('0', System.Math.Max(1, compute + 1));
+                    // NOTE: decExp uses `compute`, not `fracDigits`.
+                    decExp = digits.Length - compute;
+                    return;
+                }
+                BigInteger q = RoundToScale(sig, exp2, compute);
+                digits = q.ToString();
+                // decExp = digits.Length - compute, NOT digits.Length - fracDigits.
+                // The value is q / 10^compute; the writer will append zeros beyond
+                // `compute` fractional digits without changing decExp.
+                decExp = digits.Length - compute;
+            }
+        }
+
+        // ----------------------------------------------------------------------------
+        // Shortest round-trip digits, via exact basin test
+        // ----------------------------------------------------------------------------
+        internal static class RoundTripDigits {
+            private const int MaxN = 37;   // ⌈113·log10 2⌉ + 1
+
+
+            static readonly BigInteger p112 = BigInteger.One << 112;
+            static readonly BigInteger p113 = BigInteger.One << 113;
+
+
+            // Neighbours of sig · 2^exp2.  A zero result means "no neighbour"
+            // (below smallest positive / above largest finite).
+            private static void Neighbours(BigInteger sig, int exp2,
+                                           out BigInteger pS, out int pE,
+                                           out BigInteger nS, out int nE) {
+                // prev
+                if (sig == BigInteger.One && exp2 == -16494) { pS = 0; pE = 0; } else if (sig == p112 && exp2 > -16494) { pS = p113 - 1; pE = exp2 - 1; } else { pS = sig - 1; pE = exp2; }
+
+                // next
+                if (sig == p113 - 1 && exp2 == 16271) { nS = 0; nE = 0; }   // don't touch pE
+                else if (sig == p113 - 1) { nS = p112; nE = exp2 + 1; } else { nS = sig + 1; nE = exp2; }
+            }
+
+            // Does decimal  dNum · 10^dExp  lie in the (nearest-even) basin of sig · 2^exp2?
+            public static bool IsInBasin(BigInteger sig, int exp2, BigInteger dNum, int dExp) {
+                Debug.Assert(sig.Sign > 0);
+                var v = Ratio.FromSigExp2(sig, exp2);
+                var d = Ratio.FromDec(dNum, dExp);
+
+                bool sigEven = sig.IsEven;
+                Neighbours(sig, exp2, out var pS, out var pE, out var nS, out var nE);
+
+                // Lower boundary
+                if (pS.IsZero) {
+                    // v is the smallest positive Quadruple → mid-point with 0
+                    var vm = Ratio.Half(v);
+                    int c = Ratio.Compare(d, vm);
+                    if (c < 0) return false;
+                    if (c == 0 && !sigEven) return false;
+                } else {
+                    var prev = Ratio.FromSigExp2(pS, pE);
+                    var mid = Ratio.Midpoint(v, prev);
+                    int c = Ratio.Compare(d, mid);
+                    if (c < 0) return false;
+                    if (c == 0 && !sigEven) return false;
+                }
+
+                // Upper boundary
+                if (!nS.IsZero) {
+                    var next = Ratio.FromSigExp2(nS, nE);
+                    var mid = Ratio.Midpoint(v, next);
+                    int c = Ratio.Compare(d, mid);
+                    if (c > 0) return false;
+                    if (c == 0 && !sigEven) return false;
+                } else {
+                    // next "would-be" Quadruple is 1.000…0 × 2^16384
+                    var next = Ratio.FromSigExp2(p112, 16272);
+                    var mid = Ratio.Midpoint(v, next);
+                    int c = Ratio.Compare(d, mid);
+                    if (c > 0) return false;
+                    if (c == 0 && !sigEven) return false;
+                }
+                return true;
+            }
+
+            // Shortest decimal that round-trips.
+            public static void Get(BigInteger sig, int exp2, out string digits, out int decExp) {
+                for (int N = 1; N <= MaxN; N++) {
+                    DecimalDigits.GetSignificant(sig, exp2, N, out var d, out var e);
+                    var dNum = BigInteger.Parse(d);
+                    int dExp = e - d.Length;
+
+                    if (IsInBasin(sig, exp2, dNum, dExp)) {
+                        digits = d; decExp = e; return;
+                    }
+                }
+                // Unreachable for any finite, non-zero Quadruple.
+                DecimalDigits.GetSignificant(sig, exp2, MaxN, out digits, out decExp);
+            }
+        }
+        internal static class QuadrupleFormatter {
+            public static bool TryFormat(ulong lo, ulong hi, Span<char> dst, out int written,
+                                         ReadOnlySpan<char> format, IFormatProvider? provider) {
+                var nfi = NumberFormatInfo.GetInstance(provider);
+                var d = Decoded.Decode(lo, hi);
+
+                if (d.IsNaN) return Copy(nfi.NaNSymbol.AsSpan(), dst, out written);
+                if (d.IsPosInf) return Copy(nfi.PositiveInfinitySymbol.AsSpan(), dst, out written);
+                if (d.IsNegInf) return Copy(nfi.NegativeInfinitySymbol.AsSpan(), dst, out written);
+
+                if (format.IsEmpty) return General(dst, out written, d, -1, nfi);
+
+                char c = format[0];
+                int precision = -1;
+                bool hasPrec = false;
+                bool stdValid = char.IsLetter(c);
+
+                if (stdValid && format.Length > 1) {
+                    var rest = format[1..];
+                    bool allDigits = rest.Length > 0;
+                    for (int i = 0; i < rest.Length && allDigits; i++)
+                        if (rest[i] < '0' || rest[i] > '9') allDigits = false;
+
+                    if (allDigits) {
+                        long prec = 0;
+                        for (int i = 0; i < rest.Length; i++) {
+                            prec = prec * 10 + (rest[i] - '0');
+                            if (prec > 999_999_999)
+                                throw new FormatException(
+                                    $"Precision specifier in '{format.ToString()}' exceeds the maximum of 999,999,999.");
+                        }
+                        precision = (int)prec;
+                        hasPrec = true;
+                    } else {
+                        stdValid = false;
+                    }
+                }
+
+                if (!stdValid)
+                    return CustomFormat(dst, out written, d, format, nfi);
+
+                switch (char.ToUpperInvariant(c)) {
+                case 'G': return General(dst, out written, d, hasPrec ? precision : -1, nfi);
+                case 'F':
+                    return Fixed(dst, out written, d,
+                                              hasPrec ? precision : nfi.NumberDecimalDigits, nfi);
+                case 'E':
+                    return Exponential(dst, out written, d,
+                                              hasPrec ? precision : 6, char.IsUpper(c), nfi);
+                case 'N':
+                    return Numeric(dst, out written, d,
+                                              hasPrec ? precision : nfi.NumberDecimalDigits, nfi);
+                case 'R': return RoundTrip(dst, out written, d, nfi);
+                case 'C':
+                    return Currency(dst, out written, d,
+                                              hasPrec ? precision : nfi.CurrencyDecimalDigits, nfi);
+                case 'P':
+                    return Percent(dst, out written, d,
+                                              hasPrec ? precision : nfi.PercentDecimalDigits, nfi);
+                default:
+                    throw new FormatException($"Format specifier '{c}' was invalid.");
+                }
+            }
+
+            // ------------------------------------------------------------------ util
+            private static bool Copy(ReadOnlySpan<char> s, Span<char> dst, out int written) {
+                if (s.Length > dst.Length) { written = 0; return false; }
+                s.CopyTo(dst); written = s.Length; return true;
+            }
+            private static bool TryParsePrecision(ReadOnlySpan<char> s, out int v) {
+                v = 0;
+                if (s.IsEmpty) return false;
+                long acc = 0;
+                foreach (char c in s) {
+                    if (c < '0' || c > '9') return false;
+                    acc = acc * 10 + (c - '0');
+                    if (acc > 999_999_999) return false;
+                }
+                v = (int)acc; return true;
+            }
+            private static bool Sign(bool neg, ref Writer w, NumberFormatInfo nfi)
+                => !neg || w.TryAppend(nfi.NegativeSign);
+            private static string TrimZeros(string s) {
+                int n = s.Length;
+                while (n > 1 && s[n - 1] == '0') n--;
+                return s[..n];
+            }
+
+            // Emit "0.digits × 10^decExp" as fixed-point, padding with 0/omitting as needed.
+            // Replaces WriteFixed entirely.
+            private static bool WriteFixed(string digits, int decExp, int fracDigits,
+                                           NumberFormatInfo nfi, ref Writer w) {
+                if (decExp <= 0) {
+                    if (!w.TryAppend('0')) return false;
+                    if (fracDigits <= 0) return true;
+                    if (!w.TryAppend(nfi.NumberDecimalSeparator)) return false;
+                    int lead = System.Math.Min(-decExp, fracDigits);
+                    if (!w.TryAppendZeros(lead)) return false;
+                    int fromDigits = System.Math.Min(digits.Length, fracDigits - lead);
+                    if (fromDigits > 0 && !w.TryAppend(digits.AsSpan(0, fromDigits))) return false;
+                    int trailing = fracDigits - lead - fromDigits;
+                    if (trailing > 0 && !w.TryAppendZeros(trailing)) return false;
+                    return true;
+                }
+
+                // decExp > 0: integer part.
+                int intFromDigits = System.Math.Min(digits.Length, decExp);
+                if (intFromDigits > 0 && !w.TryAppend(digits.AsSpan(0, intFromDigits))) return false;
+                if (intFromDigits < decExp && !w.TryAppendZeros(decExp - intFromDigits)) return false;
+
+                if (fracDigits <= 0) return true;
+                if (!w.TryAppend(nfi.NumberDecimalSeparator)) return false;
+
+                int fracStart = decExp;
+                if (fracStart >= digits.Length) {
+                    if (!w.TryAppendZeros(fracDigits)) return false;
+                    return true;
+                }
+                int fromDigits2 = System.Math.Min(digits.Length - fracStart, fracDigits);
+                if (!w.TryAppend(digits.AsSpan(fracStart, fromDigits2))) return false;
+                int trailing2 = fracDigits - fromDigits2;
+                if (trailing2 > 0 && !w.TryAppendZeros(trailing2)) return false;
+                return true;
+            }
+
+            // Replaces WriteGrouped entirely.
+            private static bool WriteGrouped(string digits, int decExp, int fracDigits,
+                                             int[] sizes, string grp, string dec,
+                                             ref Writer w) {
+                int intLen = System.Math.Max(1, decExp);
+                int gs = sizes.Length > 0 ? sizes[0] : 0;
+
+                if (gs <= 0 || intLen <= gs) {
+                    int real = System.Math.Min(digits.Length, intLen);
+                    if (real > 0 && !w.TryAppend(digits.AsSpan(0, real))) return false;
+                    if (real < intLen && !w.TryAppendZeros(intLen - real)) return false;
+                } else {
+                    // Grouped walk — the group boundaries are inside the integer part, so
+                    // this loop is bounded by the *actual* digit count, not by fracDigits.
+                    for (int i = 0; i < intLen; i++) {
+                        if (i > 0 && (intLen - i) % gs == 0)
+                            if (!w.TryAppend(grp)) return false;
+                        char ch = i < digits.Length ? digits[i] : '0';
+                        if (!w.TryAppend(ch)) return false;
+                    }
+                }
+
+                if (fracDigits <= 0) return true;
+                if (!w.TryAppend(dec)) return false;
+
+                int fracStart = intLen;
+                if (fracStart >= digits.Length) {
+                    if (!w.TryAppendZeros(fracDigits)) return false;
+                    return true;
+                }
+                int fromDigits = System.Math.Min(digits.Length - fracStart, fracDigits);
+                if (!w.TryAppend(digits.AsSpan(fracStart, fromDigits))) return false;
+                int trailing = fracDigits - fromDigits;
+                if (trailing > 0 && !w.TryAppendZeros(trailing)) return false;
+                return true;
+            }
+
+            // WriteScientific gains a targetFracDigits parameter.
+            private static bool WriteScientific(string digits, int decExp,
+                                                int targetFracDigits,
+                                                ref Writer w, NumberFormatInfo nfi,
+                                                char ec, int minExpDigits, bool plusAlways) {
+                if (!w.TryAppend(digits[0])) return false;
+
+                // Fraction body: emit digits[1..] then pad with zeros to reach targetFracDigits.
+                int fracFromDigits = System.Math.Min(digits.Length - 1, targetFracDigits);
+                if (targetFracDigits > 0) {
+                    if (!w.TryAppend(nfi.NumberDecimalSeparator)) return false;
+                    if (fracFromDigits > 0 &&
+                        !w.TryAppend(digits.AsSpan(1, fracFromDigits))) return false;
+                    int trailing = targetFracDigits - fracFromDigits;
+                    if (trailing > 0 && !w.TryAppendZeros(trailing)) return false;
+                }
+
+                if (!w.TryAppend(ec)) return false;
+                int e = decExp - 1;
+                if (e < 0) { if (!w.TryAppend(nfi.NegativeSign)) return false; e = -e; } else if (plusAlways) { if (!w.TryAppend(nfi.PositiveSign)) return false; }
+
+                Span<char> tmp = stackalloc char[16];
+                int p = tmp.Length;
+                if (e == 0) tmp[--p] = '0';
+                while (e > 0) { tmp[--p] = (char)('0' + e % 10); e /= 10; }
+                int n = tmp.Length - p;
+                if (n < minExpDigits && !w.TryAppendZeros(minExpDigits - n)) return false;
+                return w.TryAppend(tmp[p..]);
+            }
+
+            // ------------------------------------------------------------------ G
+            public static bool General(Span<char> dst, out int written, in Decoded d,
+                                       int precision, NumberFormatInfo nfi) {
+                if (d.IsZero) {
+                    var wz = new Writer(dst);
+                    if (!Sign(d.IsNegative, ref wz, nfi)) goto fail;
+                    if (!wz.TryAppend('0')) goto fail;
+                    written = wz.Pos; return true;
+                }
+
+                string digits; int decExp; int threshold;
+
+                if (precision <= 0) {
+                    RoundTripDigits.Get(d.Significand, d.Exp2, out digits, out decExp);
+                    threshold = digits.Length;
+                } else {
+                    DecimalDigits.GetSignificant(d.Significand, d.Exp2, precision,
+                                                 out digits, out decExp);
+                    digits = TrimZeros(digits);
+                    threshold = precision;
+                }
+
+                int sciExp = decExp - 1;
+                bool useSci = sciExp < -4 || sciExp >= threshold;
+
+                var w = new Writer(dst);
+                if (!Sign(d.IsNegative, ref w, nfi)) goto fail;
+
+                if (useSci) {
+                    int targetFrac = digits.Length > 1 ? digits.Length - 1 : 0;
+                    if (!WriteScientific(digits, decExp, targetFrac, ref w, nfi, 'E', 2, true)) goto fail;
+                } else if (precision <= 0) {
+                    // R-like default G: no trailing-zero trimming needed.
+                    if (!WriteFixed(digits, decExp, digits.Length - decExp, nfi, ref w)) goto fail;
+                } else {
+                    // G<prec>: trim trailing zeros, then emit exactly the digits we have.
+                    int frac = System.Math.Max(0, digits.Length - decExp);
+                    while (frac > 0 && digits[decExp + frac - 1] == '0') frac--;
+                    int intLen = System.Math.Max(1, decExp);
+                    int intFrom = System.Math.Min(digits.Length, intLen);
+                    if (intFrom > 0 && !w.TryAppend(digits.AsSpan(0, intFrom))) goto fail;
+                    if (intFrom < intLen && !w.TryAppendZeros(intLen - intFrom)) goto fail;
+                    if (frac > 0) {
+                        if (!w.TryAppend(nfi.NumberDecimalSeparator)) goto fail;
+                        if (!w.TryAppend(digits.AsSpan(decExp, frac))) goto fail;
+                    }
+                }
+                written = w.Pos; return true;
+            fail: written = 0; return false;
+            }
+
+            // ------------------------------------------------------------------ F
+            public static bool Fixed(Span<char> dst, out int written, in Decoded d,
+                                     int fracDigits, NumberFormatInfo nfi) {
+                if (fracDigits < 0) fracDigits = 0;
+                if (d.IsZero) {
+                    var wz = new Writer(dst);
+                    if (!Sign(d.IsNegative, ref wz, nfi)) goto fail;
+                    if (!wz.TryAppend('0')) goto fail;
+                    if (fracDigits > 0) {
+                        if (!wz.TryAppend(nfi.NumberDecimalSeparator)) goto fail;
+                        if (!wz.TryAppendZeros(fracDigits)) goto fail;
+                    }
+                    written = wz.Pos; return true;
+                }
+                DecimalDigits.GetFixed(d.Significand, d.Exp2, fracDigits,
+                                       out var digits, out int decExp);
+                var w = new Writer(dst);
+                if (!Sign(d.IsNegative, ref w, nfi)) goto fail;
+                if (!WriteFixed(digits, decExp, fracDigits, nfi, ref w)) goto fail;
+                written = w.Pos; return true;
+            fail: written = 0; return false;
+            }
+
+            // ------------------------------------------------------------------ E
+            // Exponential
+            public static bool Exponential(Span<char> dst, out int written, in Decoded d,
+                                           int precision, bool upper, NumberFormatInfo nfi) {
+                char ec = upper ? 'E' : 'e';
+                if (d.IsZero) { /* unchanged zero branch */ }
+
+                DecimalDigits.GetSignificant(d.Significand, d.Exp2, precision + 1,
+                                             out var digits, out int decExp);
+                var w = new Writer(dst);
+                if (!Sign(d.IsNegative, ref w, nfi)) goto fail;
+                if (!WriteScientific(digits, decExp, precision, ref w, nfi, ec, 3, true)) goto fail;
+                written = w.Pos; return true;
+            fail: written = 0; return false;
+            }
+
+            // ------------------------------------------------------------------ N
+            public static bool Numeric(Span<char> dst, out int written, in Decoded d,
+                                       int fracDigits, NumberFormatInfo nfi) {
+                if (fracDigits < 0) fracDigits = 0;
+                if (d.IsZero) {
+                    var wz = new Writer(dst);
+                    if (!Sign(d.IsNegative, ref wz, nfi)) goto fail;
+                    if (!wz.TryAppend('0')) goto fail;
+                    if (fracDigits > 0) {
+                        if (!wz.TryAppend(nfi.NumberDecimalSeparator)) goto fail;
+                        if (!wz.TryAppendZeros(fracDigits)) goto fail;
+                    }
+                    written = wz.Pos; return true;
+                }
+                DecimalDigits.GetFixed(d.Significand, d.Exp2, fracDigits,
+                                       out var digits, out int decExp);
+                var w = new Writer(dst);
+                if (!Sign(d.IsNegative, ref w, nfi)) goto fail;
+                if (!WriteGrouped(digits, decExp, fracDigits,
+                                  nfi.NumberGroupSizes, nfi.NumberGroupSeparator,
+                                  nfi.NumberDecimalSeparator, ref w)) goto fail;
+                written = w.Pos; return true;
+            fail: written = 0; return false;
+            }
+
+            // ------------------------------------------------------------------ R
+            public static bool RoundTrip(Span<char> dst, out int written, in Decoded d,
+                                         NumberFormatInfo nfi) {
+                if (d.IsZero) {
+                    var wz = new Writer(dst);
+                    if (!Sign(d.IsNegative, ref wz, nfi)) goto fail;
+                    if (!wz.TryAppend('0')) goto fail;
+                    written = wz.Pos; return true;
+                }
+                RoundTripDigits.Get(d.Significand, d.Exp2, out var digits, out int decExp);
+
+                int sciExp = decExp - 1;
+                bool useSci = sciExp < -4 || sciExp >= digits.Length;
+
+                var w = new Writer(dst);
+                if (!Sign(d.IsNegative, ref w, nfi)) goto fail;
+                if (useSci) {
+                    int targetFrac = digits.Length > 1 ? digits.Length - 1 : 0;
+                    if (!WriteScientific(digits, decExp, targetFrac, ref w, nfi, 'E', 2, true)) goto fail;
+                } else {
+                    if (!WriteFixed(digits, decExp, digits.Length - decExp, nfi, ref w)) goto fail;
+                }
+                written = w.Pos; return true;
+            fail: written = 0; return false;
+            }
+
+            // ------------------------------------------------------------------ C / P
+            private static readonly string[] CurrPos = { "$n", "n$", "$ n", "n $" };
+            private static readonly string[] CurrNeg =
+            {
+        "($n)","-$n","$-n","$n-","(n$)","-n$","n-$","n$-",
+        "-n $","-$ n","n $-","$ n-","$ -n","n- $","($ n)","(n $)"
+    };
+            private static readonly string[] PctPos = { "n %", "n%", "%n", "% n" };
+            private static readonly string[] PctNeg =
+            {
+        "-n %","-n%","-%n","%-n","-%n","n-%","n%-","-%n",
+        "n %-","-n %","% n-","% -n"
+    };
+
+            private static bool EmitPattern(Span<char> dst, out int written, string pat,
+                                            ReadOnlySpan<char> body, string sym,
+                                            NumberFormatInfo nfi) {
+                var w = new Writer(dst);
+                foreach (char c in pat) {
+                    switch (c) {
+                    case 'n': if (!w.TryAppend(body)) { written = 0; return false; } break;
+                    case '$':
+                    case '%': if (!w.TryAppend(sym.AsSpan())) { written = 0; return false; } break;
+                    case '-': if (!w.TryAppend(nfi.NegativeSign.AsSpan())) { written = 0; return false; } break;
+                    default: if (!w.TryAppend(c)) { written = 0; return false; } break;
+                    }
+                }
+                written = w.Pos; return true;
+            }
+
+            public static bool Currency(Span<char> dst, out int written, in Decoded d,
+                                        int fracDigits, NumberFormatInfo nfi) {
+                if (fracDigits < 0) fracDigits = 0;
+                // body computed with C-specific group/decimal separators
+                Span<char> bodyBuf = stackalloc char[512];
+                if (!CurrencyBody(bodyBuf, out int bodyLen, d, fracDigits, nfi)) { written = 0; return false; }
+                var body = bodyBuf[..bodyLen];
+
+                int p = d.IsNegative ? nfi.CurrencyNegativePattern : nfi.CurrencyPositivePattern;
+                string pat = d.IsNegative ? CurrNeg[p] : CurrPos[p];
+                return EmitPattern(dst, out written, pat, body, nfi.CurrencySymbol, nfi);
+            }
+
+            private static bool CurrencyBody(Span<char> dst, out int written, in Decoded d,
+                                             int fracDigits, NumberFormatInfo nfi) {
+                if (d.IsZero) {
+                    var wz = new Writer(dst);
+                    if (!Sign(d.IsNegative, ref wz, nfi)) goto fail;
+                    if (!wz.TryAppend('0')) goto fail;
+                    if (fracDigits > 0) {
+                        if (!wz.TryAppend(nfi.CurrencyDecimalSeparator)) goto fail;
+                        if (!wz.TryAppendZeros(fracDigits)) goto fail;
+                    }
+                    written = wz.Pos; return true;
+                }
+                DecimalDigits.GetFixed(d.Significand, d.Exp2, fracDigits,
+                                       out var digits, out int decExp);
+                var w = new Writer(dst);
+                if (!Sign(d.IsNegative, ref w, nfi)) goto fail;
+                if (!WriteGrouped(digits, decExp, fracDigits,
+                                  nfi.CurrencyGroupSizes, nfi.CurrencyGroupSeparator,
+                                  nfi.CurrencyDecimalSeparator, ref w)) goto fail;
+                written = w.Pos; return true;
+            fail: written = 0; return false;
+            }
+
+            public static bool Percent(Span<char> dst, out int written, in Decoded d,
+                                       int fracDigits, NumberFormatInfo nfi) {
+                if (fracDigits < 0) fracDigits = 0;
+
+                // ×100 = add 2 to decExp — compute digits on the scaled significand.
+                Span<char> bodyBuf = stackalloc char[512];
+                if (!PercentBody(bodyBuf, out int bodyLen, d, fracDigits, nfi)) { written = 0; return false; }
+                var body = bodyBuf[..bodyLen];
+
+                int p = d.IsNegative ? nfi.PercentNegativePattern : nfi.PercentPositivePattern;
+                string pat = d.IsNegative ? PctNeg[p] : PctPos[p];
+                return EmitPattern(dst, out written, pat, body, nfi.PercentSymbol, nfi);
+            }
+
+            private static bool PercentBody(Span<char> dst, out int written, in Decoded d,
+                                            int fracDigits, NumberFormatInfo nfi) {
+                if (d.IsZero) {
+                    var wz = new Writer(dst);
+                    if (!Sign(d.IsNegative, ref wz, nfi)) goto fail;
+                    if (!wz.TryAppend('0')) goto fail;
+                    if (fracDigits > 0) {
+                        if (!wz.TryAppend(nfi.PercentDecimalSeparator)) goto fail;
+                        if (!wz.TryAppendZeros(fracDigits)) goto fail;
+                    }
+                    written = wz.Pos; return true;
+                }
+                BigInteger scaledSig = d.Significand * 100;
+                DecimalDigits.GetFixed(scaledSig, d.Exp2, fracDigits,
+                                       out var digits, out int decExp);
+                var w = new Writer(dst);
+                if (!Sign(d.IsNegative, ref w, nfi)) goto fail;
+                if (!WriteGrouped(digits, decExp, fracDigits,
+                                  nfi.PercentGroupSizes, nfi.PercentGroupSeparator,
+                                  nfi.PercentDecimalSeparator, ref w)) goto fail;
+                written = w.Pos; return true;
+            fail: written = 0; return false;
+            }
+
+            // ------------------------------------------------------------------ custom
+            // Handles the standard custom specifiers: 0 # . , %  ‰  E0 E+0 E-0  ' "
+            // escape with \  sections with ;  literal chars.
+            public static bool CustomFormat(Span<char> dst, out int written, in Decoded d,
+                                ReadOnlySpan<char> fmt, NumberFormatInfo nfi) {
+                // ---- 1. Split sections -------------------------------------------------
+                ReadOnlySpan<char> pos = fmt, neg = fmt, zero = fmt;
+                int s1 = fmt.IndexOf(';');
+                if (s1 >= 0) {
+                    pos = fmt[..s1];
+                    var rest = fmt[(s1 + 1)..];
+                    int s2 = rest.IndexOf(';');
+                    if (s2 < 0) { neg = rest; zero = pos; } else { neg = rest[..s2]; zero = rest[(s2 + 1)..]; }
+                }
+                var section = d.IsZero ? zero : (d.IsNegative ? neg : pos);
+                if (section.IsEmpty) section = pos;
+
+                // ---- 2. Pre-scan -------------------------------------------------------
+                int intZeros = 0, fracZeros = 0, intHashes = 0, fracHashes = 0;
+                bool hasPoint = false, hasExp = false, sciPlus = false;
+                char sciChar = 'E'; int sciZeros = 0;
+                int percentMul = 0, perMilleMul = 0, scaleCommas = 0;
+                int lastIntPlaceholder = -1;
+
+                bool beforePoint = true;
+                for (int i = 0; i < section.Length; i++) {
+                    char c = section[i];
+                    if (c == '\\') { i++; continue; }
+                    if (c == '\'' || c == '"') {
+                        char q = c; i++;
+                        while (i < section.Length && section[i] != q) { if (section[i] == '\\') i++; i++; }
+                        continue;
+                    }
+                    switch (c) {
+                    case '0':
+                        if (beforePoint) { intZeros++; lastIntPlaceholder = i; } else fracZeros++;
+                        break;
+                    case '#':
+                        if (beforePoint) { intHashes++; lastIntPlaceholder = i; } else fracHashes++;
+                        break;
+                    case '.':
+                        if (beforePoint) { hasPoint = true; beforePoint = false; }
+                        break;
+                    case ',':
+                        // Grouping = between two placeholders.  Scaling = before '.' with no
+                        // intervening placeholder.  We'll count scaling below the loop.
+                        break;
+                    case '%': percentMul++; break;
+                    case '‰': perMilleMul++; break;
+                    case 'E':
+                    case 'e':
+                        int j = i + 1;
+                        if (j < section.Length && (section[j] == '+' || section[j] == '-')) {
+                            sciPlus = section[j] == '+'; j++;
+                        }
+                        if (j < section.Length && section[j] == '0') {
+                            hasExp = true; sciChar = c;
+                            while (j < section.Length && section[j] == '0') { sciZeros++; j++; }
+                        }
+                        break;
+                    }
+                }
+                // Scaling commas: commas strictly to the right of the last integer placeholder
+                // and left of the decimal point (or end of integer part if no point).
+                int intEnd = section.Length;
+                for (int i = 0; i < section.Length; i++) if (section[i] == '.') { intEnd = i; break; }
+                for (int i = System.Math.Max(lastIntPlaceholder + 1, 0); i < intEnd; i++)
+                    if (section[i] == ',') scaleCommas++;
+
+                int multiplier = percentMul * 100 + perMilleMul * 1000;
+                int scaleShift = 3 * scaleCommas;
+
+                // ---- 3. Compute digits for the (possibly scaled) value -----------------
+                BigInteger scaledSig = multiplier > 0 ? d.Significand * multiplier : d.Significand;
+                int M_int = intZeros + intHashes;
+                int M_frac = fracZeros + fracHashes;
+                int totalFrac = M_frac;
+
+                string digits; int decExp;
+
+                if (d.IsZero) {
+                    digits = "0"; decExp = 1;
+                } else if (hasExp) {
+                    int sigDigits = System.Math.Min(1 + totalFrac, DecimalDigits.MaxSignificantComputed);
+                    DecimalDigits.GetSignificant(scaledSig, d.Exp2, sigDigits, out digits, out decExp);
+                    decExp -= scaleShift;
+                } else if (totalFrac > 0) {
+                    // Fixed with fractional digits; scaling must affect the rounding position
+                    // so we pass an adjusted k to RoundToScale.
+                    int k = totalFrac - scaleShift;
+                    BigInteger q = DecimalDigits.RoundToScale(scaledSig, d.Exp2, k);
+                    digits = q.ToString();
+                    decExp = digits.Length - totalFrac;
+                } else {
+                    // No fractional placeholders: round to integer position relative to the
+                    // scaled value.
+                    BigInteger q = DecimalDigits.RoundToScale(scaledSig, d.Exp2, -scaleShift);
+                    digits = q.ToString();
+                    decExp = digits.Length;
+                }
+
+                // ---- 4. Significant range for `#` suppression --------------------------
+                int lastNonZeroIdx = digits.Length - 1;
+                while (lastNonZeroIdx >= 0 && digits[lastNonZeroIdx] == '0') lastNonZeroIdx--;
+
+                int sigHigh, sigLow;
+                if (d.IsZero || lastNonZeroIdx < 0) {
+                    sigHigh = int.MinValue;   // no integer position is significant
+                    sigLow = int.MaxValue;   // no fractional position is significant
+                } else {
+                    sigHigh = decExp - 1;
+                    sigLow = decExp - 1 - lastNonZeroIdx;
+                }
+                int nIntValueDigits = d.IsZero ? 0 : System.Math.Max(0, decExp);
+                int nExtraIntDigits = System.Math.Max(0, nIntValueDigits - M_int);
+
+                // ---- 5. Emit ----------------------------------------------------------
+                var w = new Writer(dst);
+
+                // Negative sign is supplied by us only for single-section formats.
+                if (s1 < 0 && d.IsNegative && !d.IsZero)
+                    if (!w.TryAppend(nfi.NegativeSign)) goto fail;
+
+                int intPlaceholdersSeen = 0;
+                int fracPlaceholdersSeen = 0;
+                bool wrotePoint = false;
+                bool extrasEmitted = false;
+                bool expEmitted = false;
+
+                for (int i = 0; i < section.Length; i++) {
+                    char c = section[i];
+
+                    if (c == '\\') {
+                        if (i + 1 < section.Length && !w.TryAppend(section[i + 1])) goto fail;
+                        i++; continue;
+                    }
+                    if (c == '\'' || c == '"') {
+                        char q = c; i++;
+                        while (i < section.Length && section[i] != q) {
+                            if (section[i] == '\\' && i + 1 < section.Length) i++;
+                            if (!w.TryAppend(section[i])) goto fail;
+                            i++;
+                        }
+                        continue;
+                    }
+
+                    switch (c) {
+                    case '0':
+                    case '#': {
+                            bool isInt = !wrotePoint;
+
+                            // Emit leading "extra" integer digits once, right before the first
+                            // integer placeholder.
+                            if (isInt && !extrasEmitted) {
+                                extrasEmitted = true;
+                                for (int p = nIntValueDigits - 1; p >= M_int; p--) {
+                                    int idx = decExp - 1 - p;
+                                    char ch = unchecked((uint)idx) < unchecked((uint)digits.Length) ? digits[idx] : '0';
+                                    if (!w.TryAppend(ch)) goto fail;
+                                }
+                            }
+
+                            char emit = '\0';
+                            if (isInt) {
+                                int decPos = M_int - 1 - intPlaceholdersSeen;
+                                if (c == '0') {
+                                    int idx = decExp - 1 - decPos;
+                                    emit = unchecked((uint)idx) < unchecked((uint)digits.Length) ? digits[idx] : '0';
+                                } else if (decPos <= sigHigh) {
+                                    int idx = decExp - 1 - decPos;
+                                    emit = unchecked((uint)idx) < unchecked((uint)digits.Length) ? digits[idx] : '0';
+                                }
+                                intPlaceholdersSeen++;
+                            } else {
+                                int decPos = -(fracPlaceholdersSeen + 1);
+                                if (c == '0') {
+                                    int idx = decExp - 1 - decPos;
+                                    emit = unchecked((uint)idx) < unchecked((uint)digits.Length) ? digits[idx] : '0';
+                                } else if (decPos >= sigLow) {
+                                    // Inside the fraction, `#` emits its digit if the position is
+                                    // significant, and a padding '0' if the position is above the
+                                    // significant range but there's significance further right.
+                                    int idx = decExp - 1 - decPos;
+                                    emit = unchecked((uint)idx) < unchecked((uint)digits.Length) ? digits[idx] : '0';
+                                }
+                                fracPlaceholdersSeen++;
+                            }
+
+                            if (emit != '\0' && !w.TryAppend(emit)) goto fail;
+                            break;
+                        }
+                    case '.':
+                        if (!hasPoint) break;
+                        wrotePoint = true;
+                        if (!w.TryAppend(nfi.NumberDecimalSeparator)) goto fail;
+                        break;
+                    case ',':
+                        if (IsPlaceholder(section, i - 1) && IsPlaceholder(section, i + 1))
+                            if (!w.TryAppend(nfi.NumberGroupSeparator)) goto fail;
+                        // else: scaling separator — swallowed
+                        break;
+                    case '%': if (!w.TryAppend(nfi.PercentSymbol)) goto fail; break;
+                    case '‰': if (!w.TryAppend(nfi.PerMilleSymbol)) goto fail; break;
+                    case 'E':
+                    case 'e': {
+                            if (!hasExp || expEmitted) { if (!w.TryAppend(c)) goto fail; break; }
+                            expEmitted = true;
+                            if (!w.TryAppend(sciChar)) goto fail;
+                            int expVal = decExp - 1;
+                            if (expVal < 0) { if (!w.TryAppend(nfi.NegativeSign)) goto fail; expVal = -expVal; } else if (sciPlus) { if (!w.TryAppend(nfi.PositiveSign)) goto fail; }
+
+                            Span<char> tmp = stackalloc char[16];
+                            int p = tmp.Length;
+                            if (expVal == 0) tmp[--p] = '0';
+                            while (expVal > 0) { tmp[--p] = (char)('0' + expVal % 10); expVal /= 10; }
+                            int nd = tmp.Length - p;
+                            if (nd < sciZeros && !w.TryAppendZeros(sciZeros - nd)) goto fail;
+                            if (!w.TryAppend(tmp[p..])) goto fail;
+
+                            int k = i + 1;
+                            if (k < section.Length && (section[k] == '+' || section[k] == '-')) k++;
+                            while (k < section.Length && section[k] == '0') k++;
+                            i = k - 1;
+                            break;
+                        }
+                    default:
+                        if (!w.TryAppend(c)) goto fail;
+                        break;
+                    }
+                }
+
+                written = w.Pos; return true;
+            fail: written = 0; return false;
+            }
+
+            private static bool IsPlaceholder(ReadOnlySpan<char> s, int i)
+                => i >= 0 && i < s.Length && (s[i] == '0' || s[i] == '#');
         }
     }
 }

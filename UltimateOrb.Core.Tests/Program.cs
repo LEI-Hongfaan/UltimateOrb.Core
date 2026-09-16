@@ -170,8 +170,21 @@ namespace UltimateOrb.Core.Tests {
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private static int Main(string[] args) {
             {
+                Console.WriteLine($@"{(BigRational)Quadruple.MinValue}");
+                Console.WriteLine($@"{(BigRational)Quadruple.Epsilon}");
+                Console.WriteLine($@"{(BigRational)Quadruple.Epsilon}");
+                Console.WriteLine($@"{Quadruple.NegativeInfinity:E1}");
+                Console.WriteLine($@"{Quadruple.NaN:E1}");
 
-                
+                Console.WriteLine($@"{Quadruple.Epsilon:E1}");
+                Console.WriteLine($@"{Quadruple.Pi:E1}");
+                Console.WriteLine($@"{(Quadruple)1234.5:42_70_00}");
+                Console.WriteLine($@"{(Quadruple)123.45:42_70_00}");
+                Console.WriteLine($@"{(Quadruple)12.345:42_70_00}");
+
+                Console.WriteLine($@"{(Quadruple)12.345:B}");
+
+
                 Console.WriteLine($@"{((double)(Quadruple)3.0).ToString()}");
                 Console.WriteLine($@"{((BigRational)3.0).ToString()}");
                 Console.WriteLine($@"{((BigRational)(Quadruple)3.0).ToString()}");
@@ -179,14 +192,20 @@ namespace UltimateOrb.Core.Tests {
                 {
                     var sfas0 = Quadruple.Cbrt(3.0);
                     var sfas1 = QuadrupleLib.Float128<QuadrupleLib.Accelerators.DefaultAccelerator>.Cbrt(3.0);
+                    Console.WriteLine($@"{sfas0:G100}");
                     Console.WriteLine($@"{((BigRational)sfas0).ToString()}");
                     Console.WriteLine($@"{sfas1}");
                 }
                 {
                     var sfas0 = Quadruple.Sqrt(3.0);
                     var sfas1 = QuadrupleLib.Float128<QuadrupleLib.Accelerators.DefaultAccelerator>.Sqrt(3.0);
+                    Console.WriteLine($@"{sfas0:G1000}");
                     Console.WriteLine($@"{((BigRational)sfas0).ToString()}");
                     Console.WriteLine($@"{sfas1}");
+                }
+                Console.WriteLine();
+                {
+                    Console.WriteLine(BigRational.Parse("1.7320508075688772935274463415058723221530973174112081324397189303443238272972592994847218506038188934326171875", null));
                 }
 
                 return 0;
