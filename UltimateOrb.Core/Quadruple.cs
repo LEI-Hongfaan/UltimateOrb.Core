@@ -4173,8 +4173,16 @@ namespace UltimateOrb {
             private const int MinNormalBinExp = -16382;
             private const int MaxNormalBinExp = 16383;
             private const int MinSubnormalExp2 = -16494;    // sig · 2^exp2 for the smallest subnormal
-            private const int NaNPayloadBits = 111;       // 112 mantissa bits − 1 quiet bit
-            private const int NaNQuietBit = 111;       // position of the quiet bit inside the mantissa
+
+            // NaN fraction layout, aligned with the numeric conversion convention
+            // (FromIeee754InterchangeBinary / ToIeee754InterchangeBinaryNarrowing):
+            //   bits 0..109  : payload data
+            //   bit  110     : payload-overflow indicator
+            //                  (set iff the parsed integer had any bit at position >= 110)
+            //   bit  111     : quiet bit
+            private const int NaNPayloadDataBits = 110;
+            private const int NaNPayloadOverflowBit = 110;
+            private const int NaNQuietBit = 111;
 
             // Fast reject bounds on the decimal exponent of the MSB.
             // MaxValue ≈ 1.19e4932, smallest positive ≈ 3.65e-4966.
@@ -4575,12 +4583,12 @@ namespace UltimateOrb {
             }
 
             private static bool TryParseNaN<TChar>(ReadOnlySpan<TChar> candidate,
-                                                   string nanSym,
-                                                   bool isNegative,
-                                                   bool allowTrailingInvalid,
-                                                   ref int elementsConsumed,
-                                                   out Quadruple result)
-                where TChar : unmanaged {
+                                       string nanSym,
+                                       bool isNegative,
+                                       bool allowTrailingInvalid,
+                                       ref int elementsConsumed,
+                                       out Quadruple result)
+    where TChar : unmanaged {
                 result = default;
 
                 if (nanSym.Length == 0 || candidate.Length < nanSym.Length) return false;
@@ -4589,6 +4597,7 @@ namespace UltimateOrb {
                 ReadOnlySpan<TChar> after = candidate.Slice(nanSym.Length);
 
                 BigInteger payload = BigInteger.Zero;
+                bool payloadOverflow = false;
                 bool quiet = true;   // default
 
                 if (after.Length > 0 && UtfChar<TChar>.CastToUInt32(after[0]) == '(') {
@@ -4596,7 +4605,7 @@ namespace UltimateOrb {
 
                     // optional Q / S
                     if (after.Length > 0) {
-                        uint c = UtfChar<TChar>.CastToUInt32(after[0]) | 0x20;    // to lower-case
+                        uint c = UtfChar<TChar>.CastToUInt32(after[0]) | 0x20;   // to lower-case
                         if (c == 'q') { quiet = true; after = after.Slice(1); } else if (c == 's') { quiet = false; after = after.Slice(1); }
                     }
 
@@ -4604,9 +4613,18 @@ namespace UltimateOrb {
                     while (pos < after.Length) {
                         uint ch = UtfChar<TChar>.CastToUInt32(after[pos]);
                         if (ch < '0' || ch > '9') break;
+
+                        // Fold the digit into the payload modulo 2^110.  The first time the
+                        // running value would reach 2^110 we set the overflow flag and mask
+                        // back down; subsequent digits are folded mod 2^110 so the jammed
+                        // low bits reflect the true low-order bits of the parsed integer.
+                        // This keeps the accumulator bounded regardless of input length.
                         payload = payload * 10 + (ch - '0');
+                        if (payload >= (BigInteger.One << NaNPayloadDataBits)) {
+                            payloadOverflow = true;
+                            payload &= (BigInteger.One << NaNPayloadDataBits) - 1;
+                        }
                         pos++;
-                        if (pos > 40) return false;   // 111 bits ⇒ ≤ 34 digits
                     }
                     if (pos == 0) return false;
                     after = after.Slice(pos);
@@ -4620,11 +4638,26 @@ namespace UltimateOrb {
 
                 elementsConsumed += candidate.Length - tail.Length;
 
-                if (payload >= (BigInteger.One << NaNPayloadBits)) return false;
-                if (!quiet && payload.IsZero) return false;   // would alias Infinity
+                // NaN fraction layout, aligned with the numeric conversion convention
+                // (FromIeee754InterchangeBinary / ToIeee754InterchangeBinaryNarrowing):
+                //   bits 109..0 : payload data
+                //   bit  110    : payload-overflow indicator
+                //   bit  111    : quiet bit
+                //
+                // `payload` is already reduced mod 2^110, so the data mask is a no-op
+                // for well-formed values and preserves the low bits for jammed ones.
+                BigInteger mantissa = payload & ((BigInteger.One << NaNPayloadDataBits) - 1);
 
-                BigInteger mantissa = payload;
-                if (quiet) mantissa |= BigInteger.One << NaNQuietBit;
+                if (quiet)
+                    mantissa |= BigInteger.One << NaNQuietBit;
+
+                // Force the overflow indicator when either:
+                //   - the parsed integer had bits at position >= 110 (jam), or
+                //   - the raw fraction would be all-zero after the quiet-bit decision,
+                //     i.e. a signaling NaN with zero payload, which would otherwise
+                //     decode as ±Infinity.
+                if (mantissa.IsZero || payloadOverflow)
+                    mantissa |= BigInteger.One << NaNPayloadOverflowBit;
 
                 ulong mantLo = (ulong)(mantissa & ulong.MaxValue);
                 ulong mantHi = (ulong)((mantissa >> 64) & 0x0000_FFFF_FFFF_FFFFUL);

@@ -30,6 +30,12 @@
     <LangVersion>preview</LangVersion>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <!-- Sync with UltimateOrb.Core -->
+    <Version>3.6.1-beta.0</Version>
+  </PropertyGroup>
+	
+	
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DefineConstants>$(DefineConstants)TRACE;FEATURE_STANDARD_LIBRARY_INTEROPERABILITY_FORMATTING_AND_CONVERSION;FEATURE_WIN32_DECIMAL_INTEROPERABILITY;STANDALONE_XINTN_LIBRARY;STANDALONE_BINARYN_LIBRARY</DefineConstants>
   </PropertyGroup>
