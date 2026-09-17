@@ -4583,42 +4583,64 @@ namespace UltimateOrb {
             }
 
             private static bool TryParseNaN<TChar>(ReadOnlySpan<TChar> candidate,
-                                       string nanSym,
-                                       bool isNegative,
-                                       bool allowTrailingInvalid,
-                                       ref int elementsConsumed,
-                                       out Quadruple result)
-    where TChar : unmanaged {
+                string nanSym,
+                bool isNegative,
+                bool allowTrailingInvalid,
+                ref int elementsConsumed,
+                out Quadruple result)
+                where TChar : unmanaged {
                 result = default;
 
-                if (nanSym.Length == 0 || candidate.Length < nanSym.Length) return false;
-                if (!MatchSymbolIgnoreCaseAt(candidate, 0, nanSym)) return false;
+                if (nanSym.Length == 0) return false;
 
-                ReadOnlySpan<TChar> after = candidate.Slice(nanSym.Length);
-
-                BigInteger payload = BigInteger.Zero;
-                bool payloadOverflow = false;
+                // ------------------------------------------------------------------
+                // Optional "s" / "q" prefix, case-insensitive.
+                //   s → signaling (quiet = false), q → quiet (quiet = true).
+                //
+                // Recognized only when immediately followed by the locale's NaN symbol;
+                // otherwise the leading character is not part of the token and we fall
+                // through to the bare-symbol match. Safe for locales whose NaN symbol
+                // itself begins with 's' or 'q'.
+                // ------------------------------------------------------------------
+                int nanStart = 0;
                 bool quiet = true;   // default
+
+                if (candidate.Length >= nanSym.Length + 1) {
+                    uint c0 = UtfChar<TChar>.CastToUInt32(candidate[0]) | 0x20;
+                    if ((c0 == 's' || c0 == 'q') && MatchSymbolIgnoreCaseAt(candidate, 1, nanSym)) {
+                        quiet = (c0 == 'q');
+                        nanStart = 1;
+                    }
+                }
+
+                if (nanStart == 0) {
+                    if (candidate.Length < nanSym.Length) return false;
+                    if (!MatchSymbolIgnoreCaseAt(candidate, 0, nanSym)) return false;
+                }
+
+                ReadOnlySpan<TChar> after = candidate.Slice(nanStart + nanSym.Length);
+
+                BigInteger payload = BigInteger.Zero;   // default
+                bool payloadOverflow = false;
 
                 if (after.Length > 0 && UtfChar<TChar>.CastToUInt32(after[0]) == '(') {
                     after = after.Slice(1);
 
-                    // optional Q / S
+                    // Optional explicit Q / S marker, case-insensitive.
+                    // Overrides the prefix: "sNaN(Q1)" → quiet, "qNaN(S1)" → signaling.
+                    bool sawMarker = false;
                     if (after.Length > 0) {
-                        uint c = UtfChar<TChar>.CastToUInt32(after[0]) | 0x20;   // to lower-case
-                        if (c == 'q') { quiet = true; after = after.Slice(1); } else if (c == 's') { quiet = false; after = after.Slice(1); }
+                        uint c = UtfChar<TChar>.CastToUInt32(after[0]) | 0x20;
+                        if (c == 'q') { quiet = true; after = after.Slice(1); sawMarker = true; } else if (c == 's') { quiet = false; after = after.Slice(1); sawMarker = true; }
                     }
 
+                    // Digit run. Fold modulo 2^110; the first time the accumulator
+                    // would reach 2^110 set the overflow flag and mask back down.
                     int pos = 0;
                     while (pos < after.Length) {
                         uint ch = UtfChar<TChar>.CastToUInt32(after[pos]);
                         if (ch < '0' || ch > '9') break;
 
-                        // Fold the digit into the payload modulo 2^110.  The first time the
-                        // running value would reach 2^110 we set the overflow flag and mask
-                        // back down; subsequent digits are folded mod 2^110 so the jammed
-                        // low bits reflect the true low-order bits of the parsed integer.
-                        // This keeps the accumulator bounded regardless of input length.
                         payload = payload * 10 + (ch - '0');
                         if (payload >= (BigInteger.One << NaNPayloadDataBits)) {
                             payloadOverflow = true;
@@ -4626,7 +4648,11 @@ namespace UltimateOrb {
                         }
                         pos++;
                     }
-                    if (pos == 0) return false;
+
+                    // Empty digit run is legal only when an explicit Q/S marker was
+                    // consumed: "NaN(S)" / "NaN(Q)" collapse to a zero-payload NaN of
+                    // the chosen class. "NaN()" (no marker, no digits) stays malformed.
+                    if (pos == 0 && !sawMarker) return false;
                     after = after.Slice(pos);
 
                     if (after.Length == 0 || UtfChar<TChar>.CastToUInt32(after[0]) != ')') return false;
@@ -4638,24 +4664,17 @@ namespace UltimateOrb {
 
                 elementsConsumed += candidate.Length - tail.Length;
 
-                // NaN fraction layout, aligned with the numeric conversion convention
-                // (FromIeee754InterchangeBinary / ToIeee754InterchangeBinaryNarrowing):
-                //   bits 109..0 : payload data
-                //   bit  110    : payload-overflow indicator
-                //   bit  111    : quiet bit
-                //
-                // `payload` is already reduced mod 2^110, so the data mask is a no-op
-                // for well-formed values and preserves the low bits for jammed ones.
+                // Fraction layout: bits 109..0 data, bit 110 overflow, bit 111 quiet.
                 BigInteger mantissa = payload & ((BigInteger.One << NaNPayloadDataBits) - 1);
 
                 if (quiet)
                     mantissa |= BigInteger.One << NaNQuietBit;
 
-                // Force the overflow indicator when either:
+                // Force the overflow indicator when:
                 //   - the parsed integer had bits at position >= 110 (jam), or
-                //   - the raw fraction would be all-zero after the quiet-bit decision,
-                //     i.e. a signaling NaN with zero payload, which would otherwise
-                //     decode as ±Infinity.
+                //   - the raw fraction would be all-zero after the quiet-bit decision
+                //     (sNaN, sNaN(0), sNaN(S), NaN(S), NaN(S0), …), which would
+                //     otherwise decode as ±Infinity.
                 if (mantissa.IsZero || payloadOverflow)
                     mantissa |= BigInteger.One << NaNPayloadOverflowBit;
 

@@ -183,6 +183,10 @@ namespace UltimateOrb.Core.Tests {
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private static int Main(string[] args) {
             {
+                Console.WriteLine(Quadruple.Parse("-NaN(S)",
+                                    NumberStyles.Float | NumberStyles.HexFloat).ToString("G36"));
+            }
+            {
                 // G<prec> in [0, 1)
                 AssertAlways.Equal("0.284444444444444440743701029025138323",
                     Quadruple.Parse("0X1.23456789abcdef0123456789p-2",

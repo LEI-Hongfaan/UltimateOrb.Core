@@ -1,9 +1,10 @@
 # Quadruple Parse/TryParse Handoff — DPSK
 
-**Agent ID:** DPSK
+**Agent ID:** DPSK  
+**Revision:** 2  
 **Scope of this handoff:** `Parse` / `TryParse` / `TryParsePartial` and their supporting routines inside `QuadrupleNumber` (the parser). Formatting (`TryFormat` and friends) is covered in a sibling handoff.
 
-Throughout this document, **`[REQ]`** marks something you have explicitly required; **`[NOTE]`** marks a design decision or observation I (DPSK) introduced, not a stated requirement; **`[VERIFY]`** marks something that needs a second pair of eyes.
+Throughout this document, **`[REQ]`** marks something you have explicitly required; **`[NOTE]`** marks a design decision or observation I (DPSK) introduced, not a stated requirement; **`[VERIFY]`** marks something that needs a second pair of eyes; **`[REV]`** marks a revision relative to the previous revision of this document.
 
 ---
 
@@ -13,7 +14,7 @@ The parser is a from-scratch implementation of `Number.TryParseFloat` for `Quadr
 
 * Decimal format with full `NumberStyles` coverage.
 * Hex-float format (`0x1.8p3`).
-* NaN payload syntax `NaN(Q123)` / `NaN(S123)` / `NaN(123)`. Payload is folded to 110 data bits; bit 110 is a payload-overflow indicator; bit 111 is the quiet bit. Oversize payloads jam (never fail); `NaN(S0)` forces the overflow bit on so it does not alias `±Infinity`.
+* NaN payload syntax with optional `s`/`q` prefix and optional `(Q…)`/`(S…)`/`(…)` payload marker. All of `s`/`q`/`Q`/`S`/`NaN` are matched case-insensitively; defaults are `quiet = true`, `payload = 0`; the inner `(Q)`/`(S)` marker overrides the prefix.
 
 All rounding is exact (`BigInteger` cross-multiplication, half-to-even at a single site). Two known issues remain to be fixed (see §10); the rest of the code has been exercised through review.
 
@@ -27,11 +28,13 @@ All rounding is exact (`BigInteger` cross-multiplication, half-to-even at a sing
 * `[REQ]` Support a `TChar`-generic surface; UTF-8, UTF-16, and UTF-32 (`Rune`) code units must work. Later we may add `uint` / `Rune` overloads — keep the parser generic.
 * `[REQ]` Correctly rounded results (round-to-nearest, ties-to-even), no exceptions.
 * `[REQ]` Handle every required `NumberStyles` flag correctly.
-* `[REQ]` Parse NaN payloads: `"-NaN(Q4353)"`, `"-NaN(S4353)"`, `"-NaN(4353)"`, etc.
-    * `[REQ]` Optional `Q` / `S` selects quiet (default) or signaling.
+* `[REQ]` Parse NaN payloads with optional quiet/signaling classification and optional payload:
+    * `[REQ]` `"-NaN(Q4353)"`, `"-NaN(S4353)"`, `"-NaN(4353)"`, `"-sNaN"`, `"-qNaN(1)"`, `"-NaN(S)"`, etc.
+    * `[REQ]` Optional `s` / `q` prefix selects signaling / quiet; optional `Q` / `S` inner marker also selects quiet / signaling and **overrides the prefix**. All markers are matched case-insensitively.
+    * `[REQ]` Defaults when neither prefix nor inner marker is supplied: `quiet = true`, `payload = 0`.
     * `[REQ]` Payload is an unsigned integer folded modulo 2^110 into fraction bits 109..0. Any bit at position ≥ 110 sets a payload-overflow indicator at fraction bit 110. Fraction bit 111 is the quiet bit.
-    * `[REQ]` **No width-reject path.** Oversize input jams; it does not fail. The only NaN-grammar rejects are malformed tokens (missing `)`, no digits, non-digit garbage where a digit or `)` was expected).
-    * `[REQ]` `NaN(S0)` forces the payload-overflow indicator on. Without this, quiet=0/data=0/overflow=0 would encode the exact bit pattern of `+Infinity`; forcing bit 110 keeps the sNaN class distinguishable.
+    * `[REQ]` **No width-reject path.** Oversize input jams; it does not fail. The only NaN-grammar rejects are malformed tokens (missing `)`, non-digit garbage where a digit or `)` was expected, empty parens with no marker and no digits).
+    * `[REQ]` Any signaling NaN whose resolved fraction would otherwise be all-zero — `NaN(S)`, `NaN(S0)`, `sNaN`, `sNaN(0)`, `sNaN(S)` — forces the payload-overflow indicator on. Without this, quiet=0/data=0/overflow=0 would encode the exact bit pattern of `+Infinity`.
     * `[NOTE]` This matches the numeric conversion convention in `FromIeee754InterchangeBinary` / `ToIeee754InterchangeBinaryNarrowing`, which reserves destination fraction bit 110 as the narrowing-overflow indicator. `Quadruple.MaxNaNPayloadAsBigInteger = (1 << 110) − 1` is the exact data-mask constant.
 * `[REQ]` Precision of a standard-format specifier above 999,999,999 must throw `FormatException` (this is a formatter concern, listed here because parser and formatter share the parser-side NaN/payload grammar conventions).
 * `[REQ]` Codebase target: .NET 11+, C# 14+.
@@ -138,14 +141,60 @@ Grammar:
 * `NumberStyles.AllowTrailingInvalidCharacters` stops parsing at the first non-whitespace character after the symbol; otherwise trailing non-whitespace rejects the match.
 * `+,−` prefix is tried in addition to the locale sign.
 
-### §5.1 — NaN payload grammar `[REQ]` (full replacement)
+---
+
+### §5.1 — NaN payload grammar `[REQ]` `[REV 2]` (full replacement)
+
+Token shape:
 
 ```
-NaN                       → quiet, payload 0
-NaN(Q4353)                → quiet, payload 4353
-NaN(S4353)                → signaling, payload 4353
-NaN(4353)                 → quiet, payload 4353
+[ ("s" | "q") ]  NaN  [ "(" [ ("Q" | "S") ] [ digits ] ")" ]
 ```
+
+* The `"s"` / `"q"` prefix and the locale `NaNSymbol` are matched case-insensitively.
+* The `"Q"` / `"S"` inner marker is matched case-insensitively.
+* Leading sign (`+` / `-`) is handled by `TryParseSpecialValue` before this routine; the sign is applied to the top bit of the high word.
+
+**Defaults and precedence** (weakest → strongest):
+
+| # | Source | Effect on `quiet` | Effect on `payload` |
+|---|--------|-------------------|---------------------|
+| 1 | (none — base default) | `true` | `0` |
+| 2 | `s` prefix | `false` | — |
+| 3 | `q` prefix | `true` | — |
+| 4 | `(Q)` inner marker | `true` | — |
+| 5 | `(S)` inner marker | `false` | — |
+| 6 | digit run | — | replaces default |
+
+Inner marker (#4/#5) overrides prefix (#2/#3). If no digit run is supplied, the payload stays at the default of `0`.
+
+Trace table:
+
+| Form | quiet | payload |
+|---|---|---|
+| `NaN`, `nan`, `NAN` | 1 | 0 |
+| `NaN(Q)`, `NaN(q)` | 1 | 0 |
+| `NaN(S)`, `NaN(s)` | 0 | 0 |
+| `NaN(0)` | 1 | 0 |
+| `NaN(123)` | 1 | 123 |
+| `NaN(Q123)` / `NaN(S123)` | 1 / 0 | 123 |
+| `sNaN`, `snan`, `SNAN` | 0 | 0 |
+| `sNaN(Q)`, `sNaN(S)` | 1 / 0 | 0 |
+| `qNaN`, `qNaN(Q)`, `qNaN(S)` | 1 / 0 | 0 |
+| `sNaN(Q1)` / `qNaN(S1)` | 1 / 0 | 1 |
+
+Rejects (malformed tokens only — **no width-reject path**):
+
+| Form | Reason |
+|---|---|
+| `NaN(` | missing `)` |
+| `NaN(Q`, `NaN(S` | missing `)` |
+| `NaN(Q1`, `NaN(1` | missing `)` |
+| `NaN(Qx)` | non-digit where digit or `)` expected |
+| `NaN()` | empty parens — no marker, no digits |
+| `sNaN()`, `qNaN()` | same |
+| `XNaN`, `NaNq`, `sqNaN`, `q` | symbol / prefix mismatch |
+| `NaN(Q1)x` | trailing content without `AllowTrailingInvalidCharacters` |
 
 The NaN fraction field is partitioned as:
 
@@ -156,11 +205,14 @@ The NaN fraction field is partitioned as:
 | 109..0   | 110   | payload data                               |
 
 Rules:
+
 * Sign is applied to the top bit of the high word.
 * The parsed unsigned integer is folded modulo 2^110 into the data bits; any bit at position ≥ 110 also sets the payload-overflow indicator. The digit scan is bounded only by input length — the accumulator is masked back to 110 bits on every step and cannot grow past ~114 bits regardless of how many digits the caller supplies.
-* The quiet bit is set iff `Q` was given, or no `Q` / `S` marker was present.
-* The payload-overflow indicator is set iff either (a) the parsed integer had any bit at position ≥ 110, or (b) the fraction would otherwise be all-zero after the quiet-bit decision, i.e. `NaN(S0)`. The latter guards against aliasing `±Infinity`.
+* The quiet bit is set iff the resolved `quiet` flag (post-precedence) is `true`.
+* The payload-overflow indicator is set iff either (a) the parsed integer had any bit at position ≥ 110, or (b) the fraction would otherwise be all-zero after the quiet-bit decision, i.e. any zero-payload signaling NaN — `NaN(S)`, `NaN(S0)`, `sNaN`, `sNaN(0)`, `sNaN(S)`. The latter guards against aliasing `±Infinity`.
 * There is **no** width-reject: `NaN(Q<2^200>)` succeeds with the low 110 bits of the value jammed into the data field and bit 110 set.
+
+`[REV]` The rev-1 note that "the only NaN-grammar rejects are malformed tokens (missing `)`, no digits, non-digit garbage…)" is superseded: "no digits" is now only a reject when there is also no inner marker. `NaN()`, `sNaN()`, `qNaN()` reject; `NaN(S)`, `NaN(Q)`, `sNaN(Q)`, `qNaN(S)` succeed with payload 0.
 
 `[NOTE]` The constants are:
 
@@ -191,6 +243,8 @@ hi      = signBit | (InfinityExponent << 48) | hi_mant;
 ```
 
 `InfinityExponent = 0x7FFF`. The `IsZero` guard is what disambiguates `NaN(S0)` from `±Infinity`: with quiet = 0 and data = 0, leaving overflow at 0 would encode the exact bit pattern of an infinity. This matches the encoding used by `Quadruple.NaN`, `Quadruple.PositiveQuietNaN`, etc., with the extra invariant "fraction ≠ 0 for any NaN".
+
+`[REV]` The `IsZero` guard on the fraction now also covers the zero-payload signaling forms `NaN(S)`, `sNaN`, `sNaN(0)`, `sNaN(S)` in addition to `NaN(S0)`. All five produce fraction `1 << 110` (bit 110 forced), preserving the "fraction ≠ 0 for any NaN" invariant.
 
 Example: `-NaN(S0)` → fraction = `1 << 110` = `0x4000_0000_0000_0000_0000`, high word = `0xFFFF4000_00000000`. `+NaN(Q0)` → fraction = `1 << 111` = `0x8000_0000_0000_0000_0000`, high word = `0x7FFF8000_00000000`.
 
@@ -249,16 +303,16 @@ These are the concrete failure modes encountered (or nearly encountered) during 
 
 1. **Two rounding sites.** Any format/parse routine that rounds twice (once for `N`, once at emit) can produce an off-by-1 ULP result. All rounding goes through `RoundHalfToEven`.
 2. **Using `double` as an intermediary.** Even one `Math.Floor(log10(...))` for a *decision* loses correctness at the ULP. Use `ILog2` + exact `CompareSigExp2To10Pow` (formatter) or `ComputeBinaryExponent` (parser).
-3. **`NaN(S0)` would alias `Infinity`.** Mantissa 0 + exponent 0x7FFF is Infinity, not sNaN. Do **not** reject the input; force the payload-overflow indicator (fraction bit 110) so the fraction is nonzero and the class is unambiguous.
+3. **`NaN(S0)` would alias `Infinity`.** Mantissa 0 + exponent 0x7FFF is Infinity, not sNaN. Do **not** reject the input; force the payload-overflow indicator (fraction bit 110) so the fraction is nonzero and the class is unambiguous. Same applies to `NaN(S)`, `sNaN`, `sNaN(0)`, `sNaN(S)`.
 4. **Oversize NaN payload.** `NaN(Q<2^110>)` and any wider input is **jammed**: the data field holds the low 110 bits of the parsed integer, bit 110 is set. Do **not** fail on width. The only rejects in the NaN grammar are malformed tokens.
-5. **Leading `+`/`-` on special values.** `+Infinity`, `-NaN(Q1)` are valid. The `+` prefix in particular is easy to forget; ensure the positive-sign branch is symmetric with the negative branch.
+5. **Leading `+`/`-` on special values.** `+Infinity`, `-NaN(Q1)`, `-sNaN(1)` are valid. The `+` prefix in particular is easy to forget; ensure the positive-sign branch is symmetric with the negative branch.
 6. **`NumberStyles.AllowTrailingInvalidCharacters` must be stripped before `ValidateParseStyleFloatingPoint`.** Otherwise it looks like an invalid flag.
 7. **Hex float exponent is required.** `0x10` alone is not a valid hex float. `0x10p0` is.
 8. **Hex float uses ASCII `.`** (not `NumberDecimalSeparator`) and `p` (not `e`).
 9. **Checked context.** `<CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>` is on. Any `-e`, `-k`, `-expVal` where the operand may be `int.MinValue` must be `unchecked`. Also `(int)Math.Floor(double)` should be `unchecked((int)Math.Floor(...))` if the product's range isn't provable.
 10. **`%` and `‰` in custom formats compound multiplicatively.** `%%` = ×10000, not ×200. The current implementation in `QuadrupleFormatter.CustomFormat` uses the additive form `percentMul * 100 + perMilleMul * 1000` and is wrong for multiple markers. `[VERIFY]` — see §10.
 11. **Percent / per-mille must not go through `Quadruple` arithmetic.** Multiplying `Quadruple.MaxValue` by 100 overflows. Always scale the `BigInteger` significand and leave `Exp2` alone.
-12. **`NaN` payload is compared case-insensitively.** `nan(q1)` is valid.
+12. **`NaN` payload markers are compared case-insensitively.** `nan(q1)`, `SNAN(s1)`, `qNaN(S)` are valid.
 13. **`TailOk` in `TryParseSpecialValue` is buggy** — see §10.
 14. **Whitespace set used by `IsWhite` is wider than .NET's.** `0x1680`, `0x2000..0x200A`, `0x2028`, `0x2029`, `0x202F`, `0x205F`, `0x3000` are accepted here but not by `Number`. If cross-parser consistency matters, narrow the list.
 15. **`MatchSymbolIgnoreCaseAt` only lowercases ASCII.** Symbols containing non-ASCII letters won't match case-insensitively against their lowercase variants. `[VERIFY]` acceptable.
@@ -278,24 +332,59 @@ These are the concrete failure modes encountered (or nearly encountered) during 
 - [ ] `9.9999999999999999999999999999999999e4932` (just below MaxValue, rounds up to ∞).
 - [ ] `1e-4966` subnormal boundary; `5e-4967` (rounds to 0); `2.47e-4966` (tie case).
 
-### §9.2 — NaN payload (full replacement of the checklist)
-- [ ] `NaN`, `nan`, `-NaN`, `+NaN`.
-- [ ] `NaN(0)` → quiet = 1, overflow = 0, data = 0.  Matches `Quadruple.PositiveQuietNaN`.
-- [ ] `NaN(Q0)` → identical to `NaN(0)`.
-- [ ] `NaN(S0)` → quiet = 0, overflow = 1, data = 0.  **Succeeds**, fraction = `1 << 110`, class is signaling, is *not* `+Infinity`.  Raw high word `0x7FFF4000_00000000`.
-- [ ] `-NaN(S0)` → same fraction, sign bit set; high word `0xFFFF4000_00000000`.
-- [ ] `NaN(Q1)` → quiet = 1, overflow = 0, data = 1.
-- [ ] `NaN(S1)` → quiet = 0, overflow = 0, data = 1.
-- [ ] `NaN(Q<2^110 − 1>)` → quiet = 1, overflow = 0, data all 1s.  Payload preserved exactly.
-- [ ] `NaN(Q<2^110>)` → quiet = 1, overflow = 1, data = 0.  **Succeeds** (jam).
-- [ ] `NaN(Q<2^111 − 1>)` → quiet = 1, overflow = 1, data all 1s.
-- [ ] `NaN(Q<2^111>)` → quiet = 1, overflow = 1, data = 0.
-- [ ] `NaN(Q<10^100>)` → quiet = 1, overflow = 1, data = low 110 bits of `10^100`.
-- [ ] `NaN(Q<200k digits>)` → quiet = 1, overflow = 1, data = low 110 bits; completes without OOM or throw.
+---
+
+### §9.2 — NaN payload `[REV 2]` (full replacement of the checklist)
+
+**Defaults / quiet and signaling forms:**
+
+- [ ] `NaN`, `nan`, `NAN`, `Nan` — quiet, payload 0. Matches `Quadruple.PositiveQuietNaN`.
+- [ ] `-NaN`, `+NaN` — sign bit toggled, payload 0.
+- [ ] `NaN(Q)` — identical to `NaN`.
+- [ ] `NaN(S)` — quiet = 0, overflow = 1, data = 0. **Succeeds**. Raw high word `0x7FFF4000_00000000`.
+- [ ] `-NaN(S)` — same fraction, sign set; high word `0xFFFF4000_00000000`. *(This is the form that previously threw `FormatException` under the checked `HexFloat` style — regression sentinel.)*
+- [ ] `NaN(S)` under `NumberStyles.Float | NumberStyles.HexFloat` — succeeds with the same bits as `NaN(S)` under `NumberStyles.Float`.
+- [ ] `sNaN` / `SNAN` / `snan` — quiet = 0, overflow = 1, data = 0. Same bits as `NaN(S)`.
+- [ ] `qNaN` — quiet = 1, overflow = 0, data = 0. Same bits as `NaN`.
+- [ ] `-sNaN`, `+qNaN` — sign applied, class preserved.
+
+**Prefix vs. inner-marker precedence:**
+
+- [ ] `sNaN(Q)` — inner marker wins → quiet = 1, overflow = 0, data = 0. Same bits as `NaN(Q)`, **not** as `sNaN`.
+- [ ] `qNaN(S)` — inner marker wins → quiet = 0, overflow = 1, data = 0. Same bits as `NaN(S)`.
+- [ ] `sNaN(Q1)` — quiet = 1, data = 1.
+- [ ] `qNaN(S1)` — quiet = 0, data = 1.
+
+**Payload forms:**
+
+- [ ] `NaN(0)` — quiet = 1, overflow = 0, data = 0.
+- [ ] `NaN(Q0)` — identical to `NaN(0)`.
+- [ ] `NaN(S0)` — quiet = 0, overflow = 1, data = 0.
+- [ ] `NaN(Q1)` — quiet = 1, overflow = 0, data = 1.
+- [ ] `NaN(S1)` — quiet = 0, overflow = 0, data = 1.
+- [ ] `sNaN(1)` — same as `NaN(S1)`.
+- [ ] `NaN(Q<2^110 − 1>)` — quiet = 1, overflow = 0, data all 1s.
+- [ ] `NaN(Q<2^110>)` — quiet = 1, overflow = 1, data = 0. **Succeeds** (jam).
+- [ ] `NaN(Q<2^111 − 1>)` — quiet = 1, overflow = 1, data all 1s.
+- [ ] `NaN(Q<2^111>)` — quiet = 1, overflow = 1, data = 0.
+- [ ] `NaN(Q<10^100>)` — quiet = 1, overflow = 1, data = low 110 bits of `10^100`.
+- [ ] `NaN(Q<200k digits>)` — quiet = 1, overflow = 1, data = low 110 bits; completes without OOM or throw.
 - [ ] `NaN(1)`, `NaN(Q1)` — same result.
 - [ ] `NaN(S1)`, `-NaN(S1)` — fraction identical, sign bit differs.
-- [ ] `nan(q1)`, `NAN(s1)`, `Nan(Q1)` — case-insensitive across all three markers and the digits.
-- [ ] Malformed rejects (must **fail**, no jam): `NaN(`, `NaN()`, `NaN(Q)`, `NaN(Qx)`, `NaN(Q1`, `NaN(Q1)x` (without `AllowTrailingInvalidCharacters`).
+
+**Case-insensitivity, all three markers + prefix:**
+
+- [ ] `nan(q1)`, `NAN(S1)`, `Nan(Q1)`, `nan(s1)`, `snan(q1)`, `QNAN(s1)`, `SNAN(q1)` — all accepted.
+
+**Malformed rejects (must fail):**
+
+- [ ] `NaN(`, `NaN(Q`, `NaN(S`, `NaN(1` — missing `)`.
+- [ ] `NaN()`, `sNaN()`, `qNaN()` — empty parens.
+- [ ] `NaN(Qx)`, `NaN(Q1x)`, `sNaN(x)` — non-digit where digit or `)` expected.
+- [ ] `XNaN`, `q`, `s`, `sqNaN` — prefix / symbol mismatch.
+- [ ] `NaN(Q1)x` (without `AllowTrailingInvalidCharacters`).
+
+---
 
 ### 9.3 Special values
 - [ ] `Infinity`, `infinity`, `-Infinity`, `+Infinity`.
@@ -418,7 +507,7 @@ Current list includes `0x1680`, `0x2000..0x200A`, `0x2028`, `0x2029`, `0x202F`, 
 
 1. **Fix §10.1 (`TailOk`).** This is a hard correctness bug that will surface on any test with trailing whitespace after a special value.
 2. **Fix §10.2 (multiplicative `%` / `‰`).** Low priority if the test suite never exercises `"%%"`, but a spec-conformance issue.
-3. **Run the §9 test matrix.** Pay special attention to §9.1 round-trip and §9.2 NaN payload — the jam semantics in particular. Cross-check every parsed NaN against `ToIeee754InterchangeBinaryNarrowing` round-trips: a parsed `NaN(Q<2^110>)` must narrow to a target NaN whose overflow bit is set for any narrower target format, and a parsed `NaN(Q<2^110 − 1>)` must narrow to an exact payload. These two are the regression sentinels for the old 111-bit misalignment.
+3. **Run the §9 test matrix.** Pay special attention to §9.1 round-trip and §9.2 NaN payload — the jam semantics in particular, and the newly-added `sNaN`/`qNaN` prefix and `NaN(S)`/`NaN(Q)` marker-only forms. Cross-check every parsed NaN against `ToIeee754InterchangeBinaryNarrowing` round-trips: a parsed `NaN(Q<2^110>)` must narrow to a target NaN whose overflow bit is set for any narrower target format, and a parsed `NaN(Q<2^110 − 1>)` must narrow to an exact payload. These two are the regression sentinels for the old 111-bit misalignment.
 4. **`[VERIFY]` the checked-context negation paths.** Search the parser for `-e`, `-k`, `-expVal`, `-fracHexDigits` and wrap in `unchecked` where the operand is not provably positive. Grep pattern: `negate *int` from IL or `-.*[a-zA-Z]` in source.
 5. **`[VERIFY]` the `AllowHexSpecifier` without `AllowExponent` path.** `ValidateParseStyleFloatingPoint` should reject it, but `TryParseFloat` also needs to not silently route to the decimal path in that case.
 6. **Add a fuzz harness** covering all three `TChar` types. The parser must never throw except through `ParseFloat`.
@@ -431,11 +520,12 @@ Current list includes `0x1680`, `0x2000..0x200A`, `0x2028`, `0x2029`, `0x202F`, 
 * **Never** round outside `RoundHalfToEven`. Everything else is comparison and shifting.
 * **Never** use `double` for a decision. `double` is fine for a *hint*; every decision must be backed by an exact integer comparison.
 * **Never** call `System.Number.*`. If you need a helper (`TryStringToNumber` equivalent, `TryMatchSpecialValueSymbol`, `SpanTrimStart`), write it in the parser.
-* **Never** reject a NaN payload on width. Fold to 110 bits, set bit 110 on overflow, and let `NaN(S0)` force bit 110 so the class never aliases `±Infinity`. The only NaN failures are malformed tokens.
+* **Never** reject a NaN payload on width. Fold to 110 bits, set bit 110 on overflow, and let any zero-payload signaling form (`NaN(S)`, `NaN(S0)`, `sNaN`, `sNaN(0)`, `sNaN(S)`) force bit 110 so the class never aliases `±Infinity`. The only NaN failures are malformed tokens.
+* **NaN class resolution: default → prefix → inner marker.** `quiet = true` and `payload = 0` are the base defaults; the `s`/`q` prefix overrides quiet; the inner `(Q)`/`(S)` marker overrides the prefix. Digits replace the payload default. Do not add another override site.
 * **Wrap sign flips in `unchecked`** when the operand could be `int.MinValue`.
 * **Test one `TChar` at a time.** Generic code that compiles for `Rune` can silently mis-dispatch for `byte`.
 * **Keep the parser and formatter rounding in sync.** `RoundToScale` (formatter) and `RoundHalfToEven` (parser) are structurally identical on purpose — if one changes, the other must change with it.
 
 ---
 
-*End of handoff — DPSK.*
+*End of handoff — DPSK, revision 2.*
