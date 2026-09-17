@@ -15,16 +15,18 @@ using System.Runtime.InteropServices;
 using System.Runtime.Intrinsics;
 using System.Runtime.Serialization;
 using System.Text;
+using static UltimateOrb.Internal.System.Extensions;
 using UltimateOrb.Mathematics;
 using UltimateOrb.Numerics;
 using UltimateOrb.Utilities;
-
+using Number = UltimateOrb.Internal.System.Number;
 
 
 #pragma warning disable UoWIP // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
 using static UltimateOrb.Numerics.Binary128Arithmetic;
 #pragma warning restore UoWIP // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
 using Binary128Arithmetic = UltimateOrb.Numerics.Binary128Arithmetic;
+using UltimateOrb.Internal.System;
 
 namespace UltimateOrb {
 
@@ -1962,88 +1964,33 @@ namespace UltimateOrb {
         }
         static readonly BigInteger MaxNaNPayloadAsBigInteger = (BigInteger.One << 110) - 1;
 
-        public static Quadruple Parse(ReadOnlySpan<char> s, NumberStyles style, IFormatProvider? provider) {
-            throw new NotImplementedException();
-            /*
-            var parseResult = NumberLiteralParseModule.ParseNumberLiteral(s.ToString());
-            var kind = parseResult.Flags.GetKind();
-            if (kind == NumberLiteralFlags.Empty || kind == NumberLiteralFlags.Error) {
-                return decimal.Parse(s, provider);
-                throw new FormatException("Input string was not in a recognized format.");
-            }
-            if (kind != NumberLiteralFlags.IsFinite) {
-                var sp = parseResult.Flags.GetSpecial();
-                if (sp == NumberLiteralFlags.SpecialInfinity) {
-                    return parseResult.Flags.HasFlag(NumberLiteralFlags.IsNegative) ? NegativeInfinity : PositiveInfinity;
-                }
-                var payload = (UltimateOrb.UInt128)System.UInt128.CreateTruncating(MaxNaNPayloadAsBigInteger & parseResult.SignificandIntegralPart);
-                // traat unspecified NaN as SignalingNaN
-                var ccc = sp == NumberLiteralFlags.SpecialQuietNaN ? 0B_011_1110_0000_0000 : 0B_011_1111_0000_0000;
-                ccc += parseResult.Flags.GetSign() == NumberLiteralFlags.SignPositive ? 0 : 0B_100_0000_0000_0000;
-                return new Quadruple(payload + ((UInt128)ccc << 113), CtorFromBits);
-            }
-            {
-                BigRational r = 0;
-                var preferredBiasedExponent = checked((int)(parseResult.Exponent - parseResult.SignificandFractionalPartLength + EXP_BIAS));
-                var preferredSignBit = parseResult.Flags.HasFlag(NumberLiteralFlags.IsNegative) ? unchecked((UInt64)Int64.MinValue) : 0;
-                if (parseResult.SignificandFractionalPart.IsZero &&
-                    parseResult.SignificandIntegralPart.IsZero) {
-                } else {
-                    BigInteger denominator;
-                    BigInteger numerator;
-                    if (parseResult.Flags.HasFlag(NumberLiteralFlags.Hex)) {
-                        Debug.Assert(parseResult.SignificandFractionalPartLength >= 0);
-                        int fracLen = (int)parseResult.SignificandFractionalPartLength;
-                        BigInteger pow16 = BigInteger.Pow(16, fracLen);
-                        numerator = parseResult.SignificandIntegralPart * pow16 + parseResult.SignificandFractionalPart;
-                        denominator = pow16;
+        public static Quadruple Parse(string s) => Parse(s, NumberStyles.Float | NumberStyles.AllowThousands, provider: null);
 
-                        var exp = checked((int)parseResult.Exponent);
-                        if (exp >= 0) {
-                            numerator <<= exp;
-                        } else {
-                            denominator <<= checked(-exp);
-                        }
+        public static Quadruple Parse(string s, NumberStyles style) => Parse(s, style, provider: null);
 
-
-                    } else {
-                        // Decimal path
-                        int fracLen = checked((int)parseResult.SignificandFractionalPartLength);
-                        BigInteger pow10 = BigInteger.Pow(10, fracLen);
-                        numerator = parseResult.SignificandIntegralPart * pow10 + parseResult.SignificandFractionalPart;
-                        denominator = pow10;
-
-                        var exp = checked((int)parseResult.Exponent);
-                        if (exp >= 0) {
-                            numerator *= BigIntegerSmallExp10Module.Exp10(exp);
-                        } else {
-                            denominator *= BigIntegerSmallExp10Module.Exp10(-exp);
-                        }
-                    }
-                    r = BigRational.FromFraction(numerator, denominator);
-                    if (parseResult.Flags.HasFlag(NumberLiteralFlags.IsNegative)) r = -r;
-                }
-                var res = (Quadruple)r;
-                preferredBiasedExponent = Math.Clamp(preferredBiasedExponent, 0, MaxBiasedExponent);
-                return AdjustSignBitAndBiasedExponent(res, preferredSignBit, preferredBiasedExponent);
-            }*/
-        }
+        public static Quadruple Parse(string s, IFormatProvider? provider) => Parse(s, NumberStyles.Float | NumberStyles.AllowThousands, provider);
 
         public static Quadruple Parse(string s, NumberStyles style, IFormatProvider? provider) {
+            ArgumentNullException.ThrowIfNull(s);
             return Parse(s.AsSpan(), style, provider);
         }
 
-        public static Quadruple Parse(ReadOnlySpan<char> s, IFormatProvider? provider) {
-            return Parse(s, NumberStyles.Float, provider);
+        public static Quadruple Parse(ReadOnlySpan<char> s, NumberStyles style = NumberStyles.Float | NumberStyles.AllowThousands, IFormatProvider? provider = null) {
+            NumberFormatInfo.ValidateParseStyleFloatingPoint(style);
+            return QuadrupleNumber.ParseFloat(s, style, NumberFormatInfo.GetInstance(provider));
         }
 
-        public static Quadruple Parse(string s, IFormatProvider? provider) {
-            return Parse(s.AsSpan(), NumberStyles.Float, provider);
+        /// <inheritdoc cref="ISpanParsable{TSelf}.Parse(ReadOnlySpan{char}, IFormatProvider?)" />
+        public static Quadruple Parse(ReadOnlySpan<char> s, IFormatProvider? provider) => Parse(s, NumberStyles.Float | NumberStyles.AllowThousands, provider);
+
+        /// <inheritdoc cref="INumberBase{TSelf}.Parse(ReadOnlySpan{byte}, NumberStyles, IFormatProvider?)" />
+        public static Quadruple Parse(ReadOnlySpan<byte> utf8Text, NumberStyles style = NumberStyles.Float | NumberStyles.AllowThousands, IFormatProvider? provider = null) {
+            NumberFormatInfo.ValidateParseStyleFloatingPoint(style);
+            return QuadrupleNumber.ParseFloat(utf8Text, style, NumberFormatInfo.GetInstance(provider));
         }
 
-        public static Quadruple Parse(string s) {
-            return Parse(s, null);
-        }
+        /// <inheritdoc cref="IUtf8SpanParsable{TSelf}.Parse(ReadOnlySpan{byte}, IFormatProvider?)" />
+        public static Quadruple Parse(ReadOnlySpan<byte> utf8Text, IFormatProvider? provider) => Parse(utf8Text, NumberStyles.Float | NumberStyles.AllowThousands, provider);
 
         public static Quadruple Pow(Quadruple x, Quadruple y) {
             throw new NotImplementedException();
@@ -2236,21 +2183,64 @@ namespace UltimateOrb {
             throw new NotImplementedException();
         }
 
-        public static bool TryParse(ReadOnlySpan<char> s, NumberStyles style, IFormatProvider? provider, [MaybeNullWhen(false)] out Quadruple result) {
-            throw new NotImplementedException();
+
+        public static bool TryParse([NotNullWhen(true)] string? s, out Quadruple result) => TryParse(s, NumberStyles.Float | NumberStyles.AllowThousands, provider: null, out result);
+
+        public static bool TryParse(ReadOnlySpan<char> s, out Quadruple result) => TryParse(s, NumberStyles.Float | NumberStyles.AllowThousands, provider: null, out result);
+
+        /// <summary>Tries to convert a UTF-8 character span containing the string representation of a number to its double-precision floating-point number equivalent.</summary>
+        /// <param name="utf8Text">A read-only UTF-8 character span that contains the number to convert.</param>
+        /// <param name="result">When this method returns, contains a double-precision floating-point number equivalent of the numeric value or symbol contained in <paramref name="utf8Text" /> if the conversion succeeded or zero if the conversion failed. The conversion fails if the <paramref name="utf8Text" /> is <see cref="ReadOnlySpan{T}.Empty" /> or is not in a valid format. This parameter is passed uninitialized; any value originally supplied in result will be overwritten.</param>
+        /// <returns><c>true</c> if <paramref name="utf8Text" /> was converted successfully; otherwise, false.</returns>
+        public static bool TryParse(ReadOnlySpan<byte> utf8Text, out Quadruple result) => TryParse(utf8Text, NumberStyles.Float | NumberStyles.AllowThousands, provider: null, out result);
+
+        public static bool TryParse([NotNullWhen(true)] string? s, NumberStyles style, IFormatProvider? provider, out Quadruple result) {
+            NumberFormatInfo.ValidateParseStyleFloatingPoint(style);
+            return QuadrupleNumber.TryParseFloat(s.AsSpan(), style, NumberFormatInfo.GetInstance(provider), out result, out _);
         }
 
-        public static bool TryParse([NotNullWhen(true)] string? s, NumberStyles style, IFormatProvider? provider, [MaybeNullWhen(false)] out Quadruple result) {
-            throw new NotImplementedException();
+        public static bool TryParse(ReadOnlySpan<char> s, NumberStyles style, IFormatProvider? provider, out Quadruple result) {
+            NumberFormatInfo.ValidateParseStyleFloatingPoint(style);
+            return QuadrupleNumber.TryParseFloat(s, style, NumberFormatInfo.GetInstance(provider), out result, out _);
         }
 
-        public static bool TryParse(ReadOnlySpan<char> s, IFormatProvider? provider, [MaybeNullWhen(false)] out Quadruple result) {
-            throw new NotImplementedException();
+
+        /// <inheritdoc cref="INumberBase{TSelf}.TryParsePartial(string, NumberStyles, IFormatProvider?, out TSelf, out int)" />
+        public static bool TryParsePartial([NotNullWhen(true)] string? s, NumberStyles style, IFormatProvider? provider, out Quadruple result, out int charsConsumed) {
+            NumberFormatInfo.ValidateParseStyleFloatingPoint(style);
+            return QuadrupleNumber.TryParseFloat(s.AsSpan(), style | Number.AllowTrailingInvalidCharacters, NumberFormatInfo.GetInstance(provider), out result, out charsConsumed);
         }
 
-        public static bool TryParse([NotNullWhen(true)] string? s, IFormatProvider? provider, [MaybeNullWhen(false)] out Quadruple result) {
-            throw new NotImplementedException();
+        /// <inheritdoc cref="INumberBase{TSelf}.TryParsePartial(ReadOnlySpan{char}, NumberStyles, IFormatProvider?, out TSelf, out int)" />
+        public static bool TryParsePartial(ReadOnlySpan<char> s, NumberStyles style, IFormatProvider? provider, out Quadruple result, out int charsConsumed) {
+            NumberFormatInfo.ValidateParseStyleFloatingPoint(style);
+            return QuadrupleNumber.TryParseFloat(s, style | Number.AllowTrailingInvalidCharacters, NumberFormatInfo.GetInstance(provider), out result, out charsConsumed);
         }
+
+        /// <inheritdoc cref="INumberBase{TSelf}.TryParsePartial(ReadOnlySpan{byte}, NumberStyles, IFormatProvider?, out TSelf, out int)" />
+        public static bool TryParsePartial(ReadOnlySpan<byte> utf8Text, NumberStyles style, IFormatProvider? provider, out Quadruple result, out int bytesConsumed) {
+            NumberFormatInfo.ValidateParseStyleFloatingPoint(style);
+            return QuadrupleNumber.TryParseFloat(utf8Text, style | Number.AllowTrailingInvalidCharacters, NumberFormatInfo.GetInstance(provider), out result, out bytesConsumed);
+        }
+
+        /// <inheritdoc cref="IParsable{TSelf}.TryParse(string?, IFormatProvider?, out TSelf)" />
+        public static bool TryParse([NotNullWhen(true)] string? s, IFormatProvider? provider, out Quadruple result) => TryParse(s, NumberStyles.Float | NumberStyles.AllowThousands, provider, out result);
+      
+        /// <inheritdoc cref="ISpanParsable{TSelf}.TryParse(ReadOnlySpan{char}, IFormatProvider?, out TSelf)" />
+        public static bool TryParse(ReadOnlySpan<char> s, IFormatProvider? provider, out Quadruple result) => TryParse(s, NumberStyles.Float | NumberStyles.AllowThousands, provider, out result);
+        
+        /// <inheritdoc cref="INumberBase{TSelf}.TryParse(ReadOnlySpan{byte}, NumberStyles, IFormatProvider?, out TSelf)" />
+        public static bool TryParse(ReadOnlySpan<byte> utf8Text, NumberStyles style, IFormatProvider? provider, out Quadruple result) {
+            NumberFormatInfo.ValidateParseStyleFloatingPoint(style);
+            return QuadrupleNumber.TryParseFloat(utf8Text, style, NumberFormatInfo.GetInstance(provider), out result, out _);
+        }
+
+        /// <inheritdoc cref="IUtf8SpanParsable{TSelf}.TryParse(ReadOnlySpan{byte}, IFormatProvider?, out TSelf)" />
+        public static bool TryParse(ReadOnlySpan<byte> utf8Text, IFormatProvider? provider, out Quadruple result) => TryParse(utf8Text, NumberStyles.Float | NumberStyles.AllowThousands, provider, out result);
+
+
+
+
         /// <summary>
         /// Extracts the raw biased exponent and trailing significand field of a
         /// binary128 value supplied as two 64-bit halves.
@@ -3611,11 +3601,23 @@ namespace UltimateOrb {
                 return true;
             }
 
-            // Replaces WriteGrouped entirely.
             private static bool WriteGrouped(string digits, int decExp, int fracDigits,
-                                             int[] sizes, string grp, string dec,
-                                             ref Writer w) {
-                int intLen = System.Math.Max(1, decExp);
+                                 int[] sizes, string grp, string dec,
+                                 ref Writer w) {
+                if (decExp <= 0) {
+                    if (!w.TryAppend('0')) return false;
+                    if (fracDigits <= 0) return true;
+                    if (!w.TryAppend(dec)) return false;
+                    int lead = System.Math.Min(-decExp, fracDigits);
+                    if (!w.TryAppendZeros(lead)) return false;
+                    int fromDigits = System.Math.Min(digits.Length, fracDigits - lead);
+                    if (fromDigits > 0 && !w.TryAppend(digits.AsSpan(0, fromDigits))) return false;
+                    int trailing = fracDigits - lead - fromDigits;
+                    if (trailing > 0 && !w.TryAppendZeros(trailing)) return false;
+                    return true;
+                }
+
+                int intLen = decExp;
                 int gs = sizes.Length > 0 ? sizes[0] : 0;
 
                 if (gs <= 0 || intLen <= gs) {
@@ -3623,8 +3625,6 @@ namespace UltimateOrb {
                     if (real > 0 && !w.TryAppend(digits.AsSpan(0, real))) return false;
                     if (real < intLen && !w.TryAppendZeros(intLen - real)) return false;
                 } else {
-                    // Grouped walk — the group boundaries are inside the integer part, so
-                    // this loop is bounded by the *actual* digit count, not by fracDigits.
                     for (int i = 0; i < intLen; i++) {
                         if (i > 0 && (intLen - i) % gs == 0)
                             if (!w.TryAppend(grp)) return false;
@@ -3641,10 +3641,10 @@ namespace UltimateOrb {
                     if (!w.TryAppendZeros(fracDigits)) return false;
                     return true;
                 }
-                int fromDigits = System.Math.Min(digits.Length - fracStart, fracDigits);
-                if (!w.TryAppend(digits.AsSpan(fracStart, fromDigits))) return false;
-                int trailing = fracDigits - fromDigits;
-                if (trailing > 0 && !w.TryAppendZeros(trailing)) return false;
+                int fromDigits2 = System.Math.Min(digits.Length - fracStart, fracDigits);
+                if (!w.TryAppend(digits.AsSpan(fracStart, fromDigits2))) return false;
+                int trailing2 = fracDigits - fromDigits2;
+                if (trailing2 > 0 && !w.TryAppendZeros(trailing2)) return false;
                 return true;
             }
 
@@ -3680,7 +3680,7 @@ namespace UltimateOrb {
 
             // ------------------------------------------------------------------ G
             public static bool General(Span<char> dst, out int written, in Decoded d,
-                                       int precision, NumberFormatInfo nfi) {
+                           int precision, NumberFormatInfo nfi) {
                 if (d.IsZero) {
                     var wz = new Writer(dst);
                     if (!Sign(d.IsNegative, ref wz, nfi)) goto fail;
@@ -3688,11 +3688,19 @@ namespace UltimateOrb {
                     written = wz.Pos; return true;
                 }
 
-                string digits; int decExp; int threshold;
+                string digits;
+                int decExp;
+                int threshold;
 
                 if (precision <= 0) {
+                    // Default G: shortest round-trip digits.
                     RoundTripDigits.Get(d.Significand, d.Exp2, out digits, out decExp);
-                    threshold = digits.Length;
+
+                    // Threshold for the fixed/scientific decision.
+                    // Mirrors .NET's Double (=15) and Single (=7):
+                    //   floor(significandBits · log10(2)).
+                    // For Quadruple, 113 bits → 34.
+                    threshold = 34;
                 } else {
                     DecimalDigits.GetSignificant(d.Significand, d.Exp2, precision,
                                                  out digits, out decExp);
@@ -3709,21 +3717,13 @@ namespace UltimateOrb {
                 if (useSci) {
                     int targetFrac = digits.Length > 1 ? digits.Length - 1 : 0;
                     if (!WriteScientific(digits, decExp, targetFrac, ref w, nfi, 'E', 2, true)) goto fail;
-                } else if (precision <= 0) {
-                    // R-like default G: no trailing-zero trimming needed.
-                    if (!WriteFixed(digits, decExp, digits.Length - decExp, nfi, ref w)) goto fail;
                 } else {
-                    // G<prec>: trim trailing zeros, then emit exactly the digits we have.
-                    int frac = System.Math.Max(0, digits.Length - decExp);
-                    while (frac > 0 && digits[decExp + frac - 1] == '0') frac--;
-                    int intLen = System.Math.Max(1, decExp);
-                    int intFrom = System.Math.Min(digits.Length, intLen);
-                    if (intFrom > 0 && !w.TryAppend(digits.AsSpan(0, intFrom))) goto fail;
-                    if (intFrom < intLen && !w.TryAppendZeros(intLen - intFrom)) goto fail;
-                    if (frac > 0) {
-                        if (!w.TryAppend(nfi.NumberDecimalSeparator)) goto fail;
-                        if (!w.TryAppend(digits.AsSpan(decExp, frac))) goto fail;
-                    }
+                    // Fixed-point. WriteFixed handles decExp ≤ 0 (emitting "0." and
+                    // leading zeros), 0 < decExp < digits.Length, and decExp ≥ digits.Length
+                    // (padding with trailing zeros). `digits` is trailing-zero-free in both
+                    // the R-like and G<prec> paths, so fracDigits = digits.Length − decExp
+                    // is exactly the number of fractional digits to emit.
+                    if (!WriteFixed(digits, decExp, digits.Length - decExp, nfi, ref w)) goto fail;
                 }
                 written = w.Pos; return true;
             fail: written = 0; return false;
@@ -4160,6 +4160,1429 @@ namespace UltimateOrb {
 
             private static bool IsPlaceholder(ReadOnlySpan<char> s, int i)
                 => i >= 0 && i < s.Length && (s[i] == '0' || s[i] == '#');
+        }
+
+        internal static class QuadrupleNumber {
+            // ------------------------------------------------------------------
+            // IEEE 754 binary128 constants
+            // ------------------------------------------------------------------
+            private const int MantissaBits = 112;
+            private const int SignificandBits = 113;
+            private const int ExponentBias = 16383;
+            private const int InfinityExponent = 0x7FFF;
+            private const int MinNormalBinExp = -16382;
+            private const int MaxNormalBinExp = 16383;
+            private const int MinSubnormalExp2 = -16494;    // sig · 2^exp2 for the smallest subnormal
+            private const int NaNPayloadBits = 111;       // 112 mantissa bits − 1 quiet bit
+            private const int NaNQuietBit = 111;       // position of the quiet bit inside the mantissa
+
+            // Fast reject bounds on the decimal exponent of the MSB.
+            // MaxValue ≈ 1.19e4932, smallest positive ≈ 3.65e-4966.
+            private const int MaxDecMSB = 4934;
+            private const int MinDecMSB = -4970;
+
+            // Guard against pathological input.
+            private const int MaxInputDigits = 200_000;
+
+            // ==================================================================
+            // Public entry points
+            // ==================================================================
+            public static Quadruple ParseFloat<TChar>(ReadOnlySpan<TChar> value,
+                                                      NumberStyles styles,
+                                                      NumberFormatInfo info)
+                where TChar : unmanaged {
+                if (!TryParseFloat(value, styles, info, out Quadruple result, out _))
+                    ThrowFormatException(value);
+                return result;
+            }
+
+            public static bool TryParseFloat<TChar>(ReadOnlySpan<TChar> value,
+                                                    NumberStyles styles,
+                                                    NumberFormatInfo info,
+                                                    out Quadruple result,
+                                                    out int elementsConsumed)
+                where TChar : unmanaged {
+                if ((styles & NumberStyles.AllowHexSpecifier) != 0) {
+                    if (TryParseHexFloat(value, styles, info, out result, out elementsConsumed))
+                        return true;
+                    return TryParseSpecialValue(value, styles, info, out result, out elementsConsumed);
+                }
+
+                if (TryParseDecimalNumber(value, styles, info, out result, out elementsConsumed))
+                    return true;
+
+                return TryParseSpecialValue(value, styles, info, out result, out elementsConsumed);
+            }
+
+            // ==================================================================
+            // Decimal numeric parse
+            // ==================================================================
+            private static bool TryParseDecimalNumber<TChar>(ReadOnlySpan<TChar> value,
+                                                             NumberStyles styles,
+                                                             NumberFormatInfo info,
+                                                             out Quadruple result,
+                                                             out int elementsConsumed)
+                where TChar : unmanaged {
+                result = default;
+                elementsConsumed = 0;
+
+                int len = value.Length;
+                if (len == 0) return false;
+                int idx = 0;
+
+                // ---- leading whitespace ----
+                if ((styles & NumberStyles.AllowLeadingWhite) != 0) {
+                    while (idx < len && IsWhite(UtfChar<TChar>.CastToUInt32(value[idx]))) idx++;
+                    if (idx >= len) return false;
+                }
+
+                // ---- '(' for negative ----
+                bool hadParens = false;
+                bool isNegative = false;
+                if ((styles & NumberStyles.AllowParentheses) != 0
+                    && UtfChar<TChar>.CastToUInt32(value[idx]) == '(') {
+                    hadParens = true;
+                    isNegative = true;
+                    idx++;
+                }
+
+                // ---- leading sign ----
+                if (!hadParens && (styles & NumberStyles.AllowLeadingSign) != 0) {
+                    if (TryConsumeSign(value, ref idx, info, out bool neg))
+                        isNegative = neg;
+                }
+
+                // ---- leading currency symbol ----
+                if ((styles & NumberStyles.AllowCurrencySymbol) != 0) {
+                    if (MatchSymbol(value, idx, info.CurrencySymbol, out int c))
+                        idx += c;
+                }
+
+                if (idx >= len) return false;
+
+                // ---- mantissa digits ----
+                BigInteger sig = BigInteger.Zero;
+                bool seenPoint = false;
+                bool anyDigits = false;
+                int fracDigits = 0;
+                int digitsSeen = 0;
+                int maxDigits = MaxInputDigits;
+
+                // Local helper — accumulates a decimal digit.
+                void ProcessDigit(uint ch) {
+                    anyDigits = true;
+                    if (seenPoint) fracDigits++;
+                    if (digitsSeen < maxDigits) {
+                        sig = sig * 10 + (ch - '0');
+                        digitsSeen++;
+                    }
+                    // else: silently drop digits — the value is out of Quadruple range
+                    // and the estimate below will clamp to Infinity/Zero anyway.
+                }
+
+                // integer digits
+                while (idx < len) {
+                    uint ch = UtfChar<TChar>.CastToUInt32(value[idx]);
+                    if (ch >= '0' && ch <= '9') { ProcessDigit(ch); idx++; continue; }
+
+                    if ((styles & NumberStyles.AllowThousands) != 0 && !seenPoint && anyDigits
+                        && MatchSymbol(value, idx, info.NumberGroupSeparator, out int gs)
+                        && gs > 0 && idx + gs < len
+                        && IsAsciiDigit(UtfChar<TChar>.CastToUInt32(value[idx + gs]))) {
+                        idx += gs;
+                        continue;
+                    }
+                    break;
+                }
+
+                // decimal point
+                if ((styles & NumberStyles.AllowDecimalPoint) != 0 && idx < len
+                    && MatchSymbol(value, idx, info.NumberDecimalSeparator, out int ds) && ds > 0) {
+                    idx += ds;
+                    seenPoint = true;
+                    while (idx < len) {
+                        uint ch = UtfChar<TChar>.CastToUInt32(value[idx]);
+                        if (ch >= '0' && ch <= '9') { ProcessDigit(ch); idx++; continue; }
+
+                        if ((styles & NumberStyles.AllowThousands) != 0 && anyDigits
+                            && MatchSymbol(value, idx, info.NumberGroupSeparator, out int gs2)
+                            && gs2 > 0 && idx + gs2 < len
+                            && IsAsciiDigit(UtfChar<TChar>.CastToUInt32(value[idx + gs2]))) {
+                            idx += gs2;
+                            continue;
+                        }
+                        break;
+                    }
+                }
+
+                if (!anyDigits) return false;
+
+                // ---- exponent ----
+                long expAdjust = 0;
+                if ((styles & NumberStyles.AllowExponent) != 0 && idx < len) {
+                    uint ch = UtfChar<TChar>.CastToUInt32(value[idx]);
+                    if (ch == 'e' || ch == 'E') {
+                        int probe = idx + 1;
+                        bool expNeg = false;
+                        if (probe < len) {
+                            uint es = UtfChar<TChar>.CastToUInt32(value[probe]);
+                            if (es == '-') { expNeg = true; probe++; } else if (es == '+') probe++;
+                        }
+                        int expStart = probe;
+                        long ev = 0;
+                        while (probe < len) {
+                            uint d = UtfChar<TChar>.CastToUInt32(value[probe]);
+                            if (d < '0' || d > '9') break;
+                            ev = ev * 10 + (d - '0');
+                            if (ev > 10_000_000) ev = 10_000_000;
+                            probe++;
+                        }
+                        if (probe > expStart) {
+                            expAdjust = expNeg ? -ev : ev;
+                            idx = probe;
+                        }
+                    }
+                }
+
+                // ---- trailing currency symbol ----
+                if ((styles & NumberStyles.AllowCurrencySymbol) != 0
+                    && MatchSymbol(value, idx, info.CurrencySymbol, out int c2)) {
+                    idx += c2;
+                }
+
+                // ---- trailing sign ----
+                if ((styles & NumberStyles.AllowTrailingSign) != 0) {
+                    if (TryConsumeSign(value, ref idx, info, out bool neg2) && neg2)
+                        isNegative = true;
+                }
+
+                // ---- closing paren ----
+                if (hadParens) {
+                    if (idx >= len || UtfChar<TChar>.CastToUInt32(value[idx]) != ')')
+                        return false;
+                    idx++;
+                }
+
+                // ---- trailing whitespace ----
+                if ((styles & NumberStyles.AllowTrailingWhite) != 0) {
+                    while (idx < len && IsWhite(UtfChar<TChar>.CastToUInt32(value[idx]))) idx++;
+                }
+
+                // ---- trailing content check ----
+                // '\0' padding is always tolerated.
+                while (idx < len && UtfChar<TChar>.CastToUInt32(value[idx]) == 0) idx++;
+
+                bool allowTrailingInvalid = (styles & Number.AllowTrailingInvalidCharacters) != 0;
+                if (idx < len && !allowTrailingInvalid) return false;
+
+                // ---- convert ----
+                result = BuildQuadruple(isNegative, sig, expAdjust - fracDigits);
+                elementsConsumed = idx;
+                return true;
+            }
+
+            // ==================================================================
+            // Hexadecimal float parse — "0x<hex>[.<hex>]p<sign><dec>"
+            // ==================================================================
+            private static bool TryParseHexFloat<TChar>(ReadOnlySpan<TChar> value,
+                                                        NumberStyles styles,
+                                                        NumberFormatInfo info,
+                                                        out Quadruple result,
+                                                        out int elementsConsumed)
+                where TChar : unmanaged {
+                result = default;
+                elementsConsumed = 0;
+
+                int len = value.Length;
+                if (len == 0) return false;
+                int idx = 0;
+
+                // leading whitespace
+                if ((styles & NumberStyles.AllowLeadingWhite) != 0)
+                    while (idx < len && IsWhite(UtfChar<TChar>.CastToUInt32(value[idx]))) idx++;
+
+                // sign
+                bool isNegative = false;
+                if ((styles & NumberStyles.AllowLeadingSign) != 0) {
+                    if (idx < len && TryConsumeSign(value, ref idx, info, out bool neg))
+                        isNegative = neg;
+                }
+
+                // "0x" prefix
+                if (idx + 1 >= len) return false;
+                if (UtfChar<TChar>.CastToUInt32(value[idx]) != '0') return false;
+                uint xCh = UtfChar<TChar>.CastToUInt32(value[idx + 1]) | 0x20;
+                if (xCh != 'x') return false;
+                idx += 2;
+
+                // significand
+                BigInteger sig = BigInteger.Zero;
+                int integerHexDigits = 0;
+                int fracHexDigits = 0;
+                bool anyDigits = false;
+
+                int intStart = idx;
+                while (idx < len) {
+                    int d = HexValue(UtfChar<TChar>.CastToUInt32(value[idx]));
+                    if (d < 0) break;
+                    sig = (sig << 4) | d;
+                    integerHexDigits++;
+                    idx++;
+                }
+                anyDigits = idx > intStart;
+
+                bool seenPoint = false;
+                if ((styles & NumberStyles.AllowDecimalPoint) != 0 && idx < len
+                    && UtfChar<TChar>.CastToUInt32(value[idx]) == '.') {
+                    seenPoint = true;
+                    idx++;
+                    int fracStart = idx;
+                    while (idx < len) {
+                        int d = HexValue(UtfChar<TChar>.CastToUInt32(value[idx]));
+                        if (d < 0) break;
+                        sig = (sig << 4) | d;
+                        fracHexDigits++;
+                        idx++;
+                    }
+                    anyDigits |= idx > fracStart;
+                }
+
+                if (!anyDigits) return false;
+
+                // 'p' exponent (required)
+                if (idx >= len) return false;
+                uint pCh = UtfChar<TChar>.CastToUInt32(value[idx]) | 0x20;
+                if (pCh != 'p') return false;
+                idx++;
+
+                bool expNeg = false;
+                if (idx < len) {
+                    uint es = UtfChar<TChar>.CastToUInt32(value[idx]);
+                    if (es == '-') { expNeg = true; idx++; } else if (es == '+') idx++;
+                }
+
+                int expStart = idx;
+                long binExp = 0;
+                while (idx < len) {
+                    uint d = UtfChar<TChar>.CastToUInt32(value[idx]);
+                    if (d < '0' || d > '9') break;
+                    binExp = binExp * 10 + (d - '0');
+                    if (binExp > int.MaxValue) binExp = int.MaxValue;
+                    idx++;
+                }
+                if (idx == expStart) return false;
+                if (expNeg) binExp = -binExp;
+
+                // trailing whitespace
+                if ((styles & NumberStyles.AllowTrailingWhite) != 0)
+                    while (idx < len && IsWhite(UtfChar<TChar>.CastToUInt32(value[idx]))) idx++;
+
+                // trailing '\0'
+                while (idx < len && UtfChar<TChar>.CastToUInt32(value[idx]) == 0) idx++;
+
+                bool allowTrailingInvalid = (styles & Number.AllowTrailingInvalidCharacters) != 0;
+                if (idx < len && !allowTrailingInvalid) return false;
+
+                elementsConsumed = idx;
+
+                if (sig.IsZero) {
+                    result = isNegative ? new Quadruple(0, 0x8000_0000_0000_0000UL)
+                                        : new Quadruple(0, 0);
+                    return true;
+                }
+
+                // value = sig × 2^(binExp − 4·fracHexDigits)
+                long exp2 = binExp - 4L * fracHexDigits;
+                if (exp2 > int.MaxValue) exp2 = int.MaxValue;
+                if (exp2 < int.MinValue) exp2 = int.MinValue;
+
+                result = BuildQuadrupleFromBinary(isNegative, sig, (int)exp2);
+                return true;
+            }
+
+            // ==================================================================
+            // Infinity / NaN [+payload]
+            // ==================================================================
+            private static bool TryParseSpecialValue<TChar>(ReadOnlySpan<TChar> value,
+                                                            NumberStyles styles,
+                                                            NumberFormatInfo info,
+                                                            out Quadruple result,
+                                                            out int elementsConsumed)
+                where TChar : unmanaged {
+                result = default;
+                elementsConsumed = 0;
+
+                ReadOnlySpan<TChar> trimmed = TrimStartWhitespace(value);
+                bool allowTrailingInvalid = (styles & Number.AllowTrailingInvalidCharacters) != 0;
+
+                elementsConsumed = value.Length - trimmed.Length;
+
+                // no sign
+                if (TryMatchSymbolIgnoreCase(trimmed, info.PositiveInfinitySymbol, ref elementsConsumed)
+                    && TailOk(trimmed, info.PositiveInfinitySymbol.Length, allowTrailingInvalid, ref elementsConsumed)) {
+                    result = new Quadruple(0, 0x7FFF_0000_0000_0000UL);
+                    return true;
+                }
+                if (TryMatchSymbolIgnoreCase(trimmed, info.NegativeInfinitySymbol, ref elementsConsumed)
+                    && TailOk(trimmed, info.NegativeInfinitySymbol.Length, allowTrailingInvalid, ref elementsConsumed)) {
+                    result = new Quadruple(0, 0xFFFF_0000_0000_0000UL);
+                    return true;
+                }
+                if (TryParseNaN(trimmed, info.NaNSymbol, isNegative: false, allowTrailingInvalid,
+                                ref elementsConsumed, out result)) {
+                    return true;
+                }
+
+                // leading "+"
+                if (trimmed.Length > 0 && UtfChar<TChar>.CastToUInt32(trimmed[0]) == '+') {
+                    ReadOnlySpan<TChar> after = trimmed.Slice(1);
+                    elementsConsumed = value.Length - after.Length;
+
+                    if (TryMatchSymbolIgnoreCase(after, info.PositiveInfinitySymbol, ref elementsConsumed)
+                        && TailOk(after, info.PositiveInfinitySymbol.Length, allowTrailingInvalid, ref elementsConsumed)) {
+                        result = new Quadruple(0, 0x7FFF_0000_0000_0000UL);
+                        return true;
+                    }
+                    if (TryParseNaN(after, info.NaNSymbol, isNegative: false, allowTrailingInvalid,
+                                    ref elementsConsumed, out result)) {
+                        return true;
+                    }
+                    result = default;
+                    elementsConsumed = 0;
+                    return false;
+                }
+
+                // leading "−"
+                int negLen = MatchNegativeSignLength(trimmed, info);
+                if (negLen > 0) {
+                    ReadOnlySpan<TChar> after = trimmed.Slice(negLen);
+                    elementsConsumed = value.Length - after.Length;
+
+                    if (TryMatchSymbolIgnoreCase(after, info.NegativeInfinitySymbol, ref elementsConsumed)
+                        && TailOk(after, info.NegativeInfinitySymbol.Length, allowTrailingInvalid, ref elementsConsumed)) {
+                        result = new Quadruple(0, 0xFFFF_0000_0000_0000UL);
+                        return true;
+                    }
+                    if (TryParseNaN(after, info.NaNSymbol, isNegative: true, allowTrailingInvalid,
+                                    ref elementsConsumed, out result)) {
+                        return true;
+                    }
+                }
+
+                result = default;
+                elementsConsumed = 0;
+                return false;
+            }
+
+            private static bool TryParseNaN<TChar>(ReadOnlySpan<TChar> candidate,
+                                                   string nanSym,
+                                                   bool isNegative,
+                                                   bool allowTrailingInvalid,
+                                                   ref int elementsConsumed,
+                                                   out Quadruple result)
+                where TChar : unmanaged {
+                result = default;
+
+                if (nanSym.Length == 0 || candidate.Length < nanSym.Length) return false;
+                if (!MatchSymbolIgnoreCaseAt(candidate, 0, nanSym)) return false;
+
+                ReadOnlySpan<TChar> after = candidate.Slice(nanSym.Length);
+
+                BigInteger payload = BigInteger.Zero;
+                bool quiet = true;   // default
+
+                if (after.Length > 0 && UtfChar<TChar>.CastToUInt32(after[0]) == '(') {
+                    after = after.Slice(1);
+
+                    // optional Q / S
+                    if (after.Length > 0) {
+                        uint c = UtfChar<TChar>.CastToUInt32(after[0]) | 0x20;    // to lower-case
+                        if (c == 'q') { quiet = true; after = after.Slice(1); } else if (c == 's') { quiet = false; after = after.Slice(1); }
+                    }
+
+                    int pos = 0;
+                    while (pos < after.Length) {
+                        uint ch = UtfChar<TChar>.CastToUInt32(after[pos]);
+                        if (ch < '0' || ch > '9') break;
+                        payload = payload * 10 + (ch - '0');
+                        pos++;
+                        if (pos > 40) return false;   // 111 bits ⇒ ≤ 34 digits
+                    }
+                    if (pos == 0) return false;
+                    after = after.Slice(pos);
+
+                    if (after.Length == 0 || UtfChar<TChar>.CastToUInt32(after[0]) != ')') return false;
+                    after = after.Slice(1);
+                }
+
+                ReadOnlySpan<TChar> tail = TrimStartWhitespace(after);
+                if (!tail.IsEmpty && !allowTrailingInvalid) return false;
+
+                elementsConsumed += candidate.Length - tail.Length;
+
+                if (payload >= (BigInteger.One << NaNPayloadBits)) return false;
+                if (!quiet && payload.IsZero) return false;   // would alias Infinity
+
+                BigInteger mantissa = payload;
+                if (quiet) mantissa |= BigInteger.One << NaNQuietBit;
+
+                ulong mantLo = (ulong)(mantissa & ulong.MaxValue);
+                ulong mantHi = (ulong)((mantissa >> 64) & 0x0000_FFFF_FFFF_FFFFUL);
+                ulong signBit = isNegative ? (1UL << 63) : 0UL;
+                ulong hi = signBit | ((ulong)InfinityExponent << 48) | mantHi;
+
+                result = new Quadruple(mantLo, hi);
+                return true;
+            }
+
+            // ==================================================================
+            // Build a Quadruple from an exact decimal  value = isNeg ? −sig·10^exp10 : sig·10^exp10
+            // ==================================================================
+            private static Quadruple BuildQuadruple(bool isNegative, BigInteger sig, long exp10) {
+                if (sig.IsZero)
+                    return isNegative ? new Quadruple(0, 0x8000_0000_0000_0000UL)
+                                      : new Quadruple(0, 0);
+
+                // Estimate of the decimal position of the MSB.
+                int sigDigits = (int)((sig.GetBitLength() * 30103L) / 100_000L) + 1;
+                long msbDec = (long)sigDigits - 1 + exp10;
+
+                if (msbDec > MaxDecMSB)
+                    return isNegative ? new Quadruple(0, 0xFFFF_0000_0000_0000UL)
+                                      : new Quadruple(0, 0x7FFF_0000_0000_0000UL);
+                if (msbDec < MinDecMSB)
+                    return isNegative ? new Quadruple(0, 0x8000_0000_0000_0000UL)
+                                      : new Quadruple(0, 0);
+
+                BigInteger N, D;
+                if (exp10 >= 0) { N = sig * BigInteger.Pow(10, (int)exp10); D = BigInteger.One; } else { N = sig; D = BigInteger.Pow(10, (int)-exp10); }
+
+                return BuildFromRatio(isNegative, N, D);
+            }
+
+            /// <summary>Build a Quadruple from  sig × 2^exp2  (hex path).</summary>
+            private static Quadruple BuildQuadrupleFromBinary(bool isNegative, BigInteger sig, int exp2) {
+                if (sig.IsZero)
+                    return isNegative ? new Quadruple(0, 0x8000_0000_0000_0000UL)
+                                      : new Quadruple(0, 0);
+
+                int B = (int)(sig.GetBitLength() - 1) + exp2;
+                if (B > MaxNormalBinExp)
+                    return isNegative ? new Quadruple(0, 0xFFFF_0000_0000_0000UL)
+                                      : new Quadruple(0, 0x7FFF_0000_0000_0000UL);
+                if (B < MinSubnormalExp2 - 1)
+                    return isNegative ? new Quadruple(0, 0x8000_0000_0000_0000UL)
+                                      : new Quadruple(0, 0);
+
+                BigInteger N, D;
+                if (exp2 >= 0) { N = sig << exp2; D = BigInteger.One; } else { N = sig; D = BigInteger.One << -exp2; }
+
+                return BuildFromRatio(isNegative, N, D);
+            }
+
+            // ==================================================================
+            // Round  N/D  to a Quadruple (nearest, ties to even)
+            // ==================================================================
+            private static Quadruple BuildFromRatio(bool isNegative, BigInteger N, BigInteger D) {
+                Debug.Assert(N.Sign > 0);
+                Debug.Assert(D.Sign > 0);
+
+                int B = ComputeBinaryExponent(N, D);
+                if (B > MaxNormalBinExp)
+                    return isNegative ? new Quadruple(0, 0xFFFF_0000_0000_0000UL)
+                                      : new Quadruple(0, 0x7FFF_0000_0000_0000UL);
+                if (B < MinSubnormalExp2 - 1)
+                    return isNegative ? new Quadruple(0, 0x8000_0000_0000_0000UL)
+                                      : new Quadruple(0, 0);
+
+                bool isSubnormal = B < MinNormalBinExp;
+                int e = isSubnormal ? MinSubnormalExp2 : B - MantissaBits;
+
+                BigInteger m = RoundHalfToEven(N, D, e, out bool carry);
+
+                if (m.IsZero)
+                    return isNegative ? new Quadruple(0, 0x8000_0000_0000_0000UL)
+                                      : new Quadruple(0, 0);
+
+                if (carry) {
+                    m >>= 1;
+                    e++;
+                }
+
+                return Encode(isNegative, m, e, isSubnormal);
+            }
+
+            /// <summary>Exact floor(log2(N / D)) for N &gt; 0, D &gt; 0.</summary>
+            private static int ComputeBinaryExponent(BigInteger N, BigInteger D) {
+                long bitN = N.GetBitLength();
+                long bitD = D.GetBitLength();
+                long diff = bitN - bitD;
+
+                bool geq;
+                if (diff >= 0) geq = N >= (D << (int)diff);
+                else geq = (N << (int)(-diff)) >= D;
+
+                return geq ? (int)diff : (int)diff - 1;
+            }
+
+            /// <summary>
+            /// Returns m = round_half_to_even(N · 2^(−e) / D).
+            /// Sets <paramref name="carry"/> if m == 2^113 (i.e. the significand
+            /// overflowed and the exponent must be bumped).
+            /// </summary>
+            private static BigInteger RoundHalfToEven(BigInteger N, BigInteger D, int e, out bool carry) {
+                BigInteger num, den;
+                if (e <= 0) { num = N << -e; den = D; } else { num = N; den = D << e; }
+
+                BigInteger m = BigInteger.DivRem(num, den, out BigInteger r);
+                BigInteger twice = r << 1;
+                int cmp = twice.CompareTo(den);
+
+                bool roundUp = cmp > 0 || (cmp == 0 && !m.IsEven);
+
+                if (roundUp) {
+                    m += BigInteger.One;
+                    carry = m == (BigInteger.One << SignificandBits);
+                } else {
+                    carry = false;
+                }
+                return m;
+            }
+
+            private static Quadruple Encode(bool isNegative, BigInteger m, int e, bool isSubnormal) {
+                ulong signBit = isNegative ? (1UL << 63) : 0UL;
+
+                if (isSubnormal) {
+                    ulong lo = (ulong)(m & ulong.MaxValue);
+                    ulong hiMant = (ulong)((m >> 64) & 0x0000_FFFF_FFFF_FFFFUL);
+                    ulong hi = signBit | hiMant;
+                    return new Quadruple(lo, hi);
+                }
+
+                int biasedExp = e + MantissaBits + ExponentBias;
+                if (biasedExp >= InfinityExponent)
+                    return isNegative ? new Quadruple(0, 0xFFFF_0000_0000_0000UL)
+                                      : new Quadruple(0, 0x7FFF_0000_0000_0000UL);
+                Debug.Assert(biasedExp >= 1 && biasedExp < InfinityExponent);
+
+                BigInteger mantissa = m - (BigInteger.One << MantissaBits);
+                ulong lo2 = (ulong)(mantissa & ulong.MaxValue);
+                ulong hiMant2 = (ulong)((mantissa >> 64) & 0x0000_FFFF_FFFF_FFFFUL);
+                ulong hi2 = signBit | ((ulong)biasedExp << 48) | hiMant2;
+                return new Quadruple(lo2, hi2);
+            }
+
+            // ==================================================================
+            // Low-level helpers
+            // ==================================================================
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            private static bool IsAsciiDigit(uint ch) => ch >= '0' && ch <= '9';
+
+            private static bool IsWhite(uint ch) {
+                if (ch == ' ' || (ch >= 0x0009 && ch <= 0x000D)) return true;
+                if (ch == 0x0085 || ch == 0x00A0) return true;
+                if (ch == 0x1680) return true;
+                if (ch >= 0x2000 && ch <= 0x200A) return true;
+                if (ch == 0x2028 || ch == 0x2029 || ch == 0x202F || ch == 0x205F || ch == 0x3000) return true;
+                return false;
+            }
+
+            private static int HexValue(uint ch) {
+                if (ch >= '0' && ch <= '9') return (int)(ch - '0');
+                uint c = ch | 0x20;
+                if (c >= 'a' && c <= 'f') return (int)(c - 'a' + 10);
+                return -1;
+            }
+
+            private static ReadOnlySpan<TChar> TrimStartWhitespace<TChar>(ReadOnlySpan<TChar> span)
+                where TChar : unmanaged {
+                int i = 0;
+                while (i < span.Length && IsWhite(UtfChar<TChar>.CastToUInt32(span[i]))) i++;
+                return span.Slice(i);
+            }
+
+            private static bool TryConsumeSign<TChar>(ReadOnlySpan<TChar> value, ref int idx,
+                                                      NumberFormatInfo info, out bool isNegative)
+                where TChar : unmanaged {
+                isNegative = false;
+                int len = value.Length;
+                if (idx >= len) return false;
+
+                if (MatchSymbol(value, idx, info.NegativeSign, out int n)) { idx += n; isNegative = true; return true; }
+                if (MatchSymbol(value, idx, info.PositiveSign, out int p)) { idx += p; isNegative = false; return true; }
+
+                uint c = UtfChar<TChar>.CastToUInt32(value[idx]);
+                if (c == '-') { idx++; isNegative = true; return true; }
+                if (c == '+') { idx++; isNegative = false; return true; }
+                return false;
+            }
+
+            private static int MatchNegativeSignLength<TChar>(ReadOnlySpan<TChar> value, NumberFormatInfo info)
+                where TChar : unmanaged {
+                if (value.IsEmpty) return 0;
+                if (MatchSymbol(value, 0, info.NegativeSign, out int n) && n > 0) return n;
+                if (UtfChar<TChar>.CastToUInt32(value[0]) == '-') return 1;
+                return 0;
+            }
+
+            /// <summary>Match a NumberFormatInfo symbol against a TChar span.</summary>
+            private static bool MatchSymbol<TChar>(ReadOnlySpan<TChar> input, int offset,
+                                                   string symbol, out int consumed)
+                where TChar : unmanaged {
+                consumed = 0;
+                if (symbol.Length == 0 || offset < 0 || offset >= input.Length) return false;
+
+                if (typeof(TChar) == typeof(char)) {
+                    if (offset + symbol.Length > input.Length) return false;
+                    var casted = MemoryMarshal.Cast<TChar, char>(input.Slice(offset));
+                    for (int i = 0; i < symbol.Length; i++)
+                        if (casted[i] != symbol[i]) return false;
+                    consumed = symbol.Length;
+                    return true;
+                }
+                if (typeof(TChar) == typeof(byte)) {
+                    Span<byte> buf = stackalloc byte[64];
+                    int n;
+                    try { n = Encoding.UTF8.GetBytes(symbol, buf); } catch (ArgumentException) { return false; }
+                    if (offset + n > input.Length) return false;
+                    var casted = MemoryMarshal.Cast<TChar, byte>(input.Slice(offset));
+                    for (int i = 0; i < n; i++)
+                        if (casted[i] != buf[i]) return false;
+                    consumed = n;
+                    return true;
+                }
+                if (typeof(TChar) == typeof(Rune)) {
+                    var casted = MemoryMarshal.Cast<TChar, Rune>(input.Slice(offset));
+                    int i = 0;
+                    foreach (var r in symbol.EnumerateRunes()) {
+                        if (i >= casted.Length || casted[i] != r) return false;
+                        i++;
+                    }
+                    consumed = i;
+                    return true;
+                }
+                // Unknown TChar: fall back to code-unit comparison.
+                if (offset + symbol.Length > input.Length) return false;
+                for (int i = 0; i < symbol.Length; i++)
+                    if (UtfChar<TChar>.CastToUInt32(input[offset + i]) != symbol[i]) return false;
+                consumed = symbol.Length;
+                return true;
+            }
+
+            private static bool MatchSymbolIgnoreCaseAt<TChar>(ReadOnlySpan<TChar> input, int offset, string symbol)
+                where TChar : unmanaged {
+                if (symbol.Length == 0 || offset + symbol.Length > input.Length) return false;
+                for (int i = 0; i < symbol.Length; i++) {
+                    uint a = UtfChar<TChar>.CastToUInt32(input[offset + i]);
+                    uint b = symbol[i];
+                    if (a >= 'A' && a <= 'Z') a |= 0x20;
+                    if (b >= 'A' && b <= 'Z') b |= 0x20;
+                    if (a != b) return false;
+                }
+                return true;
+            }
+
+            private static bool TryMatchSymbolIgnoreCase<TChar>(ReadOnlySpan<TChar> input, string symbol, ref int consumed)
+                where TChar : unmanaged {
+                if (!MatchSymbolIgnoreCaseAt(input, 0, symbol)) return false;
+                consumed += symbol.Length;
+                return true;
+            }
+
+            private static bool TailOk<TChar>(ReadOnlySpan<TChar> input, int fromIndex,
+                                              bool allowTrailingInvalid, ref int consumed)
+                where TChar : unmanaged {
+                ReadOnlySpan<TChar> tail = TrimStartWhitespace(input.Slice(fromIndex));
+                if (!tail.IsEmpty && !allowTrailingInvalid) return false;
+                consumed = consumed - (input.Length - fromIndex) + (input.Length - fromIndex - tail.Length);
+                // simpler: consumed was already advanced past the symbol; add whitespace we just consumed
+                consumed += input.Length - fromIndex - tail.Length;
+                return true;
+            }
+
+            [DoesNotReturn]
+            private static void ThrowFormatException<TChar>(ReadOnlySpan<TChar> value)
+                where TChar : unmanaged
+                => throw new FormatException("The input string was not in a correct format.");
+        }
+    }
+}
+namespace UltimateOrb.Internal.System.Globalization {
+    using static global::System.Globalization.NumberStyles;
+
+    static partial class Extensions {
+
+        extension(NumberStyles) {
+
+#if !NET8_0_OR_GREATER
+            public static NumberStyles AllowBinarySpecifier { get => (NumberStyles)1024; }
+#endif
+
+#if !NET11_0_OR_GREATER
+           public static NumberStyles HexFloat { get => AllowLeadingWhite | AllowTrailingWhite | AllowLeadingSign | AllowDecimalPoint | AllowExponent | AllowHexSpecifier; }
+#endif
+        }
+    }
+}
+
+namespace UltimateOrb.Internal.System {
+    using Unsafe = UltimateOrb.Runtime.CompilerServices.Unsafe;
+
+    // Licensed to the .NET Foundation under one or more agreements.
+    // The .NET Foundation licenses this file to you under the MIT license.
+
+    internal static partial class UtfChar<TSelf>
+    where TSelf : unmanaged {
+        public static bool IsSupported { get; } =
+            typeof(TSelf) == typeof(byte) ? true :
+            typeof(TSelf) == typeof(char) ? true :
+            typeof(TSelf) == typeof(Rune) ? true :
+            typeof(TSelf) == typeof(sbyte) ? true :
+            typeof(TSelf) == typeof(UInt16) ? true :
+            typeof(TSelf) == typeof(Int16) ? true :
+            typeof(TSelf) == typeof(UInt32) ? true :
+            typeof(TSelf) == typeof(Int32) ? true :
+            false;
+
+        /// <summary>Gets whether this type represents UTF-8 code units.</summary>
+        public static bool IsUtf8 { get; } =
+            typeof(TSelf) == typeof(byte) ? true :
+            typeof(TSelf) == typeof(sbyte) ? true :
+            false;
+
+        /// <summary>Gets whether this type represents UTF-16 code units.</summary>
+        public static bool IsUtf16 { get; } =
+            typeof(TSelf) == typeof(char) ? true :
+            typeof(TSelf) == typeof(UInt16) ? true :
+            typeof(TSelf) == typeof(Int16) ? true :
+            false;
+
+        /// <summary>Gets whether this type represents UTF-32 code units.</summary>
+        public static bool IsUtf32 { get; } =
+            typeof(TSelf) == typeof(Rune) ? true :
+            typeof(TSelf) == typeof(UInt32) ? true :
+            typeof(TSelf) == typeof(Int32) ? true :
+            false;
+
+        /// <summary>Casts the specified value to this type.</summary>
+        public static TSelf CastFrom(byte value) {
+            if (typeof(TSelf) == typeof(byte)) return (TSelf)(object)value;
+            if (typeof(TSelf) == typeof(sbyte)) return (TSelf)(object)unchecked((sbyte)value);
+            if (typeof(TSelf) == typeof(char)) return (TSelf)(object)(char)value;
+            if (typeof(TSelf) == typeof(UInt16)) return (TSelf)(object)(UInt16)value;
+            if (typeof(TSelf) == typeof(Int16)) return (TSelf)(object)(Int16)value;
+            if (typeof(TSelf) == typeof(UInt32)) return (TSelf)(object)(UInt32)value;
+            if (typeof(TSelf) == typeof(Int32)) return (TSelf)(object)(Int32)value;
+            if (typeof(TSelf) == typeof(Rune)) return (TSelf)(object)Unsafe.BitCast<UInt32, Rune>(unchecked((UInt32)value));
+            throw new NotSupportedException();
+        }
+
+        /// <summary>Casts the specified value to this type.</summary>
+        public static TSelf CastFrom(char value) {
+            if (typeof(TSelf) == typeof(char)) return (TSelf)(object)value;
+            if (typeof(TSelf) == typeof(byte)) return (TSelf)(object)unchecked((byte)value);
+            if (typeof(TSelf) == typeof(sbyte)) return (TSelf)(object)unchecked((sbyte)value);
+            if (typeof(TSelf) == typeof(UInt16)) return (TSelf)(object)(UInt16)value;
+            if (typeof(TSelf) == typeof(Int16)) return (TSelf)(object)unchecked((Int16)value);
+            if (typeof(TSelf) == typeof(UInt32)) return (TSelf)(object)(UInt32)value;
+            if (typeof(TSelf) == typeof(Int32)) return (TSelf)(object)(Int32)value;
+            if (typeof(TSelf) == typeof(Rune)) return (TSelf)(object)Unsafe.BitCast<UInt32, Rune>(unchecked((UInt32)value));
+            throw new NotSupportedException();
+        }
+
+        /// <summary>Casts the specified value to this type.</summary>
+        public static TSelf CastFrom(int value) {
+            if (typeof(TSelf) == typeof(Int32)) return (TSelf)(object)value;
+            if (typeof(TSelf) == typeof(byte)) return (TSelf)(object)unchecked((byte)value);
+            if (typeof(TSelf) == typeof(sbyte)) return (TSelf)(object)unchecked((sbyte)value);
+            if (typeof(TSelf) == typeof(char)) return (TSelf)(object)unchecked((char)value);
+            if (typeof(TSelf) == typeof(UInt16)) return (TSelf)(object)unchecked((UInt16)value);
+            if (typeof(TSelf) == typeof(Int16)) return (TSelf)(object)unchecked((Int16)value);
+            if (typeof(TSelf) == typeof(UInt32)) return (TSelf)(object)unchecked((UInt32)value);
+            if (typeof(TSelf) == typeof(Rune)) return (TSelf)(object)Unsafe.BitCast<Int32, Rune>(unchecked((Int32)value));
+            throw new NotSupportedException();
+        }
+
+        /// <summary>Casts the specified value to this type.</summary>
+        public static TSelf CastFrom(uint value) {
+            if (typeof(TSelf) == typeof(UInt32)) return (TSelf)(object)value;
+            if (typeof(TSelf) == typeof(byte)) return (TSelf)(object)unchecked((byte)value);
+            if (typeof(TSelf) == typeof(sbyte)) return (TSelf)(object)unchecked((sbyte)value);
+            if (typeof(TSelf) == typeof(char)) return (TSelf)(object)unchecked((char)value);
+            if (typeof(TSelf) == typeof(UInt16)) return (TSelf)(object)unchecked((UInt16)value);
+            if (typeof(TSelf) == typeof(Int16)) return (TSelf)(object)unchecked((Int16)value);
+            if (typeof(TSelf) == typeof(Int32)) return (TSelf)(object)unchecked((Int32)value);
+            if (typeof(TSelf) == typeof(Rune)) return (TSelf)(object)Unsafe.BitCast<UInt32, Rune>(unchecked((UInt32)value));
+            throw new NotSupportedException();
+        }
+
+        /// <summary>Casts the specified value to this type.</summary>
+        public static TSelf CastFrom(ulong value) {
+            if (typeof(TSelf) == typeof(byte)) return (TSelf)(object)unchecked((byte)value);
+            if (typeof(TSelf) == typeof(sbyte)) return (TSelf)(object)unchecked((sbyte)value);
+            if (typeof(TSelf) == typeof(char)) return (TSelf)(object)unchecked((char)value);
+            if (typeof(TSelf) == typeof(UInt16)) return (TSelf)(object)unchecked((UInt16)value);
+            if (typeof(TSelf) == typeof(Int16)) return (TSelf)(object)unchecked((Int16)value);
+            if (typeof(TSelf) == typeof(UInt32)) return (TSelf)(object)unchecked((UInt32)value);
+            if (typeof(TSelf) == typeof(Int32)) return (TSelf)(object)unchecked((Int32)value);
+            if (typeof(TSelf) == typeof(Rune)) return (TSelf)(object)Unsafe.BitCast<UInt32, Rune>(unchecked((UInt32)value));
+            throw new NotSupportedException();
+        }
+
+        /// <summary>Casts a value of this type to an UInt32.</summary>
+        public static UInt32 CastToUInt32(TSelf value) {
+            if (typeof(TSelf) == typeof(UInt32)) return (UInt32)(object)value;
+            if (typeof(TSelf) == typeof(Int32)) return unchecked((UInt32)(Int32)(object)value);
+            if (typeof(TSelf) == typeof(byte)) return (byte)(object)value;
+            if (typeof(TSelf) == typeof(sbyte)) return unchecked((byte)(sbyte)(object)value);
+            if (typeof(TSelf) == typeof(char)) return (char)(object)value;
+            if (typeof(TSelf) == typeof(UInt16)) return (UInt16)(object)value;
+            if (typeof(TSelf) == typeof(Int16)) return unchecked((UInt16)(Int16)(object)value);
+            if (typeof(TSelf) == typeof(Rune)) return unchecked((UInt32)((Rune)(object)value).Value);
+            throw new NotSupportedException();
+        }
+    }
+    
+    internal static partial class BinaryFloatParseAndFormatInfo<TSelf>
+        where TSelf : unmanaged, IBinaryFloatingPointIeee754<TSelf>, IMinMaxValue<TSelf> {
+
+        public static bool IsSupported { get; } =
+            typeof(TSelf) == typeof(double) ? true :
+            typeof(TSelf) == typeof(float) ? true :
+            typeof(TSelf) == typeof(Half) ? true :
+#if NET11_0_OR_GREATER
+            typeof(TSelf) == typeof(BFloat16) ? true :
+#endif
+#pragma warning disable UoWIP
+            typeof(TSelf) == typeof(Quadruple) ? true :
+#pragma warning restore UoWIP
+            false;
+
+        /// <summary>
+        /// Ceiling(Log10(5^(Abs(MinBinaryExponent) - 1))) + NormalMantissaBits + 1 + 1
+        /// </summary>
+        public static int NumberBufferLength { get; } =
+            typeof(TSelf) == typeof(double) ? 769 :
+            typeof(TSelf) == typeof(float) ? 114 :
+            typeof(TSelf) == typeof(Half) ? 21 :
+#if NET11_0_OR_GREATER
+            typeof(TSelf) == typeof(BFloat16) ? 114 :
+#endif
+#pragma warning disable UoWIP
+            typeof(TSelf) == typeof(Quadruple) ? 11572 :
+#pragma warning restore UoWIP
+            default;
+
+        public static ulong ZeroBits { get; } = 0;
+
+        public static TBits GetZeroBits<TBits>() where TBits : unmanaged, IBinaryInteger<TBits> {
+            return TBits.Zero;
+        }
+
+        public static ulong InfinityBits { get; } =
+            typeof(TSelf) == typeof(double) ? 0x7FF00000_00000000UL :
+            typeof(TSelf) == typeof(float) ? 0x7F800000UL :
+            typeof(TSelf) == typeof(Half) ? 0x7C00UL :
+#if NET11_0_OR_GREATER
+            typeof(TSelf) == typeof(BFloat16) ? 0x7F80UL :
+#endif
+#pragma warning disable UoWIP
+            typeof(TSelf) == typeof(Quadruple) ? 0x7FFF0000_00000000UL :
+#pragma warning restore UoWIP
+            default;
+
+        public static TBits GetInfinityBits<TBits>() where TBits : unmanaged, IBinaryInteger<TBits> {
+            if (sizeof(TBits) >= sizeof(TSelf)) {
+                if (typeof(TSelf) == typeof(double) ||
+                    typeof(TSelf) == typeof(float) ||
+                    typeof(TSelf) == typeof(Half) ||
+#if NET11_0_OR_GREATER
+                    typeof(TSelf) == typeof(BFloat16) ||
+#endif
+#pragma warning disable UoWIP
+                    typeof(TSelf) == typeof(Quadruple)) {
+#pragma warning restore UoWIP
+                    return ((TBits.One << ExponentBias) - TBits.One) << DenormalMantissaBits;
+                }
+            }
+            throw new NotSupportedException();
+        }
+
+        /// <summary>
+        /// (1UL &lt;&lt; SignificandLength) - 1
+        /// </summary>
+        public static ulong NormalMantissaMask { get; } =
+            typeof(TSelf) == typeof(double) ? 0x001FFFFF_FFFFFFFFUL :
+            typeof(TSelf) == typeof(float) ? 0x00FFFFFFUL :
+            typeof(TSelf) == typeof(Half) ? 0x07FFUL :
+#if NET11_0_OR_GREATER
+            typeof(TSelf) == typeof(BFloat16) ? 0x00FFUL :
+#endif
+#pragma warning disable UoWIP
+            typeof(TSelf) == typeof(Quadruple) ? 0x0001FFFF_FFFFFFFFUL :
+#pragma warning restore UoWIP
+            default;
+
+        public static TBits GetNormalMantissaMask<TBits>() where TBits : unmanaged, IBinaryInteger<TBits> {
+            if (sizeof(TBits) >= sizeof(TSelf)) {
+                if (typeof(TSelf) == typeof(double) ||
+                    typeof(TSelf) == typeof(float) ||
+                    typeof(TSelf) == typeof(Half) ||
+#if NET11_0_OR_GREATER
+                    typeof(TSelf) == typeof(BFloat16) ||
+#endif
+#pragma warning disable UoWIP
+                    typeof(TSelf) == typeof(Quadruple))
+#pragma warning restore UoWIP
+                {
+                    return (TBits.One << NormalMantissaBits) - TBits.One;
+                }
+            }
+            throw new NotSupportedException();
+        }
+
+        /// <summary>
+        /// TrailingSignificandMask == (1UL &lt;&lt; TrailingSignificandLength) - 1
+        /// </summary>
+        public static ulong DenormalMantissaMask { get; } =
+            typeof(TSelf) == typeof(double) ? 0x000FFFFF_FFFFFFFFUL :
+            typeof(TSelf) == typeof(float) ? 0x007FFFFFUL :
+            typeof(TSelf) == typeof(Half) ? 0x03FFUL :
+#if NET11_0_OR_GREATER
+            typeof(TSelf) == typeof(BFloat16) ? 0x007FUL :
+#endif
+#pragma warning disable UoWIP
+            typeof(TSelf) == typeof(Quadruple) ? 0x0000FFFF_FFFFFFFFUL :
+#pragma warning restore UoWIP
+            default;
+
+        public static TBits GetDenormalMantissaMask<TBits>() where TBits : unmanaged, IBinaryInteger<TBits> {
+            if (sizeof(TBits) >= sizeof(TSelf)) {
+                if (typeof(TSelf) == typeof(double) ||
+                    typeof(TSelf) == typeof(float) ||
+                    typeof(TSelf) == typeof(Half) ||
+#if NET11_0_OR_GREATER
+                    typeof(TSelf) == typeof(BFloat16) ||
+#endif
+#pragma warning disable UoWIP
+                    typeof(TSelf) == typeof(Quadruple))
+#pragma warning restore UoWIP
+                {
+                    return (TBits.One << DenormalMantissaBits) - TBits.One;
+                }
+            }
+            throw new NotSupportedException();
+        }
+
+        /// <summary>
+        /// 1 - MaxBinaryExponent
+        /// </summary>
+        public static int MinBinaryExponent { get; } =
+            typeof(TSelf) == typeof(double) ? -1022 :
+            typeof(TSelf) == typeof(float) ? -126 :
+            typeof(TSelf) == typeof(Half) ? -14 :
+#if NET11_0_OR_GREATER
+            typeof(TSelf) == typeof(BFloat16) ? -126 :
+#endif
+#pragma warning disable UoWIP
+            typeof(TSelf) == typeof(Quadruple) ? -16382 :
+#pragma warning restore UoWIP
+            default;
+
+        public static int MaxBinaryExponent { get; } =
+            typeof(TSelf) == typeof(double) ? 1023 :
+            typeof(TSelf) == typeof(float) ? 127 :
+            typeof(TSelf) == typeof(Half) ? 15 :
+#if NET11_0_OR_GREATER
+            typeof(TSelf) == typeof(BFloat16) ? 127 :
+#endif
+#pragma warning disable UoWIP
+            typeof(TSelf) == typeof(Quadruple) ? 16383 :
+#pragma warning restore UoWIP
+            default;
+
+        /// <summary>
+        /// Floor(Log10(Epsilon)) where Epsilon is the smallest positive
+        /// subnormal, i.e. 2^(MinBinaryExponent - TrailingSignificandLength).
+        /// </summary>
+        public static int MinDecimalExponent { get; } =
+            typeof(TSelf) == typeof(double) ? -324 :
+            typeof(TSelf) == typeof(float) ? -45 :
+            typeof(TSelf) == typeof(Half) ? -8 :
+#if NET11_0_OR_GREATER
+            typeof(TSelf) == typeof(BFloat16) ? -41 :
+#endif
+#pragma warning disable UoWIP
+            typeof(TSelf) == typeof(Quadruple) ? -4966 :
+#pragma warning restore UoWIP
+            default;
+
+        /// <summary>
+        /// Ceiling(Log10(MaxValue))
+        /// </summary>
+        public static int MaxDecimalExponent { get; } =
+            typeof(TSelf) == typeof(double) ? 309 :
+            typeof(TSelf) == typeof(float) ? 39 :
+            typeof(TSelf) == typeof(Half) ? 5 :
+#if NET11_0_OR_GREATER
+            typeof(TSelf) == typeof(BFloat16) ? 39 :
+#endif
+#pragma warning disable UoWIP
+            typeof(TSelf) == typeof(Quadruple) ? 4933 :
+#pragma warning restore UoWIP
+            default;
+
+        public static int ExponentBias { get; } =
+            typeof(TSelf) == typeof(double) ? 1023 :
+            typeof(TSelf) == typeof(float) ? 127 :
+            typeof(TSelf) == typeof(Half) ? 15 :
+#if NET11_0_OR_GREATER
+            typeof(TSelf) == typeof(BFloat16) ? 127 :
+#endif
+#pragma warning disable UoWIP
+            typeof(TSelf) == typeof(Quadruple) ? 16383 :
+#pragma warning restore UoWIP
+            default;
+
+        public static ushort ExponentBits { get; } =
+            typeof(TSelf) == typeof(double) ? (ushort)11 :
+            typeof(TSelf) == typeof(float) ? (ushort)8 :
+            typeof(TSelf) == typeof(Half) ? (ushort)5 :
+#if NET11_0_OR_GREATER
+            typeof(TSelf) == typeof(BFloat16) ? (ushort)8 :
+#endif
+#pragma warning disable UoWIP
+            typeof(TSelf) == typeof(Quadruple) ? (ushort)15 :
+#pragma warning restore UoWIP
+            default;
+
+        /// <summary>
+        /// (MaxBinaryExponent + 2 * SignificandLength) / 3
+        /// </summary>
+        public static int OverflowDecimalExponent { get; } =
+            typeof(TSelf) == typeof(double) ? 376 :   // (1023 + 2*53) / 3
+            typeof(TSelf) == typeof(float) ? 58 :     // ( 127 + 2*24) / 3
+            typeof(TSelf) == typeof(Half) ? 12 :      // (  15 + 2*11) / 3
+#if NET11_0_OR_GREATER
+            typeof(TSelf) == typeof(BFloat16) ? 47 :  // ( 127 + 2* 8) / 3
+#endif
+#pragma warning disable UoWIP
+            typeof(TSelf) == typeof(Quadruple) ? 5536 : // (16383 + 2*113) / 3
+#pragma warning restore UoWIP
+            default;
+
+        /// <summary>
+        /// (1 &lt;&lt; ExponentBits) - 1
+        /// </summary>
+        public static int InfinityExponent { get; } =
+            typeof(TSelf) == typeof(double) ? 0x7FF :
+            typeof(TSelf) == typeof(float) ? 0xFF :
+            typeof(TSelf) == typeof(Half) ? 0x1F :
+#if NET11_0_OR_GREATER
+            typeof(TSelf) == typeof(BFloat16) ? 0xFF :
+#endif
+#pragma warning disable UoWIP
+            typeof(TSelf) == typeof(Quadruple) ? 0x7FFF :
+#pragma warning restore UoWIP
+            default;
+
+        /// <summary>
+        /// SignificandLength (implicit leading bit included)
+        /// </summary>
+        public static ushort NormalMantissaBits { get; } =
+            typeof(TSelf) == typeof(double) ? (ushort)53 :
+            typeof(TSelf) == typeof(float) ? (ushort)24 :
+            typeof(TSelf) == typeof(Half) ? (ushort)11 :
+#if NET11_0_OR_GREATER
+            typeof(TSelf) == typeof(BFloat16) ? (ushort)8 :
+#endif
+#pragma warning disable UoWIP
+            typeof(TSelf) == typeof(Quadruple) ? (ushort)113 :
+#pragma warning restore UoWIP
+            default;
+
+        /// <summary>
+        /// TrailingSignificandLength (explicit mantissa bits)
+        /// </summary>
+        public static ushort DenormalMantissaBits { get; } =
+            typeof(TSelf) == typeof(double) ? (ushort)52 :
+            typeof(TSelf) == typeof(float) ? (ushort)23 :
+            typeof(TSelf) == typeof(Half) ? (ushort)10 :
+#if NET11_0_OR_GREATER
+            typeof(TSelf) == typeof(BFloat16) ? (ushort)7 :
+#endif
+#pragma warning disable UoWIP
+            typeof(TSelf) == typeof(Quadruple) ? (ushort)112 :
+#pragma warning restore UoWIP
+            default;
+
+        /// <summary>
+        /// Ceiling(Log10(2^(MinBinaryExponent - 1 - TrailingSignificandLength - 64)))
+        /// </summary>
+        public static int MinFastFloatDecimalExponent { get; } =
+            typeof(TSelf) == typeof(double) ? -342 :
+            typeof(TSelf) == typeof(float) ? -64 :
+            typeof(TSelf) == typeof(Half) ? -26 :
+#if NET11_0_OR_GREATER
+            typeof(TSelf) == typeof(BFloat16) ? -59 :
+#endif
+#pragma warning disable UoWIP
+            typeof(TSelf) == typeof(Quadruple) ? -4984 :
+#pragma warning restore UoWIP
+            default;
+
+        /// <summary>
+        /// MaxDecimalExponent - 1
+        /// </summary>
+        public static int MaxFastFloatDecimalExponent { get; } =
+            typeof(TSelf) == typeof(double) ? 308 :
+            typeof(TSelf) == typeof(float) ? 38 :
+            typeof(TSelf) == typeof(Half) ? 4 :
+#if NET11_0_OR_GREATER
+            typeof(TSelf) == typeof(BFloat16) ? 38 :
+#endif
+#pragma warning disable UoWIP
+            typeof(TSelf) == typeof(Quadruple) ? 4932 :
+#pragma warning restore UoWIP
+            default;
+
+        /// <summary>
+        /// -Floor(Log5(2^(64 - SignificandLength)))
+        /// </summary>
+        public static int MinExponentRoundToEven { get; } =
+            typeof(TSelf) == typeof(double) ? -4 :
+            typeof(TSelf) == typeof(float) ? -17 :
+            typeof(TSelf) == typeof(Half) ? -22 :
+#if NET11_0_OR_GREATER
+            typeof(TSelf) == typeof(BFloat16) ? -24 :
+#endif
+#pragma warning disable UoWIP
+            typeof(TSelf) == typeof(Quadruple) ? 22 :
+#pragma warning restore UoWIP
+            default;
+
+        /// <summary>
+        /// Floor(Log5(2^(SignificandLength + 1)))
+        /// </summary>
+        public static int MaxExponentRoundToEven { get; } =
+            typeof(TSelf) == typeof(double) ? 23 :
+            typeof(TSelf) == typeof(float) ? 10 :
+            typeof(TSelf) == typeof(Half) ? 5 :
+#if NET11_0_OR_GREATER
+            typeof(TSelf) == typeof(BFloat16) ? 3 :
+#endif
+#pragma warning disable UoWIP
+            typeof(TSelf) == typeof(Quadruple) ? 49 :
+#pragma warning restore UoWIP
+            default;
+
+        /// <summary>
+        /// Max n such that 10^n is exactly representable.
+        /// </summary>
+        public static int MaxExponentFastPath { get; } =
+            typeof(TSelf) == typeof(double) ? 22 :
+            typeof(TSelf) == typeof(float) ? 10 :
+            typeof(TSelf) == typeof(Half) ? 4 :
+#if NET11_0_OR_GREATER
+            typeof(TSelf) == typeof(BFloat16) ? 3 :
+#endif
+#pragma warning disable UoWIP
+            typeof(TSelf) == typeof(Quadruple) ? 48 :
+#pragma warning restore UoWIP
+            default;
+
+        /// <summary>
+        /// 2UL &lt;&lt; TrailingSignificandLength
+        /// </summary>
+        public static ulong MaxMantissaFastPath { get; } =
+            typeof(TSelf) == typeof(double) ? 0x00200000_00000000UL : // 2 << 52
+            typeof(TSelf) == typeof(float) ? 0x01000000UL :            // 2 << 23
+            typeof(TSelf) == typeof(Half) ? 0x0800UL :                 // 2 << 10
+#if NET11_0_OR_GREATER
+            typeof(TSelf) == typeof(BFloat16) ? 0x0100UL :             // 2 <<  7
+#endif
+#pragma warning disable UoWIP
+            // 2 << 112 cannot fit in ulong; disable fast path.
+            typeof(TSelf) == typeof(Quadruple) ? 0UL :
+#pragma warning restore UoWIP
+            default;
+
+        public static TBits GetMaxMantissaFastPath<TBits>() where TBits : unmanaged, IBinaryInteger<TBits> {
+            if (sizeof(TBits) >= sizeof(TSelf)) {
+                if (typeof(TSelf) == typeof(double) ||
+                    typeof(TSelf) == typeof(float) ||
+                    typeof(TSelf) == typeof(Half) ||
+#if NET11_0_OR_GREATER
+                    typeof(TSelf) == typeof(BFloat16) ||
+#endif
+#pragma warning disable UoWIP
+                    typeof(TSelf) == typeof(Quadruple))
+#pragma warning restore UoWIP
+                {
+                    return TBits.One << (DenormalMantissaBits + 1);
+                }
+            }
+            throw new NotSupportedException();
+        }
+
+        /// <summary>
+        /// Ceiling(Log10(2^SignificandLength)) + 1
+        /// </summary>
+        public static int MaxRoundTripDigits { get; } =
+            typeof(TSelf) == typeof(double) ? 17 :
+            typeof(TSelf) == typeof(float) ? 9 :
+            typeof(TSelf) == typeof(Half) ? 5 :
+#if NET11_0_OR_GREATER
+            typeof(TSelf) == typeof(BFloat16) ? 4 :
+#endif
+#pragma warning disable UoWIP
+            typeof(TSelf) == typeof(Quadruple) ? 36 :
+#pragma warning restore UoWIP
+            default;
+
+        /// <summary>
+        /// Legacy pre-.NET Core 3.0 custom-format precision ceiling.
+        /// </summary>
+        public static int MaxPrecisionCustomFormat { get; } =
+            typeof(TSelf) == typeof(double) ? 15 :
+            typeof(TSelf) == typeof(float) ? 7 :
+            typeof(TSelf) == typeof(Half) ? 5 :
+#if NET11_0_OR_GREATER
+            typeof(TSelf) == typeof(BFloat16) ? 4 :
+#endif
+#pragma warning disable UoWIP
+            typeof(TSelf) == typeof(Quadruple) ? 36 :
+#pragma warning restore UoWIP
+            default;
+
+        // ------------------------------------------------------------------------
+        // Methods
+        // ------------------------------------------------------------------------
+
+        public static TSelf BitsToFloat(ulong bits) {
+            if (typeof(TSelf) == typeof(double)) {
+                double v = BitConverter.UInt64BitsToDouble(bits);
+                return Unsafe.As<double, TSelf>(ref v);
+            }
+            if (typeof(TSelf) == typeof(float)) {
+                float v = BitConverter.UInt32BitsToSingle((uint)bits);
+                return Unsafe.As<float, TSelf>(ref v);
+            }
+            if (typeof(TSelf) == typeof(Half)) {
+                Half v = BitConverter.UInt16BitsToHalf((ushort)bits);
+                return Unsafe.As<Half, TSelf>(ref v);
+            }
+#if NET11_0_OR_GREATER
+            if (typeof(TSelf) == typeof(BFloat16)) {
+                ushort v = (ushort)bits;
+                return Unsafe.As<ushort, TSelf>(ref v);
+            }
+#endif
+#pragma warning disable UoWIP
+            if (typeof(TSelf) == typeof(Quadruple)) {
+                // Only the top 64 bits (sign + exponent + high mantissa) are represented here.
+                UInt128 v = (UInt128)bits << 64;
+                return Unsafe.As<UInt128, TSelf>(ref v);
+            }
+#pragma warning restore UoWIP
+
+            return default;
+        }
+
+        public static ulong FloatToBits(TSelf value) {
+            if (typeof(TSelf) == typeof(double)) {
+                return BitConverter.DoubleToUInt64Bits(Unsafe.As<TSelf, double>(ref value));
+            }
+            if (typeof(TSelf) == typeof(float)) {
+                return BitConverter.SingleToUInt32Bits(Unsafe.As<TSelf, float>(ref value));
+            }
+            if (typeof(TSelf) == typeof(Half)) {
+                return BitConverter.HalfToUInt16Bits(Unsafe.As<TSelf, Half>(ref value));
+            }
+#if NET11_0_OR_GREATER
+            if (typeof(TSelf) == typeof(BFloat16)) {
+                return Unsafe.As<TSelf, ushort>(ref value);
+            }
+#endif
+#pragma warning disable UoWIP
+            if (typeof(TSelf) == typeof(Quadruple)) {
+                UInt128 raw = Unsafe.As<TSelf, UInt128>(ref value);
+                return (ulong)(raw >> 64);
+            }
+#pragma warning restore UoWIP
+
+            return default;
+        }
+
+        // TBits supports (U)Int16/32/64/128
+        // zero extend/truncating
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static TSelf BitsToFloat<TBits>(TBits bits) where TBits : unmanaged, IBinaryInteger<TBits> {
+            if (sizeof(TBits) >= sizeof(TSelf)) {
+                return Unsafe.As<TBits, TSelf>(ref bits);
+            } else {
+                Debug.Assert(sizeof(TBits) <= sizeof(TSelf));
+                TSelf result = default;
+                Unsafe.As<TSelf, TBits>(ref result) = bits;
+                return result;
+            }
+        }
+
+        // TBits supports (U)Int16/32/64/128
+        // but not supported (throws) if sizeof(TBits) < sizeof(TSelf)
+        // zero extend
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static TBits FloatToBits<TBits>(TSelf value) where TBits : unmanaged, IBinaryInteger<TBits> {
+            if (sizeof(TBits) >= sizeof(TSelf)) {
+                return Unsafe.As<TSelf, TBits>(ref value);
+            }
+            throw new NotSupportedException();
+        }
+    }
+
+    internal static partial class Number {
+
+        internal const NumberStyles AllowTrailingInvalidCharacters = unchecked((NumberStyles)0x80000000);
+    }
+}
+
+namespace UltimateOrb.Internal.System {
+    using Globalization;
+
+    static partial class Extensions {
+
+
+
+        extension(NumberFormatInfo) {
+
+            private static NumberStyles InvalidNumberStyles {
+                get =>
+                    ~(NumberStyles.AllowLeadingWhite | NumberStyles.AllowTrailingWhite
+                    | NumberStyles.AllowLeadingSign | NumberStyles.AllowTrailingSign
+                    | NumberStyles.AllowParentheses | NumberStyles.AllowDecimalPoint
+                    | NumberStyles.AllowThousands | NumberStyles.AllowExponent
+                    | NumberStyles.AllowCurrencySymbol | NumberStyles.AllowHexSpecifier
+                    | NumberStyles.AllowBinarySpecifier);
+            }
+
+            internal static void ValidateParseStyleFloatingPoint(NumberStyles style) {
+                // Check for undefined flags, AllowBinarySpecifier (never valid for float), or AllowHexSpecifier with anything other than HexFloat flags.
+                // When AllowHexSpecifier is specified, AllowExponent must also be specified; this reserves
+                // AllowHexSpecifier without AllowExponent for possible future use (e.g. optional p exponent).
+                if ((style & (NumberFormatInfo.InvalidNumberStyles | NumberStyles.AllowBinarySpecifier | NumberStyles.AllowHexSpecifier)) != 0 &&
+                    ((style & ~NumberStyles.HexFloat) != 0 ||
+                     (style & NumberStyles.AllowHexSpecifier) != 0 && (style & NumberStyles.AllowExponent) == 0)) {
+                    ThrowInvalid(style);
+
+                    static void ThrowInvalid(NumberStyles value) {
+                        throw new ArgumentException(
+                            (value & NumberFormatInfo.InvalidNumberStyles) != 0 ? SR.Argument_InvalidNumberStyles :
+                            (value & NumberStyles.AllowBinarySpecifier) != 0 ? SR.Arg_BinaryStyleNotSupported :
+                            SR.Arg_InvalidHexFloatStyle,
+                            nameof(style));
+                    }
+                }
+            }
         }
     }
 }

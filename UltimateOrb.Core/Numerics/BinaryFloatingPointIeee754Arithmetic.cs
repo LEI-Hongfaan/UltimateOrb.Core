@@ -61,7 +61,7 @@ namespace UltimateOrb.Numerics {
         private static IntegerKind GetIntegerKind<TFloat, TUIntBits>(TFloat value)
             where TFloat : unmanaged, IBinaryFloatingPointIeee754<TFloat>
             where TUIntBits : unmanaged, IBinaryInteger<TUIntBits>, IUnsignedNumber<TUIntBits> {
-            TUIntBits bits = Unsafe.BitCast<TFloat, TUIntBits>(value);
+            TUIntBits bits = UltimateOrb.Runtime.CompilerServices.Unsafe.BitCast<TFloat, TUIntBits>(value);
 
             int rawExponent = GetRawExponent<TFloat, TUIntBits>(bits);
 

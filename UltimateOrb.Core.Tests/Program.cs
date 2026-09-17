@@ -19,7 +19,9 @@ using UltimateOrb.Numerics.Extensions;
 [assembly: System.Runtime.CompilerServices.IgnoresAccessChecksToAttribute("UltimateOrb.Core")]
 
 namespace UltimateOrb.Core.Tests {
+    using NUnit.Framework;
     using System.Diagnostics.CodeAnalysis;
+    using System.Globalization;
     using System.Numerics;
     using System.Runtime.CompilerServices;
     using System.Runtime.InteropServices;
@@ -167,9 +169,47 @@ namespace UltimateOrb.Core.Tests {
             public ref readonly UInt64 this[int index] => ref dataRef[index];
         }
 
+        internal static  partial class AssertAlways {
+
+            public static void Equal<T>(T a, T b) {
+                if (!EqualityComparer<T>.Default.Equals(a, b)) {
+                    throw new InvalidOperationException(
+                        $"AssertAlways.Equal failed: expected [{a}], actual [{b}]");
+                }
+            }
+        }
+
+
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private static int Main(string[] args) {
             {
+                // G<prec> in [0, 1)
+                AssertAlways.Equal("0.284444444444444440743701029025138323",
+                    Quadruple.Parse("0X1.23456789abcdef0123456789p-2",
+                                    NumberStyles.Float | NumberStyles.HexFloat).ToString("G36"));
+                AssertAlways.Equal("0.05", Quadruple.Parse("0.05").ToString("G1"));
+                AssertAlways.Equal("0.1", Quadruple.Parse("0.1").ToString("G1"));
+                AssertAlways.Equal("0.013", Quadruple.Parse("0.0125").ToString("G2"));
+
+                // N / C / P in [0, 1)
+                AssertAlways.Equal("0.28", Quadruple.Parse("0.2844").ToString("N2"));
+                AssertAlways.Equal("$0.28", Quadruple.Parse("0.2844").ToString("C2",
+                                            CultureInfo.GetCultureInfo("en-US")));
+                AssertAlways.Equal("28.44%", Quadruple.Parse("0.2844").ToString("P2",
+                                            CultureInfo.GetCultureInfo("en-US")));
+
+                // Boundary: decExp just below zero
+                AssertAlways.Equal("0.1", Quadruple.Parse("0.1").ToString("F1"));
+                AssertAlways.Equal("0.1", Quadruple.Parse("0.1").ToString("N1"));
+                AssertAlways.Equal("0.10", Quadruple.Parse("0.1").ToString("F2"));
+            }
+            {
+                Console.WriteLine($@"{Quadruple.Parse("0X1.23456789abcdef0123456789p-2", System.Globalization.NumberStyles.Float | System.Globalization.NumberStyles.HexFloat):G36}");
+                Console.WriteLine($@"{Quadruple.Parse("0X1.23456789abcdef0123456789p-2", System.Globalization.NumberStyles.Float | System.Globalization.NumberStyles.HexFloat):G}");
+                Console.WriteLine($@"{(double)Quadruple.Parse("0X1.23456789abcdef0123456789p-2", System.Globalization.NumberStyles.Float | System.Globalization.NumberStyles.HexFloat):G36}");
+                Console.WriteLine($@"{(double)Quadruple.Parse("0X1.23456789abcdef0123456789p-2", System.Globalization.NumberStyles.Float | System.Globalization.NumberStyles.HexFloat):G}");
+                Console.WriteLine();
+
                 Console.WriteLine($@"{(BigRational)Quadruple.MinValue}");
                 Console.WriteLine($@"{(BigRational)Quadruple.Epsilon}");
                 Console.WriteLine($@"{(BigRational)Quadruple.Epsilon}");
@@ -234,7 +274,7 @@ namespace UltimateOrb.Core.Tests {
 
                     Console.WriteLine($@"{asdfas}");
                 }
-                
+
 
                 return 0;
 

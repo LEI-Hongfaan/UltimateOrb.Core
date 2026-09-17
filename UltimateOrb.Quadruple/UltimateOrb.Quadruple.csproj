@@ -73,7 +73,7 @@
     </Compile>
     <Compile Include="..\UltimateOrb.Core\Numerics\DoubleArithmetic{DivRem.Generic}.cs" Link="Numerics\DoubleArithmetic{DivRem.Generic}.cs" />
     <Compile Include="..\UltimateOrb.Core\Numerics\DoubleArithmetic{DivRem}.cs" Link="Numerics\DoubleArithmetic{DivRem}.cs" />
-    <Compile Include="..\UltimateOrb.Core\Numerics\DoubleArithmetic{Generic1}.cs" Link="Numerics\DoubleArithmetic{Generic1}.cs" />
+    <Compile Include="..\UltimateOrb.Core\Numerics\DoubleArithmetic{Generic0}.cs" Link="Numerics\DoubleArithmetic{Generic0}.cs" />
     <Compile Include="..\UltimateOrb.Core\Numerics\DoubleArithmetic{Increase,Decrease}.cs" Link="Numerics\DoubleArithmetic{Increase,Decrease}.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -124,6 +124,7 @@
 	<Compile Include="..\UltimateOrb.Core\Numerics\FloatingPointIeee754InterchageTypeTraits.cs" Link="Numerics\FloatingPointIeee754InterchageTypeTraits.cs" />
 	<Compile Include="..\UltimateOrb.Core\Numerics\SR.cs" Link="Numerics\SR.cs" />
 	<Compile Include="..\UltimateOrb.Core\Numerics\NumberBaseExtensions.cs" Link="Numerics\NumberBaseExtensions.cs" />
+	<Compile Include="..\UltimateOrb.Core\Numerics\BinaryIntegerTypeTraits.cs" Link="Numerics\BinaryIntegerTypeTraits.cs" />
 	<Compile Include="..\UltimateOrb.Core\Numerics\BinaryFloatingPointIeee754TypeTraitsInternal.cs" Link="Numerics\BinaryFloatingPointIeee754TypeTraitsInternal.cs" />
 	<Compile Include="..\UltimateOrb.Core\System\Diagnostics\CodeAnalysis\ConstantExpectedAttribute.cs" Link="System\Diagnostics\CodeAnalysis\ConstantExpectedAttribute.cs" />
 	<Compile Include="..\UltimateOrb.Core\System\Diagnostics\CodeAnalysis\ExperimentalAttribute.cs" Link="System\Diagnostics\CodeAnalysis\ExperimentalAttribute.cs" />

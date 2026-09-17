@@ -13,5 +13,15 @@
         internal static string? Format(string format, object? p1, object? p2) {
             return string.Format(format, p1, p2);
         }
+
+        public static string Arg_BinaryStyleNotSupported { get; } = "The number style AllowBinarySpecifier is not supported on floating point data types.";
+
+        public static string Argument_InvalidNumberStyles { get; } = "An undefined NumberStyles value is being used.";
+     
+        public static string Arg_InvalidHexFloatStyle { get; } = "With the AllowHexSpecifier bit set in the enum bit field, the only other valid bits that can be combined into the enum value must be a subset of HexFloat (AllowLeadingWhite, AllowTrailingWhite, AllowLeadingSign, AllowDecimalPoint, and AllowExponent). AllowExponent is required when AllowHexSpecifier is specified.";
+
+        
+
+
     }
 }

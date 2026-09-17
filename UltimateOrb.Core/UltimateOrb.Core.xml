@@ -8383,6 +8383,124 @@
                 <para>The Number must be in format <c>[1-9][0-9]*</c>.</para>
             </remarks>
         </member>
+        <member name="P:UltimateOrb.Internal.System.UtfChar`1.IsUtf8">
+            <summary>Gets whether this type represents UTF-8 code units.</summary>
+        </member>
+        <member name="P:UltimateOrb.Internal.System.UtfChar`1.IsUtf16">
+            <summary>Gets whether this type represents UTF-16 code units.</summary>
+        </member>
+        <member name="P:UltimateOrb.Internal.System.UtfChar`1.IsUtf32">
+            <summary>Gets whether this type represents UTF-32 code units.</summary>
+        </member>
+        <member name="M:UltimateOrb.Internal.System.UtfChar`1.CastFrom(System.Byte)">
+            <summary>Casts the specified value to this type.</summary>
+        </member>
+        <member name="M:UltimateOrb.Internal.System.UtfChar`1.CastFrom(System.Char)">
+            <summary>Casts the specified value to this type.</summary>
+        </member>
+        <member name="M:UltimateOrb.Internal.System.UtfChar`1.CastFrom(System.Int32)">
+            <summary>Casts the specified value to this type.</summary>
+        </member>
+        <member name="M:UltimateOrb.Internal.System.UtfChar`1.CastFrom(System.UInt32)">
+            <summary>Casts the specified value to this type.</summary>
+        </member>
+        <member name="M:UltimateOrb.Internal.System.UtfChar`1.CastFrom(System.UInt64)">
+            <summary>Casts the specified value to this type.</summary>
+        </member>
+        <member name="M:UltimateOrb.Internal.System.UtfChar`1.CastToUInt32(`0)">
+            <summary>Casts a value of this type to an UInt32.</summary>
+        </member>
+        <member name="P:UltimateOrb.Internal.System.BinaryFloatParseAndFormatInfo`1.NumberBufferLength">
+            <summary>
+            Ceiling(Log10(5^(Abs(MinBinaryExponent) - 1))) + NormalMantissaBits + 1 + 1
+            </summary>
+        </member>
+        <member name="P:UltimateOrb.Internal.System.BinaryFloatParseAndFormatInfo`1.NormalMantissaMask">
+            <summary>
+            (1UL &lt;&lt; SignificandLength) - 1
+            </summary>
+        </member>
+        <member name="P:UltimateOrb.Internal.System.BinaryFloatParseAndFormatInfo`1.DenormalMantissaMask">
+            <summary>
+            TrailingSignificandMask == (1UL &lt;&lt; TrailingSignificandLength) - 1
+            </summary>
+        </member>
+        <member name="P:UltimateOrb.Internal.System.BinaryFloatParseAndFormatInfo`1.MinBinaryExponent">
+            <summary>
+            1 - MaxBinaryExponent
+            </summary>
+        </member>
+        <member name="P:UltimateOrb.Internal.System.BinaryFloatParseAndFormatInfo`1.MinDecimalExponent">
+            <summary>
+            Floor(Log10(Epsilon)) where Epsilon is the smallest positive
+            subnormal, i.e. 2^(MinBinaryExponent - TrailingSignificandLength).
+            </summary>
+        </member>
+        <member name="P:UltimateOrb.Internal.System.BinaryFloatParseAndFormatInfo`1.MaxDecimalExponent">
+            <summary>
+            Ceiling(Log10(MaxValue))
+            </summary>
+        </member>
+        <member name="P:UltimateOrb.Internal.System.BinaryFloatParseAndFormatInfo`1.OverflowDecimalExponent">
+            <summary>
+            (MaxBinaryExponent + 2 * SignificandLength) / 3
+            </summary>
+        </member>
+        <member name="P:UltimateOrb.Internal.System.BinaryFloatParseAndFormatInfo`1.InfinityExponent">
+            <summary>
+            (1 &lt;&lt; ExponentBits) - 1
+            </summary>
+        </member>
+        <member name="P:UltimateOrb.Internal.System.BinaryFloatParseAndFormatInfo`1.NormalMantissaBits">
+            <summary>
+            SignificandLength (implicit leading bit included)
+            </summary>
+        </member>
+        <member name="P:UltimateOrb.Internal.System.BinaryFloatParseAndFormatInfo`1.DenormalMantissaBits">
+            <summary>
+            TrailingSignificandLength (explicit mantissa bits)
+            </summary>
+        </member>
+        <member name="P:UltimateOrb.Internal.System.BinaryFloatParseAndFormatInfo`1.MinFastFloatDecimalExponent">
+            <summary>
+            Ceiling(Log10(2^(MinBinaryExponent - 1 - TrailingSignificandLength - 64)))
+            </summary>
+        </member>
+        <member name="P:UltimateOrb.Internal.System.BinaryFloatParseAndFormatInfo`1.MaxFastFloatDecimalExponent">
+            <summary>
+            MaxDecimalExponent - 1
+            </summary>
+        </member>
+        <member name="P:UltimateOrb.Internal.System.BinaryFloatParseAndFormatInfo`1.MinExponentRoundToEven">
+            <summary>
+            -Floor(Log5(2^(64 - SignificandLength)))
+            </summary>
+        </member>
+        <member name="P:UltimateOrb.Internal.System.BinaryFloatParseAndFormatInfo`1.MaxExponentRoundToEven">
+            <summary>
+            Floor(Log5(2^(SignificandLength + 1)))
+            </summary>
+        </member>
+        <member name="P:UltimateOrb.Internal.System.BinaryFloatParseAndFormatInfo`1.MaxExponentFastPath">
+            <summary>
+            Max n such that 10^n is exactly representable.
+            </summary>
+        </member>
+        <member name="P:UltimateOrb.Internal.System.BinaryFloatParseAndFormatInfo`1.MaxMantissaFastPath">
+            <summary>
+            2UL &lt;&lt; TrailingSignificandLength
+            </summary>
+        </member>
+        <member name="P:UltimateOrb.Internal.System.BinaryFloatParseAndFormatInfo`1.MaxRoundTripDigits">
+            <summary>
+            Ceiling(Log10(2^SignificandLength)) + 1
+            </summary>
+        </member>
+        <member name="P:UltimateOrb.Internal.System.BinaryFloatParseAndFormatInfo`1.MaxPrecisionCustomFormat">
+            <summary>
+            Legacy pre-.NET Core 3.0 custom-format precision ceiling.
+            </summary>
+        </member>
         <member name="M:UltimateOrb.INumberBaseFriendInternal`1.TryConvertFromChecked``1(``0,`0@)">
             <inheritdoc cref="M:System.Numerics.INumberBase`1.TryConvertFromChecked``1(``0,`0@)"/>
         </member>
@@ -9193,6 +9311,42 @@
         <member name="M:UltimateOrb.Quadruple.ILogB(UltimateOrb.Quadruple)">
             <inheritdoc cref="M:System.Numerics.IFloatingPointIeee754`1.ILogB(`0)"/>
         </member>
+        <member name="M:UltimateOrb.Quadruple.Parse(System.ReadOnlySpan{System.Char},System.IFormatProvider)">
+            <inheritdoc cref="M:System.ISpanParsable`1.Parse(System.ReadOnlySpan{System.Char},System.IFormatProvider)" />
+        </member>
+        <member name="M:UltimateOrb.Quadruple.Parse(System.ReadOnlySpan{System.Byte},System.Globalization.NumberStyles,System.IFormatProvider)">
+            <inheritdoc cref="M:System.Numerics.INumberBase`1.Parse(System.ReadOnlySpan{System.Byte},System.Globalization.NumberStyles,System.IFormatProvider)" />
+        </member>
+        <member name="M:UltimateOrb.Quadruple.Parse(System.ReadOnlySpan{System.Byte},System.IFormatProvider)">
+            <inheritdoc cref="M:System.IUtf8SpanParsable`1.Parse(System.ReadOnlySpan{System.Byte},System.IFormatProvider)" />
+        </member>
+        <member name="M:UltimateOrb.Quadruple.TryParse(System.ReadOnlySpan{System.Byte},UltimateOrb.Quadruple@)">
+            <summary>Tries to convert a UTF-8 character span containing the string representation of a number to its double-precision floating-point number equivalent.</summary>
+            <param name="utf8Text">A read-only UTF-8 character span that contains the number to convert.</param>
+            <param name="result">When this method returns, contains a double-precision floating-point number equivalent of the numeric value or symbol contained in <paramref name="utf8Text" /> if the conversion succeeded or zero if the conversion failed. The conversion fails if the <paramref name="utf8Text" /> is <see cref="P:System.ReadOnlySpan`1.Empty" /> or is not in a valid format. This parameter is passed uninitialized; any value originally supplied in result will be overwritten.</param>
+            <returns><c>true</c> if <paramref name="utf8Text" /> was converted successfully; otherwise, false.</returns>
+        </member>
+        <member name="M:UltimateOrb.Quadruple.TryParsePartial(System.String,System.Globalization.NumberStyles,System.IFormatProvider,UltimateOrb.Quadruple@,System.Int32@)">
+            <inheritdoc cref="!:INumberBase&lt;TSelf&gt;.TryParsePartial(string, NumberStyles, IFormatProvider?, out TSelf, out int)" />
+        </member>
+        <member name="M:UltimateOrb.Quadruple.TryParsePartial(System.ReadOnlySpan{System.Char},System.Globalization.NumberStyles,System.IFormatProvider,UltimateOrb.Quadruple@,System.Int32@)">
+            <inheritdoc cref="!:INumberBase&lt;TSelf&gt;.TryParsePartial(ReadOnlySpan&lt;char&gt;, NumberStyles, IFormatProvider?, out TSelf, out int)" />
+        </member>
+        <member name="M:UltimateOrb.Quadruple.TryParsePartial(System.ReadOnlySpan{System.Byte},System.Globalization.NumberStyles,System.IFormatProvider,UltimateOrb.Quadruple@,System.Int32@)">
+            <inheritdoc cref="!:INumberBase&lt;TSelf&gt;.TryParsePartial(ReadOnlySpan&lt;byte&gt;, NumberStyles, IFormatProvider?, out TSelf, out int)" />
+        </member>
+        <member name="M:UltimateOrb.Quadruple.TryParse(System.String,System.IFormatProvider,UltimateOrb.Quadruple@)">
+            <inheritdoc cref="M:System.IParsable`1.TryParse(System.String,System.IFormatProvider,`0@)" />
+        </member>
+        <member name="M:UltimateOrb.Quadruple.TryParse(System.ReadOnlySpan{System.Char},System.IFormatProvider,UltimateOrb.Quadruple@)">
+            <inheritdoc cref="M:System.ISpanParsable`1.TryParse(System.ReadOnlySpan{System.Char},System.IFormatProvider,`0@)" />
+        </member>
+        <member name="M:UltimateOrb.Quadruple.TryParse(System.ReadOnlySpan{System.Byte},System.Globalization.NumberStyles,System.IFormatProvider,UltimateOrb.Quadruple@)">
+            <inheritdoc cref="M:System.Numerics.INumberBase`1.TryParse(System.ReadOnlySpan{System.Byte},System.Globalization.NumberStyles,System.IFormatProvider,`0@)" />
+        </member>
+        <member name="M:UltimateOrb.Quadruple.TryParse(System.ReadOnlySpan{System.Byte},System.IFormatProvider,UltimateOrb.Quadruple@)">
+            <inheritdoc cref="M:System.IUtf8SpanParsable`1.TryParse(System.ReadOnlySpan{System.Byte},System.IFormatProvider,`0@)" />
+        </member>
         <member name="M:UltimateOrb.Quadruple.ExtractRawBiasedExponentAndRawSignificand(System.UInt64,System.UInt64,System.UInt64@,System.UInt64@)">
             <summary>
             Extracts the raw biased exponent and trailing significand field of a
@@ -9273,6 +9427,22 @@
             infinity.
             </para>
             </remarks>
+        </member>
+        <member name="M:UltimateOrb.Quadruple.QuadrupleNumber.BuildQuadrupleFromBinary(System.Boolean,System.Numerics.BigInteger,System.Int32)">
+            <summary>Build a Quadruple from  sig × 2^exp2  (hex path).</summary>
+        </member>
+        <member name="M:UltimateOrb.Quadruple.QuadrupleNumber.ComputeBinaryExponent(System.Numerics.BigInteger,System.Numerics.BigInteger)">
+            <summary>Exact floor(log2(N / D)) for N &gt; 0, D &gt; 0.</summary>
+        </member>
+        <member name="M:UltimateOrb.Quadruple.QuadrupleNumber.RoundHalfToEven(System.Numerics.BigInteger,System.Numerics.BigInteger,System.Int32,System.Boolean@)">
+            <summary>
+            Returns m = round_half_to_even(N · 2^(−e) / D).
+            Sets <paramref name="carry"/> if m == 2^113 (i.e. the significand
+            overflowed and the exponent must be bumped).
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.Quadruple.QuadrupleNumber.MatchSymbol``1(System.ReadOnlySpan{``0},System.Int32,System.String,System.Int32@)">
+            <summary>Match a NumberFormatInfo symbol against a TChar span.</summary>
         </member>
         <member name="M:UltimateOrb.Quadruple.op_Explicit(UltimateOrb.Quadruple)~System.Decimal">
             <summary>

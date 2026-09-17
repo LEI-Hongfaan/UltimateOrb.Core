@@ -12,6 +12,7 @@
 	<!--<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
 	<CompilerGeneratedFilesOutputPath>generated</CompilerGeneratedFilesOutputPath>-->
 	<LangVersion>14</LangVersion>
+	<InvariantGlobalization>false</InvariantGlobalization>
   </PropertyGroup>
   
   <ItemGroup>
