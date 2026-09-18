@@ -93,6 +93,7 @@
     <Compile Include="..\UltimateOrb.Core\Numerics\DoubleArithmetic{Sqrt}.cs" Link="Numerics\DoubleArithmetic{Sqrt}.cs" />
     <Compile Include="..\UltimateOrb.Core\Runtime\CompilerServices\Unsafe.cs" Link="Runtime\CompilerServices\Unsafe.cs" />
     <Compile Include="..\UltimateOrb.Core\System\Runtime\CompilerServices\IgnoresAccessChecksToAttribute.cs" Link="System\Runtiem\CompilerServices\IgnoresAccessChecksToAttribute.cs" />
+    <Compile Include="..\UltimateOrb.Core\System\Runtime\CompilerServices\InlineArray.cs" Link="System\Runtiem\CompilerServices\InlineArray.cs" />
     <Compile Include="..\UltimateOrb.Core\UInt128.cs" Link="UInt128.cs" />
     <Compile Include="..\UltimateOrb.Core\Utilities\BooleanIntegerModule.cs" Link="Utilities\BooleanIntegerModule.cs" />
     <Compile Include="..\UltimateOrb.Core\Utilities\BooleanIntegerModule{Compare}.cs" Link="Utilities\BooleanIntegerModule{Compare}.cs">
@@ -124,6 +125,7 @@
 	<Compile Include="..\UltimateOrb.Core\FloatingPointClass.cs" Link="FloatingPointClass.cs" />
 	<Compile Include="..\UltimateOrb.Core\Numerics\FloatingPointExceptionFlags.cs" Link="Numerics\FloatingPointExceptionFlags.cs" />
 	<Compile Include="..\UltimateOrb.Core\Numerics\Binary128Arithmetic.cs" Link="Numerics\Binary128Arithmetic.cs" />
+	<Compile Include="..\UltimateOrb.Core\Numerics\Binary128Arithmetic{Acos}.cs" Link="Numerics\Binary128Arithmetic{Acos}.cs" />
 	<Compile Include="..\UltimateOrb.Core\Numerics\Binary128Arithmetic{Cbrt}.cs" Link="Numerics\Binary128Arithmetic{Cbrt}.cs" />
 	<Compile Include="..\UltimateOrb.Core\Numerics\BinaryFloatingPointIeee754Arithmetic.cs" Link="Numerics\BinaryFloatingPointIeee754Arithmetic.cs" />
 	<Compile Include="..\UltimateOrb.Core\Numerics\Win32Decimal.cs" Link="Numerics\Win32Decimal.cs" />

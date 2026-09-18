@@ -886,10 +886,25 @@ namespace UltimateOrb {
         [System.Runtime.TargetedPatchingOptOutAttribute("")]
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         [System.Diagnostics.Contracts.PureAttribute()]
-        public static explicit operator UInt64(XInt128 value) {
+        public static explicit operator
+#if NET7_0_OR_GREATER && !LEGACY_OPERATOR_CHECKNESS
+            checked
+#endif
+            UInt64(XInt128 value) {
             (checked(0 - unchecked((UInt64)value.hi))).Ignore(); // check overflow
             return value.lo;
         }
+
+#if NET7_0_OR_GREATER && !LEGACY_OPERATOR_CHECKNESS
+        [System.CLSCompliantAttribute(false)]
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
+        [System.Runtime.TargetedPatchingOptOutAttribute("")]
+        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Diagnostics.Contracts.PureAttribute()]
+        public static explicit operator /*unchecked*/ UInt64(XInt128 value) {
+            return value.lo;
+        }
+#endif
 
 #if (NET5_0 || NET6_0 || NET5_0_OR_GREATER)
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
@@ -1148,7 +1163,7 @@ namespace UltimateOrb {
             }
             return a;
         }
-        #endregion
+#endregion
 
         #region Basic arithmetic operations
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
@@ -1565,7 +1580,7 @@ namespace UltimateOrb {
             return ConvertInternal.DefaultToType(this, type, provider);
         }
 #endif
-        #endregion
+#endregion
 
         /// <summary>
         ///     <para>Parses a signed integer.</para>

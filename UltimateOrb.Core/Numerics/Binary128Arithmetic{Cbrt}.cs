@@ -235,16 +235,6 @@ namespace UltimateOrb.Numerics {
     // Part II: Cbrt overloads
 
     public static partial class Binary128Arithmetic {
-        // ====================================================================
-        // Cbrt  (correctly-rounded cube root)
-        //
-        // The core algorithm and preconditions come from the reference C
-        // implementation `cr_cbrtq`.  The x87/SSE rounding mode is simulated
-        // here by `MidpointRounding`.  Note that the reference implementation
-        // naturally provides round-half-away-from-zero behavior in its
-        // "nearest" branch (it only inspects the round bit), so
-        // MidpointRounding.AwayFromZero maps onto that branch directly.
-        // ====================================================================
 
         public static UInt64 Cbrt(UInt64 lo, UInt64 hi, out UInt64 result_hi) {
             return CbrtCore(lo, hi, MidpointRounding.ToEven, out result_hi);

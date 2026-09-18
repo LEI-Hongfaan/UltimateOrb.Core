@@ -1761,7 +1761,13 @@ namespace UltimateOrb {
 
 
         public static Quadruple Acos(Quadruple x) {
-            throw new NotImplementedException();
+            var lo = Binary128Arithmetic.Acos(x._Lo64Bits, x._Hi64Bits, MidpointRounding.ToEven, out var hi);
+            return new Quadruple(lo, hi);
+        }
+
+        public static Quadruple Acos(Quadruple x, MidpointRounding mode) {
+            var lo = Binary128Arithmetic.Acos(x._Lo64Bits, x._Hi64Bits, mode, out var hi);
+            return new Quadruple(lo, hi);
         }
 
         public static Quadruple Acosh(Quadruple x) {

@@ -8109,6 +8109,74 @@
             <param name="obj">The pinned object.</param>
             <returns></returns>
         </member>
+        <member name="M:UltimateOrb.Runtime.CompilerServices.Boxed`1.op_Implicit(UltimateOrb.Runtime.CompilerServices.Boxed{`0})~System.ValueType">
+            <returns>Untyped reference to a boxed value.</returns>
+        </member>
+        <member name="M:UltimateOrb.Runtime.CompilerServices.Boxed`1.Equals(System.Object)">
+            <inheritdoc />
+        </member>
+        <member name="M:UltimateOrb.Runtime.CompilerServices.Boxed`1.GetHashCode">
+            <inheritdoc />
+        </member>
+        <member name="M:UltimateOrb.Runtime.CompilerServices.Boxed`1.ToString">
+            <inheritdoc />
+        </member>
+        <member name="M:UltimateOrb.Runtime.CompilerServices.ReadOnlyBoxed`1.op_Explicit(UltimateOrb.Runtime.CompilerServices.ReadOnlyBoxed{`0})~System.ValueType">
+            <returns>Untyped reference to a boxed value.</returns>
+        </member>
+        <member name="M:UltimateOrb.Runtime.CompilerServices.ReadOnlyBoxed`1.Equals(System.Object)">
+            <inheritdoc />
+        </member>
+        <member name="M:UltimateOrb.Runtime.CompilerServices.ReadOnlyBoxed`1.GetHashCode">
+            <inheritdoc />
+        </member>
+        <member name="M:UltimateOrb.Runtime.CompilerServices.ReadOnlyBoxed`1.ToString">
+            <inheritdoc />
+        </member>
+        <member name="M:UltimateOrb.Runtime.CompilerServices.BoxedAny`1.UnsafeCopy">
+            <inheritdoc cref="M:System.Object.MemberwiseClone"/>
+        </member>
+        <member name="M:UltimateOrb.Runtime.CompilerServices.BoxedAny`1.Equals(System.Object)">
+            <inheritdoc />
+        </member>
+        <member name="M:UltimateOrb.Runtime.CompilerServices.BoxedAny`1.GetHashCode">
+            <inheritdoc />
+        </member>
+        <member name="M:UltimateOrb.Runtime.CompilerServices.BoxedAny`1.ToString">
+            <inheritdoc />
+        </member>
+        <member name="M:UltimateOrb.Runtime.CompilerServices.StructLayoutHelpers.AlignOf``1">
+            <summary>
+            Returns the alignment (in bytes) that the runtime uses for type <typeparamref name="T"/>.
+            This is the number of bytes that the runtime will skip over when allocating an array of <typeparamref name="T"/> or when aligning a field of type <typeparamref name="T"/> in a struct.
+            </summary>
+            <typeparam name="T">
+            The type to get the alignment for.
+            </typeparam>
+        </member>
+        <member name="M:UltimateOrb.Runtime.CompilerServices.Unsafe.BitCast``2(``0)">
+            <inheritdoc cref="M:System.Runtime.CompilerServices.Unsafe.BitCast``2(``0)"/>
+        </member>
+        <member name="T:UltimateOrb.Runtime.CompilerServices.IU">
+            <summary>
+            Defines a common interface for discriminated unions.
+            </summary>
+        </member>
+        <member name="P:UltimateOrb.Runtime.CompilerServices.IU.Value">
+            <summary>
+            Returns the value in a discriminated union.
+            </summary>
+        </member>
+        <member name="P:UltimateOrb.Runtime.CompilerServices.IU.Case">
+            <summary>
+            Returns the number that presents of which case the value is in a discriminated union.
+            </summary>
+        </member>
+        <member name="P:UltimateOrb.Runtime.CompilerServices.IU.CaseCount">
+            <summary>
+            Returns the case count of a discriminated union.
+            </summary>
+        </member>
         <member name="T:UltimateOrb.Runtime.Caching.SmallStructCache7x2`2">
             <summary>
             Represents a small, fixed‑size, value‑type cache with <c>M</c> hash‑indexed slots,
@@ -8219,74 +8287,6 @@
             <summary>
             Attempts to remove the entry associated with the specified key.
             Removal is restricted to the slot determined by the key's hash modulo the number of slots.
-            </summary>
-        </member>
-        <member name="M:UltimateOrb.Runtime.CompilerServices.Boxed`1.op_Implicit(UltimateOrb.Runtime.CompilerServices.Boxed{`0})~System.ValueType">
-            <returns>Untyped reference to a boxed value.</returns>
-        </member>
-        <member name="M:UltimateOrb.Runtime.CompilerServices.Boxed`1.Equals(System.Object)">
-            <inheritdoc />
-        </member>
-        <member name="M:UltimateOrb.Runtime.CompilerServices.Boxed`1.GetHashCode">
-            <inheritdoc />
-        </member>
-        <member name="M:UltimateOrb.Runtime.CompilerServices.Boxed`1.ToString">
-            <inheritdoc />
-        </member>
-        <member name="M:UltimateOrb.Runtime.CompilerServices.ReadOnlyBoxed`1.op_Explicit(UltimateOrb.Runtime.CompilerServices.ReadOnlyBoxed{`0})~System.ValueType">
-            <returns>Untyped reference to a boxed value.</returns>
-        </member>
-        <member name="M:UltimateOrb.Runtime.CompilerServices.ReadOnlyBoxed`1.Equals(System.Object)">
-            <inheritdoc />
-        </member>
-        <member name="M:UltimateOrb.Runtime.CompilerServices.ReadOnlyBoxed`1.GetHashCode">
-            <inheritdoc />
-        </member>
-        <member name="M:UltimateOrb.Runtime.CompilerServices.ReadOnlyBoxed`1.ToString">
-            <inheritdoc />
-        </member>
-        <member name="M:UltimateOrb.Runtime.CompilerServices.BoxedAny`1.UnsafeCopy">
-            <inheritdoc cref="M:System.Object.MemberwiseClone"/>
-        </member>
-        <member name="M:UltimateOrb.Runtime.CompilerServices.BoxedAny`1.Equals(System.Object)">
-            <inheritdoc />
-        </member>
-        <member name="M:UltimateOrb.Runtime.CompilerServices.BoxedAny`1.GetHashCode">
-            <inheritdoc />
-        </member>
-        <member name="M:UltimateOrb.Runtime.CompilerServices.BoxedAny`1.ToString">
-            <inheritdoc />
-        </member>
-        <member name="M:UltimateOrb.Runtime.CompilerServices.StructLayoutHelpers.AlignOf``1">
-            <summary>
-            Returns the alignment (in bytes) that the runtime uses for type <typeparamref name="T"/>.
-            This is the number of bytes that the runtime will skip over when allocating an array of <typeparamref name="T"/> or when aligning a field of type <typeparamref name="T"/> in a struct.
-            </summary>
-            <typeparam name="T">
-            The type to get the alignment for.
-            </typeparam>
-        </member>
-        <member name="M:UltimateOrb.Runtime.CompilerServices.Unsafe.BitCast``2(``0)">
-            <inheritdoc cref="M:System.Runtime.CompilerServices.Unsafe.BitCast``2(``0)"/>
-        </member>
-        <member name="T:UltimateOrb.Runtime.CompilerServices.IU">
-            <summary>
-            Defines a common interface for discriminated unions.
-            </summary>
-        </member>
-        <member name="P:UltimateOrb.Runtime.CompilerServices.IU.Value">
-            <summary>
-            Returns the value in a discriminated union.
-            </summary>
-        </member>
-        <member name="P:UltimateOrb.Runtime.CompilerServices.IU.Case">
-            <summary>
-            Returns the number that presents of which case the value is in a discriminated union.
-            </summary>
-        </member>
-        <member name="P:UltimateOrb.Runtime.CompilerServices.IU.CaseCount">
-            <summary>
-            Returns the case count of a discriminated union.
             </summary>
         </member>
         <member name="T:UltimateOrb.FloatingPointRounding">

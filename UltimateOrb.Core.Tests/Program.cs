@@ -182,7 +182,29 @@ namespace UltimateOrb.Core.Tests {
 
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private static int Main(string[] args) {
+
             {
+
+            }
+
+
+            {
+
+                Console.WriteLine((-Quadruple.One).ToString("G36"));
+                Console.WriteLine(Quadruple.Acos(-Quadruple.One).ToString("G36"));
+
+
+                Console.WriteLine((-Quadruple.BitDecrement(Quadruple.One)).ToString("G36"));
+                Console.WriteLine(Quadruple.Acos(-Quadruple.BitDecrement(Quadruple.One)).ToString("G36"));
+                Console.WriteLine(Quadruple.BitDecrement(Quadruple.One).ToString("G36"));
+                Console.WriteLine(Quadruple.Acos(Quadruple.BitDecrement(Quadruple.One)).ToString("G36"));
+                Console.WriteLine(Quadruple.BitIncrement(Quadruple.One).ToString("G36"));
+                Console.WriteLine(Quadruple.Acos(Quadruple.BitIncrement(Quadruple.One)).ToString("G36"));
+                Console.WriteLine(((double)Quadruple.Acos(1)).ToString("G17"));
+                Console.WriteLine(Quadruple.Acos(1).ToString("G36"));
+                Console.WriteLine(((double)Quadruple.Acos(0)).ToString("G17"));
+                Console.WriteLine(Quadruple.Acos(0).ToString("G36"));
+
                 Console.WriteLine(Quadruple.Parse("-NaN(S)",
                                     NumberStyles.Float | NumberStyles.HexFloat).ToString("G36"));
             }
