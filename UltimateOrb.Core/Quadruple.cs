@@ -1259,6 +1259,41 @@ namespace UltimateOrb {
             return new Quadruple(lo, hi);
         }
 
+        internal static Quadruple PiOverTwo {
+            // 0x3FFF921FB54442D18469898CC51701B8
+            get => new Quadruple(
+                lo64Bits: 0x8469898CC51701B8UL,
+                hi64Bits: 0x3FFF921FB54442D1UL);
+        }
+
+        internal static Quadruple Log10OfE {
+            // 0x3FFDBCB7B1526E50E32A6AB7555F5A68
+            get => new Quadruple(
+                lo64Bits: 0xE32A6AB7555F5A68UL,
+                hi64Bits: 0x3FFDBCB7B1526E50UL);
+        }
+
+        internal static Quadruple Log2OfE {
+            // 0x3FFF71547652B82FE1777D0FFDA0D23A
+            get => new Quadruple(
+                lo64Bits: 0xE1777D0FFDA0D23AUL,
+                hi64Bits: 0x3FFF71547652B82FUL);
+        }
+
+        internal static Quadruple LogOf10 {
+            // 0x400026BB1BBB5551582DD4ADAC5705A6
+            get => new Quadruple(
+                lo64Bits: 0x582DD4ADAC5705A6UL,
+                hi64Bits: 0x400026BB1BBB5551UL);
+        }
+
+        internal static Quadruple LogOf2 {
+            // 0x3FFE62E42FEFA39EF35793C7673007E6
+            get => new Quadruple(
+                lo64Bits: 0xF35793C7673007E6UL,
+                hi64Bits: 0x3FFE62E42FEFA39EUL);
+        }
+
         public static Quadruple Exp10(Quadruple x) {
             // TODO: Provide a correct impl
             return  Exp(LogOf10 * x);
@@ -1740,6 +1775,12 @@ namespace UltimateOrb {
             new(lo64Bits: 0x0000000000000000UL,
                 hi64Bits: 0x3FFF000000000000UL);
 
+        [DebuggerBrowsable(DebuggerBrowsableState.Collapsed)]
+        public static Quadruple Two =>
+            new(lo64Bits: 0x0000000000000000UL,
+                hi64Bits: 0x4000000000000000UL);
+
+        [DebuggerBrowsable(DebuggerBrowsableState.Collapsed)]
         public static Quadruple OneHalf =>
             new(lo64Bits: 0x0000000000000000UL,
                 hi64Bits: 0x3FFE000000000000UL);
@@ -1766,7 +1807,6 @@ namespace UltimateOrb {
                 lo64Bits: value._Lo64Bits,
                 hi64Bits: (value._Hi64Bits & 0x7FFFFFFFFFFFFFFFUL) | (sign._Hi64Bits & 0x8000000000000000UL));
         }
-
 
         public static Quadruple Acos(Quadruple x) {
             var lo = Binary128Arithmetic.Acos(x._Lo64Bits, x._Hi64Bits, MidpointRounding.ToEven, out var hi);
@@ -2236,6 +2276,11 @@ namespace UltimateOrb {
 
         public static Quadruple Sqrt(Quadruple x) {
             var lo = Binary128Arithmetic.Sqrt(x._Lo64Bits, x._Hi64Bits, FloatingPointRounding.ToNearestWithMidpointToEven, out var hi);
+            return new Quadruple(lo, hi);
+        }
+
+        public static Quadruple Sqrt(Quadruple x, MidpointRounding mode) {
+            var lo = Binary128Arithmetic.Sqrt(x._Lo64Bits, x._Hi64Bits, mode.ToFloatingPointRounding(), out var hi);
             return new Quadruple(lo, hi);
         }
 
