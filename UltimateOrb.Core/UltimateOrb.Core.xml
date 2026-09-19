@@ -20,6 +20,18 @@
                 </para>
             </summary>
         </member>
+        <member name="M:UltimateOrb.BigArrayExtensions.AllocateUninitializedBigArray``1(System.IntPtr,System.Boolean)">
+            <inheritdoc cref="M:UltimateOrb.BigArrayExtensions.&lt;G&gt;$2A66B3E596EA567C1CB65356319D61CC.AllocateUninitializedBigArray``1(System.IntPtr,System.Boolean)"/>
+        </member>
+        <member name="M:UltimateOrb.BigArrayExtensions.AllocateBigArray``1(System.IntPtr,System.Boolean)">
+            <inheritdoc cref="M:UltimateOrb.BigArrayExtensions.&lt;G&gt;$2A66B3E596EA567C1CB65356319D61CC.AllocateBigArray``1(System.IntPtr,System.Boolean)"/>
+        </member>
+        <member name="M:UltimateOrb.BigArrayExtensions.&lt;G&gt;$2A66B3E596EA567C1CB65356319D61CC.AllocateUninitializedBigArray``1(System.IntPtr,System.Boolean)">
+            <inheritdoc cref="M:System.GC.AllocateArray``1(System.Int32,System.Boolean)"/>
+        </member>
+        <member name="M:UltimateOrb.BigArrayExtensions.&lt;G&gt;$2A66B3E596EA567C1CB65356319D61CC.AllocateBigArray``1(System.IntPtr,System.Boolean)">
+            <inheritdoc cref="M:System.GC.AllocateArray``1(System.Int32,System.Boolean)"/>
+        </member>
         <member name="T:UltimateOrb.Boolean8">
             <summary>
             <para>
@@ -10206,11 +10218,6 @@
             <summary>Pushes 3 values onto the backtracking stack.</summary>
         </member>
         <member name="F:System.Text.RegularExpressions.Generated.Utilities.s_asciiHexDigits">
-            <summary>Supports searching for characters in or not in "0123456789ABCDEFabcdef".</summary>
-        </member>
-    </members>
-</doc>
-  <member name="F:System.Text.RegularExpressions.Generated.Utilities.s_asciiHexDigits">
             <summary>Supports searching for characters in or not in "0123456789ABCDEFabcdef".</summary>
         </member>
     </members>
