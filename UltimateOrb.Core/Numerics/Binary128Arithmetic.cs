@@ -1432,38 +1432,49 @@ namespace UltimateOrb.Numerics {
             return exponent;
         }
 
-
-        public static UInt64 ScaleB(UInt64 x_lo, UInt64 x_hi, int n, [ConstantExpected] FloatingPointRounding rounding, out UInt64 result_hi) {
+        public static UInt64 ScaleB(UInt64 x_lo, UInt64 x_hi, int n,
+            [ConstantExpected] FloatingPointRounding rounding, out UInt64 result_hi) {
             var lx = x_lo;
             var hx = x_hi;
             var k = Binary128Arithmetic.GetRawExponentFromHi64Bits(hx);
+
             if (0x7fff == k) {
                 // Infinity, NaN
                 result_hi = hx;
                 return lx;
             }
+
             var f_hi = GetRawFractionHiFromHi64Bits(hx);
 
             if (k == 0) {
                 // Subnormal, Zero
                 if (0 == ((0x7fffffffffffffffu & hx) | lx)) {
-                    // Zero
                     result_hi = hx;
                     return lx;
                 }
-                k = Binary128Arithmetic.NormalizeSubnormal(lx, f_hi, k, out lx, out f_hi);
-                f_hi &= 0x0001000000000000u;
+
+                k = Binary128Arithmetic.NormalizeSubnormal(lx, f_hi, k,
+                    out lx, out f_hi);
             }
+
+            // GetBitsFromRawPartsWithRounding expects the implicit bit.
+            f_hi |= Binary128Arithmetic.Hi64BitsImplicitBit;
+
             var s = GetRawSignFromHi64Bits(hx);
+
             unchecked {
                 k += n;
             }
+            // ?? n <= -16496 - 16383 = -32879 ??
+            // ?? n >= 16384 - (-16494) = 32878 ??
             if (n < -900630 || k < -128) {
                 k = -128;
             } else if (n > 910305 || k > 0x7fff) {
                 k = 0x7fff;
             }
-            return Binary128Arithmetic.GetBitsFromRawPartsWithRounding(0, lx, f_hi, k, s, rounding: rounding, out result_hi);
+
+            return Binary128Arithmetic.GetBitsFromRawPartsWithRounding(0, lx, f_hi, k, s,
+                rounding, out result_hi);
         }
 
         public static UInt64 ModF(UInt64 x_lo, UInt64 x_hi, int n, [ConstantExpected] FloatingPointRounding rounding, out UInt64 result_hi) {
@@ -1498,6 +1509,77 @@ namespace UltimateOrb.Numerics {
             }
             return Binary128Arithmetic.GetBitsFromRawPartsWithRounding(0, lx, f_hi, k, s, rounding: rounding, out result_hi);
         }
+
+
+        public static FloatingPointClass GetFloatingPointClass(UInt64 lo, UInt64 hi) {
+            UInt64 sign = hi >> 63;
+            UInt64 exp = (hi >> 48) & 0x7FFF;
+            UInt64 fracHi = hi & 0x0000FFFFFFFFFFFFUL;
+            bool fracIsZero = (fracHi | lo) == 0;
+
+            // --- NaN / Infinity ---
+            if (exp == 0x7FFF) {
+                if (!fracIsZero) {
+                    // NaN
+                    UInt64 quietBit = (hi >> 47) & 1;
+                    return quietBit == 1
+                        ? FloatingPointClass.QuietNaN
+                        : FloatingPointClass.SignalingNaN;
+                }
+
+                // Infinity
+                return sign == 1
+                    ? FloatingPointClass.NegativeInfinity
+                    : FloatingPointClass.PositiveInfinity;
+            }
+
+            // --- Zero / Subnormal ---
+            if (exp == 0) {
+                if (fracIsZero) {
+                    return sign == 1
+                        ? FloatingPointClass.NegativeZero
+                        : FloatingPointClass.PositiveZero;
+                }
+
+                return sign == 1
+                    ? FloatingPointClass.NegativeSubnormal
+                    : FloatingPointClass.PositiveSubnormal;
+            }
+
+            // --- Normal ---
+            return sign == 1
+                ? FloatingPointClass.NegativeNormal
+                : FloatingPointClass.PositiveNormal;
+        }
+
+        public static int ILogB(UInt64 lo, UInt64 hi) {
+            const int Bias = 16383;
+            const int FractionBits = 112;
+
+            UInt64 exp = (hi >> 48) & 0x7FFF;
+            UInt64 fracHi = hi & 0x0000FFFFFFFFFFFFUL;
+            bool fracIsZero = (fracHi == 0) && (lo == 0);
+
+            // --- NaN ---
+            if (exp == 0x7FFF && !fracIsZero)
+                return ILogSpecialResults.ILogNaN; // FP_ILOGBNAN
+
+            // --- Infinity ---
+            if (exp == 0x7FFF && fracIsZero)
+                return ILogSpecialResults.ILogInfinity; // FP_ILOGBINF
+
+            // --- Zero ---
+            if (exp == 0 && fracIsZero)
+                return ILogSpecialResults.ILog0; // FP_ILOGB0
+
+            // --- Subnormal ---
+            if (exp == 0 && !fracIsZero)
+                return 1 - Bias - FractionBits; // -17494
+
+            // --- Normal ---
+            return (int)exp - Bias;
+        }
+
     }
 
 

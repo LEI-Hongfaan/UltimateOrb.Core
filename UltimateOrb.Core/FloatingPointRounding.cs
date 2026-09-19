@@ -90,9 +90,9 @@ namespace UltimateOrb {
                 return @this switch {
                     System.MidpointRounding.ToEven => FloatingPointRounding.ToNearestWithMidpointToEven,
                     System.MidpointRounding.AwayFromZero => FloatingPointRounding.ToNearestWithMidpointAwayFromZero,
-                    System.MidpointRounding.ToZero => FloatingPointRounding.ToNearestWithMidpointTowardZero,
-                    System.MidpointRounding.ToNegativeInfinity => FloatingPointRounding.ToNearestWithMidpointDownward,
-                    System.MidpointRounding.ToPositiveInfinity => FloatingPointRounding.ToNearestWithMidpointUpward,
+                    System.MidpointRounding.ToZero => FloatingPointRounding.TowardZero,
+                    System.MidpointRounding.ToNegativeInfinity => FloatingPointRounding.Downward,
+                    System.MidpointRounding.ToPositiveInfinity => FloatingPointRounding.Upward,
                     _ => throw new NotSupportedException($"The specified {nameof(System.MidpointRounding)} value '{@this}' is not supported."),
                 };
             }
@@ -104,9 +104,9 @@ namespace UltimateOrb {
                 (System.MidpointRounding Result, bool Success) r = @this switch {
                     FloatingPointRounding.ToNearestWithMidpointToEven => (System.MidpointRounding.ToEven, true),
                     FloatingPointRounding.ToNearestWithMidpointAwayFromZero => (System.MidpointRounding.AwayFromZero, true),
-                    FloatingPointRounding.ToNearestWithMidpointTowardZero => (System.MidpointRounding.ToZero, true),
-                    FloatingPointRounding.ToNearestWithMidpointDownward => (System.MidpointRounding.ToNegativeInfinity, true),
-                    FloatingPointRounding.ToNearestWithMidpointUpward => (System.MidpointRounding.ToPositiveInfinity, true),
+                    FloatingPointRounding.TowardZero => (System.MidpointRounding.ToZero, true),
+                    FloatingPointRounding.Downward => (System.MidpointRounding.ToNegativeInfinity, true),
+                    FloatingPointRounding.Upward => (System.MidpointRounding.ToPositiveInfinity, true),
                     _ => (default, false),
                 };
                 result = r.Result;

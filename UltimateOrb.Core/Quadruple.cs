@@ -170,7 +170,7 @@ namespace UltimateOrb {
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         [System.Diagnostics.Contracts.PureAttribute()]
         public static FloatingPointClass GetFloatingPointClass(Quadruple value) {
-            throw new NotImplementedException();
+            return Binary128Arithmetic.GetFloatingPointClass(value._Lo64Bits, value._Hi64Bits);
         }
 
         /// <summary>
@@ -1250,15 +1250,23 @@ namespace UltimateOrb {
         }
 
         public static Quadruple Exp(Quadruple x) {
-            throw new NotImplementedException();
+            var lo = Binary128Arithmetic.Exp(x._Lo64Bits, x._Hi64Bits, out var hi);
+            return new Quadruple(lo, hi);
+        }
+
+        public static Quadruple Exp(Quadruple x, MidpointRounding mode) {
+            var lo = Binary128Arithmetic.Exp(x._Lo64Bits, x._Hi64Bits, mode, out var hi);
+            return new Quadruple(lo, hi);
         }
 
         public static Quadruple Exp10(Quadruple x) {
-            throw new NotImplementedException();
+            // TODO: Provide a correct impl
+            return  Exp(LogOf10 * x);
         }
 
         public static Quadruple Exp2(Quadruple x) {
-            throw new NotImplementedException();
+            // TODO: Provide a correct impl
+            return Exp(LogOf2 * x);
         }
 
         // ---------------------------------------------------------------------
@@ -1771,43 +1779,76 @@ namespace UltimateOrb {
         }
 
         public static Quadruple Acosh(Quadruple x) {
-            throw new NotImplementedException();
+            // TODO: Provide a correct impl
+            // acosh(x) = ln(x + sqrt(x-1)*sqrt(x+1))
+            var t = Sqrt(x - One) * Sqrt(x + One);
+            return Log(x + t);
         }
 
         public static Quadruple AcosPi(Quadruple x) {
-            throw new NotImplementedException();
+            // TODO: Provide a correct impl
+            // acos_pi(x) = acos(x) / π
+            var y = Sqrt(One - x * x);
+            return Atan2(y, x) / Pi;
         }
 
         public static Quadruple Asin(Quadruple x) {
-            throw new NotImplementedException();
+            // TODO: Provide a correct impl
+            // asin(x) = atan(x / sqrt(1 - x^2))
+            var t = x / Sqrt(One - x * x);
+            return Atan(t);
         }
 
         public static Quadruple Asinh(Quadruple x) {
-            throw new NotImplementedException();
+            // TODO: Provide a correct impl
+            // asinh(x) = ln(x + sqrt(x^2 + 1))
+            return Log(x + Sqrt(x * x + One));
         }
 
         public static Quadruple AsinPi(Quadruple x) {
-            throw new NotImplementedException();
+            // TODO: Provide a correct impl
+            // asin_pi(x) = asin(x) / π
+            return Asin(x) / Pi;
         }
 
         public static Quadruple Atan(Quadruple x) {
-            throw new NotImplementedException();
+            // TODO: Provide a correct impl
+            // atan(x) = atan2(x, 1)
+            return Atan2(x, One);
         }
 
         public static Quadruple Atan2(Quadruple y, Quadruple x) {
-            throw new NotImplementedException();
+            // TODO: Provide a correct impl
+            // Quadrant-correct atan2
+            if (x > Zero)
+                return Atan(y / x);
+
+            if (x < Zero)
+                return (y >= Zero ? Pi : -Pi) + Atan(y / x);
+
+            // x == 0
+            if (y > Zero) return PiOverTwo;
+            if (y < Zero) return -PiOverTwo;
+
+            return NaN;
         }
 
         public static Quadruple Atan2Pi(Quadruple y, Quadruple x) {
-            throw new NotImplementedException();
+            // TODO: Provide a correct impl
+            // atan2_pi = atan2 / π
+            return Atan2(y, x) / Pi;
         }
 
         public static Quadruple Atanh(Quadruple x) {
-            throw new NotImplementedException();
+            // TODO: Provide a correct impl
+            // atanh(x) = 1/2 * ln((1+x)/(1-x))
+            return OneHalf * Log((One + x) / (One - x));
         }
 
         public static Quadruple AtanPi(Quadruple x) {
-            throw new NotImplementedException();
+            // TODO: Provide a correct impl
+            // atan_pi(x) = atan(x) / π
+            return Atan(x) / Pi;
         }
 
         public static Quadruple BitDecrement(Quadruple x) {
@@ -1873,24 +1914,28 @@ namespace UltimateOrb {
         }
 
         public static Quadruple Cos(Quadruple x) {
+            // TODO: Provide a correct impl.
             return SinCos(x).Cos;
         }
 
         public static Quadruple Cosh(Quadruple x) {
+            // TODO: Provide a correct impl.
             return Hypot(One, Sinh(x));
         }
 
         public static Quadruple CosPi(Quadruple x) {
+            // TODO: Provide a correct impl.
             return SinCosPi(x).CosPi;
         }
 
         public static Quadruple FusedMultiplyAdd(Quadruple left, Quadruple right, Quadruple addend) {
-
-            throw new NotImplementedException();
+            // TODO: Provide a correct impl.
+            return left * right + addend;
         }
 
         public static Quadruple Hypot(Quadruple x, Quadruple y) {
-            throw new NotImplementedException();
+            // TODO: Provide a correct impl.
+            return Sqrt(x * x + y * y);
         }
 
         public static Quadruple Ieee754Remainder(Quadruple left, Quadruple right) {
@@ -1898,8 +1943,8 @@ namespace UltimateOrb {
         }
 
         /// <inheritdoc cref="IFloatingPointIeee754{Quadruple}.ILogB(Quadruple)"/>
-        public static int ILogB(Quadruple x) {
-            throw new NotImplementedException();
+        public static int ILogB(Quadruple value) {
+            return Binary128Arithmetic.ILogB(value._Lo64Bits, value._Hi64Bits);
         }
 
         public static bool IsComplexNumber(Quadruple value) {
@@ -1942,32 +1987,92 @@ namespace UltimateOrb {
         }
 
         public static Quadruple Log(Quadruple x, Quadruple newBase) {
-            throw new NotImplementedException();
+            // TODO: Provide a correct impl.
+            return Log(x) / Log(newBase);
         }
 
         public static Quadruple Log10(Quadruple x) {
-            throw new NotImplementedException();
+            // TODO: Provide a correct impl.
+            return Log(x) * Log10OfE;
         }
 
         public static Quadruple Log2(Quadruple x) {
-            throw new NotImplementedException();
+            // TODO: Provide a correct impl.
+            return Log(x) * Log2OfE;
         }
 
         public static Quadruple MaxMagnitude(Quadruple x, Quadruple y) {
-            throw new NotImplementedException();
+            if (Quadruple.IsNaN(x)) {
+                return x;
+            }
+            if (Quadruple.IsNaN(y)) {
+                return y;
+            }
+
+            Quadruple ax = Quadruple.Abs(x);
+            Quadruple ay = Quadruple.Abs(y);
+
+            int cmp = ax.CompareTo(ay);
+            if (cmp > 0) return x;
+            if (cmp < 0) return y;
+
+            return x; // tie → left operand wins
         }
 
         public static Quadruple MaxMagnitudeNumber(Quadruple x, Quadruple y) {
-            throw new NotImplementedException();
+            bool xn = Quadruple.IsNaN(x);
+            bool yn = Quadruple.IsNaN(y);
+
+            if (xn && yn) return x;
+            if (xn) return y;
+            if (yn) return x;
+
+            Quadruple ax = Quadruple.Abs(x);
+            Quadruple ay = Quadruple.Abs(y);
+
+            int cmp = ax.CompareTo(ay);
+            if (cmp > 0) return x;
+            if (cmp < 0) return y;
+
+            return x;
         }
 
         public static Quadruple MinMagnitude(Quadruple x, Quadruple y) {
-            throw new NotImplementedException();
+            if (Quadruple.IsNaN(x)) {
+                return x;
+            }
+            if (Quadruple.IsNaN(y)) {
+                return y;
+            }
+
+            Quadruple ax = Quadruple.Abs(x);
+            Quadruple ay = Quadruple.Abs(y);
+
+            int cmp = ax.CompareTo(ay);
+            if (cmp < 0) return x;
+            if (cmp > 0) return y;
+
+            return x; // tie → left operand wins
         }
 
         public static Quadruple MinMagnitudeNumber(Quadruple x, Quadruple y) {
-            throw new NotImplementedException();
+            bool xn = Quadruple.IsNaN(x);
+            bool yn = Quadruple.IsNaN(y);
+
+            if (xn && yn) return x;
+            if (xn) return y;
+            if (yn) return x;
+
+            Quadruple ax = Quadruple.Abs(x);
+            Quadruple ay = Quadruple.Abs(y);
+
+            int cmp = ax.CompareTo(ay);
+            if (cmp < 0) return x;
+            if (cmp > 0) return y;
+
+            return x;
         }
+
         static readonly BigInteger MaxNaNPayloadAsBigInteger = (BigInteger.One << 110) - 1;
 
         public static Quadruple Parse(string s) => Parse(s, NumberStyles.Float | NumberStyles.AllowThousands, provider: null);
@@ -1999,11 +2104,13 @@ namespace UltimateOrb {
         public static Quadruple Parse(ReadOnlySpan<byte> utf8Text, IFormatProvider? provider) => Parse(utf8Text, NumberStyles.Float | NumberStyles.AllowThousands, provider);
 
         public static Quadruple Pow(Quadruple x, Quadruple y) {
-            throw new NotImplementedException();
+            // TODO: Provide a correct impl
+            return Exp(Log(x) * y);
         }
 
         public static Quadruple RootN(Quadruple x, int n) {
-            throw new NotImplementedException();
+            // TODO: Provide a correct impl
+            return Exp(Log(x) / (Quadruple)n);
         }
 
         public static Quadruple Round(Quadruple x, int digits, MidpointRounding mode = MidpointRounding.ToEven) {
@@ -2013,8 +2120,21 @@ namespace UltimateOrb {
                 return new Quadruple(lo, hi);
             }
             {
-                throw new NotImplementedException();
+                // TODO: Provide a correct impl
+                return Round(x * Exp10(digits), 0, mode);
             }
+        }
+
+        public static Quadruple Floor(Quadruple x) {
+            var lo = Binary128Arithmetic.Round(x._Lo64Bits, x._Hi64Bits,
+                FloatingPointRounding.Downward, out var hi);
+            return new Quadruple(lo, hi);
+        }
+
+        public static Quadruple Ceiling(Quadruple x) {
+            var lo = Binary128Arithmetic.Round(x._Lo64Bits, x._Hi64Bits,
+                FloatingPointRounding.Upward, out var hi);
+            return new Quadruple(lo, hi);
         }
 
         public static Quadruple Truncate(Quadruple value) {
@@ -2023,10 +2143,19 @@ namespace UltimateOrb {
         }
 
         public static Quadruple ScaleB(Quadruple x, int n) {
-            throw new NotImplementedException();
+            var lo = Binary128Arithmetic.ScaleB(x._Lo64Bits, x._Hi64Bits, n,
+                FloatingPointRounding.ToNearestWithMidpointToEven, out var hi);
+            return new Quadruple(lo, hi);
+        }
+
+        public static Quadruple ScaleB(Quadruple x, int n, MidpointRounding mode) {
+            var lo = Binary128Arithmetic.ScaleB(x._Lo64Bits, x._Hi64Bits, n,
+                mode.ToFloatingPointRounding(), out var hi);
+            return new Quadruple(lo, hi);
         }
 
         public static Quadruple Sin(Quadruple x) {
+            // TODO: Provide a correct impl
             return SinCos(x).Sin;
         }
 
@@ -2035,14 +2164,73 @@ namespace UltimateOrb {
         }
 
         public static (Quadruple SinPi, Quadruple CosPi) SinCosPi(Quadruple x) {
-            throw new NotImplementedException();
+            // TODO: Provide a correct impl.
+
+            if (Quadruple.IsNaN(x))
+                return (Quadruple.NaN, Quadruple.NaN);
+
+            if (Quadruple.IsInfinity(x))
+                return (Quadruple.NaN, Quadruple.NaN);
+
+            // Reduce x = k + r, where r ∈ [-0.5, 0.5]
+            Quadruple k = Quadruple.Floor(x);
+            Quadruple r = x - k;
+
+            // Map r into [-0.5, 0.5]
+            if (r > Quadruple.OneHalf) { r -= Quadruple.One; k += Quadruple.One; }
+            if (r < -Quadruple.OneHalf) { r += Quadruple.One; k -= Quadruple.One; }
+
+            // Special exact points
+            if (r == Quadruple.Zero) {
+                Quadruple cos = ((Quadruple.IsOddInteger(k)) ? -Quadruple.One : Quadruple.One);
+                return (Quadruple.Zero, cos);
+            }
+
+            if (r == Quadruple.OneHalf) {
+                Quadruple sin = ((Quadruple.IsOddInteger(k)) ? -Quadruple.One : Quadruple.One);
+                return (sin, Quadruple.Zero);
+            }
+
+            if (r == -Quadruple.OneHalf) {
+                Quadruple sin = ((Quadruple.IsOddInteger(k)) ? Quadruple.One : -Quadruple.One);
+                return (sin, Quadruple.Zero);
+            }
+
+            // Compute sin(pi*r), cos(pi*r) using your existing SinCos
+            Quadruple angle = Quadruple.Pi * r;
+            var (s, c) = Quadruple.SinCos(angle);
+
+            // Apply (-1)^k
+            if (Quadruple.IsOddInteger(k)) {
+                s = -s;
+                c = -c;
+            }
+
+            return (s, c);
         }
+
 
         public static Quadruple Sinh(Quadruple x) {
-            throw new NotImplementedException();
+
+            // TODO: Provide a correct impl.
+
+            if (Quadruple.IsNaN(x)) return Quadruple.NaN;
+            if (Quadruple.IsInfinity(x)) return x;
+
+            Quadruple ex = Quadruple.Exp(x);
+
+            // For large |x|, exp(-x) underflows → sinh ≈ ±exp(x)/2
+            if (Quadruple.Abs(x) > (Quadruple)40)
+                return Quadruple.CopySign(ex / Quadruple.Two, x);
+
+            Quadruple emx = Quadruple.Exp(-x);
+            return (ex - emx) / Quadruple.Two;
         }
 
+
         public static Quadruple SinPi(Quadruple x) {
+
+            // TODO: Provide a correct impl.
             return SinCosPi(x).SinPi;
         }
 
@@ -2052,16 +2240,44 @@ namespace UltimateOrb {
         }
 
         public static Quadruple Tan(Quadruple x) {
-            throw new NotImplementedException();
+            // TODO: Provide a correct impl.
+            if (Quadruple.IsNaN(x)) return Quadruple.NaN;
+            var (s, c) = Quadruple.SinCos(x);
+            return s / c;
         }
+
 
         public static Quadruple Tanh(Quadruple x) {
-            throw new NotImplementedException();
+
+            // TODO: Provide a correct impl.
+            if (Quadruple.IsNaN(x)) return Quadruple.NaN;
+            if (Quadruple.IsInfinity(x)) return Quadruple.CopySign(Quadruple.One, x);
+
+            Quadruple ax = Quadruple.Abs(x);
+
+            // Large x → tanh(x) ≈ ±1
+            if (ax > (Quadruple)20)
+                return Quadruple.CopySign(Quadruple.One, x);
+
+            Quadruple e2x = Quadruple.Exp(x + x);
+            return (e2x - Quadruple.One) / (e2x + Quadruple.One);
         }
 
+
         public static Quadruple TanPi(Quadruple x) {
-            throw new NotImplementedException();
+
+            // TODO: Provide a correct impl.
+            var (s, c) = SinCosPi(x);
+
+            if (Quadruple.IsNaN(s) || Quadruple.IsNaN(c))
+                return Quadruple.NaN;
+
+            if (c == Quadruple.Zero)
+                return Quadruple.NaN; // or ±∞ depending on your policy
+
+            return s / c;
         }
+
 
         public static bool TryConvertFromChecked<TOther>(TOther value, [MaybeNullWhen(false)] out Quadruple result) where TOther : INumberBase<TOther> {
             return INumberBaseFriendInternal<Quadruple>.TryConvertFromTruncating(value, out result);
@@ -2172,11 +2388,6 @@ namespace UltimateOrb {
             }
         }
 
-
-
-
-
-
         public static bool TryConvertToChecked<TOther>(Quadruple value, [MaybeNullWhen(false)] out TOther result) where TOther : INumberBase<TOther> {
             throw new NotImplementedException();
         }
@@ -2231,10 +2442,10 @@ namespace UltimateOrb {
 
         /// <inheritdoc cref="IParsable{TSelf}.TryParse(string?, IFormatProvider?, out TSelf)" />
         public static bool TryParse([NotNullWhen(true)] string? s, IFormatProvider? provider, out Quadruple result) => TryParse(s, NumberStyles.Float | NumberStyles.AllowThousands, provider, out result);
-      
+
         /// <inheritdoc cref="ISpanParsable{TSelf}.TryParse(ReadOnlySpan{char}, IFormatProvider?, out TSelf)" />
         public static bool TryParse(ReadOnlySpan<char> s, IFormatProvider? provider, out Quadruple result) => TryParse(s, NumberStyles.Float | NumberStyles.AllowThousands, provider, out result);
-        
+
         /// <inheritdoc cref="INumberBase{TSelf}.TryParse(ReadOnlySpan{byte}, NumberStyles, IFormatProvider?, out TSelf)" />
         public static bool TryParse(ReadOnlySpan<byte> utf8Text, NumberStyles style, IFormatProvider? provider, out Quadruple result) {
             NumberFormatInfo.ValidateParseStyleFloatingPoint(style);
@@ -2325,7 +2536,13 @@ namespace UltimateOrb {
         }
 
         public int CompareTo(object? obj) {
-            throw new NotImplementedException();
+            if (obj is null)
+                return 1; // this > null
+
+            if (obj is Quadruple q)
+                return CompareTo(q);
+
+            throw new ArgumentException("Object must be of type Quadruple.", nameof(obj));
         }
 
         public int CompareTo(Quadruple other) {
@@ -4977,7 +5194,7 @@ namespace UltimateOrb.Internal.System.Globalization {
 #endif
 
 #if !NET11_0_OR_GREATER
-           public static NumberStyles HexFloat { get => AllowLeadingWhite | AllowTrailingWhite | AllowLeadingSign | AllowDecimalPoint | AllowExponent | AllowHexSpecifier; }
+            public static NumberStyles HexFloat { get => AllowLeadingWhite | AllowTrailingWhite | AllowLeadingSign | AllowDecimalPoint | AllowExponent | AllowHexSpecifier; }
 #endif
         }
     }
@@ -5100,7 +5317,7 @@ namespace UltimateOrb.Internal.System {
             throw new NotSupportedException();
         }
     }
-    
+
     internal static partial class BinaryFloatParseAndFormatInfo<TSelf>
         where TSelf : unmanaged, IBinaryFloatingPointIeee754<TSelf>, IMinMaxValue<TSelf> {
 

@@ -178,13 +178,213 @@ namespace UltimateOrb.Core.Tests {
                 }
             }
         }
+        static Quadruple[] RunDistribution(int n, Quadruple p, Quadruple lambda) {
+            Quadruple q = 1 - p;
 
+            Quadruple[] dist = new Quadruple[n];
+
+            Quadruple power = 1;
+
+            for (int k = 0; k < n - 1; k++) {
+                dist[k] = p * power / (lambda * Quadruple.Pow(lambda, k));
+                power *= q;
+            }
+
+            dist[n - 1] = Quadruple.Pow(q, n - 1) / Quadruple.Pow(lambda, n - 1);
+
+            return dist;
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private static int Main(string[] args) {
+            {
+                Console.WriteLine("=== Exp small argument tests ===");
+
+                var halfUlp = Quadruple.ScaleB(Quadruple.One, -113);
+                var ulp = Quadruple.ScaleB(Quadruple.One, -112);
+
+                var a = Quadruple.Exp(halfUlp);
+                var b = Quadruple.Exp(-halfUlp);
+
+                Console.WriteLine("Exp(+2^-113):");
+                Console.WriteLine(a.ToString("G36"));
+
+                Console.WriteLine("Exp(-2^-113):");
+                Console.WriteLine(b.ToString("G36"));
+
+                Console.WriteLine("Exp(+2^-112)-1:");
+                Console.WriteLine((Quadruple.Exp(ulp) - Quadruple.One).ToString("G36"));
+
+                Console.WriteLine("Exp(-2^-112)-1:");
+                Console.WriteLine((Quadruple.Exp(-ulp) - Quadruple.One).ToString("G36"));
+
+                Console.WriteLine();
+            }
+            {
+                Console.WriteLine("=== Exp small argument tests ===");
+
+                var minSubnormal = Quadruple.Epsilon;
+                var halfUlp = Quadruple.ScaleB(Quadruple.One, -113);
+                var ulp = Quadruple.ScaleB(Quadruple.One, -112);
+
+                Console.WriteLine($"minSubnormal = {minSubnormal:G36}");
+                Console.WriteLine($"halfUlp      = {halfUlp:G36}");
+                Console.WriteLine($"ulp          = {ulp:G36}");
+                Console.WriteLine();
+
+                // Below representable resolution around 1
+                Console.WriteLine("Exp(minSubnormal):");
+                Console.WriteLine(Quadruple.Exp(minSubnormal).ToString("G36"));
+                Console.WriteLine(Quadruple.Exp(-minSubnormal).ToString("G36"));
+                Console.WriteLine();
+
+                // Exactly half an ulp
+                Console.WriteLine("Exp(±2^-113) - 1:");
+                Console.WriteLine((Quadruple.Exp(halfUlp) - Quadruple.One).ToString("G36"));
+                Console.WriteLine((Quadruple.Exp(-halfUlp) - Quadruple.One).ToString("G36"));
+                Console.WriteLine();
+
+                // One ulp
+                Console.WriteLine("Exp(±2^-112) - 1:");
+                Console.WriteLine((Quadruple.Exp(ulp) - Quadruple.One).ToString("G36"));
+                Console.WriteLine((Quadruple.Exp(-ulp) - Quadruple.One).ToString("G36"));
+                Console.WriteLine();
+
+                // Neighbor checks
+                Console.WriteLine("Neighbor checks:");
+                Console.WriteLine((Quadruple.Exp(ulp) == Quadruple.One).ToString());
+                Console.WriteLine((Quadruple.Exp(-ulp) == Quadruple.One).ToString());
+
+                Console.WriteLine();
+
+            }
 
             {
+                var x = Quadruple.ScaleB(Quadruple.One, -112);
 
+                Console.WriteLine((Quadruple.Exp(-x) == Quadruple.One).ToString());
+                Console.WriteLine((Quadruple.Exp(-x) - 1).ToString("G36"));
+                Console.WriteLine();
+            }
+
+            {
+                var x = Quadruple.ScaleB(Quadruple.One, -112);
+
+                Console.WriteLine((Quadruple.Exp(x) == Quadruple.One).ToString());
+                Console.WriteLine((Quadruple.Exp(x) - 1).ToString("G36"));
+                Console.WriteLine();
+            }
+            {
+                var u = Quadruple.ScaleB(Quadruple.One, -113);
+
+                Console.WriteLine((Quadruple.One - u).ToString("G36"));
+                Console.WriteLine((Quadruple.Exp(-u) - 1).ToString("G36"));
+
+                Console.WriteLine();
+            }
+
+            {
+                var u = Quadruple.ScaleB(Quadruple.One, -113);
+
+                Console.WriteLine((Quadruple.One + u).ToString("G36"));
+                Console.WriteLine((Quadruple.Exp(u) - 1).ToString("G36"));
+
+
+                Console.WriteLine();
+            }
+
+            {
+                var u = Quadruple.ScaleB(1, -112);
+
+                Console.WriteLine(u.ToString("G36"));
+                Console.WriteLine((1 + u).ToString("G36"));
+                Console.WriteLine((Quadruple.Exp(u) - 1).ToString("G36"));
+                Console.WriteLine();
+            }
+
+            {
+                Console.WriteLine(Quadruple.Epsilon.ToString("G36"));
+                Console.WriteLine((Quadruple.One + Quadruple.Epsilon).ToString("G36"));
+                Console.WriteLine((Quadruple.Exp(Quadruple.Epsilon) - 1).ToString("G36"));
+                Console.WriteLine();
+
+            }
+            {
+                Console.WriteLine(Quadruple.Exp(3).ToString("G36"));
+                Console.WriteLine(Quadruple.Exp(-1).ToString("G36"));
+                Console.WriteLine(Quadruple.Exp(1).ToString("G36"));
+                Console.WriteLine(Quadruple.Exp(-0.0).ToString("G36"));
+                Console.WriteLine(Quadruple.Exp(Quadruple.PositiveInfinity).ToString("G36"));
+                Console.WriteLine(Quadruple.Exp(Quadruple.NegativeInfinity).ToString("G36"));
+
+                Console.WriteLine(Quadruple.Exp(Quadruple.Epsilon).ToString("G36"));
+                Console.WriteLine(Quadruple.Exp(-Quadruple.Epsilon).ToString("G36"));
+
+
+                Console.WriteLine(Quadruple.Exp(1e4).ToString("G36"));
+                Console.WriteLine(Quadruple.Exp(1e-4).ToString("G36"));
+                Console.WriteLine(Quadruple.Exp(-1e4).ToString("G36"));
+                Console.WriteLine(Quadruple.Exp(-1e-4).ToString("G36"));
+
+
+                Console.WriteLine(Quadruple.Exp(Quadruple.MinValue).ToString("G36"));
+                Console.WriteLine(Quadruple.Exp(Quadruple.MaxValue).ToString("G36"));
+
+                Console.WriteLine();
+
+
+            }
+            {
+                Quadruple p = Quadruple.Parse("0.01");
+                Quadruple q = 1 - p;
+
+                const int n = 10;
+
+                // Compute Perron right eigenvector by iteration
+                Quadruple[,] T = new Quadruple[n, n];
+
+                for (int i = 0; i < n; i++) {
+                    T[i, 0] = p;
+                    if (i < 9)
+                        T[i, i + 1] = q;
+                }
+
+                Quadruple[] r = new Quadruple[n];
+                for (int i = 0; i < n; i++)
+                    r[i] = 1;
+
+                Quadruple lambda = 0;
+
+                for (int iter = 0; iter < 10000; iter++) {
+                    Quadruple[] nr = new Quadruple[n];
+
+                    for (int i = 0; i < n; i++) {
+                        for (int j = 0; j < n; j++)
+                            nr[i] += T[i, j] * r[j];
+                    }
+
+                    lambda = nr[0];
+
+                    Quadruple scale = nr[0];
+                    for (int i = 0; i < n; i++)
+                        nr[i] /= scale;
+
+                    r = nr;
+                }
+
+                Console.WriteLine($"lambda = {lambda}");
+
+                Console.WriteLine("P_k:");
+                for (int k = 0; k < n; k++) {
+                    Quadruple Pk = p * r[0] / (lambda * r[k]);
+                    Console.WriteLine($"P_{k} = {Pk}");
+                }
+                Console.WriteLine("Q_k:");
+                var d = RunDistribution(10, p, lambda);
+                for (int k = 0; k < n; k++) {
+                    Quadruple Qk = d[k];
+                    Console.WriteLine($"Q_{k} = {Qk}");
+                }
             }
 
 
