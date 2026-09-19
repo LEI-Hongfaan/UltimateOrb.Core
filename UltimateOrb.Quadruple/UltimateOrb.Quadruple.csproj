@@ -37,11 +37,11 @@
 	
 	
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DefineConstants>$(DefineConstants)TRACE;FEATURE_STANDARD_LIBRARY_INTEROPERABILITY_FORMATTING_AND_CONVERSION;FEATURE_WIN32_DECIMAL_INTEROPERABILITY;STANDALONE_XINTN_LIBRARY;STANDALONE_BINARYN_LIBRARY</DefineConstants>
+    <DefineConstants>$(DefineConstants)TRACE;FEATURE_STANDARD_LIBRARY_INTEROPERABILITY_FORMATTING_AND_CONVERSION;FEATURE_WIN32_DECIMAL_INTEROPERABILITY;STANDALONE_NUMERICS_LIBRARY;STANDALONE_XINTN_LIBRARY;STANDALONE_BINARYN_LIBRARY</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DefineConstants>$(DefineConstants)TRACE;FEATURE_STANDARD_LIBRARY_INTEROPERABILITY_FORMATTING_AND_CONVERSION;FEATURE_WIN32_DECIMAL_INTEROPERABILITY;STANDALONE_XINTN_LIBRARY;STANDALONE_BINARYN_LIBRARY</DefineConstants>
+    <DefineConstants>$(DefineConstants)TRACE;FEATURE_STANDARD_LIBRARY_INTEROPERABILITY_FORMATTING_AND_CONVERSION;FEATURE_WIN32_DECIMAL_INTEROPERABILITY;STANDALONE_NUMERICS_LIBRARY;STANDALONE_XINTN_LIBRARY;STANDALONE_BINARYN_LIBRARY</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
@@ -125,11 +125,14 @@
 	<Compile Include="..\UltimateOrb.Core\FloatingPointClass.cs" Link="FloatingPointClass.cs" />
 	<Compile Include="..\UltimateOrb.Core\Numerics\FloatingPointExceptionFlags.cs" Link="Numerics\FloatingPointExceptionFlags.cs" />
 	<Compile Include="..\UltimateOrb.Core\Numerics\Binary128Arithmetic.cs" Link="Numerics\Binary128Arithmetic.cs" />
+	<Compile Include="..\UltimateOrb.Core\Numerics\Binary128Arithmetic{Exp}.cs" Link="Numerics\Binary128Arithmetic{Exp}.cs" />
+	<Compile Include="..\UltimateOrb.Core\Numerics\Binary128Arithmetic{Log}.cs" Link="Numerics\Binary128Arithmetic{Log}.cs" />
 	<Compile Include="..\UltimateOrb.Core\Numerics\Binary128Arithmetic{Acos}.cs" Link="Numerics\Binary128Arithmetic{Acos}.cs" />
 	<Compile Include="..\UltimateOrb.Core\Numerics\Binary128Arithmetic{Cbrt}.cs" Link="Numerics\Binary128Arithmetic{Cbrt}.cs" />
 	<Compile Include="..\UltimateOrb.Core\Numerics\BinaryFloatingPointIeee754Arithmetic.cs" Link="Numerics\BinaryFloatingPointIeee754Arithmetic.cs" />
 	<Compile Include="..\UltimateOrb.Core\Numerics\Win32Decimal.cs" Link="Numerics\Win32Decimal.cs" />
 	<Compile Include="..\UltimateOrb.Core\Numerics\FloatingPointIeee754InterchageTypeTraits.cs" Link="Numerics\FloatingPointIeee754InterchageTypeTraits.cs" />
+	<Compile Include="..\UltimateOrb.Core\Numerics\ILogSpecialResults.cs" Link="Numerics\ILogSpecialResults.cs" />
 	<Compile Include="..\UltimateOrb.Core\Numerics\SR.cs" Link="Numerics\SR.cs" />
 	<Compile Include="..\UltimateOrb.Core\Numerics\NumberBaseExtensions.cs" Link="Numerics\NumberBaseExtensions.cs" />
 	<Compile Include="..\UltimateOrb.Core\Numerics\BinaryIntegerTypeTraits.cs" Link="Numerics\BinaryIntegerTypeTraits.cs" />

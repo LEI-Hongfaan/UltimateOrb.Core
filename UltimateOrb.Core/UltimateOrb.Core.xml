@@ -10210,3 +10210,8 @@
         </member>
     </members>
 </doc>
+  <member name="F:System.Text.RegularExpressions.Generated.Utilities.s_asciiHexDigits">
+            <summary>Supports searching for characters in or not in "0123456789ABCDEFabcdef".</summary>
+        </member>
+    </members>
+</doc>

@@ -2023,7 +2023,14 @@ namespace UltimateOrb {
         }
 
         public static Quadruple Log(Quadruple x) {
-            throw new NotImplementedException();
+            //return System.Math.Log((double)x);
+            var lo = Binary128Arithmetic.Log(x._Lo64Bits, x._Hi64Bits, MidpointRounding.ToEven, out var hi);
+            return new Quadruple(lo, hi);
+        }
+
+        public static Quadruple Log(Quadruple x, MidpointRounding mode) {
+            var lo = Binary128Arithmetic.Log(x._Lo64Bits, x._Hi64Bits, mode, out var hi);
+            return new Quadruple(lo, hi);
         }
 
         public static Quadruple Log(Quadruple x, Quadruple newBase) {

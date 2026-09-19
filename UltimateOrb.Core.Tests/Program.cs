@@ -14,6 +14,8 @@ namespace UltimateOrb.Numerics.Specialized {
     }
 }
 */
+using UltimateOrb;
+using UltimateOrb.Numerics;
 using UltimateOrb.Numerics.Extensions;
 
 [assembly: System.Runtime.CompilerServices.IgnoresAccessChecksToAttribute("UltimateOrb.Core")]
@@ -169,7 +171,7 @@ namespace UltimateOrb.Core.Tests {
             public ref readonly UInt64 this[int index] => ref dataRef[index];
         }
 
-        internal static  partial class AssertAlways {
+        internal static partial class AssertAlways {
 
             public static void Equal<T>(T a, T b) {
                 if (!EqualityComparer<T>.Default.Equals(a, b)) {
@@ -178,25 +180,165 @@ namespace UltimateOrb.Core.Tests {
                 }
             }
         }
-        static Quadruple[] RunDistribution(int n, Quadruple p, Quadruple lambda) {
+        static Quadruple[] ComputeQ(
+    int n,
+    Quadruple p,
+    Quadruple lambda) {
             Quadruple q = 1 - p;
+            Quadruple[] Q = new Quadruple[n];
 
-            Quadruple[] dist = new Quadruple[n];
-
-            Quadruple power = 1;
-
-            for (int k = 0; k < n - 1; k++) {
-                dist[k] = p * power / (lambda * Quadruple.Pow(lambda, k));
-                power *= q;
+            for (int k = 0; k < n; k++) {
+                Q[k] =
+                    p * Quadruple.Pow(q, k)
+                    / Quadruple.Pow(lambda, k + 1);
             }
 
-            dist[n - 1] = Quadruple.Pow(q, n - 1) / Quadruple.Pow(lambda, n - 1);
-
-            return dist;
+            return Q;
         }
 
+
+        // ------------------------------------------------------------
+        // Helper: print Log(x)
+        // ------------------------------------------------------------
+        private static void TestLog(string name, Quadruple x) {
+            Quadruple y = Quadruple.Log(x);
+            Console.WriteLine($"{name}: x={x}, Log(x)={y}");
+        }
+
+        // ------------------------------------------------------------
+        // Helper: compare Quadruple result against Mathematica 200-digit decimal
+        // ------------------------------------------------------------
+        private static void VerifyAgainstMathematica(string name, Quadruple computed, string decimal200) {
+            Quadruple reference = (Quadruple)BigRational.Parse(decimal200, null);
+
+            bool equal = computed == reference;
+
+            Console.WriteLine($"{name} (Mathematica 200-digit): {(equal ? "OK" : "MISMATCH")}");
+
+            if (!equal) {
+                Console.WriteLine($"Computed:  {computed}");
+                Console.WriteLine($"Reference: {reference}");
+            }
+        }
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private static int Main(string[] args) {
+            {
+
+                Console.WriteLine($"{Quadruple.Log(2):G36}");
+                Console.WriteLine($"UInt128Bits: {BitConverter.QuadrupleToUInt128Bits(Quadruple.Log(2)):X32}");
+
+
+
+            }
+            {
+                Console.WriteLine("==== Quadruple Log(x) Tests ====");
+
+                // ------------------------------------------------------------
+                // 1. Special values
+                // ------------------------------------------------------------
+                TestLog("Log(NaN)", Quadruple.NaN);
+                TestLog("Log(+Infinity)", Quadruple.PositiveInfinity);
+                TestLog("Log(-Infinity)", Quadruple.NegativeInfinity);
+                TestLog("Log(+0)", Quadruple.PositiveZero);
+                TestLog("Log(-0)", Quadruple.NegativeZero);
+
+                // ------------------------------------------------------------
+                // 2. Negative finite values → must be NaN
+                // ------------------------------------------------------------
+                TestLog("Log(-1)", -1.0);
+                TestLog("Log(-0.5)", -0.5);
+
+                // ------------------------------------------------------------
+                // 3. Subnormal values
+                // ------------------------------------------------------------
+                Quadruple tiny = BitConverter.UInt128BitsToQuadruple(
+                    (UInt128) 0x0000000000000001UL << 64 | 0x0000000000000000UL);
+                TestLog("Log(tiny subnormal)", tiny);
+
+                // ------------------------------------------------------------
+                // 4. Normal values
+                // ------------------------------------------------------------
+                TestLog("Log(1)", 1.0);
+                TestLog("Log(2)", 2.0);
+                TestLog("Log(10)", 10.0);
+                TestLog("Log(0.5)", 0.5);
+                TestLog("Log(0.1)", 0.1);
+
+                // ------------------------------------------------------------
+                // 5. Random values
+                // ------------------------------------------------------------
+                var rng = new Random(12345);
+                for (int i = 0; i < 5; i++) {
+                    double d = rng.NextDouble() * 100.0;
+                    Quadruple q = d; // implicit conversion
+                    TestLog($"Log(random {d})", q);
+                }
+
+                // ------------------------------------------------------------
+                // 6. High‑precision verification using Mathematica
+                // ------------------------------------------------------------
+                // Paste your Mathematica results here:
+                // N[Log[2], 200]
+                VerifyAgainstMathematica(
+                    "Log(2)",
+                    Quadruple.Log(2.0),
+                    "0.69314718055994530941723212145817656807550013436025525412068000949339362196969471560586332699641868754200148102057068573368552023575813055703267075163507596193072757082837143519030703862389167347112335"
+                );
+
+                // N[Log[10], 200]
+                VerifyAgainstMathematica(
+                    "Log(10)",
+                    Quadruple.Log(10.0),
+                    "2.3025850929940456840179914546843642076011014886287729760333279009675726096773524802359972050895982983419677840422862486334095254650828067566662873690987816894829072083255546808437998948262331985283935"
+                );
+                // N[Log[4153837486827862102824397063376077/41538374868278621028243970633760768], 200]
+                VerifyAgainstMathematica(
+                    "Log(0.1q=4153837486827862102824397063376077/41538374868278621028243970633760768)",
+                    Quadruple.Log(Quadruple.Parse("0.1")),
+                    "-2.3025850929940456840179914546843641594528528789478766496338793363443908053517333646704753652583976428153075575198446405543537886690756540178214839463095814559471881177097639943840568347657965875825098"
+                );
+                // N[Log[9290479413410269547711582135067345/81129638414606681695789005144064], 200]
+                VerifyAgainstMathematica(
+                    "Log(114.514q=9290479413410269547711582135067345/81129638414606681695789005144064)",
+                    Quadruple.Log(Quadruple.Parse("114.514")),
+                    "4.7406970862621944647029536135153566062819806957416593090297720392187042266985546148933920336590056973975396067158984205459881533168500196273221266806064882167002708062930322052153615804749974654378977"
+                );
+
+
+                Console.WriteLine("==== Tests Completed ====");
+            }
+            {
+                VerifyConstant("PiOverTwo", Quadruple.PiOverTwo,
+                    "1.5707963267948966192313216916397514420985846996875529104874722961539082031431044993140174126710585339910740432566411533235469223047752911158626797040642405587251420513509692605527798223114744774651910");
+
+                VerifyConstant("Log10OfE", Quadruple.Log10OfE,
+                    "0.43429448190325182765112891891660508229439700580366656611445378316586464920887077472922494933843174831870610674476630373364167928715896390656922106466281226585212708656867032959337086965882668833116361");
+
+                VerifyConstant("Log2OfE", Quadruple.Log2OfE,
+                    "1.4426950408889634073599246810018921374266459541529859341354494069311092191811850798855266228935063444969975183096525442555931016871683596427206621582234793362745373698847184936307013876635320155338943");
+
+                VerifyConstant("LogOf10", Quadruple.LogOf10,
+                    "2.3025850929940456840179914546843642076011014886287729760333279009675726096773524802359972050895982983419677840422862486334095254650828067566662873690987816894829072083255546808437998948262331985283935");
+
+                VerifyConstant("LogOf2", Quadruple.LogOf2,
+                    "0.69314718055994530941723212145817656807550013436025525412068000949339362196969471560586332699641868754200148102057068573368552023575813055703267075163507596193072757082837143519030703862389167347112335");
+
+                static void VerifyConstant(string name, Quadruple expected, string decimalString) {
+                    Quadruple parsed = (Quadruple)BigRational.Parse(decimalString, null);
+
+                    bool equal = expected == parsed;
+
+                    Console.WriteLine($"{name}: {(equal ? "OK" : "MISMATCH")}");
+
+                    if (!equal) {
+                        Console.WriteLine($"Expected: {expected}");
+                        Console.WriteLine($"Parsed:   {parsed}");
+                    }
+                }
+
+            }
+
+
             {
                 Console.WriteLine("=== Exp small argument tests ===");
 
@@ -380,7 +522,7 @@ namespace UltimateOrb.Core.Tests {
                     Console.WriteLine($"P_{k} = {Pk}");
                 }
                 Console.WriteLine("Q_k:");
-                var d = RunDistribution(10, p, lambda);
+                var d = ComputeQ(10, p, lambda);
                 for (int k = 0; k < n; k++) {
                     Quadruple Qk = d[k];
                     Console.WriteLine($"Q_{k} = {Qk}");

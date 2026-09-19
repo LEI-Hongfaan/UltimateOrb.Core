@@ -9,7 +9,12 @@ namespace UltimateOrb.Numerics {
     /// <summary>
     /// Special return values used by ILog methods to indicate exceptional results.
     /// </summary>
-    public static partial class ILogSpecialResults {
+#if STANDALONE_NUMERICS_LIBRARY
+    internal
+#else
+    public
+#endif
+        static partial class ILogSpecialResults {
 
         /// <summary>
         /// Returned when an ILog method receives a negative input.
