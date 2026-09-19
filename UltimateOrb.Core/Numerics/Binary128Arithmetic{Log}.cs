@@ -108,12 +108,7 @@ namespace UltimateOrb.Numerics {
                 InlineArray3<UInt64> ln2a = default, offa = default, fs = default;
                 for (int j = 0; j < 3; j++) { ln2a[j] = LogLn2A[j]; offa[j] = LogOffA[j]; }
 
-
                 MultiplyAddHigh(ref fs, e, in ln2a, in offa);
-
-                Console.WriteLine($"right after MultiplyAddHigh(ref fs, e, ...): fs {fs[0]:X16}  {fs[1]:X16}  {fs[2]:X16}");
-
-
 
                 InlineArray3<UInt64> tmp3 = default;
                 for (int j = 0; j < 3; j++) tmp3[j] = LogLt0A[j0 * 3 + j];
@@ -149,9 +144,6 @@ namespace UltimateOrb.Numerics {
                 Int64 msk = unchecked((Int64)fs[2]) >> 63;
                 UInt64 mskU = unchecked((UInt64)msk);
                 fs[0] ^= mskU; fs[1] ^= mskU; fs[2] ^= mskU;
-
-
-                Console.WriteLine($"right before int nz = fs[2] != 0 ? ... : fs {fs[0]:X16}  {fs[1]:X16}  {fs[2]:X16}");
 
                 int nz = fs[2] != 0
                     ? (int)UInt64.LeadingZeroCount(fs[2])
