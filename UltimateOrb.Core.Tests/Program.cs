@@ -223,7 +223,15 @@ namespace UltimateOrb.Core.Tests {
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private static int Main(string[] args) {
             {
+                var c = new TotalOrderIeee754Comparer<Decimal128Bid>();
 
+                Console.WriteLine(c.Compare((Decimal128Bid)42.0m, (Decimal128Bid)42m));
+                Console.WriteLine(c.Compare((Decimal128Bid)42m, (Decimal128Bid)42.0m));
+                return 0;
+
+            }
+            {
+                
                 Console.WriteLine($"{Quadruple.Log(2):G36}");
                 Console.WriteLine($"UInt128Bits: {BitConverter.QuadrupleToUInt128Bits(Quadruple.Log(2)):X32}");
 

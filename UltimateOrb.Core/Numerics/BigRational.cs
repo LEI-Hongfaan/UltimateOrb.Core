@@ -430,11 +430,15 @@ namespace UltimateOrb.Numerics {
             var exponent = unchecked(dividendBits - divisorBits);
             if (exponent >= 0) {
                 var t = absDividend >> exponent;
-                if (t < absDivisor) unchecked { --exponent; }
+                if (t < absDivisor) {
+                    unchecked { --exponent; }
+                }
             } else {
                 var t = absDivisor >> unchecked(-exponent);
                 var a = absDividend.CompareTo(t);
-                if (a < 0 || (a == 0 && p < unchecked(-exponent))) unchecked { --exponent; }
+                if (a < 0 || (a == 0 && p < unchecked(-exponent))) {
+                    unchecked { --exponent; }
+                }
             }
 
             var FloatBitSize = 8 * Unsafe.SizeOf<TFloat>();
@@ -482,7 +486,10 @@ namespace UltimateOrb.Numerics {
                 var r = rem;
                 r <<= 1;
                 if (e > 0) {
-                    if (h) ++r;
+                    if (h) {
+                        ++r;
+                    }
+
                     w = (o == f) ? 0 : 1;
                 }
                 w |= r.CompareTo(absDivisor);
@@ -498,46 +505,76 @@ namespace UltimateOrb.Numerics {
 
             switch (rounding) {
             case FloatingPointRounding.ToNearestWithMidpointToEven:
-                if (IsUpper(w) || (IsTie(w) && !q.IsEven)) incrementSignificand = true;
+                if (IsUpper(w) || (IsTie(w) && !q.IsEven)) {
+                    incrementSignificand = true;
+                }
+
                 break;
 
             case FloatingPointRounding.ToNearestWithMidpointAwayFromZero:
-                if (w >= 0) incrementSignificand = true;
+                if (w >= 0) {
+                    incrementSignificand = true;
+                }
+
                 break;
 
             case FloatingPointRounding.ToNearestWithMidpointToOdd:
-                if (IsUpper(w) || (IsTie(w) && q.IsEven)) incrementSignificand = true;
+                if (IsUpper(w) || (IsTie(w) && q.IsEven)) {
+                    incrementSignificand = true;
+                }
+
                 break;
 
             case FloatingPointRounding.ToNearestWithMidpointUpward:
-                if (IsUpper(w) || (IsTie(w) && !negative)) incrementSignificand = true;
+                if (IsUpper(w) || (IsTie(w) && !negative)) {
+                    incrementSignificand = true;
+                }
+
                 break;
 
             case FloatingPointRounding.ToNearestWithMidpointDownward:
-                if (IsUpper(w) || (IsTie(w) && negative)) incrementSignificand = true;
+                if (IsUpper(w) || (IsTie(w) && negative)) {
+                    incrementSignificand = true;
+                }
+
                 break;
 
             case FloatingPointRounding.ToNearestWithMidpointTowardZero:
-                if (IsUpper(w)) incrementSignificand = true;
+                if (IsUpper(w)) {
+                    incrementSignificand = true;
+                }
+
                 break;
 
             case FloatingPointRounding.Upward:
-                if (IsInexact(w) && !negative) incrementSignificand = true;
+                if (IsInexact(w) && !negative) {
+                    incrementSignificand = true;
+                }
+
                 break;
 
             case FloatingPointRounding.Downward:
-                if (IsInexact(w) && negative) incrementSignificand = true;
+                if (IsInexact(w) && negative) {
+                    incrementSignificand = true;
+                }
+
                 break;
 
             case FloatingPointRounding.TowardZero:
                 break;
 
             case FloatingPointRounding.ToOdd:
-                if (IsInexact(w) && q.IsEven) incrementSignificand = true;
+                if (IsInexact(w) && q.IsEven) {
+                    incrementSignificand = true;
+                }
+
                 break;
 
             case FloatingPointRounding.TowardInfinity:
-                if (IsInexact(w)) incrementSignificand = true;
+                if (IsInexact(w)) {
+                    incrementSignificand = true;
+                }
+
                 break;
 
             default:
@@ -545,7 +582,9 @@ namespace UltimateOrb.Numerics {
                 break;
             }
 
-            if (incrementSignificand) ++q;
+            if (incrementSignificand) {
+                ++q;
+            }
 
             var biasedExponent = TFloatUIntBits.CreateTruncating(exponent + (ExponentBias - 1)) << SignificandBitLength;
             var s = TFloatUIntBits.CreateTruncating(q);
@@ -1305,7 +1344,9 @@ namespace UltimateOrb.Numerics {
 
             // Normalize sign and absolute numerator
             bool negative = p.Sign < 0;
-            if (negative) p = -p;
+            if (negative) {
+                p = -p;
+            }
 
             // Try scales 0..28 (decimal supports up to 28 decimal places)
             for (int scale = 28; scale >= 0; --scale) {
@@ -1324,7 +1365,9 @@ namespace UltimateOrb.Numerics {
                         div += BigInteger.One;
                     } else if (cmp == 0) {
                         // tie: round to even
-                        if (!div.IsEven) div += BigInteger.One;
+                        if (!div.IsEven) {
+                            div += BigInteger.One;
+                        }
                     }
                 }
 
@@ -1926,7 +1969,10 @@ namespace UltimateOrb.Numerics {
                         }
                     }
                     var br = BigRational.FromFraction(numerator, denominator);
-                    if (parseResult.Flags.HasFlag(NumberLiteralFlags.IsNegative)) br = -br;
+                    if (parseResult.Flags.HasFlag(NumberLiteralFlags.IsNegative)) {
+                        br = -br;
+                    }
+
                     return br;
                 }
             }
@@ -2790,11 +2836,31 @@ namespace UltimateOrb.Numerics {
         }
 
         public static BigRational operator ++(BigRational value) {
-            return value.m_SignedNumerator.IsZero ? BigRational.One : new BigRational(value.m_Denominator, value.m_SignedNumerator + value.m_Denominator);
+            if (value.m_SignedNumerator.IsZero) {
+                return One;
+            }
+
+            var numerator = value.m_SignedNumerator + value.m_Denominator;
+
+            if (numerator.IsZero) {
+                return Zero;
+            }
+
+            return new BigRational(numerator, value.m_Denominator);
         }
 
         public static BigRational operator --(BigRational value) {
-            return value.m_SignedNumerator.IsZero ? BigRational.MinusOne : new BigRational(value.m_Denominator, value.m_SignedNumerator - value.m_Denominator);
+            if (value.m_SignedNumerator.IsZero) {
+                return MinusOne;
+            }
+
+            var numerator = value.m_SignedNumerator - value.m_Denominator;
+
+            if (numerator.IsZero) {
+                return Zero;
+            }
+
+            return new BigRational(numerator, value.m_Denominator);
         }
 
         public static BigRational CopySign(BigRational value, BigRational sign) {
@@ -3250,6 +3316,14 @@ namespace UltimateOrb.Numerics {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         [Pure]
+        public static BigRational operator ~(BigRational value) {
+            var t = value;
+            ++t;
+            return -t;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [Pure]
         public static BigRational operator &(BigRational first, BigRational second) {
             return BitwiseBinaryFixedPoint(first, second, BitwiseOperation.And);
         }
@@ -3257,12 +3331,20 @@ namespace UltimateOrb.Numerics {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         [Pure]
         public static BigRational operator |(BigRational first, BigRational second) {
+           
             return BitwiseBinaryFixedPoint(first, second, BitwiseOperation.Or);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [Pure]
+        public static BigRational operator ^(BigRational first, BigRational second) {
+            return BitwiseBinaryFixedPoint(first, second, BitwiseOperation.Xor);
         }
 
         private enum BitwiseOperation : byte {
             And,
             Or,
+            Xor
         }
 
         private readonly struct BinaryRemainderPair : IEquatable<BinaryRemainderPair> {
@@ -3313,7 +3395,8 @@ namespace UltimateOrb.Numerics {
             var integerResult = operation switch {
                 BitwiseOperation.And => firstInteger & secondInteger,
                 BitwiseOperation.Or => firstInteger | secondInteger,
-                _ => throw new InvalidOperationException(),
+                BitwiseOperation.Xor => firstInteger ^ secondInteger,
+                _ => throw new NotSupportedException(),
             };
 
             /*
@@ -3726,6 +3809,7 @@ namespace UltimateOrb.Numerics {
                 var blockResult = operation switch {
                     BitwiseOperation.And => firstBits & secondBits,
                     BitwiseOperation.Or => firstBits | secondBits,
+                    BitwiseOperation.Xor => firstBits ^ secondBits,
                     _ => throw new InvalidOperationException(),
                 };
 
