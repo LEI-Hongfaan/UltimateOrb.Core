@@ -351,24 +351,24 @@ namespace UltimateOrb.Numerics {
             return Unsafe.BitCast<TFloatUIntBits, TFloat>(result);
         }
 
-        public static double ToDouble(BigRational value, MidpointRounding rounding = MidpointRounding.ToEven) {
-            return ToDouble(value, rounding.ToFloatingPointRounding());
+        public static double ToDouble(BigRational value, MidpointRounding mode = MidpointRounding.ToEven) {
+            return ToDouble(value, mode.ToFloatingPointRounding());
         }
 
         public static double ToDouble(BigRational value, FloatingPointRounding rounding = FloatingPointRounding.ToNearestWithMidpointToEven) {
             return ToIeee754InterchangeBinary<double, UInt64>(value, rounding);
         }
 
-        public static Single ToSingle(BigRational value, MidpointRounding rounding = MidpointRounding.ToEven) {
-            return ToSingle(value, rounding.ToFloatingPointRounding());
+        public static Single ToSingle(BigRational value, MidpointRounding mode = MidpointRounding.ToEven) {
+            return ToSingle(value, mode.ToFloatingPointRounding());
         }
 
         public static Single ToSingle(BigRational value, FloatingPointRounding rounding = FloatingPointRounding.ToNearestWithMidpointToEven) {
             return ToIeee754InterchangeBinary<Single, UInt32>(value, rounding);
         }
 
-        public static Half ToHalf(BigRational value, MidpointRounding rounding = MidpointRounding.ToEven) {
-            return ToHalf(value, rounding.ToFloatingPointRounding());
+        public static Half ToHalf(BigRational value, MidpointRounding mode = MidpointRounding.ToEven) {
+            return ToHalf(value, mode.ToFloatingPointRounding());
         }
 
         public static Half ToHalf(BigRational value, FloatingPointRounding rounding = FloatingPointRounding.ToNearestWithMidpointToEven) {
@@ -376,8 +376,8 @@ namespace UltimateOrb.Numerics {
         }
 
 #if NET11_0_OR_GREATER
-        public static BFloat16 ToBFloat16(BigRational value, MidpointRounding rounding = MidpointRounding.ToEven) {
-            return ToBFloat16(value, rounding.ToFloatingPointRounding());
+        public static BFloat16 ToBFloat16(BigRational value, MidpointRounding mode = MidpointRounding.ToEven) {
+            return ToBFloat16(value, mode.ToFloatingPointRounding());
         }
 
         public static BFloat16 ToBFloat16(BigRational value, FloatingPointRounding rounding = FloatingPointRounding.ToNearestWithMidpointToEven) {

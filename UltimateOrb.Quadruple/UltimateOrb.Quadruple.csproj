@@ -32,7 +32,7 @@
 
   <PropertyGroup>
     <!-- Sync with UltimateOrb.Core -->
-	<Version>3.7.1-beta.1</Version>
+	<Version>3.7.5-beta.0</Version>
   </PropertyGroup>
 	
 	
@@ -127,13 +127,24 @@
 	<Compile Include="..\UltimateOrb.Core\Numerics\Binary128Arithmetic.cs" Link="Numerics\Binary128Arithmetic.cs" />
 	<Compile Include="..\UltimateOrb.Core\Numerics\Binary128Arithmetic{Exp}.cs" Link="Numerics\Binary128Arithmetic{Exp}.cs" />
 	<Compile Include="..\UltimateOrb.Core\Numerics\Binary128Arithmetic{Log}.cs" Link="Numerics\Binary128Arithmetic{Log}.cs" />
+	<Compile Include="..\UltimateOrb.Core\Numerics\Binary128Arithmetic{SinCos}.cs" Link="Numerics\Binary128Arithmetic{SinCos}.cs" />
 	<Compile Include="..\UltimateOrb.Core\Numerics\Binary128Arithmetic{Acos}.cs" Link="Numerics\Binary128Arithmetic{Acos}.cs" />
 	<Compile Include="..\UltimateOrb.Core\Numerics\Binary128Arithmetic{Cbrt}.cs" Link="Numerics\Binary128Arithmetic{Cbrt}.cs" />
+	<Compile Include="..\UltimateOrb.Core\Numerics\Binary128Arithmetic{Hypot}.cs" Link="Numerics\Binary128Arithmetic{Hypot}.cs" />
 	<Compile Include="..\UltimateOrb.Core\Numerics\BinaryFloatingPointIeee754Arithmetic.cs" Link="Numerics\BinaryFloatingPointIeee754Arithmetic.cs" />
 	<Compile Include="..\UltimateOrb.Core\Numerics\Win32Decimal.cs" Link="Numerics\Win32Decimal.cs" />
 	<Compile Include="..\UltimateOrb.Core\Numerics\FloatingPointIeee754InterchageTypeTraits.cs" Link="Numerics\FloatingPointIeee754InterchageTypeTraits.cs" />
 	<Compile Include="..\UltimateOrb.Core\Numerics\ILogSpecialResults.cs" Link="Numerics\ILogSpecialResults.cs" />
 	<Compile Include="..\UltimateOrb.Core\Numerics\SR.cs" Link="Numerics\SR.cs" />
+	<Compile Include="..\UltimateOrb.Core\Utilities\UnsafeParameterHelpers.cs" Link="Utilities\UnsafeParameterHelpers.cs" />
+    <Compile Include="..\UltimateOrb.Core\Numerics\IBinaryIntegerBigMulUnsignedProvider.cs" Link="Numerics\IBinaryIntegerBigMulUnsignedProvider.cs" />
+    <Compile Include="..\UltimateOrb.Core\Numerics\BasicArithmeticForWellKnownTypesProvider.cs" Link="Numerics\BasicArithmeticForWellKnownTypesProvider.cs" />
+    <Compile Include="..\UltimateOrb.Core\Numerics\BinaryIntegerTypeTraitHelpers.cs" Link="Numerics\BinaryIntegerTypeTraitHelpers.cs" />
+    <Compile Include="..\UltimateOrb.Core\Numerics\DoubleArithmetic{BigMul.IntPtr}.cs" Link="Numerics\DoubleArithmetic{BigMul.IntPtr}.cs" />
+    <Compile Include="..\UltimateOrb.Core\Numerics\DoubleArithmetic{Generic1}.cs" Link="Numerics\DoubleArithmetic{Generic1}.cs" />
+    <Compile Include="..\UltimateOrb.Core\Numerics\SpecializedArithmeticHelpers.cs" Link="Numerics\SpecializedArithmeticHelpers.cs" />
+
+	<Compile Include="..\UltimateOrb.Core\Numerics\StandardGenericMathArithmeticProvider.cs" Link="Numerics\StandardGenericMathArithmeticProvider.cs" />
 	<Compile Include="..\UltimateOrb.Core\Numerics\NumberBaseExtensions.cs" Link="Numerics\NumberBaseExtensions.cs" />
 	<Compile Include="..\UltimateOrb.Core\Numerics\BinaryIntegerTypeTraits.cs" Link="Numerics\BinaryIntegerTypeTraits.cs" />
 	<Compile Include="..\UltimateOrb.Core\Numerics\BinaryFloatingPointIeee754TypeTraitsInternal.cs" Link="Numerics\BinaryFloatingPointIeee754TypeTraitsInternal.cs" />

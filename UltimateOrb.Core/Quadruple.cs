@@ -1296,7 +1296,7 @@ namespace UltimateOrb {
 
         public static Quadruple Exp10(Quadruple x) {
             // TODO: Provide a correct impl
-            return  Exp(LogOf10 * x);
+            return Exp(LogOf10 * x);
         }
 
         public static Quadruple Exp2(Quadruple x) {
@@ -1953,10 +1953,10 @@ namespace UltimateOrb {
             return new Quadruple(lo, hi);
         }
 
-        public static Quadruple Cos(Quadruple x) {
-            // TODO: Provide a correct impl.
-            return SinCos(x).Cos;
-        }
+        public static Quadruple Cos(Quadruple x) => System.BitConverter.UInt128BitsToQuadruple(Binary128Arithmetic.Cos(System.BitConverter.QuadrupleToUInt128Bits(x)));
+
+        public static Quadruple Cos(Quadruple x, MidpointRounding mode) => System.BitConverter.UInt128BitsToQuadruple(Binary128Arithmetic.Cos(System.BitConverter.QuadrupleToUInt128Bits(x), mode));
+
 
         public static Quadruple Cosh(Quadruple x) {
             // TODO: Provide a correct impl.
@@ -1973,10 +1973,15 @@ namespace UltimateOrb {
             return left * right + addend;
         }
 
-        public static Quadruple Hypot(Quadruple x, Quadruple y) {
-            // TODO: Provide a correct impl.
-            return Sqrt(x * x + y * y);
-        }
+        public static Quadruple Hypot(Quadruple x, Quadruple y) =>
+            System.BitConverter.UInt128BitsToQuadruple(Binary128Arithmetic.Hypot(
+                System.BitConverter.QuadrupleToUInt128Bits(x),
+                System.BitConverter.QuadrupleToUInt128Bits(y)));
+
+        public static Quadruple Hypot(Quadruple x, Quadruple y, MidpointRounding mode) =>
+            System.BitConverter.UInt128BitsToQuadruple(Binary128Arithmetic.Hypot(
+                System.BitConverter.QuadrupleToUInt128Bits(x),
+                System.BitConverter.QuadrupleToUInt128Bits(y), mode));
 
         public static Quadruple Ieee754Remainder(Quadruple left, Quadruple right) {
             throw new NotImplementedException();
@@ -2046,6 +2051,11 @@ namespace UltimateOrb {
         public static Quadruple Log2(Quadruple x) {
             // TODO: Provide a correct impl.
             return Log(x) * Log2OfE;
+        }
+
+        public static Quadruple LogP1(Quadruple x) {
+            // TODO: Provide a correct impl.
+            return Log(One + x);
         }
 
         public static Quadruple MaxMagnitude(Quadruple x, Quadruple y) {
@@ -2155,10 +2165,93 @@ namespace UltimateOrb {
             return Exp(Log(x) * y);
         }
 
-        public static Quadruple RootN(Quadruple x, int n) {
-            // TODO: Provide a correct impl
-            return Exp(Log(x) / (Quadruple)n);
+        static Quadruple CanonicalizeAndResetSignalingNaN(Quadruple nan) {
+            Debug.Assert(IsNaN(nan));
+
+            // Extract raw 128-bit encoding using your BitConverterExtensions
+            UInt128 bits = BitConverterExtensions.QuadrupleToUInt128Bits(nan);
+
+            // Quiet bit = fraction bit 111
+            // That is bit position 111 in the 128-bit word.
+            const int QuietBitIndex = 111;
+
+            // Force quiet bit = 1 (turn sNaN → qNaN, preserve payload)
+            bits |= ((UInt128)1 << QuietBitIndex);
+
+            // Reconstruct Quadruple using your extension
+            return BitConverterExtensions.UInt128BitsToQuadruple(bits);
         }
+
+        public static Quadruple Compound(Quadruple x, int n) {
+            // TODO: Provide a correct-rounding impl
+            
+            // (1 + x)^n with full IEEE‑754 semantics
+
+            // 1. Classification
+            if (IsNaN(x)) return CanonicalizeAndResetSignalingNaN(x);
+            if (n < 0) return Quadruple.NaN;        // negative compounding not allowed
+            if (n == 0) return Quadruple.One;
+            if (n == 1) return Quadruple.One + x;
+
+            // 2. Special cases
+            if (IsPositiveInfinity(x)) return Quadruple.PositiveInfinity;
+            if (IsNegativeInfinity(x)) {
+                // (1 + -∞) = -∞ → (-∞)^n
+                return (n % 2 == 0) ? Quadruple.PositiveInfinity : Quadruple.NegativeInfinity;
+            }
+
+            Quadruple baseValue = Quadruple.One + x;
+
+            if (IsZero(baseValue)) return Quadruple.Zero;
+            if (IsNegative(baseValue)) {
+                // Negative base: only allowed for odd n
+                if ((n & 1) == 0) return Quadruple.NaN;
+            }
+            
+            // return Exp(LogP1(x) * n);
+
+            // 3. Exponentiation by squaring (correct rounding after each op)
+            Quadruple result = Quadruple.One;
+            Quadruple y = baseValue;
+
+            int k = n;
+            while (k > 0) {
+                if ((k & 1) != 0)
+                    result *= y;   // fused multiply‑add if available
+
+                y *= y;
+                k >>= 1;
+            }
+
+            return result;
+        }
+
+        public static Quadruple RootN(Quadruple x, int n) {
+            // TODO: Provide a correct-rounding impl
+       
+            // Classification
+            if (IsNaN(x)) return CanonicalizeAndResetSignalingNaN(x);
+            if (n <= 0) return Quadruple.NaN;
+            if (n == 1) return x;
+
+            // Special cases
+            if (IsZero(x) || IsPositiveInfinity(x)) return x; // preserve sign for zero
+            if (IsNegativeInfinity(x)) return (n % 2 == 1) ? Quadruple.NegativeInfinity : Quadruple.NaN;
+
+            // Negative base with even root is NaN
+            if (x < Quadruple.Zero && (n % 2 == 0))
+                return Quadruple.NaN;
+
+            // For negative base and odd n, compute root of absolute value and restore sign
+            if (x < Quadruple.Zero) {
+                Quadruple absRoot = Exp(Log(-x) / n);
+                return -absRoot;
+            }
+
+            // General positive case
+            return Exp(Log(x) / n);
+        }
+
 
         public static Quadruple Round(Quadruple x, int digits, MidpointRounding mode = MidpointRounding.ToEven) {
             if (0 == digits) {
@@ -2201,13 +2294,18 @@ namespace UltimateOrb {
             return new Quadruple(lo, hi);
         }
 
-        public static Quadruple Sin(Quadruple x) {
-            // TODO: Provide a correct impl
-            return SinCos(x).Sin;
-        }
+        public static Quadruple Sin(Quadruple x) => System.BitConverter.UInt128BitsToQuadruple(Binary128Arithmetic.Sin(System.BitConverter.QuadrupleToUInt128Bits(x)));
+
+        public static Quadruple Sin(Quadruple x, MidpointRounding mode) => System.BitConverter.UInt128BitsToQuadruple(Binary128Arithmetic.Sin(System.BitConverter.QuadrupleToUInt128Bits(x), mode));
 
         public static (Quadruple Sin, Quadruple Cos) SinCos(Quadruple x) {
-            throw new NotImplementedException();
+            var (s, c) = Binary128Arithmetic.SinCos(System.BitConverter.QuadrupleToUInt128Bits(x));
+            return (System.BitConverter.UInt128BitsToQuadruple(s), System.BitConverter.UInt128BitsToQuadruple(c));
+        }
+
+        public static (Quadruple Sin, Quadruple Cos) SinCos(Quadruple x, MidpointRounding mode) {
+            var (s, c) = Binary128Arithmetic.SinCos(System.BitConverter.QuadrupleToUInt128Bits(x), mode);
+            return (System.BitConverter.UInt128BitsToQuadruple(s), System.BitConverter.UInt128BitsToQuadruple(c));
         }
 
         public static (Quadruple SinPi, Quadruple CosPi) SinCosPi(Quadruple x) {
@@ -2261,7 +2359,7 @@ namespace UltimateOrb {
 
             // TODO: Provide a correct impl.
 
-            if (Quadruple.IsNaN(x)) return Quadruple.NaN;
+            if (Quadruple.IsNaN(x)) return x;
             if (Quadruple.IsInfinity(x)) return x;
 
             Quadruple ex = Quadruple.Exp(x);
@@ -2293,7 +2391,7 @@ namespace UltimateOrb {
 
         public static Quadruple Tan(Quadruple x) {
             // TODO: Provide a correct impl.
-            if (Quadruple.IsNaN(x)) return Quadruple.NaN;
+            if (Quadruple.IsNaN(x)) return x;
             var (s, c) = Quadruple.SinCos(x);
             return s / c;
         }
@@ -2302,7 +2400,7 @@ namespace UltimateOrb {
         public static Quadruple Tanh(Quadruple x) {
 
             // TODO: Provide a correct impl.
-            if (Quadruple.IsNaN(x)) return Quadruple.NaN;
+            if (Quadruple.IsNaN(x)) return x;
             if (Quadruple.IsInfinity(x)) return Quadruple.CopySign(Quadruple.One, x);
 
             Quadruple ax = Quadruple.Abs(x);
@@ -2566,16 +2664,18 @@ namespace UltimateOrb {
         internal static uint ExtractRawBiasedExponentAndRawSignificand(
             UInt128 value,
             out UInt128 significand) {
-            UInt64 lo = (UInt64)value;
-            UInt64 hi = (UInt64)(value >> 64);
+            unchecked {
+                UInt64 lo = (UInt64)value;
+                UInt64 hi = (UInt64)(value >> 64);
 
-            uint rawExp = ExtractRawBiasedExponentAndRawSignificand(
-                lo, hi, out UInt64 sigLo, out UInt64 sigHi);
+                uint rawExp = ExtractRawBiasedExponentAndRawSignificand(
+                    lo, hi, out UInt64 sigLo, out UInt64 sigHi);
 
-            // sigHi is 48 bits; shift into position 64..111 and OR in the low half.
-            // The top 16 bits (112..127) of the result are zero by construction.
-            significand = ((UInt128)sigHi << 64) | sigLo;
-            return rawExp;
+                // sigHi is 48 bits; shift into position 64..111 and OR in the low half.
+                // The top 16 bits (112..127) of the result are zero by construction.
+                significand = ((UInt128)sigHi << 64) | sigLo;
+                return rawExp;
+            }
         }
 
         /// <summary>

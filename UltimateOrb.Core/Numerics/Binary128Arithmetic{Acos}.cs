@@ -7,13 +7,12 @@ using System.Threading.Tasks;
 using Misc = UltimateOrb.Miscellaneous;
 using UltimateOrb.Runtime.CompilerServices;
 
-
+namespace UltimateOrb.Numerics {
 #if NET8_0_OR_GREATER
-using UInt128 = System.UInt128;
-using Int128 = System.Int128;
+    using UInt128 = System.UInt128;
+    using Int128 = System.Int128;
 #endif
 
-namespace UltimateOrb.Numerics {
     public static partial class Binary128Arithmetic {
 
         // ---------------------------------------------------------------------
@@ -21,12 +20,12 @@ namespace UltimateOrb.Numerics {
         // ---------------------------------------------------------------------
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static UInt64 SubtractWithBorrow(UInt64 a, UInt64 b, UInt64 borrow, out UInt64 newBorrow) {
+        internal static UInt64 SubtractWithBorrow(UInt64 a, UInt64 b, nuint borrow, out nuint newBorrow) {
             unchecked {
                 UInt64 d0 = a - b;
-                UInt64 b0 = a < b ? 1UL : 0UL;
+                nuint b0 = a < b ? 1u : 0u;
                 UInt64 d1 = d0 - borrow;
-                UInt64 b1 = d0 < borrow ? 1UL : 0UL;
+                nuint b1 = d0 < borrow ? 1u : 0u;
                 newBorrow = b0 + b1;
                 return d1;
             }
@@ -40,7 +39,7 @@ namespace UltimateOrb.Numerics {
         internal static void Add(ref InlineArray2<UInt64> o, in InlineArray2<UInt64> a, in InlineArray2<UInt64> b) {
             unchecked {
                 UInt64 a0 = a[0], a1 = a[1];
-                UInt64 o0 = AddWithCarry(a0, b[0], 0, out UInt64 c);
+                UInt64 o0 = AddWithCarry(a0, b[0], 0, out var c);
                 UInt64 o1 = AddWithCarry(a1, b[1], c, out _);
                 o[0] = o0; o[1] = o1;
             }
@@ -53,8 +52,8 @@ namespace UltimateOrb.Numerics {
                 UInt64 o0 = (UInt64)(a1b0 >> 64);
                 UInt128 a0b1 = (UInt128)a[0] * b[1];
                 UInt128 a1b1 = (UInt128)a[1] * b[1];
-                UInt64 t = AddWithCarry((UInt64)a1b1, (UInt64)(a0b1 >> 64), 0, out UInt64 c0);
-                o0 = AddWithCarry(o0, t, 0, out UInt64 c1);
+                UInt64 t = AddWithCarry((UInt64)a1b1, (UInt64)(a0b1 >> 64), 0, out var c0);
+                o0 = AddWithCarry(o0, t, 0, out var c1);
                 UInt64 o1 = AddWithCarry((UInt64)(a1b1 >> 64), 0, c0, out c0);
                 o1 = AddWithCarry(o1, 0, c1, out _);
                 o[0] = o0; o[1] = o1;
@@ -69,7 +68,7 @@ namespace UltimateOrb.Numerics {
         internal static void Add(ref InlineArray3<UInt64> o, in InlineArray3<UInt64> a, in InlineArray3<UInt64> b) {
             unchecked {
                 UInt64 a0 = a[0], a1 = a[1], a2 = a[2];
-                UInt64 o0 = AddWithCarry(a0, b[0], 0, out UInt64 c);
+                UInt64 o0 = AddWithCarry(a0, b[0], 0, out var c);
                 UInt64 o1 = AddWithCarry(a1, b[1], c, out c);
                 UInt64 o2 = AddWithCarry(a2, b[2], c, out _);
                 o[0] = o0; o[1] = o1; o[2] = o2;
@@ -80,7 +79,7 @@ namespace UltimateOrb.Numerics {
         internal static void Subtract(ref InlineArray3<UInt64> o, in InlineArray3<UInt64> a, in InlineArray3<UInt64> b) {
             unchecked {
                 UInt64 a0 = a[0], a1 = a[1], a2 = a[2];
-                UInt64 o0 = SubtractWithBorrow(a0, b[0], 0, out UInt64 c);
+                UInt64 o0 = SubtractWithBorrow(a0, b[0], 0, out var c);
                 UInt64 o1 = SubtractWithBorrow(a1, b[1], c, out c);
                 UInt64 o2 = SubtractWithBorrow(a2, b[2], c, out _);
                 o[0] = o0; o[1] = o1; o[2] = o2;
@@ -94,7 +93,7 @@ namespace UltimateOrb.Numerics {
                 UInt128 xy0 = (UInt128)x[0] * y;
                 UInt128 xy1 = (UInt128)x[1] * y;
                 UInt128 xy2 = (UInt128)x[2] * y;
-                UInt64 o0 = AddWithCarry((UInt64)xy1, (UInt64)(xy0 >> 64), 0, out UInt64 c);
+                UInt64 o0 = AddWithCarry((UInt64)xy1, (UInt64)(xy0 >> 64), 0, out var c);
                 UInt64 o1 = AddWithCarry((UInt64)xy2, (UInt64)(xy1 >> 64), c, out c);
                 UInt64 o2 = AddWithCarry(0, (UInt64)(xy2 >> 64), c, out _);
                 o[0] = o0; o[1] = o1; o[2] = o2;
@@ -113,7 +112,7 @@ namespace UltimateOrb.Numerics {
                 x2y0 += x1y0 >> 64;
                 x1y1 += x0y1 >> 64;
                 x2y1 += x1y1 >> 64;
-                UInt64 o0 = AddWithCarry((UInt64)x1y1, (UInt64)x2y0, 0, out UInt64 c);
+                UInt64 o0 = AddWithCarry((UInt64)x1y1, (UInt64)x2y0, 0, out var c);
                 UInt64 o1 = AddWithCarry((UInt64)x2y1, (UInt64)(x2y0 >> 64), c, out c);
                 UInt64 o2 = AddWithCarry(0, (UInt64)(x2y1 >> 64), c, out _);
                 o[0] = o0; o[1] = o1; o[2] = o2;
@@ -137,7 +136,7 @@ namespace UltimateOrb.Numerics {
                 UInt64 o0 = (UInt64)(a1b1 >> 64);
                 UInt64 o1 = (UInt64)a2b2;
                 UInt64 o2 = (UInt64)(a2b2 >> 64);
-                o0 = AddWithCarry(o0, (UInt64)a2b1, 0, out UInt64 c);
+                o0 = AddWithCarry(o0, (UInt64)a2b1, 0, out var c);
                 o1 = AddWithCarry(o1, (UInt64)(a2b1 >> 64), c, out c);
                 o2 = AddWithCarry(o2, 0, c, out c);
 
@@ -154,7 +153,7 @@ namespace UltimateOrb.Numerics {
         internal static void MultiplyBy5(ref InlineArray3<UInt64> a) {
             unchecked {
                 UInt64 a0 = a[0], a1 = a[1], a2 = a[2];
-                UInt64 o0 = AddWithCarry(a0, (a1 << 62) | (a0 >> 2), 0, out UInt64 c);
+                UInt64 o0 = AddWithCarry(a0, (a1 << 62) | (a0 >> 2), 0, out var c);
                 UInt64 o1 = AddWithCarry(a1, (a2 << 62) | (a1 >> 2), c, out c);
                 UInt64 o2 = AddWithCarry(a2, a2 >> 2, c, out _);
                 a[0] = o0; a[1] = o1; a[2] = o2;
@@ -169,7 +168,7 @@ namespace UltimateOrb.Numerics {
         internal static void Add(ref InlineArray4<UInt64> o, in InlineArray4<UInt64> a, in InlineArray4<UInt64> b) {
             unchecked {
                 UInt64 a0 = a[0], a1 = a[1], a2 = a[2], a3 = a[3];
-                UInt64 o0 = AddWithCarry(a0, b[0], 0, out UInt64 c);
+                UInt64 o0 = AddWithCarry(a0, b[0], 0, out var c);
                 UInt64 o1 = AddWithCarry(a1, b[1], c, out c);
                 UInt64 o2 = AddWithCarry(a2, b[2], c, out c);
                 UInt64 o3 = AddWithCarry(a3, b[3], c, out _);
@@ -218,7 +217,7 @@ namespace UltimateOrb.Numerics {
                 a3b1 += a2b1 >> 64;
                 a2b2 += a1b2 >> 64;
 
-                UInt64 o0 = AddWithCarry((UInt64)(a0b3 >> 64), (UInt64)a1b3, 0, out UInt64 c);
+                UInt64 o0 = AddWithCarry((UInt64)(a0b3 >> 64), (UInt64)a1b3, 0, out var c);
                 UInt64 o1 = AddWithCarry((UInt64)(a1b3 >> 64), (UInt64)a2b3, c, out c);
                 UInt64 o2 = AddWithCarry((UInt64)(a2b3 >> 64), (UInt64)a3b3, c, out c);
                 UInt64 o3 = AddWithCarry((UInt64)(a3b3 >> 64), 0, c, out c);
@@ -247,7 +246,7 @@ namespace UltimateOrb.Numerics {
         internal static void MultiplyBy3(ref InlineArray4<UInt64> a) {
             unchecked {
                 UInt64 a0 = a[0], a1 = a[1], a2 = a[2], a3 = a[3];
-                UInt64 o0 = AddWithCarry(a0, (a1 << 63) | (a0 >> 1), 0, out UInt64 c);
+                UInt64 o0 = AddWithCarry(a0, (a1 << 63) | (a0 >> 1), 0, out var c);
                 UInt64 o1 = AddWithCarry(a1, (a2 << 63) | (a1 >> 1), c, out c);
                 UInt64 o2 = AddWithCarry(a2, (a3 << 63) | (a2 >> 1), c, out c);
                 UInt64 o3 = AddWithCarry(a3, a3 >> 1, c, out _);
@@ -263,7 +262,7 @@ namespace UltimateOrb.Numerics {
         internal static void Add(ref InlineArray5<UInt64> o, in InlineArray5<UInt64> a, in InlineArray5<UInt64> b) {
             unchecked {
                 UInt64 a0 = a[0], a1 = a[1], a2 = a[2], a3 = a[3], a4 = a[4];
-                UInt64 o0 = AddWithCarry(a0, b[0], 0, out UInt64 c);
+                UInt64 o0 = AddWithCarry(a0, b[0], 0, out var c);
                 UInt64 o1 = AddWithCarry(a1, b[1], c, out c);
                 UInt64 o2 = AddWithCarry(a2, b[2], c, out c);
                 UInt64 o3 = AddWithCarry(a3, b[3], c, out c);
@@ -276,7 +275,7 @@ namespace UltimateOrb.Numerics {
         internal static void Subtract(ref InlineArray5<UInt64> o, in InlineArray5<UInt64> a, in InlineArray5<UInt64> b) {
             unchecked {
                 UInt64 a0 = a[0], a1 = a[1], a2 = a[2], a3 = a[3], a4 = a[4];
-                UInt64 o0 = SubtractWithBorrow(a0, b[0], 0, out UInt64 c);
+                UInt64 o0 = SubtractWithBorrow(a0, b[0], 0, out var c);
                 UInt64 o1 = SubtractWithBorrow(a1, b[1], c, out c);
                 UInt64 o2 = SubtractWithBorrow(a2, b[2], c, out c);
                 UInt64 o3 = SubtractWithBorrow(a3, b[3], c, out c);
@@ -289,7 +288,8 @@ namespace UltimateOrb.Numerics {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void MultiplyHigh(ref InlineArray5<UInt64> o, in InlineArray5<UInt64> b, in InlineArray5<UInt64> a) {
             unchecked {
-                UInt64 c0, c1, t, o0, o1, o2, o3, o4;
+                nuint c0, c1;
+                UInt64 t, o0, o1, o2, o3, o4;
 
                 UInt128 a4b0 = (UInt128)a[4] * b[0];
                 o0 = (UInt64)(a4b0 >> 64);
@@ -348,7 +348,8 @@ namespace UltimateOrb.Numerics {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void MultiplyHigh(ref InlineArray5<UInt64> o, in InlineArray2<UInt64> b, in InlineArray5<UInt64> a) {
             unchecked {
-                UInt64 c0, c1, t, o0, o1, o2, o3, o4;
+                nuint c0, c1;
+                UInt64 t, o0, o1, o2, o3, o4;
                 UInt128 a1b0 = (UInt128)a[1] * b[0];
                 UInt128 a2b0 = (UInt128)a[2] * b[0];
                 UInt128 a3b0 = (UInt128)a[3] * b[0];
@@ -393,8 +394,7 @@ namespace UltimateOrb.Numerics {
                 UInt128 a2b0 = (UInt128)a[2] * b0;
                 UInt128 a3b0 = (UInt128)a[3] * b0;
                 UInt128 a4b0 = (UInt128)a[4] * b0;
-                UInt64 c0;
-                o[0] = AddWithCarry((UInt64)a1b0, (UInt64)(a0b0 >> 64), 0, out c0);
+                o[0] = AddWithCarry((UInt64)a1b0, (UInt64)(a0b0 >> 64), 0, out var c0);
                 o[1] = AddWithCarry((UInt64)a2b0, (UInt64)(a1b0 >> 64), c0, out c0);
                 o[2] = AddWithCarry((UInt64)a3b0, (UInt64)(a2b0 >> 64), c0, out c0);
                 o[3] = AddWithCarry((UInt64)a4b0, (UInt64)(a3b0 >> 64), c0, out c0);
@@ -411,7 +411,7 @@ namespace UltimateOrb.Numerics {
                 UInt128 a2b0 = (UInt128)a[2] * b0;
                 UInt128 a3b0 = (UInt128)a[3] * b0;
                 o[0] = (UInt64)a0b0;
-                o[1] = AddWithCarry((UInt64)a1b0, (UInt64)(a0b0 >> 64), 0, out UInt64 c);
+                o[1] = AddWithCarry((UInt64)a1b0, (UInt64)(a0b0 >> 64), 0, out var c);
                 o[2] = AddWithCarry((UInt64)a2b0, (UInt64)(a1b0 >> 64), c, out c);
                 o[3] = AddWithCarry((UInt64)a3b0, (UInt64)(a2b0 >> 64), c, out c);
                 o[4] = AddWithCarry(0, (UInt64)(a3b0 >> 64), c, out _);
@@ -428,7 +428,7 @@ namespace UltimateOrb.Numerics {
                 UInt128 a3b0 = (UInt128)a[3] * b0;
                 UInt128 a4b0 = (UInt128)a[4] * b0;
                 o[0] = (UInt64)a0b0;
-                o[1] = AddWithCarry((UInt64)a1b0, (UInt64)(a0b0 >> 64), 0, out UInt64 c);
+                o[1] = AddWithCarry((UInt64)a1b0, (UInt64)(a0b0 >> 64), 0, out var c);
                 o[2] = AddWithCarry((UInt64)a2b0, (UInt64)(a1b0 >> 64), c, out c);
                 o[3] = AddWithCarry((UInt64)a3b0, (UInt64)(a2b0 >> 64), c, out c);
                 o[4] = AddWithCarry((UInt64)a4b0, (UInt64)(a3b0 >> 64), c, out c);
@@ -589,7 +589,7 @@ namespace UltimateOrb.Numerics {
                 UInt128 p00 = (UInt128)x[0] * x[0];
                 UInt128 p11 = (UInt128)x[1] * x[1];
                 o[0] = (UInt64)p00;
-                o[1] = AddWithCarry((UInt64)(p00 >> 64), (UInt64)p10, 0, out UInt64 c);
+                o[1] = AddWithCarry((UInt64)(p00 >> 64), (UInt64)p10, 0, out var c);
                 o[2] = AddWithCarry((UInt64)(p10 >> 64), (UInt64)p11, c, out c);
                 o[3] = AddWithCarry((UInt64)(p11 >> 64), p10x, c, out _);
             }
@@ -624,13 +624,13 @@ namespace UltimateOrb.Numerics {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void SquareHigh(ref InlineArray4<UInt64> o, in InlineArray4<UInt64> a) {
             unchecked {
-                UInt64 c0, o0, o1, o2, o3;
+                UInt64 o0, o1, o2, o3;
                 UInt128 a2a1 = (UInt128)a[2] * a[1];
                 UInt128 a3a0 = (UInt128)a[3] * a[0];
                 UInt128 a3a1 = (UInt128)a[3] * a[1];
                 UInt128 a3a2 = (UInt128)a[3] * a[2];
 
-                o0 = AddWithCarry((UInt64)a3a1, (UInt64)(a3a0 >> 64), 0, out c0);
+                o0 = AddWithCarry((UInt64)a3a1, (UInt64)(a3a0 >> 64), 0, out var c0);
                 o1 = AddWithCarry((UInt64)a3a2, (UInt64)(a3a1 >> 64), c0, out c0);
                 o2 = AddWithCarry(0, (UInt64)(a3a2 >> 64), c0, out c0);
 
@@ -656,14 +656,14 @@ namespace UltimateOrb.Numerics {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void SquareHigh(ref InlineArray5<UInt64> o, in InlineArray5<UInt64> a) {
             unchecked {
-                UInt64 c0, c1, o0, o1, o2, o3, o4, t;
+                UInt64 o0, o1, o2, o3, o4, t;
                 UInt128 a4a0 = (UInt128)a[4] * a[0];
                 UInt128 a3a1 = (UInt128)a[3] * a[1];
-                o0 = AddWithCarry((UInt64)(a4a0 >> 64), (UInt64)(a3a1 >> 64), 0, out c0);
+                o0 = AddWithCarry((UInt64)(a4a0 >> 64), (UInt64)(a3a1 >> 64), 0, out var c0);
                 o1 = c0;
                 UInt128 a4a1 = (UInt128)a[4] * a[1];
                 UInt128 a3a2 = (UInt128)a[3] * a[2];
-                t = AddWithCarry((UInt64)a4a1, (UInt64)a3a2, 0, out c1);
+                t = AddWithCarry((UInt64)a4a1, (UInt64)a3a2, 0, out var c1);
                 o0 = AddWithCarry(o0, t, c0, out c0);
                 t = AddWithCarry((UInt64)(a4a1 >> 64), (UInt64)(a3a2 >> 64), c1, out c1);
                 o1 = AddWithCarry(o1, t, c0, out c0);
@@ -866,8 +866,7 @@ namespace UltimateOrb.Numerics {
                     X2[0] = X2[0] << lk;
                     e += lk;
                 } else {
-                    UInt64 c;
-                    X2[0] = AddWithCarry(X2[0], 1, 0, out c);
+                    X2[0] = AddWithCarry(X2[0], 1, 0, out var c);
                     X2[1] = AddWithCarry(X2[1], 0, c, out c);
                     X2[2] = AddWithCarry(X2[2], 0, c, out _);
                     int lk = (int)UInt64.LeadingZeroCount(X2[2]);
@@ -892,8 +891,7 @@ namespace UltimateOrb.Numerics {
                 X2[1] = (X2[2] << 1 << q) | (X2[1] >> s);
                 X2[2] = (X2[3] << 1 << q) | (X2[2] >> s);
                 X2[3] = X2[3] >> s;
-                UInt64 c;
-                X2[0] = SubtractWithBorrow(0, X2[0], 0, out c);
+                X2[0] = SubtractWithBorrow(0, X2[0], 0, out var c);
                 X2[1] = SubtractWithBorrow(0, X2[1], c, out c);
                 X2[2] = SubtractWithBorrow(0, X2[2], c, out c);
                 X2[3] = SubtractWithBorrow(0, X2[3], c, out _);
@@ -1185,8 +1183,8 @@ namespace UltimateOrb.Numerics {
         public static UInt64 Acos(UInt64 lo, UInt64 hi, out UInt64 result_hi)
             => AcosCore(lo, hi, MidpointRounding.ToEven, out result_hi);
 
-        public static UInt64 Acos(UInt64 lo, UInt64 hi, MidpointRounding rounding, out UInt64 result_hi)
-            => AcosCore(lo, hi, rounding, out result_hi);
+        public static UInt64 Acos(UInt64 lo, UInt64 hi, MidpointRounding mode, out UInt64 result_hi)
+            => AcosCore(lo, hi, mode, out result_hi);
 
         // ---------------------------------------------------------------------
         // Data needed for Acos
@@ -1377,8 +1375,8 @@ namespace UltimateOrb.Numerics {
         // Rounding helper
         // ---------------------------------------------------------------------
 
-        static UInt64 ComputeRnd(UInt64 rbit, MidpointRounding rounding) {
-            switch (rounding) {
+        static UInt64 ComputeRnd(UInt64 rbit, MidpointRounding mode) {
+            switch (mode) {
             case MidpointRounding.ToEven:
             case MidpointRounding.AwayFromZero:
                 return rbit;
@@ -1388,7 +1386,7 @@ namespace UltimateOrb.Numerics {
             case MidpointRounding.ToPositiveInfinity:
                 return 1;
             default:
-                throw ThrowNotSupportedException_MidpointRounding(rounding);
+                throw ThrowNotSupportedException_MidpointRounding(mode);
             }
         }
 
@@ -1396,7 +1394,7 @@ namespace UltimateOrb.Numerics {
         // Fast (correct-rounding) core, ported from cr_acosq
         // ---------------------------------------------------------------------
 
-        static UInt64 AcosCore(UInt64 x_lo, UInt64 x_hi, MidpointRounding rounding, out UInt64 result_hi) {
+        static UInt64 AcosCore(UInt64 x_lo, UInt64 x_hi, MidpointRounding mode, out UInt64 result_hi) {
             unchecked {
                 const UInt64 Smsk = 1UL << 63;
 
@@ -1413,12 +1411,12 @@ namespace UltimateOrb.Numerics {
                             UInt64 pLo = 0x849898cc51701b84UL;
                             // Round per rm for inexact (pi is not representable)
                             UInt64 rbit;
-                            switch (rounding) {
+                            switch (mode) {
                             case MidpointRounding.ToPositiveInfinity:
                             case MidpointRounding.AwayFromZero: rbit = 1; break;
                             default: rbit = 0; break;
                             }
-                            SetFlagsDummy(FloatingPointExceptionFlags.Inexact);
+                            RaiseExceptionFlagsDummy(FloatingPointExceptionFlags.Inexact);
                             pLo += rbit;
                             if (pLo < rbit) pHi += 1;
                             result_hi = pHi;
@@ -1430,14 +1428,14 @@ namespace UltimateOrb.Numerics {
                     } else {
                         byte xnan = GetClass(((UInt128)XhiNoSgn << 64) | x_lo);
                         if (xnan == 2) {
-                            SetFlagsDummy(FloatingPointExceptionFlags.Invalid);
+                            RaiseExceptionFlagsDummy(FloatingPointExceptionFlags.Invalid);
                             result_hi = 0x7fffc00000000000UL;
                             return 0;
                         } else if (xnan == 3) {
                             result_hi = x_hi;
                             return x_lo;
                         }
-                        SetFlagsDummy(FloatingPointExceptionFlags.Invalid);
+                        RaiseExceptionFlagsDummy(FloatingPointExceptionFlags.Invalid);
                         result_hi = 0x7fffc00000000000UL;
                         return 0;
                     }
@@ -1636,7 +1634,7 @@ namespace UltimateOrb.Numerics {
 
                     sf = sf > 60 ? 60 : sf;
                     UInt64 Eps = 1UL << (69 - sf);
-                    UInt128 msk = ((UInt128)(~0UL >> (k + 0x31 + (rounding == MidpointRounding.ToEven ? 1 : 0))) << 64) | ~0UL;
+                    UInt128 msk = ((UInt128)(~0UL >> (k + 0x31 + (mode == MidpointRounding.ToEven ? 1 : 0))) << 64) | ~0UL;
                     UInt128 tl = ((UInt128)xc[1] << 64) | xc[0];
                     tl += Eps;
                     tl &= msk;
@@ -1676,7 +1674,7 @@ namespace UltimateOrb.Numerics {
 
                     sf = sf > 60 ? 60 : sf;
                     UInt64 Eps = 1UL << (68 - sf);
-                    UInt128 msk = ((UInt128)(~0UL >> (k + 0x31 + (rounding == MidpointRounding.ToEven ? 1 : 0))) << 64) | ~0UL;
+                    UInt128 msk = ((UInt128)(~0UL >> (k + 0x31 + (mode == MidpointRounding.ToEven ? 1 : 0))) << 64) | ~0UL;
                     UInt128 tl = ((UInt128)xc[1] << 64) | xc[0];
                     tl += Eps;
                     tl &= msk;
@@ -1690,10 +1688,10 @@ namespace UltimateOrb.Numerics {
                 }
 
                 if (reachedAccurate) {
-                    return AcosAccurateCore(x_lo, x_hi, rounding, out result_hi);
+                    return AcosAccurateCore(x_lo, x_hi, mode, out result_hi);
                 }
 
-                rnd = ComputeRnd(rnd, rounding);
+                rnd = ComputeRnd(rnd, mode);
 
                 // dv.b[0] = rnd; dv.b[1] = xn << 48; v += dv;
                 UInt64 dLo = rnd;
@@ -1702,7 +1700,7 @@ namespace UltimateOrb.Numerics {
                 UInt128 dv = ((UInt128)dHi << 64) | dLo;
                 vFull += dv;
 
-                SetFlagsDummy(FloatingPointExceptionFlags.Inexact);
+                RaiseExceptionFlagsDummy(FloatingPointExceptionFlags.Inexact);
                 result_hi = (UInt64)(vFull >> 64);
                 return (UInt64)vFull;
             }
@@ -1712,7 +1710,7 @@ namespace UltimateOrb.Numerics {
         // Slow (high-precision) core, ported from as_acosq_accurate
         // ---------------------------------------------------------------------
 
-        static UInt64 AcosAccurateCore(UInt64 x_lo, UInt64 x_hi, MidpointRounding rounding, out UInt64 result_hi) {
+        static UInt64 AcosAccurateCore(UInt64 x_lo, UInt64 x_hi, MidpointRounding mode, out UInt64 result_hi) {
             unchecked {
                 const UInt64 Smsk = 1UL << 63;
 
@@ -1833,7 +1831,7 @@ namespace UltimateOrb.Numerics {
                     outLo = vLo;
                 }
 
-                rnd = ComputeRnd(rnd, rounding);
+                rnd = ComputeRnd(rnd, mode);
 
                 UInt64 dLo = rnd;
                 UInt64 dHi = (UInt64)new_xn << 48;
@@ -1841,7 +1839,7 @@ namespace UltimateOrb.Numerics {
                 UInt128 dv = ((UInt128)dHi << 64) | dLo;
                 vFull += dv;
 
-                SetFlagsDummy(FloatingPointExceptionFlags.Inexact);
+                RaiseExceptionFlagsDummy(FloatingPointExceptionFlags.Inexact);
                 result_hi = (UInt64)(vFull >> 64);
                 return (UInt64)vFull;
             }
@@ -1851,7 +1849,6 @@ namespace UltimateOrb.Numerics {
 }
 
 namespace UltimateOrb.Runtime.CompilerServices {
-
 
     internal static partial class InlineArrayExtensions {
 

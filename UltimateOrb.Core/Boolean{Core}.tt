@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
@@ -129,22 +130,13 @@ foreach (var item in items) {
 
         public bool TryFormat(Span<char> destination, out int charsWritten) {
             if (StandardValue) {
-                if (unchecked((uint)destination.Length) > 3) { // uint cast, per https://github.com/dotnet/runtime/issues/10596
-                    destination[0] = 'T';
-                    destination[1] = 'r';
-                    destination[2] = 'u';
-                    destination[3] = 'e';
-                    charsWritten = 4;
+                if (TrueLiteral.TryCopyTo(destination)) {
+                    charsWritten = TrueLiteral.Length;
                     return true;
                 }
             } else {
-                if (unchecked((uint)destination.Length) > 4) {
-                    destination[0] = 'F';
-                    destination[1] = 'a';
-                    destination[2] = 'l';
-                    destination[3] = 's';
-                    destination[4] = 'e';
-                    charsWritten = 5;
+                if (FalseLiteral.TryCopyTo(destination)) {
+                    charsWritten = FalseLiteral.Length;
                     return true;
                 }
             }
@@ -378,6 +370,36 @@ foreach (var item in items) {
 
         public static bool operator !=(<#= TypeName #> first, <#= TypeName #> second) {
             return !(first == second);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static <#= TypeName #> operator !(<#= TypeName #> value) {
+            return value ? False : True;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static <#= TypeName #> operator &(<#= TypeName #> first, <#= TypeName #> second) {
+            return (bool)first & (bool)second;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static <#= TypeName #> operator |(<#= TypeName #> first, <#= TypeName #> second) {
+            return (bool)first | (bool)second;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static <#= TypeName #> operator ^(<#= TypeName #> first, <#= TypeName #> second) {
+            return (bool)first ^ (bool)second;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator true(<#= TypeName #> value) {
+            return value.m_value != 0;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator false(<#= TypeName #> value) {
+            return value.m_value == 0;
         }
     }
 <#

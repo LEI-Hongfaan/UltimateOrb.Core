@@ -126,61 +126,133 @@ namespace UltimateOrb.Numerics {
         //    return exponent;
         //}
 
-        internal static UInt64 GetNaN(UInt64 value_lo, UInt64 value_hi, out UInt64 result_hi) {
-            return (result_hi = /*0x0000800000000000u |*/ value_hi).Comma(value_lo);
+        internal static UInt64 GetNaN(UInt64 lo, UInt64 hi, out UInt64 result_hi) {
+            // Quiet bit (bit 111)
+            const UInt64 QuietBit = 0x0000800000000000u;
+
+            // Preserve sign + payload, force quiet
+            result_hi = hi | QuietBit;
+            return lo;
         }
 
-        internal static UInt64 GetNaN(UInt64 first_lo, UInt64 first_hi, UInt64 second_lo, UInt64 second_hi, out UInt64 result_hi) {
-            var mask_eq = 0x7FFF800000000000u;
-            var mask_fNq = 0x00007FFFFFFFFFFFu;
-            var first_eq = mask_eq & first_hi;
-            if ((Hi64BitsExponentMask == first_eq) && (0 != (first_lo | (mask_fNq & first_hi)))) {
-                // first: sNaN
-                // second: ?
-                {
-                    // is_quiet
-                    result_hi =
-                        // 0x0000800000000000u |
-                        first_hi;
-                    return first_lo;
-                }
-            }
-            var second_eq = mask_eq & second_hi;
-            {
-                // first: qNaN or ...
-                // second: ?
-                if ((Hi64BitsExponentMask == second_eq) && (0 != (second_lo | (mask_fNq & second_hi)))) {
-                    // first: qNaN or ...
-                    // second: sNaN
-                    // is_quiet
-                    result_hi =
-                        // 0x0000800000000000u |
-                        second_hi;
-                    return second_lo;
-                }
+        internal static UInt64 GetNaN(
+            UInt64 first_lo, UInt64 first_hi,
+            UInt64 second_lo, UInt64 second_hi,
+            out UInt64 result_hi) {
 
-                if (mask_eq == first_eq) {
-                    // first: qNaN
-                    // second: qNaN or ...
-                    {
-                        // first: qNaN
-                        // second: Infinity or ...
-                        result_hi = first_hi;
-                        return first_lo;
-                    }
-                }
-                {
-                    // at least one NaN
-                    Debug.Assert(mask_eq == second_eq);
-                    {
-                        // first: Infinity or ...
-                        // second: qNaN 
-                        result_hi = second_hi;
-                        return second_lo;
-                    }
-                }
+            const UInt64 ExpMask = 0x7FFF000000000000u;
+            const UInt64 QuietBit = 0x0000800000000000u;
+            const UInt64 FracMask = 0x0000FFFFFFFFFFFFu;
+
+            bool first_is_nan =
+                ((first_hi & ExpMask) == ExpMask) &&
+                ((first_hi & FracMask) != 0 || first_lo != 0);
+
+            bool second_is_nan =
+                ((second_hi & ExpMask) == ExpMask) &&
+                ((second_hi & FracMask) != 0 || second_lo != 0);
+
+            Debug.Assert(first_is_nan || second_is_nan);
+
+            bool first_is_snan = first_is_nan && ((first_hi & QuietBit) == 0);
+            bool second_is_snan = second_is_nan && ((second_hi & QuietBit) == 0);
+
+            // 1. signaling NaN has priority
+            if (first_is_snan) {
+                result_hi = first_hi | QuietBit;
+                return first_lo;
             }
+            if (second_is_snan) {
+                result_hi = second_hi | QuietBit;
+                return second_lo;
+            }
+
+            // 2. quiet NaN: prefer first
+            if (first_is_nan) {
+                result_hi = first_hi | QuietBit;
+                return first_lo;
+            }
+
+            // 3. otherwise second must be quiet NaN
+            result_hi = second_hi | QuietBit;
+            return second_lo;
         }
+
+
+        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        public static UInt128 GetNaN() {
+            // negative canonical quiet NaN
+            UInt128 nan = ((UInt128)0xFFFF800000000000u << 64);
+
+            Debug.Assert(
+                ((nan >> 112) & 0x7FFFu) == 0x7FFFu &&   // exponent = all ones
+                ((nan >> 111) & 1) == 1               // quiet bit = 1
+            );
+
+            return nan;
+        }
+
+        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        public static UInt128 GetNaN(UInt128 bits) {
+            UInt128 ExpMask = (UInt128)0x7FFFu << 112;
+            UInt128 QuietBit = (UInt128)1 << 111;
+            UInt128 FracMask = ((UInt128)1 << 112) - 1;
+
+            // Must be NaN: exponent all ones AND fraction != 0
+            Debug.Assert(((bits & ExpMask) == ExpMask) && ((bits & FracMask) != 0));
+
+            // Preserve sign + payload, only force quiet bit
+            UInt128 result = bits | QuietBit;
+
+            Debug.Assert(((result & QuietBit) != 0));   // quiet
+
+            return result;
+        }
+
+        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        public static UInt128 GetNaN(UInt128 first, UInt128 second) {
+            UInt128 ExpMask = (UInt128)0x7FFFu << 112;
+            UInt128 QuietBit = (UInt128)1 << 111;
+            UInt128 FracMask = ((UInt128)1 << 112) - 1;
+
+            bool first_is_nan =
+                ((first & ExpMask) == ExpMask) &&
+                ((first & FracMask) != 0);
+
+            bool second_is_nan =
+                ((second & ExpMask) == ExpMask) &&
+                ((second & FracMask) != 0);
+
+            // At least one must be NaN
+            Debug.Assert(first_is_nan || second_is_nan);
+
+            bool first_is_snan = first_is_nan && ((first & QuietBit) == 0);
+            bool second_is_snan = second_is_nan && ((second & QuietBit) == 0);
+
+            UInt128 chosen;
+
+            // 1. signaling NaN has priority
+            if (first_is_snan)
+                chosen = first;
+            else if (second_is_snan)
+                chosen = second;
+
+            // 2. quiet NaN: prefer first
+            else if (first_is_nan)
+                chosen = first;
+
+            // 3. otherwise second must be quiet NaN
+            else
+                chosen = second;
+
+            // Quiet the chosen NaN (sign + payload preserved)
+            UInt128 result = chosen | QuietBit;
+
+            Debug.Assert(((result & QuietBit) != 0));   // quiet
+
+            return result;
+        }
+
 
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static UInt64 GetBitsFromRawPartsWithRounding(UInt64 fraction_cy, UInt64 fraction_lo, UInt64 fraction_hi, int exponent, int sign, [ConstantExpected] FloatingPointRounding rounding, out UInt64 result_hi) {
@@ -557,7 +629,7 @@ namespace UltimateOrb.Numerics {
 
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static UInt64 GetNaN(out UInt64 result_hi) {
-            result_hi = 0xFFFF800000000000u;
+            result_hi = 0xFFFF800000000000u;   // negative canonical quiet NaN
             return 0;
         }
 

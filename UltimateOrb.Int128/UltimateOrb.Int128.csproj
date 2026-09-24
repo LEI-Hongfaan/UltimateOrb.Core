@@ -78,7 +78,7 @@
     </Compile>
     <Compile Include="..\UltimateOrb.Core\Numerics\DoubleArithmetic{DivRem.Generic}.cs" Link="Numerics\DoubleArithmetic{DivRem.Generic}.cs" />
     <Compile Include="..\UltimateOrb.Core\Numerics\DoubleArithmetic{DivRem}.cs" Link="Numerics\DoubleArithmetic{DivRem}.cs" />
-    <Compile Include="..\UltimateOrb.Core\Numerics\DoubleArithmetic{Generic}.cs" Link="Numerics\DoubleArithmetic{Generic}.cs" />
+    <Compile Include="..\UltimateOrb.Core\Numerics\DoubleArithmetic{Generic0}.cs" Link="Numerics\DoubleArithmetic{Generic0}.cs" />
     <Compile Include="..\UltimateOrb.Core\Numerics\DoubleArithmetic{Increase,Decrease}.cs" Link="Numerics\DoubleArithmetic{Increase,Decrease}.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>

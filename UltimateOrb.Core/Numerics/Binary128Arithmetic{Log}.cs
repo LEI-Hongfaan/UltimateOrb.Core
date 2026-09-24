@@ -10,6 +10,10 @@ using UltimateOrb.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace UltimateOrb.Numerics {
+#if NET8_0_OR_GREATER
+    using UInt128 = System.UInt128;
+    using Int128 = System.Int128;
+#endif
 
     public static partial class Binary128Arithmetic {
         // ═══════════════════════════════════════════════════════════════════
@@ -19,14 +23,14 @@ namespace UltimateOrb.Numerics {
         public static UInt64 Log(UInt64 lo, UInt64 hi, out UInt64 result_hi)
             => Log(lo, hi, MidpointRounding.ToEven, out result_hi);
 
-        public static UInt64 Log(UInt64 lo, UInt64 hi, MidpointRounding rounding, out UInt64 result_hi) {
+        public static UInt64 Log(UInt64 lo, UInt64 hi, MidpointRounding mode, out UInt64 result_hi) {
             unchecked {
                 // GAP: _MM_ROUND_* → MidpointRounding.  AwayFromZero is decided at the
                 // rounding step where the result's sign is known.
-                bool isNearest = rounding == MidpointRounding.ToEven;
-                bool isUp = rounding == MidpointRounding.ToPositiveInfinity;
-                bool isDown = rounding == MidpointRounding.ToNegativeInfinity;
-                bool isAway = rounding == MidpointRounding.AwayFromZero;
+                bool isNearest = mode == MidpointRounding.ToEven;
+                bool isUp = mode == MidpointRounding.ToPositiveInfinity;
+                bool isDown = mode == MidpointRounding.ToNegativeInfinity;
+                bool isAway = mode == MidpointRounding.AwayFromZero;
 
                 // ── Specials ──────────────────────────────────────────────────
                 if (Misc.Unlikely(hi >= ((UInt64)0x7FFF << 48))) {
@@ -34,7 +38,7 @@ namespace UltimateOrb.Numerics {
                     if (b1 > ((UInt64)0x7FFF << 48) ||
                         (b1 == ((UInt64)0x7FFF << 48) && lo != 0)) {
                         if ((b1 & (1UL << 47)) == 0)
-                            SetFlagsDummy(FloatingPointExceptionFlags.Invalid);
+                            RaiseExceptionFlagsDummy(FloatingPointExceptionFlags.Invalid);
                         result_hi = hi | (1UL << 47);
                         return lo;
                     }
@@ -43,11 +47,11 @@ namespace UltimateOrb.Numerics {
                         return lo;
                     }
                     if (b1 == 0 && lo == 0) {
-                        SetFlagsDummy(FloatingPointExceptionFlags.DivideByZero);
+                        RaiseExceptionFlagsDummy(FloatingPointExceptionFlags.DivideByZero);
                         result_hi = 0xFFFFUL << 48;
                         return 0;
                     }
-                    SetFlagsDummy(FloatingPointExceptionFlags.Invalid);
+                    RaiseExceptionFlagsDummy(FloatingPointExceptionFlags.Invalid);
                     result_hi = 0xFFFF8UL << 44;
                     return 11;
                 }
@@ -65,7 +69,7 @@ namespace UltimateOrb.Numerics {
                 if (Misc.Unlikely(e == 0)) {
                     if (mLo == 0 && mHi == 0) {
                         // +0 (the −0 case is already handled by the specials guard)
-                        SetFlagsDummy(FloatingPointExceptionFlags.DivideByZero);
+                        RaiseExceptionFlagsDummy(FloatingPointExceptionFlags.DivideByZero);
                         result_hi = 0xFFFFUL << 48;
                         return 0;
                     }
@@ -166,8 +170,7 @@ namespace UltimateOrb.Numerics {
 
                     // FIX L5: the C's `res.a += (fs[0]>>(63-ls))&1` is a 128-bit add.
                     // Must propagate carry from the low word into the high word.
-                    UInt64 carryBit;
-                    rLo = AddWithCarry(rLo, (fs[0] >> (63 - ls)) & 1, 0, out carryBit);
+                    rLo = AddWithCarry(rLo, (fs[0] >> (63 - ls)) & 1, 0, out var carryBit);
                     rHi = AddWithCarry(rHi, 0, carryBit, out _);
 
                     rnd = LogRefine(el, ref rLo, ref rHi, lo, hi);
@@ -192,7 +195,7 @@ namespace UltimateOrb.Numerics {
                 UInt128 res = ((UInt128)rHi << 64) | rLo;
                 res += ((UInt128)elShifted << 64) | rnd;
 
-                SetFlagsDummy(FloatingPointExceptionFlags.Inexact);
+                RaiseExceptionFlagsDummy(FloatingPointExceptionFlags.Inexact);
                 result_hi = (UInt64)(res >> 64);
                 return (UInt64)res;
             }
@@ -228,8 +231,7 @@ namespace UltimateOrb.Numerics {
                 } else {
                     // x < 1 (but inside the near-one window → x > 0)
                     neg = 1;
-                    UInt64 borrow;
-                    UInt64 dLo = SubtractWithBorrow(0, xLo, 0, out borrow);
+                    UInt64 dLo = SubtractWithBorrow(0, xLo, 0, out var borrow);
                     UInt64 dHi = SubtractWithBorrow(OneHi, xHi, borrow, out _);
                     uLo = dLo; uHi = dHi;
                     int nz0 = uHi != 0
@@ -372,7 +374,7 @@ namespace UltimateOrb.Numerics {
                 UInt64 signField = (UInt64)neg << 63;
                 res += ((UInt128)(expField | signField) << 64) | rnd;
 
-                SetFlagsDummy(FloatingPointExceptionFlags.Inexact);
+                RaiseExceptionFlagsDummy(FloatingPointExceptionFlags.Inexact);
                 result_hi = (UInt64)(res >> 64);
                 return (UInt64)res;
             }
@@ -479,8 +481,7 @@ namespace UltimateOrb.Numerics {
                 UInt64 word2 = (UInt64)a1b1;
                 UInt64 word3 = (UInt64)(a1b1 >> 64);
 
-                UInt64 c;
-                word1 = AddWithCarry(word1, (UInt64)a1b0, 0, out c);
+                word1 = AddWithCarry(word1, (UInt64)a1b0, 0, out var c);
                 word2 = AddWithCarry(word2, (UInt64)(a1b0 >> 64), c, out c);
                 word3 = AddWithCarry(word3, 0, c, out c);
 

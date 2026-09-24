@@ -14,7 +14,7 @@ namespace UltimateOrb.Numerics {
 
     partial class DoubleArithmetic {
 
-#if STANDALONE_XINTN_LIBRARY
+#if STANDALONE_XINTN_LIBRARY && !STANDALONE_BINARYN_LIBRARY
 #else
 #if NET8_0_OR_GREATER
         [Experimental("UoWIP_GenericMath")]
@@ -29,7 +29,7 @@ namespace UltimateOrb.Numerics {
         }
 #endif
 
-#if STANDALONE_XINTN_LIBRARY
+#if STANDALONE_XINTN_LIBRARY && !STANDALONE_BINARYN_LIBRARY
 #else
 #if NET8_0_OR_GREATER
         [Experimental("UoWIP_GenericMath")]

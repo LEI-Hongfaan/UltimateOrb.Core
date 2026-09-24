@@ -1641,6 +1641,170 @@ namespace UltimateOrb {
         }
     }
 
+    public static class Decimal128BidDpd {
+        private static readonly UInt128 Pow10_33;
+        private static readonly ushort[] DpdToDec = new ushort[1024]; // 0xFFFF = invalid
+        private static readonly ushort[] DecToDpd = new ushort[1000];
+
+        static Decimal128BidDpd() {
+            Pow10_33 = 1;
+            for (int i = 0; i < 33; i++) Pow10_33 *= 10;
+
+            for (int i = 0; i < 1024; i++) DpdToDec[i] = 0xFFFF;
+            for (int v = 0; v < 1000; v++) {
+                int h = v / 100, t = (v / 10) % 10, u = v % 10;
+                int d = EncodeDeclet(h, t, u);
+                DecToDpd[v] = (ushort)d;
+                DpdToDec[d] = (ushort)v;
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static int EncodeDeclet(int a, int b, int c) {
+            int a3 = a >> 3, b3 = b >> 3, c3 = c >> 3;
+            int a2 = (a >> 2) & 1, a1 = (a >> 1) & 1, a0 = a & 1;
+            int b2 = (b >> 2) & 1, b1 = (b >> 1) & 1, b0 = b & 1;
+            int c2 = (c >> 2) & 1, c1 = (c >> 1) & 1, c0 = c & 1;
+
+            if (a3 == 0 && b3 == 0 && c3 == 0)
+                return (a2 << 8) | (a1 << 7) | (a0 << 6)
+                     | (b2 << 5) | (b1 << 4) | (b0 << 3)
+                     | (c2 << 2) | (c1 << 1) | c0;
+
+            if (a3 != 0 && b3 == 0 && c3 == 0) return 0x200 | (b2 << 6) | (b1 << 5) | (b0 << 4) | (c2 << 3) | (c1 << 2) | (c0 << 1) | a0;
+            if (a3 == 0 && b3 != 0 && c3 == 0) return 0x280 | (a2 << 6) | (a1 << 5) | (a0 << 4) | (c2 << 3) | (c1 << 2) | (c0 << 1) | b0;
+            if (a3 == 0 && b3 == 0 && c3 != 0) return 0x300 | (a2 << 6) | (a1 << 5) | (a0 << 4) | (b2 << 3) | (b1 << 2) | (b0 << 1) | c0;
+
+            if (a3 != 0 && b3 != 0 && c3 == 0) return 0x380 | (c2 << 4) | (c1 << 3) | (c0 << 2) | (a0 << 1) | b0;
+            if (a3 != 0 && b3 == 0 && c3 != 0) return 0x3A0 | (b2 << 4) | (b1 << 3) | (b0 << 2) | (a0 << 1) | c0;
+            if (a3 == 0 && b3 != 0 && c3 != 0) return 0x3C0 | (a2 << 4) | (a1 << 3) | (a0 << 2) | (b0 << 1) | c0;
+
+            return 0x3E0 | (a0 << 4) | (b0 << 3) | (c0 << 2);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void EncodeDpd(UInt128 v, out ulong dLo, out ulong dHi) {
+            dLo = 0; dHi = 0;
+            for (int i = 0; i < 11; i++) {
+                int chunk = (int)(v % 1000);
+                v /= 1000;
+                int declet = DecToDpd[chunk];
+                int bitPos = i * 10;
+                if (bitPos < 60)
+                    dLo |= (ulong)(uint)declet << bitPos;
+                else if (bitPos == 60) {
+                    dLo |= (ulong)(uint)(declet & 0xF) << 60;
+                    dHi |= (ulong)(uint)(declet >> 4);
+                } else
+                    dHi |= (ulong)(uint)declet << (bitPos - 64);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void DecodeDpd(ulong dHi, ulong dLo, out UInt128 value, out bool nonCanonical) {
+            value = 0;
+            nonCanonical = false;
+            for (int i = 10; i >= 0; i--) {
+                int bitPos = i * 10;
+                int declet;
+                if (bitPos < 60) declet = (int)((dLo >> bitPos) & 0x3FF);
+                else if (bitPos == 60) declet = (int)((dLo >> 60) & 0xF) | (int)((dHi & 0x3F) << 4);
+                else declet = (int)((dHi >> (bitPos - 64)) & 0x3FF);
+
+                ushort dec = DpdToDec[declet];
+                if (dec == 0xFFFF) { nonCanonical = true; value = 0; return; }
+                value = value * 1000 + dec;
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static UInt128 Decimal128BidToDpd(UInt128 bits) {
+            unchecked {
+                ulong hi = (ulong)(bits >> 64);
+                ulong lo = (ulong)bits;
+
+                ulong sign = hi & 0x8000_0000_0000_0000UL;
+                int comb = (int)((hi >> 58) & 0x1F);
+
+                // Infinity: canonical form has G5..G(w+4) = 0 and T = 0.
+                if (comb == 0x1E)
+                    return (UInt128)(sign | (0x1EUL << 58)) << 64;
+
+                ulong trailHi = hi & 0x3FFF_FFFF_FFFFUL;
+                UInt128 T = ((UInt128)trailHi << 64) | lo;
+
+                // NaN: payload is converted (binary -> DPD) and canonicalised.
+                if (comb == 0x1F) {
+                    if (T >= Pow10_33) T = 0;
+                    EncodeDpd(T, out ulong nLo, out ulong nHi);
+                    ulong resHi = sign | (0x1FUL << 58) | nHi;
+                    return ((UInt128)resHi << 64) | nLo;
+                }
+
+                int d0, expMsbs;
+                if (comb < 0x18) { d0 = comb & 7; expMsbs = comb >> 3; } else { d0 = 8 + (comb & 1); expMsbs = (comb >> 1) & 3; }
+
+                ulong expCont = (hi >> 46) & 0xFFF;
+
+                // Non-canonical finite BID: T >= 10^33 -> significand = 0.
+                if (T >= Pow10_33) { d0 = 0; T = 0; }
+
+                EncodeDpd(T, out ulong dLo, out ulong dHi);
+
+                int newComb = d0 < 8
+                    ? (expMsbs << 3) | d0
+                    : 0x18 | (expMsbs << 1) | (d0 - 8);
+
+                ulong resHiF = sign | ((ulong)(uint)newComb << 58) | (expCont << 46) | dHi;
+                return ((UInt128)resHiF << 64) | dLo;
+            }
+            
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static UInt128 Decimal128DpdToBid(UInt128 bits) {
+            unchecked {
+                ulong hi = (ulong)(bits >> 64);
+                ulong lo = (ulong)bits;
+
+                ulong sign = hi & 0x8000_0000_0000_0000UL;
+                int comb = (int)((hi >> 58) & 0x1F);
+
+                if (comb == 0x1E)
+                    return (UInt128)(sign | (0x1EUL << 58)) << 64;
+
+                ulong dpdHi = hi & 0x3FFF_FFFF_FFFFUL;
+                DecodeDpd(dpdHi, lo, out UInt128 T, out bool nonCanonical);
+
+                // NaN: payload is converted (DPD -> binary) and canonicalised.
+                if (comb == 0x1F) {
+                    if (nonCanonical || T >= Pow10_33) T = 0;
+                    ulong trailHiN = (ulong)(T >> 64);
+                    ulong trailLoN = (ulong)T;
+                    ulong resHiN = sign | (0x1FUL << 58) | trailHiN;
+                    return ((UInt128)resHiN << 64) | trailLoN;
+                }
+
+                int d0, expMsbs;
+                if (comb < 0x18) { d0 = comb & 7; expMsbs = comb >> 3; } else { d0 = 8 + (comb & 1); expMsbs = (comb >> 1) & 3; }
+
+                ulong expCont = (hi >> 46) & 0xFFF;
+
+                if (nonCanonical) { d0 = 0; T = 0; }
+
+                ulong trailHi = (ulong)(T >> 64);
+                ulong trailLo = (ulong)T;
+
+                int newComb = d0 < 8
+                    ? (expMsbs << 3) | d0
+                    : 0x18 | (expMsbs << 1) | (d0 - 8);
+
+                ulong resHi = sign | ((ulong)(uint)newComb << 58) | (expCont << 46) | trailHi;
+                return ((UInt128)resHi << 64) | trailLo;
+            }
+        }
+    }
+
     partial struct Decimal128Dpd {
     }
 
@@ -1666,11 +1830,11 @@ namespace UltimateOrb {
         }
 
         public static implicit operator Decimal128Bid(Decimal128Dpd value) {
-            throw new NotImplementedException();
+            return Unsafe.BitCast<UInt128, Decimal128Bid>(Decimal128BidDpd.Decimal128DpdToBid(Unsafe.BitCast<Decimal128Dpd, UInt128>(value)));
         }
 
         public static implicit operator Decimal128Dpd(Decimal128Bid value) {
-            throw new NotImplementedException();
+            return Unsafe.BitCast<UInt128, Decimal128Dpd>(Decimal128BidDpd.Decimal128BidToDpd(Unsafe.BitCast<Decimal128Bid, UInt128>(value)));
         }
 
         internal readonly struct ConstructorInternalFromPartsTag {

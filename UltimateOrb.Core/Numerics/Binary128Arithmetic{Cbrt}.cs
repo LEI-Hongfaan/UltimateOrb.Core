@@ -8,25 +8,23 @@ using System.Threading.Tasks;
 using Misc = UltimateOrb.Miscellaneous;
 using System.Diagnostics;
 
-
-#if NET8_0_OR_GREATER
-using UInt128 = System.UInt128;
-using Int128 = System.Int128;
-#endif
-
 namespace UltimateOrb.Numerics {
+#if NET8_0_OR_GREATER
+    using UInt128 = System.UInt128;
+    using Int128 = System.Int128;
+#endif
 
     // Part I: Helpers
 
     public static partial class Binary128Arithmetic {
 
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        internal static UInt64 AddWithCarry(UInt64 a, UInt64 b, UInt64 carry, out UInt64 newCarry) {
+        internal static UInt64 AddWithCarry(UInt64 a, UInt64 b, nuint carry, out nuint newCarry) {
             unchecked {
                 UInt64 s0 = a + b;
-                UInt64 c0 = s0 < a ? 1UL : 0UL;
+                nuint c0 = s0 < a ? 1u : 0u;
                 UInt64 s1 = s0 + carry;
-                UInt64 c1 = s1 < s0 ? 1UL : 0UL;
+                nuint c1 = s1 < s0 ? 1u : 0u;
                 newCarry = c0 + c1;
                 return s1;
             }
@@ -70,7 +68,7 @@ namespace UltimateOrb.Numerics {
         //     return xy1 - (m & x) + (xy0 >> 64);
         //     (m&x uses sign-extended (u128)m per C promotion rules.)
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        internal static Int128 MultiplyHighMasked(Int64 y, UInt128 x, Int64 m) {
+        internal static Int128 MultiplyHighApproximateMasked(Int64 y, UInt128 x, Int64 m) {
             unchecked {
                 UInt64 uy = (UInt64)y;
                 UInt64 x_lo = (UInt64)x;
@@ -202,7 +200,7 @@ namespace UltimateOrb.Numerics {
                 Int64 m = h >> 63;                    // sign mask: 0 or -1
 
                 Int64 h3 = MultiplyHighMasked(h, 0xAAAAAAAAAAAAAAABUL, m);   // h *= 2/3
-                Int128 ds = MultiplyHighMasked(h3, sx, m) >> (58 - 5);
+                Int128 ds = MultiplyHighApproximateMasked(h3, sx, m) >> (58 - 5);
 
                 sx <<= 5;
                 UInt128 sx1 = sx - (UInt128)ds;
@@ -240,12 +238,12 @@ namespace UltimateOrb.Numerics {
             return CbrtCore(lo, hi, MidpointRounding.ToEven, out result_hi);
         }
 
-        public static UInt64 Cbrt(UInt64 lo, UInt64 hi, MidpointRounding rounding, out UInt64 result_hi) {
-            return CbrtCore(lo, hi, rounding, out result_hi);
+        public static UInt64 Cbrt(UInt64 lo, UInt64 hi, MidpointRounding mode, out UInt64 result_hi) {
+            return CbrtCore(lo, hi, mode, out result_hi);
         }
 
         [Conditional("DEBUG")]
-        private static void SetFlagsDummy(FloatingPointExceptionFlags flags) {
+        private static void RaiseExceptionFlagsDummy(FloatingPointExceptionFlags flags) {
         }
 
 
@@ -253,7 +251,7 @@ namespace UltimateOrb.Numerics {
             throw new NotSupportedException($"The specified {nameof(System.MidpointRounding)} value '{value}' is not supported.");
         }
 
-        private static UInt64 CbrtCore(UInt64 x_lo, UInt64 x_hi, MidpointRounding rounding, out UInt64 result_hi) {
+        private static UInt64 CbrtCore(UInt64 x_lo, UInt64 x_hi, MidpointRounding mode, out UInt64 result_hi) {
             unchecked {
                 int sign = GetRawSignFromHi64Bits(x_hi);
                 uint e = unchecked((uint)GetRawExponentFromHi64Bits(x_hi));
@@ -291,7 +289,7 @@ namespace UltimateOrb.Numerics {
                     if (((frac_hi | frac_lo) != 0) && ((frac_hi & (1UL << 47)) == 0)) {
                         // sNaN -> qNaN, signal FE_INVALID.
                         u |= (UInt128)1 << (64 + 47);
-                        SetFlagsDummy(FloatingPointExceptionFlags.Invalid);
+                        RaiseExceptionFlagsDummy(FloatingPointExceptionFlags.Invalid);
                         result_hi = (UInt64)(u >> 64);
                         return (UInt64)u;
                     }
@@ -313,14 +311,14 @@ namespace UltimateOrb.Numerics {
                 // `sbit`: any of the low 16 bits of b0 set (sticky bit).
                 // `rbit`: bit 15 of b0 (round bit).
                 UInt64 sbit = ((b0 << 48) != 0) ? 1UL : 0UL;
-                if (sbit != 0) SetFlagsDummy(FloatingPointExceptionFlags.Inexact);          // FE_INEXACT
+                if (sbit != 0) RaiseExceptionFlagsDummy(FloatingPointExceptionFlags.Inexact);          // FE_INEXACT
 
                 UInt64 rbit = (b0 >> 15) & 1UL;
                 b0 >>= 16;
 
                 // -------- Rounding decision --------
                 UInt64 rnd;
-                switch (rounding) {
+                switch (mode) {
                 case MidpointRounding.ToEven:
 #if false
                     // Correct round-half-to-even.  (For f128 cbrt the exact-tie
@@ -353,7 +351,7 @@ namespace UltimateOrb.Numerics {
                     rnd = (UInt64)(1 ^ sign) & sbit;
                     break;
                 default:
-                    throw ThrowNotSupportedException_MidpointRounding(rounding);
+                    throw ThrowNotSupportedException_MidpointRounding(mode);
                 }
 
                 // Repack the significand to IEEE layout in-place.

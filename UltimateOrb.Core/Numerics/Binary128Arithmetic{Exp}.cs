@@ -10,6 +10,10 @@ using UltimateOrb.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace UltimateOrb.Numerics {
+#if NET8_0_OR_GREATER
+    using UInt128 = System.UInt128;
+    using Int128 = System.Int128;
+#endif
 
     partial class Binary128Arithmetic {
 
@@ -17,7 +21,7 @@ namespace UltimateOrb.Numerics {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void Add(ref InlineArray6<UInt64> o, in InlineArray6<UInt64> b) {
             unchecked {
-                UInt64 c;
+                nuint c;
                 o[0] = AddWithCarry(o[0], b[0], 0, out c);
                 o[1] = AddWithCarry(o[1], b[1], c, out c);
                 o[2] = AddWithCarry(o[2], b[2], c, out c);
@@ -36,7 +40,7 @@ namespace UltimateOrb.Numerics {
                         a2b1 = (UInt128)a[2] * b1, a3b1 = (UInt128)a[3] * b1,
                         a4b1 = (UInt128)a[4] * b1, a5b1 = (UInt128)a[5] * b1,
                         a6b1 = (UInt128)a[6] * b1;
-                UInt64 c0;
+                nuint c0;
                 UInt64 o0 = AddWithCarry((UInt64)a1b1, (UInt64)(a0b1 >> 64), 0, out c0);
                 UInt64 o1 = AddWithCarry((UInt64)a2b1, (UInt64)(a1b1 >> 64), c0, out c0);
                 UInt64 o2 = AddWithCarry((UInt64)a3b1, (UInt64)(a2b1 >> 64), c0, out c0);
@@ -48,7 +52,8 @@ namespace UltimateOrb.Numerics {
                 UInt128 a1b0 = (UInt128)a[1] * b0, a2b0 = (UInt128)a[2] * b0,
                         a3b0 = (UInt128)a[3] * b0, a4b0 = (UInt128)a[4] * b0,
                         a5b0 = (UInt128)a[5] * b0, a6b0 = (UInt128)a[6] * b0;
-                UInt64 c1, t;
+                nuint c1;
+                UInt64 t;
                 t = AddWithCarry((UInt64)a2b0, (UInt64)(a1b0 >> 64), 0, out c1);
                 o0 = AddWithCarry(o0, t, 0, out c0);
                 t = AddWithCarry((UInt64)a3b0, (UInt64)(a2b0 >> 64), c1, out c1);
@@ -74,14 +79,15 @@ namespace UltimateOrb.Numerics {
                 UInt64 b0 = (UInt64)b, b1 = (UInt64)(b >> 64);
                 UInt128 a0b1 = (UInt128)a[0] * b1, a1b1 = (UInt128)a[1] * b1,
                         a2b1 = (UInt128)a[2] * b1, a3b1 = (UInt128)a[3] * b1;
-                UInt64 c0;
+                nuint c0;
                 UInt64 o0 = AddWithCarry((UInt64)a1b1, (UInt64)(a0b1 >> 64), 0, out c0);
                 UInt64 o1 = AddWithCarry((UInt64)a2b1, (UInt64)(a1b1 >> 64), c0, out c0);
                 UInt64 o2 = AddWithCarry((UInt64)a3b1, (UInt64)(a2b1 >> 64), c0, out c0);
                 UInt64 o3 = AddWithCarry(0, (UInt64)(a3b1 >> 64), c0, out c0);
 
                 UInt128 a1b0 = (UInt128)a[1] * b0, a2b0 = (UInt128)a[2] * b0, a3b0 = (UInt128)a[3] * b0;
-                UInt64 c1, t;
+                nuint c1;
+                UInt64 t;
                 t = AddWithCarry((UInt64)a2b0, (UInt64)(a1b0 >> 64), 0, out c1);
                 o0 = AddWithCarry(o0, t, 0, out c0);
                 t = AddWithCarry((UInt64)a3b0, (UInt64)(a2b0 >> 64), c1, out c1);
@@ -101,7 +107,8 @@ namespace UltimateOrb.Numerics {
                 UInt64 b0 = (UInt64)b, b1 = (UInt64)(b >> 64);
                 UInt128 a1b0 = (UInt128)a[1] * b0, a2b0 = (UInt128)a[2] * b0;
                 UInt128 a0b1 = (UInt128)a[0] * b1, a1b1 = (UInt128)a[1] * b1, a2b1 = (UInt128)a[2] * b1;
-                UInt64 c0, c1, t;
+                nuint c0, c1;
+                UInt64 t;
                 UInt64 o0 = AddWithCarry((UInt64)a1b1, (UInt64)(a0b1 >> 64), 0, out c0);
                 UInt64 o1 = AddWithCarry((UInt64)a2b1, (UInt64)(a1b1 >> 64), c0, out c0);
                 UInt64 o2 = AddWithCarry(0, (UInt64)(a2b1 >> 64), c0, out c0);
@@ -118,8 +125,8 @@ namespace UltimateOrb.Numerics {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void MultiplyHigh(ref InlineArray6<UInt64> o, in InlineArray6<UInt64> b, in InlineArray6<UInt64> a) {
             unchecked {
-                UInt64 c0, c1, t, o0, o1, o2, o3, o4, o5;
-
+                nuint c0, c1;
+                UInt64 t, o0, o1, o2, o3, o4, o5;
                 UInt128 a5b5 = (UInt128)a[5] * b[5], a5b4 = (UInt128)a[5] * b[4],
                         a5b3 = (UInt128)a[5] * b[3], a5b2 = (UInt128)a[5] * b[2],
                         a5b1 = (UInt128)a[5] * b[1], a5b0 = (UInt128)a[5] * b[0];
@@ -328,7 +335,8 @@ namespace UltimateOrb.Numerics {
         internal static void MultiplyAddHigh(ref InlineArray6<UInt64> o, UInt64 a,
                                              in InlineArray6<UInt64> b, in InlineArray6<UInt64> c) {
             unchecked {
-                UInt64 c0, c1, t;
+                nuint c0, c1;
+                UInt64 t;
                 UInt128 ab0 = (UInt128)a * b[0], ab1 = (UInt128)a * b[1];
                 t = AddWithCarry((UInt64)ab1, (UInt64)(ab0 >> 64), 0, out c0);
                 o[0] = AddWithCarry(c[0], t, 0, out c1);
@@ -353,7 +361,8 @@ namespace UltimateOrb.Numerics {
         internal static void MultiplyAddHigh(ref InlineArray3<UInt64> o, UInt64 a,
                                              in InlineArray3<UInt64> b, in InlineArray3<UInt64> c) {
             unchecked {
-                UInt64 c0, c1, t;
+                nuint c0, c1;
+                UInt64 t;
                 UInt128 ab0 = (UInt128)a * b[0], ab1 = (UInt128)a * b[1];
                 t = AddWithCarry((UInt64)ab1, (UInt64)(ab0 >> 64), 0, out c0);
                 o[0] = AddWithCarry(c[0], t, 0, out c1);
@@ -472,20 +481,24 @@ namespace UltimateOrb.Numerics {
 }
 
 namespace UltimateOrb.Numerics {
+#if NET8_0_OR_GREATER
+    using UInt128 = System.UInt128;
+    using Int128 = System.Int128;
+#endif
 
     partial class Binary128Arithmetic {
 
         public static UInt64 Exp(UInt64 lo, UInt64 hi, out UInt64 result_hi)
     => Exp(lo, hi, MidpointRounding.ToEven, out result_hi);
 
-        public static UInt64 Exp(UInt64 lo, UInt64 hi, MidpointRounding rounding, out UInt64 result_hi) {
+        public static UInt64 Exp(UInt64 lo, UInt64 hi, MidpointRounding mode, out UInt64 result_hi) {
             unchecked {
                 // exp(x) > 0 always, so "away from zero" == "toward +inf".
-                if (rounding == MidpointRounding.AwayFromZero)
-                    rounding = MidpointRounding.ToPositiveInfinity;
+                if (mode == MidpointRounding.AwayFromZero)
+                    mode = MidpointRounding.ToPositiveInfinity;
 
-                bool isNearest = rounding == MidpointRounding.ToEven;
-                bool isUp = rounding == MidpointRounding.ToPositiveInfinity;
+                bool isNearest = mode == MidpointRounding.ToEven;
+                bool isUp = mode == MidpointRounding.ToPositiveInfinity;
 
                 UInt64 b1 = hi & 0x7FFFFFFFFFFFFFFFUL;   // sign-stripped
 
@@ -496,7 +509,7 @@ namespace UltimateOrb.Numerics {
                         result_hi = 0x3FFF_0000_0000_0000UL;
                         return 0;
                     }
-                    SetFlagsDummy(FloatingPointExceptionFlags.Inexact);
+                    RaiseExceptionFlagsDummy(FloatingPointExceptionFlags.Inexact);
                     // sa[] = { 1 - 2^-113, 1.0, 1 + 2^-112 }
                     int idx = 1 + (isUp ? 1 : 0) - (((hi >> 63) != 0 && !isNearest) ? 1 : 0);
                     switch (idx) {
@@ -523,7 +536,7 @@ namespace UltimateOrb.Numerics {
                     if (b1 > ((UInt64)0x7FFF << 48) ||
                         (b1 == ((UInt64)0x7FFF << 48) && lo != 0)) {
                         if ((b1 & (1UL << 47)) == 0)
-                            SetFlagsDummy(FloatingPointExceptionFlags.Invalid);
+                            RaiseExceptionFlagsDummy(FloatingPointExceptionFlags.Invalid);
                         result_hi = hi | (1UL << 47);
                         return lo;
                     }
@@ -538,7 +551,7 @@ namespace UltimateOrb.Numerics {
 
                     if ((hi >> 63) == 0 && ua >= xmaxA) {
                         // positive overflow → +∞ (or MaxValue for downward rounding)
-                        SetFlagsDummy(FloatingPointExceptionFlags.Overflow
+                        RaiseExceptionFlagsDummy(FloatingPointExceptionFlags.Overflow
                                     | FloatingPointExceptionFlags.Inexact);
                         if (isNearest || isUp) { result_hi = 0x7FFF_0000_0000_0000UL; return 0; }
                         result_hi = 0x7FFE_FFFF_FFFF_FFFFUL;
@@ -546,7 +559,7 @@ namespace UltimateOrb.Numerics {
                     }
                     if (ua >= xminA) {
                         // negative underflow → 0 (or smallest subnormal for rounding up)
-                        SetFlagsDummy(FloatingPointExceptionFlags.Underflow
+                        RaiseExceptionFlagsDummy(FloatingPointExceptionFlags.Underflow
                                     | FloatingPointExceptionFlags.Inexact);
                         if (isUp) { result_hi = 0; return 1; }
                         result_hi = 0; return 0;
@@ -616,7 +629,7 @@ namespace UltimateOrb.Numerics {
                     resHi >>= 11;
                     el += 16382;
                 } else {
-                    SetFlagsDummy(FloatingPointExceptionFlags.Underflow);
+                    RaiseExceptionFlagsDummy(FloatingPointExceptionFlags.Underflow);
                     if (el > -16499) {
                         int sh = -16372 - el;
                         UInt128 s = (UInt128)(isNearest ? 1 : 0) << sh;
@@ -643,7 +656,7 @@ namespace UltimateOrb.Numerics {
                 UInt128 v = ((UInt128)resHi << 64) | resLo;
                 v += ((UInt128)((UInt64)el << 48) << 64) | rnd;
 
-                SetFlagsDummy(FloatingPointExceptionFlags.Inexact);
+                RaiseExceptionFlagsDummy(FloatingPointExceptionFlags.Inexact);
                 result_hi = (UInt64)(v >> 64);
                 return (UInt64)v;
             }
@@ -651,9 +664,11 @@ namespace UltimateOrb.Numerics {
     }
 }
 
-
-
 namespace UltimateOrb.Numerics {
+#if NET8_0_OR_GREATER
+    using UInt128 = System.UInt128;
+    using Int128 = System.Int128;
+#endif
 
     partial class Binary128Arithmetic {
 
@@ -702,7 +717,7 @@ namespace UltimateOrb.Numerics {
                     rndfail = d <= 16;
                 } else {
                     int s = -16371 - (int)el;
-                    UInt64 k;
+                    nuint k;
                     f[0] = AddWithCarry(f[0], 8, 0, out k);
                     f[1] = AddWithCarry(f[1], 0, k, out k);
                     f[2] = AddWithCarry(f[2], 0, k, out k);
@@ -749,6 +764,10 @@ namespace UltimateOrb.Numerics {
 }
 
 namespace UltimateOrb.Numerics {
+#if NET8_0_OR_GREATER
+    using UInt128 = System.UInt128;
+    using Int128 = System.Int128;
+#endif
 
     partial class Binary128Arithmetic {
 

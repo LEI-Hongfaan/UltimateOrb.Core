@@ -1,13 +1,12 @@
 ﻿#pragma warning disable IDE0049 // Simplify Names
 using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using static UltimateOrb.Utilities.UnsafeParameterHelpers;
 
 namespace UltimateOrb.Numerics {
 
-    public readonly partial struct BasicArithmeticForWellKnownTypesProvider
+    partial struct BasicArithmeticForWellKnownTypesProvider
         : IBinaryIntegerBitwiseAndProvider<BasicArithmeticForWellKnownTypesProvider, UInt32>
         , IBinaryIntegerBitwiseOrProvider<BasicArithmeticForWellKnownTypesProvider, UInt32>
         , IBinaryIntegerBitwiseXorProvider<BasicArithmeticForWellKnownTypesProvider, UInt32>

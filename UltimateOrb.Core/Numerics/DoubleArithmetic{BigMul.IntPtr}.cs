@@ -8,7 +8,6 @@ using System.Text;
 using System.Threading.Tasks;
 using UltimateOrb.Utilities;
 
-#if !STANDALONE_XINTN_LIBRARY
 using static UltimateOrb.Utilities.UnsafeParameterHelpers;
 
 namespace UltimateOrb.Numerics {
@@ -151,4 +150,3 @@ namespace UltimateOrb.Numerics {
         }
     }
 }
-#endif

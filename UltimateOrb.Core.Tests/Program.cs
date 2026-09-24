@@ -220,10 +220,1328 @@ namespace UltimateOrb.Core.Tests {
                 Console.WriteLine($"Reference: {reference}");
             }
         }
+
+public readonly struct TotalOrderIeee754Comparer<T> :
+    IComparer<T>,
+    System.Collections.Generic.    IEqualityComparer<T>,
+    IEquatable<TotalOrderIeee754Comparer<T>>
+    where T : IFloatingPointIeee754<T>, IMinMaxValue<T> {
+            private const int StackAllocLimit = 128;
+            private static readonly bool UseLittleEndian = BitConverter.IsLittleEndian;
+
+            // ─────────────────────────────────────────────────────────────────
+            //  Decimal format constants
+            //
+            //  bias = emax + p − 2,  emax = ILogB(MaxValue),  p = Precision.
+            //    decimal32 : 96  +  7 − 2 =  101
+            //    decimal64 : 384 + 16 − 2 =  398
+            //    decimal128: 6144+ 34 − 2 = 6176
+            //
+            //  For a decimal NaN the written (biased) exponent has its top
+            //  bits fixed as s1111Q, where s is the NaN's sign and Q is the
+            //  signaling bit.  The Q bit therefore sits at
+            //      qPos = exponentBitWidth − 6
+            //  regardless of the format.
+            // ─────────────────────────────────────────────────────────────────
+
+            private static readonly int DecimalBias =
+                T.Radix == 10 ? T.ILogB(T.MaxValue) + FloatingPointIeee754InterchageTypeTraits< T>.Precision - 2 : default;
+
+            private static readonly int QBitPosition =
+                T.Radix == 10 ? T.Zero.GetExponentByteCount() * 8 - 6 : -1;
+
+            // ─────────────────────────────────────────────────────────────────
+            //  IComparer<T>
+            // ─────────────────────────────────────────────────────────────────
+
+            public int Compare(T? x, T? y) {
+                if (x is null) return y is null ? 0 : -1;
+                if (y is null) return 1;
+
+                bool xIsNaN = T.IsNaN(x);
+                bool yIsNaN = T.IsNaN(y);
+                if (xIsNaN || yIsNaN) return CompareNaNs(x, y, xIsNaN, yIsNaN);
+
+                int cmp = x.CompareTo(y);
+                if (cmp != 0) return cmp;
+
+                bool xNeg = T.IsNegative(x);
+                bool yNeg = T.IsNegative(y);
+
+                // §5.10 c.1 / c.2: −0 < +0.
+                if (T.IsZero(x) && T.IsZero(y) && xNeg != yNeg)
+                    return xNeg ? -1 : 1;
+
+                // §5.10 c.3: exponent tie-break is decimal-only.
+                if (T.Radix != 10) return 0;
+
+                int expCmp = ReadExponentAsInt64(x).CompareTo(ReadExponentAsInt64(y));
+                return xNeg ? -expCmp : expCmp;
+            }
+
+            // ─────────────────────────────────────────────────────────────────
+            //  NaN ordering
+            // ─────────────────────────────────────────────────────────────────
+
+            private static int CompareNaNs(T x, T y, bool xIsNaN, bool yIsNaN) {
+                if (xIsNaN && !yIsNaN) return T.IsNegative(x) ? -1 : 1;
+                if (!xIsNaN && yIsNaN) return T.IsNegative(y) ? 1 : -1;
+
+                bool xNeg = T.IsNegative(x);
+                bool yNeg = T.IsNegative(y);
+                if (xNeg != yNeg) return xNeg ? -1 : 1;
+
+                int cmp = T.Radix == 10 ? CompareDecimalNaNs(x, y) : CompareBinaryNaNs(x, y);
+                return xNeg ? -cmp : cmp;
+            }
+
+            // Binary: Q is the MSB of the significand, payload is below it.
+            // Unsigned significand comparison already yields sNaN < qNaN for
+            // +NaN and ascending payload order.  Do not touch.
+            private static int CompareBinaryNaNs(T x, T y)
+                => CompareSignificands(x, y);
+
+            // Decimal: Q is bit QBitPosition of the written exponent; payload
+            // is split between the exponent (below Q) and the significand.
+            private static int CompareDecimalNaNs(T x, T y) {
+                long ex = ReadExponentAsInt64(x);
+                long ey = ReadExponentAsInt64(y);
+
+                long qx = (ex >> QBitPosition) & 1L;
+                long qy = (ey >> QBitPosition) & 1L;
+
+                // §5.10 d.5.ii: signaling < quiet for +NaN.  Q = 1 → signaling.
+                // Reverse the comparison so that qx=1 / qy=0 gives −1.
+                int qCmp = qy.CompareTo(qx);
+                if (qCmp != 0) return qCmp;
+
+                // Same kind: compare high payload bits (below Q) naturally.
+                long mask = (1L << QBitPosition) - 1L;
+                int pCmp = (ex & mask).CompareTo(ey & mask);
+                if (pCmp != 0) return pCmp;
+
+                // Low payload bits live in the significand.
+                return CompareSignificands(x, y);
+            }
+
+            // ─────────────────────────────────────────────────────────────────
+            //  Writers and readers
+            // ─────────────────────────────────────────────────────────────────
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            private static void WriteExponent(T value, Span<byte> dest) {
+                if (UseLittleEndian) value.TryWriteExponentLittleEndian(dest, out _);
+                else value.TryWriteExponentBigEndian(dest, out _);
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            private static void WriteSignificand(T value, Span<byte> dest) {
+                if (UseLittleEndian) value.TryWriteSignificandLittleEndian(dest, out _);
+                else value.TryWriteSignificandBigEndian(dest, out _);
+            }
+
+            private static long ReadExponentAsInt64(T value) {
+                int n = value.GetExponentByteCount();
+                Span<byte> buf = n <= StackAllocLimit ? stackalloc byte[n] : new byte[n];
+                WriteExponent(value, buf);
+                return ReadSignedInteger(buf);
+            }
+
+            private static long ReadSignedInteger(ReadOnlySpan<byte> bytes) {
+                if (bytes.Length == 0) return 0;
+                ulong v = 0;
+                if (UseLittleEndian)
+                    for (int i = bytes.Length - 1; i >= 0; i--) v = (v << 8) | bytes[i];
+                else
+                    for (int i = 0; i < bytes.Length; i++) v = (v << 8) | bytes[i];
+
+                int bits = bytes.Length * 8;
+                if (bits < 64 && (v & (1UL << (bits - 1))) != 0)
+                    v |= ~((1UL << bits) - 1);
+                return unchecked((long)v);
+            }
+
+            private static int CompareSignificands(T x, T y) {
+                int nx = x.GetSignificandByteCount();
+                int ny = y.GetSignificandByteCount();
+                if (nx != ny) return CompareSignificandsDifferentWidth(x, nx, y, ny);
+
+                Span<byte> bx = nx <= StackAllocLimit ? stackalloc byte[nx] : new byte[nx];
+                Span<byte> by = ny <= StackAllocLimit ? stackalloc byte[ny] : new byte[ny];
+                WriteSignificand(x, bx);
+                WriteSignificand(y, by);
+                return CompareUnsignedBytes(bx, by);
+            }
+
+            private static int CompareUnsignedBytes(ReadOnlySpan<byte> a, ReadOnlySpan<byte> b) {
+                if (UseLittleEndian) {
+                    for (int i = a.Length - 1; i >= 0; i--) {
+                        int c = a[i].CompareTo(b[i]);
+                        if (c != 0) return c;
+                    }
+                    return 0;
+                }
+                return a.SequenceCompareTo(b);
+            }
+
+            private static int CompareSignificandsDifferentWidth(T x, int nx, T y, int ny) {
+                int width = Math.Max(nx, ny);
+                byte[] xBuf = new byte[width];
+                byte[] yBuf = new byte[width];
+                if (UseLittleEndian) {
+                    WriteSignificand(x, xBuf.AsSpan(0, nx));
+                    WriteSignificand(y, yBuf.AsSpan(0, ny));
+                } else {
+                    WriteSignificand(x, xBuf.AsSpan(width - nx));
+                    WriteSignificand(y, yBuf.AsSpan(width - ny));
+                }
+                return CompareUnsignedBytes(xBuf, yBuf);
+            }
+
+            // ─────────────────────────────────────────────────────────────────
+            //  IEqualityComparer<T>
+            // ─────────────────────────────────────────────────────────────────
+
+            public bool Equals(T? x, T? y) => Compare(x, y) == 0;
+
+            public int GetHashCode(T obj) {
+                if (obj is null) return 0;
+
+                var hash = new HashCode();
+                bool isNaN = T.IsNaN(obj);
+                hash.Add(T.IsNegative(obj));
+                hash.Add(isNaN);
+                hash.Add(ReadExponentAsInt64(obj));
+
+                if (isNaN) {
+                    int ns = obj.GetSignificandByteCount();
+                    Span<byte> sb = ns <= StackAllocLimit ? stackalloc byte[ns] : new byte[ns];
+                    WriteSignificand(obj, sb);
+                    hash.AddBytes(sb);
+                }
+                return hash.ToHashCode();
+            }
+
+            public bool Equals(TotalOrderIeee754Comparer<T> other) => true;
+            public override bool Equals(object? obj) => obj is TotalOrderIeee754Comparer<T>;
+            public override int GetHashCode() => 0;
+            public static bool operator ==(TotalOrderIeee754Comparer<T> a, TotalOrderIeee754Comparer<T> b) => true;
+            public static bool operator !=(TotalOrderIeee754Comparer<T> a, TotalOrderIeee754Comparer<T> b) => false;
+        }
+
+
+
+        // ─────────────────────────────────────────────────────────────────────────────
+        //  The comparer (same as the corrected version from the previous answer)
+        // ─────────────────────────────────────────────────────────────────────────────
+        public readonly struct TotalOrderIeee754Comparer2<T> :
+     IComparer<T>,
+     System.Collections.Generic.IEqualityComparer<T>,
+     IEquatable<TotalOrderIeee754Comparer2<T>>
+     where T : IFloatingPointIeee754<T> {
+            private const int StackAllocLimit = 128;
+            private static readonly bool UseLittleEndian = BitConverter.IsLittleEndian;
+
+            public int Compare(T? x, T? y) {
+                if (x is null) return y is null ? 0 : -1;
+                if (y is null) return 1;
+
+                bool xIsNaN = T.IsNaN(x);
+                bool yIsNaN = T.IsNaN(y);
+                if (xIsNaN || yIsNaN) return CompareNaNs(x, y, xIsNaN, yIsNaN);
+
+                // Finite: numeric comparison first.  CompareTo canonicalizes
+                // §3.5.2 non-canonical encodings, so a non-canonical value and
+                // its canonical representative both return 0 here.
+                int cmp = x.CompareTo(y);
+                if (cmp != 0) return cmp;
+
+                bool xNeg = T.IsNegative(x);
+                bool yNeg = T.IsNegative(y);
+
+                // §5.10 c.1 / c.2: −0 < +0.
+                if (T.IsZero(x) && T.IsZero(y) && xNeg != yNeg)
+                    return xNeg ? -1 : 1;
+
+                // §5.10 c.3 exponent tie-break is decimal-only: binary formats
+                // have exactly one canonical encoding per datum, so CompareTo
+                // == 0 (after the zero rule) implies identity.
+                if (T.Radix != 10) return 0;
+
+                int expCmp = CompareExponents(x, y);
+                return xNeg ? -expCmp : expCmp;
+            }
+
+            // ─────────────────────────────────────────────────────────────────
+            //  NaN ordering
+            //
+            //  The written significand for a decimal NaN has its MSB forced
+            //  to 1 by UnpackDecimalIeee754, so it cannot distinguish
+            //  signaling from quiet — it only carries the payload.  The
+            //  written exponent for a decimal NaN is derived from the
+            //  combination field, which contains the S/Q bit.
+            //
+            //  For a binary NaN, the significand write is the raw trailing
+            //  significand, whose MSB is the quiet bit (§3.4: 1 = quiet),
+            //  and the exponent write is constant.
+            //
+            //  So we order by exponent first, then by significand.  For
+            //  decimal NaNs the exponent comparison does the S/Q work; for
+            //  binary NaNs the exponent comparison is a no-op and the
+            //  significand comparison does it.
+            // ─────────────────────────────────────────────────────────────────
+
+            private static int CompareNaNs(T x, T y, bool xIsNaN, bool yIsNaN) {
+                // §5.10 d.1 / d.3.
+                if (xIsNaN && !yIsNaN) return T.IsNegative(x) ? -1 : 1;
+                if (!xIsNaN && yIsNaN) return T.IsNegative(y) ? 1 : -1;
+
+                // §5.10 d.5.i: negative sign orders below positive sign.
+                bool xNeg = T.IsNegative(x);
+                bool yNeg = T.IsNegative(y);
+                if (xNeg != yNeg) return xNeg ? -1 : 1;
+
+                int expCmp = CompareExponents(x, y);
+                if (expCmp != 0) {
+                    // Reached only for decimal formats.  The decimal encoding
+                    // places the S/Q bit inside the combination field, and the
+                    // canonical values show it is 1 for signaling (0x7e… vs
+                    // 0x7c…).  The exponent write therefore evaluates larger
+                    // for sNaN.  §5.10 d.5.ii wants signaling below quiet, so
+                    // negate.
+                    //
+                    // §5.10 d.5.iii says payload ordering within the same kind
+                    // and sign is implementation-defined, so the fact that the
+                    // negation also reverses payload order is permitted.
+                    int cmp = T.Radix == 10 ? -expCmp : expCmp;
+                    return xNeg ? -cmp : cmp;
+                }
+
+                // Same exponent write.  Compare significands.
+                //   Binary  — MSB = 1 for quiet (§3.4).  Unsigned order is
+                //             sNaN < qNaN already, and the payload bits below
+                //             the MSB order payloads normally.
+                //   Decimal — MSB is forced to 1 by the decoder, so this
+                //             comparison only orders payloads; the S/Q
+                //             distinction has already been handled above.
+                //             Do not negate: §5.10 d.5.iii leaves payload
+                //             order implementation-defined, and keeping the
+                //             natural order matches the binary behaviour.
+                int sigCmp = CompareSignificands(x, y);
+                return xNeg ? -sigCmp : sigCmp;
+            }
+
+            // ─────────────────────────────────────────────────────────────────
+            //  Writers — native endianness, one group per machine
+            // ─────────────────────────────────────────────────────────────────
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            private static void WriteExponent(T value, Span<byte> dest) {
+                if (UseLittleEndian) value.TryWriteExponentLittleEndian(dest, out _);
+                else value.TryWriteExponentBigEndian(dest, out _);
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            private static void WriteSignificand(T value, Span<byte> dest) {
+                if (UseLittleEndian) value.TryWriteSignificandLittleEndian(dest, out _);
+                else value.TryWriteSignificandBigEndian(dest, out _);
+            }
+
+            // ─────────────────────────────────────────────────────────────────
+            //  Exponent / significand comparison
+            // ─────────────────────────────────────────────────────────────────
+
+            private static int CompareExponents(T x, T y) {
+                int nx = x.GetExponentByteCount();
+                int ny = y.GetExponentByteCount();
+                if (nx == ny) {
+                    Span<byte> bx = nx <= StackAllocLimit ? stackalloc byte[nx] : new byte[nx];
+                    Span<byte> by = ny <= StackAllocLimit ? stackalloc byte[ny] : new byte[ny];
+                    WriteExponent(x, bx);
+                    WriteExponent(y, by);
+                    return CompareSignedBytes(bx, by);
+                }
+                return CompareExponentsDifferentWidth(x, nx, y, ny);
+            }
+
+            private static int CompareSignificands(T x, T y) {
+                int nx = x.GetSignificandByteCount();
+                int ny = y.GetSignificandByteCount();
+                if (nx == ny) {
+                    Span<byte> bx = nx <= StackAllocLimit ? stackalloc byte[nx] : new byte[nx];
+                    Span<byte> by = ny <= StackAllocLimit ? stackalloc byte[ny] : new byte[ny];
+                    WriteSignificand(x, bx);
+                    WriteSignificand(y, by);
+                    return CompareUnsignedBytes(bx, by);
+                }
+                return CompareSignificandsDifferentWidth(x, nx, y, ny);
+            }
+
+            // ─────────────────────────────────────────────────────────────────
+            //  Integer comparisons over byte spans
+            // ─────────────────────────────────────────────────────────────────
+
+            private static int CompareSignedBytes(ReadOnlySpan<byte> a, ReadOnlySpan<byte> b) {
+                int signA = UseLittleEndian ? (a[^1] >> 7) : (a[0] >> 7);
+                int signB = UseLittleEndian ? (b[^1] >> 7) : (b[0] >> 7);
+                if (signA != signB) return signB - signA;
+
+                if (UseLittleEndian) {
+                    for (int i = a.Length - 1; i >= 0; i--) {
+                        int c = a[i].CompareTo(b[i]);
+                        if (c != 0) return c;
+                    }
+                    return 0;
+                }
+                return a.SequenceCompareTo(b);
+            }
+
+            private static int CompareUnsignedBytes(ReadOnlySpan<byte> a, ReadOnlySpan<byte> b) {
+                if (UseLittleEndian) {
+                    for (int i = a.Length - 1; i >= 0; i--) {
+                        int c = a[i].CompareTo(b[i]);
+                        if (c != 0) return c;
+                    }
+                    return 0;
+                }
+                return a.SequenceCompareTo(b);
+            }
+
+            // ─────────────────────────────────────────────────────────────────
+            //  Different-width fallbacks (dead code for well-formed T)
+            // ─────────────────────────────────────────────────────────────────
+
+            private static int CompareExponentsDifferentWidth(T x, int nx, T y, int ny) {
+                int width = Math.Max(nx, ny);
+                byte[] xBuf = new byte[width];
+                byte[] yBuf = new byte[width];
+
+                if (UseLittleEndian) {
+                    WriteExponent(x, xBuf.AsSpan(0, nx));
+                    WriteExponent(y, yBuf.AsSpan(0, ny));
+                    xBuf.AsSpan(nx).Fill((byte)((sbyte)xBuf[nx - 1] >> 7));
+                    yBuf.AsSpan(ny).Fill((byte)((sbyte)yBuf[ny - 1] >> 7));
+                } else {
+                    WriteExponent(x, xBuf.AsSpan(width - nx));
+                    WriteExponent(y, yBuf.AsSpan(width - ny));
+                    xBuf.AsSpan(0, width - nx).Fill((byte)((sbyte)xBuf[width - nx] >> 7));
+                    yBuf.AsSpan(0, width - ny).Fill((byte)((sbyte)yBuf[width - ny] >> 7));
+                }
+                return CompareSignedBytes(xBuf, yBuf);
+            }
+
+            private static int CompareSignificandsDifferentWidth(T x, int nx, T y, int ny) {
+                int width = Math.Max(nx, ny);
+                byte[] xBuf = new byte[width];
+                byte[] yBuf = new byte[width];
+                if (UseLittleEndian) {
+                    WriteSignificand(x, xBuf.AsSpan(0, nx));
+                    WriteSignificand(y, yBuf.AsSpan(0, ny));
+                } else {
+                    WriteSignificand(x, xBuf.AsSpan(width - nx));
+                    WriteSignificand(y, yBuf.AsSpan(width - ny));
+                }
+                return CompareUnsignedBytes(xBuf, yBuf);
+            }
+
+            // ─────────────────────────────────────────────────────────────────
+            //  IEqualityComparer<T>
+            // ─────────────────────────────────────────────────────────────────
+
+            public bool Equals(T? x, T? y) => Compare(x, y) == 0;
+
+            public int GetHashCode(T obj) {
+                if (obj is null) return 0;
+
+                var hash = new HashCode();
+                bool isNaN = T.IsNaN(obj);
+                hash.Add(T.IsNegative(obj));
+                hash.Add(isNaN);
+
+                // The exponent write is canonical for every finite encoding:
+                // non-canonical values (§3.5.2) share the exponent of their
+                // canonical representative, and Compare already reports them
+                // equal via CompareTo.
+                int ne = obj.GetExponentByteCount();
+                Span<byte> eb = ne <= StackAllocLimit ? stackalloc byte[ne] : new byte[ne];
+                WriteExponent(obj, eb);
+                hash.AddBytes(eb);
+
+                // Include the significand only for NaN.  For a decimal NaN the
+                // significand carries the payload; for a binary NaN it carries
+                // the payload and the quiet bit.  For finite values, omitting
+                // it is essential: a non-canonical encoding's raw coefficient
+                // is zeroed by the decoder but might still differ from a
+                // canonical encoding's bytes on some implementations, and
+                // Compare reports the two as equal.
+                if (isNaN) {
+                    int ns = obj.GetSignificandByteCount();
+                    Span<byte> sb = ns <= StackAllocLimit ? stackalloc byte[ns] : new byte[ns];
+                    WriteSignificand(obj, sb);
+                    hash.AddBytes(sb);
+                }
+
+                return hash.ToHashCode();
+            }
+
+            public bool Equals(TotalOrderIeee754Comparer2<T> other) => true;
+            public override bool Equals(object? obj) => obj is TotalOrderIeee754Comparer2<T>;
+            public override int GetHashCode() => 0;
+            public static bool operator ==(TotalOrderIeee754Comparer2<T> a, TotalOrderIeee754Comparer2<T> b) => true;
+            public static bool operator !=(TotalOrderIeee754Comparer2<T> a, TotalOrderIeee754Comparer2<T> b) => false;
+        }
+
+        private static int _passed;
+        private static int _failed;
+
+        // ─────────────────────────────────────────────────────────────────────────────
+        //  Shared test harness
+        // ─────────────────────────────────────────────────────────────────────────────
+        public static class TestHarness {
+            public static int Passed;
+            public static int Failed;
+
+            public static void Assert(bool condition, string message) {
+                if (condition) { Passed++; } else {
+                    Failed++;
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine($"    FAIL: {message}");
+                    Console.ResetColor();
+                }
+            }
+
+            public static void Reset() {
+                Passed = 0;
+                Failed = 0;
+            }
+
+            public static void PrintSummary(string typeName) {
+                Console.WriteLine();
+                Console.ForegroundColor = Failed == 0 ? ConsoleColor.Green : ConsoleColor.Red;
+                Console.WriteLine($"  === {typeName}: {Passed} passed, {Failed} failed ===");
+                Console.ResetColor();
+            }
+        }
+
+        // ─────────────────────────────────────────────────────────────────────────────
+        //  Decimal-format test suite (works for any IFloatingPointIeee754 decimal type)
+        // ─────────────────────────────────────────────────────────────────────────────
+        public static class Decimal128TestSuite<T>
+            where T : IFloatingPointIeee754<T> {
+            public static void Run(string typeName) {
+                Console.WriteLine($"\n═══════════════════════════════════════════════════════════════");
+                Console.WriteLine($"  {typeName}");
+                Console.WriteLine($"═══════════════════════════════════════════════════════════════\n");
+
+                TestHarness.Reset();
+                var cmp = new TotalOrderIeee754Comparer<T>();
+                var eq = (System.Collections.Generic.IEqualityComparer<T>)cmp;
+
+                // ─────────────────────────────────────────────────────────────────
+                // Construct values through Parse.  Decimal formats support
+                // cohort-distinguishing literals: "1.0" and "1.00" have the same
+                // numeric value but different quantum exponents.
+                // ─────────────────────────────────────────────────────────────────
+
+                // Non-NaN canonical values
+                T posInf = T.Parse("∞", null);
+                T negInf = T.Parse("-∞", null);
+
+                T posOne = T.Parse("1", null);
+                T negOne = T.Parse("-1", null);
+
+                T posTwo = T.Parse("2", null);
+                T negTwo = T.Parse("-2", null);
+
+                // Cohort pairs: same numeric value, different exponent
+                T posOneC1 = T.Parse("1.0", null);     // exponent -1
+                T posOneC2 = T.Parse("1.00", null);    // exponent -2
+                T negOneC1 = T.Parse("-1.0", null);
+                T negOneC2 = T.Parse("-1.00", null);
+
+                // Zero cohorts
+                T posZero = T.Parse("0", null);
+                T negZero = T.Parse("-0", null);
+                T posZeroC1 = T.Parse("0.0", null);
+                T posZeroC2 = T.Parse("0.00", null);
+                T negZeroC1 = T.Parse("-0.0", null);
+                T negZeroC2 = T.Parse("-0.00", null);
+
+                // Sign- and kind-specified NaNs via Fortran-style syntax.
+                // Explicit '+' or '-' is required; bare "NaN" has an unspecified sign.
+                T posQNaN1 = typeof(T)== typeof(System.Numerics.Decimal128) ?
+                    (T)(object)System.Numerics.Decimal128.DecodeBinary(Unsafe.BitCast<Decimal128Bid, UInt128>(Decimal128Bid.Parse("+qNaN(1)"))) :
+                    T.Parse("+qNaN(1)", null);
+                T posQNaN2 = typeof(T) == typeof(System.Numerics.Decimal128) ? (T)(object)System.Numerics.Decimal128.DecodeBinary(Unsafe.BitCast<Decimal128Bid, UInt128>(Decimal128Bid.Parse("+qNaN(2)"))) : T.Parse("+qNaN(2)", null);
+                T posSNaN1 = typeof(T) == typeof(System.Numerics.Decimal128) ? (T)(object)System.Numerics.Decimal128.DecodeBinary(Unsafe.BitCast<Decimal128Bid, UInt128>(Decimal128Bid.Parse("+sNaN(1)"))) : T.Parse("+sNaN(1)", null);
+                T posSNaN2 = typeof(T) == typeof(System.Numerics.Decimal128) ? (T)(object)System.Numerics.Decimal128.DecodeBinary(Unsafe.BitCast<Decimal128Bid, UInt128>(Decimal128Bid.Parse("+sNaN(2)"))) : T.Parse("+sNaN(2)", null);
+                T negQNaN1 = typeof(T) == typeof(System.Numerics.Decimal128) ? (T)(object)System.Numerics.Decimal128.DecodeBinary(Unsafe.BitCast<Decimal128Bid, UInt128>(Decimal128Bid.Parse("-qNaN(1)"))) : T.Parse("-qNaN(1)", null);
+                T negQNaN2 = typeof(T) == typeof(System.Numerics.Decimal128) ? (T)(object)System.Numerics.Decimal128.DecodeBinary(Unsafe.BitCast<Decimal128Bid, UInt128>(Decimal128Bid.Parse("-qNaN(2)"))) : T.Parse("-qNaN(2)", null);
+                T negSNaN1 = typeof(T) == typeof(System.Numerics.Decimal128) ? (T)(object)System.Numerics.Decimal128.DecodeBinary(Unsafe.BitCast<Decimal128Bid, UInt128>(Decimal128Bid.Parse("-sNaN(1)"))) : T.Parse("-sNaN(1)", null);
+                T negSNaN2 = typeof(T) == typeof(System.Numerics.Decimal128) ? (T)(object)System.Numerics.Decimal128.DecodeBinary(Unsafe.BitCast<Decimal128Bid, UInt128>(Decimal128Bid.Parse("-sNaN(2)"))) : T.Parse("-sNaN(2)", null);
+
+                // Sanity: signs are as intended
+                TestHarness.Assert(!T.IsNegative(posQNaN1), "posQNaN1 has positive sign");
+                TestHarness.Assert(T.IsNegative(negQNaN1), "negQNaN1 has negative sign");
+                TestHarness.Assert(!T.IsNegative(posSNaN1), "posSNaN1 has positive sign");
+                TestHarness.Assert(T.IsNegative(negSNaN1), "negSNaN1 has negative sign");
+                TestHarness.Assert(T.IsNaN(posQNaN1), "posQNaN1 is NaN");
+                TestHarness.Assert(T.IsNaN(negSNaN1), "negSNaN1 is NaN");
+
+                // ─────────────────────────────────────────────────────────────────
+                // 1. Numeric ordering
+                // ─────────────────────────────────────────────────────────────────
+                Console.WriteLine("1. Numeric ordering");
+                TestHarness.Assert(cmp.Compare(negInf, negTwo) < 0, "-Inf < -2");
+                TestHarness.Assert(cmp.Compare(negTwo, negOne) < 0, "-2 < -1");
+                TestHarness.Assert(cmp.Compare(negOne, negZero) < 0, "-1 < -0");
+                TestHarness.Assert(cmp.Compare(negZero, posZero) < 0, "-0 < +0");
+                TestHarness.Assert(cmp.Compare(posZero, posOne) < 0, "+0 < +1");
+                TestHarness.Assert(cmp.Compare(posOne, posTwo) < 0, "+1 < +2");
+                TestHarness.Assert(cmp.Compare(posTwo, posInf) < 0, "+2 < +Inf");
+
+                // ─────────────────────────────────────────────────────────────────
+                // 2. Reflexivity and antisymmetry
+                // ─────────────────────────────────────────────────────────────────
+                Console.WriteLine("2. Reflexivity & antisymmetry");
+                var coreValues = new[]
+                {
+            negQNaN2, negQNaN1, negSNaN2, negSNaN1,
+            negInf, negTwo, negOne, negZero,
+            posZero, posOne, posTwo, posInf,
+            posSNaN1, posSNaN2, posQNaN1, posQNaN2
+        };
+                foreach (var v in coreValues) {
+                    TestHarness.Assert(cmp.Compare(v, v) == 0, $"Compare({v}, {v}) == 0");
+                    TestHarness.Assert(eq.Equals(v, v), $"Equals({v}, {v})");
+                }
+                for (int i = 0; i < coreValues.Length; i++)
+                    for (int j = 0; j < coreValues.Length; j++) {
+                        int ij = Math.Sign(cmp.Compare(coreValues[i], coreValues[j]));
+                        int ji = Math.Sign(cmp.Compare(coreValues[j], coreValues[i]));
+                        TestHarness.Assert(ij == -ji, $"antisymmetry [{coreValues[i]}, {coreValues[j]}]");
+                    }
+
+                // ─────────────────────────────────────────────────────────────────
+                // 3. Signed zeros (§5.10 c.1 / c.2)
+                // ─────────────────────────────────────────────────────────────────
+                Console.WriteLine("3. Signed zeros");
+                TestHarness.Assert(cmp.Compare(negZero, posZero) < 0, "totalOrder(-0, +0) is true");
+                TestHarness.Assert(cmp.Compare(posZero, negZero) > 0, "totalOrder(+0, -0) is false");
+                TestHarness.Assert(!eq.Equals(negZero, posZero), "-0 and +0 not equal under totalOrder");
+                TestHarness.Assert(!eq.Equals(posZero, negZero), "+0 and -0 not equal under totalOrder");
+
+                // ─────────────────────────────────────────────────────────────────
+                // 4. Decimal cohorts (§5.10 c.3) — the key decimal-specific test
+                // ─────────────────────────────────────────────────────────────────
+                Console.WriteLine("4. Decimal cohorts (exponent tie-break)");
+
+                // Positive: smaller exponent orders first (1.00 < 1.0)
+                TestHarness.Assert(cmp.Compare(posOneC2, posOneC1) < 0, "+1.00 < +1.0 (exponent -2 < -1)");
+                TestHarness.Assert(cmp.Compare(posOneC1, posOneC2) > 0, "+1.0 > +1.00");
+                TestHarness.Assert(!eq.Equals(posOneC2, posOneC1), "+1.00 and +1.0 are not equal under totalOrder");
+
+                // Negative: larger exponent orders first (-1.0 < -1.00)
+                TestHarness.Assert(cmp.Compare(negOneC1, negOneC2) < 0, "-1.0 < -1.00 (exponent -1 > -2)");
+                TestHarness.Assert(cmp.Compare(negOneC2, negOneC1) > 0, "-1.00 > -1.0");
+                TestHarness.Assert(!eq.Equals(negOneC1, negOneC2), "-1.0 and -1.00 are not equal under totalOrder");
+
+                // Zero cohorts: same-sign zeros still distinguished by exponent
+                TestHarness.Assert(cmp.Compare(posZeroC2, posZeroC1) < 0, "+0.00 < +0.0");
+                TestHarness.Assert(cmp.Compare(negZeroC1, negZeroC2) < 0, "-0.0 < -0.00");
+                TestHarness.Assert(!eq.Equals(posZeroC2, posZeroC1), "+0.00 and +0.0 not equal");
+                TestHarness.Assert(!eq.Equals(negZeroC1, negZeroC2), "-0.0 and -0.00 not equal");
+
+                // Cross-sign zero cohorts: sign rule takes precedence over exponent
+                TestHarness.Assert(cmp.Compare(negZeroC2, posZeroC1) < 0, "-0.00 < +0.0 (sign first)");
+
+                // ─────────────────────────────────────────────────────────────────
+                // 5. NaN ordering (§5.10 d)
+                // ─────────────────────────────────────────────────────────────────
+                Console.WriteLine("5. NaN ordering");
+
+                // d.1: -NaN below every non-NaN
+                TestHarness.Assert(cmp.Compare(negQNaN1, negInf) < 0, "-qNaN < -Inf");
+                TestHarness.Assert(cmp.Compare(negSNaN1, negOne) < 0, "-sNaN < -1");
+                TestHarness.Assert(cmp.Compare(negQNaN1, negZero) < 0, "-qNaN < -0");
+                TestHarness.Assert(cmp.Compare(negQNaN1, posZero) < 0, "-qNaN < +0");
+                TestHarness.Assert(cmp.Compare(negQNaN1, posInf) < 0, "-qNaN < +Inf");
+
+                // d.3: +NaN above every non-NaN
+                TestHarness.Assert(cmp.Compare(posQNaN1, negInf) > 0, "+qNaN > -Inf");
+                TestHarness.Assert(cmp.Compare(posSNaN1, posOne) > 0, "+sNaN > +1");
+                TestHarness.Assert(cmp.Compare(posQNaN1, posInf) > 0, "+qNaN > +Inf");
+
+                // d.5.i: negative sign orders below positive sign
+                TestHarness.Assert(cmp.Compare(negQNaN1, posQNaN1) < 0, "-qNaN < +qNaN");
+                TestHarness.Assert(cmp.Compare(negSNaN1, posSNaN1) < 0, "-sNaN < +sNaN");
+                TestHarness.Assert(cmp.Compare(negQNaN1, posSNaN1) < 0, "-qNaN < +sNaN");
+                TestHarness.Assert(cmp.Compare(negSNaN1, posQNaN1) < 0, "-sNaN < +qNaN");
+
+                // d.5.ii: for +NaN, signaling < quiet; for -NaN, quiet < signaling
+                TestHarness.Assert(cmp.Compare(posSNaN1, posQNaN1) < 0, "+sNaN < +qNaN");
+                TestHarness.Assert(cmp.Compare(posQNaN1, posSNaN1) > 0, "+qNaN > +sNaN");
+                TestHarness.Assert(cmp.Compare(negQNaN1, negSNaN1) < 0, "-qNaN < -sNaN");
+                TestHarness.Assert(cmp.Compare(negSNaN1, negQNaN1) > 0, "-sNaN > -qNaN");
+
+                // Payload ordering within same kind and sign
+                TestHarness.Assert(cmp.Compare(posSNaN1, posSNaN2) < 0, "+sNaN1 < +sNaN2 (payload)");
+                TestHarness.Assert(cmp.Compare(posQNaN1, posQNaN2) < 0, "+qNaN1 < +qNaN2 (payload)");
+                TestHarness.Assert(cmp.Compare(negSNaN1, negSNaN2) > 0, "-sNaN1 > -sNaN2 (payload, reversed)");
+                TestHarness.Assert(cmp.Compare(negQNaN1, negQNaN2) > 0, "-qNaN1 > -qNaN2 (payload, reversed)");
+
+                // Bitwise-identical NaNs are equal
+                TestHarness.Assert(cmp.Compare(posQNaN1, posQNaN1) == 0, "+qNaN1 == +qNaN1");
+                TestHarness.Assert(cmp.Compare(negSNaN1, negSNaN1) == 0, "-sNaN1 == -sNaN1");
+
+                // Distinct NaNs are not equal
+                TestHarness.Assert(!eq.Equals(posQNaN1, posQNaN2), "+qNaN1 != +qNaN2 (payload)");
+                TestHarness.Assert(!eq.Equals(posSNaN1, posQNaN1), "+sNaN1 != +qNaN1 (kind)");
+                TestHarness.Assert(!eq.Equals(negQNaN1, negSNaN1), "-qNaN1 != -sNaN1 (kind)");
+                TestHarness.Assert(!eq.Equals(posQNaN1, negQNaN1), "+qNaN1 != -qNaN1 (sign)");
+
+                // ─────────────────────────────────────────────────────────────────
+                // 6. Transitivity and totality over the full chain
+                // ─────────────────────────────────────────────────────────────────
+                Console.WriteLine("6. Transitivity & totality");
+                for (int i = 0; i < coreValues.Length; i++)
+                    for (int j = i + 1; j < coreValues.Length; j++)
+                        for (int k = j + 1; k < coreValues.Length; k++) {
+                            int ij = cmp.Compare(coreValues[i], coreValues[j]);
+                            int jk = cmp.Compare(coreValues[j], coreValues[k]);
+                            int ik = cmp.Compare(coreValues[i], coreValues[k]);
+                            TestHarness.Assert(ij < 0 && jk < 0 ? ik < 0 : true,
+                                $"transitivity [{coreValues[i]}, {coreValues[j]}, {coreValues[k]}]");
+                        }
+                for (int i = 0; i < coreValues.Length; i++)
+                    for (int j = 0; j < coreValues.Length; j++) {
+                        int c = Math.Sign(cmp.Compare(coreValues[i], coreValues[j]));
+                        TestHarness.Assert(c is -1 or 0 or 1, $"totality [{coreValues[i]}, {coreValues[j]}]");
+                    }
+
+                // ─────────────────────────────────────────────────────────────────
+                // 7. Interface consistency
+                // ─────────────────────────────────────────────────────────────────
+                Console.WriteLine("7. Interface consistency");
+                TestHarness.Assert(eq.Equals(negOne, negOne), "Equals(-1, -1)");
+                TestHarness.Assert(!eq.Equals(negOne, posOne), "!Equals(-1, +1)");
+                TestHarness.Assert(eq.Equals(posQNaN1, posQNaN1), "Equals(+qNaN1, +qNaN1)");
+                TestHarness.Assert(eq.Equals(negSNaN1, negSNaN1), "Equals(-sNaN1, -sNaN1)");
+
+                TestHarness.Assert(eq.GetHashCode(negOne) == eq.GetHashCode(negOne), "hash(-1) == hash(-1)");
+                TestHarness.Assert(eq.GetHashCode(posQNaN1) == eq.GetHashCode(posQNaN1),
+                    "hash(+qNaN1) == hash(+qNaN1)");
+                TestHarness.Assert(eq.GetHashCode(posOneC1) == eq.GetHashCode(posOneC1),
+                    "hash(+1.0) == hash(+1.0)");
+                TestHarness.Assert(eq.GetHashCode(posOneC1) != eq.GetHashCode(posOneC2),
+                    "hash(+1.0) != hash(+1.00) — cohorts hash differently");
+
+                var set = new HashSet<T>(eq);
+                foreach (var v in coreValues) set.Add(v);
+                TestHarness.Assert(set.Count == coreValues.Length,
+                    $"HashSet has {coreValues.Length} distinct values (got {set.Count})");
+
+                // ─────────────────────────────────────────────────────────────────
+                // 8. Sorting the full chain
+                // ─────────────────────────────────────────────────────────────────
+                Console.WriteLine("8. Sorting");
+                var shuffled = new[]
+                {
+            posQNaN2, negTwo, posSNaN1, posZero, negQNaN1, negInf,
+            posOne, negSNaN2, negZero, posInf,
+            negQNaN2, posTwo, negSNaN1, negOne, posQNaN1, posSNaN2
+        };
+                Array.Sort(shuffled, cmp);
+                for (int i = 0; i < coreValues.Length; i++) {
+                    TestHarness.Assert(cmp.Compare(shuffled[i], coreValues[i]) == 0,
+                        $"sorted[{i}] == {coreValues[i]} (got {shuffled[i]})");
+                }
+
+                // ─────────────────────────────────────────────────────────────────
+                // 9. Parser round-trips
+                // ─────────────────────────────────────────────────────────────────
+                Console.WriteLine("9. Parser round-trips");
+                if (typeof(T) != typeof(System.Numerics.Decimal128)) {
+                    TestHarness.Assert(cmp.Compare(T.Parse("+qNaN(1)", null), posQNaN1) == 0,
+                        "Parse(\"+NaN(Q1)\") == posQNaN1");
+                    TestHarness.Assert(cmp.Compare(T.Parse("-sNaN(1)", null), negSNaN1) == 0,
+                        "Parse(\"-NaN(S1)\") == negSNaN1");
+                }
+                TestHarness.Assert(cmp.Compare(T.Parse("1.00", null), posOneC2) == 0,
+                    "Parse(\"1.00\") == posOneC2");
+
+                // CopySign preserves NaN kind and payload
+                TestHarness.Assert(cmp.Compare(T.CopySign(posSNaN1, -T.One), negSNaN1) == 0,
+                    "CopySign(+sNaN1, -1) == -sNaN1");
+                TestHarness.Assert(cmp.Compare(T.CopySign(negQNaN2, T.One), posQNaN2) == 0,
+                    "CopySign(-qNaN2, +1) == +qNaN2");
+
+                TestHarness.PrintSummary(typeName);
+            }
+        }
+
+
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private static int Main(string[] args) {
             {
-                var c = new TotalOrderIeee754Comparer<Decimal128Bid>();
+                Console.WriteLine($"Decimal128Bid.MaxValue = {Decimal128Bid.MaxValue}");
+                Console.WriteLine($"Decimal128Bid.MaxValue = {Decimal128Bid.ILogB(Decimal128Bid.MaxValue)}");
+
+
+            }
+
+            {
+                Console.WriteLine($"Scale10(0, -7) = {Decimal128Bid.Scale10(0, -7)}");
+                Console.WriteLine($"Scale10(0, +7) = {Decimal128Bid.Scale10(0, +7)}");
+                Console.WriteLine($"Scale10(0, +7000) = {Decimal128Bid.Scale10(0, +7000)}");
+                Console.WriteLine($"Scale10(0, -7000) = {Decimal128Bid.Scale10(0, -7000)}");
+
+                Console.WriteLine($"IsNegative(-0) = {Decimal128Bid.IsNegative(Decimal128Bid.Parse("-0"))}");
+
+                Decimal128Bid[] testData1 = [
+                    Decimal128Bid.Parse("+qNaN(0x4000000000000000000000000009)"),
+                    Decimal128Bid.Parse("+qNaN(0X3ffffffffffffffffffffffffffF)"),
+                    Decimal128Bid.Parse("sNaN(111)"),
+                    Decimal128Bid.Parse("qNaN(222)"),
+                    Decimal128Bid.Parse("NaN(333)"),
+                    Decimal128Bid.Parse("+sNaN(444)"),
+                    Decimal128Bid.Parse("+qNaN(555)"),
+                    Decimal128Bid.Parse("+NaN(666)"),
+                    Decimal128Bid.Parse("-sNaN(777)"),
+                    Decimal128Bid.Parse("-qNaN(888)"),
+                    Decimal128Bid.Parse("-NaN(999)"),
+
+                    Decimal128Bid.Parse("+inF"),
+                    Decimal128Bid.Parse("-∞"),
+                    Decimal128Bid.Parse("Infinity"),
+                    Decimal128Bid.Parse("1919810"),
+                    Decimal128Bid.ToCoarsestCohort(Decimal128Bid.Parse("1919810")),
+                    Decimal128Bid.ToFinestCohort(Decimal128Bid.Parse("1919810")),
+
+                    Decimal128Bid.Parse("-10100"),
+                    Decimal128Bid.ToCoarsestCohort(Decimal128Bid.Parse("-10100")),
+                    Decimal128Bid.ToFinestCohort(Decimal128Bid.Parse("-10100")),
+                    Decimal128Bid.ToCohort(Decimal128Bid.Parse("-10100"), qExponent: 1),
+                    Decimal128Bid.Pi,
+                    Decimal128Bid.Tau,
+                    Decimal128Bid.Epsilon,
+                    -Decimal128Bid.Epsilon,
+                    -Decimal128Bid.AdditiveIdentity,
+                    Decimal128Bid.AdditiveIdentity,
+                    Decimal128Bid.BitDecrement(Decimal128Bid.Epsilon),
+                    Decimal128Bid.BitIncrement(Decimal128Bid.Epsilon),
+                    Decimal128Bid.BitDecrement(-Decimal128Bid.Epsilon),
+                    Decimal128Bid.BitIncrement(-Decimal128Bid.Epsilon),
+
+                    Decimal128Bid.Parse("-0"),
+                    Decimal128Bid.Parse("+0"),
+                    Decimal128Bid.Parse("-.0E-9000"),
+
+                    Decimal128Bid.Parse("-∞"),
+                    Decimal128Bid.Parse("Infinity"), ];
+
+                foreach (var item in testData1.OrderBy(Decimal128Extensions.TotalOrderIeee754_192BitsKeySelector)) {
+                    Console.Write(item.ToStringWithSignAndNaNPayload());
+                    Console.Write(' ');
+                }
+                Console.WriteLine();
+                foreach (var item in testData1.OrderBy(x => x, new TotalOrderIeee754Comparer<Decimal128Bid>())) {
+                    Console.Write(item.ToStringWithSignAndNaNPayload());
+                    Console.Write(' ');
+                }
+                Console.WriteLine();
+                foreach (var item in testData1.OrderBy(x => x)) {
+                    Console.Write(item.ToStringWithSignAndNaNPayload());
+                    Console.Write(' ');
+                }
+                Console.WriteLine();
+                foreach (var item in testData1.OrderBy(Decimal128Extensions.TotalOrderDefaultSystemInt128KeySelector)) {
+                    Console.Write(item.ToStringWithSignAndNaNPayload());
+                    Console.Write(' ');
+                }
+                Console.WriteLine();
+            }
+            {
+                Console.WriteLine("╔═══════════════════════════════════════════════════════════════╗");
+                Console.WriteLine("║  IEEE 754 totalOrder tests for Decimal128Bid and Decimal128Dpd ║");
+                Console.WriteLine("╚═══════════════════════════════════════════════════════════════╝");
+
+                Decimal128TestSuite<System.Numerics.Decimal128>.Run("System.Numerics.Decimal128");
+                Decimal128TestSuite<Decimal128Bid>.Run("Decimal128Bid");
+                Decimal128TestSuite<Decimal128Dpd>.Run("Decimal128Dpd");
+
+                // Overall summary
+                Console.WriteLine();
+                int totalPassed = TestHarness.Passed; // only last run's counts; use counters per type if needed
+                Console.WriteLine("Done. Check the per-type summaries above.");
+            }
+            {
+
+
+                static void Assert(bool condition, string message) {
+                    if (condition) { _passed++; } else {
+                        _failed++;
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine($"  FAIL: {message}");
+                        Console.ResetColor();
+                    }
+                }
+
+                Console.WriteLine("=== UltimateOrb.Quadruple totalOrder tests ===\n");
+
+                var cmp = new System.Numerics.TotalOrderIeee754Comparer<Quadruple>();
+                var eq = (System.Collections.Generic.IEqualityComparer<Quadruple>)cmp;
+                // -----------------------------------------------------------------
+                // Canonical values.
+                //
+                // The Fortran-style NaN literal has THREE independent axes:
+                //
+                //     sign     kind       payload
+                //     ----     ----       -------
+                //     '+'/'-'  'Q'/'S'/∅  decimal digits
+                //
+                // If the sign is omitted, the sign bit is UNSPECIFIED — it may be
+                // positive on one platform and negative on another.  So every NaN
+                // we construct here is written with an explicit leading '+' or '-'.
+                // The same rule applies to bare "NaN": always write "+NaN" or
+                // "-NaN" when the sign matters.
+                //
+                // Grammar (case-insensitive):
+                //     [+|-] NaN ( [Q|S] digits? )
+                // Examples:
+                //     +NaN           quiet, positive, default payload
+                //     +NaN(Q1)       quiet, positive, payload 1
+                //     -NaN(S2)       signaling, negative, payload 2
+                // -----------------------------------------------------------------
+                Quadruple posInf = Quadruple.PositiveInfinity;
+                Quadruple negInf = Quadruple.NegativeInfinity;
+
+                // Quiet NaNs, positive sign.
+                Quadruple posQNaN1 = Quadruple.Parse("+NaN(Q1)");
+                Quadruple posQNaN2 = Quadruple.Parse("+NaN(Q2)");
+
+                // Signaling NaNs, positive sign.
+                Quadruple posSNaN1 = Quadruple.Parse("+NaN(S1)");
+                Quadruple posSNaN2 = Quadruple.Parse("+NaN(S2)");
+
+                // Quiet and signaling NaNs, negative sign.
+                Quadruple negQNaN1 = Quadruple.Parse("-NaN(Q1)");
+                Quadruple negQNaN2 = Quadruple.Parse("-NaN(Q2)");
+                Quadruple negSNaN1 = Quadruple.Parse("-NaN(S1)");
+                Quadruple negSNaN2 = Quadruple.Parse("-NaN(S2)");
+
+                Quadruple posZero = Quadruple.Zero;
+                Quadruple negZero = Quadruple.NegativeZero;
+
+                Quadruple posOne = Quadruple.One;
+                Quadruple negOne = -Quadruple.One;
+                Quadruple posTwo = Quadruple.One + Quadruple.One;
+                Quadruple negTwo = -posTwo;
+
+                // Sanity: every constructed NaN really has the intended sign.
+                Assert(Quadruple.IsNaN(posQNaN1), "posQNaN1 is NaN");
+                Assert(!Quadruple.IsNegative(posQNaN1), "posQNaN1 has positive sign");
+                Assert(Quadruple.IsNaN(posSNaN1), "posSNaN1 is NaN");
+                Assert(!Quadruple.IsNegative(posSNaN1), "posSNaN1 has positive sign");
+                Assert(Quadruple.IsNaN(negQNaN1), "negQNaN1 is NaN");
+                Assert(Quadruple.IsNegative(negQNaN1), "negQNaN1 has negative sign");
+                Assert(Quadruple.IsNaN(negSNaN1), "negSNaN1 is NaN");
+                Assert(Quadruple.IsNegative(negSNaN1), "negSNaN1 has negative sign");
+
+                // -----------------------------------------------------------------
+                // The full canonical chain in totalOrder:
+                //
+                //   -qNaN2 < -qNaN1 < -sNaN2 < -sNaN1
+                //     < -Inf < -2 < -1 < -0 < +0 < +1 < +2 < +Inf
+                //     < +sNaN1 < +sNaN2 < +qNaN1 < +qNaN2
+                //
+                // For positive NaNs, larger payload → larger significand → greater.
+                // For negative NaNs, the comparison is reversed, so larger payload
+                // orders first.
+                // -----------------------------------------------------------------
+                var canonical = new[]
+                {
+            negQNaN2, negQNaN1, negSNaN2, negSNaN1,
+            negInf, negTwo, negOne, negZero,
+            posZero, posOne, posTwo, posInf,
+            posSNaN1, posSNaN2, posQNaN1, posQNaN2
+        };
+
+                // -----------------------------------------------------------------
+                // 1. Numeric ordering
+                // -----------------------------------------------------------------
+                Console.WriteLine("1. Numeric ordering");
+                Assert(cmp.Compare(negInf, negTwo) < 0, "-Inf < -2");
+                Assert(cmp.Compare(negTwo, negOne) < 0, "-2 < -1");
+                Assert(cmp.Compare(negOne, negZero) < 0, "-1 < -0");
+                Assert(cmp.Compare(negZero, posZero) < 0, "-0 < +0");
+                Assert(cmp.Compare(posZero, posOne) < 0, "+0 < +1");
+                Assert(cmp.Compare(posOne, posTwo) < 0, "+1 < +2");
+                Assert(cmp.Compare(posTwo, posInf) < 0, "+2 < +Inf");
+
+                // -----------------------------------------------------------------
+                // 2. Reflexivity and antisymmetry
+                // -----------------------------------------------------------------
+                Console.WriteLine("2. Reflexivity & antisymmetry");
+                foreach (var v in canonical) {
+                    Assert(cmp.Compare(v, v) == 0, $"Compare({v}, {v}) == 0");
+                    Assert(eq.Equals(v, v), $"Equals({v}, {v})");
+                }
+                for (int i = 0; i < canonical.Length; i++)
+                    for (int j = 0; j < canonical.Length; j++) {
+                        int ij = Math.Sign(cmp.Compare(canonical[i], canonical[j]));
+                        int ji = Math.Sign(cmp.Compare(canonical[j], canonical[i]));
+                        Assert(ij == -ji, $"antisymmetry [{canonical[i]}, {canonical[j]}]");
+                    }
+
+                // -----------------------------------------------------------------
+                // 3. Signed zeros (§5.10 c.1 / c.2)
+                // -----------------------------------------------------------------
+                Console.WriteLine("3. Signed zeros");
+                Assert(cmp.Compare(negZero, posZero) < 0, "totalOrder(-0, +0) is true");
+                Assert(cmp.Compare(posZero, negZero) > 0, "totalOrder(+0, -0) is false");
+                Assert(!eq.Equals(negZero, posZero), "-0 and +0 not equal under totalOrder");
+                Assert(!eq.Equals(posZero, negZero), "+0 and -0 not equal under totalOrder");
+
+                // -----------------------------------------------------------------
+                // 4. NaN ordering (§5.10 d)
+                // -----------------------------------------------------------------
+                Console.WriteLine("4. NaN ordering");
+
+                // d.1: -NaN is below every non-NaN
+                Assert(cmp.Compare(negQNaN1, negInf) < 0, "-qNaN < -Inf");
+                Assert(cmp.Compare(negSNaN1, negInf) < 0, "-sNaN < -Inf");
+                Assert(cmp.Compare(negQNaN1, negOne) < 0, "-qNaN < -1");
+                Assert(cmp.Compare(negQNaN1, negZero) < 0, "-qNaN < -0");
+                Assert(cmp.Compare(negQNaN1, posZero) < 0, "-qNaN < +0");
+                Assert(cmp.Compare(negQNaN1, posInf) < 0, "-qNaN < +Inf");
+
+                // d.2: every non-NaN is above -NaN
+                Assert(cmp.Compare(negInf, negQNaN1) > 0, "-Inf > -qNaN");
+                Assert(cmp.Compare(posInf, negSNaN1) > 0, "+Inf > -sNaN");
+
+                // d.3: +NaN is above every non-NaN
+                Assert(cmp.Compare(posQNaN1, negInf) > 0, "+qNaN > -Inf");
+                Assert(cmp.Compare(posSNaN1, negOne) > 0, "+sNaN > -1");
+                Assert(cmp.Compare(posQNaN1, posZero) > 0, "+qNaN > +0");
+                Assert(cmp.Compare(posQNaN1, posInf) > 0, "+qNaN > +Inf");
+
+                // d.4: every non-NaN is below +NaN
+                Assert(cmp.Compare(negInf, posQNaN1) < 0, "-Inf < +qNaN");
+                Assert(cmp.Compare(posInf, posSNaN1) < 0, "+Inf < +sNaN");
+
+                // d.5.i: negative sign orders below positive sign
+                Assert(cmp.Compare(negQNaN1, posQNaN1) < 0, "-qNaN < +qNaN");
+                Assert(cmp.Compare(negSNaN1, posSNaN1) < 0, "-sNaN < +sNaN");
+                Assert(cmp.Compare(negQNaN1, posSNaN1) < 0, "-qNaN < +sNaN");
+                Assert(cmp.Compare(negSNaN1, posQNaN1) < 0, "-sNaN < +qNaN");
+
+                // d.5.ii: for +NaN, signaling < quiet; for -NaN, quiet < signaling.
+                Assert(cmp.Compare(posSNaN1, posQNaN1) < 0, "+sNaN < +qNaN");
+                Assert(cmp.Compare(posQNaN1, posSNaN1) > 0, "+qNaN > +sNaN");
+                Assert(cmp.Compare(negQNaN1, negSNaN1) < 0, "-qNaN < -sNaN");
+                Assert(cmp.Compare(negSNaN1, negQNaN1) > 0, "-sNaN > -qNaN");
+
+                // Payload ordering within the same kind and sign (d.5.iii).
+                Assert(cmp.Compare(posSNaN1, posSNaN2) < 0, "+sNaN1 < +sNaN2 (payload)");
+                Assert(cmp.Compare(posQNaN1, posQNaN2) < 0, "+qNaN1 < +qNaN2 (payload)");
+                Assert(cmp.Compare(negSNaN1, negSNaN2) > 0, "-sNaN1 > -sNaN2 (payload, reversed)");
+                Assert(cmp.Compare(negQNaN1, negQNaN2) > 0, "-qNaN1 > -qNaN2 (payload, reversed)");
+
+                // Bitwise-identical NaNs are equal under totalOrder.
+                Assert(cmp.Compare(posQNaN1, posQNaN1) == 0, "+qNaN1 == +qNaN1");
+                Assert(cmp.Compare(posSNaN1, posSNaN1) == 0, "+sNaN1 == +sNaN1");
+                Assert(cmp.Compare(negQNaN1, negQNaN1) == 0, "-qNaN1 == -qNaN1");
+                Assert(cmp.Compare(negSNaN1, negSNaN1) == 0, "-sNaN1 == -sNaN1");
+
+                // Distinct NaNs are not equal.
+                Assert(!eq.Equals(posQNaN1, posQNaN2), "+qNaN1 != +qNaN2 (payload)");
+                Assert(!eq.Equals(posSNaN1, posQNaN1), "+sNaN1 != +qNaN1 (kind)");
+                Assert(!eq.Equals(negQNaN1, negSNaN1), "-qNaN1 != -sNaN1 (kind)");
+                Assert(!eq.Equals(posQNaN1, negQNaN1), "+qNaN1 != -qNaN1 (sign)");
+
+                // -----------------------------------------------------------------
+                // 5. Transitivity and totality over the full chain
+                // -----------------------------------------------------------------
+                Console.WriteLine("5. Transitivity & totality");
+                for (int i = 0; i < canonical.Length; i++)
+                    for (int j = i + 1; j < canonical.Length; j++)
+                        for (int k = j + 1; k < canonical.Length; k++) {
+                            int ij = cmp.Compare(canonical[i], canonical[j]);
+                            int jk = cmp.Compare(canonical[j], canonical[k]);
+                            int ik = cmp.Compare(canonical[i], canonical[k]);
+                            Assert(ij < 0 && jk < 0 ? ik < 0 : true,
+                                   $"transitivity [{canonical[i]}, {canonical[j]}, {canonical[k]}]");
+                        }
+                for (int i = 0; i < canonical.Length; i++)
+                    for (int j = 0; j < canonical.Length; j++) {
+                        int c = Math.Sign(cmp.Compare(canonical[i], canonical[j]));
+                        Assert(c is -1 or 0 or 1, $"totality [{canonical[i]}, {canonical[j]}]");
+                    }
+
+                // -----------------------------------------------------------------
+                // 6. IComparer<T> / IEqualityComparer<T> consistency
+                // -----------------------------------------------------------------
+                Console.WriteLine("6. Interface consistency");
+                Assert(eq.Equals(negOne, negOne), "Equals(-1, -1)");
+                Assert(!eq.Equals(negOne, posOne), "!Equals(-1, +1)");
+                Assert(eq.Equals(posQNaN1, posQNaN1), "Equals(+qNaN1, +qNaN1)");
+                Assert(eq.Equals(negSNaN1, negSNaN1), "Equals(-sNaN1, -sNaN1)");
+
+                Assert(eq.GetHashCode(negOne) == eq.GetHashCode(negOne), "hash(-1) == hash(-1)");
+                Assert(eq.GetHashCode(posQNaN1) == eq.GetHashCode(posQNaN1),
+                       "hash(+qNaN1) == hash(+qNaN1)");
+                Assert(eq.GetHashCode(negSNaN1) == eq.GetHashCode(negSNaN1),
+                       "hash(-sNaN1) == hash(-sNaN1)");
+
+                var set = new HashSet<Quadruple>(eq);
+                foreach (var v in canonical) set.Add(v);
+                Assert(set.Count == canonical.Length,
+                       $"HashSet has {canonical.Length} distinct values (got {set.Count})");
+
+                // -----------------------------------------------------------------
+                // 7. Sorting the full chain
+                // -----------------------------------------------------------------
+                Console.WriteLine("7. Sorting");
+                var shuffled = new[]
+                {
+            posQNaN2, negTwo, posSNaN1, posZero, negQNaN1, negInf,
+            posOne, negSNaN2, negZero, posInf,
+            negQNaN2, posTwo, negSNaN1, negOne, posQNaN1, posSNaN2
+        };
+                Array.Sort(shuffled, cmp);
+                for (int i = 0; i < canonical.Length; i++) {
+                    Assert(cmp.Compare(shuffled[i], canonical[i]) == 0,
+                           $"sorted[{i}] == {canonical[i]} (got {shuffled[i]})");
+                }
+
+                // -----------------------------------------------------------------
+                // 8. Parser round-trips and sign-preservation
+                // -----------------------------------------------------------------
+                Console.WriteLine("8. Parser round-trips");
+
+                // Re-parsing the same literal must give an equal value.
+                Assert(cmp.Compare(Quadruple.Parse("+NaN(Q1)"), posQNaN1) == 0,
+                       "Parse(\"+NaN(Q1)\") == posQNaN1");
+                Assert(cmp.Compare(Quadruple.Parse("+NaN(S1)"), posSNaN1) == 0,
+                       "Parse(\"+NaN(S1)\") == posSNaN1");
+                Assert(cmp.Compare(Quadruple.Parse("-NaN(Q1)"), negQNaN1) == 0,
+                       "Parse(\"-NaN(Q1)\") == negQNaN1");
+                Assert(cmp.Compare(Quadruple.Parse("-NaN(S1)"), negSNaN1) == 0,
+                       "Parse(\"-NaN(S1)\") == negSNaN1");
+
+                // Explicitly-signed bare NaN literals.
+                Quadruple posQNaN0 = Quadruple.Parse("+NaN");
+                Quadruple negQNaN0 = Quadruple.Parse("-NaN");
+                Assert(Quadruple.IsNaN(posQNaN0), "+NaN parses to a NaN");
+                Assert(!Quadruple.IsNegative(posQNaN0), "+NaN has positive sign");
+                Assert(Quadruple.IsNaN(negQNaN0), "-NaN parses to a NaN");
+                Assert(Quadruple.IsNegative(negQNaN0), "-NaN has negative sign");
+                Assert(cmp.Compare(posQNaN0, negQNaN0) > 0, "+NaN > -NaN");
+                Assert(cmp.Compare(posQNaN0, posQNaN1) < 0, "+NaN (default payload) < +NaN(Q1)");
+
+                // The parser must agree with CopySign on sign-flip semantics.
+                Assert(cmp.Compare(Quadruple.CopySign(posQNaN1, -Quadruple.One), negQNaN1) == 0,
+                       "CopySign(+qNaN1, -1) == -qNaN1");
+                Assert(cmp.Compare(Quadruple.CopySign(posSNaN1, -Quadruple.One), negSNaN1) == 0,
+                       "CopySign(+sNaN1, -1) == -sNaN1");
+                Assert(cmp.Compare(Quadruple.CopySign(negQNaN2, Quadruple.One), posQNaN2) == 0,
+                       "CopySign(-qNaN2, +1) == +qNaN2");
+                Assert(cmp.Compare(Quadruple.CopySign(negSNaN2, Quadruple.One), posSNaN2) == 0,
+                       "CopySign(-sNaN2, +1) == +sNaN2");
+
+                // -----------------------------------------------------------------
+                // Summary
+                // -----------------------------------------------------------------
+                Console.WriteLine();
+                Console.ForegroundColor = _failed == 0 ? ConsoleColor.Green : ConsoleColor.Red;
+                Console.WriteLine($"=== {_passed} passed, {_failed} failed ===");
+                Console.ResetColor();
+            }
+            {
+
+                VerifyAgainstMathematica(
+                    "Hypot(2.0Q, 3.0Q)",
+                    Quadruple.Hypot(2, 3),
+                    "3.6055512754639892931192212674704959462512965738452462127104530562271669482930104452046190820184907176735141820240635403760306782646978077051630171668927097577426905642741526332338303949623469447962732"
+                );
+                VerifyAgainstMathematica(
+                    "Hypot(2 * Quadruple.Epsilon, -3 * Quadruple.Epsilon)",
+                    Quadruple.Hypot(2 * Quadruple.Epsilon, -3 * Quadruple.Epsilon),
+                    "2.3346575910742460648666845727864261102928952010012980249857794005876202541694614854643944638732349531984863529962503496445201678776978842033097992570692016487485157853929308212072493348652568872694954E-4965"
+                );
+                return 0;
+            }
+            {
+                var x = Quadruple.PiOverTwo;
+                Console.WriteLine(Quadruple.Parse("-6.4751751194380251109244389582276465524995693380346810096898843891970395401241193710176714912766499402558781414768481196765872198863825420466851100719726179830427927107513349344167346256384717402394485E-4966"));
+                Console.WriteLine(x.ToString("G36"));
+                Console.WriteLine((BigRational)x);
+                Console.WriteLine();
+                Console.WriteLine("SinCos.Sin/Cos");
+                Console.WriteLine();
+
+                VerifyAgainstMathematica(
+                 "Sin(0)",
+                 Quadruple.SinCos(0).Sin,
+                 "0"
+             );
+                VerifyAgainstMathematica(
+                    "Cos(0)",
+                    Quadruple.SinCos(0).Cos,
+                    "1"
+                );
+
+
+                VerifyAgainstMathematica(
+                    "Sin(Quadruple.Pi)",
+                    Quadruple.SinCos(Quadruple.Pi).Sin,
+                    "8.6718101301237810247970440260433519687623233462565303417759357210804305024405832251835165593321742030164854972798621711503745900722378718736731952293430765605241765460717475367383543465448593745588219E-35"
+                );
+                VerifyAgainstMathematica(
+                    "Cos(Quadruple.Pi)",
+                    Quadruple.SinCos(Quadruple.Pi).Cos,
+                    "-0.999999999999999999999999999999999999999999999999999999999999999999996239985453354128600525555154985137336409707247878560844139805039770182053151090938566469356979217900488313577944439248110260264467083"
+                );
+
+                VerifyAgainstMathematica(
+                    "Sin(Quadruple.PiOverTwo)",
+                    Quadruple.SinCos(Quadruple.PiOverTwo).Sin,
+                    "0.999999999999999999999999999999999999999999999999999999999999999999999059996363338532150131388788746284334102426811969640211034951259942545071484354266249185146878285421363443538083496550683761707115373"
+                );
+                VerifyAgainstMathematica(
+                    "Cos(Quadruple.PiOverTwo)",
+                    Quadruple.SinCos(Quadruple.PiOverTwo).Cos,
+                    "4.3359050650618905123985220130216759843811616731282651708879678605402193269868209896472055890893799222107503881377875894357012094128810566783674843543614930100556156928380881393864089708669233214455179E-35"
+                );
+
+
+                VerifyAgainstMathematica(
+                    "Sin(0.5q)",
+                    Quadruple.SinCos(0.5).Sin,
+                    "0.47942553860420300027328793521557138808180336794060067518861661312553500028781483220963127468434826908613209108450571741781109374860994028278015396204619192460995729393228140053354633818805522859567014"
+                );
+                VerifyAgainstMathematica(
+                    "Cos(0.5q)",
+                    Quadruple.SinCos(0.5).Cos,
+                    "0.87758256189037271611628158260382965199164519710974405299761086831595076327421394740579418408468225835547840059310905399341382797683328026679975612095022401558762915687859072347693931098961673967701441"
+                );
+
+
+
+                VerifyAgainstMathematica(
+                   "Sin(-2^-16494)",
+                   Quadruple.SinCos(-Quadruple.Epsilon).Sin,
+                   "-6.4751751194380251109244389582276465524995693380346810096898843891970395401241193710176714912766499402558781414768481196765872198863825420466851100719726179830427927107513349344167346256384717402394485E-4966"
+                );
+                VerifyAgainstMathematica(
+                   "Cos(-2^-16494)",
+                   Quadruple.SinCos(-Quadruple.Epsilon).Cos,
+                   "1"
+                );
+
+                VerifyAgainstMathematica(
+                   "Sin(1.0q)",
+                   Quadruple.SinCos(1.0).Sin,
+                   "0.84147098480789650665250232163029899962256306079837106567275170999191040439123966894863974354305269585434903790792067429325911892099189888119341032772921240948079195582676660699990776401197840878273257"
+                );
+                VerifyAgainstMathematica(
+                   "Cos(1.0q)",
+                   Quadruple.SinCos(1.0).Cos,
+                   "0.54030230586813971740093660744297660373231042061792222767009725538110039477447176451795185608718308934357173116003008909786063376002166345640651226541731858471797116447447949423311792455139325433594352"
+                );
+
+                VerifyAgainstMathematica(
+                   "Sin(1.18973149535723176508575932662800702E+4932q=1189731<<...>>363968)",
+                   Quadruple.SinCos(Quadruple.MaxValue).Sin,
+                   "0.95191485407882048113632489293757294203297420250976463875139332618137512162045793913431205526834123348503247352731909125464224200828509068032778740296872558559594417733410200876422009802861743735201273"
+                );
+                VerifyAgainstMathematica(
+                   "Cos(1.18973149535723176508575932662800702E+4932q=1189731<<...>>363968)",
+                   Quadruple.SinCos(Quadruple.MaxValue).Cos,
+                   "-0.30636271082509031488660022448440017919312519259050857080649519080770756682434732290755375700667347959975438682991870671207223337586354269355536125317367190130057536352937686702071667622453570128415116"
+                );
+                
+                
+                Console.WriteLine();
+                Console.WriteLine("Direct Sin/Cos");
+                Console.WriteLine();
+
+
+
+                VerifyAgainstMathematica(
+                   "Sin(Quadruple.Pi)",
+                   Quadruple.Sin(Quadruple.Pi),
+                   "8.6718101301237810247970440260433519687623233462565303417759357210804305024405832251835165593321742030164854972798621711503745900722378718736731952293430765605241765460717475367383543465448593745588219E-35"
+               );
+                VerifyAgainstMathematica(
+                    "Cos(Quadruple.Pi)",
+                    Quadruple.Cos(Quadruple.Pi),
+                    "-0.999999999999999999999999999999999999999999999999999999999999999999996239985453354128600525555154985137336409707247878560844139805039770182053151090938566469356979217900488313577944439248110260264467083"
+                );
+
+                VerifyAgainstMathematica(
+                    "Sin(Quadruple.PiOverTwo)",
+                    Quadruple.Sin(Quadruple.PiOverTwo),
+                    "0.999999999999999999999999999999999999999999999999999999999999999999999059996363338532150131388788746284334102426811969640211034951259942545071484354266249185146878285421363443538083496550683761707115373"
+                );
+                VerifyAgainstMathematica(
+                    "Cos(Quadruple.PiOverTwo)",
+                    Quadruple.Cos(Quadruple.PiOverTwo),
+                    "4.3359050650618905123985220130216759843811616731282651708879678605402193269868209896472055890893799222107503881377875894357012094128810566783674843543614930100556156928380881393864089708669233214455179E-35"
+                );
+
+
+                VerifyAgainstMathematica(
+                    "Sin(0.5q)",
+                    Quadruple.Sin(0.5),
+                    "0.47942553860420300027328793521557138808180336794060067518861661312553500028781483220963127468434826908613209108450571741781109374860994028278015396204619192460995729393228140053354633818805522859567014"
+                );
+                VerifyAgainstMathematica(
+                    "Cos(0.5q)",
+                    Quadruple.Cos(0.5),
+                    "0.87758256189037271611628158260382965199164519710974405299761086831595076327421394740579418408468225835547840059310905399341382797683328026679975612095022401558762915687859072347693931098961673967701441"
+                );
+
+
+
+                VerifyAgainstMathematica(
+                   "Sin(-2^-16494)",
+                   Quadruple.Sin(-Quadruple.Epsilon),
+                   "-6.4751751194380251109244389582276465524995693380346810096898843891970395401241193710176714912766499402558781414768481196765872198863825420466851100719726179830427927107513349344167346256384717402394485E-4966"
+                );
+                VerifyAgainstMathematica(
+                   "Cos(-2^-16494)",
+                   Quadruple.Cos(-Quadruple.Epsilon),
+                   "1"
+                );
+
+                VerifyAgainstMathematica(
+                   "Sin(1.0q)",
+                   Quadruple.Sin(1.0),
+                   "0.84147098480789650665250232163029899962256306079837106567275170999191040439123966894863974354305269585434903790792067429325911892099189888119341032772921240948079195582676660699990776401197840878273257"
+                );
+                VerifyAgainstMathematica(
+                   "Cos(1.0q)",
+                   Quadruple.Cos(1.0),
+                   "0.54030230586813971740093660744297660373231042061792222767009725538110039477447176451795185608718308934357173116003008909786063376002166345640651226541731858471797116447447949423311792455139325433594352"
+                );
+
+                VerifyAgainstMathematica(
+                   "Sin(1.18973149535723176508575932662800702E+4932q=1189731<<...>>363968)",
+                   Quadruple.Sin(Quadruple.MaxValue),
+                   "0.95191485407882048113632489293757294203297420250976463875139332618137512162045793913431205526834123348503247352731909125464224200828509068032778740296872558559594417733410200876422009802861743735201273"
+                );
+                VerifyAgainstMathematica(
+                   "Cos(1.18973149535723176508575932662800702E+4932q=1189731<<...>>363968)",
+                   Quadruple.Cos(Quadruple.MaxValue),
+                   "-0.30636271082509031488660022448440017919312519259050857080649519080770756682434732290755375700667347959975438682991870671207223337586354269355536125317367190130057536352937686702071667622453570128415116"
+                );
+                return 0;
+
+            }
+            {
+                var c = new TotalOrderIeee754Comparer2<Decimal128Bid>();
 
                 Console.WriteLine(c.Compare((Decimal128Bid)42.0m, (Decimal128Bid)42m));
                 Console.WriteLine(c.Compare((Decimal128Bid)42m, (Decimal128Bid)42.0m));
@@ -791,77 +2109,6 @@ namespace UltimateOrb.Core.Tests {
             }
 
             {
-                Console.WriteLine($"Scale10(0, -7) = {Decimal128Bid.Scale10(0, -7)}");
-                Console.WriteLine($"Scale10(0, +7) = {Decimal128Bid.Scale10(0, +7)}");
-                Console.WriteLine($"Scale10(0, +7000) = {Decimal128Bid.Scale10(0, +7000)}");
-                Console.WriteLine($"Scale10(0, -7000) = {Decimal128Bid.Scale10(0, -7000)}");
-
-                Console.WriteLine($"IsNegative(-0) = {Decimal128Bid.IsNegative(Decimal128Bid.Parse("-0"))}");
-
-                Decimal128Bid[] testData1 = [
-                    Decimal128Bid.Parse("+qNaN(0x4000000000000000000000000009)"),
-                    Decimal128Bid.Parse("+qNaN(0X3ffffffffffffffffffffffffffF)"),
-                    Decimal128Bid.Parse("sNaN(111)"),
-                    Decimal128Bid.Parse("qNaN(222)"),
-                    Decimal128Bid.Parse("NaN(333)"),
-                    Decimal128Bid.Parse("+sNaN(444)"),
-                    Decimal128Bid.Parse("+qNaN(555)"),
-                    Decimal128Bid.Parse("+NaN(666)"),
-                    Decimal128Bid.Parse("-sNaN(777)"),
-                    Decimal128Bid.Parse("-qNaN(888)"),
-                    Decimal128Bid.Parse("-NaN(999)"),
-
-                    Decimal128Bid.Parse("+inF"),
-                    Decimal128Bid.Parse("-∞"),
-                    Decimal128Bid.Parse("Infinity"),
-                    Decimal128Bid.Parse("1919810"),
-                    Decimal128Bid.ToCoarsestCohort(Decimal128Bid.Parse("1919810")),
-                    Decimal128Bid.ToFinestCohort(Decimal128Bid.Parse("1919810")),
-
-                    Decimal128Bid.Parse("-10100"),
-                    Decimal128Bid.ToCoarsestCohort(Decimal128Bid.Parse("-10100")),
-                    Decimal128Bid.ToFinestCohort(Decimal128Bid.Parse("-10100")),
-                    Decimal128Bid.ToCohort(Decimal128Bid.Parse("-10100"), qExponent: 1),
-                    Decimal128Bid.Pi,
-                    Decimal128Bid.Tau,
-                    Decimal128Bid.Epsilon,
-                    -Decimal128Bid.Epsilon,
-                    -Decimal128Bid.AdditiveIdentity,
-                    Decimal128Bid.AdditiveIdentity,
-                    Decimal128Bid.BitDecrement(Decimal128Bid.Epsilon),
-                    Decimal128Bid.BitIncrement(Decimal128Bid.Epsilon),
-                    Decimal128Bid.BitDecrement(-Decimal128Bid.Epsilon),
-                    Decimal128Bid.BitIncrement(-Decimal128Bid.Epsilon),
-
-                    Decimal128Bid.Parse("-0"),
-                    Decimal128Bid.Parse("+0"),
-                    Decimal128Bid.Parse("-.0E-9000"),
-
-                    Decimal128Bid.Parse("-∞"),
-                    Decimal128Bid.Parse("Infinity"), ];
-
-                foreach (var item in testData1.OrderBy(Decimal128Extensions.TotalOrderIeee754_192BitsKeySelector)) {
-                    Console.Write(item.ToStringWithSignAndNaNPayload());
-                    Console.Write(' ');
-                }
-                Console.WriteLine();
-                foreach (var item in testData1.OrderBy(x => x, new TotalOrderIeee754Comparer<Decimal128Bid>())) {
-                    Console.Write(item.ToStringWithSignAndNaNPayload());
-                    Console.Write(' ');
-                }
-                Console.WriteLine();
-                foreach (var item in testData1.OrderBy(x => x)) {
-                    Console.Write(item.ToStringWithSignAndNaNPayload());
-                    Console.Write(' ');
-                }
-                Console.WriteLine();
-                foreach (var item in testData1.OrderBy(Decimal128Extensions.TotalOrderDefaultSystemInt128KeySelector)) {
-                    Console.Write(item.ToStringWithSignAndNaNPayload());
-                    Console.Write(' ');
-                }
-                Console.WriteLine();
-            }
-            {
                 Decimal128Bid.IsZero(Decimal128Bid.Parse("+sNaN"));
                 Decimal128Bid.TotalOrderIeee754_192BitsKeySelector(Decimal128Bid.Parse("+sNaN"));
                 Console.WriteLine($"IsSignalingNaN(+sNaN) = {Decimal128Bid.IsSignalingNaN(Decimal128Bid.Parse("+sNaN"))}");
@@ -877,7 +2124,7 @@ namespace UltimateOrb.Core.Tests {
 
             }
             {
-                var comparer = new TotalOrderIeee754Comparer<Decimal128Bid>();
+                var comparer = new TotalOrderIeee754Comparer2<Decimal128Bid>();
 
                 Console.WriteLine($"TotalOrderIeee754(+sNaN, +qNaN(0x4243)) = {int.Sign(comparer.Compare(
                     Decimal128Bid.Parse("+sNaN"), Decimal128Bid.Parse("+qNaN(0x4243)")))}");

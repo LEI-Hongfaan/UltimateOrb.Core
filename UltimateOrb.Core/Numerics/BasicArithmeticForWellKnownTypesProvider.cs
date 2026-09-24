@@ -8,8 +8,13 @@ using static UltimateOrb.Utilities.UnsafeParameterHelpers;
 
 namespace UltimateOrb.Numerics {
 
+#if STANDALONE_NUMERICS_LIBRARY
+    internal
+#else
     [Experimental("UoWIP_GenericMath")]
-    public readonly partial struct BasicArithmeticForWellKnownTypesProvider :
+    public
+#endif
+        readonly partial struct BasicArithmeticForWellKnownTypesProvider :
         IBinaryIntegerBigMulUnsignedProvider<BasicArithmeticForWellKnownTypesProvider, uint>,
         IBinaryIntegerBigMulUnsignedProvider<BasicArithmeticForWellKnownTypesProvider, int>,
         IBinaryIntegerBigMulUnsignedProvider<BasicArithmeticForWellKnownTypesProvider, nuint>,
@@ -92,15 +97,25 @@ namespace UltimateOrb.Numerics {
 namespace UltimateOrb.Numerics.Generic {
     using static UnsafeParameterHelpers;
 
+#if STANDALONE_NUMERICS_LIBRARY
+    internal
+#else
     [Experimental("UoWIP_GenericMath")]
-    public readonly partial struct DoubleLongArithmeticProvider<TInt, TIntArithmeticProvider, TLong, TDoubleLongDataProvider> :
+    public
+#endif
+        readonly partial struct DoubleLongArithmeticProvider<TInt, TIntArithmeticProvider, TLong, TDoubleLongDataProvider> :
         IBinaryIntegerBigMulUnsignedDoubleLongProvider<DoubleLongArithmeticProvider<TInt, TIntArithmeticProvider, TLong, TDoubleLongDataProvider>, TInt, TIntArithmeticProvider, TLong, TDoubleLongDataProvider>
         where TIntArithmeticProvider :
             IBinaryIntegerBigMulUnsignedProvider<TIntArithmeticProvider, TInt> {
     }
 
+#if STANDALONE_NUMERICS_LIBRARY
+    internal
+#else
     [Experimental("UoWIP_GenericMath")]
-    public interface IBinaryIntegerBigMulUnsignedDoubleLongProvider<TSelf, TInt, TIntArithmeticProvider, TLong, TDoubleLongDataProvider> :
+    public
+#endif
+        interface IBinaryIntegerBigMulUnsignedDoubleLongProvider<TSelf, TInt, TIntArithmeticProvider, TLong, TDoubleLongDataProvider> :
         IBinaryIntegerBigMulUnsignedProvider<TSelf, TLong>
         where TSelf :
             IBinaryIntegerBigMulUnsignedDoubleLongProvider<TSelf, TInt, TIntArithmeticProvider, TLong, TDoubleLongDataProvider>

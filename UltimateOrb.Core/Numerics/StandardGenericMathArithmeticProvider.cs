@@ -11,8 +11,13 @@ using UltimateOrb.Utilities;
 namespace UltimateOrb.Numerics {
     using static UnsafeParameterHelpers;
 
+#if STANDALONE_NUMERICS_LIBRARY
+    internal
+#else
     [Experimental("UoWIP_GenericMath")]
-    public readonly partial struct StandardGenericMathArithmeticProvider<T> :
+    public
+#endif
+        readonly partial struct StandardGenericMathArithmeticProvider<T> :
         IBinaryIntegerBigMulUnsignedProvider<StandardGenericMathArithmeticProvider<T>, T>
         where T :
             IBinaryInteger<T>,

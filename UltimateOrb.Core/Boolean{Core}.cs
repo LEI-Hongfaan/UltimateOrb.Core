@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
@@ -107,22 +108,13 @@ namespace UltimateOrb {
 
         public bool TryFormat(Span<char> destination, out int charsWritten) {
             if (StandardValue) {
-                if (unchecked((uint)destination.Length) > 3) { // uint cast, per https://github.com/dotnet/runtime/issues/10596
-                    destination[0] = 'T';
-                    destination[1] = 'r';
-                    destination[2] = 'u';
-                    destination[3] = 'e';
-                    charsWritten = 4;
+                if (TrueLiteral.TryCopyTo(destination)) {
+                    charsWritten = TrueLiteral.Length;
                     return true;
                 }
             } else {
-                if (unchecked((uint)destination.Length) > 4) {
-                    destination[0] = 'F';
-                    destination[1] = 'a';
-                    destination[2] = 'l';
-                    destination[3] = 's';
-                    destination[4] = 'e';
-                    charsWritten = 5;
+                if (FalseLiteral.TryCopyTo(destination)) {
+                    charsWritten = FalseLiteral.Length;
                     return true;
                 }
             }
@@ -357,6 +349,36 @@ namespace UltimateOrb {
         public static bool operator !=(Boolean8 first, Boolean8 second) {
             return !(first == second);
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Boolean8 operator !(Boolean8 value) {
+            return value ? False : True;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Boolean8 operator &(Boolean8 first, Boolean8 second) {
+            return (bool)first & (bool)second;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Boolean8 operator |(Boolean8 first, Boolean8 second) {
+            return (bool)first | (bool)second;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Boolean8 operator ^(Boolean8 first, Boolean8 second) {
+            return (bool)first ^ (bool)second;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator true(Boolean8 value) {
+            return value.m_value != 0;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator false(Boolean8 value) {
+            return value.m_value == 0;
+        }
     }
 
     public readonly partial struct Boolean32 : IComparable, IComparable<Boolean32>, IConvertible, IEquatable<Boolean32>, ISerializable {
@@ -457,22 +479,13 @@ namespace UltimateOrb {
 
         public bool TryFormat(Span<char> destination, out int charsWritten) {
             if (StandardValue) {
-                if (unchecked((uint)destination.Length) > 3) { // uint cast, per https://github.com/dotnet/runtime/issues/10596
-                    destination[0] = 'T';
-                    destination[1] = 'r';
-                    destination[2] = 'u';
-                    destination[3] = 'e';
-                    charsWritten = 4;
+                if (TrueLiteral.TryCopyTo(destination)) {
+                    charsWritten = TrueLiteral.Length;
                     return true;
                 }
             } else {
-                if (unchecked((uint)destination.Length) > 4) {
-                    destination[0] = 'F';
-                    destination[1] = 'a';
-                    destination[2] = 'l';
-                    destination[3] = 's';
-                    destination[4] = 'e';
-                    charsWritten = 5;
+                if (FalseLiteral.TryCopyTo(destination)) {
+                    charsWritten = FalseLiteral.Length;
                     return true;
                 }
             }
@@ -706,6 +719,36 @@ namespace UltimateOrb {
 
         public static bool operator !=(Boolean32 first, Boolean32 second) {
             return !(first == second);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Boolean32 operator !(Boolean32 value) {
+            return value ? False : True;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Boolean32 operator &(Boolean32 first, Boolean32 second) {
+            return (bool)first & (bool)second;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Boolean32 operator |(Boolean32 first, Boolean32 second) {
+            return (bool)first | (bool)second;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Boolean32 operator ^(Boolean32 first, Boolean32 second) {
+            return (bool)first ^ (bool)second;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator true(Boolean32 value) {
+            return value.m_value != 0;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator false(Boolean32 value) {
+            return value.m_value == 0;
         }
     }
 }
