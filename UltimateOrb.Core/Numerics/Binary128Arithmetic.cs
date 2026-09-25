@@ -1490,7 +1490,30 @@ namespace UltimateOrb.Numerics {
             }
         }
 
-        internal static int NormalizeSubnormal(UInt64 fraction_lo, UInt64 fraction_hi, int exponent, out UInt64 result_fraction_lo, out UInt64 result_fraction_hi) {
+        internal static int NormalizeSubnormal(UInt64 fraction_lo, UInt64 fraction_hi, int exponent,
+            out UInt64 result_fraction_lo, out UInt64 result_fraction_hi) {
+            // fraction_hi holds only 48 bits; the upper 16 bits are always zero.
+            int first_lzc;
+            if (fraction_hi != 0) {
+                first_lzc = BinaryNumerals.CountLeadingZeros(fraction_hi) - 16;
+            } else {
+                // 48 zero bits from fraction_hi + leading zeros in fraction_lo
+                first_lzc = 48 + BinaryNumerals.CountLeadingZeros(fraction_lo);
+            }
+
+            // The biased exponent of the normalized form is -first_lzc.
+            // (The incoming exponent is 0 for a subnormal.)
+            exponent -= first_lzc;
+
+            // Shift left so the highest set bit moves to position 112 (implicit bit).
+            // Correct shift amount is first_lzc + 1.
+            result_fraction_lo = DoubleArithmetic.ShiftLeft(fraction_lo, fraction_hi,
+                first_lzc + 1, out result_fraction_hi);
+
+            return exponent;
+        }
+
+        internal static int NormalizeSubnormal_A(UInt64 fraction_lo, UInt64 fraction_hi, int exponent, out UInt64 result_fraction_lo, out UInt64 result_fraction_hi) {
             var first_lzc = BinaryNumerals.CountLeadingZeros(fraction_hi);
             if (64 == first_lzc) {
                 unchecked {
@@ -1515,6 +1538,8 @@ namespace UltimateOrb.Numerics {
                 result_hi = hx;
                 return lx;
             }
+            var s = GetRawSignFromHi64Bits(hx);
+           
 
             var f_hi = GetRawFractionHiFromHi64Bits(hx);
 
@@ -1528,20 +1553,32 @@ namespace UltimateOrb.Numerics {
                 k = Binary128Arithmetic.NormalizeSubnormal(lx, f_hi, k,
                     out lx, out f_hi);
             }
+            if (n > 910305) {
+                result_hi = 0x8000000000000000 & hx;
+                return 0;
+            }
+            if (n < -900630) {
+                result_hi = 0x7fff000000000000UL | (0x8000000000000000 & hx);
+                return 0;
+            }
+            
 
-            // GetBitsFromRawPartsWithRounding expects the implicit bit.
+            // GetBitsFromRawPartsWithRounding expects the implicit bit to be set.
             f_hi |= Binary128Arithmetic.Hi64BitsImplicitBit;
 
-            var s = GetRawSignFromHi64Bits(hx);
 
             unchecked {
                 k += n;
             }
-            // ?? n <= -16496 - 16383 = -32879 ??
-            // ?? n >= 16384 - (-16494) = 32878 ??
-            if (n < -900630 || k < -128) {
+
+            // GetBitsFromRawPartsWithRounding expects exponent = true_biased - 1
+            // for ALL values (normal and subnormal). Not just subnormals.
+            k--;
+
+            // Clamp to avoid overflow/underflow in k += n and in GetBits shifts.
+            if (k < -128) {
                 k = -128;
-            } else if (n > 910305 || k > 0x7fff) {
+            } else if (k > 0x7fff) {
                 k = 0x7fff;
             }
 
@@ -1549,7 +1586,8 @@ namespace UltimateOrb.Numerics {
                 rounding, out result_hi);
         }
 
-        public static UInt64 ModF(UInt64 x_lo, UInt64 x_hi, int n, [ConstantExpected] FloatingPointRounding rounding, out UInt64 result_hi) {
+        [Obsolete]
+        static UInt64 ScaleB_L(UInt64 x_lo, UInt64 x_hi, int n, [ConstantExpected] FloatingPointRounding rounding, out UInt64 result_hi) {
             var lx = x_lo;
             var hx = x_hi;
             var k = Binary128Arithmetic.GetRawExponentFromHi64Bits(hx);

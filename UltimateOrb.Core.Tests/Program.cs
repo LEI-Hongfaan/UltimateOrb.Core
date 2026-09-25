@@ -220,7 +220,7 @@ namespace UltimateOrb.Core.Tests {
                 Console.WriteLine($"Reference: {reference}");
             }
         }
-
+        /*
 public readonly struct TotalOrderIeee754Comparer<T> :
     IComparer<T>,
     System.Collections.Generic.    IEqualityComparer<T>,
@@ -245,7 +245,7 @@ public readonly struct TotalOrderIeee754Comparer<T> :
             // ─────────────────────────────────────────────────────────────────
 
             private static readonly int DecimalBias =
-                T.Radix == 10 ? T.ILogB(T.MaxValue) + FloatingPointIeee754InterchageTypeTraits< T>.Precision - 2 : default;
+                T.Radix == 10 ? T.ILogB(T.MaxValue) + FloatingPointIeee754InterchageTypeTraits<T>.Precision - 2 : default;
 
             private static readonly int QBitPosition =
                 T.Radix == 10 ? T.Zero.GetExponentByteCount() * 8 - 6 : -1;
@@ -429,15 +429,15 @@ public readonly struct TotalOrderIeee754Comparer<T> :
             public static bool operator !=(TotalOrderIeee754Comparer<T> a, TotalOrderIeee754Comparer<T> b) => false;
         }
 
-
+        */
 
         // ─────────────────────────────────────────────────────────────────────────────
         //  The comparer (same as the corrected version from the previous answer)
         // ─────────────────────────────────────────────────────────────────────────────
-        public readonly struct TotalOrderIeee754Comparer2<T> :
+        public readonly struct TotalOrderIeee754Comparer<T> :
      IComparer<T>,
      System.Collections.Generic.IEqualityComparer<T>,
-     IEquatable<TotalOrderIeee754Comparer2<T>>
+     IEquatable<TotalOrderIeee754Comparer<T>>
      where T : IFloatingPointIeee754<T> {
             private const int StackAllocLimit = 128;
             private static readonly bool UseLittleEndian = BitConverter.IsLittleEndian;
@@ -684,11 +684,11 @@ public readonly struct TotalOrderIeee754Comparer<T> :
                 return hash.ToHashCode();
             }
 
-            public bool Equals(TotalOrderIeee754Comparer2<T> other) => true;
-            public override bool Equals(object? obj) => obj is TotalOrderIeee754Comparer2<T>;
+            public bool Equals(TotalOrderIeee754Comparer<T> other) => true;
+            public override bool Equals(object? obj) => obj is TotalOrderIeee754Comparer<T>;
             public override int GetHashCode() => 0;
-            public static bool operator ==(TotalOrderIeee754Comparer2<T> a, TotalOrderIeee754Comparer2<T> b) => true;
-            public static bool operator !=(TotalOrderIeee754Comparer2<T> a, TotalOrderIeee754Comparer2<T> b) => false;
+            public static bool operator ==(TotalOrderIeee754Comparer<T> a, TotalOrderIeee754Comparer<T> b) => true;
+            public static bool operator !=(TotalOrderIeee754Comparer<T> a, TotalOrderIeee754Comparer<T> b) => false;
         }
 
         private static int _passed;
@@ -727,7 +727,7 @@ public readonly struct TotalOrderIeee754Comparer<T> :
         //  Decimal-format test suite (works for any IFloatingPointIeee754 decimal type)
         // ─────────────────────────────────────────────────────────────────────────────
         public static class Decimal128TestSuite<T>
-            where T : IFloatingPointIeee754<T> {
+            where T : IFloatingPointIeee754<T>, IMinMaxValue<T> {
             public static void Run(string typeName) {
                 Console.WriteLine($"\n═══════════════════════════════════════════════════════════════");
                 Console.WriteLine($"  {typeName}");
@@ -983,6 +983,61 @@ public readonly struct TotalOrderIeee754Comparer<T> :
 
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private static int Main(string[] args) {
+            {
+                Console.WriteLine($"6 % 4 = {(Quadruple)6 % 4}");
+                Console.WriteLine($"Ieee754Remainder(6, 4) = {Quadruple.Ieee754Remainder(6, 4)}");
+
+            }
+
+            {
+                Console.WriteLine($"ScaleB(-1, int.MaxValue)\t{UltimateOrb.Quadruple.ScaleB(-UltimateOrb.Quadruple.One, int.MaxValue)}");
+                Console.WriteLine($"ScaleB(-1, int.MinValue)\t{UltimateOrb.Quadruple.ScaleB(-UltimateOrb.Quadruple.One, int.MinValue)}");
+
+
+                Console.WriteLine($"ScaleB(MinValue, 3)\t{UltimateOrb.Quadruple.ScaleB(UltimateOrb.Quadruple.MinValue, 3)}");
+                Console.WriteLine($"ScaleB(MinValue, 2)\t{UltimateOrb.Quadruple.ScaleB(UltimateOrb.Quadruple.MinValue, 2)}");
+                Console.WriteLine($"ScaleB(MinValue, 1)\t{UltimateOrb.Quadruple.ScaleB(UltimateOrb.Quadruple.MinValue, 1)}");
+                Console.WriteLine($"ScaleB(MinValue, 0)\t{UltimateOrb.Quadruple.ScaleB(UltimateOrb.Quadruple.MinValue, 0)}");
+                Console.WriteLine($"ScaleB(MinValue, -1)\t{UltimateOrb.Quadruple.ScaleB(UltimateOrb.Quadruple.MinValue, -1)}");
+                Console.WriteLine($"ScaleB(MinValue, -2)\t{UltimateOrb.Quadruple.ScaleB(UltimateOrb.Quadruple.MinValue, -2)}");
+                Console.WriteLine($"ScaleB(MinValue, -3)\t{UltimateOrb.Quadruple.ScaleB(UltimateOrb.Quadruple.MinValue, -3)}");
+
+
+                Console.WriteLine($"ScaleB(1, 3)\t{UltimateOrb.Quadruple.ScaleB(UltimateOrb.Quadruple.One, 3)}");
+                Console.WriteLine($"ScaleB(1, 2)\t{UltimateOrb.Quadruple.ScaleB(UltimateOrb.Quadruple.One, 2)}");
+                Console.WriteLine($"ScaleB(1, 1)\t{UltimateOrb.Quadruple.ScaleB(UltimateOrb.Quadruple.One, 1)}");
+                Console.WriteLine($"ScaleB(1, 0)\t{UltimateOrb.Quadruple.ScaleB(UltimateOrb.Quadruple.One, 0)}");
+                Console.WriteLine($"ScaleB(1, -1)\t{UltimateOrb.Quadruple.ScaleB(UltimateOrb.Quadruple.One, -1)}");
+                Console.WriteLine($"ScaleB(1, -2)\t{UltimateOrb.Quadruple.ScaleB(UltimateOrb.Quadruple.One, -2)}");
+                Console.WriteLine($"ScaleB(1, -3)\t{UltimateOrb.Quadruple.ScaleB(UltimateOrb.Quadruple.One, -3)}");
+
+                Console.WriteLine($"ScaleB(3, 3)\t{UltimateOrb.Quadruple.ScaleB(3, 3)}");
+                Console.WriteLine($"ScaleB(3, 2)\t{UltimateOrb.Quadruple.ScaleB(3, 2)}");
+                Console.WriteLine($"ScaleB(3, 1)\t{UltimateOrb.Quadruple.ScaleB(3, 1)}");
+                Console.WriteLine($"ScaleB(3, 0)\t{UltimateOrb.Quadruple.ScaleB(3, 0)}");
+                Console.WriteLine($"ScaleB(3, -1)\t{UltimateOrb.Quadruple.ScaleB(3, -1)}");
+                Console.WriteLine($"ScaleB(3, -2)\t{UltimateOrb.Quadruple.ScaleB(3, -2)}");
+                Console.WriteLine($"ScaleB(3, -3)\t{UltimateOrb.Quadruple.ScaleB(3, -3)}");
+
+
+                Console.WriteLine($"ScaleB(-Epsilon, 3)\t{UltimateOrb.Quadruple.ScaleB(-UltimateOrb.Quadruple.Epsilon, 3)}");
+                Console.WriteLine($"ScaleB(-Epsilon, 2)\t{UltimateOrb.Quadruple.ScaleB(-UltimateOrb.Quadruple.Epsilon, 2)}");
+                Console.WriteLine($"ScaleB(-Epsilon, 1)\t{UltimateOrb.Quadruple.ScaleB(-UltimateOrb.Quadruple.Epsilon, 1)}");
+                Console.WriteLine($"ScaleB(-Epsilon, 0)\t{UltimateOrb.Quadruple.ScaleB(-UltimateOrb.Quadruple.Epsilon, 0)}");
+                Console.WriteLine($"ScaleB(-Epsilon, -1)\t{UltimateOrb.Quadruple.ScaleB(-UltimateOrb.Quadruple.Epsilon, -1)}");
+                Console.WriteLine($"ScaleB(-Epsilon, -2)\t{UltimateOrb.Quadruple.ScaleB(-UltimateOrb.Quadruple.Epsilon, -2)}");
+                Console.WriteLine($"ScaleB(-Epsilon, -3)\t{UltimateOrb.Quadruple.ScaleB(-UltimateOrb.Quadruple.Epsilon, -3)}");
+
+                Console.WriteLine($"ScaleB(-5 * Epsilon, 3)\t{UltimateOrb.Quadruple.ScaleB(-5 * UltimateOrb.Quadruple.Epsilon, 3):R}");
+                Console.WriteLine($"ScaleB(-5 * Epsilon, 2)\t{UltimateOrb.Quadruple.ScaleB(-5 * UltimateOrb.Quadruple.Epsilon, 2):R}");
+                Console.WriteLine($"ScaleB(-5 * Epsilon, 1)\t{UltimateOrb.Quadruple.ScaleB(-5 * UltimateOrb.Quadruple.Epsilon, 1):R}");
+                Console.WriteLine($"ScaleB(-5 * Epsilon, 0)\t{UltimateOrb.Quadruple.ScaleB(-5 * UltimateOrb.Quadruple.Epsilon, 0):R}");
+                Console.WriteLine($"ScaleB(-5 * Epsilon, -1)\t{UltimateOrb.Quadruple.ScaleB(-5 * UltimateOrb.Quadruple.Epsilon, -1):R}");
+                Console.WriteLine($"ScaleB(-5 * Epsilon, -2)\t{UltimateOrb.Quadruple.ScaleB(-5 * UltimateOrb.Quadruple.Epsilon, -2):R}");
+                Console.WriteLine($"ScaleB(-5 * Epsilon, -3)\t{UltimateOrb.Quadruple.ScaleB(-5 * UltimateOrb.Quadruple.Epsilon, -3):R}");
+                Console.WriteLine($"ScaleB(-5 * Epsilon, -4)\t{UltimateOrb.Quadruple.ScaleB(-5 * UltimateOrb.Quadruple.Epsilon, -4):R}");
+
+            }
             {
                 Console.WriteLine($"Decimal128Bid.MaxValue = {Decimal128Bid.MaxValue}");
                 Console.WriteLine($"Decimal128Bid.MaxValue = {Decimal128Bid.ILogB(Decimal128Bid.MaxValue)}");
@@ -1541,7 +1596,7 @@ public readonly struct TotalOrderIeee754Comparer<T> :
 
             }
             {
-                var c = new TotalOrderIeee754Comparer2<Decimal128Bid>();
+                var c = new TotalOrderIeee754Comparer<Decimal128Bid>();
 
                 Console.WriteLine(c.Compare((Decimal128Bid)42.0m, (Decimal128Bid)42m));
                 Console.WriteLine(c.Compare((Decimal128Bid)42m, (Decimal128Bid)42.0m));
@@ -2124,7 +2179,7 @@ public readonly struct TotalOrderIeee754Comparer<T> :
 
             }
             {
-                var comparer = new TotalOrderIeee754Comparer2<Decimal128Bid>();
+                var comparer = new TotalOrderIeee754Comparer<Decimal128Bid>();
 
                 Console.WriteLine($"TotalOrderIeee754(+sNaN, +qNaN(0x4243)) = {int.Sign(comparer.Compare(
                     Decimal128Bid.Parse("+sNaN"), Decimal128Bid.Parse("+qNaN(0x4243)")))}");

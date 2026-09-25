@@ -148,7 +148,7 @@ namespace UltimateOrb {
         }
 
         public static Quadruple operator %(Quadruple first, Quadruple second) {
-            return new Quadruple(Binary128Arithmetic.Divide(first._Lo64Bits, first._Hi64Bits, second._Lo64Bits, second._Hi64Bits, FloatingPointRounding.ToNearestWithMidpointToEven, out var t), t);
+            return new Quadruple(Binary128Arithmetic.Remainder(first._Lo64Bits, first._Hi64Bits, second._Lo64Bits, second._Hi64Bits, FloatingPointRounding.ToNearestWithMidpointToEven, out var t), t);
         }
 
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
@@ -160,6 +160,17 @@ namespace UltimateOrb {
         public static Quadruple Remainder(Quadruple first, Quadruple second, [ConstantExpected] FloatingPointRounding rounding) {
             return new Quadruple(Binary128Arithmetic.Remainder(first._Lo64Bits, first._Hi64Bits, second._Lo64Bits, second._Hi64Bits, rounding, out var t), t);
         }
+
+        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+        public static Quadruple Ieee754Remainder(Quadruple first, Quadruple second) {
+            return new Quadruple(Binary128Arithmetic.IEEERemainder(first._Lo64Bits, first._Hi64Bits, second._Lo64Bits, second._Hi64Bits, FloatingPointRounding.ToNearestWithMidpointToEven, out var t), t);
+        }
+
+        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+        public static Quadruple Ieee754Remainder(Quadruple first, Quadruple second, [ConstantExpected] FloatingPointRounding rounding) {
+            return new Quadruple(Binary128Arithmetic.IEEERemainder(first._Lo64Bits, first._Hi64Bits, second._Lo64Bits, second._Hi64Bits, rounding, out var t), t);
+        }
+
         #region Non-computational Operations
         #region IEEE Std 754
         /// <summary>
@@ -1982,10 +1993,6 @@ namespace UltimateOrb {
             System.BitConverter.UInt128BitsToQuadruple(Binary128Arithmetic.Hypot(
                 System.BitConverter.QuadrupleToUInt128Bits(x),
                 System.BitConverter.QuadrupleToUInt128Bits(y), mode));
-
-        public static Quadruple Ieee754Remainder(Quadruple left, Quadruple right) {
-            throw new NotImplementedException();
-        }
 
         /// <inheritdoc cref="IFloatingPointIeee754{Quadruple}.ILogB(Quadruple)"/>
         public static int ILogB(Quadruple value) {
