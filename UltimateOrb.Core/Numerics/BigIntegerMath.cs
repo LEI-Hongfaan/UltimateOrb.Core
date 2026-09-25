@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Numerics;
 using System.Text;
@@ -8,9 +9,15 @@ using System.Threading.Tasks;
 
 namespace UltimateOrb.Numerics {
 
-    public static partial class BigIntegerMath {
+#if STANDALONE_NUMERICS_LIBRARY
+    internal
+#else
+    [Experimental("UoWIP_GenericMath")]
+    public
+#endif
+        static partial class BigIntegerMath {
     }
-
+    
     partial class BigIntegerMath {
 
         /// <summary>

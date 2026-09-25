@@ -1270,6 +1270,11 @@ namespace UltimateOrb {
             return new Quadruple(lo, hi);
         }
 
+        public static Quadruple ExpM1(Quadruple x) {
+            // TODO: provide a correct impl
+            return Exp(x) - One;
+        }
+
         internal static Quadruple PiOverTwo {
             // 0x3FFF921FB54442D18469898CC51701B8
             get => new Quadruple(
@@ -2231,6 +2236,47 @@ namespace UltimateOrb {
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// Computes the multiplicative inverse of the specified value.
+        /// </summary>
+        /// <param name="x">The input value whose reciprocal is to be computed.</param>
+        /// <remarks>
+        /// The result is mathematically equivalent to <c>1 / x</c>.
+        /// <para>
+        /// Special‑case behavior follows the Quadruple division operator:
+        /// </para>
+        /// <list type="bullet">
+        ///   <item>
+        ///     <description>
+        ///       Returns positive or negative infinity when <paramref name="x"/> is
+        ///       positive or negative zero, respectively.
+        ///     </description>
+        ///   </item>
+        ///   <item>
+        ///     <description>
+        ///       Returns positive or negative zero when <paramref name="x"/> is
+        ///       positive or negative infinity, respectively.
+        ///     </description>
+        ///   </item>
+        ///   <item>
+        ///     <description>
+        ///       Propagates NaN if <paramref name="x"/> is NaN.
+        ///     </description>
+        ///   </item>
+        /// </list>
+        /// </remarks>
+        /// <returns>
+        /// The reciprocal of <paramref name="x"/>.
+        /// </returns>
+        public static Quadruple Reciprocal(Quadruple x) {
+            return One / x;
+        }
+
+        public static Quadruple ReciprocalSqrt(Quadruple x) {
+            // TODO: Provide a correct-rounding impl
+            return One / Sqrt(x);
         }
 
         public static Quadruple RootN(Quadruple x, int n) {
@@ -5078,8 +5124,12 @@ namespace UltimateOrb {
                                       : new Quadruple(0, 0);
 
                 // Estimate of the decimal position of the MSB.
-                int sigDigits = (int)((sig.GetBitLength() * 30103L) / 100_000L) + 1;
-                long msbDec = (long)sigDigits - 1 + exp10;
+
+                int sigD = sig.ILog10();
+                if (sigD == ILogSpecialResults.ILogNaN) { // ilog result overflow
+                    _ = 0u - sigD.ToUnsignedUnchecked();
+                }
+                long msbDec = (long)sigD + exp10;
 
                 if (msbDec > MaxDecMSB)
                     return isNegative ? new Quadruple(0, 0xFFFF_0000_0000_0000UL)
@@ -5141,6 +5191,21 @@ namespace UltimateOrb {
                 if (carry) {
                     m >>= 1;
                     e++;
+                }
+
+                // If we were in the subnormal range but rounding pushed us up to
+                // exactly 2^MantissaBits, we have reached the smallest normal number.
+                // Promote to normal representation.
+                if (isSubnormal && m >= (BigInteger.One << MantissaBits)) {
+                    isSubnormal = false;
+                }
+
+                // Check for overflow to infinity after rounding (normal range only).
+                if (!isSubnormal) {
+                    int unbiasedExp = e + MantissaBits;
+                    if (unbiasedExp > MaxNormalBinExp)
+                        return isNegative ? new Quadruple(0, 0xFFFF_0000_0000_0000UL)
+                                          : new Quadruple(0, 0x7FFF_0000_0000_0000UL);
                 }
 
                 return Encode(isNegative, m, e, isSubnormal);

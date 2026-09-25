@@ -6,7 +6,7 @@ using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
-using UltimateOrb.Runtime.CompilerServices.TypeTokens;
+using UltimateOrb.Numerics;
 
 namespace UltimateOrb.Numerics {
 
@@ -249,6 +249,38 @@ namespace UltimateOrb.Numerics {
                     }
                 }
             }
+        }
+    }
+}
+
+namespace System {
+    internal static partial class ArgumentOutOfRangeExceptionExtensions {
+
+        extension(ArgumentOutOfRangeException) {
+
+#if !NET8_0_OR_GREATER
+            [DoesNotReturn]
+            private static void ThrowLessEqual<T>(T value, T other, string? paramName) =>
+                throw new ArgumentOutOfRangeException(paramName, value, SR.Format(SR.ArgumentOutOfRange_Generic_MustBeGreater, paramName, value, other));
+
+            public static void ThrowIfLessThanOrEqual<T>(T value, T other, [CallerArgumentExpression(nameof(value))] string? paramName = null)
+                where T : IComparable<T> {
+                if (value.CompareTo(other) <= 0)
+                    ThrowLessEqual(value, other, paramName);
+            }
+
+            [DoesNotReturn]
+            private static void ThrowNegative<T>(T value, string? paramName) =>
+                throw new ArgumentOutOfRangeException(paramName, value, SR.Format(SR.ArgumentOutOfRange_Generic_MustBeNonNegative, paramName, value));
+
+
+            public static void ThrowIfNegative<T>(T value, [CallerArgumentExpression(nameof(value))] string? paramName = null)
+                where T : INumberBase<T> {
+                if (T.IsNegative(value) || T.IsZero(value)) {
+                    ThrowNegative(value, paramName);
+                }
+            }
+#endif
         }
     }
 }

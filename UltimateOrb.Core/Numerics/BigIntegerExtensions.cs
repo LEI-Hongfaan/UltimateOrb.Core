@@ -1,16 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
-using UltimateOrb.Numerics.BigIntegerWrappers;
 using UltimateOrb.Utilities;
 
 namespace UltimateOrb.Numerics {
 
-    public static partial class BigIntegerExtensions {
+#if STANDALONE_NUMERICS_LIBRARY
+    internal
+#else
+    [Experimental("UoWIP_GenericMath")]
+    public
+#endif
+        static partial class BigIntegerExtensions {
 
         public static bool TestBit(this BigInteger value, int bitPosition) {
             ArgumentOutOfRangeException.ThrowIfNegative(bitPosition, nameof(bitPosition));
@@ -23,7 +29,7 @@ namespace UltimateOrb.Numerics {
         }
     }
 
-    public static partial class BigIntegerExtensions {
+    static partial class BigIntegerExtensions {
 
         extension(BigInteger) {
 

@@ -9332,6 +9332,40 @@
         <member name="M:UltimateOrb.Quadruple.Parse(System.ReadOnlySpan{System.Byte},System.IFormatProvider)">
             <inheritdoc cref="M:System.IUtf8SpanParsable`1.Parse(System.ReadOnlySpan{System.Byte},System.IFormatProvider)" />
         </member>
+        <member name="M:UltimateOrb.Quadruple.Reciprocal(UltimateOrb.Quadruple)">
+            <summary>
+            Computes the multiplicative inverse of the specified value.
+            </summary>
+            <param name="x">The input value whose reciprocal is to be computed.</param>
+            <remarks>
+            The result is mathematically equivalent to <c>1 / x</c>.
+            <para>
+            Special‑case behavior follows the Quadruple division operator:
+            </para>
+            <list type="bullet">
+              <item>
+                <description>
+                  Returns positive or negative infinity when <paramref name="x"/> is
+                  positive or negative zero, respectively.
+                </description>
+              </item>
+              <item>
+                <description>
+                  Returns positive or negative zero when <paramref name="x"/> is
+                  positive or negative infinity, respectively.
+                </description>
+              </item>
+              <item>
+                <description>
+                  Propagates NaN if <paramref name="x"/> is NaN.
+                </description>
+              </item>
+            </list>
+            </remarks>
+            <returns>
+            The reciprocal of <paramref name="x"/>.
+            </returns>
+        </member>
         <member name="M:UltimateOrb.Quadruple.TryParse(System.ReadOnlySpan{System.Byte},UltimateOrb.Quadruple@)">
             <summary>Tries to convert a UTF-8 character span containing the string representation of a number to its double-precision floating-point number equivalent.</summary>
             <param name="utf8Text">A read-only UTF-8 character span that contains the number to convert.</param>

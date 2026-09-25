@@ -984,6 +984,15 @@ public readonly struct TotalOrderIeee754Comparer<T> :
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private static int Main(string[] args) {
             {
+
+                var sdfasd = Quadruple.Parse("3.362103143112093506262677817321752600E-4932");
+
+                Console.WriteLine($"? = {sdfasd}");
+
+            }
+
+
+            {
                 Console.WriteLine($"6 % 4 = {(Quadruple)6 % 4}");
                 Console.WriteLine($"Ieee754Remainder(6, 4) = {Quadruple.Ieee754Remainder(6, 4)}");
 
