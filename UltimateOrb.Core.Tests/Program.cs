@@ -769,7 +769,7 @@ public readonly struct TotalOrderIeee754Comparer<T> :
 
                 // Sign- and kind-specified NaNs via Fortran-style syntax.
                 // Explicit '+' or '-' is required; bare "NaN" has an unspecified sign.
-                T posQNaN1 = typeof(T)== typeof(System.Numerics.Decimal128) ?
+                T posQNaN1 = typeof(T) == typeof(System.Numerics.Decimal128) ?
                     (T)(object)System.Numerics.Decimal128.DecodeBinary(Unsafe.BitCast<Decimal128Bid, UInt128>(Decimal128Bid.Parse("+qNaN(1)"))) :
                     T.Parse("+qNaN(1)", null);
                 T posQNaN2 = typeof(T) == typeof(System.Numerics.Decimal128) ? (T)(object)System.Numerics.Decimal128.DecodeBinary(Unsafe.BitCast<Decimal128Bid, UInt128>(Decimal128Bid.Parse("+qNaN(2)"))) : T.Parse("+qNaN(2)", null);
@@ -983,7 +983,21 @@ public readonly struct TotalOrderIeee754Comparer<T> :
 
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private static int Main(string[] args) {
+            {
+                var sdfasd = Quadruple.Parse("-1");
+                sdfasd = Quadruple.Parse("0x1.b0e000000001p-2", NumberStyles.HexFloat | NumberStyles.AllowHexSpecifier);
+                var sdfasdsads = Quadruple.Acos(sdfasd);
 
+                Console.WriteLine($"? = {sdfasdsads}");
+            }
+            {
+                var sdfd = double.Parse("0x1.921fb54442d18469898cc51701b8p+1", NumberStyles.Float | NumberStyles.AllowHexSpecifier);
+                var sdfasd = Quadruple.Parse("0x1.921fb54442d18469898cc51701b8p+1", NumberStyles.Float | NumberStyles.AllowHexSpecifier);
+                var sdfasdsads = BitConverter.QuadrupleToUInt128Bits(sdfasd);
+                Console.WriteLine($"? = {sdfasdsads:X32}");
+
+            }
+           
             {
                 var sdfasd = Quadruple.Parse("0x1.9bdb55c6b76ea2d8cd8b2ba09601p+10571", NumberStyles.Float | NumberStyles.AllowHexSpecifier);
                 var sdfasdsads = Quadruple.ReciprocalSqrt(sdfasd);
@@ -1533,8 +1547,8 @@ public readonly struct TotalOrderIeee754Comparer<T> :
                    Quadruple.SinCos(Quadruple.MaxValue).Cos,
                    "-0.30636271082509031488660022448440017919312519259050857080649519080770756682434732290755375700667347959975438682991870671207223337586354269355536125317367190130057536352937686702071667622453570128415116"
                 );
-                
-                
+
+
                 Console.WriteLine();
                 Console.WriteLine("Direct Sin/Cos");
                 Console.WriteLine();
@@ -1621,7 +1635,7 @@ public readonly struct TotalOrderIeee754Comparer<T> :
 
             }
             {
-                
+
                 Console.WriteLine($"{Quadruple.Log(2):G36}");
                 Console.WriteLine($"UInt128Bits: {BitConverter.QuadrupleToUInt128Bits(Quadruple.Log(2)):X32}");
 
@@ -1650,7 +1664,7 @@ public readonly struct TotalOrderIeee754Comparer<T> :
                 // 3. Subnormal values
                 // ------------------------------------------------------------
                 Quadruple tiny = BitConverter.UInt128BitsToQuadruple(
-                    (UInt128) 0x0000000000000001UL << 64 | 0x0000000000000000UL);
+                    (UInt128)0x0000000000000001UL << 64 | 0x0000000000000000UL);
                 TestLog("Log(tiny subnormal)", tiny);
 
                 // ------------------------------------------------------------
