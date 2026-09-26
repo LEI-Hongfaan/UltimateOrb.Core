@@ -539,9 +539,8 @@ namespace UltimateOrb.Numerics {
                         result_hi = hi | (1UL << 47);
                         return lo;
                     }
-
-                    // Bounds:  xmax = +1.62e42fefa39ef35793c7673007e6 * 2^13
-                    //          xmin = -1.654bb3b2c73ebb059fabb506ff34 * 2^13
+                    // Bounds:  xmax = +0x1.62e42fefa39ef35793c7673007e6p+13q
+                    //          xmin = -0x1.654bb3b2c73ebb059fabb506ff34p+13q
                     const UInt64 XMaxHi = 0x400C_62E4_2FEF_A39EUL, XMaxLo = 0xF357_93C7_6730_07E6UL;
                     const UInt64 XMinHi = 0xC00C_654B_B3B2_C73EUL, XMinLo = 0xBB05_9FAB_B506_FF34UL;
                     UInt128 ua = ((UInt128)hi << 64) | lo;
