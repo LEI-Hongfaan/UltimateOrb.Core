@@ -75,7 +75,7 @@ namespace UltimateOrb.Numerics {
 
         // ─── mhu4xu2 : o = high 4 words of (a (4w) * b (2w)) ────────────────────────
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void MultiplyHigh(ref InlineArray4<UInt64> o, in InlineArray4<UInt64> a, UInt128 b) {
+        internal static void MultiplyHigh(out InlineArray4<UInt64> o, in InlineArray4<UInt64> a, UInt128 b) {
             unchecked {
                 UInt64 b0 = (UInt64)b, b1 = (UInt64)(b >> 64);
                 UInt128 a0b1 = (UInt128)a[0] * b1, a1b1 = (UInt128)a[1] * b1,
@@ -119,7 +119,7 @@ namespace UltimateOrb.Numerics {
                 t = AddWithCarry(0, (UInt64)(a2b0 >> 64), c1, out c1);
                 o_[1] = AddWithCarry(o_[1], t, c0, out c0);
                 o_[2] = AddWithCarry(o_[2], 0, c0, out _);
-                o  = o_;
+                o = o_;
             }
         }
 
@@ -454,6 +454,7 @@ namespace UltimateOrb.Numerics {
         }
 
         // pol3 : 3-word Horner evaluation.
+        [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.AggressiveOptimization)]
         static void EvalPoly3(out InlineArray3<UInt64> f, UInt64 x, ReadOnlySpan<InlineArray3<UInt64>> c) {
             unchecked {
                 var n = c.Length;
@@ -468,6 +469,7 @@ namespace UltimateOrb.Numerics {
         }
 
         // pol : f = c[0] + c[1]*x + ... + c[n-1]*x^(n-1) + f0*x^n, 128-bit coeffs.
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static UInt128 EvalPoly2(UInt64 x, UInt128 f0, ReadOnlySpan<UInt128> c) {
             unchecked {
                 var n = c.Length;
@@ -490,15 +492,11 @@ namespace UltimateOrb.Numerics {
     partial class Binary128Arithmetic {
 
         public static UInt64 Exp(UInt64 lo, UInt64 hi, out UInt64 result_hi)
-    => Exp(lo, hi, MidpointRounding.ToEven, out result_hi);
+            => Exp(lo, hi, MidpointRounding.ToEven, out result_hi);
 
         public static UInt64 Exp(UInt64 lo, UInt64 hi, MidpointRounding mode, out UInt64 result_hi) {
             unchecked {
-                // exp(x) > 0 always, so "away from zero" == "toward +inf".
-                if (mode == MidpointRounding.AwayFromZero)
-                    mode = MidpointRounding.ToPositiveInfinity;
-
-                bool isNearest = mode == MidpointRounding.ToEven;
+                bool isNearest = IsNearest(mode);
                 bool isUp = mode == MidpointRounding.ToPositiveInfinity;
 
                 UInt64 b1 = hi & 0x7FFFFFFFFFFFFFFFUL;   // sign-stripped
@@ -583,7 +581,7 @@ namespace UltimateOrb.Numerics {
                 ShiftRightArithmetic(ref fs, 0x401A - (int)((hi >> 48) & 0x7FFF));
 
                 Int64 fs2 = unchecked((Int64)fs[2]);
-                int el = (int)(fs2 >> 20);
+                nint el = (nint)(fs2 >> 20);
                 int i0 = (int)((fs2 >> 15) & 31);
                 int i1 = (int)((fs2 >> 10) & 31);
                 int i2 = (int)((fs2 >> 5) & 31);
@@ -621,9 +619,8 @@ namespace UltimateOrb.Numerics {
                 if (Misc.Likely(el >= -16382)) {
                     UInt64 s = (UInt64)(isNearest ? 1 : 0) << 10;
                     if (Misc.Unlikely(((resLo + s + 6) & 0x7FF) <= 6)) {
-                        AsExpqAccurate(out Int64 nel, ref resLo, ref resHi,
+                        AsExpqAccurate(out el, out resLo, out resHi,
                                        ((UInt128)hi << 64) | lo);
-                        el = (int)nel;
                     }
                     rnd = (resLo >> 10) & 1UL;
                     resLo = (resLo >> 11) | (resHi << 53);
@@ -632,18 +629,18 @@ namespace UltimateOrb.Numerics {
                 } else {
                     RaiseExceptionFlagsDummy(FloatingPointExceptionFlags.Underflow);
                     if (el > -16499) {
-                        int sh = -16372 - el;
+                        int sh = -16372 - (int)el;
                         UInt128 s = (UInt128)(isNearest ? 1 : 0) << sh;
                         UInt128 mask = ((UInt128)2 << sh) - 1;
                         UInt128 ra = ((UInt128)resHi << 64) | resLo;
                         if (Misc.Unlikely(((ra + s + 6) & mask) <= 6)) {
-                            AsExpqAccurate(out Int64 nel, ref resLo, ref resHi,
+                            AsExpqAccurate(out el, out resLo, out resHi,
                                            ((UInt128)hi << 64) | lo);
-                            el = (int)nel;
                             ra = ((UInt128)resHi << 64) | resLo;
                         }
+                        sh = -16372 - (int)el;
                         rnd = (UInt64)((ra >> sh) & 1);
-                        ra >>= (-16371 - el);
+                        ra >>= sh + 1;
                         resLo = (UInt64)ra;
                         resHi = (UInt64)(ra >> 64);
                     } else {
@@ -675,38 +672,39 @@ namespace UltimateOrb.Numerics {
 
 
         // as_expq_accurate — 3-word fast path used when the main result is near a tie.
-        static void AsExpqAccurate(out Int64 el, ref UInt64 mLo, ref UInt64 mHi, UInt128 x0) {
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        static void AsExpqAccurate(out nint el, out UInt64 mLo, out UInt64 mHi, UInt128 x0) {
             // Tables ExpTbl0, ExpTbl1, ExpCAcc (all int[][3] → flat spans, row-major).
             // (Full literal tables omitted here for brevity — copy verbatim from the C source;
             //  3-word rows, 16 / 16 / 15 entries respectively. See §4 for the flat layout.)
             unchecked {
                 UInt64 sm = unchecked((UInt64)((Int64)(x0 >> 64) >> 63));
                 UInt128 t = (x0 & (((UInt128)1 << 112) - 1)) | ((UInt128)1 << 112);
-                InlineArray4<UInt64> x = default;
+                InlineArray4<UInt64> x;
                 InlineArray4<UInt64> iln2Top4 = default;
                 for (int j = 0; j < 4; j++) iln2Top4[j] = ExpIlN2[j + 3];
-                MultiplyHigh(ref x, in iln2Top4, t);
+                MultiplyHigh(out x, in iln2Top4, t);
                 x[0] ^= sm; x[1] ^= sm; x[2] ^= sm; x[3] ^= sm;
                 ShiftRightArithmetic(ref x, 0x402E - (int)((x0 >> 112) & 0x7FFF));
-                el = unchecked((Int64)x[3]);
+                el = (nint)x[3];
                 int jt0 = (int)(x[2] >> 60), jt1 = (int)((x[2] >> 56) & 15);
                 x[2] &= 0x00FF_FFFF_FFFF_FFFFUL;
 
                 InlineArray3<UInt64> ft = default;
                 InlineArray3<UInt64> t0 = default, t1 = default;
                 for (int j = 0; j < 3; j++) { t0[j] = ExpTbl0Flat[jt0 * 3 + j]; t1[j] = ExpTbl1Flat[jt1 * 3 + j]; }
-                MultiplyHigh(ref ft, in t0, in t1);
+                MultiplyHigh(out ft, in t0, in t1);
 
                 InlineArray3<UInt64> f = default;
                 EvalPoly3(out f, x[2], ExpCAcc);
-                MultiplyHigh(ref ft, in f, in ft);
+                MultiplyHigh(out ft, in f, in ft);
 
                 UInt128 c1 = ((UInt128)ExpCAccFlat[1 * 3 + 2] << 64) | ExpCAccFlat[1 * 3 + 1];
                 UInt128 f2 = MultiplyHighApproximate(((UInt128)x[1] << 64) | x[0],
                                 c1 + MultiplyHigh(ExpCAccFlat[2 * 3 + 2], x[1]));
                 InlineArray3<UInt64> f1 = default;
                 f1[0] = (UInt64)f2; f1[1] = (UInt64)(f2 >> 64); f1[2] = ExpCAccFlat[0 * 3 + 2];
-                MultiplyHigh(ref f, in ft, in f1);
+                MultiplyHigh(out f, in ft, in f1);
 
                 mLo = (f[1] >> 1) | (f[2] << 63);
                 mHi = f[2] >> 1;
@@ -714,7 +712,7 @@ namespace UltimateOrb.Numerics {
                 bool rndfail;
                 if (Misc.Likely(el >= -16382)) {
                     f2 = ((UInt128)f[1] << 64) | f[0];
-                    UInt128 d = (f2 + 8) & ~((UInt128)0 >> 53);
+                    UInt128 d = (f2 + 8) & (~(UInt128)0 >> 53);
                     rndfail = d <= 16;
                 } else {
                     int s = -16371 - (int)el;
@@ -722,17 +720,22 @@ namespace UltimateOrb.Numerics {
                     f[0] = AddWithCarry(f[0], 8, 0, out k);
                     f[1] = AddWithCarry(f[1], 0, k, out k);
                     f[2] = AddWithCarry(f[2], 0, k, out k);
-                    if (s < 64) { f[1] &= (1UL << s) - 1; f[2] = 0; } else if (s < 128) { f[2] &= (1UL << (s - 64)) - 1; }
+                    if (s < 64) {
+                        f[1] &= (1UL << s) - 1; f[2] = 0;
+                    } else if (s < 128) {
+                        f[2] &= (1UL << (s - 64)) - 1;
+                    }
                     rndfail = f[0] <= 16 && (f[1] | f[2]) == 0;
                 }
                 if (rndfail)
-                    AsExpqSuperaccurate(out el, ref mLo, ref mHi, x0);
+                    AsExpqSuperaccurate(out el, out mLo, out mHi, x0);
             }
         }
 
         // as_expq_superaccurate — same shape, uses the 7-word iln2 and the 6-word tables.
-        static void AsExpqSuperaccurate(out Int64 el, ref UInt64 mLo, ref UInt64 mHi, UInt128 x0) {
-            // Uses ExpTbl6Flat (16×6), ExpC6Flat (28×6), ExpIlN2 (7 words).
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        static void AsExpqSuperaccurate(out nint el, out UInt64 mLo, out UInt64 mHi, UInt128 x0) {
+            // Uses ExpTblSupAccFlat (16×6), ExpC6Flat (28×6), ExpIlN2 (7 words).
             unchecked {
                 Int64 sm = unchecked((Int64)(x0 >> 64) >> 63);
                 UInt128 t = (x0 & (((UInt128)1 << 112) - 1)) | ((UInt128)1 << 112);
@@ -740,21 +743,21 @@ namespace UltimateOrb.Numerics {
                 MultiplyHigh(out x, in ExpIlN2_7, t);
                 for (int j = 0; j < 7; j++) x[j] ^= unchecked((UInt64)sm);
                 ShiftRightArithmetic(ref x, 0x402E - (int)((x0 >> 112) & 0x7FFF));
-                el = unchecked((Int64)x[6]);
+                el = (nint)x[6];
                 int jt = (int)(x[5] >> 60);
                 x[5] &= 0x0FFF_FFFF_FFFF_FFFFUL;
 
                 InlineArray6<UInt64> f = default, f1 = default, f2 = default, ft = default;
-                EvalPoly6(out f, x[5], ExpC6);
-                EvalPoly6Reduced(out f1, x[4], ExpC6);
+                EvalPoly6(out f, x[5], ExpCSupAcc);
+                EvalPoly6Reduced(out f1, x[4], ExpCSupAcc);
                 InlineArray6<UInt64> xCopy = default;
                 for (int j = 0; j < 6; j++) xCopy[j] = x[j];
-                EvalPoly6ReducedReduced(out f2, ref xCopy, ExpC6);
+                EvalPoly6ReducedReduced(out f2, ref xCopy, ExpCSupAcc);
 
                 MultiplyHigh(out ft, in f, in f1);
                 MultiplyHigh(out ft, in ft, in f2);
                 InlineArray6<UInt64> tbl = default;
-                for (int j = 0; j < 6; j++) tbl[j] = ExpTbl6Flat[jt * 6 + j];
+                for (int j = 0; j < 6; j++) tbl[j] = ExpTblSupAccFlat[jt * 6 + j];
                 MultiplyHigh(out ft, in ft, in tbl);
 
                 mLo = (ft[4] >> 1) | (ft[5] << 63);
@@ -776,7 +779,7 @@ namespace UltimateOrb.Numerics {
         // iln2 (7 words, from the C source):
         static ReadOnlySpan<UInt64> ExpIlN2 => [
             0xea90b9e60c4a90a0, 0x24d92f75c16be0b3, 0xde1c43f755176cd6, 0x8b25166cd1a13247,
-        0xeb577aa8dd695a58, 0xbe87fed0691d3e88, 0xb8aa3b295c17f0bb
+            0xeb577aa8dd695a58, 0xbe87fed0691d3e88, 0xb8aa3b295c17f0bb
         ];
 
         static ref readonly InlineArray7<UInt64> ExpIlN2_7 => ref UltimateOrb.Runtime.CompilerServices.Unsafe.As<UInt64, InlineArray7<UInt64>>(ref MemoryMarshal.GetReference(ExpIlN2));
@@ -884,7 +887,7 @@ namespace UltimateOrb.Numerics {
 
 
         // 6-word tables used by AsExpqSuperaccurate (16×6 and 28×6).
-        static ReadOnlySpan<UInt64> ExpTbl6Flat => [
+        static ReadOnlySpan<UInt64> ExpTblSupAccFlat => [
 
              0x0000000000000000, 0x0000000000000000, 0x0000000000000000, 0x0000000000000000, 0x0000000000000000, 0x8000000000000000,
 0x82dc9bf3421840d1, 0x7835af9ab4e6355c, 0x5d42b362af1ee859, 0x148a0459e7585151, 0xc5c95b8c2154c1b2, 0x85aac367cc487b14,
@@ -905,51 +908,52 @@ namespace UltimateOrb.Numerics {
             ];
 
 
-        static ReadOnlySpan<UInt64> ExpC6Flat => [
-              0x0000000000000000, 0x0000000000000000, 0x0000000000000000, 0x0000000000000000, 0x0000000000000000, 0x8000000000000000,
- 0x2acaa97da57cadbe, 0xf3dc3b1036f5d64c, 0xc5068badc5d57d15, 0xa079a193394c5b16, 0xe4f1d9cc01f97b57, 0x58b90bfbe8e7bcd5,
- 0xd344071b5ec47714, 0x524eb0376b9686e0, 0xc2be93bbb1396e6e, 0xa3a2751c30ce69d4, 0x6f16b06ec9735fca, 0x1ebfbdff82c58ea8,
- 0x80960837d68b3044, 0x44545f2e4dd67d06, 0x4753198ade236146, 0xa7ae23a226d00887, 0xcce9d8aeccaf4b7b, 0x071ac235c1282fe2,
- 0xeee877628d8f6274, 0x8f7e8887e73829d7, 0x699b709699e1815f, 0x72478ea53e63911d, 0x9ccbbe0b53eeac50, 0x013b2ab6fba4e772,
- 0x318a9f63b2f3ec5c, 0x2f040f926e2c93be, 0xc8cdc36aa406093f, 0x60aed94d2dce32e1, 0x20e2fed34a297d86, 0x002bb0ffcf14ce62,
- 0x2d3c7b9299d0d3e1, 0x91ec7aec4e3f0a35, 0x549592ff6d6ab786, 0xcfb314ffccc47bb0, 0xdbd2c2a261ac8d07, 0x00050c244be1b1e1,
- 0xcd46dc2cd5899528, 0x95ce94549c9a636a, 0x5d3119327fac831d, 0x4ace1152e8810fee, 0x1a1ac547321f639a, 0x00007ff2ff1622c3,
- 0x8531a13788143560, 0x5c5f54178a891b6b, 0x7d5b21cd05968068, 0x2586e1a0f7107ab9, 0x11fec7ff3036d3be, 0x00000b160111d2e4,
- 0xe590c3fdfb446be7, 0x2d5087b376c0214d, 0x738afd2a4917377a, 0x84518cb8caa9ba26, 0x3e1ed253872d27fc, 0x000000da929e9caf,
- 0xcc782de6ff640fd0, 0x68569686f1264ea6, 0x98468b24acd303be, 0xb4ce2a0608a16570, 0xc764fb7ed0eca973, 0x0000000f267a8ac5,
- 0xee22a537a6d9a8b8, 0x08110963d1d9380f, 0x43b147aa9f2c11b5, 0x90a4edc7b3f29c1c, 0x8dd92607abccaf23, 0x00000000f465639a,
- 0x38202f8bf18f1943, 0xbc2fb66e0bf68e76, 0x511f7698b91cba26, 0xd17730e76aaedf16, 0x7e14c2f15ab43f0b, 0x000000000e1deb28,
- 0xea93b5cedf528c2f, 0x6ee667b44f788f66, 0x714aa5175cd8c9ab, 0x7b8d8ce6fe81f087, 0x8b3687cb140d6180, 0x0000000000c0b0c9,
- 0x88ad1fe5bcec581b, 0xa772e0b581376df7, 0x1d1edb9f5248282a, 0x2ae5761242913279, 0x26ac3c54b9f8a1b1, 0x0000000000098a4b,
- 0x9d19faf9f3a16e65, 0xc2fde1c74321a361, 0x3787e55bad70a464, 0xfc6a729280d47c69, 0xa10ec1008799ec55, 0x00000000000070db,
- 0xf708ee5bf7061dee, 0x921cfcdbbccf2eb0, 0x7cd64e11a79215fe, 0x93b26377e3b574bd, 0xa26b9e7e2ce48e3f, 0x00000000000004e3,
- 0x9bb4d4ccb609d71e, 0x6ef9409a4cd3ac24, 0xc560a32b4349d4dd, 0xb1001eff03e83f71, 0x088968384b4faac3, 0x0000000000000033,
- 0xb5c5f81b7e235f48, 0x9c1837383fef6aa4, 0xcf80a6c83ea7dc89, 0x2ed389743c9aa15c, 0xf7176bdb43695d73, 0x0000000000000001,
- 0x4e3f1412be77b88a, 0x75f070df1338e5db, 0xd970f6d684dcca91, 0xe056ab257aa7f274, 0x125a7ecb835c64da, 0x0000000000000000,
- 0x6c8a502410b3a92b, 0x5ae22ff5b3b87c53, 0x5510cef268f5a4f6, 0x27126f802bc39d75, 0x00a2d6625a8289ac, 0x0000000000000000,
- 0xa851c04a8293fece, 0x95e77dec82b8eb58, 0xef60eb192fe67eda, 0xe0aadf36ddf86f4f, 0x00055ff15e0f8271, 0x0000000000000000,
- 0x7e2f1903476d3f72, 0x991510e40164f6ec, 0xb93a9cf471520656, 0x81d8f91aed9d0512, 0x00002b59f5a6e03b, 0x0000000000000000,
- 0xe661b8b0f04bd98d, 0xc0c7162d7c443b27, 0x48eb10aa6d041426, 0xfb5cb2465d33a354, 0x0000014e7515dc98, 0x0000000000000000,
- 0xa2de610b24affa88, 0x36d51a1c2cf018ae, 0xe823660bee34df2b, 0xd5e52102fa4f3d47, 0x00000009a8d57b65, 0x0000000000000000,
- 0x8297d75925cf8a0e, 0xb19c48d3a13188f6, 0x08ec765f339c0710, 0x6a09e41e7a3814f9, 0x00000000448fbf65, 0x0000000000000000,
- 0x11744278158dd70d, 0xd10b922fb4d1b574, 0xdd8263d932a8a20c, 0x99f1cc682af884c5, 0x0000000001d3ebc2, 0x0000000000000000,
- 0x20127ee09bb9f25c, 0x5ed98d7cde9ecace, 0x46da42907892bb39, 0x9af8dbd36a3b0863, 0x00000000000c0334, 0x0000000000000000,
- 0xafd75d37c82b15ca, 0xf0acd37674cf3129, 0xae8a3fb59540ab8d, 0xa3dfeb50d4131639, 0x0000000000004c20, 0x0000000000000000,
- 0xdaaf1913e1cb12f0, 0xe352ea644fb69c62, 0xf3fac0750b414cc5, 0xcf69a29f13de20e8, 0x00000000000001d1, 0x0000000000000000,
- 0x0587a7d1a7ec6c45, 0x05eaca3704dcd2f6, 0x12dcbe8116eada8f, 0xc333445e3155f79b, 0x000000000000000a, 0x0000000000000000,
- 0x183f54470927dbcd, 0x76bc8f5b8e8b7093, 0x8f099fb908474b26, 0x3d9aea5b4d0ebfae, 0x0000000000000000, 0x0000000000000000,
- 0x261c179f4bdffa1d, 0x0909a0681e2103a8, 0x4dbdd766d2d9a092, 0x01559c86508b1539, 0x0000000000000000, 0x0000000000000000,
- 0x3816a7ca0ca85578, 0x6b7fd2696989cdee, 0xd34dacabb2d48a6c, 0x00072ce49e65a3ac, 0x0000000000000000, 0x0000000000000000,
- 0xd4e29d35fe14e115, 0xc30d08011bdafd19, 0xa9a6bf19955b2132, 0x00002572be492f62, 0x0000000000000000, 0x0000000000000000,
- 0xe4df41884be86bb5, 0x0c5772ee960fd5bf, 0x9dbee3b9355d1fb0, 0x000000bdd01d5d84, 0x0000000000000000, 0x0000000000000000,
- 0x80446608d32c4ed3, 0xb4d5892fe7709c19, 0xd3840403fcefe8a9, 0x00000003bc4fb6d4, 0x0000000000000000, 0x0000000000000000
+
+        static ReadOnlySpan<UInt64> ExpCSupAccFlat => [
+            0x0000000000000000, 0x0000000000000000, 0x0000000000000000, 0x0000000000000000, 0x0000000000000000, 0x8000000000000000,
+      0x2acaa97da57cadbe, 0xf3dc3b1036f5d64c, 0xc5068badc5d57d15, 0xa079a193394c5b16, 0xe4f1d9cc01f97b57, 0x58b90bfbe8e7bcd5,
+      0xd344071b5ec47714, 0x524eb0376b9686e0, 0xc2be93bbb1396e6e, 0xa3a2751c30ce69d4, 0x6f16b06ec9735fca, 0x1ebfbdff82c58ea8,
+      0x80960837d68b3044, 0x44545f2e4dd67d06, 0x4753198ade236146, 0xa7ae23a226d00887, 0xcce9d8aeccaf4b7b, 0x071ac235c1282fe2,
+      0xeee877628d8f6274, 0x8f7e8887e73829d7, 0x699b709699e1815f, 0x72478ea53e63911d, 0x9ccbbe0b53eeac50, 0x013b2ab6fba4e772,
+      0x318a9f63b2f3ec5c, 0x2f040f926e2c93be, 0xc8cdc36aa406093f, 0x60aed94d2dce32e1, 0x20e2fed34a297d86, 0x002bb0ffcf14ce62,
+      0x2d3c7b9299d0d3e1, 0x91ec7aec4e3f0a35, 0x549592ff6d6ab786, 0xcfb314ffccc47bb0, 0xdbd2c2a261ac8d07, 0x00050c244be1b1e1,
+      0xcd46dc2cd5899528, 0x95ce94549c9a636a, 0x5d3119327fac831d, 0x4ace1152e8810fee, 0x1a1ac547321f639a, 0x00007ff2ff1622c3,
+      0x8531a13788143560, 0x5c5f54178a891b6b, 0x7d5b21cd05968068, 0x2586e1a0f7107ab9, 0x11fec7ff3036d3be, 0x00000b160111d2e4,
+      0xe590c3fdfb446be7, 0x2d5087b376c0214d, 0x738afd2a4917377a, 0x84518cb8caa9ba26, 0x3e1ed253872d27fc, 0x000000da929e9caf,
+      0xcc782de6ff640fd0, 0x68569686f1264ea6, 0x98468b24acd303be, 0xb4ce2a0608a16570, 0xc764fb7ed0eca973, 0x0000000f267a8ac5,
+      0xee22a537a6d9a8b8, 0x08110963d1d9380f, 0x43b147aa9f2c11b5, 0x90a4edc7b3f29c1c, 0x8dd92607abccaf23, 0x00000000f465639a,
+      0x38202f8bf18f1943, 0xbc2fb66e0bf68e76, 0x511f7698b91cba26, 0xd17730e76aaedf16, 0x7e14c2f15ab43f0b, 0x000000000e1deb28,
+      0xea93b5cedf528c2f, 0x6ee667b44f788f66, 0x714aa5175cd8c9ab, 0x7b8d8ce6fe81f087, 0x8b3687cb140d6180, 0x0000000000c0b0c9,
+      0x88ad1fe5bcec581b, 0xa772e0b581376df7, 0x1d1edb9f5248282a, 0x2ae5761242913279, 0x26ac3c54b9f8a1b1, 0x0000000000098a4b,
+      0x9d19faf9f3a16e65, 0xc2fde1c74321a361, 0x3787e55bad70a464, 0xfc6a729280d47c69, 0xa10ec1008799ec55, 0x00000000000070db,
+      0xf708ee5bf7061dee, 0x921cfcdbbccf2eb0, 0x7cd64e11a79215fe, 0x93b26377e3b574bd, 0xa26b9e7e2ce48e3f, 0x00000000000004e3,
+      0x9bb4d4ccb609d71e, 0x6ef9409a4cd3ac24, 0xc560a32b4349d4dd, 0xb1001eff03e83f71, 0x088968384b4faac3, 0x0000000000000033,
+      0xb5c5f81b7e235f48, 0x9c1837383fef6aa4, 0xcf80a6c83ea7dc89, 0x2ed389743c9aa15c, 0xf7176bdb43695d73, 0x0000000000000001,
+      0x4e3f1412be77b88a, 0x75f070df1338e5db, 0xd970f6d684dcca91, 0xe056ab257aa7f274, 0x125a7ecb835c64da, 0x0000000000000000,
+      0x6c8a502410b3a92b, 0x5ae22ff5b3b87c53, 0x5510cef268f5a4f6, 0x27126f802bc39d75, 0x00a2d6625a8289ac, 0x0000000000000000,
+      0xa851c04a8293fece, 0x95e77dec82b8eb58, 0xef60eb192fe67eda, 0xe0aadf36ddf86f4f, 0x00055ff15e0f8271, 0x0000000000000000,
+      0x7e2f1903476d3f72, 0x991510e40164f6ec, 0xb93a9cf471520656, 0x81d8f91aed9d0512, 0x00002b59f5a6e03b, 0x0000000000000000,
+      0xe661b8b0f04bd98d, 0xc0c7162d7c443b27, 0x48eb10aa6d041426, 0xfb5cb2465d33a354, 0x0000014e7515dc98, 0x0000000000000000,
+      0xa2de610b24affa88, 0x36d51a1c2cf018ae, 0xe823660bee34df2b, 0xd5e52102fa4f3d47, 0x00000009a8d57b65, 0x0000000000000000,
+      0x8297d75925cf8a0e, 0xb19c48d3a13188f6, 0x08ec765f339c0710, 0x6a09e41e7a3814f9, 0x00000000448fbf65, 0x0000000000000000,
+      0x11744278158dd70d, 0xd10b922fb4d1b574, 0xdd8263d932a8a20c, 0x99f1cc682af884c5, 0x0000000001d3ebc2, 0x0000000000000000,
+      0x20127ee09bb9f25c, 0x5ed98d7cde9ecace, 0x46da42907892bb39, 0x9af8dbd36a3b0863, 0x00000000000c0334, 0x0000000000000000,
+      0xafd75d37c82b15ca, 0xf0acd37674cf3129, 0xae8a3fb59540ab8d, 0xa3dfeb50d4131639, 0x0000000000004c20, 0x0000000000000000,
+      0xdaaf1913e1cb12f0, 0xe352ea644fb69c62, 0xf3fac0750b414cc5, 0xcf69a29f13de20e8, 0x00000000000001d1, 0x0000000000000000,
+      0x0587a7d1a7ec6c45, 0x05eaca3704dcd2f6, 0x12dcbe8116eada8f, 0xc333445e3155f79b, 0x000000000000000a, 0x0000000000000000,
+      0x183f54470927dbcd, 0x76bc8f5b8e8b7093, 0x8f099fb908474b26, 0x3d9aea5b4d0ebfae, 0x0000000000000000, 0x0000000000000000,
+      0x261c179f4bdffa1d, 0x0909a0681e2103a8, 0x4dbdd766d2d9a092, 0x01559c86508b1539, 0x0000000000000000, 0x0000000000000000,
+      0x3816a7ca0ca85578, 0x6b7fd2696989cdee, 0xd34dacabb2d48a6c, 0x00072ce49e65a3ac, 0x0000000000000000, 0x0000000000000000,
+      0xd4e29d35fe14e115, 0xc30d08011bdafd19, 0xa9a6bf19955b2132, 0x00002572be492f62, 0x0000000000000000, 0x0000000000000000,
+      0xe4df41884be86bb5, 0x0c5772ee960fd5bf, 0x9dbee3b9355d1fb0, 0x000000bdd01d5d84, 0x0000000000000000, 0x0000000000000000,
+      0x80446608d32c4ed3, 0xb4d5892fe7709c19, 0xd3840403fcefe8a9, 0x00000003bc4fb6d4, 0x0000000000000000, 0x0000000000000000,
 
 
 
             ];
 
-        static ReadOnlySpan<InlineArray6<UInt64>> ExpC6 => MemoryMarshal.CreateReadOnlySpan(
-            ref System.Runtime.CompilerServices.Unsafe.As<UInt64, InlineArray6<UInt64>>(ref MemoryMarshal.GetReference(ExpC6Flat)), 28);
+        static ReadOnlySpan<InlineArray6<UInt64>> ExpCSupAcc => MemoryMarshal.CreateReadOnlySpan(
+            ref System.Runtime.CompilerServices.Unsafe.As<UInt64, InlineArray6<UInt64>>(ref MemoryMarshal.GetReference(ExpCSupAccFlat)), 37);
 
 
 

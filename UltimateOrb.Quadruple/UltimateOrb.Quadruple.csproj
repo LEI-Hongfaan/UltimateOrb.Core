@@ -32,7 +32,7 @@
 
   <PropertyGroup>
     <!-- Sync with UltimateOrb.Core -->
-	<Version>3.7.8-beta.5</Version>
+	<Version>3.7.9-beta.0</Version>
   </PropertyGroup>
 	
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

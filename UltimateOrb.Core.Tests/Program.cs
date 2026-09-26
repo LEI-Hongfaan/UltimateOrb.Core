@@ -983,15 +983,46 @@ public readonly struct TotalOrderIeee754Comparer<T> :
 
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private static int Main(string[] args) {
+
             {
-                
+                Console.WriteLine((BigRational)Quadruple.Parse("-0x1.62dce2413e7765c7c0243f671121p+13", NumberStyles.HexFloat | NumberStyles.AllowHexSpecifier));
+
+                VerifyAgainstMathematica(
+                    "Exp(-0x1.62dce2413e7765c7c0243f671121p+13Q)",
+                    Quadruple.Exp(Quadruple.Parse("-0x1.62dce2413e7765c7c0243f671121p+13", NumberStyles.HexFloat | NumberStyles.AllowHexSpecifier)),
+                    "2.0942649676780800727735277433416883817872725165808339258074245075733822792359646633525768677916728881165533827288548328122534814974069802722954793017891484734575664178190357757436980439025354517211451E-4932"
+                );
+
+                Console.WriteLine((BigRational)Quadruple.Parse("-0x1.62de6f282657d4361c7897593a4fp+13", NumberStyles.HexFloat | NumberStyles.AllowHexSpecifier));
+                VerifyAgainstMathematica(
+                    "Exp(-0x1.62de6f282657d4361c7897593a4fp+13Q)",
+                    Quadruple.Exp(Quadruple.Parse("-0x1.62de6f282657d4361c7897593a4fp+13", NumberStyles.HexFloat | NumberStyles.AllowHexSpecifier)),
+                    "1.7253032778213895939230521761530895925151784150113067188905394654156973813326006991564952489466210415454375907705408931637982098389915728171445905852342578352230451020496063951788202037759548716721714E-4932"
+                 );
+                return 0;
+            }
+            {
+                var sdfasd = Quadruple.Parse("0x1.0000000000000000000000000002p-113", NumberStyles.HexFloat | NumberStyles.AllowHexSpecifier);
+                sdfasd = Quadruple.Parse("-0x1p-114", NumberStyles.HexFloat | NumberStyles.AllowHexSpecifier);
+                sdfasd = Quadruple.Parse("-0x1.62de6f282657d4361c7897593a4fp+13", NumberStyles.HexFloat | NumberStyles.AllowHexSpecifier);
+
+
+
+                var sdfasdsads = Quadruple.Exp(sdfasd);
+
+                Console.WriteLine($"? = {sdfasdsads:G36}");
+
+
+            }
+            {
+
                 var sdfasd = Quadruple.Parse("0x3.fa697792aae67f93d752261ef204p+0", NumberStyles.HexFloat | NumberStyles.AllowHexSpecifier);
                 sdfasd = Quadruple.Parse("0x1.fffff0000040p-1", NumberStyles.HexFloat | NumberStyles.AllowHexSpecifier);
                 sdfasd = Quadruple.Parse("0x1.6b458a5043ee7e707906a79d67dp+0", NumberStyles.HexFloat | NumberStyles.AllowHexSpecifier);
                 sdfasd = Quadruple.Parse("0x1.000007174d5df1a9c57076b66f6bp+0", NumberStyles.HexFloat | NumberStyles.AllowHexSpecifier);
                 var sdfasdsads = Quadruple.Log(sdfasd);
 
-                Console.WriteLine($"? = {sdfasdsads}");
+                Console.WriteLine($"? = {sdfasdsads:G36}");
 
             }
             {
@@ -999,7 +1030,7 @@ public readonly struct TotalOrderIeee754Comparer<T> :
                 sdfasd = Quadruple.Parse("0x1.b0e000000001p-2", NumberStyles.HexFloat | NumberStyles.AllowHexSpecifier);
                 var sdfasdsads = Quadruple.Acos(sdfasd);
 
-                Console.WriteLine($"? = {sdfasdsads}");
+                Console.WriteLine($"? = {sdfasdsads:G36}");
             }
             {
                 var sdfd = double.Parse("0x1.921fb54442d18469898cc51701b8p+1", NumberStyles.Float | NumberStyles.AllowHexSpecifier);
@@ -1008,19 +1039,19 @@ public readonly struct TotalOrderIeee754Comparer<T> :
                 Console.WriteLine($"? = {sdfasdsads:X32}");
 
             }
-           
+
             {
                 var sdfasd = Quadruple.Parse("0x1.9bdb55c6b76ea2d8cd8b2ba09601p+10571", NumberStyles.Float | NumberStyles.AllowHexSpecifier);
                 var sdfasdsads = Quadruple.ReciprocalSqrt(sdfasd);
 
-                Console.WriteLine($"? = {sdfasdsads}");
+                Console.WriteLine($"? = {sdfasdsads:G36}");
 
             }
             {
 
                 var sdfasd = Quadruple.Parse("3.362103143112093506262677817321752600E-4932");
 
-                Console.WriteLine($"? = {sdfasd}");
+                Console.WriteLine($"? = {sdfasd:G36}");
 
             }
 

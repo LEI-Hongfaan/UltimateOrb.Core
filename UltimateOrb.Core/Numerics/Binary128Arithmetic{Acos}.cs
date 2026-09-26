@@ -46,17 +46,18 @@ namespace UltimateOrb.Numerics {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void MultiplyHigh(ref InlineArray2<UInt64> o, in InlineArray2<UInt64> b, in InlineArray2<UInt64> a) {
+        internal static void MultiplyHigh(out InlineArray2<UInt64> o, in InlineArray2<UInt64> b, in InlineArray2<UInt64> a) {
             unchecked {
                 UInt128 a1b0 = (UInt128)a[1] * b[0];
-                UInt64 o0 = (UInt64)(a1b0 >> 64);
+                InlineArray2<UInt64> o_ = default;
+                o_[0] = (UInt64)(a1b0 >> 64);
                 UInt128 a0b1 = (UInt128)a[0] * b[1];
                 UInt128 a1b1 = (UInt128)a[1] * b[1];
                 UInt64 t = AddWithCarry((UInt64)a1b1, (UInt64)(a0b1 >> 64), 0, out var c0);
-                o0 = AddWithCarry(o0, t, 0, out var c1);
-                UInt64 o1 = AddWithCarry((UInt64)(a1b1 >> 64), 0, c0, out c0);
-                o1 = AddWithCarry(o1, 0, c1, out _);
-                o[0] = o0; o[1] = o1;
+                o_[0] = AddWithCarry(o_[0], t, 0, out var c1);
+                o_[1] = AddWithCarry((UInt64)(a1b1 >> 64), 0, c0, out c0);
+                o_[1] = AddWithCarry(o_[1], 0, c1, out _);
+                o = o_;
             }
         }
 
@@ -88,21 +89,22 @@ namespace UltimateOrb.Numerics {
 
         // mhu3uu3: multiply high of 3-word by 1-word
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void MultiplyHigh(ref InlineArray3<UInt64> o, UInt64 y, in InlineArray3<UInt64> x) {
+        internal static void MultiplyHigh(out InlineArray3<UInt64> o, UInt64 y, in InlineArray3<UInt64> x) {
             unchecked {
                 UInt128 xy0 = (UInt128)x[0] * y;
                 UInt128 xy1 = (UInt128)x[1] * y;
                 UInt128 xy2 = (UInt128)x[2] * y;
-                UInt64 o0 = AddWithCarry((UInt64)xy1, (UInt64)(xy0 >> 64), 0, out var c);
-                UInt64 o1 = AddWithCarry((UInt64)xy2, (UInt64)(xy1 >> 64), c, out c);
-                UInt64 o2 = AddWithCarry(0, (UInt64)(xy2 >> 64), c, out _);
-                o[0] = o0; o[1] = o1; o[2] = o2;
+                InlineArray3<UInt64> o_ = default;
+                o_[0] = AddWithCarry((UInt64)xy1, (UInt64)(xy0 >> 64), 0, out var c);
+                o_[1] = AddWithCarry((UInt64)xy2, (UInt64)(xy1 >> 64), c, out c);
+                o_[2] = AddWithCarry(0, (UInt64)(xy2 >> 64), c, out _);
+                o = o_;
             }
         }
 
         // mhu3u2u3: multiply-high of 3-word by 2-word (returns 3-word high)
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void MultiplyHigh(ref InlineArray3<UInt64> o, in InlineArray2<UInt64> y, in InlineArray3<UInt64> x) {
+        internal static void MultiplyHigh(out InlineArray3<UInt64> o, in InlineArray2<UInt64> y, in InlineArray3<UInt64> x) {
             unchecked {
                 UInt128 x1y0 = (UInt128)x[1] * y[0];
                 UInt128 x2y0 = (UInt128)x[2] * y[0];
@@ -112,16 +114,17 @@ namespace UltimateOrb.Numerics {
                 x2y0 += x1y0 >> 64;
                 x1y1 += x0y1 >> 64;
                 x2y1 += x1y1 >> 64;
-                UInt64 o0 = AddWithCarry((UInt64)x1y1, (UInt64)x2y0, 0, out var c);
-                UInt64 o1 = AddWithCarry((UInt64)x2y1, (UInt64)(x2y0 >> 64), c, out c);
-                UInt64 o2 = AddWithCarry(0, (UInt64)(x2y1 >> 64), c, out _);
-                o[0] = o0; o[1] = o1; o[2] = o2;
+                InlineArray3<UInt64> o_ = default;
+                o_[0] = AddWithCarry((UInt64)x1y1, (UInt64)x2y0, 0, out var c);
+                o_[1] = AddWithCarry((UInt64)x2y1, (UInt64)(x2y0 >> 64), c, out c);
+                o_[2] = AddWithCarry(0, (UInt64)(x2y1 >> 64), c, out _);
+                o = o_;
             }
         }
 
         // mhu3u3u3: multiply-high of 3-word by 3-word (returns 3-word high)
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void MultiplyHigh(ref InlineArray3<UInt64> o, in InlineArray3<UInt64> b, in InlineArray3<UInt64> a) {
+        internal static void MultiplyHigh(out InlineArray3<UInt64> o, in InlineArray3<UInt64> b, in InlineArray3<UInt64> a) {
             unchecked {
                 UInt128 a1b1 = (UInt128)a[1] * b[1];
                 UInt128 a2b0 = (UInt128)a[2] * b[0];
@@ -132,19 +135,19 @@ namespace UltimateOrb.Numerics {
 
                 a2b1 += a2b0 >> 64;
                 a1b2 += a0b2 >> 64;
+                InlineArray3<UInt64> o_ = default;
+                o_[0] = (UInt64)(a1b1 >> 64);
+                o_[1] = (UInt64)a2b2;
+                o_[2] = (UInt64)(a2b2 >> 64);
+                o_[0] = AddWithCarry(o_[0], (UInt64)a2b1, 0, out var c);
+                o_[1] = AddWithCarry(o_[1], (UInt64)(a2b1 >> 64), c, out c);
+                o_[2] = AddWithCarry(o_[2], 0, c, out c);
 
-                UInt64 o0 = (UInt64)(a1b1 >> 64);
-                UInt64 o1 = (UInt64)a2b2;
-                UInt64 o2 = (UInt64)(a2b2 >> 64);
-                o0 = AddWithCarry(o0, (UInt64)a2b1, 0, out var c);
-                o1 = AddWithCarry(o1, (UInt64)(a2b1 >> 64), c, out c);
-                o2 = AddWithCarry(o2, 0, c, out c);
+                o_[0] = AddWithCarry(o_[0], (UInt64)a1b2, 0, out c);
+                o_[1] = AddWithCarry(o_[1], (UInt64)(a1b2 >> 64), c, out c);
+                o_[2] = AddWithCarry(o_[2], 0, c, out _);
 
-                o0 = AddWithCarry(o0, (UInt64)a1b2, 0, out c);
-                o1 = AddWithCarry(o1, (UInt64)(a1b2 >> 64), c, out c);
-                o2 = AddWithCarry(o2, 0, c, out _);
-
-                o[0] = o0; o[1] = o1; o[2] = o2;
+                o = o_;
             }
         }
 
@@ -201,7 +204,7 @@ namespace UltimateOrb.Numerics {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void MultiplyHigh(ref InlineArray4<UInt64> o, in InlineArray4<UInt64> b, in InlineArray4<UInt64> a) {
+        internal static void MultiplyHigh(out InlineArray4<UInt64> o, in InlineArray4<UInt64> b, in InlineArray4<UInt64> a) {
             unchecked {
                 UInt128 a3b0 = (UInt128)a[3] * b[0];
                 UInt128 a3b2 = (UInt128)a[3] * b[2];
@@ -217,27 +220,28 @@ namespace UltimateOrb.Numerics {
                 a3b1 += a2b1 >> 64;
                 a2b2 += a1b2 >> 64;
 
-                UInt64 o0 = AddWithCarry((UInt64)(a0b3 >> 64), (UInt64)a1b3, 0, out var c);
-                UInt64 o1 = AddWithCarry((UInt64)(a1b3 >> 64), (UInt64)a2b3, c, out c);
-                UInt64 o2 = AddWithCarry((UInt64)(a2b3 >> 64), (UInt64)a3b3, c, out c);
-                UInt64 o3 = AddWithCarry((UInt64)(a3b3 >> 64), 0, c, out c);
+                InlineArray4<UInt64> o_ = default;
+                o_[0] = AddWithCarry((UInt64)(a0b3 >> 64), (UInt64)a1b3, 0, out var c);
+                o_[1] = AddWithCarry((UInt64)(a1b3 >> 64), (UInt64)a2b3, c, out c);
+                o_[2] = AddWithCarry((UInt64)(a2b3 >> 64), (UInt64)a3b3, c, out c);
+                o_[3] = AddWithCarry((UInt64)(a3b3 >> 64), 0, c, out c);
 
-                o0 = AddWithCarry(o0, (UInt64)(a3b0 >> 64), 0, out c);
-                o1 = AddWithCarry(o1, (UInt64)a3b2, c, out c);
-                o2 = AddWithCarry(o2, (UInt64)(a3b2 >> 64), c, out c);
-                o3 = AddWithCarry(o3, 0, c, out c);
+                o_[0] = AddWithCarry(o_[0], (UInt64)(a3b0 >> 64), 0, out c);
+                o_[1] = AddWithCarry(o_[1], (UInt64)a3b2, c, out c);
+                o_[2] = AddWithCarry(o_[2], (UInt64)(a3b2 >> 64), c, out c);
+                o_[3] = AddWithCarry(o_[3], 0, c, out c);
 
-                o0 = AddWithCarry(o0, (UInt64)a3b1, 0, out c);
-                o1 = AddWithCarry(o1, (UInt64)(a3b1 >> 64), c, out c);
-                o2 = AddWithCarry(o2, 0, c, out c);
-                o3 = AddWithCarry(o3, 0, c, out c);
+                o_[0] = AddWithCarry(o_[0], (UInt64)a3b1, 0, out c);
+                o_[1] = AddWithCarry(o_[1], (UInt64)(a3b1 >> 64), c, out c);
+                o_[2] = AddWithCarry(o_[2], 0, c, out c);
+                o_[3] = AddWithCarry(o_[3], 0, c, out c);
 
-                o0 = AddWithCarry(o0, (UInt64)a2b2, 0, out c);
-                o1 = AddWithCarry(o1, (UInt64)(a2b2 >> 64), c, out c);
-                o2 = AddWithCarry(o2, 0, c, out c);
-                o3 = AddWithCarry(o3, 0, c, out _);
+                o_[0] = AddWithCarry(o_[0], (UInt64)a2b2, 0, out c);
+                o_[1] = AddWithCarry(o_[1], (UInt64)(a2b2 >> 64), c, out c);
+                o_[2] = AddWithCarry(o_[2], 0, c, out c);
+                o_[3] = AddWithCarry(o_[3], 0, c, out _);
 
-                o[0] = o0; o[1] = o1; o[2] = o2; o[3] = o3;
+                o = o_;
             }
         }
 
@@ -286,79 +290,81 @@ namespace UltimateOrb.Numerics {
 
         // mhu5u5u5: high 5-word of a 5x5 product
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void MultiplyHigh(ref InlineArray5<UInt64> o, in InlineArray5<UInt64> b, in InlineArray5<UInt64> a) {
+        internal static void MultiplyHigh(out InlineArray5<UInt64> o, in InlineArray5<UInt64> b, in InlineArray5<UInt64> a) {
             unchecked {
                 nuint c0, c1;
-                UInt64 t, o0, o1, o2, o3, o4;
+                UInt64 t;
+                InlineArray5<UInt64> o_ = default;
 
                 UInt128 a4b0 = (UInt128)a[4] * b[0];
-                o0 = (UInt64)(a4b0 >> 64);
+                o_[0] = (UInt64)(a4b0 >> 64);
 
                 UInt128 a3b1 = (UInt128)a[3] * b[1];
                 UInt128 a4b1 = (UInt128)a[4] * b[1];
                 t = AddWithCarry((UInt64)a4b1, (UInt64)(a3b1 >> 64), 0, out c0);
-                o0 = AddWithCarry(o0, t, 0, out c1);
-                o1 = AddWithCarry((UInt64)(a4b1 >> 64), 0, c0, out c0);
-                o1 = AddWithCarry(o1, 0, c1, out c1);
+                o_[0] = AddWithCarry(o_[0], t, 0, out c1);
+                o_[1] = AddWithCarry((UInt64)(a4b1 >> 64), 0, c0, out c0);
+                o_[1] = AddWithCarry(o_[1], 0, c1, out c1);
 
                 UInt128 a2b2 = (UInt128)a[2] * b[2];
                 UInt128 a3b2 = (UInt128)a[3] * b[2];
                 t = AddWithCarry((UInt64)a3b2, (UInt64)(a2b2 >> 64), 0, out c0);
-                o0 = AddWithCarry(o0, t, 0, out c1);
+                o_[0] = AddWithCarry(o_[0], t, 0, out c1);
                 UInt128 a4b2 = (UInt128)a[4] * b[2];
                 t = AddWithCarry((UInt64)a4b2, (UInt64)(a3b2 >> 64), c0, out c0);
-                o1 = AddWithCarry(o1, t, c1, out c1);
-                o2 = AddWithCarry((UInt64)(a4b2 >> 64), 0, c0, out c0);
-                o2 = AddWithCarry(o2, 0, c1, out c1);
+                o_[1] = AddWithCarry(o_[1], t, c1, out c1);
+                o_[2] = AddWithCarry((UInt64)(a4b2 >> 64), 0, c0, out c0);
+                o_[2] = AddWithCarry(o_[2], 0, c1, out c1);
 
                 UInt128 a1b3 = (UInt128)a[1] * b[3];
                 UInt128 a2b3 = (UInt128)a[2] * b[3];
                 t = AddWithCarry((UInt64)a2b3, (UInt64)(a1b3 >> 64), 0, out c0);
-                o0 = AddWithCarry(o0, t, 0, out c1);
+                o_[0] = AddWithCarry(o_[0], t, 0, out c1);
                 UInt128 a3b3 = (UInt128)a[3] * b[3];
                 t = AddWithCarry((UInt64)a3b3, (UInt64)(a2b3 >> 64), c0, out c0);
-                o1 = AddWithCarry(o1, t, c1, out c1);
+                o_[1] = AddWithCarry(o_[1], t, c1, out c1);
                 UInt128 a4b3 = (UInt128)a[4] * b[3];
                 t = AddWithCarry((UInt64)a4b3, (UInt64)(a3b3 >> 64), c0, out c0);
-                o2 = AddWithCarry(o2, t, c1, out c1);
-                o3 = AddWithCarry((UInt64)(a4b3 >> 64), 0, c0, out c0);
-                o3 = AddWithCarry(o3, 0, c1, out c1);
+                o_[2] = AddWithCarry(o_[2], t, c1, out c1);
+                o_[3] = AddWithCarry((UInt64)(a4b3 >> 64), 0, c0, out c0);
+                o_[3] = AddWithCarry(o_[3], 0, c1, out c1);
 
                 UInt128 a0b4 = (UInt128)a[0] * b[4];
                 UInt128 a1b4 = (UInt128)a[1] * b[4];
                 t = AddWithCarry((UInt64)a1b4, (UInt64)(a0b4 >> 64), 0, out c0);
-                o0 = AddWithCarry(o0, t, 0, out c1);
+                o_[0] = AddWithCarry(o_[0], t, 0, out c1);
                 UInt128 a2b4 = (UInt128)a[2] * b[4];
                 t = AddWithCarry((UInt64)a2b4, (UInt64)(a1b4 >> 64), c0, out c0);
-                o1 = AddWithCarry(o1, t, c1, out c1);
+                o_[1] = AddWithCarry(o_[1], t, c1, out c1);
                 UInt128 a3b4 = (UInt128)a[3] * b[4];
                 t = AddWithCarry((UInt64)a3b4, (UInt64)(a2b4 >> 64), c0, out c0);
-                o2 = AddWithCarry(o2, t, c1, out c1);
+                o_[2] = AddWithCarry(o_[2], t, c1, out c1);
                 UInt128 a4b4 = (UInt128)a[4] * b[4];
                 t = AddWithCarry((UInt64)a4b4, (UInt64)(a3b4 >> 64), c0, out c0);
-                o3 = AddWithCarry(o3, t, c1, out c1);
-                o4 = AddWithCarry((UInt64)(a4b4 >> 64), 0, c0, out c0);
-                o4 = AddWithCarry(o4, 0, c1, out _);
+                o_[3] = AddWithCarry(o_[3], t, c1, out c1);
+                o_[4] = AddWithCarry((UInt64)(a4b4 >> 64), 0, c0, out c0);
+                o_[4] = AddWithCarry(o_[4], 0, c1, out _);
 
-                o[0] = o0; o[1] = o1; o[2] = o2; o[3] = o3; o[4] = o4;
+                o = o_;
             }
         }
 
         // mhu5u2u5: high 5-word of 5-word by 2-word
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void MultiplyHigh(ref InlineArray5<UInt64> o, in InlineArray2<UInt64> b, in InlineArray5<UInt64> a) {
+        internal static void MultiplyHigh(out InlineArray5<UInt64> o, in InlineArray2<UInt64> b, in InlineArray5<UInt64> a) {
             unchecked {
                 nuint c0, c1;
-                UInt64 t, o0, o1, o2, o3, o4;
+                UInt64 t;
                 UInt128 a1b0 = (UInt128)a[1] * b[0];
                 UInt128 a2b0 = (UInt128)a[2] * b[0];
                 UInt128 a3b0 = (UInt128)a[3] * b[0];
                 UInt128 a4b0 = (UInt128)a[4] * b[0];
 
-                o0 = AddWithCarry((UInt64)a2b0, (UInt64)(a1b0 >> 64), 0, out c0);
-                o1 = AddWithCarry((UInt64)a3b0, (UInt64)(a2b0 >> 64), c0, out c0);
-                o2 = AddWithCarry((UInt64)a4b0, (UInt64)(a3b0 >> 64), c0, out c0);
-                o3 = AddWithCarry(0, (UInt64)(a4b0 >> 64), c0, out c0);
+                InlineArray5<UInt64> o_ = default;
+                o_[0] = AddWithCarry((UInt64)a2b0, (UInt64)(a1b0 >> 64), 0, out c0);
+                o_[1] = AddWithCarry((UInt64)a3b0, (UInt64)(a2b0 >> 64), c0, out c0);
+                o_[2] = AddWithCarry((UInt64)a4b0, (UInt64)(a3b0 >> 64), c0, out c0);
+                o_[3] = AddWithCarry(0, (UInt64)(a4b0 >> 64), c0, out c0);
 
                 UInt128 a0b1 = (UInt128)a[0] * b[1];
                 UInt128 a1b1 = (UInt128)a[1] * b[1];
@@ -367,38 +373,40 @@ namespace UltimateOrb.Numerics {
                 UInt128 a4b1 = (UInt128)a[4] * b[1];
 
                 t = AddWithCarry((UInt64)a1b1, (UInt64)(a0b1 >> 64), 0, out c0);
-                o0 = AddWithCarry(o0, t, 0, out c1);
+                o_[0] = AddWithCarry(o_[0], t, 0, out c1);
 
                 t = AddWithCarry((UInt64)a2b1, (UInt64)(a1b1 >> 64), c0, out c0);
-                o1 = AddWithCarry(o1, t, c1, out c1);
+                o_[1] = AddWithCarry(o_[1], t, c1, out c1);
 
                 t = AddWithCarry((UInt64)a3b1, (UInt64)(a2b1 >> 64), c0, out c0);
-                o2 = AddWithCarry(o2, t, c1, out c1);
+                o_[2] = AddWithCarry(o_[2], t, c1, out c1);
 
                 t = AddWithCarry((UInt64)a4b1, (UInt64)(a3b1 >> 64), c0, out c0);
-                o3 = AddWithCarry(o3, t, c1, out c1);
+                o_[3] = AddWithCarry(o_[3], t, c1, out c1);
 
                 t = AddWithCarry(0, (UInt64)(a4b1 >> 64), c0, out c0);
-                o4 = AddWithCarry(0, t, c1, out _);
+                o_[4] = AddWithCarry(0, t, c1, out _);
 
-                o[0] = o0; o[1] = o1; o[2] = o2; o[3] = o3; o[4] = o4;
+                o = o_;
             }
         }
 
         // mhu5u1u5: high 5-word of 5-word by 1-word
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void MultiplyHigh(ref InlineArray5<UInt64> o, UInt64 b0, in InlineArray5<UInt64> a) {
+        internal static void MultiplyHigh(out InlineArray5<UInt64> o, UInt64 b0, in InlineArray5<UInt64> a) {
             unchecked {
                 UInt128 a0b0 = (UInt128)a[0] * b0;
                 UInt128 a1b0 = (UInt128)a[1] * b0;
                 UInt128 a2b0 = (UInt128)a[2] * b0;
                 UInt128 a3b0 = (UInt128)a[3] * b0;
                 UInt128 a4b0 = (UInt128)a[4] * b0;
-                o[0] = AddWithCarry((UInt64)a1b0, (UInt64)(a0b0 >> 64), 0, out var c0);
-                o[1] = AddWithCarry((UInt64)a2b0, (UInt64)(a1b0 >> 64), c0, out c0);
-                o[2] = AddWithCarry((UInt64)a3b0, (UInt64)(a2b0 >> 64), c0, out c0);
-                o[3] = AddWithCarry((UInt64)a4b0, (UInt64)(a3b0 >> 64), c0, out c0);
-                o[4] = AddWithCarry(0, (UInt64)(a4b0 >> 64), c0, out _);
+                InlineArray5<UInt64> o_ = default;
+                o_[0] = AddWithCarry((UInt64)a1b0, (UInt64)(a0b0 >> 64), 0, out var c0);
+                o_[1] = AddWithCarry((UInt64)a2b0, (UInt64)(a1b0 >> 64), c0, out c0);
+                o_[2] = AddWithCarry((UInt64)a3b0, (UInt64)(a2b0 >> 64), c0, out c0);
+                o_[3] = AddWithCarry((UInt64)a4b0, (UInt64)(a3b0 >> 64), c0, out c0);
+                o_[4] = AddWithCarry(0, (UInt64)(a4b0 >> 64), c0, out _);
+                o = o_;
             }
         }
 
@@ -958,7 +966,7 @@ namespace UltimateOrb.Numerics {
                 InlineArray3<UInt64> h2s_hi_3 = default;
                 h2s_hi_3[0] = h2s[2]; h2s_hi_3[1] = h2s[3]; h2s_hi_3[2] = h2s[4];
                 InlineArray3<UInt64> h3s_hi_3 = default;
-                MultiplyHigh(ref h3s_hi_3, in h_hi_3, in h2s_hi_3);
+                MultiplyHigh(out h3s_hi_3, in h_hi_3, in h2s_hi_3);
                 h3s[2] = h3s_hi_3[0]; h3s[3] = h3s_hi_3[1]; h3s[4] = h3s_hi_3[2];
 
                 // h2s (index 1..4) *= 3
@@ -1006,7 +1014,7 @@ namespace UltimateOrb.Numerics {
                 x2l[1] = x2[0]; x2l[2] = x2[1]; x2l[3] = x2[2]; x2l[4] = x2[3];
 
                 // mhu5u5u5(h, h+1, x2l);
-                MultiplyHigh(ref h.AsInlineArray5(), in h.Skip1(), in x2l);
+                MultiplyHigh(out h.AsInlineArray5(), in h.Skip1(), in x2l);
                 ShiftRight(ref h.AsInlineArray5(), 62 - (e & 1));
 
                 if (msk == 0) {
@@ -1024,7 +1032,7 @@ namespace UltimateOrb.Numerics {
 
         // mhu1u1u1 helpers (single-element)
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void MultiplyHigh(ref UInt64 o, UInt64 b, UInt64 a) {
+        internal static void MultiplyHigh(out UInt64 o, UInt64 b, UInt64 a) {
             unchecked { o = (UInt64)(((UInt128)a * b) >> 64); }
         }
 
@@ -1055,7 +1063,7 @@ namespace UltimateOrb.Numerics {
                 var cp = EvalPolyCoeffs;
 
                 f[0] = cp[ck];
-                MultiplyHigh(ref f[0], f[0], t2[4]); ck += 1;
+                MultiplyHigh(out f[0], f[0], t2[4]); ck += 1;
                 f[0] = unchecked(cp[ck] + f[0]);
 
                 f[1] = cp[ck + 1];
@@ -1065,7 +1073,7 @@ namespace UltimateOrb.Numerics {
                     InlineArray2<UInt64> t2_23 = default;
                     t2_23[0] = t2[3]; t2_23[1] = t2[4];
                     InlineArray2<UInt64> tmp = default;
-                    MultiplyHigh(ref tmp, in f2, in t2_23);
+                    MultiplyHigh(out tmp, in f2, in t2_23);
                     f[0] = tmp[0]; f[1] = tmp[1];
                 }
                 ck += 2;
@@ -1085,7 +1093,7 @@ namespace UltimateOrb.Numerics {
                     InlineArray2<UInt64> t2_23 = default;
                     t2_23[0] = t2[3]; t2_23[1] = t2[4];
                     InlineArray2<UInt64> tmp = default;
-                    MultiplyHigh(ref tmp, in f2, in t2_23);
+                    MultiplyHigh(out tmp, in f2, in t2_23);
                     f[0] = tmp[0]; f[1] = tmp[1];
                     ck += 2;
                     InlineArray2<UInt64> a = default;
@@ -1104,7 +1112,7 @@ namespace UltimateOrb.Numerics {
                     InlineArray3<UInt64> t2_234 = default;
                     t2_234[0] = t2[2]; t2_234[1] = t2[3]; t2_234[2] = t2[4];
                     InlineArray3<UInt64> tmp = default;
-                    MultiplyHigh(ref tmp, in f3, in t2_234);
+                    MultiplyHigh(out tmp, in f3, in t2_234);
                     f[0] = tmp[0]; f[1] = tmp[1]; f[2] = tmp[2];
                     ck += 3;
                     InlineArray3<UInt64> a = default;
@@ -1123,7 +1131,7 @@ namespace UltimateOrb.Numerics {
                     InlineArray4<UInt64> t2_1234 = default;
                     t2_1234[0] = t2[1]; t2_1234[1] = t2[2]; t2_1234[2] = t2[3]; t2_1234[3] = t2[4];
                     InlineArray4<UInt64> tmp = default;
-                    MultiplyHigh(ref tmp, in f4, in t2_1234);
+                    MultiplyHigh(out tmp, in f4, in t2_1234);
                     f[0] = tmp[0]; f[1] = tmp[1]; f[2] = tmp[2]; f[3] = tmp[3];
                     ck += 4;
                     InlineArray4<UInt64> a = default;
@@ -1142,7 +1150,7 @@ namespace UltimateOrb.Numerics {
                     InlineArray5<UInt64> t2b = default;
                     t2b[0] = t2[0]; t2b[1] = t2[1]; t2b[2] = t2[2]; t2b[3] = t2[3]; t2b[4] = t2[4];
                     InlineArray5<UInt64> tmp = default;
-                    MultiplyHigh(ref tmp, in f5, in t2b);
+                    MultiplyHigh(out tmp, in f5, in t2b);
                     f[0] = tmp[0]; f[1] = tmp[1]; f[2] = tmp[2]; f[3] = tmp[3]; f[4] = tmp[4];
                     ck += 5;
                     InlineArray5<UInt64> a = default;
@@ -1468,10 +1476,10 @@ namespace UltimateOrb.Numerics {
                     InlineArray3<UInt64> SX = default;
                     InlineArray3<UInt64> X2_slice = default;
                     X2_slice[0] = X2[1]; X2_slice[1] = X2[2]; X2_slice[2] = X2[3];
-                    MultiplyHigh(ref SX, r, in X2_slice);
+                    MultiplyHigh(out SX, r, in X2_slice);
 
                     InlineArray3<UInt64> H = default;
-                    MultiplyHigh(ref H, r, in SX);
+                    MultiplyHigh(out H, r, in SX);
 
                     const int koff = 2, rkoff = 64 - koff;
                     H[0] = (H[0] >> koff) | (H[1] << rkoff);
@@ -1512,15 +1520,15 @@ namespace UltimateOrb.Numerics {
                         ReadOnlySpan<UInt64> cth_j = AcosCth((int)j);
                         cth_j_2to4[0] = cth_j[2]; cth_j_2to4[1] = cth_j[3]; cth_j_2to4[2] = cth_j[4];
 
-                        MultiplyHigh(ref xc, in Xb, in cth_j_2to4);
+                        MultiplyHigh(out xc, in Xb, in cth_j_2to4);
 
                         UInt64 sj = AcosPth[(int)j];
                         int sp = 43 - (e >> 1);
                         if (Misc.Likely(sp >= 0)) {
                             sj <<= sp;
-                            MultiplyHigh(ref SX, sj, in SX);
+                            MultiplyHigh(out SX, sj, in SX);
                         } else {
-                            MultiplyHigh(ref SX, sj, in SX);
+                            MultiplyHigh(out SX, sj, in SX);
                             rk = (-sp) & 63;
                             lk = sp & 63;
                             SX[0] = (SX[0] >> rk) | (SX[1] << lk);
@@ -1739,12 +1747,12 @@ namespace UltimateOrb.Numerics {
                         ReadOnlySpan<UInt64> cth_j = AcosCth((int)j);
                         InlineArray5<UInt64> cth_j5 = default;
                         cth_j5[0] = cth_j[0]; cth_j5[1] = cth_j[1]; cth_j5[2] = cth_j[2]; cth_j5[3] = cth_j[3]; cth_j5[4] = cth_j[4];
-                        MultiplyHigh(ref xc, in Xbs, in cth_j5);
+                        MultiplyHigh(out xc, in Xbs, in cth_j5);
 
                         UInt64 sj = AcosPth[(int)j];
                         int sp = 43 - (e >> 1);
                         if (sp >= 0) sj <<= sp;
-                        MultiplyHigh(ref sq, sj, in sq);
+                        MultiplyHigh(out sq, sj, in sq);
                         if (sp < 0) ShiftRight(ref sq, -sp);
 
                         Subtract(ref xc, in xc, in sq);
@@ -1775,13 +1783,13 @@ namespace UltimateOrb.Numerics {
                 InlineArray5<UInt64> t2 = default;
                 SquareHigh(ref t2, in t);
                 InlineArray5<UInt64> t3 = default;
-                MultiplyHigh(ref t3, in t, in t2);
+                MultiplyHigh(out t3, in t, in t2);
                 int s2 = 2 * (nz - 6) - 1;
                 ShiftRight(ref t2, s2);
 
                 InlineArray5<UInt64> f = default;
                 EvalPoly(ref f, in t2);
-                MultiplyHigh(ref f, in t3, in f);
+                MultiplyHigh(out f, in t3, in f);
 
                 UInt64 outLo, outHi, rnd;
                 int new_xn;
