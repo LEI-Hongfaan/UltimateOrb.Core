@@ -4,6 +4,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using UltimateOrb;
 using Misc = UltimateOrb.Miscellaneous;
 
 namespace UltimateOrb.Numerics {
@@ -16,7 +17,9 @@ namespace UltimateOrb.Numerics {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static Int64 MultiplyHigh(UInt64 y, Int64 x) {
-            return (Int64)((Math.BigMul((UInt64)x, y) >> 64) - ((UInt64)(x >> 63) & y));
+            unchecked {
+                return (Int64)((Math.BigMul((UInt64)x, y) >> 64) - ((UInt64)(x >> 63) & y));
+            }
         }
 
         public static UInt64 ReciprocalSqrt(UInt64 lo, UInt64 hi, out UInt64 result_hi)
@@ -76,29 +79,28 @@ namespace UltimateOrb.Numerics {
                     }
 
                     UInt64 rx = hi, r = Rsqrt9(rx);
-
                     UInt128 r2 = Math.BigMul(r, rsqrt2_64[(int)i]);
                     nuint shft = 4 - i;
-                    r2 >>= (int)shft;
+
+                    // Shift the 128-bit input right by shft
+                    lo = DoubleArithmetic.ShiftRight(lo, hi, (int)shft, out hi);
                     hi |= (UInt64)1u << (int)(60 + i);
-                    r = (UInt64)(r2 >> 64);
+
+                    r = (UInt64)(r2 >> 64);       // use unshifted r2
                     UInt128 R2 = Math.BigMul(r, r);
-
-                    var a = (lo | ((UInt128)hi << 64));
-
+                    var a = (lo | ((UInt128)hi << 64));  // now a is correctly shifted
                     Int64 h = (Int64)MultiplyHighApproximate(R2, a), ds = MultiplyHigh(r, h);
 
                     UInt128 v = ((UInt128)r << 64) - ((UInt128)(Int128)ds << 3);
-                    //UInt64 v_lo = (UInt64)v, v_hi = (UInt64)(v >> 64);
                     bool nrst = IsNearest(rm);
                     Int16 dd = (Int16)((UInt64)v << 2);
                     if (Misc.Unlikely(!(dd < -4 || dd > 96))) { // can round correctly?
                         v += 1 << 13;
                         UInt128 m = v >> 14, t0, t1, k0, k1;
-                        t1 = DoubleArithmetic.BigMul(m, a, out t0);
-                        k1 = DoubleArithmetic.BigMul(t0, m, out k0);
+                        t1 = Math.BigMul(m, a, out t0);
+                        k1 = Math.BigMul(t0, m, out k0);
                         k1 += t1 * m;
-                        k1 |= 0 != k0 ? 1u : 0u;
+                        k1 |= ((0 != k0) ? 1u : 0u);
                         v &= ~(UInt128)0x3fff;
                         Int128 D = (Int128)k1;
                         if (D < 0) v++;
@@ -116,7 +118,7 @@ namespace UltimateOrb.Numerics {
                     v >>= 15; // position mantissa
                     v += rnd; // round
                     RaiseExceptionFlagsDummy(FloatingPointExceptionFlags.Inexact);
-                    v += (UInt64)(Int64)e2 << 64; // place exponent
+                    v += (UInt128)(UInt64)(Int64)e2 << 64; // place exponent
                     result_hi = (UInt64)(v >> 64);
                     return (UInt64)v;
                 }

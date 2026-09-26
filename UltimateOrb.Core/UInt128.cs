@@ -3921,7 +3921,11 @@ namespace UltimateOrb {
             /// <returns>The full product of the specified numbers.</returns>
             [CLSCompliant(false)]
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static UInt128 BigMul(UInt64 a, UInt64 b) => UInt128.Math.BigMul(a, b);
+#if NET7_0_OR_GREATER
+            public static System.UInt128 BigMul(UInt64 a, UInt64 b) => UInt128.Math.BigMul(a, b);
+#else
+            public static UltimateOrb.UInt128 BigMul(UInt64 a, UInt64 b) => UInt128.Math.BigMul(a, b);
+#endif
 
             /// <summary>Produces the full product of two unsigned 64-bit numbers.</summary>
             /// <param name="a">The first number to multiply.</param>
@@ -3930,11 +3934,26 @@ namespace UltimateOrb {
             /// <returns>The high 64-bit of the product of the specified numbers.</returns>
             [CLSCompliant(false)]
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static UInt128 BigMul(UInt128 a, UInt128 b, out UInt128 low) {
+            public static UltimateOrb.UInt128 BigMul(UltimateOrb.UInt128 a, UltimateOrb.UInt128 b, out UltimateOrb.UInt128 low) {
                 var lo = UInt128.DoubleArithmetic.BigMul(a, b, out var hi);
                 low = lo;
                 return hi;
             }
+
+#if NET7_0_OR_GREATER
+            /// <summary>Produces the full product of two unsigned 64-bit numbers.</summary>
+            /// <param name="a">The first number to multiply.</param>
+            /// <param name="b">The second number to multiply.</param>
+            /// <param name="low">The low 64-bit of the product of the specified numbers.</param>
+            /// <returns>The high 64-bit of the product of the specified numbers.</returns>
+            [CLSCompliant(false)]
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static System.UInt128 BigMul(System.UInt128 a, System.UInt128 b, out System.UInt128 low) {
+                var lo = UInt128.DoubleArithmetic.BigMul(a, b, out var hi);
+                low = lo;
+                return hi;
+            }
+#endif
         }
     }
 }
