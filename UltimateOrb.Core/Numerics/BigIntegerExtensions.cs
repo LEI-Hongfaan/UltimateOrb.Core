@@ -13,7 +13,6 @@ namespace UltimateOrb.Numerics {
 #if STANDALONE_NUMERICS_LIBRARY
     internal
 #else
-    [Experimental("UoWIP_GenericMath")]
     public
 #endif
         static partial class BigIntegerExtensions {

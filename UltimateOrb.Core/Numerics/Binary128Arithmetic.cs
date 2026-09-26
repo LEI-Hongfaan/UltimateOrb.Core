@@ -627,6 +627,23 @@ namespace UltimateOrb.Numerics {
 
         }
 
+        // Returns the low 64 bits; sets result_hi to the high 64 bits.
+        // Positive infinity for binary128: sign = 0, exponent = all 1s (15 bits), fraction = 0.
+        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        public static UInt64 GetPositiveInfinity(out UInt64 result_hi) {
+            // Exponent all ones (15 bits) placed at high-word bits 48..62
+            // result_hi = exponent << 48
+            result_hi = 0x7FFF000000000000UL;
+            return 0u; // low 64 bits (fraction low) = 0
+        }
+
+        // Negative infinity: same as positive infinity but with sign bit set in the high word.
+        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        public static UInt64 GetNegativeInfinity(out UInt64 result_hi) {
+            result_hi = 0xFFFF000000000000UL;
+            return 0u;
+        }
+
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static UInt64 GetNaN(out UInt64 result_hi) {
             result_hi = 0xFFFF800000000000u;   // negative canonical quiet NaN

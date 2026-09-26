@@ -2275,8 +2275,13 @@ namespace UltimateOrb {
         }
 
         public static Quadruple ReciprocalSqrt(Quadruple x) {
-            // TODO: Provide a correct-rounding impl
-            return One / Sqrt(x);
+            var lo = Binary128Arithmetic.ReciprocalSqrt(x._Lo64Bits, x._Hi64Bits, out var hi);
+            return new Quadruple(lo, hi);
+        }
+
+        public static Quadruple ReciprocalSqrt(Quadruple x, MidpointRounding mode) {
+            var lo = Binary128Arithmetic.ReciprocalSqrt(x._Lo64Bits, x._Hi64Bits, mode, out var hi);
+            return new Quadruple(lo, hi);
         }
 
         public static Quadruple RootN(Quadruple x, int n) {

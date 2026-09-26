@@ -32,7 +32,7 @@
 
   <PropertyGroup>
     <!-- Sync with UltimateOrb.Core -->
-	<Version>3.7.7-beta.1</Version>
+	<Version>3.7.7-beta.2</Version>
   </PropertyGroup>
 	
 	
@@ -131,6 +131,7 @@
 	<Compile Include="..\UltimateOrb.Core\Numerics\Binary128Arithmetic{Acos}.cs" Link="Numerics\Binary128Arithmetic{Acos}.cs" />
 	<Compile Include="..\UltimateOrb.Core\Numerics\Binary128Arithmetic{Cbrt}.cs" Link="Numerics\Binary128Arithmetic{Cbrt}.cs" />
 	<Compile Include="..\UltimateOrb.Core\Numerics\Binary128Arithmetic{Hypot}.cs" Link="Numerics\Binary128Arithmetic{Hypot}.cs" />
+	<Compile Include="..\UltimateOrb.Core\Numerics\Binary128Arithmetic{ReciprocalSqrt}.cs" Link="Numerics\Binary128Arithmetic{ReciprocalSqrt}.cs" />
 	<Compile Include="..\UltimateOrb.Core\Numerics\BinaryFloatingPointIeee754Arithmetic.cs" Link="Numerics\BinaryFloatingPointIeee754Arithmetic.cs" />
 	<Compile Include="..\UltimateOrb.Core\Numerics\Win32Decimal.cs" Link="Numerics\Win32Decimal.cs" />
 	<Compile Include="..\UltimateOrb.Core\Numerics\FloatingPointIeee754InterchageTypeTraits.cs" Link="Numerics\FloatingPointIeee754InterchageTypeTraits.cs" />
