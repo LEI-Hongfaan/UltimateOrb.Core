@@ -27,10 +27,9 @@ namespace UltimateOrb.Numerics {
             unchecked {
                 // GAP: _MM_ROUND_* → MidpointRounding.  AwayFromZero is decided at the
                 // rounding step where the result's sign is known.
-                bool isNearest = mode == MidpointRounding.ToEven;
+                bool isNearest = IsNearest(mode);
                 bool isUp = mode == MidpointRounding.ToPositiveInfinity;
                 bool isDown = mode == MidpointRounding.ToNegativeInfinity;
-                bool isAway = mode == MidpointRounding.AwayFromZero;
 
                 // ── Specials ──────────────────────────────────────────────────
                 if (Misc.Unlikely(hi >= ((UInt64)0x7FFF << 48))) {
@@ -59,7 +58,7 @@ namespace UltimateOrb.Numerics {
                 // ── Near one ──────────────────────────────────────────────────
                 if ((UInt64)0x3FFE_FFFF_F000_0040UL <= hi &&
                     hi <= 0x3FFF_0000_0800_0020UL) {
-                    return LogNearOne(lo, hi, isNearest, isUp, isDown, isAway, out result_hi);
+                    return LogNearOne(lo, hi, mode, out result_hi);
                 }
 
                 // ── Main path (cr_logq) ───────────────────────────────────────
@@ -109,10 +108,10 @@ namespace UltimateOrb.Numerics {
                 mVal = ((UInt128)mHi << 64) | mLo; // refresh mVal to post-reduction m
 
                 // ── fs = e·ln2a + offa;  += lt0..lt3 ──────────────────────────
-                InlineArray3<UInt64> ln2a = default, offa = default, fs = default;
+                InlineArray3<UInt64> ln2a = default, offa = default, fs;
                 for (int j = 0; j < 3; j++) { ln2a[j] = LogLn2A[j]; offa[j] = LogOffA[j]; }
 
-                MultiplyAddHigh(ref fs, e, in ln2a, in offa);
+                MultiplyAddHigh(out fs, e, in ln2a, in offa);
 
                 InlineArray3<UInt64> tmp3 = default;
                 for (int j = 0; j < 3; j++) tmp3[j] = LogLt0A[j0 * 3 + j];
@@ -149,7 +148,7 @@ namespace UltimateOrb.Numerics {
                 UInt64 mskU = unchecked((UInt64)msk);
                 fs[0] ^= mskU; fs[1] ^= mskU; fs[2] ^= mskU;
 
-                int nz = fs[2] != 0
+                int nz = Misc.Likely(fs[2] != 0)
                     ? (int)UInt64.LeadingZeroCount(fs[2])
                     : (int)UInt64.LeadingZeroCount(fs[1]) + 64;
                 int ns = nz - 15;
@@ -179,11 +178,9 @@ namespace UltimateOrb.Numerics {
                     rLo = (fs[1] << ns) | (fs[0] >> ((-ns) & 63));
                 }
 
-                if (!isNearest) {
+                if (Misc.Unlikely(!isNearest)) {
                     // C: rnd = (rm==UP)*!msk + (rm==DOWN)*!!msk;
-                    if (isAway)       // away from zero: magnitude up, rnd = 1
-                        rnd = 1;
-                    else if (isUp)    // toward +∞
+                    if (isUp)    // toward +∞
                         rnd = (msk == 0) ? 1UL : 0UL;
                     else if (isDown)  // toward −∞
                         rnd = (msk != 0) ? 1UL : 0UL;
@@ -205,12 +202,13 @@ namespace UltimateOrb.Numerics {
         // as_logq_nearone
         // ═══════════════════════════════════════════════════════════════════
 
-        static UInt64 LogNearOne(
-            UInt64 xLo, UInt64 xHi,
-            bool isNearest, bool isUp, bool isDown, bool isAway,
-            out UInt64 result_hi) {
+        static UInt64 LogNearOne(UInt64 xLo, UInt64 xHi, MidpointRounding rm, out UInt64 result_hi) {
             unchecked {
                 const UInt64 OneHi = (UInt64)0x3FFF << 48;
+
+                bool isNearest = IsNearest(rm);
+                bool isUp = rm == MidpointRounding.ToPositiveInfinity;
+                bool isDown = rm == MidpointRounding.ToNegativeInfinity;
 
                 Int64 neg;
                 UInt64 uLo, uHi;
@@ -219,92 +217,103 @@ namespace UltimateOrb.Numerics {
                 if (xHi >= OneHi) {
                     // x >= 1
                     neg = 0;
-                    uLo = xLo;
                     uHi = xHi - OneHi;
+                    uLo = xLo;
                     if (uHi == 0 && uLo == 0) { result_hi = 0; return 0; } // x == 1
+
                     int nz0 = uHi != 0
                         ? (int)UInt64.LeadingZeroCount(uHi)
                         : (int)UInt64.LeadingZeroCount(uLo) + 64;
                     UInt128 sh = (((UInt128)uHi << 64) | uLo) << nz0;
-                    uLo = (UInt64)sh; uHi = (UInt64)(sh >> 64);
+                    uLo = (UInt64)sh;
+                    uHi = (UInt64)(sh >> 64);
                     e = nz0 - 16;
                 } else {
-                    // x < 1 (but inside the near-one window → x > 0)
+                    // x < 1  (inside the near-one window)
                     neg = 1;
-                    UInt64 dLo = SubtractWithBorrow(0, xLo, 0, out var borrow);
-                    UInt64 dHi = SubtractWithBorrow(OneHi, xHi, borrow, out _);
-                    uLo = dLo; uHi = dHi;
+                    uLo = SubtractWithBorrow(0, xLo, 0, out var borrow);
+                    uHi = SubtractWithBorrow(OneHi, xHi, borrow, out _);
+
                     int nz0 = uHi != 0
                         ? (int)UInt64.LeadingZeroCount(uHi)
                         : (int)UInt64.LeadingZeroCount(uLo) + 64;
                     UInt128 sh = (((UInt128)uHi << 64) | uLo) << nz0;
-                    uLo = (UInt64)sh; uHi = (UInt64)(sh >> 64);
+                    uLo = (UInt64)sh;
+                    uHi = (UInt64)(sh >> 64);
                     e = nz0 - 16;
                 }
 
                 UInt128 uVal = ((UInt128)uHi << 64) | uLo;
                 UInt128 u2 = MultiplyHighApproximate(uVal, uVal);
 
-                // m.a >>= e-20  →  m = u · 2^(20−e)
+                // m.a >>= e - 20   ⇒   m = u · 2^(20 − e)
                 int mShift = e - 20;
                 UInt128 mVal = mShift >= 0 ? (uVal >> mShift) : (uVal << (-mShift));
                 UInt64 mB1 = (UInt64)(mVal >> 64);
 
-                // ── polynomial f ──────────────────────────────────────────────
-                UInt128 f;
+                // ── polynomial f (result lands back into m.a) ────────────────
                 if (neg == 0) {
-                    // cp chain: 64-bit mhuu inner, mhUU outer.
-                    //   f = (cp[3].b1<<64) | (cp[3].b0 − mhuu(m.b1, cp[4].b0 − mhuu(m.b1, cp[5].b0)))
-                    //   i=3; while(--i>=0) f = cp[i].a − mhUU(m.a, f);   → i=2,1,0
-                    //   m.a = mhUU(u2, f)
-                    UInt64 t5n = MultiplyHigh(mB1, LogCp[5 * 2 + 0]);
-                    UInt64 t4n = LogCp[4 * 2 + 0] - t5n;
-                    UInt64 t3n = LogCp[3 * 2 + 0] - MultiplyHigh(mB1, t4n);
-                    f = ((UInt128)LogCp[3 * 2 + 1] << 64) | t3n;
-                    for (int i = 2; i >= 0; i--) {
+                    // cp chain: inner u64 mhuu against mB1, then u128 mhUU against m.a
+                    //   f = (cp[3].b1 << 64) | (cp[3].b0 − mhuu(mB1, cp[4].b0 − mhuu(mB1, cp[5].b0)))
+                    //   then: for i = 2,1,0:  f = cp[i].a − mhUU(m.a, f)
+                    //   then: m.a = mhUU(u2, f)
+                    UInt64 t5 = MultiplyHigh(mB1, LogCp[5 * 2 + 0]);
+                    UInt64 t4 = LogCp[4 * 2 + 0] - t5;
+                    UInt64 t3 = LogCp[3 * 2 + 0] - MultiplyHigh(mB1, t4);
+
+                    UInt128 f = ((UInt128)LogCp[3 * 2 + 1] << 64) | t3;
+                    for (int i = 2; i >= 0; i--)   // matches  while(--i >= 0)  with  i0 = 3
+                    {
                         UInt128 ci = ((UInt128)LogCp[i * 2 + 1] << 64) | LogCp[i * 2 + 0];
                         f = ci - MultiplyHighApproximate(mVal, f);
                     }
-                    f = MultiplyHighApproximate(u2, f);
+                    mVal = MultiplyHighApproximate(u2, f);   // ← was `f = ...` in prior C# (bug)
                 } else {
-                    // FIX L2: the C's `i=2; while(--i>=0)` runs for i=1,0 — TWO
-                    // iterations, not three.  The prior revision used i=2,1,0.
-                    // Also: inner chain is a literal u64 mhuu chain against m.b1.
+                    // inner = mhuu(mB1, cn[5].b0);  inner += cn[4].b0;
+                    // inner = mhuu(mB1, inner);     inner += cn[3].b0;
+                    // f     = cn[2].a + mhuu(mB1, inner);
+                    // then: for i = 1,0:  f = cn[i].a + mhUU(m.a, f)
+                    // then: m.a = mhUU(u2, f)
                     UInt64 inner = MultiplyHigh(mB1, LogCn[5 * 2 + 0]);
                     inner += LogCn[4 * 2 + 0];
                     inner = MultiplyHigh(mB1, inner);
                     inner += LogCn[3 * 2 + 0];
+
                     UInt128 f0 = ((UInt128)LogCn[2 * 2 + 1] << 64) | LogCn[2 * 2 + 0];
                     f0 += (UInt128)MultiplyHigh(mB1, inner);
-                    for (int i = 1; i >= 0; i--)   // ← FIX L2
+
+                    for (int i = 1; i >= 0; i--)   // matches  while(--i >= 0)  with  i0 = 2
                     {
                         UInt128 ci = ((UInt128)LogCn[i * 2 + 1] << 64) | LogCn[i * 2 + 0];
                         f0 = ci + MultiplyHighApproximate(mVal, f0);
                     }
-                    f = MultiplyHighApproximate(u2, f0);
+                    mVal = MultiplyHighApproximate(u2, f0);  // ← was `f = ...` in prior C# (bug)
                 }
 
-                // ── z, t ──────────────────────────────────────────────────────
+                // ── z, t ─────────────────────────────────────────────────────
                 InlineArray3<UInt64> z = default, tArr = default;
-                z[0] = 0; z[1] = uLo; z[2] = uHi;
-                tArr[0] = 0; tArr[1] = (UInt64)mVal; tArr[2] = (UInt64)(mVal >> 64);
+                tArr[0] = 0;
+                tArr[1] = (UInt64)mVal;
+                tArr[2] = (UInt64)(mVal >> 64);
 
                 if (neg == 0) {
+                    z[0] = 0; z[1] = uLo; z[2] = uHi;
                     Rlshft3(ref tArr, e);
                     Subtract(ref z, in z, in tArr);
                 } else {
-                    UInt128 uHalf = uVal >> 1;
+                    UInt128 uHalf = uVal >> 1;               // u.a >>= 1
+                    z[0] = 0;
                     z[1] = (UInt64)uHalf;
                     z[2] = (UInt64)(uHalf >> 64);
                     Rlshft3(ref tArr, e + 2);
                     Add(ref z, in z, in tArr);
                 }
 
-                // ── rounding test ─────────────────────────────────────────────
+                // ── rounding test ────────────────────────────────────────────
                 UInt64 eps = 12;
-                UInt64 signZ2 = z[2] >> 63;
+                UInt64 signZ2 = z[2] >> 63;                  // 0 or 1
                 UInt128 tl = ((UInt128)z[1] << 64) | z[0];
-                UInt128 mskR = UInt128.MaxValue;
+                UInt128 mskR = UInt128.MaxValue;            // (u128)-1
                 UInt128 nrnd = (UInt128)(isNearest ? 1UL : 0UL) << (int)(13 + signZ2);
                 mskR >>= (int)(50 - signZ2);
 
@@ -333,25 +342,24 @@ namespace UltimateOrb.Numerics {
                     crnd = tl <= 2 * eps;
                 }
 
-                // ── normalize ─────────────────────────────────────────────────
-                UInt64 rHi = z[2], rLo = z[1];
-                UInt128 res = ((UInt128)rHi << 64) | rLo;
+                // ── normalize ────────────────────────────────────────────────
+                UInt128 res = ((UInt128)z[2] << 64) | z[1];
 
-                if ((rHi >> 63) == 0) {
+                if ((z[2] >> 63) == 0)                       // (res.b[1] >> 63) == 0
+                {
                     res <<= 1;
                     e++;
                 }
 
-                // FIX L4: C is `(res.b[0] >> 14) & 1` — bit 14 of the LOW word.
-                // The prior revision masked with 0x3FFF BEFORE shifting, zeroing it.
+                // (res.b[0] >> 14) & 1   — LOW word, bit 14
                 UInt64 rnd = ((UInt64)res >> 14) & 1;
 
                 e = 16381 - e;
 
                 if (crnd) {
                     res = (res + ((UInt128)1 << 13)) >> 14;
-                    rLo = (UInt64)res;
-                    rHi = (UInt64)(res >> 64);
+                    UInt64 rLo = (UInt64)res;
+                    UInt64 rHi = (UInt64)(res >> 64);
                     Int64 el = unchecked((Int64)((UInt64)e | ((UInt64)neg << 15)));
                     rnd = LogRefine(el, ref rLo, ref rHi, xLo, xHi);
                     res = ((UInt128)rHi << 64) | rLo;
@@ -360,14 +368,9 @@ namespace UltimateOrb.Numerics {
                 }
 
                 if (!isNearest) {
-                    if (isAway)       // away from zero = magnitude up
-                        rnd = 1;
-                    else if (isUp)
-                        rnd = neg == 0 ? 1UL : 0UL;
-                    else if (isDown)
-                        rnd = neg != 0 ? 1UL : 0UL;
-                    else
-                        rnd = 0;
+                    if (isUp) rnd = neg == 0 ? 1UL : 0UL;
+                    else if (isDown) rnd = neg != 0 ? 1UL : 0UL;
+                    else rnd = 0;
                 }
 
                 UInt64 expField = (UInt64)e << 48;
@@ -394,7 +397,7 @@ namespace UltimateOrb.Numerics {
 
                 // mhu7xu2(x, iln2, m)
                 InlineArray7<UInt64> x = default;
-                MultiplyHigh(ref x, in ExpIlN2_7, mVal);
+                MultiplyHigh(out x, in ExpIlN2_7, mVal);
 
                 x[0] ^= smU; x[1] ^= smU; x[2] ^= smU; x[3] ^= smU;
                 x[4] ^= smU; x[5] ^= smU; x[6] ^= smU;
@@ -405,20 +408,20 @@ namespace UltimateOrb.Numerics {
                 int jt = (int)(x[5] >> 60);
                 x[5] &= 0x0FFF_FFFF_FFFF_FFFFUL;
 
-                InlineArray6<UInt64> f = default, f1 = default, f2 = default, ft = default;
+                InlineArray6<UInt64> f, f1 = default, f2 = default, ft = default;
 
-                EvalPoly6(ref f, x[5], 36, LogC36Flat);
-                EvalPoly6Reduced(ref f1, x[4], LogC36Flat);
+                EvalPoly6(out f, x[5], LogC37);
+                EvalPoly6Reduced(out f1, x[4], LogC37);
                 InlineArray6<UInt64> x6 = default;
                 for (int j = 0; j < 6; j++) x6[j] = x[j];
-                EvalPoly6ReducedReduced(ref f2, ref x6, LogC36Flat);
+                EvalPoly6ReducedReduced(out f2, ref x6, LogC37);
 
-                MultiplyHigh(ref ft, in f, in f1);
-                MultiplyHigh(ref ft, in ft, in f2);
+                MultiplyHigh(out ft, in f, in f1);
+                MultiplyHigh(out ft, in ft, in f2);
 
                 InlineArray6<UInt64> tblRow = default;
                 for (int j = 0; j < 6; j++) tblRow[j] = LogTbl6Flat[jt * 6 + j];
-                MultiplyHigh(ref ft, in ft, in tblRow);
+                MultiplyHigh(out ft, in ft, in tblRow);
 
                 UInt64 sticky = (ft[0] | ft[1] | ft[2] | ft[3]) != 0 ? 1UL : 0UL;
                 ft[4] |= sticky;
@@ -526,184 +529,104 @@ namespace UltimateOrb.Numerics {
         ];
 
         static ReadOnlySpan<UInt32> LogRt0 => [
-            0x80000000u, 0x7D41D96Eu, 0x7A92BE8Bu, 0x77F25CCEu,
-        0x75606374u, 0x72DC8374u, 0x70666F77u, 0x6DFDDBCCu,
-        0x6BA27E66u, 0x69540EC9u, 0x6712460Bu, 0x64DCDEC4u,
-        0x62B39509u, 0x60962666u, 0x5E8451D0u, 0x5C7DD7A4u,
-        0x5A82799Au, 0x5891FAC1u, 0x56AC1F76u, 0x54D0AD5Bu,
-        0x52FF6B55u, 0x51382182u, 0x4F7A9931u, 0x4DC69CDDu,
-        0x4C1BF829u, 0x4A7A77D5u, 0x48E1E9BAu, 0x47521CC6u,
-        0x45CAE0F2u, 0x444C0741u, 0x42D561B4u, 0x4166C34Du
+            0x80000000, 0x7d41d96e, 0x7a92be8b, 0x77f25cce, 0x75606374, 0x72dc8374, 0x70666f77, 0x6dfddbcc,
+      0x6ba27e66, 0x69540ec9, 0x6712460b, 0x64dcdec4, 0x62b39509, 0x60962666, 0x5e8451d0, 0x5c7dd7a4,
+      0x5a82799a, 0x5891fac1, 0x56ac1f76, 0x54d0ad5b, 0x52ff6b55, 0x51382182, 0x4f7a9931, 0x4dc69cdd,
+      0x4c1bf829, 0x4a7a77d5, 0x48e1e9ba, 0x47521cc6, 0x45cae0f2, 0x444c0741, 0x42d561b4, 0x4166c34d,
         ];
         static ReadOnlySpan<UInt32> LogRt1 => [
-            0x80000000u, 0x7FE9D3A9u, 0x7FD3AB2Au, 0x7FBD8680u,
-        0x7FA765ADu, 0x7F9148AFu, 0x7F7B2F86u, 0x7F651A31u,
-        0x7F4F08AFu, 0x7F38FAFFu, 0x7F22F122u, 0x7F0CEB16u,
-        0x7EF6E8DBu, 0x7EE0EA6Fu, 0x7ECAEFD4u, 0x7EB4F906u,
-        0x7E9F0607u, 0x7E8916D5u, 0x7E732B70u, 0x7E5D43D7u,
-        0x7E476009u, 0x7E318006u, 0x7E1BA3CDu, 0x7E05CB5Eu,
-        0x7DEFF6B7u, 0x7DDA25D8u, 0x7DC458C1u, 0x7DAE8F71u,
-        0x7D98C9E7u, 0x7D830822u, 0x7D6D4A22u, 0x7D578FE6u
+            0x80000000, 0x7fe9d3a9, 0x7fd3ab2a, 0x7fbd8680, 0x7fa765ad, 0x7f9148af, 0x7f7b2f86, 0x7f651a31,
+      0x7f4f08af, 0x7f38faff, 0x7f22f122, 0x7f0ceb16, 0x7ef6e8db, 0x7ee0ea6f, 0x7ecaefd4, 0x7eb4f906,
+      0x7e9f0607, 0x7e8916d5, 0x7e732b70, 0x7e5d43d7, 0x7e476009, 0x7e318006, 0x7e1ba3cd, 0x7e05cb5e,
+      0x7deff6b7, 0x7dda25d8, 0x7dc458c1, 0x7dae8f71, 0x7d98c9e7, 0x7d830822, 0x7d6d4a22, 0x7d578fe6,
         ];
         static ReadOnlySpan<UInt32> LogRt2 => [
-            0x80000000u, 0x7FFF4E8Fu, 0x7FFE9D1Eu, 0x7FFDEBAFu,
-        0x7FFD3A40u, 0x7FFC88D2u, 0x7FFBD765u, 0x7FFB25F9u,
-        0x7FFA748Eu, 0x7FF9C325u, 0x7FF911BCu, 0x7FF86054u,
-        0x7FF7AEEDu, 0x7FF6FD86u, 0x7FF64C21u, 0x7FF59ABDu,
-        0x7FF4E95Au, 0x7FF437F8u, 0x7FF38696u, 0x7FF2D536u,
-        0x7FF223D7u, 0x7FF17278u, 0x7FF0C11Bu, 0x7FF00FBEu,
-        0x7FEF5E63u, 0x7FEEAD08u, 0x7FEDFBAFu, 0x7FED4A56u,
-        0x7FEC98FEu, 0x7FEBE7A8u, 0x7FEB3652u, 0x7FEA84FDu
+            0x80000000, 0x7fff4e8f, 0x7ffe9d1e, 0x7ffdebaf, 0x7ffd3a40, 0x7ffc88d2, 0x7ffbd765, 0x7ffb25f9,
+      0x7ffa748e, 0x7ff9c325, 0x7ff911bc, 0x7ff86054, 0x7ff7aeed, 0x7ff6fd86, 0x7ff64c21, 0x7ff59abd,
+      0x7ff4e95a, 0x7ff437f8, 0x7ff38696, 0x7ff2d536, 0x7ff223d7, 0x7ff17278, 0x7ff0c11b, 0x7ff00fbe,
+      0x7fef5e63, 0x7feead08, 0x7fedfbaf, 0x7fed4a56, 0x7fec98fe, 0x7febe7a8, 0x7feb3652, 0x7fea84fd,
         ];
         static ReadOnlySpan<UInt32> LogRt3 => [
-            0x80000000u, 0x7FFFFA75u, 0x7FFFF4E9u, 0x7FFFEF5Eu,
-        0x7FFFE9D2u, 0x7FFFE447u, 0x7FFFDEBBu, 0x7FFFD930u,
-        0x7FFFD3A4u, 0x7FFFCE18u, 0x7FFFC88Du, 0x7FFFC301u,
-        0x7FFFBD76u, 0x7FFFB7EAu, 0x7FFFB25Fu, 0x7FFFACD3u,
-        0x7FFFA748u, 0x7FFFA1BCu, 0x7FFF9C30u, 0x7FFF96A5u,
-        0x7FFF9119u, 0x7FFF8B8Eu, 0x7FFF8602u, 0x7FFF8077u,
-        0x7FFF7AEBu, 0x7FFF7560u, 0x7FFF6FD4u, 0x7FFF6A49u,
-        0x7FFF64BDu, 0x7FFF5F31u, 0x7FFF59A6u, 0x7FFF541Au
+            0x80000000, 0x7ffffa75, 0x7ffff4e9, 0x7fffef5e, 0x7fffe9d2, 0x7fffe447, 0x7fffdebb, 0x7fffd930,
+      0x7fffd3a4, 0x7fffce18, 0x7fffc88d, 0x7fffc301, 0x7fffbd76, 0x7fffb7ea, 0x7fffb25f, 0x7fffacd3,
+      0x7fffa748, 0x7fffa1bc, 0x7fff9c30, 0x7fff96a5, 0x7fff9119, 0x7fff8b8e, 0x7fff8602, 0x7fff8077,
+      0x7fff7aeb, 0x7fff7560, 0x7fff6fd4, 0x7fff6a49, 0x7fff64bd, 0x7fff5f31, 0x7fff59a6, 0x7fff541a,
         ];
 
         static ReadOnlySpan<UInt64> LogLt0A => [
-            0x0000000000000000UL, 0x0000000000000000UL, 0x0000000000000000UL,
-        0xA89586EFCF459616UL, 0x0BF2D9D6938E7957UL, 0x00000000000058B9UL,
-        0x1C4217AC03D7F347UL, 0x17E97EC3BBBE7FA5UL, 0x000000000000B172UL,
-        0xEFB93FF266057747UL, 0x23F162A58989F516UL, 0x0000000000010A2BUL,
-        0xE785FEE03979770CUL, 0x2FED4367CAB6F34CUL, 0x00000000000162E4UL,
-        0xB7178705EB425D19UL, 0x3BE26415CB5FFCA2UL, 0x000000000001BB9DUL,
-        0x99D386FE1E67FE52UL, 0x47C60C5651FC6826UL, 0x0000000000021456UL,
-        0xDC33CA27AE76C0E3UL, 0x53E0AC68AF0F8D45UL, 0x0000000000026D0FUL,
-        0xB920987460CCAB06UL, 0x5FC92CCD6BB8F0A7UL, 0x000000000002C5C8UL,
-        0x1668340EE9FE5A93UL, 0x6BDA0FBED4C7F913UL, 0x0000000000031E81UL,
-        0x08EA18591547F82BUL, 0x77C5ACA6064AC9D5UL, 0x000000000003773AUL,
-        0x10BE2CE034FF1E0BUL, 0x83B323296E47FD8AUL, 0x000000000003CFF3UL,
-        0xE27D52AE22538CBBUL, 0x8FC10F43EA11902BUL, 0x00000000000428ACUL,
-        0x6D1339A150080F6BUL, 0x9BA8E78A4A916975UL, 0x0000000000048165UL,
-        0x6CB99B86DEFF0B66UL, 0xA7B88577D11699BEUL, 0x000000000004DA1EUL,
-        0x88B410857D77A113UL, 0xB3B510D166B0BFCDUL, 0x00000000000532D7UL,
-        0x9328234A71B9E39EUL, 0xBFBE03BFA45E53D0UL, 0x0000000000058B90UL,
-        0xA9113370E6C95819UL, 0xCBB65F48E215A1BEUL, 0x000000000005E449UL,
-        0xE92C7C696E7F112CUL, 0xD78D448CDA05AA76UL, 0x0000000000063D02UL,
-        0xC391AA17BB2E306DUL, 0xE3981C232F9C13AFUL, 0x00000000000695BBUL,
-        0x938A7D8CFFA8155EUL, 0xEFA69C9432396C18UL, 0x000000000006EE74UL,
-        0xF2A451564D1C4467UL, 0xFB92199C68D6317EUL, 0x000000000007472DUL,
-        0x298ED4E3413DEFD5UL, 0x07812354074DF8F7UL, 0x0000000000079FE7UL,
-        0xB9020C95072A113FUL, 0x139D8899037598BFUL, 0x000000000007F8A0UL,
-        0xFAC4D6A530C11DCBUL, 0x1F91D2A304280C6DUL, 0x0000000000085159UL,
-        0x361EBA5F7B210F8EUL, 0x2B7E22B48DC9C3ACUL, 0x000000000008AA12UL,
-        0x067B013198BFF7BBUL, 0x378C54FB8DF946F4UL, 0x00000000000902CBUL,
-        0x668E61761F70153BUL, 0x437CADB3F378D692UL, 0x0000000000095B84UL,
-        0xA7E6655EA0F729E3UL, 0x4F8B03CDFC0665F2UL, 0x000000000009B43DUL,
-        0x67731AA1F81E8841UL, 0x5B5E9CB8EA72447EUL, 0x00000000000A0CF6UL,
-        0x1A7B7C5AEF8482A9UL, 0x677F1A61810B457CUL, 0x00000000000A65AFUL,
-        0xA5E22A09ADE4180EUL, 0x7357A288FC7E3DE4UL, 0x00000000000ABE68UL
+            0,0,0,0xa89586efcf459616,0xbf2d9d6938e7957,0x58b9,
+  0x1c4217ac03d7f347,0x17e97ec3bbbe7fa5,0xb172,0xefb93ff266057747,0x23f162a58989f516,0x10a2b,
+  0xe785fee03979770c,0x2fed4367cab6f34c,0x162e4,0xb7178705eb425d19,0x3be26415cb5ffca2,0x1bb9d,
+  0x99d386fe1e67fe52,0x47c60c5651fc6826,0x21456,0xdc33ca27ae76c0e3,0x53e0ac68af0f8d45,0x26d0f,
+  0xb920987460ccab06,0x5fc92ccd6bb8f0a7,0x2c5c8,0x1668340ee9fe5a93,0x6bda0fbed4c7f913,0x31e81,
+  0x8ea18591547f82b,0x77c5aca6064ac9d5,0x3773a,0x10be2ce034ff1e0b,0x83b323296e47fd8a,0x3cff3,
+  0xe27d52ae22538cbb,0x8fc10f43ea11902b,0x428ac,0x6d1339a150080f6b,0x9ba8e78a4a916975,0x48165,
+  0x6cb99b86deff0b66,0xa7b88577d11699be,0x4da1e,0x88b410857d77a113,0xb3b510d166b0bfcd,0x532d7,
+  0x9328234a71b9e39e,0xbfbe03bfa45e53d0,0x58b90,0xa9113370e6c95819,0xcbb65f48e215a1be,0x5e449,
+  0xe92c7c696e7f112c,0xd78d448cda05aa76,0x63d02,0xc391aa17bb2e306d,0xe3981c232f9c13af,0x695bb,
+  0x938a7d8cffa8155e,0xefa69c9432396c18,0x6ee74,0xf2a451564d1c4467,0xfb92199c68d6317e,0x7472d,
+  0x298ed4e3413defd5,0x7812354074df8f7,0x79fe7,0xb9020c95072a113f,0x139d8899037598bf,0x7f8a0,
+  0xfac4d6a530c11dcb,0x1f91d2a304280c6d,0x85159,0x361eba5f7b210f8e,0x2b7e22b48dc9c3ac,0x8aa12,
+  0x67b013198bff7bb,0x378c54fb8df946f4,0x902cb,0x668e61761f70153b,0x437cadb3f378d692,0x95b84,
+  0xa7e6655ea0f729e3,0x4f8b03cdfc0665f2,0x9b43d,0x67731aa1f81e8841,0x5b5e9cb8ea72447e,0xa0cf6,
+  0x1a7b7c5aef8482a9,0x677f1a61810b457c,0xa65af,0xa5e22a09ade4180e,0x7357a288fc7e3de4,0xabe68,
         ];
 
         static ReadOnlySpan<UInt64> LogLt1A => [
-            0x0000000000000000UL, 0x0000000000000000UL, 0x0000000000000000UL,
-        0xFCD4886923DAE6B6UL, 0xC85BEE167CAB86CEUL, 0x00000000000002C5UL,
-        0x635E6B704ED2F5FAUL, 0x90A17CEECC3FE577UL, 0x000000000000058BUL,
-        0x0DF932DA91371DD2UL, 0x591B7D0A4D0016A7UL, 0x0000000000000851UL,
-        0x73159A852516C020UL, 0x2174877366AB0CECUL, 0x0000000000000B17UL,
-        0x6DAF0FEE571D4B99UL, 0xE9D76CBBDDB12B9DUL, 0x0000000000000DDCUL,
-        0xC537F3BCCF1BCDDaUL, 0xB22EDC3896D8E511UL, 0x00000000000010A2UL,
-        0x7ACD5F3C275334BCUL, 0x7A85A1047F10C872UL, 0x0000000000001368UL,
-        0xCF11C6053E5E8A85UL, 0x42E69173390188DCUL, 0x000000000000162EUL,
-        0x5263D7113FF4EC99UL, 0x0B5C8F0CFA3BCD0DUL, 0x00000000000018F4UL,
-        0xB72B8544C29A9CCAUL, 0xD3B2174EBD216DAAUL, 0x0000000000001BB9UL,
-        0xC46FC691949A5AABUL, 0x9C123DF6AAF7611BUL, 0x0000000000001E7FUL,
-        0xC10A731729FCD789UL, 0x6467B2B9AEA50BE5UL, 0x0000000000002145UL,
-        0x893FA461CBBD9064UL, 0x2CDDAB05D780030BUL, 0x000000000000240BUL,
-        0x34C38552CB1A0B96UL, 0xF51E45F22E4B220EUL, 0x00000000000026D0UL,
-        0x70F1813D88D0193BUL, 0xBD95605269B91143UL, 0x0000000000002996UL,
-        0x73E5B8717251D0F7UL, 0x85ED0E45F6C8616DUL, 0x0000000000002C5CUL,
-        0x7F5AE5D5B9581561UL, 0x4E50A741A891EEB4UL, 0x0000000000002F22UL,
-        0x56594D2D9101BAD3UL, 0x16AADBA73393C1A7UL, 0x00000000000031E8UL,
-        0xEF4A8EB0C15FBF7AUL, 0xDF06BACC0921D568UL, 0x00000000000034ADUL,
-        0x5D054864B92A7751UL, 0xA76F5F65463C79F7UL, 0x0000000000003773UL,
-        0x7A5575CF1DF04DF6UL, 0x6FCF7A45D5191939UL, 0x0000000000003A39UL,
-        0x9618AD49BB912343UL, 0x38322C12B8541A4AUL, 0x0000000000003CFFUL,
-        0x2EDCE206B7063305UL, 0x00822052FAB58FD5UL, 0x0000000000003FC5UL,
-        0x2E80337B06ED4E80UL, 0xC8EB03CD67C0701CUL, 0x000000000000428AUL,
-        0xD46EA81C5E577187UL, 0x91578DA94328A582UL, 0x0000000000004550UL,
-        0x8705F6EFE46E502BUL, 0x59B269F9F7D32471UL, 0x0000000000004816UL,
-        0xFBDB66EBECF00A88UL, 0x2206D0D3E982FCD2UL, 0x0000000000004ADCUL,
-        0xC819E2A66EFB2206UL, 0xEA6005C8E6DA3826UL, 0x0000000000004DA1UL,
-        0xED64886CDF895904UL, 0xB2C957EE1AAC3666UL, 0x0000000000005067UL,
-        0xB1F969DAE7EDC113UL, 0x7B2D79D3AFECBFBEUL, 0x000000000000532DUL,
-        0x1B3B44759B966886UL, 0x4397C0ABDEA76DC5UL, 0x00000000000055F3UL
+              0,0,0,0xfcd4886923dae6b6,0xc85bee167cab86ce,0x2c5,
+  0x635e6b704ed2f5fa,0x90a17ceecc3fe577,0x58b,0xdf932da91371dd2,0x591b7d0a4d0016a7,0x851,
+  0x73159a852516c020,0x2174877366ab0cec,0xb17,0x6daf0fee571d4b99,0xe9d76cbddb12b19d,0xddc,
+  0xc537f3bccf1bcdda,0xb22edc3896d8e511,0x10a2,0x7acd5f3c275334bc,0x7a85a1047f10c872,0x1368,
+  0xcf11c6053e5e8a85,0x42e69173390188dc,0x162e,0x5263d7113ff4ec99,0xb5c8f0cfa3bcd0d,0x18f4,
+  0xb72b8544c29a9cca,0xd3b2174ebd216daa,0x1bb9,0xc46fc691949a5aab,0x9c123df6aaf7611b,0x1e7f,
+  0xc10a731729fcd789,0x6467b2b9aea50be5,0x2145,0x893fa461cbbd9064,0x2cddab05d780030b,0x240b,
+  0x34c38552cb1a0b96,0xf51e45f22e4b220e,0x26d0,0x70f1813d88d0193b,0xbd95605269b91143,0x2996,
+  0x73e5b8717251d0f7,0x85ed0e45f6c8616d,0x2c5c,0x7f5ae5d5b9581561,0x4e50a741a891eeb4,0x2f22,
+  0x56594d2d9101bad3,0x16aadba73393c1a7,0x31e8,0xef4a8eb0c15fbf7a,0xdf06bacc0921d568,0x34ad,
+  0x5d054864b92a7751,0xa76f5f65463c79f7,0x3773,0x7a5575cf1df04df6,0x6fcf7a45d5191939,0x3a39,
+  0x9618ad49bb912343,0x38322c12b8541a4a,0x3cff,0x2edce206b7063305,0x822052fab58fd5,0x3fc5,
+  0x2e80337b06ed4e80,0xc8eb03cd67c0701c,0x428a,0xd46ea81c5e577187,0x91578da94328a582,0x4550,
+  0x8705f6efe46e502b,0x59b269f9f7d32471,0x4816,0xfbdb66ebecf00a88,0x2206d0d3e982fcd2,0x4adc,
+  0xc819e2a66efb2206,0xea6005c8e6da3826,0x4da1,0xed64886cdf895904,0xb2c957ee1aac3666,0x5067,
+  0xb1f969dae7edc113,0x7b2d79d3afecbfbe,0x532d,0x1b3b44759b966886,0x4397c0abdea76dc5,0x55f3,
         ];
 
         static ReadOnlySpan<UInt64> LogLt2A => [
-            0x0000000000000000UL, 0x0000000000000000UL, 0x0000000000000000UL,
-        0x9CF3BC3D208C9185UL, 0x2E2F5FBCB16FF027UL, 0x0000000000000016UL,
-        0xDA087301FF6274D4UL, 0x5C7D7F2B9B75AFE0UL, 0x000000000000002CUL,
-        0x134A54F71A0236C3UL, 0x8AAA5D97D2591B8FUL, 0x0000000000000042UL,
-        0xD9C68A61183CE86AUL, 0xB8F5FBAF4FB0944AUL, 0x0000000000000058UL,
-        0x9C822A201EB1FC42UL, 0xE74058E9835896C7UL, 0x000000000000006EUL,
-        0x5441BB438A9FA9A5UL, 0x1589751695C42B17UL, 0x0000000000000085UL,
-        0xBD2D2405A0DF752AUL, 0x43D15006AEA6E5E2UL, 0x000000000000009BUL,
-        0xE419CB9011950B79UL, 0x7217E989F4F4E681UL, 0x00000000000000B1UL,
-        0x534A67BFDF41CFA2UL, 0xA03D3FE1448D8184UL, 0x00000000000000C7UL,
-        0x51F2181BF5CF5458UL, 0xCE8155CEF8C016E6UL, 0x00000000000000DDUL,
-        0x2DB9191EC9FC2EB3UL, 0xFCC429C04A827E7EUL, 0x00000000000000F3UL,
-        0xCD759D3F967FC6F7UL, 0x2B05BB855DCAEF6BUL, 0x000000000000010AUL,
-        0x95EF9CBD1C7B13C7UL, 0x59660D2F1CC94616UL, 0x0000000000000120UL,
-        0x2AF332CA6CC1B350UL, 0x87A51A387BBEE256UL, 0x0000000000000136UL,
-        0x7948F090BABD87B8UL, 0xB5E2E48603DB2B0EUL, 0x000000000000014CUL,
-        0xC53979D14662EF59UL, 0xE41F6BE7D6165086UL, 0x0000000000000162UL,
-        0xEABBA1758308D7B9UL, 0x125AB02E12A8FC92UL, 0x0000000000000179UL,
-        0xBECF1149DA50DE5EUL, 0x40B4B4478141A2F2UL, 0x000000000000018FUL,
-        0x477F919CF0A27011UL, 0x6EED71F351129EA7UL, 0x00000000000001A5UL,
-        0xBA7E797E9EB461B6UL, 0x9D24EBF3E7A2E2A7UL, 0x00000000000001BBUL,
-        0x3A5E7941BEF2E816UL, 0xCB7B25BD2DFD7F94UL, 0x00000000000001D1UL,
-        0xC9B5422A00CEABBFUL, 0xF9B018040A909DA4UL, 0x00000000000001E7UL,
-        0xCADE12D9D3E36920UL, 0x2803CA0C93032D7EUL, 0x00000000000001FEUL,
-        0x222F102EB784552BUL, 0x563633DA2572876CUL, 0x0000000000000214UL,
-        0x75D47798F62FF1C7UL, 0x84875D625DC415F0UL, 0x000000000000022AUL,
-        0x63E729D32C4F6E9EUL, 0xB2B73DF70FEC66B5UL, 0x0000000000000240UL,
-        0x7B5AFEEBC54C49ABUL, 0xE105DE3F5FE748EBUL, 0x0000000000000256UL,
-        0x221CA10AAC8A3B6AUL, 0x0F5339B6125EE838UL, 0x000000000000026DUL,
-        0x9E9E828D80C1CF32UL, 0x3D7F4B245F1A3BFFUL, 0x0000000000000283UL,
-        0x88AD9AB83FC30A52UL, 0x6BCA1C3BB9EB9390UL, 0x0000000000000299UL,
-        0x4D28B6B2476EE8F8UL, 0x9A13A7F1BC8C0D71UL, 0x00000000000002AFUL
+            0,0,0,0x9cf3bc3d208c9185,0x2e2f5fbcb16ff027,0x16,
+  0xda087301ff6274d4,0x5c7d7f2b9b75afe0,0x2c,0x134a54f71a0236c3,0x8aaa5d97d2591b8f,0x42,
+  0xd9c68a61183ce86a,0xb8f5fbaf4fb0944a,0x58,0x9c822a201eb1fc42,0xe74058e9835896c7,0x6e,
+  0x5441bb438a9fa9a5,0x1589751695c42b17,0x85,0xbd2d2405a0df752a,0x43d15006aea6e5e2,0x9b,
+  0xe419cb9011950b79,0x7217e989f4f4e681,0xb1,0x534a67bfdf41cfa2,0xa03d3fe1448d8184,0xc7,
+  0x51f2181bf5cf5458,0xce8155cef8c016e6,0xdd,0x2db9191ec9fc2eb3,0xfcc429c04a827e7e,0xf3,
+  0xcd759d3f967fc6f7,0x2b05bb855dcaef6b,0x10a,0x95ef9cbd1c7b13c7,0x59660d2f1cc94616,0x120,
+  0x2af332ca6cc1b350,0x87a51a387bbee256,0x136,0x7948f090babd87b8,0xb5e2e48603db2b0e,0x14c,
+  0xc53979d14662ef59,0xe41f6be7d6165086,0x162,0xeabba1758308d7b9,0x125ab02e12a8fc92,0x179,
+  0xbecf1149da50de5e,0x40b4b4478141a2f2,0x18f,0x477f919cf0a27011,0x6eed71f351129ea7,0x1a5,
+  0xba7e797e9eb461b6,0x9d24ebf3e7a2e2a7,0x1bb,0x3a5e7941bef2e816,0xcb7b25bd2dfd7f94,0x1d1,
+  0xc9b5422a00ceabbf,0xf9b018040a909da4,0x1e7,0xcade12d9d3e36920,0x2803ca0c93032d7e,0x1fe,
+  0x222f102eb784552b,0x563633da2572876c,0x214,0x75d47798f62ff1c7,0x84875d625dc415f0,0x22a,
+  0x63e729d32c4f6e9e,0xb2b73df70fec66b5,0x240,0x7b5afeebc54c49ab,0xe105de3f5fe748eb,0x256,
+  0x221ca10aac8a3b6a,0xf5339b6125ee838,0x26d,0x9e9e828d80c1cf32,0x3d7f4b245f1a3bff,0x283,
+  0x88ad9ab83fc30a52,0x6bca1c3bb9eb9390,0x299,0x4d28b6b2476ee8f8,0x9a13a7f1bc8c0d71,0x2af,
         ];
 
         static ReadOnlySpan<UInt64> LogLt3A => [
-            0x0000000000000000UL, 0x0000000000000000UL, 0x0000000000000000UL,
-        0x347FB733D023CC27UL, 0xB16003D72F3C6259UL, 0x0000000000000000UL,
-        0x8679CA1F8E0297B8UL, 0x62E00F5F83035049UL, 0x0000000000000001UL,
-        0x5490AB9896A762F9UL, 0x14402294D37EE9E5UL, 0x0000000000000002UL,
-        0x5E57AE0F99D9A1E6UL, 0xC5C03D7E0F9A82C2UL, 0x0000000000000002UL,
-        0x78D5D5583FAD6E57UL, 0x7720601183FF07B0UL, 0x0000000000000003UL,
-        0xCE2ECE6E0065F25AUL, 0x28A08A5BAB197ADEUL, 0x0000000000000004UL,
-        0x17FD57B0C9F4117DUL, 0xDA00BC4D46109FE0UL, 0x0000000000000004UL,
-        0x9CDC64425D00B1F6UL, 0x8B80F5F85AD41D75UL, 0x0000000000000005UL,
-        0x3AE1D5BE90AD7893UL, 0x3D01375498EC7536UL, 0x0000000000000006UL,
-        0x12009A12EB106FA8UL, 0xEE618054241E50C0UL, 0x0000000000000006UL,
-        0x1C52307D1547E6A6UL, 0x9FE1D11153DF1B17UL, 0x0000000000000007UL,
-        0xF679672EA03B5B71UL, 0x5142296F0C4BFC59UL, 0x0000000000000008UL,
-        0xA28C66C32C76DF90UL, 0x02C2898D305F6B18UL, 0x0000000000000009UL,
-        0x94DD6B2C7F525610UL, 0xB422F14918B10941UL, 0x0000000000000009UL,
-        0x692D440A10A891F7UL, 0x65A360C833C14EEAUL, 0x000000000000000AUL,
-        0xB9F6C9A02410801AUL, 0x1703D7E24EA161D7UL, 0x000000000000000BUL,
-        0x8E428B3FDD4FF401UL, 0xC88456C26358B19EUL, 0x000000000000000BUL,
-        0x798BB05020BCB8CAUL, 0x7A04DD53A7646701UL, 0x000000000000000CUL,
-        0xB2C5D2CBF27D3F39UL, 0x2B656B7BC4797FA9UL, 0x000000000000000DUL,
-        0xEE8203ED92FD41CFUL, 0xDCE6016E062BAC06UL, 0x000000000000000DUL,
-        0xFB1760C891901812UL, 0x8E469EF45C77A6E2UL, 0x000000000000000EUL,
-        0xB33A3B423EEAEDD0UL, 0x3FC744479E7A7F29UL, 0x000000000000000FUL,
-        0x0F790771B31F0C07UL, 0xF127F12C30A71684UL, 0x000000000000000FUL,
-        0xC210DFA087D58623UL, 0xA2A8A5E075A4D054UL, 0x0000000000000010UL,
-        0x1C8901C916301142UL, 0x54096223465BBF29UL, 0x0000000000000011UL,
-        0x99FC5710AC4E702EUL, 0x058A263890FE90D5UL, 0x0000000000000012UL,
-        0xD3BCD06F88DDB2F1UL, 0xB6EAF1D9A2E992D0UL, 0x0000000000000012UL,
-        0x3F07C144ADF4E354UL, 0x686BC54FF5DBB35CUL, 0x0000000000000013UL,
-        0x288D50E0D51AB78AUL, 0x19ECA0777F77067FUL, 0x0000000000000014UL,
-        0x3ACDD4C172D84D84UL, 0xCB4D8326A9902BFBUL, 0x0000000000000014UL,
-        0x81F0878A8D99E057UL, 0x7CCE6DAF3F7A4090UL, 0x0000000000000015UL
+            0,0,0,0x347fb733d023cc27,0xb16003d72f3c6259,0,
+  0x8679ca1f8e0297b8,0x62e00f5f83035049,1,0x5490ab9896a762f9,0x14402294d37ee9e5,2,
+  0x5e57ae0f99d9a1e6,0xc5c03d7e0f9a82c2,2,0x78d5d5583fad6e57,0x7720601183ff07b0,3,
+  0xce2ece6e0065f25a,0x28a08a5bab197ade,4,0x17fd57b0c9f4117d,0xda00bc4d46109fe0,4,
+  0x9cdc64425d00b1f6,0x8b80f5f85ad41d75,5,0x3ae1d5be90ad7893,0x3d01375498ec7536,6,
+  0x12009a12eb106fa8,0xee618054241e50c0,6,0x1c52307d1547e6a6,0x9fe1d11153df1b17,7,
+  0xf679672ea03b5b71,0x5142296f0c4bfc59,8,0xa28c66c32c76df90,0x2c2898d305f6b18,9,
+  0x94dd6b2c7f525610,0xb422f14918b10941,9,0x692d440a10a891f7,0x65a360c833c14eea,0xa,
+  0xb9f6c9a02410801a,0x1703d7e24ea161d7,0xb,0x8e428b3fdd4ff401,0xc88456c26358b19e,0xb,
+  0x798bb05020bcb8ca,0x7a04dd53a7646701,0xc,0xb2c5d2cbf27d3f39,0x2b656b7bc4797fa9,0xd,
+  0xee8203ed92fd41cf,0xdce6016e062bac06,0xd,0xfb1760c891901812,0x8e469ef45c77a6e2,0xe,
+  0xb33a3b423eeaedd0,0x3fc744479e7a7f29,0xf,0xf790771b31f0c07,0xf127f12c30a71684,0xf,
+  0xc210dfa087d58623,0xa2a8a5e075a4d054,0x10,0x1c8901c916301142,0x54096223465bbf29,0x11,
+  0x99fc5710ac4e702e,0x58a263890fe90d5,0x12,0xd3bcd06f88ddb2f1,0xb6eaf1d9a2e992d0,0x12,
+  0x3f07c144adf4e354,0x686bc54ff5dbb35c,0x13,0x288d50e0d51ab78a,0x19eca0777f77067f,0x14,
+  0x3acdd4c172d84d84,0xcb4d8326a9902bfb,0x14,0x81f0878a8d99e057,0x7cce6daf3f7a4090,0x15,
         ];
 
         static ReadOnlySpan<UInt64> LogC => [
@@ -716,61 +639,63 @@ namespace UltimateOrb.Numerics {
         ];
 
         static ReadOnlySpan<UInt64> LogCp => [
-            0xFFFF_FFFF_FFFF_FFFFUL, 0x7FFF_FFFF_FFFF_FFFFUL,
-        0x5555_5555_5555_5555UL, 0x0000_0555_5555_5555UL,
-        0xFFFF_FFFF_FFFF_FFFDUL, 0x0000_0000_003F_FFFFUL,
-        0x3333_3333_3333_3326UL, 0x0000_0000_0000_0003UL,
-        0x0000_2AAA_AAAA_A884UL, 0x0000_0000_0000_0000UL,
-        0x0000_0000_0249_245AUL, 0x0000_0000_0000_0000UL
+          0xffffffffffffffffUL, 0x7fffffffffffffffUL,
+      0x5555555555555555UL, 0x0000055555555555UL,
+      0xfffffffffffffffdUL, 0x00000000003fffffUL,
+      0x3333333333333326UL, 0x0000000000000003UL,
+      0x00002aaaaaaaaa84UL, 0x0000000000000000UL,
+      0x000000000249245aUL, 0x0000000000000000UL
         ];
         static ReadOnlySpan<UInt64> LogCn => [
-            0x0000_0000_0000_0000UL, 0x8000_0000_0000_0000UL,
-        0xAAAA_AAAA_AAAA_AAAAUL, 0x0000_02AA_AAAA_AAAAUL,
-        0xFFFF_FFFF_FFFF_FFFFUL, 0x0000_0000_000F_FFFFUL,
-        0x6666_6666_6666_6668UL, 0x0000_0000_0000_0000UL,
-        0x0000_02AA_AAAA_AAA8UL, 0x0000_0000_0000_0000UL,
-        0x0000_0000_0012_4926UL, 0x0000_0000_0000_0000UL
+           0x0000000000000000UL, 0x8000000000000000UL,
+      0xaaaaaaaaaaaaaaaaUL, 0x000002aaaaaaaaaaUL,
+      0xffffffffffffffffUL, 0x00000000000fffffUL,
+      0x6666666666666668UL, 0x0000000000000000UL,
+      0x000002aaaaaaaaa8UL, 0x0000000000000000UL,
+      0x0000000000124926UL, 0x0000000000000000UL
         ];
 
-        static ReadOnlySpan<UInt64> LogC36Flat => [
-            0x0000000000000000UL, 0x0000000000000000UL, 0x0000000000000000UL, 0x0000000000000000UL, 0x0000000000000000UL, 0x8000000000000000UL,
-        0x2ACAA97DA57CADBEUL, 0xF3DC3B1036F5D64CUL, 0xC5068BADC5D57D15UL, 0xA079A193394C5B16UL, 0xE4F1D9CC01F97B57UL, 0x58B90BFBE8E7BCD5UL,
-        0xD344071B5EC47714UL, 0x524EB0376B9686E0UL, 0xC2BE93BBB1396E6EUL, 0xA3A2751C30CE69D4UL, 0x6F16B06EC9735FCAUL, 0x1EBFBDFF82C58EA8UL,
-        0x80960837D68B3044UL, 0x44545F2E4DD67D06UL, 0x4753198ADE236146UL, 0xA7AE23A226D00887UL, 0xCCE9D8AECCAF4B7BUL, 0x071AC235C1282FE2UL,
-        0xEEE877628D8F6274UL, 0x8F7E8887E73829D7UL, 0x699B709699E1815FUL, 0x72478EA53E63911DUL, 0x9CCBBE0B53EEAC50UL, 0x013B2AB6FBA4E772UL,
-        0x318A9F63B2F3EC5CUL, 0x2F040F926E2C93BEUL, 0xC8CDC36AA406093FUL, 0x60AED94D2DCE32E1UL, 0x20E2FED34A297D86UL, 0x002BB0FFCF14CE62UL,
-        0x2D3C7B9299D0D3E1UL, 0x91EC7AEC4E3F0A35UL, 0x549592FF6D6AB786UL, 0xCFB314FFCCC47BB0UL, 0xDBD2C2A261AC8D07UL, 0x00050C244BE1B1E1UL,
-        0xCD46DC2CD5899528UL, 0x95CE94549C9A636AUL, 0x5D3119327FAC831DUL, 0x4ACE1152E8810FEEUL, 0x1A1AC547321F639AUL, 0x00007FF2FF1622C3UL,
-        0x8531A13788143560UL, 0x5C5F54178A891B6BUL, 0x7D5B21CD05968068UL, 0x2586E1A0F7107AB9UL, 0x11FEC7FF3036D3BEUL, 0x00000B160111D2E4UL,
-        0xE590C3FDFB446BE7UL, 0x2D5087B376C0214DUL, 0x738AFD2A4917377AUL, 0x84518CB8CAA9BA26UL, 0x3E1ED253872D27FCUL, 0x000000DA929E9CAFUL,
-        0xCC782DE6FF640FD0UL, 0x68569686F1264EA6UL, 0x98468B24ACD303BEUL, 0xB4CE2A0608A16570UL, 0xC764FB7ED0ECA973UL, 0x0000000F267A8AC5UL,
-        0xEE22A537A6D9A8B8UL, 0x08110963D1D9380FUL, 0x43B147AA9F2C11B5UL, 0x90A4EDC7B3F29C1CUL, 0x8DD92607ABCCAF23UL, 0x00000000F465639AUL,
-        0x38202F8BF18F1943UL, 0xBC2FB66E0BF68E76UL, 0x511F7698B91CBA26UL, 0xD17730E76AAEDF16UL, 0x7E14C2F15AB43F0BUL, 0x000000000E1DEB28UL,
-        0xEA93B5CEDF528C2FUL, 0x6EE667B44F788F66UL, 0x714AA5175CD8C9ABUL, 0x7B8D8CE6FE81F087UL, 0x8B3687CB140D6180UL, 0x0000000000C0B0C9UL,
-        0x88AD1FE5BCEC581BUL, 0xA772E0B581376DF7UL, 0x1D1EDB9F5248282AUL, 0x2AE5761242913279UL, 0x26AC3C54B9F8A1B1UL, 0x0000000000098A4BUL,
-        0x9D19FAF9F3A16E65UL, 0xC2FDE1C74321A361UL, 0x3787E55BAD70A464UL, 0xFC6A729280D47C69UL, 0xA10EC1008799EC55UL, 0x00000000000070DBUL,
-        0xF708EE5BF7061DEEUL, 0x921CFCDBBCCF2EB0UL, 0x7CD64E11A79215FEUL, 0x93B26377E3B574BDUL, 0xA26B9E7E2CE48E3FUL, 0x00000000000004E3UL,
-        0x9BB4D4CCB609D71EUL, 0x6EF9409A4CD3AC24UL, 0xC560A32B4349D4DDUL, 0xB1001EFF03E83F71UL, 0x088968384B4FAAC3UL, 0x0000000000000033UL,
-        0xB5C5F81B7E235F48UL, 0x9C1837383FEF6AA4UL, 0xCF80A6C83EA7DC89UL, 0x2ED389743C9AA15CUL, 0xF7176BDB43695D73UL, 0x0000000000000001UL,
-        0x4E3F1412BE77B88AUL, 0x75F070DF1338E5DBUL, 0xD970F6D684DCCA91UL, 0xE056AB257AA7F274UL, 0x125A7ECB835C64DAUL, 0x0000000000000000UL,
-        0x6C8A502410B3A92BUL, 0x5AE22FF5B3B87C53UL, 0x5510CEF268F5A4F6UL, 0x27126F802BC39D75UL, 0x00A2D6625A8289ACUL, 0x0000000000000000UL,
-        0xA851C04A8293FECEUL, 0x95E77DEC82B8EB58UL, 0xEF60EB192FE67EDAUL, 0xE0AADF36DDF86F4FUL, 0x00055FF15E0F8271UL, 0x0000000000000000UL,
-        0x7E2F1903476D3F72UL, 0x991510E40164F6ECUL, 0xB93A9CF471520656UL, 0x81D8F91AED9D0512UL, 0x00002B59F5A6E03BUL, 0x0000000000000000UL,
-        0xE661B8B0F04BD98DUL, 0xC0C7162D7C443B27UL, 0x48EB10AA6D041426UL, 0xFB5CB2465D33A354UL, 0x0000014E7515DC98UL, 0x0000000000000000UL,
-        0xA2DE610B24AFFA88UL, 0x36D51A1C2CF018AEUL, 0xE823660BEE34DF2BUL, 0xD5E52102FA4F3D47UL, 0x00000009A8D57B65UL, 0x0000000000000000UL,
-        0x8297D75925CF8A0EUL, 0xB19C48D3A13188F6UL, 0x08EC765F339C0710UL, 0x6A09E41E7A3814F9UL, 0x00000000448FBF65UL, 0x0000000000000000UL,
-        0x11744278158DD70DUL, 0xD10B922FB4D1B574UL, 0xDD8263D932A8A20CUL, 0x99F1CC682AF884C5UL, 0x0000000001D3EBC2UL, 0x0000000000000000UL,
-        0x20127EE09BB9F25CUL, 0x5ED98D7CDE9ECACEUL, 0x46DA42907892BB39UL, 0x9AF8DBD36A3B0863UL, 0x00000000000C0334UL, 0x0000000000000000UL,
-        0xAFD75D37C82B15CAUL, 0xF0ACD37674CF3129UL, 0xAE8A3FB59540AB8DUL, 0xA3DFEB50D4131639UL, 0x0000000000004C20UL, 0x0000000000000000UL,
-        0xDAAF1913E1CB12F0UL, 0xE352EA644FB69C62UL, 0xF3FAC0750B414CC5UL, 0xCF69A29F13DE20E8UL, 0x00000000000001D1UL, 0x0000000000000000UL,
-        0x0587A7D1A7EC6C45UL, 0x05EACA3704DCD2F6UL, 0x12DCBE8116EADA8FUL, 0xC333445E3155F79BUL, 0x000000000000000AUL, 0x0000000000000000UL,
-        0x183F54470927DBCDUL, 0x76BC8F5B8E8B7093UL, 0x8F099FB908474B26UL, 0x3D9AEA5B4D0EBFAEUL, 0x0000000000000000UL, 0x0000000000000000UL,
-        0x261C179F4BDFFA1DUL, 0x0909A0681E2103A8UL, 0x4DBDD766D2D9A092UL, 0x01559C86508B1539UL, 0x0000000000000000UL, 0x0000000000000000UL,
-        0x3816A7CA0CA85578UL, 0x6B7FD2696989CDEEUL, 0xD34DACABB2D48A6CUL, 0x00072CE49E65A3ACUL, 0x0000000000000000UL, 0x0000000000000000UL,
-        0xD4E29D35FE14E115UL, 0xC30D08011BDAFD19UL, 0xA9A6BF19955B2132UL, 0x00002572BE492F62UL, 0x0000000000000000UL, 0x0000000000000000UL,
-        0xE4DF41884BE86BB5UL, 0x0C5772EE960FD5BFUL, 0x9DBEE3B9355D1FB0UL, 0x000000BDD01D5D84UL, 0x0000000000000000UL, 0x0000000000000000UL,
-        0x80446608D32C4ED3UL, 0xB4D5892FE7709C19UL, 0xD3840403FCEFE8A9UL, 0x00000003BC4FB6D4UL, 0x0000000000000000UL, 0x0000000000000000UL
-        ];
+        static ReadOnlySpan<UInt64> LogC37Flat => [
+            0x0000000000000000, 0x0000000000000000, 0x0000000000000000, 0x0000000000000000, 0x0000000000000000, 0x8000000000000000,
+            0x2acaa97da57cadbe, 0xf3dc3b1036f5d64c, 0xc5068badc5d57d15, 0xa079a193394c5b16, 0xe4f1d9cc01f97b57, 0x58b90bfbe8e7bcd5,
+            0xd344071b5ec47714, 0x524eb0376b9686e0, 0xc2be93bbb1396e6e, 0xa3a2751c30ce69d4, 0x6f16b06ec9735fca, 0x1ebfbdff82c58ea8,
+            0x80960837d68b3044, 0x44545f2e4dd67d06, 0x4753198ade236146, 0xa7ae23a226d00887, 0xcce9d8aeccaf4b7b, 0x071ac235c1282fe2,
+            0xeee877628d8f6274, 0x8f7e8887e73829d7, 0x699b709699e1815f, 0x72478ea53e63911d, 0x9ccbbe0b53eeac50, 0x013b2ab6fba4e772,
+            0x318a9f63b2f3ec5c, 0x2f040f926e2c93be, 0xc8cdc36aa406093f, 0x60aed94d2dce32e1, 0x20e2fed34a297d86, 0x002bb0ffcf14ce62,
+            0x2d3c7b9299d0d3e1, 0x91ec7aec4e3f0a35, 0x549592ff6d6ab786, 0xcfb314ffccc47bb0, 0xdbd2c2a261ac8d07, 0x00050c244be1b1e1,
+            0xcd46dc2cd5899528, 0x95ce94549c9a636a, 0x5d3119327fac831d, 0x4ace1152e8810fee, 0x1a1ac547321f639a, 0x00007ff2ff1622c3,
+            0x8531a13788143560, 0x5c5f54178a891b6b, 0x7d5b21cd05968068, 0x2586e1a0f7107ab9, 0x11fec7ff3036d3be, 0x00000b160111d2e4,
+            0xe590c3fdfb446be7, 0x2d5087b376c0214d, 0x738afd2a4917377a, 0x84518cb8caa9ba26, 0x3e1ed253872d27fc, 0x000000da929e9caf,
+            0xcc782de6ff640fd0, 0x68569686f1264ea6, 0x98468b24acd303be, 0xb4ce2a0608a16570, 0xc764fb7ed0eca973, 0x0000000f267a8ac5,
+            0xee22a537a6d9a8b8, 0x08110963d1d9380f, 0x43b147aa9f2c11b5, 0x90a4edc7b3f29c1c, 0x8dd92607abccaf23, 0x00000000f465639a,
+            0x38202f8bf18f1943, 0xbc2fb66e0bf68e76, 0x511f7698b91cba26, 0xd17730e76aaedf16, 0x7e14c2f15ab43f0b, 0x000000000e1deb28,
+            0xea93b5cedf528c2f, 0x6ee667b44f788f66, 0x714aa5175cd8c9ab, 0x7b8d8ce6fe81f087, 0x8b3687cb140d6180, 0x0000000000c0b0c9,
+            0x88ad1fe5bcec581b, 0xa772e0b581376df7, 0x1d1edb9f5248282a, 0x2ae5761242913279, 0x26ac3c54b9f8a1b1, 0x0000000000098a4b,
+            0x9d19faf9f3a16e65, 0xc2fde1c74321a361, 0x3787e55bad70a464, 0xfc6a729280d47c69, 0xa10ec1008799ec55, 0x00000000000070db,
+            0xf708ee5bf7061dee, 0x921cfcdbbccf2eb0, 0x7cd64e11a79215fe, 0x93b26377e3b574bd, 0xa26b9e7e2ce48e3f, 0x00000000000004e3,
+            0x9bb4d4ccb609d71e, 0x6ef9409a4cd3ac24, 0xc560a32b4349d4dd, 0xb1001eff03e83f71, 0x088968384b4faac3, 0x0000000000000033,
+            0xb5c5f81b7e235f48, 0x9c1837383fef6aa4, 0xcf80a6c83ea7dc89, 0x2ed389743c9aa15c, 0xf7176bdb43695d73, 0x0000000000000001,
+            0x4e3f1412be77b88a, 0x75f070df1338e5db, 0xd970f6d684dcca91, 0xe056ab257aa7f274, 0x125a7ecb835c64da, 0x0000000000000000,
+            0x6c8a502410b3a92b, 0x5ae22ff5b3b87c53, 0x5510cef268f5a4f6, 0x27126f802bc39d75, 0x00a2d6625a8289ac, 0x0000000000000000,
+            0xa851c04a8293fece, 0x95e77dec82b8eb58, 0xef60eb192fe67eda, 0xe0aadf36ddf86f4f, 0x00055ff15e0f8271, 0x0000000000000000,
+            0x7e2f1903476d3f72, 0x991510e40164f6ec, 0xb93a9cf471520656, 0x81d8f91aed9d0512, 0x00002b59f5a6e03b, 0x0000000000000000,
+            0xe661b8b0f04bd98d, 0xc0c7162d7c443b27, 0x48eb10aa6d041426, 0xfb5cb2465d33a354, 0x0000014e7515dc98, 0x0000000000000000,
+            0xa2de610b24affa88, 0x36d51a1c2cf018ae, 0xe823660bee34df2b, 0xd5e52102fa4f3d47, 0x00000009a8d57b65, 0x0000000000000000,
+            0x8297d75925cf8a0e, 0xb19c48d3a13188f6, 0x08ec765f339c0710, 0x6a09e41e7a3814f9, 0x00000000448fbf65, 0x0000000000000000,
+            0x11744278158dd70d, 0xd10b922fb4d1b574, 0xdd8263d932a8a20c, 0x99f1cc682af884c5, 0x0000000001d3ebc2, 0x0000000000000000,
+            0x20127ee09bb9f25c, 0x5ed98d7cde9ecace, 0x46da42907892bb39, 0x9af8dbd36a3b0863, 0x00000000000c0334, 0x0000000000000000,
+            0xafd75d37c82b15ca, 0xf0acd37674cf3129, 0xae8a3fb59540ab8d, 0xa3dfeb50d4131639, 0x0000000000004c20, 0x0000000000000000,
+            0xdaaf1913e1cb12f0, 0xe352ea644fb69c62, 0xf3fac0750b414cc5, 0xcf69a29f13de20e8, 0x00000000000001d1, 0x0000000000000000,
+            0x0587a7d1a7ec6c45, 0x05eaca3704dcd2f6, 0x12dcbe8116eada8f, 0xc333445e3155f79b, 0x000000000000000a, 0x0000000000000000,
+            0x183f54470927dbcd, 0x76bc8f5b8e8b7093, 0x8f099fb908474b26, 0x3d9aea5b4d0ebfae, 0x0000000000000000, 0x0000000000000000,
+            0x261c179f4bdffa1d, 0x0909a0681e2103a8, 0x4dbdd766d2d9a092, 0x01559c86508b1539, 0x0000000000000000, 0x0000000000000000,
+            0x3816a7ca0ca85578, 0x6b7fd2696989cdee, 0xd34dacabb2d48a6c, 0x00072ce49e65a3ac, 0x0000000000000000, 0x0000000000000000,
+            0xd4e29d35fe14e115, 0xc30d08011bdafd19, 0xa9a6bf19955b2132, 0x00002572be492f62, 0x0000000000000000, 0x0000000000000000,
+            0xe4df41884be86bb5, 0x0c5772ee960fd5bf, 0x9dbee3b9355d1fb0, 0x000000bdd01d5d84, 0x0000000000000000, 0x0000000000000000,
+            0x80446608d32c4ed3, 0xb4d5892fe7709c19, 0xd3840403fcefe8a9, 0x00000003bc4fb6d4, 0x0000000000000000, 0x0000000000000000];
+
+        static ReadOnlySpan<InlineArray6<UInt64>> LogC37 => MemoryMarshal.CreateReadOnlySpan(
+            ref System.Runtime.CompilerServices.Unsafe.As<UInt64, InlineArray6<UInt64>>(ref MemoryMarshal.GetReference(LogC37Flat)), 37);
 
         static ReadOnlySpan<UInt64> LogTbl6Flat => [
             0x0000000000000000UL, 0x0000000000000000UL, 0x0000000000000000UL, 0x0000000000000000UL, 0x0000000000000000UL, 0x8000000000000000UL,

@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Misc = UltimateOrb.Miscellaneous;
 using UltimateOrb.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using UltimateOrb.Utilities;
 
 namespace UltimateOrb.Numerics {
 #if NET8_0_OR_GREATER
@@ -33,21 +34,21 @@ namespace UltimateOrb.Numerics {
 
         // ─── mhu7xu2 : o = high 7 words of (a (7w) * b (2w)) , i.e. product >> 128 ──
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void MultiplyHigh(ref InlineArray7<UInt64> o, in InlineArray7<UInt64> a, UInt128 b) {
+        internal static void MultiplyHigh(out InlineArray7<UInt64> o, in InlineArray7<UInt64> a, UInt128 b) {
             unchecked {
                 UInt64 b0 = (UInt64)b, b1 = (UInt64)(b >> 64);
                 UInt128 a0b1 = (UInt128)a[0] * b1, a1b1 = (UInt128)a[1] * b1,
                         a2b1 = (UInt128)a[2] * b1, a3b1 = (UInt128)a[3] * b1,
                         a4b1 = (UInt128)a[4] * b1, a5b1 = (UInt128)a[5] * b1,
                         a6b1 = (UInt128)a[6] * b1;
-                nuint c0;
-                UInt64 o0 = AddWithCarry((UInt64)a1b1, (UInt64)(a0b1 >> 64), 0, out c0);
-                UInt64 o1 = AddWithCarry((UInt64)a2b1, (UInt64)(a1b1 >> 64), c0, out c0);
-                UInt64 o2 = AddWithCarry((UInt64)a3b1, (UInt64)(a2b1 >> 64), c0, out c0);
-                UInt64 o3 = AddWithCarry((UInt64)a4b1, (UInt64)(a3b1 >> 64), c0, out c0);
-                UInt64 o4 = AddWithCarry((UInt64)a5b1, (UInt64)(a4b1 >> 64), c0, out c0);
-                UInt64 o5 = AddWithCarry((UInt64)a6b1, (UInt64)(a5b1 >> 64), c0, out c0);
-                UInt64 o6 = AddWithCarry(0, (UInt64)(a6b1 >> 64), c0, out _);
+                InlineArray7<UInt64> o_ = default;
+                o_[0] = AddWithCarry((UInt64)a1b1, (UInt64)(a0b1 >> 64), 0, out nuint c0);
+                o_[1] = AddWithCarry((UInt64)a2b1, (UInt64)(a1b1 >> 64), c0, out c0);
+                o_[2] = AddWithCarry((UInt64)a3b1, (UInt64)(a2b1 >> 64), c0, out c0);
+                o_[3] = AddWithCarry((UInt64)a4b1, (UInt64)(a3b1 >> 64), c0, out c0);
+                o_[4] = AddWithCarry((UInt64)a5b1, (UInt64)(a4b1 >> 64), c0, out c0);
+                o_[5] = AddWithCarry((UInt64)a6b1, (UInt64)(a5b1 >> 64), c0, out c0);
+                o_[6] = AddWithCarry(0, (UInt64)(a6b1 >> 64), c0, out _);
 
                 UInt128 a1b0 = (UInt128)a[1] * b0, a2b0 = (UInt128)a[2] * b0,
                         a3b0 = (UInt128)a[3] * b0, a4b0 = (UInt128)a[4] * b0,
@@ -55,20 +56,20 @@ namespace UltimateOrb.Numerics {
                 nuint c1;
                 UInt64 t;
                 t = AddWithCarry((UInt64)a2b0, (UInt64)(a1b0 >> 64), 0, out c1);
-                o0 = AddWithCarry(o0, t, 0, out c0);
+                o_[0] = AddWithCarry(o_[0], t, 0, out c0);
                 t = AddWithCarry((UInt64)a3b0, (UInt64)(a2b0 >> 64), c1, out c1);
-                o1 = AddWithCarry(o1, t, c0, out c0);
+                o_[1] = AddWithCarry(o_[1], t, c0, out c0);
                 t = AddWithCarry((UInt64)a4b0, (UInt64)(a3b0 >> 64), c1, out c1);
-                o2 = AddWithCarry(o2, t, c0, out c0);
+                o_[2] = AddWithCarry(o_[2], t, c0, out c0);
                 t = AddWithCarry((UInt64)a5b0, (UInt64)(a4b0 >> 64), c1, out c1);
-                o3 = AddWithCarry(o3, t, c0, out c0);
+                o_[3] = AddWithCarry(o_[3], t, c0, out c0);
                 t = AddWithCarry((UInt64)a6b0, (UInt64)(a5b0 >> 64), c1, out c1);
-                o4 = AddWithCarry(o4, t, c0, out c0);
+                o_[4] = AddWithCarry(o_[4], t, c0, out c0);
                 t = AddWithCarry(0, (UInt64)(a6b0 >> 64), c1, out c1);
-                o5 = AddWithCarry(o5, t, c0, out c0);
-                o6 = AddWithCarry(o6, 0, c0, out _);
+                o_[5] = AddWithCarry(o_[5], t, c0, out c0);
+                o_[6] = AddWithCarry(o_[6], 0, c0, out _);
 
-                o[0] = o0; o[1] = o1; o[2] = o2; o[3] = o3; o[4] = o4; o[5] = o5; o[6] = o6;
+                o = o_;
             }
         }
 
@@ -79,120 +80,124 @@ namespace UltimateOrb.Numerics {
                 UInt64 b0 = (UInt64)b, b1 = (UInt64)(b >> 64);
                 UInt128 a0b1 = (UInt128)a[0] * b1, a1b1 = (UInt128)a[1] * b1,
                         a2b1 = (UInt128)a[2] * b1, a3b1 = (UInt128)a[3] * b1;
-                nuint c0;
-                UInt64 o0 = AddWithCarry((UInt64)a1b1, (UInt64)(a0b1 >> 64), 0, out c0);
-                UInt64 o1 = AddWithCarry((UInt64)a2b1, (UInt64)(a1b1 >> 64), c0, out c0);
-                UInt64 o2 = AddWithCarry((UInt64)a3b1, (UInt64)(a2b1 >> 64), c0, out c0);
-                UInt64 o3 = AddWithCarry(0, (UInt64)(a3b1 >> 64), c0, out c0);
+
+                InlineArray4<UInt64> o_ = default;
+                o_[0] = AddWithCarry((UInt64)a1b1, (UInt64)(a0b1 >> 64), 0, out nuint c0);
+                o_[1] = AddWithCarry((UInt64)a2b1, (UInt64)(a1b1 >> 64), c0, out c0);
+                o_[2] = AddWithCarry((UInt64)a3b1, (UInt64)(a2b1 >> 64), c0, out c0);
+                o_[3] = AddWithCarry(0, (UInt64)(a3b1 >> 64), c0, out c0);
 
                 UInt128 a1b0 = (UInt128)a[1] * b0, a2b0 = (UInt128)a[2] * b0, a3b0 = (UInt128)a[3] * b0;
                 nuint c1;
                 UInt64 t;
                 t = AddWithCarry((UInt64)a2b0, (UInt64)(a1b0 >> 64), 0, out c1);
-                o0 = AddWithCarry(o0, t, 0, out c0);
+                o_[0] = AddWithCarry(o_[0], t, 0, out c0);
                 t = AddWithCarry((UInt64)a3b0, (UInt64)(a2b0 >> 64), c1, out c1);
-                o1 = AddWithCarry(o1, t, c0, out c0);
+                o_[1] = AddWithCarry(o_[1], t, c0, out c0);
                 t = AddWithCarry(0, (UInt64)(a3b0 >> 64), c1, out c1);
-                o2 = AddWithCarry(o2, t, c0, out c0);
-                o3 = AddWithCarry(o3, 0, c0, out _);
+                o_[2] = AddWithCarry(o_[2], t, c0, out c0);
+                o_[3] = AddWithCarry(o_[3], 0, c0, out _);
 
-                o[0] = o0; o[1] = o1; o[2] = o2; o[3] = o3;
+                o = o_;
             }
         }
 
         // ─── mhu3xu2 : o = high 3 words of (a (3w) * b (2w)) ────────────────────────
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void MultiplyHigh(ref InlineArray3<UInt64> o, in InlineArray3<UInt64> a, UInt128 b) {
+        internal static void MultiplyHigh(out InlineArray3<UInt64> o, in InlineArray3<UInt64> a, UInt128 b) {
             unchecked {
                 UInt64 b0 = (UInt64)b, b1 = (UInt64)(b >> 64);
                 UInt128 a1b0 = (UInt128)a[1] * b0, a2b0 = (UInt128)a[2] * b0;
                 UInt128 a0b1 = (UInt128)a[0] * b1, a1b1 = (UInt128)a[1] * b1, a2b1 = (UInt128)a[2] * b1;
-                nuint c0, c1;
                 UInt64 t;
-                UInt64 o0 = AddWithCarry((UInt64)a1b1, (UInt64)(a0b1 >> 64), 0, out c0);
-                UInt64 o1 = AddWithCarry((UInt64)a2b1, (UInt64)(a1b1 >> 64), c0, out c0);
-                UInt64 o2 = AddWithCarry(0, (UInt64)(a2b1 >> 64), c0, out c0);
-                t = AddWithCarry((UInt64)a2b0, (UInt64)(a1b0 >> 64), 0, out c1);
-                o0 = AddWithCarry(o0, t, 0, out c0);
+                InlineArray3<UInt64> o_ = default;
+                o_[0] = AddWithCarry((UInt64)a1b1, (UInt64)(a0b1 >> 64), 0, out nuint c0);
+                o_[1] = AddWithCarry((UInt64)a2b1, (UInt64)(a1b1 >> 64), c0, out c0);
+                o_[2] = AddWithCarry(0, (UInt64)(a2b1 >> 64), c0, out c0);
+                t = AddWithCarry((UInt64)a2b0, (UInt64)(a1b0 >> 64), 0, out nuint c1);
+                o_[0] = AddWithCarry(o_[0], t, 0, out c0);
                 t = AddWithCarry(0, (UInt64)(a2b0 >> 64), c1, out c1);
-                o1 = AddWithCarry(o1, t, c0, out c0);
-                o2 = AddWithCarry(o2, 0, c0, out _);
-                o[0] = o0; o[1] = o1; o[2] = o2;
+                o_[1] = AddWithCarry(o_[1], t, c0, out c0);
+                o_[2] = AddWithCarry(o_[2], 0, c0, out _);
+                o  = o_;
             }
         }
 
         // ─── mhu6u6u6 : o = high 6 words of (a (6w) * b (6w)) ───────────────────────
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void MultiplyHigh(ref InlineArray6<UInt64> o, in InlineArray6<UInt64> b, in InlineArray6<UInt64> a) {
+        internal static void MultiplyHigh(out InlineArray6<UInt64> o, in InlineArray6<UInt64> b, in InlineArray6<UInt64> a) {
             unchecked {
                 nuint c0, c1;
-                UInt64 t, o0, o1, o2, o3, o4, o5;
+                UInt64 t;
+                InlineArray6<UInt64> o_ = default;
                 UInt128 a5b5 = (UInt128)a[5] * b[5], a5b4 = (UInt128)a[5] * b[4],
                         a5b3 = (UInt128)a[5] * b[3], a5b2 = (UInt128)a[5] * b[2],
                         a5b1 = (UInt128)a[5] * b[1], a5b0 = (UInt128)a[5] * b[0];
-                o0 = AddWithCarry((UInt64)a5b1, (UInt64)(a5b0 >> 64), 0, out c0);
-                o1 = AddWithCarry((UInt64)a5b2, (UInt64)(a5b1 >> 64), c0, out c0);
-                o2 = AddWithCarry((UInt64)a5b3, (UInt64)(a5b2 >> 64), c0, out c0);
-                o3 = AddWithCarry((UInt64)a5b4, (UInt64)(a5b3 >> 64), c0, out c0);
-                o4 = AddWithCarry((UInt64)a5b5, (UInt64)(a5b4 >> 64), c0, out c0);
-                o5 = AddWithCarry(0, (UInt64)(a5b5 >> 64), c0, out c0);
+                o_[0] = AddWithCarry((UInt64)a5b1, (UInt64)(a5b0 >> 64), 0, out c0);
+                o_[1] = AddWithCarry((UInt64)a5b2, (UInt64)(a5b1 >> 64), c0, out c0);
+                o_[2] = AddWithCarry((UInt64)a5b3, (UInt64)(a5b2 >> 64), c0, out c0);
+                o_[3] = AddWithCarry((UInt64)a5b4, (UInt64)(a5b3 >> 64), c0, out c0);
+                o_[4] = AddWithCarry((UInt64)a5b5, (UInt64)(a5b4 >> 64), c0, out c0);
+                o_[5] = AddWithCarry(0, (UInt64)(a5b5 >> 64), c0, out c0);
 
                 UInt128 a4b5 = (UInt128)a[4] * b[5], a4b4 = (UInt128)a[4] * b[4],
                         a4b3 = (UInt128)a[4] * b[3], a4b2 = (UInt128)a[4] * b[2],
                         a4b1 = (UInt128)a[4] * b[1];
                 t = AddWithCarry((UInt64)a4b2, (UInt64)(a4b1 >> 64), 0, out c0);
-                o0 = AddWithCarry(o0, t, 0, out c1);
+                o_[0] = AddWithCarry(o_[0], t, 0, out c1);
                 t = AddWithCarry((UInt64)a4b3, (UInt64)(a4b2 >> 64), c0, out c0);
-                o1 = AddWithCarry(o1, t, c1, out c1);
+                o_[1] = AddWithCarry(o_[1], t, c1, out c1);
                 t = AddWithCarry((UInt64)a4b4, (UInt64)(a4b3 >> 64), c0, out c0);
-                o2 = AddWithCarry(o2, t, c1, out c1);
+                o_[2] = AddWithCarry(o_[2], t, c1, out c1);
                 t = AddWithCarry((UInt64)a4b5, (UInt64)(a4b4 >> 64), c0, out c0);
-                o3 = AddWithCarry(o3, t, c1, out c1);
+                o_[3] = AddWithCarry(o_[3], t, c1, out c1);
                 t = AddWithCarry(0, (UInt64)(a4b5 >> 64), c0, out c0);
-                o4 = AddWithCarry(o4, t, c1, out c1);
-                o5 = AddWithCarry(o5, 0, c1, out _);
+                o_[4] = AddWithCarry(o_[4], t, c1, out c1);
+                o_[5] = AddWithCarry(o_[5], 0, c1, out _);
 
                 UInt128 a3b5 = (UInt128)a[3] * b[5], a3b4 = (UInt128)a[3] * b[4],
                         a3b3 = (UInt128)a[3] * b[3], a3b2 = (UInt128)a[3] * b[2];
                 t = AddWithCarry((UInt64)a3b3, (UInt64)(a3b2 >> 64), 0, out c0);
-                o0 = AddWithCarry(o0, t, 0, out c1);
+                o_[0] = AddWithCarry(o_[0], t, 0, out c1);
                 t = AddWithCarry((UInt64)a3b4, (UInt64)(a3b3 >> 64), c0, out c0);
-                o1 = AddWithCarry(o1, t, c1, out c1);
+                o_[1] = AddWithCarry(o_[1], t, c1, out c1);
                 t = AddWithCarry((UInt64)a3b5, (UInt64)(a3b4 >> 64), c0, out c0);
-                o2 = AddWithCarry(o2, t, c1, out c1);
+                o_[2] = AddWithCarry(o_[2], t, c1, out c1);
                 t = AddWithCarry(0, (UInt64)(a3b5 >> 64), c0, out c0);
-                o3 = AddWithCarry(o3, t, c1, out c1);
-                o4 = AddWithCarry(o4, 0, c1, out c1);
-                o5 = AddWithCarry(o5, 0, c1, out _);
+                o_[3] = AddWithCarry(o_[3], t, c1, out c1);
+                o_[4] = AddWithCarry(o_[4], 0, c1, out c1);
+                o_[5] = AddWithCarry(o_[5], 0, c1, out _);
 
                 UInt128 a2b5 = (UInt128)a[2] * b[5], a2b4 = (UInt128)a[2] * b[4], a2b3 = (UInt128)a[2] * b[3];
                 t = AddWithCarry((UInt64)a2b4, (UInt64)(a2b3 >> 64), 0, out c0);
-                o0 = AddWithCarry(o0, t, 0, out c1);
+                o_[0] = AddWithCarry(o_[0], t, 0, out c1);
                 t = AddWithCarry((UInt64)a2b5, (UInt64)(a2b4 >> 64), c0, out c0);
-                o1 = AddWithCarry(o1, t, c1, out c1);
+                o_[1] = AddWithCarry(o_[1], t, c1, out c1);
                 t = AddWithCarry(0, (UInt64)(a2b5 >> 64), c0, out c0);
-                o2 = AddWithCarry(o2, t, c1, out c1);
-                o3 = AddWithCarry(o3, 0, c1, out c1);
-                o4 = AddWithCarry(o4, 0, c1, out c1);
-                o5 = AddWithCarry(o5, 0, c1, out _);
+                o_[2] = AddWithCarry(o_[2], t, c1, out c1);
+                o_[3] = AddWithCarry(o_[3], 0, c1, out c1);
+                o_[4] = AddWithCarry(o_[4], 0, c1, out c1);
+                o_[5] = AddWithCarry(o_[5], 0, c1, out _);
 
                 UInt128 a1b5 = (UInt128)a[1] * b[5], a1b4 = (UInt128)a[1] * b[4];
                 t = AddWithCarry((UInt64)a1b5, (UInt64)(a1b4 >> 64), 0, out c0);
-                o0 = AddWithCarry(o0, t, 0, out c1);
+                o_[0] = AddWithCarry(o_[0], t, 0, out c1);
                 t = AddWithCarry(0, (UInt64)(a1b5 >> 64), c0, out c0);
-                o1 = AddWithCarry(o1, t, c1, out c1);
-                o2 = AddWithCarry(o2, 0, c1, out c1);
-                o3 = AddWithCarry(o3, 0, c1, out c1);
-                o4 = AddWithCarry(o4, 0, c1, out c1);
-                o5 = AddWithCarry(o5, 0, c1, out _);
+                o_[1] = AddWithCarry(o_[1], t, c1, out c1);
+                o_[2] = AddWithCarry(o_[2], 0, c1, out c1);
+                o_[3] = AddWithCarry(o_[3], 0, c1, out c1);
+                o_[4] = AddWithCarry(o_[4], 0, c1, out c1);
+                o_[5] = AddWithCarry(o_[5], 0, c1, out _);
 
                 UInt128 a0b5 = (UInt128)a[0] * b[5];
-                o[0] = AddWithCarry(o0, (UInt64)(a0b5 >> 64), 0, out c1);
-                o[1] = AddWithCarry(o1, 0, c1, out c1);
-                o[2] = AddWithCarry(o2, 0, c1, out c1);
-                o[3] = AddWithCarry(o3, 0, c1, out c1);
-                o[4] = AddWithCarry(o4, 0, c1, out c1);
-                o[5] = AddWithCarry(o5, 0, c1, out _);
+                o_[0] = AddWithCarry(o_[0], (UInt64)(a0b5 >> 64), 0, out c1);
+                o_[1] = AddWithCarry(o_[1], 0, c1, out c1);
+                o_[2] = AddWithCarry(o_[2], 0, c1, out c1);
+                o_[3] = AddWithCarry(o_[3], 0, c1, out c1);
+                o_[4] = AddWithCarry(o_[4], 0, c1, out c1);
+                o_[5] = AddWithCarry(o_[5], 0, c1, out _);
+
+                o = o_;
             }
         }
 
@@ -318,7 +323,7 @@ namespace UltimateOrb.Numerics {
             unchecked {
                 if (n <= 0) { if (n < 0) ShiftRightArithmetic(ref a, -n); return; }
                 if (n >= 448) { a[0] = a[1] = a[2] = a[3] = a[4] = a[5] = a[6] = 0; return; }
-                UInt64[] old = [a[0], a[1], a[2], a[3], a[4], a[5], a[6]];
+                ReadOnlySpan<UInt64> old = [a[0], a[1], a[2], a[3], a[4], a[5], a[6]];
                 int qk = n >> 6, rk = n & 63, lk = 64 - rk;
                 for (int i = 6; i >= 0; i--) {
                     int src = i - qk;
@@ -332,45 +337,49 @@ namespace UltimateOrb.Numerics {
 
         // ─── mahu1u6u6 / mahu1u3u3 : o = a*b + c ────────────────────────────────────
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void MultiplyAddHigh(ref InlineArray6<UInt64> o, UInt64 a,
+        internal static void MultiplyAddHigh(out InlineArray6<UInt64> o, UInt64 a,
                                              in InlineArray6<UInt64> b, in InlineArray6<UInt64> c) {
             unchecked {
-                nuint c0, c1;
                 UInt64 t;
-                UInt128 ab0 = (UInt128)a * b[0], ab1 = (UInt128)a * b[1];
-                t = AddWithCarry((UInt64)ab1, (UInt64)(ab0 >> 64), 0, out c0);
-                o[0] = AddWithCarry(c[0], t, 0, out c1);
+                UInt128 ab0 = (UInt128)a * b[0];
+                UInt128 ab1 = (UInt128)a * b[1];
+                InlineArray6<UInt64> o_ = default;
+                t = AddWithCarry((UInt64)ab1, (UInt64)(ab0 >> 64), 0, out var c0);
+                o_[0] = AddWithCarry(c[0], t, 0, out var c1);
                 UInt128 ab2 = (UInt128)a * b[2];
                 t = AddWithCarry((UInt64)ab2, (UInt64)(ab1 >> 64), c0, out c0);
-                o[1] = AddWithCarry(c[1], t, c1, out c1);
+                o_[1] = AddWithCarry(c[1], t, c1, out c1);
                 UInt128 ab3 = (UInt128)a * b[3];
                 t = AddWithCarry((UInt64)ab3, (UInt64)(ab2 >> 64), c0, out c0);
-                o[2] = AddWithCarry(c[2], t, c1, out c1);
+                o_[2] = AddWithCarry(c[2], t, c1, out c1);
                 UInt128 ab4 = (UInt128)a * b[4];
                 t = AddWithCarry((UInt64)ab4, (UInt64)(ab3 >> 64), c0, out c0);
-                o[3] = AddWithCarry(c[3], t, c1, out c1);
+                o_[3] = AddWithCarry(c[3], t, c1, out c1);
                 UInt128 ab5 = (UInt128)a * b[5];
                 t = AddWithCarry((UInt64)ab5, (UInt64)(ab4 >> 64), c0, out c0);
-                o[4] = AddWithCarry(c[4], t, c1, out c1);
-                t = AddWithCarry(0, (UInt64)(ab5 >> 64), c0, out c0);
-                o[5] = AddWithCarry(c[5], t, c1, out _);
+                o_[4] = AddWithCarry(c[4], t, c1, out c1);
+                t = AddWithCarry(0, (UInt64)(ab5 >> 64), c0, out _);
+                o_[5] = AddWithCarry(c[5], t, c1, out _);
+                o = o_;
             }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void MultiplyAddHigh(ref InlineArray3<UInt64> o, UInt64 a,
+        internal static void MultiplyAddHigh(out InlineArray3<UInt64> o, UInt64 a,
                                              in InlineArray3<UInt64> b, in InlineArray3<UInt64> c) {
             unchecked {
                 nuint c0, c1;
                 UInt64 t;
                 UInt128 ab0 = (UInt128)a * b[0], ab1 = (UInt128)a * b[1];
+                InlineArray3<UInt64> o_ = default;
                 t = AddWithCarry((UInt64)ab1, (UInt64)(ab0 >> 64), 0, out c0);
-                o[0] = AddWithCarry(c[0], t, 0, out c1);
+                o_[0] = AddWithCarry(c[0], t, 0, out c1);
                 UInt128 ab2 = (UInt128)a * b[2];
                 t = AddWithCarry((UInt64)ab2, (UInt64)(ab1 >> 64), c0, out c0);
-                o[1] = AddWithCarry(c[1], t, c1, out c1);
+                o_[1] = AddWithCarry(c[1], t, c1, out c1);
                 t = AddWithCarry(0, (UInt64)(ab2 >> 64), c0, out c0);
-                o[2] = AddWithCarry(c[2], t, c1, out _);
+                o_[2] = AddWithCarry(c[2], t, c1, out _);
+                o = o_;
             }
         }
 
@@ -385,95 +394,87 @@ namespace UltimateOrb.Numerics {
 
         // ─── Polynomial evaluation ─────────────────────────────────────────────────
         // pol6 : f = Horner evaluation of a degree-(n-1) poly with 6-word coeffs, x is u64.
-        static void EvalPoly6(ref InlineArray6<UInt64> f, UInt64 x, int n, ReadOnlySpan<UInt64> c) {
+        [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.AggressiveOptimization)]
+        static void EvalPoly6(out InlineArray6<UInt64> f, UInt64 x, ReadOnlySpan<InlineArray6<UInt64>> c) {
             unchecked {
-                InlineArray6<UInt64> a = default, b = default, t = default;
-                for (int j = 0; j < 6; j++) { b[j] = c[(n - 1) * 6 + j]; t[j] = c[(n - 2) * 6 + j]; }
-                MultiplyAddHigh(ref a, x, in b, in t);
-                for (int i = n - 3; i > 1; i--) {
-                    for (int j = 0; j < 6; j++) t[j] = c[i * 6 + j];
-                    for (int j = 0; j < 6; j++) b[j] = a[j];
-                    MultiplyAddHigh(ref a, x, in b, in t);
-                }
-                for (int j = 0; j < 6; j++) t[j] = c[j];
-                for (int j = 0; j < 6; j++) b[j] = a[j];
-                MultiplyAddHigh(ref f, x, in b, in t);
+                var n = c.Length;
+                InlineArray6<UInt64> a;
+                MultiplyAddHigh(out a, x, in c[n - 1], in c[n - 2]);
+                int i = n - 2;
+                do {
+                    MultiplyAddHigh(out a, x, in a, in c[--i]);
+                } while (i > 1);
+                MultiplyAddHigh(out f, x, in a, in c[0]);
             }
         }
 
         // pol6red : reduced fixed-shape form used in as_expq_superaccurate.
-        static void EvalPoly6Reduced(ref InlineArray6<UInt64> f, UInt64 x, ReadOnlySpan<UInt64> c) {
+        static void EvalPoly6Reduced(out InlineArray6<UInt64> f, UInt64 x, ReadOnlySpan<InlineArray6<UInt64>> c) {
             unchecked {
-                InlineArray6<UInt64> a = default, b = default, t = default;
+                if (c.Length < 6) {
+                    throw Utilities.ThrowHelper.Throw<ArgumentException, ArgumentException>();
+                }
+                InlineArray6<UInt64> a = default, b;
                 // c[5][5]
-                b[0] = c[5 * 6 + 5]; b[1] = b[2] = b[3] = b[4] = b[5] = 0;
-                for (int j = 0; j < 6; j++) t[j] = a[j];
-                MultiplyAddHigh(ref a, x, in t, in b);
+                b = default; b[0] = c[5][5];
+                MultiplyAddHigh(out a, x, in a, in b);
                 // c[4][4], c[4][5]
-                b[0] = c[4 * 6 + 4]; b[1] = c[4 * 6 + 5]; b[2] = b[3] = b[4] = b[5] = 0;
-                for (int j = 0; j < 6; j++) t[j] = a[j];
-                MultiplyAddHigh(ref a, x, in t, in b);
+                b = default; b[0] = c[4][4]; b[1] = c[4][5];
+                MultiplyAddHigh(out a, x, in a, in b);
                 // c[3][3..5]
-                b[0] = c[3 * 6 + 3]; b[1] = c[3 * 6 + 4]; b[2] = c[3 * 6 + 5]; b[3] = b[4] = b[5] = 0;
-                for (int j = 0; j < 6; j++) t[j] = a[j];
-                MultiplyAddHigh(ref a, x, in t, in b);
+                b = default; b[0] = c[3][3]; b[1] = c[3][4]; b[2] = c[3][5];
+                MultiplyAddHigh(out a, x, in a, in b);
                 // c[2][2..5]
-                b[0] = c[2 * 6 + 2]; b[1] = c[2 * 6 + 3]; b[2] = c[2 * 6 + 4]; b[3] = c[2 * 6 + 5]; b[4] = b[5] = 0;
-                for (int j = 0; j < 6; j++) t[j] = a[j];
-                MultiplyAddHigh(ref a, x, in t, in b);
+                b = default; b[0] = c[2][2]; b[1] = c[2][3]; b[2] = c[2][4]; b[3] = c[2][5];
+                MultiplyAddHigh(out a, x, in a, in b);
                 // c[1][1..5]
-                b[0] = c[1 * 6 + 1]; b[1] = c[1 * 6 + 2]; b[2] = c[1 * 6 + 3]; b[3] = c[1 * 6 + 4]; b[4] = c[1 * 6 + 5]; b[5] = 0;
-                for (int j = 0; j < 6; j++) t[j] = a[j];
-                MultiplyAddHigh(ref a, x, in t, in b);
+                b = default; b[0] = c[1][1]; b[1] = c[1][2]; b[2] = c[1][3]; b[3] = c[1][4]; b[4] = c[1][5];
+                MultiplyAddHigh(out a, x, in a, in b);
                 // final
-                for (int j = 0; j < 6; j++) b[j] = c[j];
-                for (int j = 0; j < 6; j++) t[j] = a[j];
-                MultiplyAddHigh(ref f, x, in t, in b);
+                b = c[0];
+                MultiplyAddHigh(out f, x, in a, in b);
             }
         }
 
+
         // pol6redred : f = ... using full 6-word x (mutated in place: x[5..2] = x[3..0], x[1..0] = 0).
-        static void EvalPoly6ReducedReduced(ref InlineArray6<UInt64> f, ref InlineArray6<UInt64> x, ReadOnlySpan<UInt64> c) {
+        static void EvalPoly6ReducedReduced(out InlineArray6<UInt64> f, ref InlineArray6<UInt64> x, ReadOnlySpan<InlineArray6<UInt64>> c) {
             unchecked {
                 x[5] = x[3]; x[4] = x[2]; x[3] = x[1]; x[2] = x[0]; x[1] = x[0] = 0;
-                InlineArray6<UInt64> c2 = default;
-                for (int j = 0; j < 6; j++) c2[j] = c[2 * 6 + j];
-                MultiplyHigh(ref f, in x, in c2);
+                InlineArray6<UInt64> c2 = c[2];
+                MultiplyHigh(out f, in x, in c2);
                 f[0] = f[2]; f[1] = f[3]; f[2] = f[4]; f[3] = f[5]; f[4] = f[5] = 0;
-                InlineArray6<UInt64> c1 = default;
-                for (int j = 0; j < 6; j++) c1[j] = c[1 * 6 + j];
+                InlineArray6<UInt64> c1 = c[1];
                 Add(ref f, in c1);
-                InlineArray6<UInt64> tmp = default;
-                for (int j = 0; j < 6; j++) tmp[j] = f[j];
-                MultiplyHigh(ref f, in x, in tmp);
+                InlineArray6<UInt64> tmp = f;
+                MultiplyHigh(out f, in x, in tmp);
                 f[0] = f[2]; f[1] = f[3]; f[2] = f[4]; f[3] = f[5];
-                f[4] = c[0 * 6 + 4]; f[5] = c[0 * 6 + 5];
+                f[4] = c[0][4]; f[5] = c[0][5];
             }
         }
 
         // pol3 : 3-word Horner evaluation.
-        static void EvalPoly3(ref InlineArray3<UInt64> f, UInt64 x, int n, ReadOnlySpan<UInt64> c) {
+        static void EvalPoly3(out InlineArray3<UInt64> f, UInt64 x, ReadOnlySpan<InlineArray3<UInt64>> c) {
             unchecked {
-                InlineArray3<UInt64> a = default, b = default, t = default;
-                for (int j = 0; j < 3; j++) { b[j] = c[(n - 1) * 3 + j]; t[j] = c[(n - 2) * 3 + j]; }
-                MultiplyAddHigh(ref a, x, in b, in t);
-                for (int i = n - 3; i > 1; i--) {
-                    for (int j = 0; j < 3; j++) t[j] = c[i * 3 + j];
-                    for (int j = 0; j < 3; j++) b[j] = a[j];
-                    MultiplyAddHigh(ref a, x, in b, in t);
-                }
-                for (int j = 0; j < 3; j++) t[j] = c[j];
-                for (int j = 0; j < 3; j++) b[j] = a[j];
-                MultiplyAddHigh(ref f, x, in b, in t);
+                var n = c.Length;
+                InlineArray3<UInt64> a;
+                MultiplyAddHigh(out a, x, in c[n - 1], in c[n - 2]);
+                int i = n - 2;
+                do {
+                    MultiplyAddHigh(out a, x, in a, in c[--i]);
+                } while (i > 1);
+                MultiplyAddHigh(out f, x, in a, in c[0]);
             }
         }
 
         // pol : f = c[0] + c[1]*x + ... + c[n-1]*x^(n-1) + f0*x^n, 128-bit coeffs.
-        static UInt128 EvalPoly2(UInt64 x, UInt128 f0, int n, ReadOnlySpan<UInt128> c) {
+        static UInt128 EvalPoly2(UInt64 x, UInt128 f0, ReadOnlySpan<UInt128> c) {
             unchecked {
+                var n = c.Length;
                 UInt128 f = c[n - 1] + f0;
-                for (int i = n - 1; i > 0; i--)
+                for (int i = n - 1; i > 0; i--) {
                     f = MultiplyAddHigh(x, f, c[i - 1]);
+                }
                 return f;
             }
         }
@@ -575,7 +576,7 @@ namespace UltimateOrb.Numerics {
                 InlineArray3<UInt64> iln2Top3 = default;
                 for (int j = 0; j < 3; j++) iln2Top3[j] = ExpIlN2[j + 4];
                 InlineArray3<UInt64> fs = default;
-                MultiplyHigh(ref fs, in iln2Top3, mVal);
+                MultiplyHigh(out fs, in iln2Top3, mVal);
                 fs[0] ^= unchecked((UInt64)sm);
                 fs[1] ^= unchecked((UInt64)sm);
                 fs[2] ^= unchecked((UInt64)sm);
@@ -597,7 +598,7 @@ namespace UltimateOrb.Numerics {
                                     ExpC[4 * 2 + 0] + MultiplyHigh(z, ExpC[5 * 2 + 0])));
 
                 // res = pol(z, f0, 3, c)  ==  c[0] + c[1]*z + c[2]*z^2 + f0*z^2
-                UInt128 res = EvalPoly2(z, f0, 3, ExpCAsUInt128);
+                UInt128 res = EvalPoly2(z, f0, ExpCAsUInt128[..3]);
 
                 UInt128 t0 = ((UInt128)ExpR0[i0 * 2 + 1] << 64) | ExpR0[i0 * 2 + 0];
                 UInt128 t1 = ((UInt128)ExpR1[i1 * 2 + 1] << 64) | ExpR1[i1 * 2 + 0];
@@ -697,7 +698,7 @@ namespace UltimateOrb.Numerics {
                 MultiplyHigh(ref ft, in t0, in t1);
 
                 InlineArray3<UInt64> f = default;
-                EvalPoly3(ref f, x[2], ExpCAccRows, ExpCAccFlat);
+                EvalPoly3(out f, x[2], ExpCAcc);
                 MultiplyHigh(ref ft, in f, in ft);
 
                 UInt128 c1 = ((UInt128)ExpCAccFlat[1 * 3 + 2] << 64) | ExpCAccFlat[1 * 3 + 1];
@@ -736,7 +737,7 @@ namespace UltimateOrb.Numerics {
                 Int64 sm = unchecked((Int64)(x0 >> 64) >> 63);
                 UInt128 t = (x0 & (((UInt128)1 << 112) - 1)) | ((UInt128)1 << 112);
                 InlineArray7<UInt64> x = default;
-                MultiplyHigh(ref x, in ExpIlN2_7, t);
+                MultiplyHigh(out x, in ExpIlN2_7, t);
                 for (int j = 0; j < 7; j++) x[j] ^= unchecked((UInt64)sm);
                 ShiftRightArithmetic(ref x, 0x402E - (int)((x0 >> 112) & 0x7FFF));
                 el = unchecked((Int64)x[6]);
@@ -744,17 +745,17 @@ namespace UltimateOrb.Numerics {
                 x[5] &= 0x0FFF_FFFF_FFFF_FFFFUL;
 
                 InlineArray6<UInt64> f = default, f1 = default, f2 = default, ft = default;
-                EvalPoly6(ref f, x[5], 28, ExpC6Flat);
-                EvalPoly6Reduced(ref f1, x[4], ExpC6Flat);
+                EvalPoly6(out f, x[5], ExpC6);
+                EvalPoly6Reduced(out f1, x[4], ExpC6);
                 InlineArray6<UInt64> xCopy = default;
                 for (int j = 0; j < 6; j++) xCopy[j] = x[j];
-                EvalPoly6ReducedReduced(ref f2, ref xCopy, ExpC6Flat);
+                EvalPoly6ReducedReduced(out f2, ref xCopy, ExpC6);
 
-                MultiplyHigh(ref ft, in f, in f1);
-                MultiplyHigh(ref ft, in ft, in f2);
+                MultiplyHigh(out ft, in f, in f1);
+                MultiplyHigh(out ft, in ft, in f2);
                 InlineArray6<UInt64> tbl = default;
                 for (int j = 0; j < 6; j++) tbl[j] = ExpTbl6Flat[jt * 6 + j];
-                MultiplyHigh(ref ft, in ft, in tbl);
+                MultiplyHigh(out ft, in ft, in tbl);
 
                 mLo = (ft[4] >> 1) | (ft[5] << 63);
                 mHi = ft[5] >> 1;
@@ -863,23 +864,23 @@ namespace UltimateOrb.Numerics {
         // c (6 rows × 2 words each).
         static ReadOnlySpan<UInt64> ExpC => [
             0xFFFF_FFFF_FFFF_FFFF, 0x7FFF_FFFF_FFFF_FFFF,
-        0x7BCD_5E4F_1D9C_C01F, 0x0000_058B_90BF_BE8E,
-        0xFF82_C58E_A86F_16B0, 0x0000_0000_001E_BFBD,
-        0x71AC_235C_1282_FE2C, 0x0000_0000_0000_0000,
-        0x0000_013B_2AB6_FBA4, 0x0000_0000_0000_0000,
-        0x0000_0000_0002_BB10, 0x0000_0000_0000_0000
+            0x7BCD_5E4F_1D9C_C01F, 0x0000_058B_90BF_BE8E,
+            0xFF82_C58E_A86F_16B0, 0x0000_0000_001E_BFBD,
+            0x71AC_235C_1282_FE2C, 0x0000_0000_0000_0000,
+            0x0000_013B_2AB6_FBA4, 0x0000_0000_0000_0000,
+            0x0000_0000_0002_BB10, 0x0000_0000_0000_0000
         ];
 
-        static ReadOnlySpan<UInt64> ExpC_BE => [
-            0x7FFF_FFFF_FFFF_FFFF, 0xFFFF_FFFF_FFFF_FFFF,
-        0x0000_058B_90BF_BE8E, 0x7BCD_5E4F_1D9C_C01F,
-        0x0000_0000_001E_BFBD, 0xFF82_C58E_A86F_16B0,
-        0x0000_0000_0000_0000, 0x71AC_235C_1282_FE2C,
-        0x0000_0000_0000_0000, 0x0000_013B_2AB6_FBA4,
-        0x0000_0000_0000_0000, 0x0000_0000_0002_BB10,
-    ];
+        static readonly UInt128[] ExpCAsUInt128_ = [
+            U128(0x7FFF_FFFF_FFFF_FFFF, 0xFFFF_FFFF_FFFF_FFFF),
+            U128(0x0000_058B_90BF_BE8E, 0x7BCD_5E4F_1D9C_C01F),
+            U128(0x0000_0000_001E_BFBD, 0xFF82_C58E_A86F_16B0),
+            U128(0x0000_0000_0000_0000, 0x71AC_235C_1282_FE2C),
+            U128(0x0000_0000_0000_0000, 0x0000_013B_2AB6_FBA4),
+            U128(0x0000_0000_0000_0000, 0x0000_0000_0002_BB10),
+        ];
 
-        static ReadOnlySpan<UInt128> ExpCAsUInt128 => MemoryMarshal.Cast<UInt64, UInt128>(BitConverter.IsLittleEndian ? ExpC : ExpC_BE);
+        static ReadOnlySpan<UInt128> ExpCAsUInt128 => ExpCAsUInt128_;
 
 
         // 6-word tables used by AsExpqSuperaccurate (16×6 and 28×6).
@@ -946,7 +947,11 @@ namespace UltimateOrb.Numerics {
 
 
             ];
-        static int ExpC6Rows => 28;
+
+        static ReadOnlySpan<InlineArray6<UInt64>> ExpC6 => MemoryMarshal.CreateReadOnlySpan(
+            ref System.Runtime.CompilerServices.Unsafe.As<UInt64, InlineArray6<UInt64>>(ref MemoryMarshal.GetReference(ExpC6Flat)), 28);
+
+
 
         // 3-word tables used by AsExpqAccurate (16×3, 16×3, 15×3).
         static ReadOnlySpan<UInt64> ExpTbl0Flat => [
@@ -1010,5 +1015,9 @@ namespace UltimateOrb.Numerics {
 
             ];
         static int ExpCAccRows => 15;
+
+        static ReadOnlySpan<InlineArray3<UInt64>> ExpCAcc => MemoryMarshal.CreateReadOnlySpan(
+            ref System.Runtime.CompilerServices.Unsafe.As<UInt64, InlineArray3<UInt64>>(ref MemoryMarshal.GetReference(ExpCAccFlat)), ExpCAccRows);
+
     }
 }

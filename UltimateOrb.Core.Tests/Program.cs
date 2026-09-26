@@ -984,6 +984,17 @@ public readonly struct TotalOrderIeee754Comparer<T> :
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private static int Main(string[] args) {
             {
+                
+                var sdfasd = Quadruple.Parse("0x3.fa697792aae67f93d752261ef204p+0", NumberStyles.HexFloat | NumberStyles.AllowHexSpecifier);
+                sdfasd = Quadruple.Parse("0x1.fffff0000040p-1", NumberStyles.HexFloat | NumberStyles.AllowHexSpecifier);
+                sdfasd = Quadruple.Parse("0x1.6b458a5043ee7e707906a79d67dp+0", NumberStyles.HexFloat | NumberStyles.AllowHexSpecifier);
+                sdfasd = Quadruple.Parse("0x1.000007174d5df1a9c57076b66f6bp+0", NumberStyles.HexFloat | NumberStyles.AllowHexSpecifier);
+                var sdfasdsads = Quadruple.Log(sdfasd);
+
+                Console.WriteLine($"? = {sdfasdsads}");
+
+            }
+            {
                 var sdfasd = Quadruple.Parse("-1");
                 sdfasd = Quadruple.Parse("0x1.b0e000000001p-2", NumberStyles.HexFloat | NumberStyles.AllowHexSpecifier);
                 var sdfasdsads = Quadruple.Acos(sdfasd);
