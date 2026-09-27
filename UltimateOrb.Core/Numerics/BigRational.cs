@@ -351,12 +351,28 @@ namespace UltimateOrb.Numerics {
             return Unsafe.BitCast<TFloatUIntBits, TFloat>(result);
         }
 
+        public static Quadruple ToQuadruple(BigRational value, MidpointRounding mode = MidpointRounding.ToEven) {
+            return ToQuadruple(value, mode.ToFloatingPointRounding());
+        }
+
+        public static Quadruple ToQuadruple(BigRational value, FloatingPointRounding rounding = FloatingPointRounding.ToNearestWithMidpointToEven) {
+            return ToIeee754InterchangeBinary<Quadruple, System.UInt128>(value, rounding);
+        }
+
+        public static Quadruple ToQuadruple(BigRational value) {
+            return ToIeee754InterchangeBinary<Quadruple, System.UInt128>(value, FloatingPointRounding.ToNearestWithMidpointToEven);
+        }
+
         public static double ToDouble(BigRational value, MidpointRounding mode = MidpointRounding.ToEven) {
             return ToDouble(value, mode.ToFloatingPointRounding());
         }
 
         public static double ToDouble(BigRational value, FloatingPointRounding rounding = FloatingPointRounding.ToNearestWithMidpointToEven) {
             return ToIeee754InterchangeBinary<double, UInt64>(value, rounding);
+        }
+        
+        public static double ToDouble(BigRational value) {
+            return ToIeee754InterchangeBinary<double, UInt64>(value, FloatingPointRounding.ToNearestWithMidpointToEven);
         }
 
         public static Single ToSingle(BigRational value, MidpointRounding mode = MidpointRounding.ToEven) {
@@ -365,6 +381,10 @@ namespace UltimateOrb.Numerics {
 
         public static Single ToSingle(BigRational value, FloatingPointRounding rounding = FloatingPointRounding.ToNearestWithMidpointToEven) {
             return ToIeee754InterchangeBinary<Single, UInt32>(value, rounding);
+        }
+        
+        public static Single ToSingle(BigRational value) {
+            return ToIeee754InterchangeBinary<Single, UInt32>(value, FloatingPointRounding.ToNearestWithMidpointToEven);
         }
 
         public static Half ToHalf(BigRational value, MidpointRounding mode = MidpointRounding.ToEven) {
@@ -375,6 +395,10 @@ namespace UltimateOrb.Numerics {
             return ToIeee754InterchangeBinary<Half, UInt16>(value, rounding);
         }
 
+        public static Half ToHalf(BigRational value) {
+            return ToIeee754InterchangeBinary<Half, UInt16>(value, FloatingPointRounding.ToNearestWithMidpointToEven);
+        }
+
 #if NET11_0_OR_GREATER
         public static BFloat16 ToBFloat16(BigRational value, MidpointRounding mode = MidpointRounding.ToEven) {
             return ToBFloat16(value, mode.ToFloatingPointRounding());
@@ -383,6 +407,10 @@ namespace UltimateOrb.Numerics {
         public static BFloat16 ToBFloat16(BigRational value, FloatingPointRounding rounding = FloatingPointRounding.ToNearestWithMidpointToEven) {
             // BFloat16 is not an IEEE Interchange format, but the conversion algorithm works on it.
             return ToIeee754InterchangeBinary<BFloat16, UInt16>(value, rounding);
+        }
+
+        public static BFloat16 ToBFloat16(BigRational value) {
+            return ToIeee754InterchangeBinary<BFloat16, UInt16>(value, FloatingPointRounding.ToNearestWithMidpointToEven);
         }
 #endif
 

@@ -1874,19 +1874,13 @@ namespace UltimateOrb {
         }
 
         public static Quadruple Atan2(Quadruple y, Quadruple x) {
-            // TODO: Provide a correct impl
-            // Quadrant-correct atan2
-            if (x > Zero)
-                return Atan(y / x);
+            return BitConverter.UInt128BitsToQuadruple(Binary128Arithmetic.Atan2(
+                BitConverter.QuadrupleToUInt128Bits(y), BitConverter.QuadrupleToUInt128Bits(x)));
+        }
 
-            if (x < Zero)
-                return (y >= Zero ? Pi : -Pi) + Atan(y / x);
-
-            // x == 0
-            if (y > Zero) return PiOverTwo;
-            if (y < Zero) return -PiOverTwo;
-
-            return NaN;
+        public static Quadruple Atan2(Quadruple y, Quadruple x, MidpointRounding mode) {
+            return BitConverter.UInt128BitsToQuadruple(Binary128Arithmetic.Atan2(
+                BitConverter.QuadrupleToUInt128Bits(y), BitConverter.QuadrupleToUInt128Bits(x), mode));
         }
 
         public static Quadruple Atan2Pi(Quadruple y, Quadruple x) {

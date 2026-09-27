@@ -605,7 +605,7 @@ namespace UltimateOrb.Numerics {
 
         // sqrhU: approximate high 128 bits of a 128-bit square
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static UInt128 SquareHigh(UInt128 a) {
+        internal static UInt128 SquareHighApproximate(UInt128 a) {
             unchecked {
                 UInt64 a0 = (UInt64)a, a1 = (UInt64)(a >> 64);
                 UInt128 a10 = (UInt128)a1 * a0;
@@ -618,7 +618,7 @@ namespace UltimateOrb.Numerics {
 
         // sqrhu2: approximate high 2-word of a 2-word square
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void SquareHigh(ref InlineArray2<UInt64> o, in InlineArray2<UInt64> a) {
+        internal static void SquareHighUnsignedApproximate(ref InlineArray2<UInt64> o, in InlineArray2<UInt64> a) {
             unchecked {
                 UInt128 a1a0 = (UInt128)a[1] * a[0];
                 UInt128 a1a1 = (UInt128)a[1] * a[1];
@@ -630,7 +630,7 @@ namespace UltimateOrb.Numerics {
 
         // sqrhu4: approximate high 4-word of a 4-word square
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void SquareHigh(ref InlineArray4<UInt64> o, in InlineArray4<UInt64> a) {
+        internal static void SquareHighUnsignedApproximate(ref InlineArray4<UInt64> o, in InlineArray4<UInt64> a) {
             unchecked {
                 UInt64 o0, o1, o2, o3;
                 UInt128 a2a1 = (UInt128)a[2] * a[1];
@@ -662,7 +662,7 @@ namespace UltimateOrb.Numerics {
 
         // sqrhu5: approximate high 5-word of a 5-word square
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void SquareHigh(ref InlineArray5<UInt64> o, in InlineArray5<UInt64> a) {
+        internal static void SquareHighUnsignedApproximate(ref InlineArray5<UInt64> o, in InlineArray5<UInt64> a) {
             unchecked {
                 UInt64 o0, o1, o2, o3, o4, t;
                 UInt128 a4a0 = (UInt128)a[4] * a[0];
@@ -952,13 +952,13 @@ namespace UltimateOrb.Numerics {
                 h_hi_4[0] = h[1]; h_hi_4[1] = h[2]; h_hi_4[2] = h[3]; h_hi_4[3] = h[4];
                 InlineArray5<UInt64> h2s = default;
                 InlineArray4<UInt64> h2s_inner = default;
-                SquareHigh(ref h2s_inner, in h_hi_4);
+                SquareHighUnsignedApproximate(ref h2s_inner, in h_hi_4);
                 h2s[1] = h2s_inner[0]; h2s[2] = h2s_inner[1]; h2s[3] = h2s_inner[2]; h2s[4] = h2s_inner[3];
 
                 InlineArray2<UInt64> h4s = default;
                 InlineArray2<UInt64> h2s_tail = default;
                 h2s_tail[0] = h2s[3]; h2s_tail[1] = h2s[4];
-                SquareHigh(ref h4s, in h2s_tail);
+                SquareHighUnsignedApproximate(ref h4s, in h2s_tail);
 
                 InlineArray5<UInt64> h3s = default;
                 InlineArray3<UInt64> h_hi_3 = default;
@@ -1569,7 +1569,7 @@ namespace UltimateOrb.Numerics {
 
                 // Polynomial tail
                 UInt128 t = t0;
-                UInt128 t2 = SquareHigh(t);
+                UInt128 t2 = SquareHighApproximate(t);
                 UInt128 t3 = MultiplyHighApproximate(t, t2);
                 int s2 = 2 * (nz - 6);
                 if (Misc.Likely(s2 < 128)) t2 >>= s2;
@@ -1781,7 +1781,7 @@ namespace UltimateOrb.Numerics {
                 }
 
                 InlineArray5<UInt64> t2 = default;
-                SquareHigh(ref t2, in t);
+                SquareHighUnsignedApproximate(ref t2, in t);
                 InlineArray5<UInt64> t3 = default;
                 MultiplyHigh(out t3, in t, in t2);
                 int s2 = 2 * (nz - 6) - 1;

@@ -83,7 +83,6 @@ namespace UltimateOrb.Numerics {
             return r;
         }
 
-        [System.CLSCompliantAttribute(false)]
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         static UInt64 ShiftLeftPartial(UInt64 low, UInt64 high, int count, out UInt64 highResult) {
             unchecked {

@@ -198,11 +198,11 @@ namespace UltimateOrb.Core.Tests {
 
 
         // ------------------------------------------------------------
-        // Helper: print Log(x)
+        // Helper: print Log(a)
         // ------------------------------------------------------------
         private static void TestLog(string name, Quadruple x) {
             Quadruple y = Quadruple.Log(x);
-            Console.WriteLine($"{name}: x={x}, Log(x)={y}");
+            Console.WriteLine($"{name}: a={x}, Log(a)={y}");
         }
 
         // ------------------------------------------------------------
@@ -254,28 +254,28 @@ public readonly struct TotalOrderIeee754Comparer<T> :
             //  IComparer<T>
             // ─────────────────────────────────────────────────────────────────
 
-            public int Compare(T? x, T? y) {
-                if (x is null) return y is null ? 0 : -1;
-                if (y is null) return 1;
+            public int Compare(T? a, T? b) {
+                if (a is null) return b is null ? 0 : -1;
+                if (b is null) return 1;
 
-                bool xIsNaN = T.IsNaN(x);
-                bool yIsNaN = T.IsNaN(y);
-                if (xIsNaN || yIsNaN) return CompareNaNs(x, y, xIsNaN, yIsNaN);
+                bool xIsNaN = T.IsNaN(a);
+                bool yIsNaN = T.IsNaN(b);
+                if (xIsNaN || yIsNaN) return CompareNaNs(a, b, xIsNaN, yIsNaN);
 
-                int cmp = x.CompareTo(y);
+                int cmp = a.CompareTo(b);
                 if (cmp != 0) return cmp;
 
-                bool xNeg = T.IsNegative(x);
-                bool yNeg = T.IsNegative(y);
+                bool xNeg = T.IsNegative(a);
+                bool yNeg = T.IsNegative(b);
 
                 // §5.10 c.1 / c.2: −0 < +0.
-                if (T.IsZero(x) && T.IsZero(y) && xNeg != yNeg)
+                if (T.IsZero(a) && T.IsZero(b) && xNeg != yNeg)
                     return xNeg ? -1 : 1;
 
                 // §5.10 c.3: exponent tie-break is decimal-only.
                 if (T.Radix != 10) return 0;
 
-                int expCmp = ReadExponentAsInt64(x).CompareTo(ReadExponentAsInt64(y));
+                int expCmp = ReadExponentAsInt64(a).CompareTo(ReadExponentAsInt64(b));
                 return xNeg ? -expCmp : expCmp;
             }
 
@@ -283,29 +283,29 @@ public readonly struct TotalOrderIeee754Comparer<T> :
             //  NaN ordering
             // ─────────────────────────────────────────────────────────────────
 
-            private static int CompareNaNs(T x, T y, bool xIsNaN, bool yIsNaN) {
-                if (xIsNaN && !yIsNaN) return T.IsNegative(x) ? -1 : 1;
-                if (!xIsNaN && yIsNaN) return T.IsNegative(y) ? 1 : -1;
+            private static int CompareNaNs(T a, T b, bool xIsNaN, bool yIsNaN) {
+                if (xIsNaN && !yIsNaN) return T.IsNegative(a) ? -1 : 1;
+                if (!xIsNaN && yIsNaN) return T.IsNegative(b) ? 1 : -1;
 
-                bool xNeg = T.IsNegative(x);
-                bool yNeg = T.IsNegative(y);
+                bool xNeg = T.IsNegative(a);
+                bool yNeg = T.IsNegative(b);
                 if (xNeg != yNeg) return xNeg ? -1 : 1;
 
-                int cmp = T.Radix == 10 ? CompareDecimalNaNs(x, y) : CompareBinaryNaNs(x, y);
+                int cmp = T.Radix == 10 ? CompareDecimalNaNs(a, b) : CompareBinaryNaNs(a, b);
                 return xNeg ? -cmp : cmp;
             }
 
             // Binary: Q is the MSB of the significand, payload is below it.
             // Unsigned significand comparison already yields sNaN < qNaN for
             // +NaN and ascending payload order.  Do not touch.
-            private static int CompareBinaryNaNs(T x, T y)
-                => CompareSignificands(x, y);
+            private static int CompareBinaryNaNs(T a, T b)
+                => CompareSignificands(a, b);
 
             // Decimal: Q is bit QBitPosition of the written exponent; payload
             // is split between the exponent (below Q) and the significand.
-            private static int CompareDecimalNaNs(T x, T y) {
-                long ex = ReadExponentAsInt64(x);
-                long ey = ReadExponentAsInt64(y);
+            private static int CompareDecimalNaNs(T a, T b) {
+                long ex = ReadExponentAsInt64(a);
+                long ey = ReadExponentAsInt64(b);
 
                 long qx = (ex >> QBitPosition) & 1L;
                 long qy = (ey >> QBitPosition) & 1L;
@@ -321,7 +321,7 @@ public readonly struct TotalOrderIeee754Comparer<T> :
                 if (pCmp != 0) return pCmp;
 
                 // Low payload bits live in the significand.
-                return CompareSignificands(x, y);
+                return CompareSignificands(a, b);
             }
 
             // ─────────────────────────────────────────────────────────────────
@@ -361,15 +361,15 @@ public readonly struct TotalOrderIeee754Comparer<T> :
                 return unchecked((long)v);
             }
 
-            private static int CompareSignificands(T x, T y) {
-                int nx = x.GetSignificandByteCount();
-                int ny = y.GetSignificandByteCount();
-                if (nx != ny) return CompareSignificandsDifferentWidth(x, nx, y, ny);
+            private static int CompareSignificands(T a, T b) {
+                int nx = a.GetSignificandByteCount();
+                int ny = b.GetSignificandByteCount();
+                if (nx != ny) return CompareSignificandsDifferentWidth(a, nx, b, ny);
 
                 Span<byte> bx = nx <= StackAllocLimit ? stackalloc byte[nx] : new byte[nx];
                 Span<byte> by = ny <= StackAllocLimit ? stackalloc byte[ny] : new byte[ny];
-                WriteSignificand(x, bx);
-                WriteSignificand(y, by);
+                WriteSignificand(a, bx);
+                WriteSignificand(b, by);
                 return CompareUnsignedBytes(bx, by);
             }
 
@@ -384,16 +384,16 @@ public readonly struct TotalOrderIeee754Comparer<T> :
                 return a.SequenceCompareTo(b);
             }
 
-            private static int CompareSignificandsDifferentWidth(T x, int nx, T y, int ny) {
+            private static int CompareSignificandsDifferentWidth(T a, int nx, T b, int ny) {
                 int width = Math.Max(nx, ny);
                 byte[] xBuf = new byte[width];
                 byte[] yBuf = new byte[width];
                 if (UseLittleEndian) {
-                    WriteSignificand(x, xBuf.AsSpan(0, nx));
-                    WriteSignificand(y, yBuf.AsSpan(0, ny));
+                    WriteSignificand(a, xBuf.AsSpan(0, nx));
+                    WriteSignificand(b, yBuf.AsSpan(0, ny));
                 } else {
-                    WriteSignificand(x, xBuf.AsSpan(width - nx));
-                    WriteSignificand(y, yBuf.AsSpan(width - ny));
+                    WriteSignificand(a, xBuf.AsSpan(width - nx));
+                    WriteSignificand(b, yBuf.AsSpan(width - ny));
                 }
                 return CompareUnsignedBytes(xBuf, yBuf);
             }
@@ -402,7 +402,7 @@ public readonly struct TotalOrderIeee754Comparer<T> :
             //  IEqualityComparer<T>
             // ─────────────────────────────────────────────────────────────────
 
-            public bool Equals(T? x, T? y) => Compare(x, y) == 0;
+            public bool Equals(T? a, T? b) => Compare(a, b) == 0;
 
             public int GetHashCode(T obj) {
                 if (obj is null) return 0;
@@ -983,6 +983,20 @@ public readonly struct TotalOrderIeee754Comparer<T> :
 
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private static int Main(string[] args) {
+            {
+                var a = Quadruple.Parse("0x1.671319be89ea5fa44781ca8bd812p-8086", NumberStyles.HexFloat | NumberStyles.AllowHexSpecifier);
+                var b = Quadruple.Parse("0x1.a347c20399e672b9e51aa62baed6p+8311", NumberStyles.HexFloat | NumberStyles.AllowHexSpecifier);
+                a = Quadruple.Parse("0x1p-495", NumberStyles.HexFloat | NumberStyles.AllowHexSpecifier);
+                b = Quadruple.Parse("0x1p+16000", NumberStyles.HexFloat | NumberStyles.AllowHexSpecifier);
+                a = Quadruple.Parse("0x1.9fecb2756afe716p-436", NumberStyles.HexFloat | NumberStyles.AllowHexSpecifier);
+                b = Quadruple.Parse("0x1p+16000", NumberStyles.HexFloat | NumberStyles.AllowHexSpecifier);
+
+                var sdfasdsads = Quadruple.Atan2(a, b);
+
+                Console.WriteLine($"? = {sdfasdsads:G36}");
+
+                return 0;
+            }
             {
                 {
                     var sdfasd = Quadruple.Parse("-0x1.654bb3b2c73ebb059fabb506ff34p+13", NumberStyles.HexFloat | NumberStyles.AllowHexSpecifier);
@@ -1698,7 +1712,7 @@ public readonly struct TotalOrderIeee754Comparer<T> :
 
             }
             {
-                Console.WriteLine("==== Quadruple Log(x) Tests ====");
+                Console.WriteLine("==== Quadruple Log(a) Tests ====");
 
                 // ------------------------------------------------------------
                 // 1. Special values
@@ -2945,8 +2959,8 @@ public readonly struct TotalOrderIeee754Comparer<T> :
 
                 {
                     //
-                    // var (x, y, z, angle) = (1.0, 1.0, 1.0, 2.0 / 3.0 * Math.PI);
-                    // var (x, y, z, angle) = (1.0, 1.0, 1.0, -Math.PI);
+                    // var (a, b, z, angle) = (1.0, 1.0, 1.0, 2.0 / 3.0 * Math.PI);
+                    // var (a, b, z, angle) = (1.0, 1.0, 1.0, -Math.PI);
                     var (x, y, z, angle) = (0.5, -1.5, 2.5, 2.0);
                     UltimateOrb.Numerics.SystemNumericsExtensions.ToIntrinsicXYZEulerAnglesFromAxisAngle(x, y, z, angle, out var a0, out var a1, out var a2);
                     Console.WriteLine($@"{a0:R}, {a1:R}, {a2:R}");
@@ -3034,8 +3048,8 @@ public readonly struct TotalOrderIeee754Comparer<T> :
 
                 {
                     //
-                    // var (x, y, z, angle) = (1.0, 1.0, 1.0, 2.0 / 3.0 * Math.PI);
-                    // var (x, y, z, angle) = (1.0, 1.0, 1.0, -Math.PI);
+                    // var (a, b, z, angle) = (1.0, 1.0, 1.0, 2.0 / 3.0 * Math.PI);
+                    // var (a, b, z, angle) = (1.0, 1.0, 1.0, -Math.PI);
                     var (x, y, z, angle) = (0.5, -1.5, 2.5, 2.0);
                     UltimateOrb.Numerics.SystemNumericsExtensions.ToIntrinsicXYZEulerAnglesFromAxisAngle(x, y, z, angle, out var a0, out var a1, out var a2);
                     Console.WriteLine($@"{a0:R}, {a1:R}, {a2:R}");

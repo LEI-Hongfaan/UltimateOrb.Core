@@ -40,9 +40,10 @@ namespace UltimateOrb.Numerics {
                 return xy1 + (xy0 >> 64);
             }
         }
-
-        /* approximate high 128 bits of a 128-bit square; at most 2 units short */
-        static UInt128 SquareHighApproximate(UInt128 a) {
+        
+        /*
+        // approximate high 128 bits of a 128-bit square; at most 2 units short
+        static UInt128 SquareHighUnsignedApproximate(UInt128 a) {
             unchecked {
                 UInt64 al = (UInt64)a, ah = (UInt64)(a >> 64);
                 UInt128 a10 = (UInt128)al * ah;
@@ -52,6 +53,7 @@ namespace UltimateOrb.Numerics {
                 return a11;
             }
         }
+        */
 
         /* full product of a 128-bit square; returns the high 128 bits and writes
            the low 128 through *lo.  The double-add is the C original's two
@@ -335,7 +337,7 @@ namespace UltimateOrb.Numerics {
                         /* overflow range */
                         UInt64 over = (UInt64)(v >> 127);
                         int rnd;
-                        if (rm == MidpointRounding.ToEven || rm == MidpointRounding.ToPositiveInfinity) rnd = 1;
+                        if (IsNearest(rm) || rm == MidpointRounding.ToPositiveInfinity) rnd = 1;
                         else rnd = 0;
                         v = ((UInt128)0x7fff << 112) - 1;
                         v += (UInt128)(UInt64)rnd;
@@ -348,7 +350,7 @@ namespace UltimateOrb.Numerics {
                         UInt64 vlow = (UInt64)v;
                         UInt64 frac = vlow & 0x7fff;
                         int rnd;
-                        if (rm == MidpointRounding.ToEven) {
+                        if (IsNearest(rm)) {
                             if (frac == 0x4000) rnd = (int)((vlow >> 15) & 1);
                             else rnd = (int)(frac >> 14);
                         } else if (rm == MidpointRounding.ToPositiveInfinity) {
@@ -365,7 +367,7 @@ namespace UltimateOrb.Numerics {
                     /* subnormal range */
                     UInt128 frac = v & (((UInt128)1 << (15 - xn)) - 1);
                     int rnd;
-                    if (rm == MidpointRounding.ToEven) {
+                    if (IsNearest(rm)) {
                         UInt128 threshold = (UInt128)1 << (14 - xn);
                         if (frac == threshold) rnd = (int)((v >> (15 - xn)) & 1);
                         else rnd = (int)(frac >> (14 - xn));
