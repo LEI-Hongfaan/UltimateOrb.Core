@@ -695,6 +695,13 @@ namespace UltimateOrb.Numerics {
 
         readonly UnsafeEndiannessAwareUpperLowerPair<TUInt, TUInt> pair;
 
+        // always call this function with parameter names.
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal ULong(TUInt lower, TUInt upper) {
+            pair.Lower = lower;
+            pair.Upper = upper;
+        }
+
         [return: NotNullIfNotNull(nameof(value1)), NotNullIfNotNull(nameof(value2))]
         static ULong<TInt, TUInt> IInterfaceDerivedTaggedSelfBase<ULong<TInt, TUInt>, Tag<LongTags.Lo2Hi>, TUInt, TUInt>.FromBase(TUInt value1, TUInt? value2) {
             return InterfaceDerivedDefault<ULong<TInt, TUInt>, TUInt, TUInt>.FromBase(value1, value2);
@@ -1006,7 +1013,8 @@ namespace UltimateOrb.Numerics {
 
 namespace UltimateOrb.Mathematics.Exact {
 
-
+    // Inexact values are considered as Numerator/Denominator overflow
+    // All public members return/output canonical values. Non-canonical values are not accepted as inputs unless explicitly documented or the operation is merely a simple bit-manipulating operation. 
     public readonly struct LongRational<TInt, TUInt> :
         IComparable<LongRational<TInt, TUInt>>,
         IEquatable<LongRational<TInt, TUInt>>,

@@ -32,15 +32,15 @@ namespace UltimateOrb.Mathematics.Exact {
         IDecrementOperators<Rational64>,
         IDivisionOperators<Rational64, Rational64, Rational64>,
         IEqualityOperators<Rational64, Rational64, bool>,
-        // IExponentialFunctions<Rational64>,
+        IExponentialFunctions<Rational64>,
         // IFloatingPoint<Rational64>,
         IIncrementOperators<Rational64>,
         IModulusOperators<Rational64, Rational64, Rational64>,
         IMultiplicativeIdentity<Rational64, Rational64>,
         IMultiplyOperators<Rational64, Rational64, Rational64>,
-        // INumber<Rational64>,
+        INumber<Rational64>,
         INumberBase<Rational64>,
-        // IPowerFunctions<Rational64>,
+        IPowerFunctions<Rational64>,
         IRootFunctions<Rational64>,
         ISignedNumber<Rational64>,
         ISubtractionOperators<Rational64, Rational64, Rational64>,
@@ -246,34 +246,37 @@ namespace UltimateOrb.Mathematics.Exact {
         static Rational64 IFloatingPointConstants<Rational64>.Tau => throw new OverflowException();
 
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
-        [TargetedPatchingOptOutAttribute("")]
-        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
-        [PureAttribute()]
+        [TargetedPatchingOptOut("")]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [Pure]
         public static Rational64 Inverse(Rational64 value) {
-            var d = unchecked((UInt32)value.bits);
-            var c = unchecked((Int32)(value.bits >> 32));
-            if (0 != d) {
-                {
-                    _ = checked(d - unchecked((UInt32)Int32.MinValue));
-                }
-                if (0 <= c) {
-                    unchecked {
-                        ++c;
-                    }
-                    unchecked {
-                        --d;
-                    }
-                } else {
-                    unchecked {
-                        c = -c;
-                    }
-                }
-                return new Rational64(unchecked((UInt64)(((Int64)c << 32) | (Int64)(Int32)d)));
+            var n = unchecked((UInt32)value.bits);
+            var e = unchecked((Int32)(value.bits >> 32));
+
+            if (n == 0u) {
+                // Force DivideByZeroException via the JIT's own div-by-zero path.
+                UInt32 zero = 0;
+                _ = n / zero;
+                return default;
             }
-            {
-                _ = c / unchecked((Int32)d);
+
+            // n >= 1.  Need n <= 2^31 so the new encoded denominator
+            // (either n - 1 or -n) fits in Int32.  checked cast throws when
+            // n - 1 > Int32.MaxValue, i.e. n > 2^31.
+            _ = checked((Int32)(n - 1u));
+
+            UInt32 newN;
+            Int32 newE;
+            if (e >= 0) {
+                // D_old = e + 1 > 0.  Inverse = (e + 1) / n.  Both positive.
+                newN = unchecked((UInt32)e + 1u);        // = D_old
+                newE = unchecked((Int32)(n - 1u));       // = n - 1  (fits: guarded above)
+            } else {
+                // D_old = e < 0.  Inverse = e / n = |e| / (-n).  Sign lives on denom.
+                newN = unchecked((UInt32)(-(Int64)e));   // = |D_old| <= 2^31, fits UInt32
+                newE = checked((Int32)(-(Int64)n));      // = -n, fits because n <= 2^31
             }
-            return default(Rational64);
+            return new Rational64(unchecked(((UInt64)(UInt32)newE << 32) | newN));
         }
 
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
@@ -281,14 +284,13 @@ namespace UltimateOrb.Mathematics.Exact {
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         [PureAttribute()]
         public static Rational64 Negate(Rational64 value) {
-            var d = unchecked((UInt32)(value.bits));
-            var c = unchecked((Int32)(value.bits >> 32));
-            if (0u == d) {
-                return Rational64.Zero;
-            } else {
-                c = 0 > c ? ~c : unchecked(-c);
-                return new Rational64(unchecked((UInt64)((Int64)c << 32) | d));
+            var n = unchecked((UInt32)value.bits);
+            if (0u == n) {
+                return Zero;
             }
+            var e = unchecked((Int32)(value.bits >> 32));
+            e = ~e;
+            return new Rational64(unchecked(((UInt64)(UInt32)e << 32) | n));
         }
 
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
@@ -994,8 +996,8 @@ namespace UltimateOrb.Mathematics.Exact {
             var numerator = unchecked((UInt32)value.bits);
             var denominator = unchecked((Int32)(value.bits >> 32));
             var c = denominator >> (32 - 1);
-            checked(0 - unchecked((UInt32)(c ^ denominator))).Ignore();
-            return (Int64)(((UInt64)c << 32) | numerator);
+            checked(0u - unchecked((UInt32)(c ^ denominator))).Ignore();
+            return unchecked(0 != c ? -(Int64)numerator : (Int64)numerator);
         }
 
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
@@ -1077,7 +1079,7 @@ namespace UltimateOrb.Mathematics.Exact {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static bool IsPow2(UInt32 value) {
+        static bool IsPow2Partial(UInt32 value) {
             Debug.Assert(0 != value);
             return (value & (value - 1)) == 0;
         }
@@ -1089,22 +1091,29 @@ namespace UltimateOrb.Mathematics.Exact {
         public static Double ToDoubleExact(Rational64 value) {
             var c = value.bits;
             if (0 == c) {
-                return 0;
+                return 0.0;
             }
+            // c: Int64, currently encoded denominator in [-2^31, 2^31 - 1]
             c = unchecked((Int32)(c >> 32));
+            // d: UInt32, will become |actual denominator|
             UInt32 d = unchecked((UInt32)(Int32)c);
             if (0 <= unchecked((Int32)d)) {
+                // e >= 0: denominator d = e + 1 > 0
                 unchecked {
-                    ++c;
-                    ++d;
+                    ++c;     // c = e + 1, in [1, 2^31]
+                    ++d;     // d = e + 1, in [1, 2^31]
                 }
             } else {
+                // e < 0: denominator d = e < 0
                 unchecked {
-                    d = (-d.ToSignedUnchecked()).ToUnsignedUnchecked();
+                    d = (UInt32)(-((Int32)d));   // d = -e, in [1, 2^31]
                 }
+                // c is left as e (negative) — correct sign for the division below
             }
-            UltimateOrb.Utilities.ThrowHelper.ThrowOnTrue(IsPow2(d));
-            return (Double)unchecked((UInt32)value.bits) / unchecked((Int32)c);
+            // Exact iff the reduced denominator is a power of two.
+            UltimateOrb.Utilities.ThrowHelper.ThrowOnFalse(IsPow2Partial(d));
+            // c is Int64 here, so c = ±2^31 is not truncated.
+            return (Double)unchecked((UInt32)value.bits) / (Double)c;
         }
 
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
@@ -1154,7 +1163,7 @@ namespace UltimateOrb.Mathematics.Exact {
             }
             var e = unchecked(BinaryNumerals.CountLeadingZeros(unchecked((UInt32)value.bits)) + BinaryNumerals.CountTrailingZeros(unchecked((UInt32)value.bits)));
             UltimateOrb.Utilities.ThrowHelper.ThrowOnGreaterThan(e, 32 - (1 + 23));
-            UltimateOrb.Utilities.ThrowHelper.ThrowOnTrue(IsPow2(d));
+            UltimateOrb.Utilities.ThrowHelper.ThrowOnTrue(IsPow2Partial(d));
             return (Single)(Double)unchecked((UInt32)value.bits) / unchecked((Int32)c);
         }
 
@@ -1273,11 +1282,23 @@ namespace UltimateOrb.Mathematics.Exact {
         }
 
         static bool INumberBase<Rational64>.IsCanonical(Rational64 value) {
-            return true;
+            var n = unchecked((UInt32)value.bits);
+            if (0u == n) {
+                // Only the canonical zero encoding has bits == 0.
+                // Anything else with n == 0 (e.g. 0xFFFFFFFF00000000) is 0 with
+                // a denominator other than 1 — not canonical.
+                return value.bits == 0;
+            }
+            var e = unchecked((Int32)(value.bits >> 32));
+            UInt32 absD = e >= 0
+                ? unchecked((UInt32)((Int64)e + 1))
+                : unchecked((UInt32)(-(Int64)e));
+            // n > 0 here, so gcd(n, |d|) >= 1; canonical iff it equals 1.
+            return 1u == EuclideanAlgorithm.GreatestCommonDivisorPartial(n, absD);
         }
 
         static bool INumberBase<Rational64>.IsComplexNumber(Rational64 value) {
-            return true;
+            return false;
         }
 
         static bool INumberBase<Rational64>.IsEvenInteger(Rational64 value) {
@@ -1356,12 +1377,122 @@ namespace UltimateOrb.Mathematics.Exact {
             return IntegerGenericMathImpl.MinMagnitude(x, y);
         }
 
-        static Rational64 INumberBase<Rational64>.Parse(ReadOnlySpan<char> s, NumberStyles style, IFormatProvider? provider) {
-            throw new NotImplementedException();
+#pragma warning disable UoWIP // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+        /// <summary>
+        /// Converts a <see cref="BigRational"/> to <see cref="Rational64"/> if the value
+        /// fits the compact encoding (numerator in [0, 2^32 - 1], denominator magnitude
+        /// in [1, 2^31]).  Returns false otherwise.
+        /// </summary>
+        private static bool TryFromBigRational(BigRational big, out Rational64 result) {
+            BigInteger num = big.Numerator;
+            BigInteger den = big.SignedDenominator;
+
+            // Canonical BigRational has den > 0; normalise defensively.
+            if (den.Sign < 0) {
+                num = -num;
+                den = -den;
+            }
+
+            // Encoding limits.
+            BigInteger absNum = BigInteger.Abs(num);
+            if (absNum > UInt32.MaxValue) {                 // 2^32 - 1
+                result = default;
+                return false;
+            }
+            if (den > (BigInteger.One << 31)) {             // 2^31
+                result = default;
+                return false;
+            }
+
+            // Canonical zero: bits == 0.
+            if (absNum.IsZero) {
+                result = default;
+                return true;
+            }
+
+            // num.Sign != 0 and |num| <= UInt32.MaxValue, den in [1, 2^31].
+            UInt32 n = (UInt32)absNum;
+            Int32 e = num.Sign < 0
+                ? -(Int32)(UInt32)den                       // d = -den, encoded as d
+                : (Int32)((UInt32)den - 1u);                // d = +den, encoded as d - 1
+            result = new Rational64(((UInt64)(UInt32)e << 32) | n);
+            return true;
+        }
+#pragma warning restore UoWIP // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+
+        public static Rational64 Parse(ReadOnlySpan<char> s, NumberStyles style, IFormatProvider? provider) {
+#pragma warning disable UoWIP // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+            var big = BigRational.Parse(s, style, provider);
+#pragma warning restore UoWIP // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+            return (Rational64)big;
         }
 
-        static Rational64 INumberBase<Rational64>.Parse(string s, NumberStyles style, IFormatProvider? provider) {
-            throw new NotImplementedException();
+        public static Rational64 Parse(string s, NumberStyles style, IFormatProvider? provider) {
+#pragma warning disable UoWIP // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+            var big = BigRational.Parse(s, style, provider);
+#pragma warning restore UoWIP // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+            return (Rational64)big;
+        }
+
+        public static bool TryParse(ReadOnlySpan<char> s, NumberStyles style, IFormatProvider? provider, out Rational64 result) {
+#pragma warning disable UoWIP // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+            if (!BigRational.TryParse(s, style, provider, out var big)) {
+                result = default;
+                return false;
+            }
+#pragma warning restore UoWIP // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+            return TryFromBigRational(big, out result);
+        }
+
+        public static bool TryParse(string? s, NumberStyles style, IFormatProvider? provider, out Rational64 result) {
+#pragma warning disable UoWIP // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+            if (!BigRational.TryParse(s, style, provider, out var big)) {
+                result = default;
+                return false;
+            }
+#pragma warning restore UoWIP // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+            return TryFromBigRational(big, out result);
+        }
+
+        public bool TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider) {
+#pragma warning disable UoWIP // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+            BigRational big = this;         // implicit Rational64 -> BigRational
+#pragma warning restore UoWIP // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+            return big.TryFormat(destination, out charsWritten, format, provider);
+        }
+
+        public static Rational64 Parse(ReadOnlySpan<char> s, IFormatProvider? provider) {
+#pragma warning disable UoWIP // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+            var big = BigRational.Parse(s, provider);
+#pragma warning restore UoWIP // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+            return (Rational64)big;
+        }
+
+        public static bool TryParse(ReadOnlySpan<char> s, IFormatProvider? provider, out Rational64 result) {
+#pragma warning disable UoWIP // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+            if (!BigRational.TryParse(s, provider, out var big)) {
+                result = default;
+                return false;
+            }
+#pragma warning restore UoWIP // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+            return TryFromBigRational(big, out result);
+        }
+
+        public static Rational64 Parse(string s, IFormatProvider? provider) {
+#pragma warning disable UoWIP // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+            var big = BigRational.Parse(s, provider);
+#pragma warning restore UoWIP // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+            return (Rational64)big;
+        }
+
+        public static bool TryParse(string? s, IFormatProvider? provider, out Rational64 result) {
+#pragma warning disable UoWIP // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+            if (!BigRational.TryParse(s, provider, out var big)) {
+                result = default;
+                return false;
+            }
+#pragma warning restore UoWIP // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+            return TryFromBigRational(big, out result);
         }
 
         static bool INumberBase<Rational64>.TryConvertFromChecked<TOther>(TOther value, out Rational64 result) {
@@ -1388,33 +1519,6 @@ namespace UltimateOrb.Mathematics.Exact {
             throw new NotImplementedException();
         }
 
-        static bool INumberBase<Rational64>.TryParse(ReadOnlySpan<char> s, NumberStyles style, IFormatProvider? provider, out Rational64 result) {
-            throw new NotImplementedException();
-        }
-
-        static bool INumberBase<Rational64>.TryParse(string? s, NumberStyles style, IFormatProvider? provider, out Rational64 result) {
-            throw new NotImplementedException();
-        }
-
-        bool ISpanFormattable.TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider) {
-            throw new NotImplementedException();
-        }
-
-        static Rational64 ISpanParsable<Rational64>.Parse(ReadOnlySpan<char> s, IFormatProvider? provider) {
-            throw new NotImplementedException();
-        }
-
-        static bool ISpanParsable<Rational64>.TryParse(ReadOnlySpan<char> s, IFormatProvider? provider, out Rational64 result) {
-            throw new NotImplementedException();
-        }
-
-        static Rational64 IParsable<Rational64>.Parse(string s, IFormatProvider? provider) {
-            throw new NotImplementedException();
-        }
-
-        static bool IParsable<Rational64>.TryParse(string? s, IFormatProvider? provider, out Rational64 result) {
-            throw new NotImplementedException();
-        }
 
         // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.MayFail)]
         [TargetedPatchingOptOutAttribute("")]
@@ -1566,17 +1670,387 @@ namespace UltimateOrb.Mathematics.Exact {
             return new Rational64(unchecked(n | ((UInt64)d << 32)));
         }
 
-        static Rational64 IRootFunctions<Rational64>.Hypot(Rational64 x, Rational64 y) {
-            throw new NotImplementedException();
+        /// <summary>
+        /// Returns <paramref name="x"/> raised to the integer power <paramref name="n"/>,
+        /// reduced and canonical.  Throws <see cref="OverflowException"/> if the exact
+        /// result is not representable in <see cref="Rational64"/>.
+        /// </summary>
+        public static Rational64 PowN(Rational64 x, long n) {
+            if (n == 0) return One;
+
+            UInt32 num = (UInt32)x.bits;
+            if (num == 0u) {
+                if (n > 0) return default;                 // 0^n = 0, n > 0
+                UInt32 zero = 0;
+                _ = zero / zero;                           // 0^negative -> DivideByZeroException
+                return default;                            // unreachable
+            }
+
+            if (n < 0) {
+                // -n would overflow long only for long.MinValue; combined with
+                // |x| != 1 this forces overflow, so guard with ThrowOnTrue.
+                Utilities.ThrowHelper.ThrowOnTrue(n == long.MinValue);
+                // Invert the base first.  Then the bounds enforced by PowNPositive
+                // (numerator <= 2^32 - 1, denominator magnitude <= 2^31) are exactly
+                // the bounds the final result must satisfy.
+                return PowNPositive(Inverse(x), -n);
+            }
+
+            return PowNPositive(x, n);
         }
 
-        static Rational64 IRootFunctions<Rational64>.RootN(Rational64 x, int n) {
-            throw new NotImplementedException();
+        // Preconditions: n > 0, x != 0.
+        private static Rational64 PowNPositive(Rational64 x, long n) {
+            Debug.Assert(n > 0);
+
+            UInt32 num = (UInt32)x.bits;
+            Debug.Assert(num != 0u);
+
+            Int32 e = (Int32)(x.bits >> 32);
+            Int64 d = e >= 0 ? (Int64)e + 1 : (Int64)e;
+            bool neg = d < 0;
+            UInt32 absD = neg ? unchecked((UInt32)(-d)) : unchecked((UInt32)d);
+
+            // |x| = 1  =>  ±1
+            if (num == 1u && absD == 1u) {
+                return (neg && (n & 1L) != 0L) ? MinusOne : One;
+            }
+
+            // |x| != 1 and num != 0  =>  num >= 2 or absD >= 2.  Then num^n must
+            // stay <= 2^32 - 1 and absD^n must stay <= 2^31, so n >= 32 always
+            // overflows the encoding.
+            Utilities.ThrowHelper.ThrowOnTrue(n > 31);
+
+            UInt64 p = 1;
+            UInt64 q = 1;
+            Int32 nn = (Int32)n;
+            for (Int32 i = 0; i < nn; i++) {
+                p *= num;
+                Utilities.ThrowHelper.ThrowOnTrue(p > UInt32.MaxValue);      // numerator bound: 2^32 - 1
+                q *= absD;
+                Utilities.ThrowHelper.ThrowOnTrue(q > (1UL << 31));          // denominator magnitude bound: 2^31
+            }
+
+            UInt32 newN = (UInt32)p;
+            bool resultNeg = neg && (n & 1L) != 0L;
+            Int64 newD = resultNeg ? -(Int64)q : (Int64)q;
+            // newD == +2^31 encodes to Int32.MaxValue; newD == -2^31 encodes to
+            // Int32.MinValue.  Both fit, so these casts never throw for the ranges
+            // guaranteed by the loop above.
+            Int32 newE = newD > 0
+                ? checked((Int32)(newD - 1))
+                : checked((Int32)newD);
+            return new Rational64(((UInt64)(UInt32)newE << 32) | newN);
         }
 
-        static Rational64 IRootFunctions<Rational64>.Sqrt(Rational64 x) {
-            throw new NotImplementedException();
+        public static Rational64 Pow(Rational64 x, Rational64 y) {
+            // x^0 = 1 for any x, including 0^0 = 1 (matches Math.Pow).
+            if (y.bits == 0) return One;
+
+            // 0^y for y != 0
+            if (x.bits == 0) {
+                if (y.bits > 0) return Zero;            // 0^positive = 0
+                                                        // 0^negative = 1/0 -> DivideByZeroException.
+                UInt32 zero = unchecked((UInt32)x.bits);   // x.bits == 0 -> zero == 0
+                _ = zero / zero;
+                return default;                         // unreachable
+            }
+
+            // Decode the exponent y = p / qAbs, with p signed, qAbs > 0, gcd(|p|, qAbs) = 1.
+            Int64 p = y.SignedNumerator;
+            Int64 q = y.SignedDenominator;              // nonzero, same sign as y
+            Int64 qAbs = q < 0 ? -q : q;
+
+            // |x| = 1 iff numerator == 1 and |denominator| == 1; encoded denom is 0 or -1.
+            // Handle separately because RootN cannot represent ±1^(1/q) for q > 32.
+            UInt32 xNum = unchecked((UInt32)x.bits);
+            Int32 xE = unchecked((Int32)(x.bits >> 32));
+            if (xNum == 1u && (xE == 0 || xE == -1)) {
+                if (x.bits > 0) {
+                    return One;                         // 1^y = 1
+                }
+                // x = -1
+                if ((qAbs & 1) == 0) {
+                    // (-1)^(p/qAbs) with qAbs even is complex; no real rational result.
+                    Utilities.ThrowHelper.ThrowOnTrue(true);
+                }
+                // qAbs odd: (-1)^(p/qAbs) = (-1)^p.
+                return (p & 1) == 0 ? One : MinusOne;
+            }
+
+            // |x| != 1 and x != 0.
+            if (qAbs == 1) {
+                // Integer exponent.
+                return PowN(x, p);
+            }
+
+            // Non-integer exponent p/qAbs with qAbs >= 2.
+            // No perfect qAbs-th power in [2, 2^32 - 1] exists when qAbs > 32, so for
+            // |x| != 1 the qAbs-th root is irrational (or overflows).
+            Utilities.ThrowHelper.ThrowOnTrue(qAbs > 32);
+
+            // Even root of a negative base: complex.
+            Utilities.ThrowHelper.ThrowOnTrue(x.bits < 0 && (qAbs & 1) == 0);
+
+            // x^(p/qAbs) = (x^(1/qAbs))^p.  Root first keeps the intermediate small;
+            // PowN's bounds then check the true final result, not a proxy.
+            Rational64 rootBase = RootN(x, (Int32)qAbs);
+            return PowN(rootBase, p);
         }
+
+        public static Rational64 Hypot(Rational64 x, Rational64 y) {
+            unchecked {
+                UInt32 n1 = (UInt32)x.bits;
+                UInt32 n2 = (UInt32)y.bits;
+                if (n1 == 0u && n2 == 0u) return default;
+
+                Int32 e1 = (Int32)(x.bits >> 32);
+                Int32 e2 = (Int32)(y.bits >> 32);
+                // hypot only depends on the magnitudes, so drop the signs of d1, d2.
+                UInt32 d1 = e1 >= 0 ? (UInt32)e1 + 1 : (UInt32)(-e1);
+                UInt32 d2 = e2 >= 0 ? (UInt32)e2 + 1 : (UInt32)(-e2);
+
+                // x² + y² = (n1²·A2² + n2²·A1²) / (A1²·A2²)
+                UInt64 n1s = (UInt64)n1 * n1;
+                UInt64 n2s = (UInt64)n2 * n2;
+                UInt64 d1s = (UInt64)d1 * d1;
+                UInt64 d2s = (UInt64)d2 * d2;
+
+                UInt128 num = Math.BigMul(n1s, d2s) + Math.BigMul(n2s, d1s);
+                UInt128 den = Math.BigMul(d1s, d2s);
+
+                var s = DoubleArithmetic.BigSqrtRem(num.GetLowPart(), num.GetHighPart(), out var rem_lo, out var rem_hi);
+                Utilities.ThrowHelper.ThrowOnNonZero(rem_lo | rem_hi);
+
+                // den == (A1·A2)², so its integer sqrt is exact.
+                UInt128 t = Math.BigMul(d1, d2);
+
+                // Reduce s/t; result is canonical because inputs are canonical.
+                var t1 = DoubleArithmetic.BigRemInternal((UInt64)t, (UInt64)(t >> 64), s);
+
+                var g = Mathematics.NumberTheory.EuclideanAlgorithm.GreatestCommonDivisor(s, t1);
+                s /= g;
+                t /= g;
+
+                // Encoding limits: numerator < 2^32, positive denominator ≤ Int32.MaxValue.
+                Utilities.ThrowHelper.ThrowOnTrue(t > (UInt32)Int32.MinValue);
+                Utilities.ThrowHelper.ThrowOnGreaterThan(s, UInt32.MaxValue);
+
+                UInt32 newN = (UInt32)s;
+                Int32 newE = (Int32)((Int64)t - 1);               // t > 0, encoded as t - 1
+                return new Rational64(((UInt64)(UInt32)newE << 32) | newN);
+            }
+        }
+
+
+        public static Rational64 RootN(Rational64 x, int n) {
+            if (n == 0) {
+                throw new ArgumentOutOfRangeException(nameof(n));
+            }
+            if (n == 1) {
+                return x;
+            }
+            if (n == -1) {
+                return Inverse(x);
+            }
+            if (n < 0) {
+                // x^(1/n) = (1/x)^(1/|n|).  -n fits in Int64 even for Int32.MinValue.
+                // Inverse(0) throws DivideByZeroException, which is the correct
+                // answer for 0^(negative).
+                return RootNPositive(Inverse(x), -(Int64)n);
+            }
+            return RootNPositive(x, n);
+        }
+
+        // n >= 2.  Returns x^(1/n) exactly, or throws OverflowException if the
+        // exact result is not representable in Rational64.
+        private static Rational64 RootNPositive(Rational64 x, Int64 n) {
+            Debug.Assert(n >= 2);
+            unchecked {
+                UInt32 num = (UInt32)x.bits;
+                if (0u == num) {
+                    // 0^(1/n) = 0 for any n >= 1
+                    return default;
+                }
+
+                Int32 e = (Int32)(x.bits >> 32);
+                Int64 d = e >= 0 ? (Int64)e + 1 : (Int64)e;
+                bool neg = d < 0;
+
+                // even root of a negative rational: not real
+                Utilities.ThrowHelper.ThrowOnTrue(neg && (n & 1L) == 0L);   // OverflowException
+
+                UInt32 absD = neg ? unchecked((UInt32)(-d)) : (UInt32)d;
+
+                UInt32 rn;
+                if (num <= 1u) {
+                    rn = num;                                  // 1
+                } else if (n > 32) {
+                    // 2^33 > UInt32.MaxValue, so 1 is the only positive perfect n-th
+                    // power in [0, 2^32 - 1].  Since num >= 2 we cannot be exact.
+                    Utilities.ThrowHelper.ThrowOnTrue(true);   // OverflowException
+                    throw null!;
+                } else {
+                    var exactN = TryIntegerRootNExact(num, (Int32)n, out rn);
+                    Utilities.ThrowHelper.ThrowOnFalse(exactN);
+                }
+
+                UInt32 rd;
+                if (absD <= 1u) {
+                    rd = absD;                                 // 1
+                } else if (n > 32) {
+                    Utilities.ThrowHelper.ThrowOnTrue(true);
+                    throw null!;
+                } else {
+                    var exactD = TryIntegerRootNExact(absD, (Int32)n, out rd);
+                    Utilities.ThrowHelper.ThrowOnFalse(exactD);
+                }
+
+                // rd >= 1, so the encoding is well defined.
+                Int32 newE = neg
+                    ? checked((Int32)(-(Int64)rd))             // d' = -rd -> e = d'
+                    : checked((Int32)((Int64)rd - 1));         // d' = +rd -> e = d' - 1
+                return new Rational64(((UInt64)(UInt32)newE << 32) | rn);
+            }
+        }
+
+        // floor(x^(1/n)) with exactness flag.  Preconditions: x >= 2, 2 <= n <= 32.
+        private static bool TryIntegerRootNExact(UInt32 x, Int32 n, out UInt32 root) {
+            Debug.Assert(x >= 2);
+            Debug.Assert(n >= 2 && n <= 32);
+            unchecked {
+                // 65535 is the largest possible integer root of any UInt32 for n >= 2
+                // (65535^2 = 4294836225 <= 2^32 - 1 < 65536^2).
+                UInt32 lo = 1;
+                UInt32 hi = 65535u;
+                while (lo < hi) {
+                    UInt32 mid = (UInt32)(((UInt64)lo + hi + 1) / 2);
+                    if (PowLE(mid, n, x)) lo = mid;
+                    else hi = mid - 1;
+                }
+                // lo == floor(x^(1/n))
+                UInt64 p = 1;
+                for (Int32 i = 0; i < n; i++) {
+                    p *= lo;
+                    if (p > x) {
+                        // cannot happen because lo is a lower bound, but keep it defensive
+                        root = lo;
+                        return false;
+                    }
+                }
+                root = lo;
+                return p == x;
+            }
+        }
+
+        // Returns true iff b^n <= limit.  Short circuits as soon as the partial
+        // product exceeds limit, so n may be arbitrarily large.
+        private static bool PowLE(UInt32 b, Int32 n, UInt32 limit) {
+            unchecked {
+                UInt64 p = 1;
+                for (Int32 i = 0; i < n; i++) {
+                    p *= b;
+                    if (p > limit) return false;
+                }
+                return true;
+            }
+        }
+
+        public static Rational64 Sqrt(Rational64 x) {
+            unchecked {
+                UInt32 n = (UInt32)x.bits;
+                if (0u == n) {
+                    // sqrt(0) = 0
+                    return default;
+                }
+
+                Int32 e = (Int32)(x.bits >> 32);
+                Utilities.ThrowHelper.ThrowOnNegative(e);
+                Int64 d = e >= 0 ? (Int64)e + 1 : (Int64)e;
+
+                UInt32 absD = (UInt32)d;
+
+                // numerator must be a perfect square
+                UInt32 sn = UltimateOrb.Mathematics.Elementary.Math.SqrtRem(n, out UInt32 rn);
+                Utilities.ThrowHelper.ThrowOnNonZero(rn);
+
+
+                // denominator must be a perfect square
+                UInt32 sd = UltimateOrb.Mathematics.Elementary.Math.SqrtRem(absD, out UInt32 rd);
+                Utilities.ThrowHelper.ThrowOnNonZero(rd);
+
+                // sqrt(n/absD) = sn/sd, sd >= 1 so encoded denominator = sd - 1
+                Int32 newE = checked((Int32)((Int64)sd - 1));
+                return new Rational64(((UInt64)(UInt32)newE << 32) | sn);
+            }
+        }
+
+        public static Rational64 Exp(Rational64 x) {
+            // e^0 = 1
+            if (x.bits == 0) return One;
+            // For every nonzero algebraic x, e^x is transcendental (Lindemann-Weierstrass),
+            // hence not representable as a rational.
+            Utilities.ThrowHelper.ThrowOnTrue(true);
+            return default;                              // unreachable
+        }
+
+        public static Rational64 Exp2(Rational64 x) {
+            if (x.bits == 0) return One;
+
+            // 2^x is rational iff x is an integer.
+            Utilities.ThrowHelper.ThrowOnFalse(IsInteger(x));
+
+            Int64 n = ToInt64(x);                        // safe: x is integer (absD = 1)
+                                                         // n ∈ [-31, 31] \{0} encodes exactly; outside that range overflow.
+            Utilities.ThrowHelper.ThrowOnTrue(n > 31 || n < -31);
+
+            if (n > 0) {
+                // 2^n, n ∈ [1, 31], d = 1 => encoded denominator = 0
+                UInt32 p = unchecked(1u << (Int32)n);
+                return new Rational64((UInt64)p);
+            } else {
+                // 2^-k = 1/2^k, k ∈ [1, 31]; encoded denominator = 2^k - 1
+                Int32 k = (Int32)(-n);
+                UInt32 absD = unchecked(1u << k);
+                // 2^31 encodes to Int32.MaxValue (d = 2^31), so no signed overflow here
+                Int32 newE = unchecked((Int32)absD - 1);
+                return new Rational64(((UInt64)(UInt32)newE << 32) | 1UL);
+            }
+        }
+
+        public static Rational64 Exp10(Rational64 x) {
+            if (x.bits == 0) return One;
+
+            Utilities.ThrowHelper.ThrowOnFalse(IsInteger(x));
+
+            Int64 n = ToInt64(x);
+            // n ∈ [-9, 9] \{0}: 10^9 ≤ UInt32.MaxValue and 10^9 ≤ 2^31
+            Utilities.ThrowHelper.ThrowOnTrue(n > 9 || n < -9);
+
+            if (n > 0) {
+                // 10^n, n ∈ [1, 9], d = 1
+                return new Rational64((UInt64)SmallExp10((Int32)n));
+            } else {
+                // 10^-k = 1/10^k, k ∈ [1, 9]; encoded denominator = 10^k - 1
+                UInt32 absD = SmallExp10((Int32)(-n));
+                Int32 newE = unchecked((Int32)absD - 1);
+                return new Rational64(((UInt64)(UInt32)newE << 32) | 1UL);
+            }
+
+            // 10^n for n in [0, 9]; caller guarantees the range.
+            static UInt32 SmallExp10(Int32 n) {
+                unchecked {
+                    UInt32 r = 1u;
+                    for (Int32 i = 0; i < n; i++) {
+                        r *= 10u;
+                    }
+                    return r;
+                }
+
+            }
+        }
+
+       
     }
 }
 

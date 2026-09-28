@@ -580,7 +580,7 @@ namespace UltimateOrb.Mathematics.NumberTheory {
             System.Diagnostics.Contracts.Contract.EnsuresOnThrow<DivideByZeroException>(0u == System.Diagnostics.Contracts.Contract.OldValue(modulus));
             return GreatestCommonDivisor_A_Binary(modulus, value, out pseudoinverse);
         }
-        
+
         public static ulong GreatestCommonDivisorNoThrow_A_Binary(ulong modulus, ulong value, out ulong pseudoinverse) {
             ulong x0 = 1, x1 = 0, y0 = 0, y1 = 1;
 
@@ -664,6 +664,434 @@ namespace UltimateOrb.Mathematics.NumberTheory {
                     return n;
                 }
                 v1 -= (long)q * v0;
+                goto L_01;
+            L_03:
+                pseudoinverse = 0u;
+                return 0u;
+            }
+        }
+    }
+}
+
+namespace UltimateOrb.Mathematics.NumberTheory {
+    using Utilities = EuclideanAlgorithm;
+    using Math = global::Internal.System.Math;
+
+    static partial class EuclideanAlgorithm {
+
+        // ============================================================
+        // (U)Int128 overloads
+        // ============================================================
+
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
+        [System.Runtime.TargetedPatchingOptOutAttribute("")]
+        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Diagnostics.Contracts.PureAttribute()]
+        internal static UInt128 GreatestCommonDivisorPartialStub0001(UInt128 first, UInt128 second) {
+            System.Diagnostics.Contracts.Contract.Requires(((uint)second & 1u) == 1u && second > 1u);
+            System.Diagnostics.Contracts.Contract.Ensures(System.Diagnostics.Contracts.Contract.Result<UInt128>() != 0);
+            System.Diagnostics.Contracts.Contract.Ensures(0u == System.Diagnostics.Contracts.Contract.OldValue(first) % System.Diagnostics.Contracts.Contract.Result<UInt128>());
+            System.Diagnostics.Contracts.Contract.Ensures(0u == System.Diagnostics.Contracts.Contract.OldValue(second) % System.Diagnostics.Contracts.Contract.Result<UInt128>());
+            unchecked {
+                if (0u == first) {
+                    return second;
+                }
+                while (0u == ((uint)first & 1u)) {
+                    first >>= 1;
+                }
+                if (first == 1u) {
+                    return 1u;
+                }
+                if (first == second) {
+                    return second;
+                } else if (first > second) {
+                    goto L_Gt;
+                }
+            L_Lt:
+                ;
+                if (0u != (((uint)first ^ (uint)second) & 2u)) {
+                    second = (first >> 2) + (second >> 2) + 1u;
+                } else {
+                    second = (second - first) >> 2;
+                }
+                while (0u == ((uint)second & 1u)) {
+                    second >>= 1;
+                }
+                if (second == 1u) {
+                    return 1u;
+                }
+                if (first == second) {
+                    return second;
+                } else if (first < second) {
+                    goto L_Lt;
+                }
+            L_Gt:
+                ;
+                if (0u != (((uint)first ^ (uint)second) & 2u)) {
+                    first = (first >> 2) + (second >> 2) + 1u;
+                } else {
+                    first = (first - second) >> 2;
+                }
+                while (0u == ((uint)first & 1u)) {
+                    first >>= 1;
+                }
+                if (first == 1u) {
+                    return 1u;
+                }
+                if (first == second) {
+                    return second;
+                } else if (first > second) {
+                    goto L_Gt;
+                }
+                goto L_Lt;
+            }
+        }
+
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
+        [System.Runtime.TargetedPatchingOptOutAttribute("")]
+        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Diagnostics.Contracts.PureAttribute()]
+        internal static UInt128 GreatestCommonDivisorPartialStub0002(UInt128 first, UInt128 second) {
+            System.Diagnostics.Contracts.Contract.Requires(((uint)first & 1u) == 1u || ((uint)second & 1u) == 1u);
+            System.Diagnostics.Contracts.Contract.Ensures(System.Diagnostics.Contracts.Contract.Result<UInt128>() != 0);
+            System.Diagnostics.Contracts.Contract.Ensures(0u == System.Diagnostics.Contracts.Contract.OldValue(first) % System.Diagnostics.Contracts.Contract.Result<UInt128>());
+            System.Diagnostics.Contracts.Contract.Ensures(0u == System.Diagnostics.Contracts.Contract.OldValue(second) % System.Diagnostics.Contracts.Contract.Result<UInt128>());
+            unchecked {
+                UInt128 c;
+                if (0u != ((uint)second & 1u)) {
+                    if (first == 1u || second == 1u) {
+                        c = 1u;
+                    } else {
+                        c = GreatestCommonDivisorPartialStub0001(first, second);
+                    }
+                } else {
+                    if (first == 1u) {
+                        c = 1u;
+                    } else {
+                        c = GreatestCommonDivisorPartialStub0001(second, first);
+                    }
+                }
+                return c;
+            }
+        }
+
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
+        [System.Runtime.TargetedPatchingOptOutAttribute("")]
+        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Diagnostics.Contracts.PureAttribute()]
+        internal static UInt128 Abs(Int128 value) {
+            unchecked {
+                if (0 > value) {
+                    return (UInt128)(-value);
+                }
+                return (UInt128)value;
+            }
+        }
+
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
+        [System.Runtime.TargetedPatchingOptOutAttribute("")]
+        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Diagnostics.Contracts.PureAttribute()]
+        internal static int CountTrailingZeros(UInt128 value) {
+            System.Diagnostics.Contracts.Contract.Requires(0 != value);
+            unchecked {
+                var lo = (ulong)value;
+                if (0ul != lo) {
+                    return CountTrailingZeros(lo);
+                }
+                return 64 + CountTrailingZeros((ulong)(value >> 64));
+            }
+        }
+
+        [System.CLSCompliantAttribute(false)]
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
+        [System.Runtime.TargetedPatchingOptOutAttribute("")]
+        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Diagnostics.Contracts.PureAttribute()]
+        public static UInt128 GreatestCommonDivisor(UInt128 first, UInt128 second) {
+            System.Diagnostics.Contracts.Contract.Ensures((System.Diagnostics.Contracts.Contract.Result<UInt128>() == 0u) == (System.Diagnostics.Contracts.Contract.OldValue(first) == 0u && System.Diagnostics.Contracts.Contract.OldValue(second) == 0u));
+            System.Diagnostics.Contracts.Contract.Ensures(0u == System.Diagnostics.Contracts.Contract.Result<UInt128>() || 0u == System.Diagnostics.Contracts.Contract.OldValue(first) % System.Diagnostics.Contracts.Contract.Result<UInt128>());
+            System.Diagnostics.Contracts.Contract.Ensures(0u == System.Diagnostics.Contracts.Contract.Result<UInt128>() || 0u == System.Diagnostics.Contracts.Contract.OldValue(second) % System.Diagnostics.Contracts.Contract.Result<UInt128>());
+            unchecked {
+                if (0u == second) {
+                    return first;
+                }
+                if (0u == first) {
+                    return second;
+                }
+                if (first > second) {
+                    first %= second;
+                    if (0u == first) {
+                        return second;
+                    }
+                } else {
+                    second %= first;
+                    if (0u == second) {
+                        return first;
+                    }
+                }
+                var v = Utilities.CountTrailingZeros(first | second);
+                return GreatestCommonDivisorPartialStub0002(first >> v, second >> v) << v;
+            }
+        }
+
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
+        [System.Runtime.TargetedPatchingOptOutAttribute("")]
+        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Diagnostics.Contracts.PureAttribute()]
+        public static Int128 GreatestCommonDivisor(Int128 first, Int128 second) {
+            System.Diagnostics.Contracts.Contract.Ensures((System.Diagnostics.Contracts.Contract.Result<Int128>() == 0u) == (System.Diagnostics.Contracts.Contract.OldValue(first) == 0u && System.Diagnostics.Contracts.Contract.OldValue(second) == 0u));
+            System.Diagnostics.Contracts.Contract.Ensures(0u == System.Diagnostics.Contracts.Contract.Result<Int128>() || 0u == System.Diagnostics.Contracts.Contract.OldValue(first) % System.Diagnostics.Contracts.Contract.Result<Int128>());
+            System.Diagnostics.Contracts.Contract.Ensures(0u == System.Diagnostics.Contracts.Contract.Result<Int128>() || 0u == System.Diagnostics.Contracts.Contract.OldValue(second) % System.Diagnostics.Contracts.Contract.Result<Int128>());
+            unchecked {
+                first = (Int128)Abs(first);
+                if (0 == second) {
+                    return first;
+                }
+                second = (Int128)Abs(second);
+                if (0 == first) {
+                    return second;
+                }
+                if (first > second) {
+                    first %= second;
+                    if (0 == first) {
+                        return second;
+                    }
+                } else {
+                    second %= first;
+                    if (0 == second) {
+                        return first;
+                    }
+                }
+                var v = Utilities.CountTrailingZeros((UInt128)(first | second));
+                return (Int128)(GreatestCommonDivisorPartialStub0002((UInt128)(first >> v), (UInt128)(second >> v)) << v);
+            }
+        }
+
+        [System.CLSCompliantAttribute(false)]
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
+        [System.Runtime.TargetedPatchingOptOutAttribute("")]
+        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Diagnostics.Contracts.PureAttribute()]
+        public static UInt128 GreatestCommonDivisorPartial(UInt128 first, UInt128 second) {
+            System.Diagnostics.Contracts.Contract.Requires(first > 0);
+            System.Diagnostics.Contracts.Contract.Requires(second > 0);
+            unchecked {
+                if (first > second) {
+                    first %= second;
+                    if (0u == first) {
+                        return second;
+                    }
+                } else {
+                    second %= first;
+                    if (0u == second) {
+                        return first;
+                    }
+                }
+                var v = Utilities.CountTrailingZeros(first | second);
+                return GreatestCommonDivisorPartialStub0002(first >> v, second >> v) << v;
+            }
+        }
+
+        [System.CLSCompliantAttribute(false)]
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
+        [System.Runtime.TargetedPatchingOptOutAttribute("")]
+        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Diagnostics.Contracts.PureAttribute()]
+        public static UInt128 GreatestCommonDivisorPartial(UInt128 first, UInt128 second, out Int128 firstCoefficient, out Int128 secondCoefficient) {
+            System.Diagnostics.Contracts.Contract.Requires(first > 0);
+            System.Diagnostics.Contracts.Contract.Requires(second > 0);
+            unchecked {
+                Int128 u0 = 1;
+                Int128 v0 = 0;
+                Int128 u1 = 0;
+                Int128 v1 = 1;
+                if (second > first) {
+                    goto L_02;
+                }
+            L_01:
+                UInt128 q;
+                q = Math.DivRem(first, second, out first);
+                if (0u == first) {
+                    firstCoefficient = u1;
+                    secondCoefficient = v1;
+                    return second;
+                }
+                u0 -= (Int128)q * u1;
+                v0 -= (Int128)q * v1;
+            L_02:
+                q = Math.DivRem(second, first, out second);
+                if (0u == second) {
+                    firstCoefficient = u0;
+                    secondCoefficient = v0;
+                    return first;
+                }
+                u1 -= (Int128)q * u0;
+                v1 -= (Int128)q * v0;
+                goto L_01;
+            }
+        }
+
+        [System.CLSCompliantAttribute(false)]
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
+        [System.Runtime.TargetedPatchingOptOutAttribute("")]
+        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Diagnostics.Contracts.PureAttribute()]
+        public static UInt128 GreatestCommonDivisorPartial(UInt128 modulus, UInt128 value, out Int128 pseudoinverse) {
+            System.Diagnostics.Contracts.Contract.Requires(modulus > 0);
+            System.Diagnostics.Contracts.Contract.Requires(value > 0);
+            unchecked {
+                Int128 v0 = 0;
+                Int128 v1 = 1;
+                if (value > modulus) {
+                    goto L_02;
+                }
+            L_01:
+                UInt128 q;
+                q = Math.DivRem(modulus, value, out modulus);
+                if (0u == modulus) {
+                    pseudoinverse = v1;
+                    return value;
+                }
+                v0 -= (Int128)q * v1;
+            L_02:
+                q = Math.DivRem(value, modulus, out value);
+                if (0u == value) {
+                    pseudoinverse = v0;
+                    return modulus;
+                }
+                v1 -= (Int128)q * v0;
+                goto L_01;
+            }
+        }
+
+        [System.CLSCompliantAttribute(false)]
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
+        [System.Runtime.TargetedPatchingOptOutAttribute("")]
+        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Diagnostics.Contracts.PureAttribute()]
+        public static UInt128 GreatestCommonDivisorPartial(UInt128 modulus, UInt128 value, out UInt128 pseudoinverse) {
+            System.Diagnostics.Contracts.Contract.Requires(modulus > 0);
+            System.Diagnostics.Contracts.Contract.Requires(modulus > value);
+            System.Diagnostics.Contracts.Contract.Requires(value > 0);
+            unchecked {
+                Int128 v0 = 0;
+                Int128 v1 = 1;
+                for (var n = modulus; ;) {
+                    UInt128 q;
+                    q = Math.DivRem(n, value, out n);
+                    if (0u == n) {
+                        pseudoinverse = ((0 > v1) ? (modulus + (UInt128)v1) : (UInt128)v1);
+                        return value;
+                    }
+                    v0 -= (Int128)q * v1;
+                    q = Math.DivRem(value, n, out value);
+                    if (0u == value) {
+                        pseudoinverse = ((0 > v0) ? (modulus + (UInt128)v0) : (UInt128)v0);
+                        return n;
+                    }
+                    v1 -= (Int128)q * v0;
+                }
+            }
+        }
+
+        [System.CLSCompliantAttribute(false)]
+        // [ReliabilityContractAttribute(Consistency.WillNotCorruptState, Cer.Success)]
+        [System.Runtime.TargetedPatchingOptOutAttribute("")]
+        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Diagnostics.Contracts.PureAttribute()]
+        public static UInt128 GreatestCommonDivisor(UInt128 modulus, UInt128 value, out UInt128 pseudoinverse) {
+            System.Diagnostics.Contracts.Contract.Requires(modulus > 0u);
+            System.Diagnostics.Contracts.Contract.EnsuresOnThrow<DivideByZeroException>(0u == System.Diagnostics.Contracts.Contract.OldValue(modulus));
+            return GreatestCommonDivisor_A_Binary(modulus, value, out pseudoinverse);
+        }
+
+        [System.CLSCompliantAttribute(false)]
+        public static UInt128 GreatestCommonDivisorNoThrow_A_Binary(UInt128 modulus, UInt128 value, out UInt128 pseudoinverse) {
+            UInt128 x0 = 1, x1 = 0, y0 = 0, y1 = 1;
+
+            while (modulus != 0 && value != 0) {
+                while ((modulus & 1) == 0) {
+                    modulus >>= 1;
+                    if ((x0 & 1) == 0 && (y0 & 1) == 0) {
+                        x0 >>= 1;
+                        y0 >>= 1;
+                    } else {
+                        x0 = (x0 + value) >> 1;
+                        y0 = (y0 - modulus) >> 1;
+                    }
+                }
+
+                while ((value & 1) == 0) {
+                    value >>= 1;
+                    if ((x1 & 1) == 0 && (y1 & 1) == 0) {
+                        x1 >>= 1;
+                        y1 >>= 1;
+                    } else {
+                        x1 = (x1 + value) >> 1;
+                        y1 = (y1 - modulus) >> 1;
+                    }
+                }
+
+                if (modulus >= value) {
+                    modulus -= value;
+                    x0 -= x1;
+                    y0 -= y1;
+                } else {
+                    value -= modulus;
+                    x1 -= x0;
+                    y1 -= y0;
+                }
+            }
+            pseudoinverse = y0;
+            return modulus == 0 ? value : modulus;
+        }
+
+        [System.CLSCompliantAttribute(false)]
+        public static UInt128 GreatestCommonDivisor_A_Binary(UInt128 modulus, UInt128 value, out UInt128 pseudoinverse) {
+            System.Diagnostics.Contracts.Contract.Requires(modulus > 0u);
+            System.Diagnostics.Contracts.Contract.EnsuresOnThrow<DivideByZeroException>(0u == System.Diagnostics.Contracts.Contract.OldValue(modulus));
+            if (modulus == 0) {
+                _ = 1 / modulus; // throw
+            }
+            return GreatestCommonDivisorNoThrow_A_Binary(modulus, value, out pseudoinverse);
+        }
+
+        [System.CLSCompliantAttribute(false)]
+        public static UInt128 GreatestCommonDivisor_A_DivRem(UInt128 modulus, UInt128 value, out UInt128 pseudoinverse) {
+            System.Diagnostics.Contracts.Contract.Requires(modulus > 0u);
+            System.Diagnostics.Contracts.Contract.EnsuresOnThrow<DivideByZeroException>(0u == System.Diagnostics.Contracts.Contract.OldValue(modulus));
+            unchecked {
+                Int128 v0 = 0;
+                Int128 v1 = 1;
+                var n = modulus;
+                if (value > modulus) {
+                    goto L_02;
+                }
+                if (0u == value && 0u != modulus) {
+                    goto L_03;
+                }
+            L_01:
+                UInt128 q;
+                q = Math.DivRem(n, value, out n);
+                if (0u == n) {
+                    if (0 == v1) {
+                        goto L_03;
+                    }
+                    pseudoinverse = ((0 > v1) ? (modulus + (UInt128)v1) : (UInt128)v1);
+                    return value;
+                }
+                v0 -= (Int128)q * v1;
+            L_02:
+                q = Math.DivRem(value, n, out value);
+                if (0u == value) {
+                    if (0 == v0) {
+                        goto L_03;
+                    }
+                    pseudoinverse = ((0 > v0) ? (modulus + (UInt128)v0) : (UInt128)v0);
+                    return n;
+                }
+                v1 -= (Int128)q * v0;
                 goto L_01;
             L_03:
                 pseudoinverse = 0u;
