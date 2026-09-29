@@ -479,8 +479,33 @@ namespace UltimateOrb.Numerics {
             if (exponent > ExponentBias) {
                 return ClampOverflowWithRoundingInternal(negative ? TFloat.NegativeInfinity : TFloat.PositiveInfinity, rounding);
             }
+            static bool RoundsTinyToZero(FloatingPointRounding rounding, bool negative) =>
+                rounding switch {
+                    FloatingPointRounding.ToNearestWithMidpointToEven => true,
+                    FloatingPointRounding.ToNearestWithMidpointAwayFromZero => true,
+                    FloatingPointRounding.ToNearestWithMidpointToOdd => true,
+                    FloatingPointRounding.ToNearestWithMidpointUpward => true,
+                    FloatingPointRounding.ToNearestWithMidpointDownward => true,
+                    FloatingPointRounding.ToNearestWithMidpointTowardZero => true,
+                    
+                    FloatingPointRounding.TowardZero => true,
+                    
+                    // Toward +∞: positive tiny -> +min subnormal, negative tiny -> -0
+                    FloatingPointRounding.Upward => negative,
 
-            if (exponent < ExponentUnderflowZeroBoundExclusive) {
+                    // Toward -∞: positive tiny -> +0, negative tiny -> -min subnormal
+                    FloatingPointRounding.Downward => !negative,
+
+                    // Away from zero: always rounds to ±min subnormal
+                    FloatingPointRounding.TowardInfinity => false,
+
+                    // ToOdd: q == 0 is even, so inexact tiny increments to min subnormal
+                    FloatingPointRounding.ToOdd => false,
+
+                    _ => false
+                };
+
+            if (exponent < ExponentUnderflowZeroBoundExclusive && RoundsTinyToZero(rounding, negative)) {
                 return negative ? TFloat.NegativeZero : TFloat.Zero;
             }
 
