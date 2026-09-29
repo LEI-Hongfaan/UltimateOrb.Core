@@ -1640,7 +1640,7 @@ namespace UltimateOrb.Numerics {
 
                     sf = sf > 60 ? 60 : sf;
                     UInt64 Eps = 1UL << (69 - sf);
-                    UInt128 msk = ((UInt128)(~0UL >> (k + 0x31 + (mode == MidpointRounding.ToEven ? 1 : 0))) << 64) | ~0UL;
+                    UInt128 msk = ((UInt128)(~0UL >> (k + 0x31 + (IsNearest(mode) ? 1 : 0))) << 64) | ~0UL;
                     UInt128 tl = ((UInt128)xc[1] << 64) | xc[0];
                     tl += Eps;
                     tl &= msk;
@@ -1680,7 +1680,7 @@ namespace UltimateOrb.Numerics {
 
                     sf = sf > 60 ? 60 : sf;
                     UInt64 Eps = 1UL << (68 - sf);
-                    UInt128 msk = ((UInt128)(~0UL >> (k + 0x31 + (mode == MidpointRounding.ToEven ? 1 : 0))) << 64) | ~0UL;
+                    UInt128 msk = ((UInt128)(~0UL >> (k + 0x31 + (IsNearest(mode) ? 1 : 0))) << 64) | ~0UL;
                     UInt128 tl = ((UInt128)xc[1] << 64) | xc[0];
                     tl += Eps;
                     tl &= msk;

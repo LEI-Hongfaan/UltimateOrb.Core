@@ -3584,6 +3584,41 @@ namespace UltimateOrb.Numerics {
                 fractionalResult.m_Denominator);
         }
 
+        public static BigRational Ceiling(BigRational value) {
+            return CeilingToBigInteger(value);
+        }
+
+        public static BigRational Floor(BigRational value) {
+            return FloorToBigInteger(value);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static BigInteger CeilingToBigInteger(BigRational value) {
+
+            var numerator = value.m_SignedNumerator;
+
+            if (numerator.IsZero) {
+                return BigInteger.Zero;
+            }
+
+            var denominator = value.m_Denominator;
+
+            if (denominator.IsOne) {
+                return numerator;
+            }
+
+            var quotient = BigInteger.DivRem(
+                numerator,
+                denominator,
+                out var remainder);
+
+            if (remainder.Sign > 0) {
+                ++quotient;
+            }
+
+            return quotient;
+        }
+
         /*
          * Returns floor(value).
          *

@@ -983,7 +983,21 @@ public readonly struct TotalOrderIeee754Comparer<T> :
 
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private static int Main(string[] args) {
+            {
+                
+                VerifyAgainstMathematica(
+                    "Hypot(0X1P-16494Q, 0X1P-16494Q)",
+                    Quadruple.Hypot(Quadruple.Parse("0X1P-16494", NumberStyles.HexFloat | NumberStyles.AllowHexSpecifier),
+                        Quadruple.Parse("0X1P-16494", NumberStyles.HexFloat | NumberStyles.AllowHexSpecifier)
+                    ),
+                    "9.1572804726500807075521065242888978445857211308382860673568527527620981228788976360849197659939379195488069883025119784347037319849113794995305176129251614994312207750726211259766455189696478788448973E-4966"
+                );
 
+            }
+            {
+                var sdfdas = Quadruple.Parse("+0x1.ffffffffffffffffffffffffffffp+16383", NumberStyles.HexFloat | NumberStyles.AllowHexSpecifier);
+                Console.WriteLine($"? = {sdfdas}");
+            }
             {
                 var dsfa = Rational64.ToInt64(Rational64.FromFraction(22, -1));
                 Console.WriteLine($"? = {dsfa}");
