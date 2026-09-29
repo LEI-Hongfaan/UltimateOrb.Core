@@ -984,6 +984,34 @@ public readonly struct TotalOrderIeee754Comparer<T> :
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private static int Main(string[] args) {
             {
+                var sdfa = Quadruple.RootN(-0.0, -2);
+                Console.WriteLine($"? = {sdfa:G36}");
+            }
+            {
+                var sdfa = Quadruple.RootN(-(Quadruple)27 / 8, -3);
+                Console.WriteLine($"? = {sdfa:G36}");
+            }
+            {
+                var sdfa = Quadruple.Add(-Quadruple.Zero, Quadruple.Zero, FloatingPointRounding.Downward);
+                Console.WriteLine($"? = {sdfa:G36}");
+            }
+            {
+                var sdfa = Quadruple.ReciprocalSqrt(-Quadruple.Zero);
+                Console.WriteLine($"? = {sdfa:G36}");
+            }
+            {
+                var sdfa = Quadruple.RootN(-Quadruple.Zero, -2);
+                Console.WriteLine($"? = {sdfa:G36}");
+            }
+            {
+
+                var sdfa = Quadruple.FusedMultiplyAdd(Quadruple.Parse("0.49999999999999"),
+                   Quadruple.Parse("0X1P-100", NumberStyles.HexFloat | NumberStyles.AllowHexSpecifier),
+                   -Quadruple.Parse("0X1P13", NumberStyles.HexFloat | NumberStyles.AllowHexSpecifier));
+                Console.WriteLine($"? = {sdfa:G36}");
+
+            }
+            {
                 
                 VerifyAgainstMathematica(
                     "Hypot(0X1P-16494Q, 0X1P-16494Q)",

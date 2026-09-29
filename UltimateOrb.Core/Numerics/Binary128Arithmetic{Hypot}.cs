@@ -337,11 +337,12 @@ namespace UltimateOrb.Numerics {
                         /* overflow range */
                         UInt64 over = (UInt64)(v >> 127);
                         int rnd;
-                        if (IsNearest(rm) || rm == MidpointRounding.ToPositiveInfinity) rnd = 1;
-                        else rnd = 0;
+                        if (rm == MidpointRounding.ToZero || rm == MidpointRounding.ToNegativeInfinity) rnd = 0;
+                        else rnd = 1;
                         v = ((UInt128)0x7fff << 112) - 1;
                         v += (UInt128)(UInt64)rnd;
-                        RaiseExceptionFlagsDummy(FloatingPointExceptionFlags.Inexact);
+                        // only inexact if rounding actually moved something off the exact value
+                        if (rnd != 0 || over != 0) RaiseExceptionFlagsDummy(FloatingPointExceptionFlags.Inexact);
                         if ((UInt64)(v >> 64) == (0x7fffUL << 48) || over != 0) {
                             RaiseExceptionFlagsDummy(FloatingPointExceptionFlags.Overflow);
                         }
@@ -350,13 +351,27 @@ namespace UltimateOrb.Numerics {
                         UInt64 vlow = (UInt64)v;
                         UInt64 frac = vlow & 0x7fff;
                         int rnd;
-                        if (IsNearest(rm)) {
+                        switch (rm) {
+                        case MidpointRounding.ToEven:
                             if (frac == 0x4000) rnd = (int)((vlow >> 15) & 1);
                             else rnd = (int)(frac >> 14);
-                        } else if (rm == MidpointRounding.ToPositiveInfinity) {
+                            break;
+
+                        case MidpointRounding.AwayFromZero:
+                            // result is >= 0, so "away from zero" == "up"
+                            //  frac <  0x4000  -> rnd = 0
+                            //  frac == 0x4000  -> rnd = 1   (tie -> away)
+                            //  frac >  0x4000  -> rnd = 1
+                            rnd = frac >= 0x4000 ? 1 : 0;
+                            break;
+
+                        case MidpointRounding.ToPositiveInfinity:
                             rnd = frac != 0 ? 1 : 0;
-                        } else {
+                            break;
+
+                        default: // ToNegativeInfinity, ToZero, anything else
                             rnd = 0;
+                            break;
                         }
                         v >>= 15;
                         v += (UInt128)(UInt64)rnd;
@@ -367,14 +382,25 @@ namespace UltimateOrb.Numerics {
                     /* subnormal range */
                     UInt128 frac = v & (((UInt128)1 << (15 - xn)) - 1);
                     int rnd;
-                    if (IsNearest(rm)) {
-                        UInt128 threshold = (UInt128)1 << (14 - xn);
-                        if (frac == threshold) rnd = (int)((v >> (15 - xn)) & 1);
-                        else rnd = (int)(frac >> (14 - xn));
-                    } else if (rm == MidpointRounding.ToPositiveInfinity) {
+                    switch (rm) {
+                    case MidpointRounding.ToEven: {
+                            UInt128 threshold = (UInt128)1 << (14 - xn);
+                            if (frac == threshold) rnd = (int)((v >> (15 - xn)) & 1);
+                            else rnd = (int)(frac >> (14 - xn));
+                            break;
+                        }
+                    case MidpointRounding.AwayFromZero: {
+                            UInt128 threshold = (UInt128)1 << (14 - xn);
+                            rnd = frac >= threshold ? 1 : 0;   // tie -> away
+                            break;
+                        }
+                    case MidpointRounding.ToPositiveInfinity:
                         rnd = frac != 0 ? 1 : 0;
-                    } else {
+                        break;
+
+                    default:
                         rnd = 0;
+                        break;
                     }
                     v >>= (15 - xn);
                     v += (UInt128)(UInt64)rnd;

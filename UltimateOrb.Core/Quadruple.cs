@@ -51,6 +51,11 @@ namespace UltimateOrb {
 #else
         readonly System.UInt128 _Bits;
 #endif
+        readonly System.UInt128 _UInt128Bits {
+
+            [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+            get => unchecked((UInt64)_Lo64Bits | ((System.UInt128)(UInt64)_Hi64Bits << 64));
+        }
 
         readonly UInt64 _Lo64Bits {
 
@@ -1873,6 +1878,12 @@ namespace UltimateOrb {
             return Atan2(x, One);
         }
 
+        public static Quadruple Atan(Quadruple x, MidpointRounding mode) {
+            // TODO: Provide a correct impl
+            // atan(x) = atan2(x, 1)
+            return Atan2(x, One, mode);
+        }
+
         public static Quadruple Atan2(Quadruple y, Quadruple x) {
             return BitConverter.UInt128BitsToQuadruple(Binary128Arithmetic.Atan2(
                 BitConverter.QuadrupleToUInt128Bits(y), BitConverter.QuadrupleToUInt128Bits(x)));
@@ -1979,8 +1990,17 @@ namespace UltimateOrb {
         }
 
         public static Quadruple FusedMultiplyAdd(Quadruple left, Quadruple right, Quadruple addend) {
-            // TODO: Provide a correct impl.
-            return left * right + addend;
+            var lo = Binary128Arithmetic.FusedMultiplyAddOrSubtract(
+                left._Lo64Bits, left._Hi64Bits, right._Lo64Bits, right._Hi64Bits, addend._Lo64Bits, addend._Hi64Bits,
+                Binary128Arithmetic.FusedMultiplyAddOrSubtractOperationKind.FusedMultiplyAdd, FloatingPointRounding.ToNearestWithMidpointToEven, out var hi);
+            return new Quadruple(lo, hi);
+        }
+
+        public static Quadruple FusedMultiplyAdd(Quadruple left, Quadruple right, Quadruple addend, MidpointRounding mode) {
+            var lo = Binary128Arithmetic.FusedMultiplyAddOrSubtract(
+                left._Lo64Bits, left._Hi64Bits, right._Lo64Bits, right._Hi64Bits, addend._Lo64Bits, addend._Hi64Bits,
+                Binary128Arithmetic.FusedMultiplyAddOrSubtractOperationKind.FusedMultiplyAdd, mode.ToFloatingPointRounding(), out var hi);
+            return new Quadruple(lo, hi);
         }
 
         public static Quadruple Hypot(Quadruple x, Quadruple y) =>
@@ -2193,43 +2213,17 @@ namespace UltimateOrb {
             
             // (1 + x)^n with full IEEE‑754 semantics
 
-            // 1. Classification
-            if (IsNaN(x)) return CanonicalizeAndResetSignalingNaN(x);
-            if (n < 0) return Quadruple.NaN;        // negative compounding not allowed
+            //  Classification
+            if (IsSignalingNaN(x)) return CanonicalizeAndResetSignalingNaN(x);
+            if (x < -1) return Quadruple.NaN; // invalid
             if (n == 0) return Quadruple.One;
+            if (Quadruple.IsZero(x)) return Quadruple.One;
+            if (Quadruple.IsPositiveInfinity(x)) return n < 0 ? Quadruple.PositiveZero : Quadruple.PositiveInfinity;
+            if (x._UInt128Bits == Quadruple.NegativeOne._UInt128Bits) return n < 0 ? Quadruple.PositiveInfinity/*divideByZero*/ : Quadruple.PositiveZero;
+            if (IsQuietNaN(x)) return x;
             if (n == 1) return Quadruple.One + x;
-
-            // 2. Special cases
-            if (IsPositiveInfinity(x)) return Quadruple.PositiveInfinity;
-            if (IsNegativeInfinity(x)) {
-                // (1 + -∞) = -∞ → (-∞)^n
-                return (n % 2 == 0) ? Quadruple.PositiveInfinity : Quadruple.NegativeInfinity;
-            }
-
-            Quadruple baseValue = Quadruple.One + x;
-
-            if (IsZero(baseValue)) return Quadruple.Zero;
-            if (IsNegative(baseValue)) {
-                // Negative base: only allowed for odd n
-                if ((n & 1) == 0) return Quadruple.NaN;
-            }
             
-            // return Exp(LogP1(x) * n);
-
-            // 3. Exponentiation by squaring (correct rounding after each op)
-            Quadruple result = Quadruple.One;
-            Quadruple y = baseValue;
-
-            int k = n;
-            while (k > 0) {
-                if ((k & 1) != 0)
-                    result *= y;   // fused multiply‑add if available
-
-                y *= y;
-                k >>= 1;
-            }
-
-            return result;
+            return Exp(LogP1(x) * n);
         }
 
         /// <summary>
@@ -2283,16 +2277,33 @@ namespace UltimateOrb {
        
             // Classification
             if (IsNaN(x)) return CanonicalizeAndResetSignalingNaN(x);
-            if (n <= 0) return Quadruple.NaN;
-            if (n == 1) return x;
-
-            // Special cases
-            if (IsZero(x) || IsPositiveInfinity(x)) return x; // preserve sign for zero
-            if (IsNegativeInfinity(x)) return (n % 2 == 1) ? Quadruple.NegativeInfinity : Quadruple.NaN;
-
-            // Negative base with even root is NaN
-            if (x < Quadruple.Zero && (n % 2 == 0))
-                return Quadruple.NaN;
+            if (n == 0) return Quadruple.NaN; // invalid
+            if (n < 0) {
+                if (0 == (1 & n)) {
+                    if (IsZero(x)) return PositiveInfinity; // divideByZero
+                    if (IsPositiveInfinity(x)) return PositiveZero;
+                    if (IsNegativeInfinity(x)) return NaN;
+                    if (n == -2) return ReciprocalSqrt(x);
+                    if (x < Quadruple.Zero) return Quadruple.NaN; // invalid
+                } else {
+                    if (IsZero(x)) return CopySign(PositiveInfinity, x); // divideByZero
+                    if (IsInfinity(x)) return CopySign(PositiveZero, x);
+                    if (n == -1) return One / x;
+                }
+            } else {
+                if (0 == (1 & n)) {
+                    if (IsZero(x)) return PositiveZero;
+                    if (IsPositiveInfinity(x)) return PositiveInfinity;
+                    if (IsNegativeInfinity(x)) return NaN;
+                    if (n == 2) return Sqrt(x);
+                    if (x < Quadruple.Zero) return Quadruple.NaN; // invalid
+                } else {
+                    if (IsZero(x)) return x;
+                    if (IsInfinity(x)) return x;
+                    if (n == 1) return x;
+                    if (n == 3) return Cbrt(x);
+                }
+            }
 
             // For negative base and odd n, compute root of absolute value and restore sign
             if (x < Quadruple.Zero) {

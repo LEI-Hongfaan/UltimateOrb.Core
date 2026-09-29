@@ -2677,6 +2677,44 @@
             which is interpreted with <c>b_k = 0</c>.
             </remarks>
         </member>
+        <member name="M:UltimateOrb.Numerics.Binary128Arithmetic.BigMul(System.UInt64@,System.UInt64@,System.UInt64@,System.UInt64@,System.UInt64,System.UInt64,System.UInt64,System.UInt64)">
+            <summary>
+            128x128 -> 256 bit unsigned multiplication.
+            (<paramref name="a_hi"/>:<paramref name="a_lo"/>) * (<paramref name="b_hi"/>:<paramref name="b_lo"/>).
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Binary128Arithmetic.AddUnchecked(System.UInt64@,System.UInt64@,System.UInt64@,System.UInt64@,System.UInt64,System.UInt64,System.UInt64,System.UInt64,System.UInt64,System.UInt64,System.UInt64,System.UInt64)">
+            <summary>256-bit addition, result truncated to 256 bits.</summary>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Binary128Arithmetic.SubtractUnchecked(System.UInt64@,System.UInt64@,System.UInt64@,System.UInt64@,System.UInt64,System.UInt64,System.UInt64,System.UInt64,System.UInt64,System.UInt64,System.UInt64,System.UInt64)">
+            <summary>256-bit subtraction, result truncated to 256 bits.</summary>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Binary128Arithmetic.ShiftRightUnsignedPartial(System.UInt64@,System.UInt64@,System.UInt64,System.UInt64,System.Int32)">
+            <summary>
+            128-bit logical right shift. <paramref name="dist"/> must be in [0, 64).
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.Numerics.Binary128Arithmetic.ShiftRightUnsignedJamming(System.UInt64,System.UInt64,System.UInt64,System.UInt64,System.Int32,System.UInt64@,System.UInt64@,System.UInt64@,System.UInt64@)">
+            <summary>
+            256-bit right shift with "jam": the bit OR of all discarded low bits
+            is jammed into bit 0 of the result. Word order matches (<c>a0</c> MSW … <c>a3</c> LSW).
+            </summary>
+        </member>
+        <member name="T:UltimateOrb.Numerics.Binary128Arithmetic.FusedMultiplyAddOrSubtractOperationKind">
+            <summary>
+            Selects the sign of the product and of the addend for
+            <see cref="M:UltimateOrb.Numerics.Binary128Arithmetic.FusedMultiplyAddOrSubtract(System.UInt64,System.UInt64,System.UInt64,System.UInt64,System.UInt64,System.UInt64,UltimateOrb.Numerics.Binary128Arithmetic.FusedMultiplyAddOrSubtractOperationKind,UltimateOrb.FloatingPointRounding,System.UInt64@)"/>.
+            </summary>
+        </member>
+        <member name="F:UltimateOrb.Numerics.Binary128Arithmetic.FusedMultiplyAddOrSubtractOperationKind.FusedMultiplyAdd">
+            <summary>Compute <c>A * B + C</c>.</summary>
+        </member>
+        <member name="F:UltimateOrb.Numerics.Binary128Arithmetic.FusedMultiplyAddOrSubtractOperationKind.FusedMultiplySubtract">
+            <summary>Compute <c>A * B - C</c>.</summary>
+        </member>
+        <member name="F:UltimateOrb.Numerics.Binary128Arithmetic.FusedMultiplyAddOrSubtractOperationKind.FusedMultiplySubtractAndNegate">
+            <summary>Compute <c>-A * B + C</c>.</summary>
+        </member>
         <member name="T:UltimateOrb.Numerics.BinaryFloatingPointIeee754TypeTraitsInternal`1">
             <summary>
             Compile-time metadata for an IEEE-style binary floating-point format

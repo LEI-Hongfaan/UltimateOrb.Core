@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 using UltimateOrb.Mathematics;
 using UltimateOrb.Utilities.Extensions;
 using static UltimateOrb.Utilities.BooleanIntegerModule;
@@ -1488,8 +1489,521 @@ namespace UltimateOrb.Numerics {
             }
         }
 
-        public static UInt64 FusedMultiplyAdd(UInt64 first_lo, UInt64 first_hi, UInt64 second_lo, UInt64 second_hi, UInt64 addend_lo, UInt64 addend_hi, [ConstantExpected] FloatingPointRounding rounding, out UInt64 result_hi) {
-            throw new NotImplementedException();
+
+        // ====================================================================
+        // 256-bit helpers used by FusedMultiplyAddOrSubtract.
+        // Word order: z0 = MSW, z3 = LSW.
+        // ====================================================================
+
+        /// <summary>
+        /// 128x128 -> 256 bit unsigned multiplication.
+        /// (<paramref name="a_hi"/>:<paramref name="a_lo"/>) * (<paramref name="b_hi"/>:<paramref name="b_lo"/>).
+        /// </summary>
+        private static void BigMul(
+            out UInt64 z0, out UInt64 z1, out UInt64 z2, out UInt64 z3,
+            UInt64 a_hi, UInt64 a_lo, UInt64 b_hi, UInt64 b_lo) {
+            unchecked {
+                UInt128 p0 = (UInt128)a_lo * b_lo;
+                UInt128 p1 = (UInt128)a_lo * b_hi;
+                UInt128 p2 = (UInt128)a_hi * b_lo;
+                UInt128 p3 = (UInt128)a_hi * b_hi;
+
+                UInt64 p0l = (UInt64)p0, p0h = (UInt64)(p0 >> 64);
+                UInt64 p1l = (UInt64)p1, p1h = (UInt64)(p1 >> 64);
+                UInt64 p2l = (UInt64)p2, p2h = (UInt64)(p2 >> 64);
+                UInt64 p3l = (UInt64)p3, p3h = (UInt64)(p3 >> 64);
+
+                z3 = p0l;
+
+                UInt64 s = p0h + p1l;
+                UInt64 c1 = s < p0h ? 1UL : 0UL;
+                UInt64 s2 = s + p2l;
+                UInt64 c2 = s2 < s ? 1UL : 0UL;
+                z2 = s2;
+                UInt64 carryA = c1 + c2;
+
+                s = p3l + p1h;
+                c1 = s < p3l ? 1UL : 0UL;
+                s2 = s + p2h;
+                c2 = s2 < s ? 1UL : 0UL;
+                UInt64 s3 = s2 + carryA;
+                UInt64 c3 = s3 < s2 ? 1UL : 0UL;
+                z1 = s3;
+                UInt64 carryB = c1 + c2 + c3;
+
+                z0 = p3h + carryB;
+            }
+        }
+
+        /// <summary>256-bit addition, result truncated to 256 bits.</summary>
+        private static void AddUnchecked(
+            out UInt64 z0, out UInt64 z1, out UInt64 z2, out UInt64 z3,
+            UInt64 a0, UInt64 a1, UInt64 a2, UInt64 a3,
+            UInt64 b0, UInt64 b1, UInt64 b2, UInt64 b3) {
+            unchecked {
+                UInt64 s = a3 + b3;
+                UInt64 c = s < a3 ? 1UL : 0UL;
+                z3 = s;
+
+                UInt64 t = a2 + b2;
+                UInt64 ca = t < a2 ? 1UL : 0UL;
+                UInt64 t2 = t + c;
+                UInt64 cb = t2 < t ? 1UL : 0UL;
+                z2 = t2;
+                c = ca + cb;
+
+                t = a1 + b1;
+                ca = t < a1 ? 1UL : 0UL;
+                t2 = t + c;
+                cb = t2 < t ? 1UL : 0UL;
+                z1 = t2;
+                c = ca + cb;
+
+                z0 = a0 + b0 + c;
+            }
+        }
+
+        /// <summary>256-bit subtraction, result truncated to 256 bits.</summary>
+        private static void SubtractUnchecked(
+            out UInt64 z0, out UInt64 z1, out UInt64 z2, out UInt64 z3,
+            UInt64 a0, UInt64 a1, UInt64 a2, UInt64 a3,
+            UInt64 b0, UInt64 b1, UInt64 b2, UInt64 b3) {
+            unchecked {
+                UInt64 t1 = a3 - b3;
+                UInt64 borrow = a3 < b3 ? 1UL : 0UL;
+                z3 = t1;
+
+                t1 = a2 - b2;
+                UInt64 bb = a2 < b2 ? 1UL : 0UL;
+                UInt64 t2 = t1 - borrow;
+                UInt64 bc = t1 < borrow ? 1UL : 0UL;
+                z2 = t2;
+                borrow = bb | bc;
+
+                t1 = a1 - b1;
+                bb = a1 < b1 ? 1UL : 0UL;
+                t2 = t1 - borrow;
+                bc = t1 < borrow ? 1UL : 0UL;
+                z1 = t2;
+                borrow = bb | bc;
+
+                t1 = a0 - b0;
+                z0 = t1 - borrow;
+            }
+        }
+
+        /// <summary>
+        /// 128-bit logical right shift. <paramref name="dist"/> must be in [0, 64).
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void ShiftRightUnsignedPartial(
+            out UInt64 r_lo, out UInt64 r_hi, UInt64 a_lo,
+            UInt64 a_hi, int dist) {
+            unchecked {
+                if (dist == 0) { r_hi = a_hi; r_lo = a_lo; return; }
+                r_hi = a_hi >> dist;
+                r_lo = (a_hi << (64 - dist)) | (a_lo >> dist);
+            }
+        }
+
+        /// <summary>
+        /// 256-bit right shift with "jam": the bit OR of all discarded low bits
+        /// is jammed into bit 0 of the result. Word order matches (<c>a0</c> MSW … <c>a3</c> LSW).
+        /// </summary>
+        private static void ShiftRightUnsignedJamming(
+            UInt64 a0, UInt64 a1, UInt64 a2, UInt64 a3,
+            int dist,
+            out UInt64 z0, out UInt64 z1, out UInt64 z2, out UInt64 z3) {
+            unchecked {
+                if (dist == 0) {
+                    z0 = a0; z1 = a1; z2 = a2; z3 = a3;
+                    return;
+                }
+                if (dist >= 256) {
+                    z0 = z1 = z2 = z3 = 0;
+                    if ((a0 | a1 | a2 | a3) != 0) z3 = 1;
+                    return;
+                }
+
+                int wordDist = dist >> 6;
+                int bitDist = dist & 63;
+
+                // Initial word-level alignment.
+                UInt64 r0, r1, r2, r3;
+                switch (wordDist) {
+                case 0: r0 = a0; r1 = a1; r2 = a2; r3 = a3; break;
+                case 1: r0 = a1; r1 = a2; r2 = a3; r3 = 0; break;
+                case 2: r0 = a2; r1 = a3; r2 = 0; r3 = 0; break;
+                case 3: r0 = a3; r1 = 0; r2 = 0; r3 = 0; break;
+                default: r0 = r1 = r2 = r3 = 0; break;
+                }
+
+                UInt64 jam = 0;
+
+                // Any bit in the discarded low words?
+                if (wordDist >= 1 && a3 != 0) jam = 1;
+                if (wordDist >= 2 && a2 != 0) jam = 1;
+                if (wordDist >= 3 && a1 != 0) jam = 1;
+                if (wordDist >= 4 && a0 != 0) jam = 1;
+
+                // Bit-level shift.
+                if (bitDist != 0) {
+                    UInt64 n0 = r0 >> bitDist;
+                    UInt64 n1 = (r1 >> bitDist) | (r0 << (64 - bitDist));
+                    UInt64 n2 = (r2 >> bitDist) | (r1 << (64 - bitDist));
+                    UInt64 n3 = (r3 >> bitDist) | (r2 << (64 - bitDist));
+                    r0 = n0; r1 = n1; r2 = n2; r3 = n3;
+
+                    // Low bits of the "partial" word a[3 - wordDist] are discarded.
+                    int partialIdx = 3 - wordDist;
+                    if (partialIdx >= 0) {
+                        UInt64 av = partialIdx switch {
+                            0 => a0,
+                            1 => a1,
+                            2 => a2,
+                            3 => a3,
+                            _ => 0UL,
+                        };
+                        if ((av & ((1UL << bitDist) - 1)) != 0) jam = 1;
+                    }
+                }
+
+                if (jam != 0) r3 |= 1;
+
+                z0 = r0; z1 = r1; z2 = r2; z3 = r3;
+            }
+        }
+
+
+        /// <summary>
+        /// Selects the sign of the product and of the addend for
+        /// <see cref="FusedMultiplyAddOrSubtract(UInt64, UInt64, UInt64, UInt64, UInt64, UInt64, FusedMultiplyAddOrSubtractOperationKind, FloatingPointRounding, out UInt64)"/>.
+        /// </summary>
+        public enum FusedMultiplyAddOrSubtractOperationKind : byte {
+            /// <summary>Compute <c>A * B + C</c>.</summary>
+            FusedMultiplyAdd = 0,
+            /// <summary>Compute <c>A * B - C</c>.</summary>
+            FusedMultiplySubtract = 1,
+            /// <summary>Compute <c>-A * B + C</c>.</summary>
+            FusedMultiplySubtractAndNegate = 2,
+        }
+
+        public static UInt64 FusedMultiplyAddOrSubtract(
+            UInt64 first_lo, UInt64 first_hi,
+            UInt64 second_lo, UInt64 second_hi,
+            UInt64 addOrSubtractOperand_lo, UInt64 addOrSubtractOperand_hi,
+            [ConstantExpected] FusedMultiplyAddOrSubtractOperationKind operation, [ConstantExpected] FloatingPointRounding rounding,
+            out UInt64 result_hi) {
+            unchecked {
+                // -------- Operand decomposition --------
+                int signA = GetRawSignFromHi64Bits(first_hi);
+                int expA = GetRawExponentFromHi64Bits(first_hi);
+                UInt64 sigA_hi = GetRawFractionHiFromHi64Bits(first_hi);
+                UInt64 sigA_lo = first_lo;
+
+                int signB = GetRawSignFromHi64Bits(second_hi);
+                int expB = GetRawExponentFromHi64Bits(second_hi);
+                UInt64 sigB_hi = GetRawFractionHiFromHi64Bits(second_hi);
+                UInt64 sigB_lo = second_lo;
+
+                int signC = GetRawSignFromHi64Bits(addOrSubtractOperand_hi)
+                            ^ (operation == FusedMultiplyAddOrSubtractOperationKind.FusedMultiplySubtract ? 1 : 0);
+                int expC = GetRawExponentFromHi64Bits(addOrSubtractOperand_hi);
+                UInt64 sigC_hi = GetRawFractionHiFromHi64Bits(addOrSubtractOperand_hi);
+                UInt64 sigC_lo = addOrSubtractOperand_lo;
+
+                int signZ = (signA ^ signB)
+                            ^ (operation == FusedMultiplyAddOrSubtractOperationKind.FusedMultiplySubtractAndNegate ? 1 : 0);
+
+                // -------- Locals declared up front so goto labels can share them --------
+                UInt64 z0 = 0, z1 = 0, z2 = 0, z3 = 0;   // product 256-bit, z0 = MSW
+                UInt64 c0 = 0, c1 = 0, c2 = 0, c3 = 0;   // C       256-bit, c0 = MSW
+
+                UInt64 sigZ_hi = 0, sigZ_lo = 0;
+                int expZ = 0;
+                UInt64 sigZExtra = 0;
+                int shiftDist = 0;
+                int expDiff = 0;
+                UInt64 magBits = 0;
+
+                // -------- Step 1: NaN / Inf in A or B --------
+                if (expA == 0x7FFF) {
+                    if ((sigA_hi | sigA_lo) != 0
+                            || (expB == 0x7FFF && (sigB_hi | sigB_lo) != 0)) {
+                        goto propagateNaN_ABC;
+                    }
+                    magBits = (UInt64)(uint)expB | sigB_hi | sigB_lo;
+                    goto infProdArg;
+                }
+                if (expB == 0x7FFF) {
+                    if ((sigB_hi | sigB_lo) != 0) goto propagateNaN_ABC;
+                    magBits = (UInt64)(uint)expA | sigA_hi | sigA_lo;
+                    goto infProdArg;
+                }
+
+                // -------- Step 2: NaN / Inf in C --------
+                if (expC == 0x7FFF) {
+                    if ((sigC_hi | sigC_lo) != 0) {
+                        // C is NaN: let propagateNaN_ZC pick it (A*B is finite here).
+                        sigZ_hi = 0;
+                        sigZ_lo = 0;
+                        goto propagateNaN_ZC;
+                    }
+                    // C is Inf: A*B is finite, so result = C.
+                    result_hi = addOrSubtractOperand_hi;
+                    return addOrSubtractOperand_lo;
+                }
+
+                // -------- Step 3: normalize A, B --------
+                if (expA == 0) {
+                    if ((sigA_hi | sigA_lo) == 0) goto zeroProd;
+                    expA = NormalizeSubnormal(sigA_lo, sigA_hi, out sigA_lo, out sigA_hi);
+                }
+                if (expB == 0) {
+                    if ((sigB_hi | sigB_lo) == 0) goto zeroProd;
+                    expB = NormalizeSubnormal(sigB_lo, sigB_hi, out sigB_lo, out sigB_hi);
+                }
+
+                // -------- Step 4: compute the full 256-bit product --------
+                expZ = expA + expB - 0x3FFE;
+                sigA_hi |= Hi64BitsImplicitBit;
+                sigB_hi |= Hi64BitsImplicitBit;
+                sigA_lo = ShiftLeftPartial(sigA_lo, sigA_hi, 8, out sigA_hi);
+                sigB_lo = ShiftLeftPartial(sigB_lo, sigB_hi, 15, out sigB_hi);
+
+                BigMul(out z0, out z1, out z2, out z3, sigA_hi, sigA_lo, sigB_hi, sigB_lo);
+                sigZ_hi = z0;
+                sigZ_lo = z1;
+
+                shiftDist = 0;
+                if ((sigZ_hi & 0x0100000000000000UL) == 0) {
+                    --expZ;
+                    shiftDist = -1;
+                }
+
+                // -------- Step 5: special case C == 0 --------
+                if (expC == 0) {
+                    if ((sigC_hi | sigC_lo) == 0) {
+                        shiftDist += 8;
+                        goto sigZ_label;
+                    }
+                    expC = NormalizeSubnormal(sigC_lo, sigC_hi, out sigC_lo, out sigC_hi);
+                }
+                sigC_hi |= Hi64BitsImplicitBit;
+                sigC_lo = ShiftLeftPartial(sigC_lo, sigC_hi, 8, out sigC_hi);
+
+                // -------- Step 6: align exponents --------
+                expDiff = expZ - expC;
+                if (expDiff < 0) {
+                    expZ = expC;
+                    if (signZ == signC || expDiff < -1) {
+                        shiftDist -= expDiff;
+                        if (shiftDist != 0) {
+                            sigZ_lo = ShiftRightWithJamming(sigZ_lo, sigZ_hi, shiftDist, out sigZ_hi);
+                        }
+                    } else {
+                        // signZ != signC && expDiff == -1
+                        if (shiftDist == 0) {
+                            // Shift the full 256-bit product right by 1 to keep sticky bits.
+                            ShiftRightUnsignedPartial(out UInt64 x_lo, out UInt64 x_hi, z3, z2, 1);
+                            z2 = (sigZ_lo << 63) | x_hi;
+                            z3 = x_lo;
+                            ShiftRightUnsignedPartial(out sigZ_lo, out sigZ_hi, sigZ_lo, sigZ_hi, 1);
+                            z0 = sigZ_hi;
+                            z1 = sigZ_lo;
+                        }
+                    }
+                } else {
+                    if (shiftDist != 0) {
+                        // Doubling the 256-bit product (logical << 1).
+                        AddUnchecked(out z0, out z1, out z2, out z3, z0, z1, z2, z3, z0, z1, z2, z3);
+                    }
+                    if (expDiff == 0) {
+                        sigZ_hi = z0;
+                        sigZ_lo = z1;
+                    } else {
+                        // Shift C right into the 256-bit frame.
+                        c0 = sigC_hi;
+                        c1 = sigC_lo;
+                        c2 = 0;
+                        c3 = 0;
+                        ShiftRightUnsignedJamming(c0, c1, c2, c3, expDiff, out c0, out c1, out c2, out c3);
+                    }
+                }
+
+                // -------- Step 7: combine --------
+                shiftDist = 8;
+                if (signZ == signC) {
+                    // ----- same sign: ADD -----
+                    if (expDiff <= 0) {
+                        sigZ_lo = DoubleArithmetic.AddUnchecked(
+                            sigC_lo, sigC_hi, sigZ_lo, sigZ_hi, out sigZ_hi);
+                    } else {
+                        AddUnchecked(out z0, out z1, out z2, out z3, z0, z1, z2, z3, c0, c1, c2, c3);
+                        sigZ_hi = z0;
+                        sigZ_lo = z1;
+                    }
+                    if ((sigZ_hi & 0x0200000000000000UL) != 0) {
+                        ++expZ;
+                        shiftDist = 9;
+                    }
+                    // fall through to sigZ_label
+                } else {
+                    // ----- opposite signs: SUBTRACT -----
+                    if (expDiff < 0) {
+                        signZ = signC;
+                        if (expDiff < -1) {
+                            sigZ_lo = DoubleArithmetic.SubtractUnchecked(
+                                sigC_lo, sigC_hi, sigZ_lo, sigZ_hi, out sigZ_hi);
+                            sigZExtra = z2 | z3;
+                            if (sigZExtra != 0) {
+                                sigZ_lo = DoubleArithmetic.SubtractUnchecked(
+                                    sigZ_lo, sigZ_hi, 0, 1, out sigZ_hi);
+                            }
+                            if ((sigZ_hi & 0x0100000000000000UL) == 0) {
+                                --expZ;
+                                shiftDist = 7;
+                            }
+                            goto shiftRightRoundPack;
+                        } else {
+                            // expDiff == -1
+                            c0 = sigC_hi;
+                            c1 = sigC_lo;
+                            c2 = 0;
+                            c3 = 0;
+                            SubtractUnchecked(out z0, out z1, out z2, out z3, c0, c1, c2, c3,
+                                        z0, z1, z2, z3);
+                        }
+                    } else if (expDiff == 0) {
+                        sigZ_lo = DoubleArithmetic.SubtractUnchecked(
+                            sigZ_lo, sigZ_hi, sigC_lo, sigC_hi, out sigZ_hi);
+                        if ((sigZ_hi | sigZ_lo) == 0 && z2 == 0 && z3 == 0) {
+                            goto completeCancellation;
+                        }
+                        z0 = sigZ_hi;
+                        z1 = sigZ_lo;
+                        if ((sigZ_hi & 0x8000000000000000UL) != 0) {
+                            signZ = 1 - signZ;
+                            SubtractUnchecked(out z0, out z1, out z2, out z3, 0, 0, 0, 0,
+                                        z0, z1, z2, z3);
+                        }
+                    } else {
+                        // expDiff > 0
+                        SubtractUnchecked(out z0, out z1, out z2, out z3, z0, z1, z2, z3,
+                                    c0, c1, c2, c3);
+                        if (expDiff > 1) {
+                            sigZ_hi = z0;
+                            sigZ_lo = z1;
+                            if ((sigZ_hi & 0x0100000000000000UL) == 0) {
+                                --expZ;
+                                shiftDist = 7;
+                            }
+                            goto sigZ_label;
+                        }
+                    }
+
+                    // ----- renormalize the small difference -----
+                    sigZ_hi = z0;
+                    sigZ_lo = z1;
+                    sigZExtra = z2;
+                    UInt64 sig256Z0 = z3;
+
+                    if (sigZ_hi != 0) {
+                        if (sig256Z0 != 0) sigZExtra |= 1;
+                    } else {
+                        expZ -= 64;
+                        sigZ_hi = sigZ_lo;
+                        sigZ_lo = sigZExtra;
+                        sigZExtra = sig256Z0;
+                        if (sigZ_hi == 0) {
+                            expZ -= 64;
+                            sigZ_hi = sigZ_lo;
+                            sigZ_lo = sigZExtra;
+                            sigZExtra = 0;
+                            if (sigZ_hi == 0) {
+                                expZ -= 64;
+                                sigZ_hi = sigZ_lo;
+                                sigZ_lo = 0;
+                            }
+                        }
+                    }
+
+                    shiftDist = (int)UInt64.LeadingZeroCount(sigZ_hi);
+                    expZ += 7 - shiftDist;
+                    shiftDist = 15 - shiftDist;
+                    if (shiftDist > 0) goto shiftRightRoundPack;
+                    if (shiftDist != 0) {
+                        shiftDist = -shiftDist;
+                        sigZ_lo = ShiftLeftPartial(sigZ_lo, sigZ_hi, shiftDist, out sigZ_hi);
+                        UInt64 x_lo = ShiftLeftPartial(sigZExtra, 0, shiftDist, out UInt64 x_hi);
+                        sigZ_lo |= x_hi;
+                        sigZExtra = x_lo;
+                    }
+                    goto roundPack;
+                }
+
+            sigZ_label:
+                sigZExtra = z2 | z3;
+
+            shiftRightRoundPack:
+                sigZExtra = (sigZ_lo << (64 - shiftDist)) | (sigZExtra != 0 ? 1UL : 0UL);
+                ShiftRightUnsignedPartial(out sigZ_lo, out sigZ_hi, sigZ_lo, sigZ_hi, shiftDist);
+
+            roundPack:
+                return GetBitsFromRawPartsWithRounding(
+                    sigZExtra, sigZ_lo, sigZ_hi, expZ - 1, signZ, rounding, out result_hi);
+
+            propagateNaN_ABC:
+                {
+                    UInt64 nan_lo = GetNaN(first_lo, first_hi, second_lo, second_hi,
+                                           out UInt64 nan_hi);
+                    sigZ_lo = nan_lo;
+                    sigZ_hi = nan_hi;
+                }
+                goto propagateNaN_ZC;
+
+            infProdArg:
+                if (magBits != 0) {
+                    sigZ_hi = GetHi64BitsFromRawParts(signZ, 0x7FFF, 0);
+                    sigZ_lo = 0;
+                    if (expC != 0x7FFF) goto uiZ;
+                    if ((sigC_hi | sigC_lo) != 0) goto propagateNaN_ZC;
+                    if (signZ == signC) goto uiZ;
+                }
+                RaiseExceptionFlagsDummy(FloatingPointExceptionFlags.Invalid);
+                sigZ_hi = 0xFFFF800000000000UL;
+                sigZ_lo = 0;
+
+            propagateNaN_ZC:
+                {
+                    UInt64 nan_lo = GetNaN(sigZ_lo, sigZ_hi,
+                                           addOrSubtractOperand_lo, addOrSubtractOperand_hi,
+                                           out UInt64 nan_hi);
+                    result_hi = nan_hi;
+                    return nan_lo;
+                }
+
+            zeroProd:
+                if (((uint)expC | (sigC_hi | sigC_lo)) == 0 && signZ != signC) {
+
+                } else {
+                    goto completeCancellationEnd;
+                }
+            completeCancellation:
+                {
+              
+                    result_hi = GetHi64BitsFromRawParts(
+                        rounding == FloatingPointRounding.Downward ? 1 : 0, 0, 0);
+                    return 0;
+                }
+            completeCancellationEnd:
+                result_hi = addOrSubtractOperand_hi;
+                return addOrSubtractOperand_lo;
+
+            uiZ:
+                result_hi = sigZ_hi;
+                return sigZ_lo;
+            }
         }
 
         const UInt64 Binary64_MaxValue_Binary128_Hi64Bits = 0X43feffffffffffffU;
