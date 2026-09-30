@@ -296,6 +296,7 @@ namespace UltimateOrb {
 
         internal protected ref T DataReference {
 
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => ref Unsafe.As<byte, T>(ref base.DataReference);
         }
 
@@ -349,6 +350,11 @@ namespace UltimateOrb {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => ref this[checked((nuint)index)];
         }
+
+        public static BigArray<T> Empty {
+
+            get => Unsafe.As<BigArray<T>>(Array.Empty<T>());
+        }
     }
 }
 
@@ -366,6 +372,20 @@ namespace UltimateOrb {
             /// <inheritdoc cref="GC.AllocateArray{T}(int, bool)"/>
             public static BigArray<T> AllocateBigArray<T>(nint length, bool pinned = false) {
                 return BigArray.CreateInstance<T>(length, pinned);
+            }
+        }
+
+        extension(MemoryMarshal) {
+
+            /// <inheritdoc cref="MemoryMarshal.GetArrayDataReference(Array)"/>
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static ref byte GetArrayDataReference(BigArray array) {
+                return ref array.DataReference;
+            }
+
+            /// <inheritdoc cref="MemoryMarshal.GetArrayDataReference{T}(T[])"/>
+            public static ref T GetArrayDataReference<T>(BigArray<T> array) {
+                return ref array.DataReference;
             }
         }
     }

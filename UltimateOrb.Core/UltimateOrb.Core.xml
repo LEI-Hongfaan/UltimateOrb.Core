@@ -26,11 +26,880 @@
         <member name="M:UltimateOrb.BigArrayExtensions.AllocateBigArray``1(System.IntPtr,System.Boolean)">
             <inheritdoc cref="M:UltimateOrb.BigArrayExtensions.&lt;G&gt;$2A66B3E596EA567C1CB65356319D61CC.AllocateBigArray``1(System.IntPtr,System.Boolean)"/>
         </member>
+        <member name="M:UltimateOrb.BigArrayExtensions.GetArrayDataReference(UltimateOrb.BigArray)">
+            <inheritdoc cref="M:UltimateOrb.BigArrayExtensions.&lt;G&gt;$F4262405175F032A68A4C7B44189EFC6.GetArrayDataReference(UltimateOrb.BigArray)"/>
+        </member>
+        <member name="M:UltimateOrb.BigArrayExtensions.GetArrayDataReference``1(UltimateOrb.BigArray{``0})">
+            <inheritdoc cref="M:UltimateOrb.BigArrayExtensions.&lt;G&gt;$F4262405175F032A68A4C7B44189EFC6.GetArrayDataReference``1(UltimateOrb.BigArray{``0})"/>
+        </member>
         <member name="M:UltimateOrb.BigArrayExtensions.&lt;G&gt;$2A66B3E596EA567C1CB65356319D61CC.AllocateUninitializedBigArray``1(System.IntPtr,System.Boolean)">
             <inheritdoc cref="M:System.GC.AllocateArray``1(System.Int32,System.Boolean)"/>
         </member>
         <member name="M:UltimateOrb.BigArrayExtensions.&lt;G&gt;$2A66B3E596EA567C1CB65356319D61CC.AllocateBigArray``1(System.IntPtr,System.Boolean)">
             <inheritdoc cref="M:System.GC.AllocateArray``1(System.Int32,System.Boolean)"/>
+        </member>
+        <member name="M:UltimateOrb.BigArrayExtensions.&lt;G&gt;$F4262405175F032A68A4C7B44189EFC6.GetArrayDataReference(UltimateOrb.BigArray)">
+            <inheritdoc cref="M:System.Runtime.InteropServices.MemoryMarshal.GetArrayDataReference(System.Array)"/>
+        </member>
+        <member name="M:UltimateOrb.BigArrayExtensions.&lt;G&gt;$F4262405175F032A68A4C7B44189EFC6.GetArrayDataReference``1(UltimateOrb.BigArray{``0})">
+            <inheritdoc cref="M:System.Runtime.InteropServices.MemoryMarshal.GetArrayDataReference``1(``0[])"/>
+        </member>
+        <member name="M:UltimateOrb.Internal.Vector256Extensions.Create``1(System.Runtime.Intrinsics.Vector64{``0})">
+            <inheritdoc cref="M:UltimateOrb.Internal.Vector256Extensions.&lt;G&gt;$0DA2C045A34DF9EF0D153DA47A7C687C.Create``1(System.Runtime.Intrinsics.Vector64{``0})"/>
+        </member>
+        <member name="M:UltimateOrb.Internal.Vector256Extensions.Create``1(System.Runtime.Intrinsics.Vector128{``0})">
+            <inheritdoc cref="M:UltimateOrb.Internal.Vector256Extensions.&lt;G&gt;$0DA2C045A34DF9EF0D153DA47A7C687C.Create``1(System.Runtime.Intrinsics.Vector128{``0})"/>
+        </member>
+        <member name="M:UltimateOrb.Internal.Vector256Extensions.Create``1(System.Runtime.Intrinsics.Vector128{``0},System.Runtime.Intrinsics.Vector128{``0})">
+            <inheritdoc cref="M:UltimateOrb.Internal.Vector256Extensions.&lt;G&gt;$0DA2C045A34DF9EF0D153DA47A7C687C.Create``1(System.Runtime.Intrinsics.Vector128{``0},System.Runtime.Intrinsics.Vector128{``0})"/>
+        </member>
+        <member name="M:UltimateOrb.Internal.Vector256Extensions.&lt;G&gt;$0DA2C045A34DF9EF0D153DA47A7C687C.Create``1(System.Runtime.Intrinsics.Vector64{``0})">
+            <summary>Creates a new <see cref="T:System.Runtime.Intrinsics.Vector256`1" /> instance with all 64-bit parts initialized to a specified value.</summary>
+            <typeparam name="T">The type of the elements in the vector.</typeparam>
+            <param name="value">The value that the 64-bit parts will be initialized to.</param>
+            <returns>A new <see cref="T:System.Runtime.Intrinsics.Vector128`1" /> with the 64-bit parts initialized to <paramref name="value" />.</returns>
+            <exception cref="T:System.NotSupportedException">The type of <paramref name="value" /> (<typeparamref name="T" />) is not supported.</exception>
+        </member>
+        <member name="M:UltimateOrb.Internal.Vector256Extensions.&lt;G&gt;$0DA2C045A34DF9EF0D153DA47A7C687C.Create``1(System.Runtime.Intrinsics.Vector128{``0})">
+            <summary>Creates a new <see cref="T:System.Runtime.Intrinsics.Vector256`1" /> instance with the lower and upper 128-bits initialized to a specified value.</summary>
+            <typeparam name="T">The type of the elements in the vector.</typeparam>
+            <param name="value">The value that the lower and upper 128-bits will be initialized to.</param>
+            <returns>A new <see cref="T:System.Runtime.Intrinsics.Vector128`1" /> with the lower and upper 128-bits initialized to <paramref name="value" />.</returns>
+            <exception cref="T:System.NotSupportedException">The type of <paramref name="value" /> (<typeparamref name="T" />) is not supported.</exception>
+        </member>
+        <member name="M:UltimateOrb.Internal.Vector256Extensions.&lt;G&gt;$0DA2C045A34DF9EF0D153DA47A7C687C.Create``1(System.Runtime.Intrinsics.Vector128{``0},System.Runtime.Intrinsics.Vector128{``0})">
+            <summary>Creates a new <see cref="T:System.Runtime.Intrinsics.Vector256`1" /> instance from two <see cref="T:System.Runtime.Intrinsics.Vector128`1" /> instances.</summary>
+            <typeparam name="T">The type of the elements in the vector.</typeparam>
+            <param name="lower">The value that the lower 128-bits will be initialized to.</param>
+            <param name="upper">The value that the upper 128-bits will be initialized to.</param>
+            <returns>A new <see cref="T:System.Runtime.Intrinsics.Vector256`1" /> initialized from <paramref name="lower" /> and <paramref name="upper" />.</returns>
+            <exception cref="T:System.NotSupportedException">The type of <paramref name="lower" /> and <paramref name="upper" /> (<typeparamref name="T" />) is not supported.</exception>
+        </member>
+        <member name="M:UltimateOrb.Internal.Vector512Extensions.Create``1(System.Runtime.Intrinsics.Vector64{``0})">
+            <inheritdoc cref="M:UltimateOrb.Internal.Vector512Extensions.&lt;G&gt;$7978B1CA76F4914B24818B597898C823.Create``1(System.Runtime.Intrinsics.Vector64{``0})"/>
+        </member>
+        <member name="M:UltimateOrb.Internal.Vector512Extensions.Create``1(System.Runtime.Intrinsics.Vector128{``0})">
+            <inheritdoc cref="M:UltimateOrb.Internal.Vector512Extensions.&lt;G&gt;$7978B1CA76F4914B24818B597898C823.Create``1(System.Runtime.Intrinsics.Vector128{``0})"/>
+        </member>
+        <member name="M:UltimateOrb.Internal.Vector512Extensions.Create``1(System.Runtime.Intrinsics.Vector256{``0})">
+            <inheritdoc cref="M:UltimateOrb.Internal.Vector512Extensions.&lt;G&gt;$7978B1CA76F4914B24818B597898C823.Create``1(System.Runtime.Intrinsics.Vector256{``0})"/>
+        </member>
+        <member name="M:UltimateOrb.Internal.Vector512Extensions.Create``1(System.Runtime.Intrinsics.Vector256{``0},System.Runtime.Intrinsics.Vector256{``0})">
+            <inheritdoc cref="M:UltimateOrb.Internal.Vector512Extensions.&lt;G&gt;$7978B1CA76F4914B24818B597898C823.Create``1(System.Runtime.Intrinsics.Vector256{``0},System.Runtime.Intrinsics.Vector256{``0})"/>
+        </member>
+        <member name="M:UltimateOrb.Internal.Vector512Extensions.&lt;G&gt;$7978B1CA76F4914B24818B597898C823.Create``1(System.Runtime.Intrinsics.Vector64{``0})">
+            <summary>Creates a new <see cref="T:System.Runtime.Intrinsics.Vector512`1" /> instance with all 64-bit parts initialized to a specified value.</summary>
+            <typeparam name="T">The type of the elements in the vector.</typeparam>
+            <param name="value">The value that the 64-bit parts will be initialized to.</param>
+            <returns>A new <see cref="T:System.Runtime.Intrinsics.Vector128`1" /> with the 64-bit parts initialized to <paramref name="value" />.</returns>
+            <exception cref="T:System.NotSupportedException">The type of <paramref name="value" /> (<typeparamref name="T" />) is not supported.</exception>
+        </member>
+        <member name="M:UltimateOrb.Internal.Vector512Extensions.&lt;G&gt;$7978B1CA76F4914B24818B597898C823.Create``1(System.Runtime.Intrinsics.Vector128{``0})">
+            <summary>Creates a new <see cref="T:System.Runtime.Intrinsics.Vector512`1" /> instance with all 128-bit parts initialized to a specified value.</summary>
+            <typeparam name="T">The type of the elements in the vector.</typeparam>
+            <param name="value">The value that the 128-bit parts will be initialized to.</param>
+            <returns>A new <see cref="T:System.Runtime.Intrinsics.Vector128`1" /> with the 128-bit parts initialized to <paramref name="value" />.</returns>
+            <exception cref="T:System.NotSupportedException">The type of <paramref name="value" /> (<typeparamref name="T" />) is not supported.</exception>
+        </member>
+        <member name="M:UltimateOrb.Internal.Vector512Extensions.&lt;G&gt;$7978B1CA76F4914B24818B597898C823.Create``1(System.Runtime.Intrinsics.Vector256{``0})">
+            <summary>Creates a new <see cref="T:System.Runtime.Intrinsics.Vector512`1" /> instance with the lower and upper 256-bits initialized to a specified value.</summary>
+            <typeparam name="T">The type of the elements in the vector.</typeparam>
+            <param name="value">The value that the lower and upper 256-bits will be initialized to.</param>
+            <returns>A new <see cref="T:System.Runtime.Intrinsics.Vector128`1" /> with the lower and upper 256-bits initialized to <paramref name="value" />.</returns>
+            <exception cref="T:System.NotSupportedException">The type of <paramref name="value" /> (<typeparamref name="T" />) is not supported.</exception>
+        </member>
+        <member name="M:UltimateOrb.Internal.Vector512Extensions.&lt;G&gt;$7978B1CA76F4914B24818B597898C823.Create``1(System.Runtime.Intrinsics.Vector256{``0},System.Runtime.Intrinsics.Vector256{``0})">
+            <summary>Creates a new <see cref="T:System.Runtime.Intrinsics.Vector512`1" /> instance from two <see cref="T:System.Runtime.Intrinsics.Vector256`1" /> instances.</summary>
+            <typeparam name="T">The type of the elements in the vector.</typeparam>
+            <param name="lower">The value that the lower 256-bits will be initialized to.</param>
+            <param name="upper">The value that the upper 256-bits will be initialized to.</param>
+            <returns>A new <see cref="T:System.Runtime.Intrinsics.Vector512`1" /> initialized from <paramref name="lower" /> and <paramref name="upper" />.</returns>
+            <exception cref="T:System.NotSupportedException">The type of <paramref name="lower" /> and <paramref name="upper" /> (<typeparamref name="T" />) is not supported.</exception>
+        </member>
+        <member name="P:UltimateOrb.Internal.System.UtfChar`1.IsUtf8">
+            <summary>Gets whether this type represents UTF-8 code units.</summary>
+        </member>
+        <member name="P:UltimateOrb.Internal.System.UtfChar`1.IsUtf16">
+            <summary>Gets whether this type represents UTF-16 code units.</summary>
+        </member>
+        <member name="P:UltimateOrb.Internal.System.UtfChar`1.IsUtf32">
+            <summary>Gets whether this type represents UTF-32 code units.</summary>
+        </member>
+        <member name="M:UltimateOrb.Internal.System.UtfChar`1.CastFrom(System.Byte)">
+            <summary>Casts the specified value to this type.</summary>
+        </member>
+        <member name="M:UltimateOrb.Internal.System.UtfChar`1.CastFrom(System.Char)">
+            <summary>Casts the specified value to this type.</summary>
+        </member>
+        <member name="M:UltimateOrb.Internal.System.UtfChar`1.CastFrom(System.Int32)">
+            <summary>Casts the specified value to this type.</summary>
+        </member>
+        <member name="M:UltimateOrb.Internal.System.UtfChar`1.CastFrom(System.UInt32)">
+            <summary>Casts the specified value to this type.</summary>
+        </member>
+        <member name="M:UltimateOrb.Internal.System.UtfChar`1.CastFrom(System.UInt64)">
+            <summary>Casts the specified value to this type.</summary>
+        </member>
+        <member name="M:UltimateOrb.Internal.System.UtfChar`1.CastToUInt32(`0)">
+            <summary>Casts a value of this type to an UInt32.</summary>
+        </member>
+        <member name="P:UltimateOrb.Internal.System.BinaryFloatParseAndFormatInfo`1.NumberBufferLength">
+            <summary>
+            Ceiling(Log10(5^(Abs(MinBinaryExponent) - 1))) + NormalMantissaBits + 1 + 1
+            </summary>
+        </member>
+        <member name="P:UltimateOrb.Internal.System.BinaryFloatParseAndFormatInfo`1.NormalMantissaMask">
+            <summary>
+            (1UL &lt;&lt; SignificandLength) - 1
+            </summary>
+        </member>
+        <member name="P:UltimateOrb.Internal.System.BinaryFloatParseAndFormatInfo`1.DenormalMantissaMask">
+            <summary>
+            TrailingSignificandMask == (1UL &lt;&lt; TrailingSignificandLength) - 1
+            </summary>
+        </member>
+        <member name="P:UltimateOrb.Internal.System.BinaryFloatParseAndFormatInfo`1.MinBinaryExponent">
+            <summary>
+            1 - MaxBinaryExponent
+            </summary>
+        </member>
+        <member name="P:UltimateOrb.Internal.System.BinaryFloatParseAndFormatInfo`1.MinDecimalExponent">
+            <summary>
+            Floor(Log10(Epsilon)) where Epsilon is the smallest positive
+            subnormal, i.e. 2^(MinBinaryExponent - TrailingSignificandLength).
+            </summary>
+        </member>
+        <member name="P:UltimateOrb.Internal.System.BinaryFloatParseAndFormatInfo`1.MaxDecimalExponent">
+            <summary>
+            Ceiling(Log10(MaxValue))
+            </summary>
+        </member>
+        <member name="P:UltimateOrb.Internal.System.BinaryFloatParseAndFormatInfo`1.OverflowDecimalExponent">
+            <summary>
+            (MaxBinaryExponent + 2 * SignificandLength) / 3
+            </summary>
+        </member>
+        <member name="P:UltimateOrb.Internal.System.BinaryFloatParseAndFormatInfo`1.InfinityExponent">
+            <summary>
+            (1 &lt;&lt; ExponentBits) - 1
+            </summary>
+        </member>
+        <member name="P:UltimateOrb.Internal.System.BinaryFloatParseAndFormatInfo`1.NormalMantissaBits">
+            <summary>
+            SignificandLength (implicit leading bit included)
+            </summary>
+        </member>
+        <member name="P:UltimateOrb.Internal.System.BinaryFloatParseAndFormatInfo`1.DenormalMantissaBits">
+            <summary>
+            TrailingSignificandLength (explicit mantissa bits)
+            </summary>
+        </member>
+        <member name="P:UltimateOrb.Internal.System.BinaryFloatParseAndFormatInfo`1.MinFastFloatDecimalExponent">
+            <summary>
+            Ceiling(Log10(2^(MinBinaryExponent - 1 - TrailingSignificandLength - 64)))
+            </summary>
+        </member>
+        <member name="P:UltimateOrb.Internal.System.BinaryFloatParseAndFormatInfo`1.MaxFastFloatDecimalExponent">
+            <summary>
+            MaxDecimalExponent - 1
+            </summary>
+        </member>
+        <member name="P:UltimateOrb.Internal.System.BinaryFloatParseAndFormatInfo`1.MinExponentRoundToEven">
+            <summary>
+            -Floor(Log5(2^(64 - SignificandLength)))
+            </summary>
+        </member>
+        <member name="P:UltimateOrb.Internal.System.BinaryFloatParseAndFormatInfo`1.MaxExponentRoundToEven">
+            <summary>
+            Floor(Log5(2^(SignificandLength + 1)))
+            </summary>
+        </member>
+        <member name="P:UltimateOrb.Internal.System.BinaryFloatParseAndFormatInfo`1.MaxExponentFastPath">
+            <summary>
+            Max n such that 10^n is exactly representable.
+            </summary>
+        </member>
+        <member name="P:UltimateOrb.Internal.System.BinaryFloatParseAndFormatInfo`1.MaxMantissaFastPath">
+            <summary>
+            2UL &lt;&lt; TrailingSignificandLength
+            </summary>
+        </member>
+        <member name="P:UltimateOrb.Internal.System.BinaryFloatParseAndFormatInfo`1.MaxRoundTripDigits">
+            <summary>
+            Ceiling(Log10(2^SignificandLength)) + 1
+            </summary>
+        </member>
+        <member name="P:UltimateOrb.Internal.System.BinaryFloatParseAndFormatInfo`1.MaxPrecisionCustomFormat">
+            <summary>
+            Legacy pre-.NET Core 3.0 custom-format precision ceiling.
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.BigSpanExtensions.AsBytes``1(UltimateOrb.BigSpan{``0})">
+            <inheritdoc cref="M:UltimateOrb.BigSpanExtensions.&lt;G&gt;$F4262405175F032A68A4C7B44189EFC6.AsBytes``1(UltimateOrb.BigSpan{``0})"/>
+        </member>
+        <member name="M:UltimateOrb.BigSpanExtensions.AsBytes``1(UltimateOrb.ReadOnlyBigSpan{``0})">
+            <inheritdoc cref="M:UltimateOrb.BigSpanExtensions.&lt;G&gt;$F4262405175F032A68A4C7B44189EFC6.AsBytes``1(UltimateOrb.ReadOnlyBigSpan{``0})"/>
+        </member>
+        <member name="M:UltimateOrb.BigSpanExtensions.GetReference``1(UltimateOrb.BigSpan{``0})">
+            <inheritdoc cref="M:UltimateOrb.BigSpanExtensions.&lt;G&gt;$F4262405175F032A68A4C7B44189EFC6.GetReference``1(UltimateOrb.BigSpan{``0})"/>
+        </member>
+        <member name="M:UltimateOrb.BigSpanExtensions.GetReference``1(UltimateOrb.ReadOnlyBigSpan{``0})">
+            <inheritdoc cref="M:UltimateOrb.BigSpanExtensions.&lt;G&gt;$F4262405175F032A68A4C7B44189EFC6.GetReference``1(UltimateOrb.ReadOnlyBigSpan{``0})"/>
+        </member>
+        <member name="M:UltimateOrb.BigSpanExtensions.Cast``2(UltimateOrb.BigSpan{``0})">
+            <inheritdoc cref="M:UltimateOrb.BigSpanExtensions.&lt;G&gt;$F4262405175F032A68A4C7B44189EFC6.Cast``2(UltimateOrb.BigSpan{``0})"/>
+        </member>
+        <member name="M:UltimateOrb.BigSpanExtensions.Cast``2(UltimateOrb.ReadOnlyBigSpan{``0})">
+            <inheritdoc cref="M:UltimateOrb.BigSpanExtensions.&lt;G&gt;$F4262405175F032A68A4C7B44189EFC6.Cast``2(UltimateOrb.ReadOnlyBigSpan{``0})"/>
+        </member>
+        <member name="M:UltimateOrb.BigSpanExtensions.CreateBigSpan``1(``0@,System.IntPtr)">
+            <inheritdoc cref="M:UltimateOrb.BigSpanExtensions.&lt;G&gt;$F4262405175F032A68A4C7B44189EFC6.CreateBigSpan``1(``0@,System.IntPtr)"/>
+        </member>
+        <member name="M:UltimateOrb.BigSpanExtensions.CreateReadOnlySpan``1(``0@,System.IntPtr)">
+            <inheritdoc cref="M:UltimateOrb.BigSpanExtensions.&lt;G&gt;$F4262405175F032A68A4C7B44189EFC6.CreateReadOnlySpan``1(``0@,System.IntPtr)"/>
+        </member>
+        <member name="M:UltimateOrb.BigSpanExtensions.Read``1(UltimateOrb.ReadOnlyBigSpan{System.Byte})">
+            <inheritdoc cref="M:UltimateOrb.BigSpanExtensions.&lt;G&gt;$F4262405175F032A68A4C7B44189EFC6.Read``1(UltimateOrb.ReadOnlyBigSpan{System.Byte})"/>
+        </member>
+        <member name="M:UltimateOrb.BigSpanExtensions.TryRead``1(UltimateOrb.ReadOnlyBigSpan{System.Byte},``0@)">
+            <inheritdoc cref="M:UltimateOrb.BigSpanExtensions.&lt;G&gt;$F4262405175F032A68A4C7B44189EFC6.TryRead``1(UltimateOrb.ReadOnlyBigSpan{System.Byte},``0@)"/>
+        </member>
+        <member name="M:UltimateOrb.BigSpanExtensions.Write``1(UltimateOrb.BigSpan{System.Byte},``0@)">
+            <inheritdoc cref="M:UltimateOrb.BigSpanExtensions.&lt;G&gt;$F4262405175F032A68A4C7B44189EFC6.Write``1(UltimateOrb.BigSpan{System.Byte},``0@)"/>
+        </member>
+        <member name="M:UltimateOrb.BigSpanExtensions.TryWrite``1(UltimateOrb.BigSpan{System.Byte},``0@)">
+            <inheritdoc cref="M:UltimateOrb.BigSpanExtensions.&lt;G&gt;$F4262405175F032A68A4C7B44189EFC6.TryWrite``1(UltimateOrb.BigSpan{System.Byte},``0@)"/>
+        </member>
+        <member name="M:UltimateOrb.BigSpanExtensions.AsRef``1(UltimateOrb.BigSpan{System.Byte})">
+            <inheritdoc cref="M:UltimateOrb.BigSpanExtensions.&lt;G&gt;$F4262405175F032A68A4C7B44189EFC6.AsRef``1(UltimateOrb.BigSpan{System.Byte})"/>
+        </member>
+        <member name="M:UltimateOrb.BigSpanExtensions.AsRef``1(UltimateOrb.ReadOnlyBigSpan{System.Byte})">
+            <inheritdoc cref="M:UltimateOrb.BigSpanExtensions.&lt;G&gt;$F4262405175F032A68A4C7B44189EFC6.AsRef``1(UltimateOrb.ReadOnlyBigSpan{System.Byte})"/>
+        </member>
+        <member name="M:UltimateOrb.BigSpanExtensions.&lt;G&gt;$F4262405175F032A68A4C7B44189EFC6.AsBytes``1(UltimateOrb.BigSpan{``0})">
+            <inheritdoc cref="M:System.Runtime.InteropServices.MemoryMarshal.AsBytes``1(System.Span{``0})"/>>
+        </member>
+        <member name="M:UltimateOrb.BigSpanExtensions.&lt;G&gt;$F4262405175F032A68A4C7B44189EFC6.AsBytes``1(UltimateOrb.ReadOnlyBigSpan{``0})">
+            <inheritdoc cref="M:System.Runtime.InteropServices.MemoryMarshal.AsBytes``1(System.ReadOnlySpan{``0})"/>>
+        </member>
+        <member name="M:UltimateOrb.BigSpanExtensions.&lt;G&gt;$F4262405175F032A68A4C7B44189EFC6.GetReference``1(UltimateOrb.BigSpan{``0})">
+            <inheritdoc cref="M:System.Runtime.InteropServices.MemoryMarshal.GetReference``1(System.Span{``0})"/>>
+        </member>
+        <member name="M:UltimateOrb.BigSpanExtensions.&lt;G&gt;$F4262405175F032A68A4C7B44189EFC6.GetReference``1(UltimateOrb.ReadOnlyBigSpan{``0})">
+            <inheritdoc cref="M:System.Runtime.InteropServices.MemoryMarshal.GetReference``1(System.ReadOnlySpan{``0})"/>>
+        </member>
+        <member name="M:UltimateOrb.BigSpanExtensions.&lt;G&gt;$F4262405175F032A68A4C7B44189EFC6.Cast``2(UltimateOrb.BigSpan{``0})">
+            <inheritdoc cref="M:System.Runtime.InteropServices.MemoryMarshal.Cast``2(System.Span{``0})"/>>
+        </member>
+        <member name="M:UltimateOrb.BigSpanExtensions.&lt;G&gt;$F4262405175F032A68A4C7B44189EFC6.Cast``2(UltimateOrb.ReadOnlyBigSpan{``0})">
+            <inheritdoc cref="M:System.Runtime.InteropServices.MemoryMarshal.Cast``2(System.ReadOnlySpan{``0})"/>>
+        </member>
+        <member name="M:UltimateOrb.BigSpanExtensions.&lt;G&gt;$F4262405175F032A68A4C7B44189EFC6.CreateBigSpan``1(``0@,System.IntPtr)">
+            <inheritdoc cref="M:System.Runtime.InteropServices.MemoryMarshal.CreateSpan``1(``0@,System.Int32)"/>>
+        </member>
+        <member name="M:UltimateOrb.BigSpanExtensions.&lt;G&gt;$F4262405175F032A68A4C7B44189EFC6.CreateReadOnlySpan``1(``0@,System.IntPtr)">
+            <inheritdoc cref="M:System.Runtime.InteropServices.MemoryMarshal.CreateReadOnlySpan``1(``0@,System.Int32)"/>>
+        </member>
+        <member name="M:UltimateOrb.BigSpanExtensions.&lt;G&gt;$F4262405175F032A68A4C7B44189EFC6.Read``1(UltimateOrb.ReadOnlyBigSpan{System.Byte})">
+            <inheritdoc cref="M:System.Runtime.InteropServices.MemoryMarshal.Read``1(System.ReadOnlySpan{System.Byte})"/>>
+        </member>
+        <member name="M:UltimateOrb.BigSpanExtensions.&lt;G&gt;$F4262405175F032A68A4C7B44189EFC6.TryRead``1(UltimateOrb.ReadOnlyBigSpan{System.Byte},``0@)">
+            <inheritdoc cref="M:System.Runtime.InteropServices.MemoryMarshal.TryRead``1(System.ReadOnlySpan{System.Byte},``0@)"/>>
+        </member>
+        <member name="M:UltimateOrb.BigSpanExtensions.&lt;G&gt;$F4262405175F032A68A4C7B44189EFC6.Write``1(UltimateOrb.BigSpan{System.Byte},``0@)">
+            <inheritdoc cref="M:System.Runtime.InteropServices.MemoryMarshal.Write``1(System.Span{System.Byte},``0@)"/>>
+        </member>
+        <member name="M:UltimateOrb.BigSpanExtensions.&lt;G&gt;$F4262405175F032A68A4C7B44189EFC6.TryWrite``1(UltimateOrb.BigSpan{System.Byte},``0@)">
+            <inheritdoc cref="M:System.Runtime.InteropServices.MemoryMarshal.TryWrite``1(System.Span{System.Byte},``0@)"/>>
+        </member>
+        <member name="M:UltimateOrb.BigSpanExtensions.&lt;G&gt;$F4262405175F032A68A4C7B44189EFC6.AsRef``1(UltimateOrb.BigSpan{System.Byte})">
+            <inheritdoc cref="M:System.Runtime.InteropServices.MemoryMarshal.AsRef``1(System.Span{System.Byte})"/>>
+        </member>
+        <member name="M:UltimateOrb.BigSpanExtensions.&lt;G&gt;$F4262405175F032A68A4C7B44189EFC6.AsRef``1(UltimateOrb.ReadOnlyBigSpan{System.Byte})">
+            <inheritdoc cref="M:System.Runtime.InteropServices.MemoryMarshal.AsRef``1(System.ReadOnlySpan{System.Byte})"/>>
+        </member>
+        <member name="T:UltimateOrb.BigSpan`1">
+            <inheritdoc cref="T:System.Span`1"/>
+        </member>
+        <member name="M:UltimateOrb.BigSpan`1.#ctor(UltimateOrb.BigArray{`0})">
+            <inheritdoc cref="M:System.Span`1.#ctor(`0[])"/>
+        </member>
+        <member name="M:UltimateOrb.BigSpan`1.#ctor(`0[])">
+            <inheritdoc cref="M:System.Span`1.#ctor(`0[])"/>
+        </member>
+        <member name="M:UltimateOrb.BigSpan`1.#ctor(UltimateOrb.BigArray{`0},System.IntPtr,System.IntPtr)">
+            <inheritdoc cref="M:System.Span`1.#ctor(`0[],System.Int32,System.Int32)"/>
+        </member>
+        <member name="M:UltimateOrb.BigSpan`1.#ctor(`0[],System.Int32,System.Int32)">
+            <inheritdoc cref="M:System.Span`1.#ctor(`0[],System.Int32,System.Int32)"/>
+        </member>
+        <member name="M:UltimateOrb.BigSpan`1.#ctor(System.Void*,System.IntPtr)">
+            <inheritdoc cref="M:System.Span`1.#ctor(System.Void*,System.Int32)"/>
+        </member>
+        <member name="M:UltimateOrb.BigSpan`1.#ctor(System.Void*,System.Int32)">
+            <inheritdoc cref="M:System.Span`1.#ctor(System.Void*,System.Int32)"/>
+        </member>
+        <member name="M:UltimateOrb.BigSpan`1.#ctor(`0@)">
+            <inheritdoc cref="M:System.Span`1.#ctor(`0@)"/>
+        </member>
+        <member name="P:UltimateOrb.BigSpan`1.Item(System.Int32)">
+            <inheritdoc cref="P:System.Span`1.Item(System.Int32)"/>
+        </member>
+        <member name="P:UltimateOrb.BigSpan`1.Item(System.UInt32)">
+            <inheritdoc cref="P:System.Span`1.Item(System.Int32)"/>
+        </member>
+        <member name="P:UltimateOrb.BigSpan`1.Item(System.IntPtr)">
+            <inheritdoc cref="P:System.Span`1.Item(System.Int32)"/>
+        </member>
+        <member name="P:UltimateOrb.BigSpan`1.Item(System.UIntPtr)">
+            <inheritdoc cref="P:System.Span`1.Item(System.Int32)"/>
+        </member>
+        <member name="P:UltimateOrb.BigSpan`1.Item(System.Int64)">
+            <inheritdoc cref="P:System.Span`1.Item(System.Int32)"/>
+        </member>
+        <member name="P:UltimateOrb.BigSpan`1.Item(System.UInt64)">
+            <inheritdoc cref="P:System.Span`1.Item(System.Int32)"/>
+        </member>
+        <member name="P:UltimateOrb.BigSpan`1.Length">
+            <inheritdoc cref="P:System.Span`1.Length"/>
+        </member>
+        <member name="P:UltimateOrb.BigSpan`1.IsEmpty">
+            <inheritdoc cref="P:System.Span`1.IsEmpty"/>
+        </member>
+        <member name="M:UltimateOrb.BigSpan`1.op_Inequality(UltimateOrb.BigSpan{`0},UltimateOrb.BigSpan{`0})">
+            <inheritdoc cref="M:System.Span`1.op_Inequality(System.Span{`0},System.Span{`0})"/>
+        </member>
+        <member name="M:UltimateOrb.BigSpan`1.Equals(System.Object)">
+            <inheritdoc cref="M:System.Span`1.Equals(System.Object)"/>
+        </member>
+        <member name="M:UltimateOrb.BigSpan`1.GetHashCode">
+            <inheritdoc cref="M:System.Span`1.GetHashCode"/>
+        </member>
+        <member name="M:UltimateOrb.BigSpan`1.op_Implicit(UltimateOrb.BigArray{`0})~UltimateOrb.BigSpan{`0}">
+            <inheritdoc cref="M:System.Span`1.op_Implicit(`0[])~System.Span{`0}"/>
+        </member>
+        <member name="M:UltimateOrb.BigSpan`1.op_Implicit(`0[])~UltimateOrb.BigSpan{`0}">
+            <inheritdoc cref="M:System.Span`1.op_Implicit(`0[])~System.Span{`0}"/>
+        </member>
+        <member name="M:UltimateOrb.BigSpan`1.op_Implicit(System.ArraySegment{`0})~UltimateOrb.BigSpan{`0}">
+            <inheritdoc cref="M:System.Span`1.op_Implicit(System.ArraySegment{`0})~System.Span{`0}"/>
+        </member>
+        <member name="P:UltimateOrb.BigSpan`1.Empty">
+            <inheritdoc cref="P:UltimateOrb.BigSpan`1.Empty"/>
+        </member>
+        <member name="M:UltimateOrb.BigSpan`1.GetEnumerator">
+            <inheritdoc cref="M:System.Span`1.GetEnumerator"/>
+        </member>
+        <member name="T:UltimateOrb.BigSpan`1.Enumerator">
+            <inheritdoc cref="T:System.Span`1.Enumerator"/>
+        </member>
+        <member name="M:UltimateOrb.BigSpan`1.Enumerator.MoveNext">
+            <inheritdoc cref="M:System.Span`1.Enumerator.MoveNext"/>
+        </member>
+        <member name="P:UltimateOrb.BigSpan`1.Enumerator.Current">
+            <inheritdoc cref="P:System.Span`1.Enumerator.Current"/>
+        </member>
+        <member name="M:UltimateOrb.BigSpan`1.GetPinnableReference">
+            <inheritdoc cref="M:System.Span`1.GetPinnableReference"/>
+        </member>
+        <member name="M:UltimateOrb.BigSpan`1.Clear">
+            <inheritdoc cref="M:System.Span`1.Clear"/>
+        </member>
+        <member name="M:UltimateOrb.BigSpan`1.Fill(`0)">
+            <inheritdoc cref="M:System.Span`1.Fill(`0)"/>
+        </member>
+        <member name="M:UltimateOrb.BigSpan`1.CopyTo(UltimateOrb.BigSpan{`0})">
+            <inheritdoc cref="M:System.Span`1.CopyTo(System.Span{`0})"/>
+        </member>
+        <member name="M:UltimateOrb.BigSpan`1.TryCopyTo(UltimateOrb.BigSpan{`0})">
+            <inheritdoc cref="M:System.Span`1.TryCopyTo(System.Span{`0})"/>
+        </member>
+        <member name="M:UltimateOrb.BigSpan`1.op_Equality(UltimateOrb.BigSpan{`0},UltimateOrb.BigSpan{`0})">
+            <inheritdoc cref="M:System.Span`1.op_Equality(System.Span{`0},System.Span{`0})"/>
+        </member>
+        <member name="M:UltimateOrb.BigSpan`1.op_Implicit(UltimateOrb.BigSpan{`0})~UltimateOrb.ReadOnlyBigSpan{`0}">
+            <inheritdoc cref="M:System.Span`1.op_Implicit(System.Span{`0})~System.ReadOnlySpan{`0}"/>
+        </member>
+        <member name="M:UltimateOrb.BigSpan`1.ToString">
+            <inheritdoc cref="M:System.Span`1.ToString"/>
+        </member>
+        <member name="M:UltimateOrb.BigSpan`1.Slice(System.Int32)">
+            <inheritdoc cref="M:System.Span`1.Slice(System.Int32)"/>
+        </member>
+        <member name="M:UltimateOrb.BigSpan`1.Slice(System.IntPtr)">
+            <inheritdoc cref="M:System.Span`1.Slice(System.Int32)"/>
+        </member>
+        <member name="M:UltimateOrb.BigSpan`1.Slice(System.Int32,System.Int32)">
+            <inheritdoc cref="M:System.Span`1.Slice(System.Int32,System.Int32)"/>
+        </member>
+        <member name="M:UltimateOrb.BigSpan`1.Slice(System.IntPtr,System.Int32)">
+            <inheritdoc cref="M:System.Span`1.Slice(System.Int32,System.Int32)"/>
+        </member>
+        <member name="M:UltimateOrb.BigSpan`1.Slice(System.IntPtr,System.IntPtr)">
+            <inheritdoc cref="M:System.Span`1.Slice(System.Int32,System.Int32)"/>
+        </member>
+        <member name="M:UltimateOrb.BigSpan`1.ToArray">
+            <inheritdoc cref="M:System.Span`1.ToArray"/>
+        </member>
+        <member name="M:UltimateOrb.BigSpan`1.ToBigArray">
+            <inheritdoc cref="M:System.Span`1.ToArray"/>
+        </member>
+        <member name="T:UltimateOrb.ReadOnlyBigSpan`1">
+            <inheritdoc cref="T:System.ReadOnlySpan`1"/>
+        </member>
+        <member name="M:UltimateOrb.ReadOnlyBigSpan`1.#ctor(UltimateOrb.BigArray{`0})">
+            <inheritdoc cref="M:System.ReadOnlySpan`1.#ctor(`0[])"/>
+        </member>
+        <member name="M:UltimateOrb.ReadOnlyBigSpan`1.#ctor(`0[])">
+            <inheritdoc cref="M:System.ReadOnlySpan`1.#ctor(`0[])"/>
+        </member>
+        <member name="M:UltimateOrb.ReadOnlyBigSpan`1.#ctor(UltimateOrb.BigArray{`0},System.IntPtr,System.IntPtr)">
+            <inheritdoc cref="M:System.ReadOnlySpan`1.#ctor(`0[],System.Int32,System.Int32)"/>
+        </member>
+        <member name="M:UltimateOrb.ReadOnlyBigSpan`1.#ctor(`0[],System.Int32,System.Int32)">
+            <inheritdoc cref="M:System.ReadOnlySpan`1.#ctor(`0[],System.Int32,System.Int32)"/>
+        </member>
+        <member name="M:UltimateOrb.ReadOnlyBigSpan`1.#ctor(System.Void*,System.IntPtr)">
+            <inheritdoc cref="M:System.ReadOnlySpan`1.#ctor(System.Void*,System.Int32)"/>
+        </member>
+        <member name="M:UltimateOrb.ReadOnlyBigSpan`1.#ctor(System.Void*,System.Int32)">
+            <inheritdoc cref="M:System.ReadOnlySpan`1.#ctor(System.Void*,System.Int32)"/>
+        </member>
+        <!-- Badly formed XML comment ignored for member "M:UltimateOrb.ReadOnlyBigSpan`1.#ctor(`0@)" -->
+        <member name="P:UltimateOrb.ReadOnlyBigSpan`1.Item(System.Int32)">
+            <inheritdoc cref="P:System.ReadOnlySpan`1.Item(System.Int32)"/>
+        </member>
+        <member name="P:UltimateOrb.ReadOnlyBigSpan`1.Item(System.UInt32)">
+            <inheritdoc cref="P:System.ReadOnlySpan`1.Item(System.Int32)"/>
+        </member>
+        <member name="P:UltimateOrb.ReadOnlyBigSpan`1.Item(System.IntPtr)">
+            <inheritdoc cref="P:System.ReadOnlySpan`1.Item(System.Int32)"/>
+        </member>
+        <member name="P:UltimateOrb.ReadOnlyBigSpan`1.Item(System.UIntPtr)">
+            <inheritdoc cref="P:System.ReadOnlySpan`1.Item(System.Int32)"/>
+        </member>
+        <member name="P:UltimateOrb.ReadOnlyBigSpan`1.Item(System.Int64)">
+            <inheritdoc cref="P:System.ReadOnlySpan`1.Item(System.Int32)"/>
+        </member>
+        <member name="P:UltimateOrb.ReadOnlyBigSpan`1.Item(System.UInt64)">
+            <inheritdoc cref="P:System.ReadOnlySpan`1.Item(System.Int32)"/>
+        </member>
+        <member name="P:UltimateOrb.ReadOnlyBigSpan`1.Length">
+            <inheritdoc cref="P:System.ReadOnlySpan`1.Length"/>
+        </member>
+        <member name="P:UltimateOrb.ReadOnlyBigSpan`1.IsEmpty">
+            <inheritdoc cref="P:System.ReadOnlySpan`1.IsEmpty"/>
+        </member>
+        <member name="M:UltimateOrb.ReadOnlyBigSpan`1.op_Inequality(UltimateOrb.ReadOnlyBigSpan{`0},UltimateOrb.ReadOnlyBigSpan{`0})">
+            <inheritdoc cref="M:System.ReadOnlySpan`1.op_Inequality(System.ReadOnlySpan{`0},System.ReadOnlySpan{`0})"/>
+        </member>
+        <member name="M:UltimateOrb.ReadOnlyBigSpan`1.Equals(System.Object)">
+            <inheritdoc cref="M:System.ReadOnlySpan`1.Equals(System.Object)"/>
+        </member>
+        <member name="M:UltimateOrb.ReadOnlyBigSpan`1.GetHashCode">
+            <inheritdoc cref="M:System.ReadOnlySpan`1.GetHashCode"/>
+        </member>
+        <member name="M:UltimateOrb.ReadOnlyBigSpan`1.op_Implicit(UltimateOrb.BigArray{`0})~UltimateOrb.ReadOnlyBigSpan{`0}">
+            <inheritdoc cref="M:System.ReadOnlySpan`1.op_Implicit(`0[])~System.ReadOnlySpan{`0}"/>
+        </member>
+        <member name="M:UltimateOrb.ReadOnlyBigSpan`1.op_Implicit(`0[])~UltimateOrb.ReadOnlyBigSpan{`0}">
+            <inheritdoc cref="M:System.ReadOnlySpan`1.op_Implicit(`0[])~System.ReadOnlySpan{`0}"/>
+        </member>
+        <member name="M:UltimateOrb.ReadOnlyBigSpan`1.op_Implicit(System.ArraySegment{`0})~UltimateOrb.ReadOnlyBigSpan{`0}">
+            <inheritdoc cref="M:System.ReadOnlySpan`1.op_Implicit(System.ArraySegment{`0})~System.ReadOnlySpan{`0}"/>
+        </member>
+        <member name="P:UltimateOrb.ReadOnlyBigSpan`1.Empty">
+            <inheritdoc cref="P:UltimateOrb.ReadOnlyBigSpan`1.Empty"/>
+        </member>
+        <member name="M:UltimateOrb.ReadOnlyBigSpan`1.GetEnumerator">
+            <inheritdoc cref="M:System.ReadOnlySpan`1.GetEnumerator"/>
+        </member>
+        <member name="T:UltimateOrb.ReadOnlyBigSpan`1.Enumerator">
+            <inheritdoc cref="T:System.ReadOnlySpan`1.Enumerator"/>
+        </member>
+        <member name="M:UltimateOrb.ReadOnlyBigSpan`1.Enumerator.MoveNext">
+            <inheritdoc cref="M:System.ReadOnlySpan`1.Enumerator.MoveNext"/>
+        </member>
+        <member name="P:UltimateOrb.ReadOnlyBigSpan`1.Enumerator.Current">
+            <inheritdoc cref="P:System.ReadOnlySpan`1.Enumerator.Current"/>
+        </member>
+        <member name="M:UltimateOrb.ReadOnlyBigSpan`1.GetPinnableReference">
+            <inheritdoc cref="M:System.ReadOnlySpan`1.GetPinnableReference"/>
+        </member>
+        <member name="M:UltimateOrb.ReadOnlyBigSpan`1.CopyTo(UltimateOrb.BigSpan{`0})">
+            <inheritdoc cref="M:System.ReadOnlySpan`1.CopyTo(System.Span{`0})"/>
+        </member>
+        <member name="M:UltimateOrb.ReadOnlyBigSpan`1.TryCopyTo(UltimateOrb.BigSpan{`0})">
+            <inheritdoc cref="M:System.ReadOnlySpan`1.TryCopyTo(System.Span{`0})"/>
+        </member>
+        <member name="M:UltimateOrb.ReadOnlyBigSpan`1.op_Equality(UltimateOrb.ReadOnlyBigSpan{`0},UltimateOrb.ReadOnlyBigSpan{`0})">
+            <inheritdoc cref="M:System.ReadOnlySpan`1.op_Equality(System.ReadOnlySpan{`0},System.ReadOnlySpan{`0})"/>
+        </member>
+        <member name="M:UltimateOrb.ReadOnlyBigSpan`1.ToString">
+            <inheritdoc cref="M:System.ReadOnlySpan`1.ToString"/>
+        </member>
+        <member name="M:UltimateOrb.ReadOnlyBigSpan`1.Slice(System.Int32)">
+            <inheritdoc cref="M:System.ReadOnlySpan`1.Slice(System.Int32)"/>
+        </member>
+        <member name="M:UltimateOrb.ReadOnlyBigSpan`1.Slice(System.IntPtr)">
+            <inheritdoc cref="M:System.ReadOnlySpan`1.Slice(System.Int32)"/>
+        </member>
+        <member name="M:UltimateOrb.ReadOnlyBigSpan`1.Slice(System.Int32,System.Int32)">
+            <inheritdoc cref="M:System.ReadOnlySpan`1.Slice(System.Int32,System.Int32)"/>
+        </member>
+        <member name="M:UltimateOrb.ReadOnlyBigSpan`1.Slice(System.IntPtr,System.Int32)">
+            <inheritdoc cref="M:System.ReadOnlySpan`1.Slice(System.Int32,System.Int32)"/>
+        </member>
+        <member name="M:UltimateOrb.ReadOnlyBigSpan`1.Slice(System.IntPtr,System.IntPtr)">
+            <inheritdoc cref="M:System.ReadOnlySpan`1.Slice(System.Int32,System.Int32)"/>
+        </member>
+        <member name="M:UltimateOrb.ReadOnlyBigSpan`1.ToArray">
+            <inheritdoc cref="M:System.ReadOnlySpan`1.ToArray"/>
+        </member>
+        <member name="M:UltimateOrb.ReadOnlyBigSpan`1.ToBigArray">
+            <inheritdoc cref="M:System.ReadOnlySpan`1.ToArray"/>
+        </member>
+        <member name="T:UltimateOrb.TNull">
+            <summary>
+            Represents a sentinel null-like type used for scenarios where
+            <c>null</c> must be expressed as a distinct type rather than a literal.
+            </summary>
+            <remarks>
+            <para>
+            <see cref="T:UltimateOrb.TNull"/> cannot be instantiated. Its static constructor throws
+            <see cref="T:System.NotSupportedException"/> unconditionally, and its instance
+            constructor is private.
+            </para>
+            <para>
+            The type exposes a single constant, <see cref="F:UltimateOrb.TNull.Null"/>, which is always
+            <c>null</c>. This allows <see cref="T:UltimateOrb.TNull"/> to participate in generic
+            type systems that require a type-level representation of null.
+            </para>
+            </remarks>
+        </member>
+        <member name="F:UltimateOrb.TNull.Null">
+            <summary>
+            Gets the canonical null value for <see cref="T:UltimateOrb.TNull"/>.  
+            This constant is always <c>null</c>.
+            </summary>
+        </member>
+        <member name="F:UltimateOrb.TNull.o">
+            <summary>
+            A private static field used only to force a reference to
+            <see cref="T:System.Object"/> during type initialization.
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.TNull.#cctor">
+            <summary>
+            Static constructor.  
+            Always throws <see cref="T:System.NotSupportedException"/> to prevent
+            type initialization and ensure <see cref="T:UltimateOrb.TNull"/> cannot be used
+            as a normal runtime type.
+            </summary>
+            <exception cref="T:System.NotSupportedException">
+            Always thrown when the type is initialized.
+            </exception>
+        </member>
+        <member name="M:UltimateOrb.TNull.#ctor">
+            <summary>
+            Private instance constructor.  
+            Invokes <see cref="M:System.Object.GetHashCode"/> on a cached <see cref="T:System.Object"/>
+            instance solely to prevent the constructor from being empty.
+            </summary>
+        </member>
+        <member name="T:UltimateOrb.Runtime.InteropServices.Marshalling.BigSpanMarshaller`2">
+            <summary>
+            Supports marshalling a <see cref="T:System.Span`1"/> from managed value
+            to a contiguous native array of the unmanaged values of the elements.
+            </summary>
+            <typeparam name="T">The managed element type of the span.</typeparam>
+            <typeparam name="TUnmanagedElement">The unmanaged type for the elements of the span.</typeparam>
+            <remarks>
+            A <see cref="T:System.Span`1"/> marshalled with this marshaller will match the semantics of <see cref="M:System.Runtime.InteropServices.MemoryMarshal.GetReference``1(System.Span{``0})"/>.
+            In particular, this marshaller will pass a non-null value for a zero-length span if the span was constructed with a non-null value.
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Runtime.InteropServices.Marshalling.BigSpanMarshaller`2.AllocateContainerForUnmanagedElements(UltimateOrb.BigSpan{`0},System.Int32@)">
+            <summary>
+            Allocates the space to store the unmanaged elements.
+            </summary>
+            <param name="managed">The managed span.</param>
+            <param name="numElements">The number of elements in the span.</param>
+            <returns>A pointer to the block of memory for the unmanaged elements.</returns>
+        </member>
+        <member name="M:UltimateOrb.Runtime.InteropServices.Marshalling.BigSpanMarshaller`2.GetManagedValuesSource(UltimateOrb.BigSpan{`0})">
+            <summary>
+            Gets a span of the managed collection elements.
+            </summary>
+            <param name="managed">The managed collection.</param>
+            <returns>A span of the managed collection elements.</returns>
+        </member>
+        <member name="M:UltimateOrb.Runtime.InteropServices.Marshalling.BigSpanMarshaller`2.GetUnmanagedValuesDestination(`1*,System.Int32)">
+            <summary>
+            Gets a span of the space where the unmanaged collection elements should be stored.
+            </summary>
+            <param name="unmanaged">The pointer to the block of memory for the unmanaged elements.</param>
+            <param name="numElements">The number of elements that will be copied into the memory block.</param>
+            <returns>A span over the unmanaged memory that can contain the specified number of elements.</returns>
+        </member>
+        <member name="M:UltimateOrb.Runtime.InteropServices.Marshalling.BigSpanMarshaller`2.AllocateContainerForManagedElements(`1*,System.Int32)">
+            <summary>
+            Allocates space to store the managed elements.
+            </summary>
+            <param name="unmanaged">The unmanaged value.</param>
+            <param name="numElements">The number of elements in the unmanaged collection.</param>
+            <returns>A span over enough memory to contain <paramref name="numElements"/> elements.</returns>
+        </member>
+        <member name="M:UltimateOrb.Runtime.InteropServices.Marshalling.BigSpanMarshaller`2.GetManagedValuesDestination(System.Span{`0})">
+            <summary>
+            Gets a span of the space where the managed collection elements should be stored.
+            </summary>
+            <param name="managed">A span over the space to store the managed elements.</param>
+            <returns>A span over the managed memory that can contain the specified number of elements.</returns>
+        </member>
+        <member name="M:UltimateOrb.Runtime.InteropServices.Marshalling.BigSpanMarshaller`2.GetUnmanagedValuesSource(`1*,System.Int32)">
+            <summary>
+            Gets a span of the native collection elements.
+            </summary>
+            <param name="unmanaged">The unmanaged value.</param>
+            <param name="numElements">The number of elements in the unmanaged collection.</param>
+            <returns>A span over the native collection elements.</returns>
+        </member>
+        <member name="M:UltimateOrb.Runtime.InteropServices.Marshalling.BigSpanMarshaller`2.Free(`1*)">
+            <summary>
+            Frees the allocated unmanaged memory.
+            </summary>
+            <param name="unmanaged">A pointer to the allocated unmanaged memory.</param>
+        </member>
+        <member name="T:UltimateOrb.Runtime.InteropServices.Marshalling.BigSpanMarshaller`2.ManagedToUnmanagedIn">
+            <summary>
+            Supports marshalling from managed into unmanaged in a call from managed code to unmanaged code.
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.Runtime.InteropServices.Marshalling.BigSpanMarshaller`2.ManagedToUnmanagedIn.FromManaged(UltimateOrb.BigSpan{`0},System.Span{`1})">
+            <summary>
+            Initializes the <see cref="T:System.Runtime.InteropServices.Marshalling.SpanMarshaller`2.ManagedToUnmanagedIn"/> marshaller.
+            </summary>
+            <param name="managed">The span to be marshalled.</param>
+            <param name="buffer">The buffer that may be used for marshalling.</param>
+            <remarks>
+            The <paramref name="buffer"/> must not be movable - that is, it should not be
+            on the managed heap or it should be pinned.
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Runtime.InteropServices.Marshalling.BigSpanMarshaller`2.ManagedToUnmanagedIn.GetManagedValuesSource">
+            <summary>
+            Gets a span that points to the memory where the managed values of the array are stored.
+            </summary>
+            <returns>A span over the managed values of the array.</returns>
+        </member>
+        <member name="M:UltimateOrb.Runtime.InteropServices.Marshalling.BigSpanMarshaller`2.ManagedToUnmanagedIn.GetUnmanagedValuesDestination">
+            <summary>
+            Returns a span that points to the memory where the unmanaged values of the array should be stored.
+            </summary>
+            <returns>A span where unmanaged values of the array should be stored.</returns>
+        </member>
+        <member name="M:UltimateOrb.Runtime.InteropServices.Marshalling.BigSpanMarshaller`2.ManagedToUnmanagedIn.GetPinnableReference">
+            <summary>
+            Returns a reference to the marshalled array.
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.Runtime.InteropServices.Marshalling.BigSpanMarshaller`2.ManagedToUnmanagedIn.ToUnmanaged">
+            <summary>
+            Returns the unmanaged value representing the array.
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.Runtime.InteropServices.Marshalling.BigSpanMarshaller`2.ManagedToUnmanagedIn.Free">
+            <summary>
+            Frees resources.
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.Runtime.InteropServices.Marshalling.BigSpanMarshaller`2.ManagedToUnmanagedIn.GetPinnableReference(UltimateOrb.BigSpan{`0})">
+            <summary>
+            Gets a pinnable reference to the managed span.
+            </summary>
+            <param name="managed">The managed span.</param>
+            <returns>A reference that can be pinned and directly passed to unmanaged code.</returns>
+        </member>
+        <member name="M:UltimateOrb.Runtime.CompilerServices.Boxed`1.op_Implicit(UltimateOrb.Runtime.CompilerServices.Boxed{`0})~System.ValueType">
+            <returns>Untyped reference to a boxed value.</returns>
+        </member>
+        <member name="M:UltimateOrb.Runtime.CompilerServices.Boxed`1.Equals(System.Object)">
+            <inheritdoc />
+        </member>
+        <member name="M:UltimateOrb.Runtime.CompilerServices.Boxed`1.GetHashCode">
+            <inheritdoc />
+        </member>
+        <member name="M:UltimateOrb.Runtime.CompilerServices.Boxed`1.ToString">
+            <inheritdoc />
+        </member>
+        <member name="M:UltimateOrb.Runtime.CompilerServices.ReadOnlyBoxed`1.op_Explicit(UltimateOrb.Runtime.CompilerServices.ReadOnlyBoxed{`0})~System.ValueType">
+            <returns>Untyped reference to a boxed value.</returns>
+        </member>
+        <member name="M:UltimateOrb.Runtime.CompilerServices.ReadOnlyBoxed`1.Equals(System.Object)">
+            <inheritdoc />
+        </member>
+        <member name="M:UltimateOrb.Runtime.CompilerServices.ReadOnlyBoxed`1.GetHashCode">
+            <inheritdoc />
+        </member>
+        <member name="M:UltimateOrb.Runtime.CompilerServices.ReadOnlyBoxed`1.ToString">
+            <inheritdoc />
+        </member>
+        <member name="M:UltimateOrb.Runtime.CompilerServices.BoxedAny`1.UnsafeCopy">
+            <inheritdoc cref="M:System.Object.MemberwiseClone"/>
+        </member>
+        <member name="M:UltimateOrb.Runtime.CompilerServices.BoxedAny`1.Equals(System.Object)">
+            <inheritdoc />
+        </member>
+        <member name="M:UltimateOrb.Runtime.CompilerServices.BoxedAny`1.GetHashCode">
+            <inheritdoc />
+        </member>
+        <member name="M:UltimateOrb.Runtime.CompilerServices.BoxedAny`1.ToString">
+            <inheritdoc />
+        </member>
+        <member name="M:UltimateOrb.Runtime.CompilerServices.StructLayoutHelpers.AlignOf``1">
+            <summary>
+            Returns the alignment (in bytes) that the runtime uses for type <typeparamref name="T"/>.
+            This is the number of bytes that the runtime will skip over when allocating an array of <typeparamref name="T"/> or when aligning a field of type <typeparamref name="T"/> in a struct.
+            </summary>
+            <typeparam name="T">
+            The type to get the alignment for.
+            </typeparam>
+        </member>
+        <member name="M:UltimateOrb.Runtime.CompilerServices.Unsafe.BitCast``2(``0)">
+            <inheritdoc cref="M:System.Runtime.CompilerServices.Unsafe.BitCast``2(``0)"/>
+        </member>
+        <member name="T:UltimateOrb.Runtime.CompilerServices.IU">
+            <summary>
+            Defines a common interface for discriminated unions.
+            </summary>
+        </member>
+        <member name="P:UltimateOrb.Runtime.CompilerServices.IU.Value">
+            <summary>
+            Returns the value in a discriminated union.
+            </summary>
+        </member>
+        <member name="P:UltimateOrb.Runtime.CompilerServices.IU.Case">
+            <summary>
+            Returns the number that presents of which case the value is in a discriminated union.
+            </summary>
+        </member>
+        <member name="P:UltimateOrb.Runtime.CompilerServices.IU.CaseCount">
+            <summary>
+            Returns the case count of a discriminated union.
+            </summary>
+        </member>
+        <member name="T:UltimateOrb.Runtime.Caching.SmallStructCache7x2`2">
+            <summary>
+            Represents a small, fixed‑size, value‑type cache with <c>M</c> hash‑indexed slots,
+            each containing up to <c>N</c> key/value entries.
+            <para>
+            This cache is designed for extremely low‑overhead scenarios: it is a pure struct,
+            stores entries inline, performs no allocations, and uses a simple modulo‑hash
+            dispatch to select a slot.
+            </para>
+            <para>
+            Each slot maintains up to <c>N</c> entries and uses a deterministic overwrite
+            policy (typically round‑robin) when all entries in the slot are occupied.
+            </para>
+            <para>
+            Lookups, insertions, and removals operate only within the slot determined by
+            <see cref="M:System.Collections.Generic.IEqualityComparer`1.GetHashCode(`0)"/> modulo the number of slots.
+            No probing, chaining, or resizing occurs.
+            </para>
+            </summary>
+            <typeparam name="TKey">
+            The key type. Must be non‑null. Keys are compared using the configured
+            <see cref="T:System.Collections.Generic.IEqualityComparer`1"/>.
+            </typeparam>
+            <typeparam name="TValue">
+            The value type stored in the cache.
+            </typeparam>
+            <remarks>
+            <para>
+            This cache is intended for high‑performance micro‑caching, memoization,
+            or lookup tables where a small number of entries per hash slot is sufficient.
+            </para>
+            </remarks>
+        </member>
+        <member name="P:UltimateOrb.Runtime.Caching.SmallStructCache7x2`2.IsDefault">
+            <summary>
+            Gets a value indicating whether this cache instance was default‑constructed
+            (i.e., whether the comparer field is uninitialized).
+            </summary>
+        </member>
+        <member name="T:UltimateOrb.Runtime.Caching.SmallStructCache7x2`2.Entry">
+            <summary>
+            Represents a single hash slot containing up to <c>N</c> key/value entries.
+            The slot supports lookup, insertion with overwrite, and removal.
+            <para>
+            When all entries are occupied and a new key is inserted, the slot overwrites
+            one entry according to a deterministic policy (e.g., round‑robin).
+            </para>
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.Runtime.Caching.SmallStructCache7x2`2.Entry.TryGet(`0,System.Collections.Generic.IEqualityComparer{`0},`1@)">
+            <summary>
+            Attempts to retrieve the value associated with the specified key.
+            Lookup is restricted to this slot only.
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.Runtime.Caching.SmallStructCache7x2`2.Entry.AddOrReplaceWithOverwrite(`0,`1,System.Collections.Generic.IEqualityComparer{`0})">
+            <summary>
+            Adds a key/value pair to the slot or replaces an existing entry.
+            <para>
+            If the slot has free capacity, the new entry is placed in the first available position.
+            If the slot is full, an existing entry is overwritten according to the slot's
+            deterministic overwrite policy.
+            </para>
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.Runtime.Caching.SmallStructCache7x2`2.Entry.TryRemove(`0,System.Collections.Generic.IEqualityComparer{`0})">
+            <summary>
+            Attempts to remove the entry associated with the specified key.
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.Runtime.Caching.SmallStructCache7x2`2.#ctor">
+            <summary>
+            Initializes a new cache instance using <see cref="P:System.Collections.Generic.EqualityComparer`1.Default"/>.
+            All entries start empty.
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.Runtime.Caching.SmallStructCache7x2`2.#ctor(System.Collections.Generic.IEqualityComparer{`0})">
+            <summary>
+            Initializes a new cache instance using the specified key comparer.
+            All entries start empty.
+            </summary>
+            <param name="comparer">
+            The comparer used for key equality. If <c>null</c>, the default comparer is used.
+            </param>
+        </member>
+        <member name="P:UltimateOrb.Runtime.Caching.SmallStructCache7x2`2.Comparer">
+            <summary>
+            Gets the <see cref="T:System.Collections.Generic.IEqualityComparer`1"/> used for key comparison.
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.Runtime.Caching.SmallStructCache7x2`2.TryGetValue(`0,`1@)">
+            <summary>
+            Attempts to retrieve the value associated with the specified key.
+            Lookup is restricted to the slot determined by the key's hash modulo the number of slots.
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.Runtime.Caching.SmallStructCache7x2`2.TryAdd(`0,`1)">
+            <summary>
+            Adds a key/value pair to the cache or replaces an existing entry in the same slot.
+            <para>
+            If the slot has free capacity, the new entry is placed in the first available position.
+            If the slot is full, an existing entry is overwritten according to the slot's
+            deterministic overwrite policy.
+            </para>
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.Runtime.Caching.SmallStructCache7x2`2.TryRemove(`0)">
+            <summary>
+            Attempts to remove the entry associated with the specified key.
+            Removal is restricted to the slot determined by the key's hash modulo the number of slots.
+            </summary>
         </member>
         <member name="T:UltimateOrb.Boolean8">
             <summary>
@@ -2456,6 +3325,23 @@
             <typeparam name="TUInt"></typeparam>
             <typeparam name="TLong"></typeparam>
             <typeparam name="TULong"></typeparam>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BigFloatBuilderCore.Add(UltimateOrb.Numerics.BigFloatContext@,UltimateOrb.Numerics.BigFloatBuilderCore@,UltimateOrb.Numerics.BigFloatBuilderCore,UltimateOrb.Numerics.BigFloatBuilderCore,UltimateOrb.FloatingPointRounding)">
+            <summary>
+            Returns 0 (exact), +1 (result &gt; exact) or -1 (result &lt; exact).
+            Prefers result.PrecisionInternal over context.Precision.
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BigFloatBuilderCore.ToBigInteger(UltimateOrb.BigSpan{System.UIntPtr})">
+            <summary>
+            Little-endian nuint limbs → non-negative BigInteger.
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.Numerics.BigFloatBuilderCore.WriteBigInteger(UltimateOrb.Numerics.BigFloatBuilderCore@,System.Numerics.BigInteger)">
+            <summary>
+            Non-negative BigInteger → little-endian nuint limbs in
+            <see cref="!:result"/>.RawSignificand. Assumes sufficient capacity.
+            </summary>
         </member>
         <member name="M:UltimateOrb.Numerics.BigIntegerExtensions.get_Two">
             <inheritdoc cref="P:UltimateOrb.Numerics.BigIntegerExtensions.&lt;G&gt;$9CFAEDA43E3429DBE35978030E0B8E1A.Two"/>
@@ -7586,7 +8472,7 @@
             ○ Match if at the beginning of the string.<br/>
             ○ Optional (greedy).<br/>
                 ○ "sign" capture group.<br/>
-                    ○ Match a character in the set [+\-].<br/>
+                    ○ Match a character in the set [+-].<br/>
             ○ Match with 4 alternative expressions.<br/>
                 ○ "hex" capture group.<br/>
                     ○ Match '0'.<br/>
@@ -7595,16 +8481,17 @@
                         ○ Match with 2 alternative expressions.<br/>
                             ○ Match a sequence of expressions.<br/>
                                 ○ Match '.'.<br/>
-                                ○ Match a hexadecimal digit atomically at least once.<br/>
+                                ○ Match a character in the set [0-9A-Fa-f] atomically at least once.<br/>
                             ○ Match a sequence of expressions.<br/>
-                                ○ Match a hexadecimal digit greedily at least once.<br/>
+                                ○ Match a character in the set [0-9A-Fa-f] greedily at least once.<br/>
                                 ○ Optional (greedy).<br/>
                                     ○ Match '.'.<br/>
-                                    ○ Optional (greedy).<br/>
-                                        ○ Match a hexadecimal digit atomically at least once.<br/>
+                                    ○ Match with 2 alternative expressions.<br/>
+                                        ○ Match a character in the set [0-9A-Fa-f] greedily at least once.<br/>
+                                        ○ Match an empty string.<br/>
                     ○ Match a character in the set [Pp].<br/>
                     ○ "hexExpSign" capture group.<br/>
-                        ○ Match a character in the set [+\-] atomically, optionally.<br/>
+                        ○ Match a character in the set [+-] atomically, optionally.<br/>
                     ○ "hexExp" capture group.<br/>
                         ○ Match a character in the set [0-9] atomically at least once.<br/>
                 ○ "dec" capture group.<br/>
@@ -7617,14 +8504,15 @@
                                 ○ Match a character in the set [0-9] greedily at least once.<br/>
                                 ○ Optional (greedy).<br/>
                                     ○ Match '.'.<br/>
-                                    ○ Optional (greedy).<br/>
+                                    ○ Match with 2 alternative expressions.<br/>
                                         ○ Match a character in the set [0-9] greedily at least once.<br/>
+                                        ○ Match an empty string.<br/>
                     ○ Optional (greedy).<br/>
                         ○ Match a character in the set [Ee].<br/>
                         ○ "decExpSign" capture group.<br/>
-                            ○ Match a character in the set [+\-] atomically, optionally.<br/>
+                            ○ Match a character in the set [+-] atomically, optionally.<br/>
                         ○ "decExp" capture group.<br/>
-                            ○ Match a character in the set [0-9] atomically at least once.<br/>
+                            ○ Match a character in the set [0-9] greedily at least once.<br/>
                 ○ "nan" capture group.<br/>
                     ○ "nanPrefix" capture group.<br/>
                         ○ Match a character in the set [QSqs] atomically, optionally.<br/>
@@ -7639,7 +8527,7 @@
                                 ○ Match a sequence of expressions.<br/>
                                     ○ Match '0'.<br/>
                                     ○ Match a character in the set [Xx].<br/>
-                                    ○ Match a hexadecimal digit atomically at least once.<br/>
+                                    ○ Match a character in the set [0-9A-Fa-f] atomically at least once.<br/>
                                 ○ Match a character in the set [0-9] atomically at least once.<br/>
                         ○ Match ')'.<br/>
                 ○ "inf" capture group.<br/>
@@ -8175,186 +9063,6 @@
             <param name="obj">The pinned object.</param>
             <returns></returns>
         </member>
-        <member name="M:UltimateOrb.Runtime.CompilerServices.Boxed`1.op_Implicit(UltimateOrb.Runtime.CompilerServices.Boxed{`0})~System.ValueType">
-            <returns>Untyped reference to a boxed value.</returns>
-        </member>
-        <member name="M:UltimateOrb.Runtime.CompilerServices.Boxed`1.Equals(System.Object)">
-            <inheritdoc />
-        </member>
-        <member name="M:UltimateOrb.Runtime.CompilerServices.Boxed`1.GetHashCode">
-            <inheritdoc />
-        </member>
-        <member name="M:UltimateOrb.Runtime.CompilerServices.Boxed`1.ToString">
-            <inheritdoc />
-        </member>
-        <member name="M:UltimateOrb.Runtime.CompilerServices.ReadOnlyBoxed`1.op_Explicit(UltimateOrb.Runtime.CompilerServices.ReadOnlyBoxed{`0})~System.ValueType">
-            <returns>Untyped reference to a boxed value.</returns>
-        </member>
-        <member name="M:UltimateOrb.Runtime.CompilerServices.ReadOnlyBoxed`1.Equals(System.Object)">
-            <inheritdoc />
-        </member>
-        <member name="M:UltimateOrb.Runtime.CompilerServices.ReadOnlyBoxed`1.GetHashCode">
-            <inheritdoc />
-        </member>
-        <member name="M:UltimateOrb.Runtime.CompilerServices.ReadOnlyBoxed`1.ToString">
-            <inheritdoc />
-        </member>
-        <member name="M:UltimateOrb.Runtime.CompilerServices.BoxedAny`1.UnsafeCopy">
-            <inheritdoc cref="M:System.Object.MemberwiseClone"/>
-        </member>
-        <member name="M:UltimateOrb.Runtime.CompilerServices.BoxedAny`1.Equals(System.Object)">
-            <inheritdoc />
-        </member>
-        <member name="M:UltimateOrb.Runtime.CompilerServices.BoxedAny`1.GetHashCode">
-            <inheritdoc />
-        </member>
-        <member name="M:UltimateOrb.Runtime.CompilerServices.BoxedAny`1.ToString">
-            <inheritdoc />
-        </member>
-        <member name="M:UltimateOrb.Runtime.CompilerServices.StructLayoutHelpers.AlignOf``1">
-            <summary>
-            Returns the alignment (in bytes) that the runtime uses for type <typeparamref name="T"/>.
-            This is the number of bytes that the runtime will skip over when allocating an array of <typeparamref name="T"/> or when aligning a field of type <typeparamref name="T"/> in a struct.
-            </summary>
-            <typeparam name="T">
-            The type to get the alignment for.
-            </typeparam>
-        </member>
-        <member name="M:UltimateOrb.Runtime.CompilerServices.Unsafe.BitCast``2(``0)">
-            <inheritdoc cref="M:System.Runtime.CompilerServices.Unsafe.BitCast``2(``0)"/>
-        </member>
-        <member name="T:UltimateOrb.Runtime.CompilerServices.IU">
-            <summary>
-            Defines a common interface for discriminated unions.
-            </summary>
-        </member>
-        <member name="P:UltimateOrb.Runtime.CompilerServices.IU.Value">
-            <summary>
-            Returns the value in a discriminated union.
-            </summary>
-        </member>
-        <member name="P:UltimateOrb.Runtime.CompilerServices.IU.Case">
-            <summary>
-            Returns the number that presents of which case the value is in a discriminated union.
-            </summary>
-        </member>
-        <member name="P:UltimateOrb.Runtime.CompilerServices.IU.CaseCount">
-            <summary>
-            Returns the case count of a discriminated union.
-            </summary>
-        </member>
-        <member name="T:UltimateOrb.Runtime.Caching.SmallStructCache7x2`2">
-            <summary>
-            Represents a small, fixed‑size, value‑type cache with <c>M</c> hash‑indexed slots,
-            each containing up to <c>N</c> key/value entries.
-            <para>
-            This cache is designed for extremely low‑overhead scenarios: it is a pure struct,
-            stores entries inline, performs no allocations, and uses a simple modulo‑hash
-            dispatch to select a slot.
-            </para>
-            <para>
-            Each slot maintains up to <c>N</c> entries and uses a deterministic overwrite
-            policy (typically round‑robin) when all entries in the slot are occupied.
-            </para>
-            <para>
-            Lookups, insertions, and removals operate only within the slot determined by
-            <see cref="M:System.Collections.Generic.IEqualityComparer`1.GetHashCode(`0)"/> modulo the number of slots.
-            No probing, chaining, or resizing occurs.
-            </para>
-            </summary>
-            <typeparam name="TKey">
-            The key type. Must be non‑null. Keys are compared using the configured
-            <see cref="T:System.Collections.Generic.IEqualityComparer`1"/>.
-            </typeparam>
-            <typeparam name="TValue">
-            The value type stored in the cache.
-            </typeparam>
-            <remarks>
-            <para>
-            This cache is intended for high‑performance micro‑caching, memoization,
-            or lookup tables where a small number of entries per hash slot is sufficient.
-            </para>
-            </remarks>
-        </member>
-        <member name="P:UltimateOrb.Runtime.Caching.SmallStructCache7x2`2.IsDefault">
-            <summary>
-            Gets a value indicating whether this cache instance was default‑constructed
-            (i.e., whether the comparer field is uninitialized).
-            </summary>
-        </member>
-        <member name="T:UltimateOrb.Runtime.Caching.SmallStructCache7x2`2.Entry">
-            <summary>
-            Represents a single hash slot containing up to <c>N</c> key/value entries.
-            The slot supports lookup, insertion with overwrite, and removal.
-            <para>
-            When all entries are occupied and a new key is inserted, the slot overwrites
-            one entry according to a deterministic policy (e.g., round‑robin).
-            </para>
-            </summary>
-        </member>
-        <member name="M:UltimateOrb.Runtime.Caching.SmallStructCache7x2`2.Entry.TryGet(`0,System.Collections.Generic.IEqualityComparer{`0},`1@)">
-            <summary>
-            Attempts to retrieve the value associated with the specified key.
-            Lookup is restricted to this slot only.
-            </summary>
-        </member>
-        <member name="M:UltimateOrb.Runtime.Caching.SmallStructCache7x2`2.Entry.AddOrReplaceWithOverwrite(`0,`1,System.Collections.Generic.IEqualityComparer{`0})">
-            <summary>
-            Adds a key/value pair to the slot or replaces an existing entry.
-            <para>
-            If the slot has free capacity, the new entry is placed in the first available position.
-            If the slot is full, an existing entry is overwritten according to the slot's
-            deterministic overwrite policy.
-            </para>
-            </summary>
-        </member>
-        <member name="M:UltimateOrb.Runtime.Caching.SmallStructCache7x2`2.Entry.TryRemove(`0,System.Collections.Generic.IEqualityComparer{`0})">
-            <summary>
-            Attempts to remove the entry associated with the specified key.
-            </summary>
-        </member>
-        <member name="M:UltimateOrb.Runtime.Caching.SmallStructCache7x2`2.#ctor">
-            <summary>
-            Initializes a new cache instance using <see cref="P:System.Collections.Generic.EqualityComparer`1.Default"/>.
-            All entries start empty.
-            </summary>
-        </member>
-        <member name="M:UltimateOrb.Runtime.Caching.SmallStructCache7x2`2.#ctor(System.Collections.Generic.IEqualityComparer{`0})">
-            <summary>
-            Initializes a new cache instance using the specified key comparer.
-            All entries start empty.
-            </summary>
-            <param name="comparer">
-            The comparer used for key equality. If <c>null</c>, the default comparer is used.
-            </param>
-        </member>
-        <member name="P:UltimateOrb.Runtime.Caching.SmallStructCache7x2`2.Comparer">
-            <summary>
-            Gets the <see cref="T:System.Collections.Generic.IEqualityComparer`1"/> used for key comparison.
-            </summary>
-        </member>
-        <member name="M:UltimateOrb.Runtime.Caching.SmallStructCache7x2`2.TryGetValue(`0,`1@)">
-            <summary>
-            Attempts to retrieve the value associated with the specified key.
-            Lookup is restricted to the slot determined by the key's hash modulo the number of slots.
-            </summary>
-        </member>
-        <member name="M:UltimateOrb.Runtime.Caching.SmallStructCache7x2`2.TryAdd(`0,`1)">
-            <summary>
-            Adds a key/value pair to the cache or replaces an existing entry in the same slot.
-            <para>
-            If the slot has free capacity, the new entry is placed in the first available position.
-            If the slot is full, an existing entry is overwritten according to the slot's
-            deterministic overwrite policy.
-            </para>
-            </summary>
-        </member>
-        <member name="M:UltimateOrb.Runtime.Caching.SmallStructCache7x2`2.TryRemove(`0)">
-            <summary>
-            Attempts to remove the entry associated with the specified key.
-            Removal is restricted to the slot determined by the key's hash modulo the number of slots.
-            </summary>
-        </member>
         <member name="T:UltimateOrb.FloatingPointRounding">
             <summary>
             Specifies the rounding mode used for floating-point operations.
@@ -8444,124 +9152,6 @@
             <remarks>
                 <para>The Number must be in format <c>[1-9][0-9]*</c>.</para>
             </remarks>
-        </member>
-        <member name="P:UltimateOrb.Internal.System.UtfChar`1.IsUtf8">
-            <summary>Gets whether this type represents UTF-8 code units.</summary>
-        </member>
-        <member name="P:UltimateOrb.Internal.System.UtfChar`1.IsUtf16">
-            <summary>Gets whether this type represents UTF-16 code units.</summary>
-        </member>
-        <member name="P:UltimateOrb.Internal.System.UtfChar`1.IsUtf32">
-            <summary>Gets whether this type represents UTF-32 code units.</summary>
-        </member>
-        <member name="M:UltimateOrb.Internal.System.UtfChar`1.CastFrom(System.Byte)">
-            <summary>Casts the specified value to this type.</summary>
-        </member>
-        <member name="M:UltimateOrb.Internal.System.UtfChar`1.CastFrom(System.Char)">
-            <summary>Casts the specified value to this type.</summary>
-        </member>
-        <member name="M:UltimateOrb.Internal.System.UtfChar`1.CastFrom(System.Int32)">
-            <summary>Casts the specified value to this type.</summary>
-        </member>
-        <member name="M:UltimateOrb.Internal.System.UtfChar`1.CastFrom(System.UInt32)">
-            <summary>Casts the specified value to this type.</summary>
-        </member>
-        <member name="M:UltimateOrb.Internal.System.UtfChar`1.CastFrom(System.UInt64)">
-            <summary>Casts the specified value to this type.</summary>
-        </member>
-        <member name="M:UltimateOrb.Internal.System.UtfChar`1.CastToUInt32(`0)">
-            <summary>Casts a value of this type to an UInt32.</summary>
-        </member>
-        <member name="P:UltimateOrb.Internal.System.BinaryFloatParseAndFormatInfo`1.NumberBufferLength">
-            <summary>
-            Ceiling(Log10(5^(Abs(MinBinaryExponent) - 1))) + NormalMantissaBits + 1 + 1
-            </summary>
-        </member>
-        <member name="P:UltimateOrb.Internal.System.BinaryFloatParseAndFormatInfo`1.NormalMantissaMask">
-            <summary>
-            (1UL &lt;&lt; SignificandLength) - 1
-            </summary>
-        </member>
-        <member name="P:UltimateOrb.Internal.System.BinaryFloatParseAndFormatInfo`1.DenormalMantissaMask">
-            <summary>
-            TrailingSignificandMask == (1UL &lt;&lt; TrailingSignificandLength) - 1
-            </summary>
-        </member>
-        <member name="P:UltimateOrb.Internal.System.BinaryFloatParseAndFormatInfo`1.MinBinaryExponent">
-            <summary>
-            1 - MaxBinaryExponent
-            </summary>
-        </member>
-        <member name="P:UltimateOrb.Internal.System.BinaryFloatParseAndFormatInfo`1.MinDecimalExponent">
-            <summary>
-            Floor(Log10(Epsilon)) where Epsilon is the smallest positive
-            subnormal, i.e. 2^(MinBinaryExponent - TrailingSignificandLength).
-            </summary>
-        </member>
-        <member name="P:UltimateOrb.Internal.System.BinaryFloatParseAndFormatInfo`1.MaxDecimalExponent">
-            <summary>
-            Ceiling(Log10(MaxValue))
-            </summary>
-        </member>
-        <member name="P:UltimateOrb.Internal.System.BinaryFloatParseAndFormatInfo`1.OverflowDecimalExponent">
-            <summary>
-            (MaxBinaryExponent + 2 * SignificandLength) / 3
-            </summary>
-        </member>
-        <member name="P:UltimateOrb.Internal.System.BinaryFloatParseAndFormatInfo`1.InfinityExponent">
-            <summary>
-            (1 &lt;&lt; ExponentBits) - 1
-            </summary>
-        </member>
-        <member name="P:UltimateOrb.Internal.System.BinaryFloatParseAndFormatInfo`1.NormalMantissaBits">
-            <summary>
-            SignificandLength (implicit leading bit included)
-            </summary>
-        </member>
-        <member name="P:UltimateOrb.Internal.System.BinaryFloatParseAndFormatInfo`1.DenormalMantissaBits">
-            <summary>
-            TrailingSignificandLength (explicit mantissa bits)
-            </summary>
-        </member>
-        <member name="P:UltimateOrb.Internal.System.BinaryFloatParseAndFormatInfo`1.MinFastFloatDecimalExponent">
-            <summary>
-            Ceiling(Log10(2^(MinBinaryExponent - 1 - TrailingSignificandLength - 64)))
-            </summary>
-        </member>
-        <member name="P:UltimateOrb.Internal.System.BinaryFloatParseAndFormatInfo`1.MaxFastFloatDecimalExponent">
-            <summary>
-            MaxDecimalExponent - 1
-            </summary>
-        </member>
-        <member name="P:UltimateOrb.Internal.System.BinaryFloatParseAndFormatInfo`1.MinExponentRoundToEven">
-            <summary>
-            -Floor(Log5(2^(64 - SignificandLength)))
-            </summary>
-        </member>
-        <member name="P:UltimateOrb.Internal.System.BinaryFloatParseAndFormatInfo`1.MaxExponentRoundToEven">
-            <summary>
-            Floor(Log5(2^(SignificandLength + 1)))
-            </summary>
-        </member>
-        <member name="P:UltimateOrb.Internal.System.BinaryFloatParseAndFormatInfo`1.MaxExponentFastPath">
-            <summary>
-            Max n such that 10^n is exactly representable.
-            </summary>
-        </member>
-        <member name="P:UltimateOrb.Internal.System.BinaryFloatParseAndFormatInfo`1.MaxMantissaFastPath">
-            <summary>
-            2UL &lt;&lt; TrailingSignificandLength
-            </summary>
-        </member>
-        <member name="P:UltimateOrb.Internal.System.BinaryFloatParseAndFormatInfo`1.MaxRoundTripDigits">
-            <summary>
-            Ceiling(Log10(2^SignificandLength)) + 1
-            </summary>
-        </member>
-        <member name="P:UltimateOrb.Internal.System.BinaryFloatParseAndFormatInfo`1.MaxPrecisionCustomFormat">
-            <summary>
-            Legacy pre-.NET Core 3.0 custom-format precision ceiling.
-            </summary>
         </member>
         <member name="M:UltimateOrb.INumberBaseFriendInternal`1.TryConvertFromChecked``1(``0,`0@)">
             <inheritdoc cref="M:System.Numerics.INumberBase`1.TryConvertFromChecked``1(``0,`0@)"/>
@@ -10242,6 +10832,137 @@
                     The second specified type.
                 </para>
             </typeparam>
+        </member>
+        <member name="T:System.Runtime.InteropServices.Marshalling.ReadOnlyBigSpanMarshaller`2">
+            <summary>
+            Supports marshalling a <see cref="T:System.ReadOnlySpan`1"/> from managed value
+            to a contiguous native array of the unmanaged values of the elements.
+            </summary>
+            <typeparam name="T">The managed element type of the span.</typeparam>
+            <typeparam name="TUnmanagedElement">The unmanaged type for the elements of the span.</typeparam>
+            <remarks>
+            A <see cref="T:System.ReadOnlySpan`1"/> marshalled with this marshaller will match the semantics of <see cref="M:System.Runtime.InteropServices.MemoryMarshal.GetReference``1(System.ReadOnlySpan{``0})"/>.
+            In particular, this marshaller will pass a non-null value for a zero-length span if the span was constructed with a non-null value.
+            </remarks>
+        </member>
+        <member name="T:System.Runtime.InteropServices.Marshalling.ReadOnlyBigSpanMarshaller`2.UnmanagedToManagedOut">
+            <summary>
+            Supports marshalling from managed into unmanaged in a call from unmanaged code to managed code.
+            </summary>
+        </member>
+        <member name="M:System.Runtime.InteropServices.Marshalling.ReadOnlyBigSpanMarshaller`2.UnmanagedToManagedOut.AllocateContainerForUnmanagedElements(UltimateOrb.ReadOnlyBigSpan{`0},System.Int32@)">
+            <summary>
+            Allocates the space to store the unmanaged elements.
+            </summary>
+            <param name="managed">The managed span.</param>
+            <param name="numElements">The number of elements in the span.</param>
+            <returns>A pointer to the block of memory for the unmanaged elements.</returns>
+        </member>
+        <member name="M:System.Runtime.InteropServices.Marshalling.ReadOnlyBigSpanMarshaller`2.UnmanagedToManagedOut.GetManagedValuesSource(UltimateOrb.ReadOnlyBigSpan{`0})">
+            <summary>
+            Gets a span of the managed collection elements.
+            </summary>
+            <param name="managed">The managed collection.</param>
+            <returns>A span of the managed collection elements.</returns>
+        </member>
+        <member name="M:System.Runtime.InteropServices.Marshalling.ReadOnlyBigSpanMarshaller`2.UnmanagedToManagedOut.GetUnmanagedValuesDestination(`1*,System.Int32)">
+            <summary>
+            Gets a span of the space where the unmanaged collection elements should be stored.
+            </summary>
+            <param name="unmanaged">The pointer to the block of memory for the unmanaged elements.</param>
+            <param name="numElements">The number of elements that will be copied into the memory block.</param>
+            <returns>A span over the unmanaged memory that can contain the specified number of elements.</returns>
+        </member>
+        <member name="T:System.Runtime.InteropServices.Marshalling.ReadOnlyBigSpanMarshaller`2.ManagedToUnmanagedIn">
+            <summary>
+            Supports marshalling from managed into unmanaged in a call from managed code to unmanaged code.
+            </summary>
+        </member>
+        <member name="P:System.Runtime.InteropServices.Marshalling.ReadOnlyBigSpanMarshaller`2.ManagedToUnmanagedIn.BufferSize">
+            <summary>
+            Gets the size of the caller-allocated buffer to allocate.
+            </summary>
+        </member>
+        <member name="M:System.Runtime.InteropServices.Marshalling.ReadOnlyBigSpanMarshaller`2.ManagedToUnmanagedIn.FromManaged(UltimateOrb.ReadOnlyBigSpan{`0},System.Span{`1})">
+            <summary>
+            Initializes the <see cref="T:System.Runtime.InteropServices.Marshalling.ReadOnlySpanMarshaller`2.ManagedToUnmanagedIn"/> marshaller.
+            </summary>
+            <param name="managed">The span to be marshalled.</param>
+            <param name="buffer">The buffer that may be used for marshalling.</param>
+            <remarks>
+            The <paramref name="buffer"/> must not be movable - that is, it should not be
+            on the managed heap or it should be pinned.
+            </remarks>
+        </member>
+        <member name="M:System.Runtime.InteropServices.Marshalling.ReadOnlyBigSpanMarshaller`2.ManagedToUnmanagedIn.GetManagedValuesSource">
+            <summary>
+            Returns a span that points to the memory where the managed values of the array are stored.
+            </summary>
+            <returns>A span over managed values of the array.</returns>
+        </member>
+        <member name="M:System.Runtime.InteropServices.Marshalling.ReadOnlyBigSpanMarshaller`2.ManagedToUnmanagedIn.GetUnmanagedValuesDestination">
+            <summary>
+            Returns a span that points to the memory where the unmanaged values of the array should be stored.
+            </summary>
+            <returns>A span where unmanaged values of the array should be stored.</returns>
+        </member>
+        <member name="M:System.Runtime.InteropServices.Marshalling.ReadOnlyBigSpanMarshaller`2.ManagedToUnmanagedIn.GetPinnableReference">
+            <summary>
+            Returns a reference to the marshalled array.
+            </summary>
+        </member>
+        <member name="M:System.Runtime.InteropServices.Marshalling.ReadOnlyBigSpanMarshaller`2.ManagedToUnmanagedIn.ToUnmanaged">
+            <summary>
+            Returns the unmanaged value representing the array.
+            </summary>
+        </member>
+        <member name="M:System.Runtime.InteropServices.Marshalling.ReadOnlyBigSpanMarshaller`2.ManagedToUnmanagedIn.Free">
+            <summary>
+            Frees resources.
+            </summary>
+        </member>
+        <member name="M:System.Runtime.InteropServices.Marshalling.ReadOnlyBigSpanMarshaller`2.ManagedToUnmanagedIn.GetPinnableReference(UltimateOrb.ReadOnlyBigSpan{`0})">
+            <summary>
+            Pins the managed span to a pointer to pass directly to unmanaged code.
+            </summary>
+            <param name="managed">The managed span.</param>
+            <returns>A reference that can be pinned and directly passed to unmanaged code.</returns>
+        </member>
+        <member name="T:System.Runtime.InteropServices.Marshalling.ReadOnlyBigSpanMarshaller`2.ManagedToUnmanagedOut">
+            <summary>
+            Supports marshalling from unmanaged to managed in a call from managed code to unmanaged code. For example, return values and `out` parameters in P/Invoke methods.
+            </summary>
+        </member>
+        <member name="M:System.Runtime.InteropServices.Marshalling.ReadOnlyBigSpanMarshaller`2.ManagedToUnmanagedOut.FromUnmanaged(`1*)">
+            <summary>
+            Initializes the <see cref="T:System.Runtime.InteropServices.Marshalling.ReadOnlySpanMarshaller`2.ManagedToUnmanagedOut"/> marshaller.
+            </summary>
+            <param name="unmanaged">A pointer to the array to be unmarshalled from native to managed.</param>
+        </member>
+        <member name="M:System.Runtime.InteropServices.Marshalling.ReadOnlyBigSpanMarshaller`2.ManagedToUnmanagedOut.ToManaged">
+            <summary>
+            Returns the managed value representing the native array.
+            </summary>
+            <returns>A span over managed values of the array.</returns>
+        </member>
+        <member name="M:System.Runtime.InteropServices.Marshalling.ReadOnlyBigSpanMarshaller`2.ManagedToUnmanagedOut.GetUnmanagedValuesSource(System.Int32)">
+            <summary>
+            Returns a span that points to the memory where the unmanaged elements of the array are stored.
+            </summary>
+            <param name="numElements">The number of elements in the array.</param>
+            <returns>A span over unmanaged values of the array.</returns>
+        </member>
+        <member name="M:System.Runtime.InteropServices.Marshalling.ReadOnlyBigSpanMarshaller`2.ManagedToUnmanagedOut.GetManagedValuesDestination(System.Int32)">
+            <summary>
+            Returns a span that points to the memory where the managed elements of the array should be stored.
+            </summary>
+            <param name="numElements">The number of elements in the array.</param>
+            <returns>A span where managed values of the array should be stored.</returns>
+        </member>
+        <member name="M:System.Runtime.InteropServices.Marshalling.ReadOnlyBigSpanMarshaller`2.ManagedToUnmanagedOut.Free">
+            <summary>
+            Frees resources.
+            </summary>
         </member>
         <member name="T:System.Runtime.CompilerServices.IgnoresAccessChecksToAttribute">
             <summary>

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
@@ -7,7 +8,8 @@ using System.Threading.Tasks;
 
 namespace UltimateOrb.Internal {
 
-    static class ThrowHelper {
+    [StackTraceHidden]
+    static partial class ThrowHelper {
 
         [DoesNotReturnAttribute()]
         public static NotSupportedException ThrowNotSupportedException_readonly() {

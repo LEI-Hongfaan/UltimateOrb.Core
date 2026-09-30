@@ -973,6 +973,17 @@ namespace UltimateOrb.Numerics {
             59, 60, 60, 60, 61, 61, 61, 62, 62, 62, 63, 63, 63,
         ];
 
+        static ReadOnlySpan<Byte> Indh => [
+    0, 0, 1, 1, 2, 2, 3, 4, 5, 5, 5, 6, 6, 7, 8, 9, 10, 10, 10, 11, 11,
+  11, 12, 12, 13, 14, 14, 15, 16, 16, 17, 18, 19, 20, 20, 20, 21, 21,
+  21, 22, 22, 23, 23, 23, 24, 24, 25, 25, 26, 26, 27, 27, 28, 29, 29,
+  30, 31, 31, 32, 33, 34, 34, 35, 36, 37, 38, 38, 38, 38, 39, 39, 39,
+  39, 40, 40, 40, 41, 41, 41, 41, 42, 42, 42, 43, 43, 43, 44, 44, 44,
+  45, 45, 46, 46, 46, 47, 47, 47, 48, 48, 49, 49, 49, 50, 50, 51, 51,
+  52, 52, 53, 53, 54, 54, 54, 55, 55, 56, 57, 57, 58, 58, 59, 59, 60,
+  60, 61, 62, 62, 63
+];
+
         // a 15 bit approximation of tan(i*pi/4/64)
         internal static ReadOnlySpan<UInt16> Tn => [
             0, 0x192, 0x324, 0x4b7, 0x64a, 0x7dd, 0x971, 0xb06, 0xc9b, 0xe32,
@@ -1821,6 +1832,671 @@ namespace UltimateOrb.Numerics {
 
                 result_hi = (UInt64)(result >> 64);
                 return (UInt64)result;
+            }
+        }
+    }
+}
+
+
+
+
+namespace UltimateOrb.Numerics {
+    using Unsafe = System.Runtime.CompilerServices.Unsafe;
+
+#if NET8_0_OR_GREATER
+    using Int128 = System.Int128;
+    using UInt128 = System.UInt128;
+#endif
+
+    partial class Binary128Arithmetic {
+
+        public static UInt128 Atan(UInt128 y, MidpointRounding rounding) => AtanCore(y, rounding);
+        public static UInt128 Atan(UInt128 y) => AtanCore(y, MidpointRounding.ToEven);
+
+        public static UInt64 Atan(UInt64 y_lo, UInt64 y_hi,
+            MidpointRounding rounding, out UInt64 result_hi) {
+            unchecked {
+                UInt128 r = AtanCore(((UInt128)y_hi << 64) | y_lo, rounding);
+                result_hi = (UInt64)(r >> 64);
+                return (UInt64)r;
+            }
+        }
+
+        public static UInt64 Atan(UInt64 y_lo, UInt64 y_hi, out UInt64 result_hi)
+            => Atan(y_lo, y_hi, MidpointRounding.ToEven, out result_hi);
+    }
+
+
+    partial class Binary128Arithmetic {
+
+        internal static ReadOnlySpan<InlineArray6<UInt64>> Pio2 => MemoryMarshal.CreateReadOnlySpan(
+            ref Unsafe.As<UInt64, InlineArray6<UInt64>>(ref MemoryMarshal.GetReference(PIO2_384_flat)), 1);
+
+        // --- C: 0x1.921fb54442d18469898cc51701b8p+0q — literal π/2 as u128 ---
+        const UInt64 PiOver2_hi = 0x3FFF921FB54442D1UL;
+        const UInt64 PiOver2_lo = 0x849898CC51701B80UL;
+    }
+
+    partial class Binary128Arithmetic {
+
+        // ------------------------------------------------------------------
+        // Special-case handler for Atan(y) — the analogue of AsAtan2Special
+        // with x = +1.0 (so `xsgn = 0` and `x` is never NaN/Inf).
+        // Reachable only when y is sNaN/qNaN/±Inf (from AtanCore's early
+        // test) or y == ±0 (from the b == 0 fallback in AtanCore).
+        // ------------------------------------------------------------------
+        [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.AggressiveOptimization)]
+        static UInt128 AsAtanSpecial(UInt128 y, MidpointRounding rm) {
+            unchecked {
+                const UInt64 smsk = (UInt64)1 << 63;
+
+                UInt64 iyLo = (UInt64)y;
+                UInt64 iyHi = (UInt64)(y >> 64);
+                uint ysgn = (uint)(iyHi >> 63);
+
+                iyHi &= ~smsk;
+                UInt128 iyAbs = ((UInt128)iyHi << 64) | iyLo;
+
+                int ynan = GetClass(iyAbs);
+
+                UInt128 outVal;
+
+                if (ynan == 2) {
+                    // signaling NaN
+                    RaiseExceptionFlagsDummy(FloatingPointExceptionFlags.Invalid);
+                    return GetNaN(y);
+                } else if (ynan == 3) {
+                    // quiet NaN — pass through
+                    return y;
+                } else if (ynan == 1) {
+                    // ±Inf  →  ±π/2
+                    outVal = RsAtan2Special[4];
+                } else if (iyAbs == 0) {
+                    // ±0  →  ±0  (sign of y)
+                    outVal = RsAtan2Special[0];
+                } else {
+                    // Unreachable when x = +1.0; defensive fallback.
+                    throw null!;
+                }
+
+                UInt64 outLo = (UInt64)outVal;
+                UInt64 outHi = (UInt64)(outVal >> 64);
+
+                if (outHi != 0) {
+                    // Renormalize the selected constant so MSB lands in bit 63 of outHi.
+                    int k = (int)UInt64.LeadingZeroCount(outHi);
+
+                    UInt64 rnd = (outLo >> (14 - k)) & 1;
+                    UInt64 frac = outLo << (49 + k);
+                    int xn = 0x4000 - k;
+
+                    outLo = (outLo >> (15 - k)) | (outHi << (49 + k));
+                    outHi = outHi >> (15 - k);
+
+                    // Directed rounding override (same convention as AsAtan2Special).
+                    if (!IsNearest(rm)) {
+                        bool isUp = rm == MidpointRounding.ToPositiveInfinity;
+                        bool isDown = rm == MidpointRounding.ToNegativeInfinity;
+                        UInt64 incUp = (ysgn == 0) ? 1UL : 0UL;
+                        UInt64 incDown = (ysgn != 0) ? 1UL : 0UL;
+                        rnd = incUp * (isUp ? 1UL : 0UL) + incDown * (isDown ? 1UL : 0UL);
+                    }
+
+                    UInt64 rndBit = rnd * (frac != 0 ? 1UL : 0UL);
+                    UInt128 dout = ((UInt128)(((UInt64)xn << 48) | ((UInt64)ysgn << 63)) << 64)
+                                 | rndBit;
+
+                    outVal = ((UInt128)outHi << 64) | outLo;
+                    outVal += dout;
+
+                    if (frac != 0)
+                        RaiseExceptionFlagsDummy(FloatingPointExceptionFlags.Inexact);
+                } else {
+                    // ±0 (RsAtan2Special[0]) → signed zero.
+                    outVal = (UInt128)((UInt64)ysgn << 63) << 64;
+                }
+
+                return outVal;
+            }
+        }
+
+        // ------------------------------------------------------------------
+        // AtanCore — Atan2Core specialized with x = +1.0.
+        //
+        // Derived simplifications applied (relative to Atan2Core):
+        //   * `xsgn` is identically 0.
+        //   * The early bail-out only tests y (x = 1.0 never triggers it).
+        //   * `if (xn == 0)` inside the subnormal-normalization step is dead
+        //     code:  a is either One (biased exp 0x3FFF) or |y| > 1 (biased
+        //     exp ≥ 1).
+        //   * `g ^ xsgn` ⇒ `g`,  `qidx` ⇒ `(g != 0) ? 1 : 0`,
+        //     `(isct | g) | xsgn` ⇒ `(isct | g)`.
+        //   * `AsAtan2Accurate(y, One, rm)` is used unchanged for the
+        //     accurate-recompute slow path.
+        // ------------------------------------------------------------------
+        static UInt128 AtanCore(UInt128 y, MidpointRounding rm) {
+            unchecked {
+                const UInt64 smsk = 1UL << 63;
+                const UInt64 inf = (UInt64)0x7FFF << 48;
+
+                UInt64 yLo = (UInt64)y;
+                UInt64 yHi = (UInt64)(y >> 64);
+
+                UInt64 ysgn = yHi & smsk;   // 0 or 0x8000_0000_0000_0000
+                yHi &= ~smsk;
+
+                if (Misc.Unlikely(yHi >= inf))
+                    return AsAtanSpecial(y, rm);
+
+                UInt128 yAbs = ((UInt128)yHi << 64) | yLo;
+
+                // g = -1  ⇔  |y| > 1.0   (compare |y| against One as bit patterns)
+                Int128 dab = unchecked((Int128)ONE) - unchecked((Int128)yAbs);
+                Int64 g = (Int64)(dab >> 127);    // 0 or -1
+                dab &= (Int128)g;
+                UInt128 aVal = ONE - unchecked((UInt128)dab);
+                UInt128 bVal = yAbs + unchecked((UInt128)dab);
+
+                UInt64 aHi = (UInt64)(aVal >> 64), aLo = (UInt64)aVal;
+                UInt64 bHi = (UInt64)(bVal >> 64), bLo = (UInt64)bVal;
+
+                int xn = (int)(aHi >> 48);
+                int yn = (int)(bHi >> 48);
+
+                // Only `b` can be subnormal here — see header comment.
+                // If b == 0 then y == ±0, route to AsAtanSpecial.
+                if (Misc.Unlikely(yn == 0)) {
+                    int ns = -15;
+                    if (bHi != 0) ns += (int)BitOperations.LeadingZeroCount(bHi);
+                    else if (bLo != 0) ns += (int)BitOperations.LeadingZeroCount(bLo) + 64;
+                    else return AsAtanSpecial(y, rm);   // y == ±0
+
+                    yn = 1 - ns;
+                    bLo = DoubleArithmetic.ShiftLeft(bLo, bHi, ns, out bHi);
+                    bVal = ((UInt128)bHi << 64) | bLo;
+                }
+
+                int dn = xn - yn;
+
+                aHi = (aHi & 0x0000FFFFFFFFFFFFUL) | (1UL << 48);
+                bHi = (bHi & 0x0000FFFFFFFFFFFFUL) | (1UL << 48);
+                aVal = ((UInt128)aHi << 64) | aLo;
+                bVal = ((UInt128)bHi << 64) | bLo;
+
+                // Approximate reciprocal step to select the tangent index
+                int inda = (int)((aHi >> 41) & 127);
+                long rcpx = (2L + (inda == 0 ? 1 : 0) + (inda < 43 ? 1 : 0)) << 8
+                          | (long)Rcp[inda];
+                long kL = (long)(((bHi >> 10) * (UInt64)rcpx) >> 41);
+                if (Misc.Likely(dn < 64)) kL >>= dn; else kL = 0;
+
+                int isct = Ind[(int)kL];
+                if (dn < 64 && (aHi >> 15) * Tn[isct + 1] < (bHi >> dn)) isct++;
+
+                UInt128 kn, kd;
+
+                if (isct == 0) {
+                    kn = bVal << 15;
+                    kd = aVal << 15;
+                } else {
+                    if (Misc.Unlikely(isct == 64)) isct = 63;
+                    kn = (bVal << 15) - ((aVal * Tn[isct]) << dn);
+                    if (Misc.Unlikely((kn >> 127) != 0))
+                        kn = (bVal << 15) - ((aVal * Tn[--isct]) << dn);
+
+                    UInt64 knh = (UInt64)(kn >> 64);
+                    UInt64 knl = (UInt64)kn;
+                    int nzn = kn != 0
+                        ? (Misc.Likely(knh != 0) ? (int)BitOperations.LeadingZeroCount(knh)
+                                                 : 64 + (int)BitOperations.LeadingZeroCount(knl))
+                        : 0;
+                    kn <<= nzn;
+
+                    int sl = 15 + dn, sr = 49 - dn;
+                    InlineArray3<UInt64> kd3 = default;
+                    kd3[2] = aHi >> sr;
+                    kd3[1] = (aLo >> sr) | (aHi << sl);
+                    kd3[0] = aLo << sl;
+
+                    bVal *= Tn[isct];
+                    bHi = (UInt64)(bVal >> 64);
+                    bLo = (UInt64)bVal;
+                    AddUnchecked(out kd3, in kd3, bVal);
+
+                    UInt64 kdh = kd3[2];
+                    int nzd, md;
+                    if (kdh != 0) {
+                        nzd = (int)BitOperations.LeadingZeroCount(kdh);
+                        md = 64 - nzd;
+                        UInt64 hi = (kdh << nzd) | (kd3[1] >> md);
+                        UInt64 lo = (kd3[1] << nzd) | (kd3[0] >> md);
+                        kd = ((UInt128)hi << 64) | lo;
+                    } else {
+                        kdh = kd3[1];
+                        nzd = (int)BitOperations.LeadingZeroCount(kdh);
+                        md = (~nzd) & 63;
+                        UInt64 hi = (kdh << nzd) | (kd3[0] >> 1 >> md);
+                        UInt64 lo = kd3[0] << nzd;
+                        kd = ((UInt128)hi << 64) | lo;
+                        nzd += 64;
+                    }
+                    dn = nzn - nzd + 64;
+                }
+
+                UInt128 R = ReciprocalU(kd);
+                UInt128 T = MultiplyHighApproximate(kn, R);
+                UInt128 T2 = SquareHighApproximate(T);
+                int dn2 = 2 * dn - 12;
+                if (Misc.Likely(dn2 < 128)) T2 >>= dn2; else T2 = 0;
+
+                // Polynomial: f = T - T·T2·P(T2), P uses c[5..1]
+                UInt64 t2h = (UInt64)(T2 >> 64);
+                UInt64 fl = CAtan2Core_flat[8 * 2 + 0];
+                fl = CAtan2Core_flat[7 * 2 + 0] - MultiplyHigh(t2h, fl);
+                fl = CAtan2Core_flat[6 * 2 + 0] - MultiplyHigh(t2h, fl);
+
+                UInt128 f = ((UInt128)CAtan2Core_flat[5 * 2 + 1] << 64)
+                          | (CAtan2Core_flat[5 * 2 + 0] - t2h - MultiplyHigh(t2h, fl));
+                for (int ii = 4; ii >= 1; ii--) {
+                    UInt128 ci = ((UInt128)CAtan2Core_flat[ii * 2 + 1] << 64)
+                               | CAtan2Core_flat[ii * 2 + 0];
+                    f = ci - MultiplyHighApproximate(T2, f);
+                }
+                f = MultiplyHighApproximate(T2, f);
+                f = MultiplyHighApproximate(T, f);
+                f = T - f;
+
+                UInt128 v;
+                UInt64 rnd;
+
+                if (Misc.Likely(((Int64)isct | g) != 0)) {
+                    // Path through 3-word fixup + phase offset
+                    InlineArray3<UInt64> f3 = default;
+                    f3[0] = 0;
+                    f3[1] = (UInt64)f;
+                    f3[2] = (UInt64)(f >> 64);
+
+                    dn++;
+                    if (Misc.Likely(dn < 64)) {
+                        f3[0] = f3[1] << (64 - dn);
+                        f3[1] = (f3[1] >> dn) | (f3[2] << (64 - dn));
+                        f3[2] = f3[2] >> dn;
+                    } else {
+                        ShiftRightUnsignedFull(MemoryMarshal.CreateSpan(ref f3[0], 3), dn);
+                    }
+
+                    AddUnchecked(out f3, in f3, in Unsafe.As<UInt64, InlineArray3<UInt64>>(
+                        ref Unsafe.AsRef(in Phi0[isct][3])));
+
+                    // msk = g ^ xsgn, with xsgn = 0  ⇒  msk = g
+                    Int64 msk = g;
+                    f3[0] ^= (UInt64)msk;
+                    f3[1] ^= (UInt64)msk;
+                    f3[2] ^= (UInt64)msk;
+
+                    // qidx = (g != 0 ? 1 : 0) + ((g == 0 && xsgn != 0) ? 2 : 0)
+                    //      = (g != 0 ? 1 : 0)
+                    int qidx = (g != 0) ? 1 : 0;
+                    AddUnchecked(out f3, in f3, in Unsafe.As<UInt64, InlineArray3<UInt64>>(
+                        ref Unsafe.AsRef(in Qoff[qidx][3])));
+
+                    int kk = (int)BitOperations.LeadingZeroCount(f3[2]);
+                    rnd = (f3[1] >> (14 - kk)) & 1;
+
+                    UInt128 t = ((UInt128)f3[1] << 64) | f3[0];
+                    const UInt64 eps = 0xCA2339C0EBEDFA4UL;
+                    t += eps;
+                    UInt64 th = (UInt64)(t >> 64);
+                    UInt64 tl = (UInt64)t;
+                    th &= (1UL << (15 - kk)) - 1;
+                    th ^= (UInt64)(IsNearest(rm) ? 1UL : 0UL) << (14 - kk);
+                    if (th == 0 && tl < 0x194467381D7DBF48UL)
+                        return AsAtanAccurate(y, rm);
+
+                    xn = 0x3FFF - kk;
+                    UInt64 vHi = f3[2] >> (15 - kk);
+                    UInt64 vLo = (f3[1] >> (15 - kk)) | (f3[2] << (49 + kk));
+                    v = ((UInt128)vHi << 64) | vLo;
+                } else {
+                    // isct == 0 and g == 0  →  |y| ≤ 1, tiny sector
+                    v = f;
+                    UInt64 vHi = (UInt64)(v >> 64);
+                    UInt64 vLo = (UInt64)v;
+                    int kk = (int)BitOperations.LeadingZeroCount(vHi);
+                    xn = 0x3FFE - dn - kk;
+                    if (xn > 0) {
+                        UInt64 tl = (vLo + 6) & (~0UL >> (49 + kk));
+                        tl ^= (UInt64)(IsNearest(rm) ? 1UL : 0UL) << (14 - kk);
+                        if (Misc.Unlikely(tl <= 15)) return AsAtanAccurate(y, rm);
+                        rnd = (vLo >> (14 - kk)) & 1;
+                        vLo = (vLo >> (15 - kk)) | (vHi << (49 + kk));
+                        vHi = vHi >> (15 - kk);
+                        v = ((UInt128)vHi << 64) | vLo;
+                    } else {
+                        xn = 0;
+                        kk = 15 - 0x3FFE + dn;
+                        if (kk < 128) {
+                            UInt128 t = (v + 6) & (((UInt128)1 << kk) - 1);
+                            t ^= (UInt128)(IsNearest(rm) ? 1UL : 0UL) << (kk - 1);
+                            if (Misc.Unlikely(t <= 15)) return AsAtanAccurate(y, rm);
+                            rnd = (UInt64)((v >> (kk - 1)) & 1);
+                            v >>= kk;
+                        } else {
+                            rnd = (kk == 128) ? (UInt64)(v >> 127) : 0;
+                            v = 0;
+                        }
+                    }
+                }
+
+                if (Misc.Unlikely(!IsNearest(rm))) {
+                    bool isUp = rm == MidpointRounding.ToPositiveInfinity;
+                    bool isDown = rm == MidpointRounding.ToNegativeInfinity;
+                    UInt64 incUp = (ysgn == 0) ? 1UL : 0UL;
+                    UInt64 incDown = (ysgn != 0) ? 1UL : 0UL;
+                    rnd = incUp * (isUp ? 1UL : 0UL) + incDown * (isDown ? 1UL : 0UL);
+                }
+
+                UInt128 dv = ((UInt128)((UInt64)xn << 48) << 64) | rnd;
+                v += dv;
+
+                UInt64 vHiF = (UInt64)(v >> 64);
+                if (vHiF < (1UL << 48))
+                    RaiseExceptionFlagsDummy(FloatingPointExceptionFlags.Underflow);
+
+                vHiF |= ysgn;
+                v = ((UInt128)vHiF << 64) | (UInt64)v;
+
+                RaiseExceptionFlagsDummy(FloatingPointExceptionFlags.Inexact);
+                return v;
+            }
+        }
+
+    }
+
+    partial class Binary128Arithmetic {
+
+        // ------------------------------------------------------------------
+        // AsAtanAccurate — AsAtan2Accurate specialized with x = +1.0.
+        //
+        // Simplifications applied:
+        //   * xsgn ≡ 0, xAbs = One.  Consequently:
+        //       - g = -1 ⇔ |y| > 1;   g = 0 ⇔ |y| ≤ 1.
+        //       - a = max(One, |y|), b = min(One, |y|).
+        //       - The inner `if (xn == 0)` renormalization never fires.
+        //       - qidx  = (g != 0) ? 1 : 0.
+        //       - mask  = g ^ -(Int64)xsgn = g.
+        //       - The `(isct | g | xsgn) != 0` dispatch becomes (isct | g).
+        //   * x = One is never NaN/Inf, so the early `yn == 0` path can
+        //     never itself recurse into specials.
+        // ------------------------------------------------------------------
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        static UInt128 AsAtanAccurate(UInt128 y, MidpointRounding rm) {
+            unchecked {
+                const UInt64 smsk = 1UL << 63;
+
+                UInt64 yHi = (UInt64)(y >> 64), yLo = (UInt64)y;
+
+                UInt64 ysgn = yHi & smsk;      // 0 or 0x8000_0000_0000_0000
+                yHi &= ~smsk;
+
+                UInt128 yAbs = ((UInt128)yHi << 64) | yLo;
+
+                // g = -1 ⇔ |y| > One;   aVal = max(One, |y|);  bVal = min(One, |y|).
+                Int128 dab = unchecked((Int128)ONE) - unchecked((Int128)yAbs);
+                Int64 g = (Int64)(dab >> 127);       // 0 or -1
+                dab &= (Int128)g;
+                UInt128 aVal = ONE - unchecked((UInt128)dab);
+                UInt128 bVal = yAbs + unchecked((UInt128)dab);
+
+                UInt64 aHi = (UInt64)(aVal >> 64), aLo = (UInt64)aVal;
+                UInt64 bHi = (UInt64)(bVal >> 64), bLo = (UInt64)bVal;
+
+                int xn = (int)(aHi >> 48);
+                int yn = (int)(bHi >> 48);
+
+                // Only `b` (== |y|, only possible when g == 0) can be subnormal.
+                // When g == -1, b == One, so this block is skipped entirely.
+                if (Misc.Unlikely(yn == 0)) {
+                    int ns = -15;
+                    if (bHi != 0) ns += (int)BitOperations.LeadingZeroCount(bHi);
+                    else ns += (int)BitOperations.LeadingZeroCount(bLo) + 64;
+                    yn = 1 - ns;
+                    bLo = DoubleArithmetic.ShiftLeft(bLo, bHi, ns, out bHi);
+                    bVal = ((UInt128)bHi << 64) | bLo;
+                    // a == One here, so xn == 0x3FFF ≠ 0 — no renormalization.
+                }
+
+                int dn = xn - yn;
+                aHi = (aHi & 0x0000FFFFFFFFFFFFUL) | (1UL << 48);
+                bHi = (bHi & 0x0000FFFFFFFFFFFFUL) | (1UL << 48);
+                aVal = ((UInt128)aHi << 64) | aLo;
+                bVal = ((UInt128)bHi << 64) | bLo;
+
+                int inda = (int)((aHi >> 41) & 127);
+                long rcpx = (2L + (inda == 0 ? 1 : 0) + (inda < 43 ? 1 : 0)) << 8
+                          | (long)Rcp[inda];
+                long kL = (long)(((bHi >> 10) * (UInt64)rcpx) >> 41);
+                if (Misc.Likely(dn < 64)) kL >>= dn; else kL = 0;
+
+                int isct = Ind[(int)kL];
+                if (dn < 64 && (aHi >> 15) * Tn[isct + 1] < (bHi >> dn)) isct++;
+
+                UInt128 kn;
+                InlineArray3<UInt64> kd = default;
+
+                if (isct == 0) {
+                    kn = bVal << 15;
+                    aVal <<= 15;
+                    aHi = (UInt64)(aVal >> 64);
+                    aLo = (UInt64)aVal;
+                    kd[2] = aHi;
+                    kd[1] = aLo;
+                    kd[0] = 0;
+                } else {
+                    if (isct == 64) isct = 63;
+                    kn = (bVal << 15) - ((aVal * Tn[isct]) << dn);
+                    if (Misc.Unlikely((kn >> 127) != 0))
+                        kn = (bVal << 15) - ((aVal * Tn[--isct]) << dn);
+
+                    UInt64 knh = (UInt64)(kn >> 64);
+                    UInt64 knl = (UInt64)kn;
+                    int nzn = kn != 0
+                        ? (knh != 0 ? (int)BitOperations.LeadingZeroCount(knh)
+                                    : 64 + (int)BitOperations.LeadingZeroCount(knl))
+                        : 0;
+                    kn <<= nzn;
+
+                    int sl = 15 + dn, sr = 64 - sl;
+                    kd[2] = aHi >> sr;
+                    kd[1] = (aLo >> sr) | (aHi << sl);
+                    kd[0] = aLo << sl;
+
+                    bVal *= Tn[isct];
+                    AddUnchecked(out kd, in kd, bVal);
+
+                    int nzd = 0;
+                    if (kd[2] == 0) { kd[2] = kd[1]; kd[1] = kd[0]; kd[0] = 0; nzd = 64; }
+                    sl = (int)BitOperations.LeadingZeroCount(kd[2]);
+                    sr = (~sl) & 63;
+                    nzd += sl;
+                    kd[2] = (kd[2] << sl) | (kd[1] >> 1 >> sr);
+                    kd[1] = (kd[1] << sl) | (kd[0] >> 1 >> sr);
+                    kd[0] = kd[0] << sl;
+                    dn = nzn - nzd + 64;
+                }
+
+                UInt128 R = ReciprocalU(((UInt128)kd[2] << 64) | kd[1]);
+
+                InlineArray6<UInt64> r = default;
+                r[4] = (UInt64)R;
+                r[5] = (UInt64)(R >> 64);
+
+                InlineArray2<UInt64> rTop = default;
+                rTop[0] = r[4]; rTop[1] = r[5];
+                InlineArray5<UInt64> H;
+                MultiplyUnsigned(out H, in rTop, in kd);
+
+                InlineArray3<UInt64> sH = default;
+                sH[0] = (H[0] >> 58) | (H[1] << 6);
+                sH[1] = (H[1] >> 58) | (H[2] << 6);
+                sH[2] = (H[2] >> 58) | (H[3] << 6);
+
+                InlineArray6<UInt64> H2;
+                SquareSigned(out H2, in sH);
+
+                ShiftLeftUnsignedFull(MemoryMarshal.CreateSpan(ref H[0], 5), 75);
+
+                nuint cc;
+                H[0] = SubtractWithBorrow(H[0], H2[2], 0, out cc);
+                H[1] = SubtractWithBorrow(H[1], H2[3], cc, out cc);
+                H[2] = SubtractWithBorrow(H[2], H2[4], cc, out cc);
+                H[3] = SubtractWithBorrow(H[3], 0, cc, out cc);
+                H[4] = SubtractWithBorrow(H[4], 0, cc, out cc);
+
+                InlineArray7<UInt64> dR = default;
+                MultiplyUnsigned(out dR, in H, in rTop);
+
+                if ((H[4] >> 63) != 0) {
+                    dR[5] = SubtractWithBorrow(dR[5], r[4], 0, out cc);
+                    dR[6] = SubtractWithBorrow(dR[6], r[5], cc, out cc);
+                }
+
+                ShiftRightSignedFull(MemoryMarshal.CreateSpan(ref dR[0], 7), 10);
+
+                r[0] = SubtractWithBorrow(r[0], dR[2], 0, out cc);
+                r[1] = SubtractWithBorrow(r[1], dR[3], cc, out cc);
+                r[2] = SubtractWithBorrow(r[2], dR[4], cc, out cc);
+                r[3] = SubtractWithBorrow(r[3], dR[5], cc, out cc);
+                r[4] = SubtractWithBorrow(r[4], dR[6], cc, out cc);
+                r[5] = SubtractWithBorrow(r[5], (UInt64)((Int64)dR[6] >> 63), cc, out cc);
+
+                InlineArray2<UInt64> nn = default;
+                nn[0] = (UInt64)kn;
+                nn[1] = (UInt64)(kn >> 64);
+                InlineArray8<UInt64> t = default;
+                MultiplyUnsigned(out t, in r, in nn);
+
+                InlineArray6<UInt64> tLo = default;
+                tLo[0] = t[2]; tLo[1] = t[3]; tLo[2] = t[4];
+                tLo[3] = t[5]; tLo[4] = t[6]; tLo[5] = t[7];
+                InlineArray6<UInt64> t2 = default;
+                SquareHighUnsignedApproximate(out t2, in tLo);
+                int dn2 = 2 * dn - 14;
+                ShiftRightUnsignedFull(MemoryMarshal.CreateSpan(ref t2[0], 6), dn2);
+
+                ReadOnlySpan<UInt64> cp = CpAtan2Acc;
+                InlineArray6<UInt64> fp = default;
+
+                int ck = 0;
+                fp[0] = cp[0];
+                fp[1] = cp[1];
+
+                // 2-word phase
+                for (int i = 25; i > 20; i--) {
+                    ck += 2;
+                    ref InlineArray2<UInt64> fp_ = ref Unsafe.As<UInt64, InlineArray2<UInt64>>(ref Unsafe.AsRef(in fp[0]));
+                    MultiplyHighUnsignedApproximate(out fp_, fp_, Unsafe.As<UInt64, InlineArray2<UInt64>>(ref Unsafe.AsRef(in t2[4])));
+                    SubtractUnchecked(out fp_, Unsafe.As<UInt64, InlineArray2<UInt64>>(ref Unsafe.AsRef(in cp[ck])), fp_);
+                }
+                fp[2] = cp[ck + 2];
+
+                // 3-word phase
+                for (int i = 20; i > 15; i--) {
+                    ck += 3;
+                    ref InlineArray3<UInt64> fp_ = ref Unsafe.As<UInt64, InlineArray3<UInt64>>(ref Unsafe.AsRef(in fp[0]));
+                    MultiplyHighUnsignedApproximate(out fp_, in fp_, Unsafe.As<UInt64, InlineArray3<UInt64>>(ref Unsafe.AsRef(in t2[3])));
+                    SubtractUnchecked(out fp_, Unsafe.As<UInt64, InlineArray3<UInt64>>(ref Unsafe.AsRef(in cp[ck])), fp_);
+                }
+                fp[3] = cp[ck + 3];
+
+                // 4-word phase
+                for (int i = 15; i > 10; i--) {
+                    ck += 4;
+                    ref InlineArray4<UInt64> fp_ = ref Unsafe.As<UInt64, InlineArray4<UInt64>>(ref Unsafe.AsRef(in fp[0]));
+                    MultiplyHighUnsignedApproximate(out fp_, in fp_, Unsafe.As<UInt64, InlineArray4<UInt64>>(ref Unsafe.AsRef(in t2[2])));
+                    SubtractUnchecked(out fp_, Unsafe.As<UInt64, InlineArray4<UInt64>>(ref Unsafe.AsRef(in cp[ck])), fp_);
+                }
+                fp[4] = cp[ck + 4];
+
+                // 5-word phase
+                for (int i = 10; i > 5; i--) {
+                    ck += 5;
+                    ref InlineArray5<UInt64> fp_ = ref Unsafe.As<UInt64, InlineArray5<UInt64>>(ref Unsafe.AsRef(in fp[0]));
+                    MultiplyHighUnsignedApproximate(out fp_, in fp_, Unsafe.As<UInt64, InlineArray5<UInt64>>(ref Unsafe.AsRef(in t2[1])));
+                    SubtractUnchecked(out fp_, Unsafe.As<UInt64, InlineArray5<UInt64>>(ref Unsafe.AsRef(in cp[ck])), fp_);
+                }
+                fp[5] = cp[ck + 5];
+
+                // 6-word phase
+                for (int i = 5; i > 1; i--) {
+                    ck += 6;
+                    MultiplyHighUnsignedApproximate(out fp, in fp, in t2);
+                    SubtractUnchecked(out fp, in Unsafe.As<UInt64, InlineArray6<UInt64>>(ref Unsafe.AsRef(in cp[ck])), in fp);
+                }
+                MultiplyHighUnsignedApproximate(out fp, in fp, in t2);
+                MultiplyHighUnsignedApproximate(out fp, in tLo, in fp);
+                SubtractUnchecked(out fp, in tLo, in fp);
+
+                // xsgn == 0  ⇒  dispatch on (isct | g).
+                if (((Int64)isct | g) != 0) {
+                    ShiftRightUnsignedFull(MemoryMarshal.CreateSpan(ref fp[0], 6), dn + 1);
+                    AddUnchecked(out fp, in Phi0[isct], in fp);
+                    // mask = g ^ -(Int64)xsgn = g ^ 0 = g.
+                    Int64 msk = g;
+                    fp[0] ^= (UInt64)msk;
+                    fp[1] ^= (UInt64)msk;
+                    fp[2] ^= (UInt64)msk;
+                    fp[3] ^= (UInt64)msk;
+                    fp[4] ^= (UInt64)msk;
+                    fp[5] ^= (UInt64)msk;
+                    // qidx = (g != 0 ? 1 : 0) + 0.
+                    int qidx = (g != 0) ? 1 : 0;
+                    AddUnchecked(out fp, in Qoff[qidx], in fp);
+                    dn = -1;
+                }
+
+                UInt128 v = U128(fp[5], fp[4]);
+                System.Diagnostics.Debug.Assert(BitOperations.LeadingZeroCount(fp[5]) == LeadingZeroCount(v));
+                int kk = (int)BitOperations.LeadingZeroCount(fp[5]);
+                v <<= kk;
+                xn = 0x3FFE - dn - kk;
+
+                UInt64 rnd;
+                if (xn > 0) {
+                    rnd = ((nuint)v >> 14) & 1;
+                    v >>= 15;
+                } else {
+                    kk = 15 - xn;
+                    if (kk < 128) {
+                        rnd = (UInt64)((v >> (kk - 1)) & 1);
+                        v >>= kk;
+                    } else {
+                        rnd = (kk == 128) ? (UInt64)(v >> 127) : 0;
+                        v = 0;
+                    }
+                    xn = 0;
+                }
+
+                if (Misc.Unlikely(!IsNearest(rm))) {
+                    bool isUp = rm == MidpointRounding.ToPositiveInfinity;
+                    bool isDown = rm == MidpointRounding.ToNegativeInfinity;
+                    UInt64 incUp = (ysgn == 0) ? 1UL : 0UL;
+                    UInt64 incDown = (ysgn != 0) ? 1UL : 0UL;
+                    rnd = incUp * (isUp ? 1UL : 0UL) + incDown * (isDown ? 1UL : 0UL);
+                }
+
+                UInt128 dv = ((UInt128)((UInt64)xn << 48) << 64) | rnd;
+                v += dv;
+
+                UInt64 vHiF = (UInt64)(v >> 64);
+                if (vHiF < (1UL << 48))
+                    RaiseExceptionFlagsDummy(FloatingPointExceptionFlags.Underflow);
+
+                vHiF |= ysgn;
+                v = ((UInt128)vHiF << 64) | (UInt64)v;
+
+                RaiseExceptionFlagsDummy(FloatingPointExceptionFlags.Inexact);
+                return v;
             }
         }
     }
