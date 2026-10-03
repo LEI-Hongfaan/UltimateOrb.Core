@@ -299,7 +299,7 @@ namespace UltimateOrb.Numerics {
                 UInt64 z = (0x3FFFUL << 48) - x;
                 UInt64 mz = z << 16;
                 nint e = (nint)(z >> 48);
-                nint nz = LeadingZeroCount(mz) * ((e == 0) ? 1 : 0);
+                nint nz = (int)UInt64.LeadingZeroCount(mz) * ((e == 0) ? 1 : 0);
                 mz <<= (int)(nz + ((e == 0) ? 1 : 0));
                 e -= nz;
                 nint lz = (e << 4 | (nint)(mz >> 60)) + 161;
@@ -477,17 +477,20 @@ namespace UltimateOrb.Numerics {
             unchecked {
                 ReadOnlySpan<UInt64> cp = AsinEvalPolyCp;
                 InlineArray5<UInt64> fp = default;
-                int ck = 0;
+                int ck;
 
+                // f[0] = high64(cp[0] * t2[4]) + cp[1]
+                // C:  f[0] = ck[0];
+                //     mhu1u1u1(f, f, t2 + 4);
+                //     addu1u1u1(f, ck += 1, f);
+                // FIX 3a: the second op is an *addition* of cp[1], not another multiply.
                 fp[0] = cp[0];
-                {
-                    var r = MultiplyHigh(t2[4], fp[0]);
-                    fp[0] = MultiplyHigh(r, cp[ck + 1]);
-                }
-                ck += 1;
+                fp[0] = MultiplyHigh(t2[4], fp[0]) + cp[1];
+                ck = 1;
 
-                fp[1] = cp[ck + 1];
-                for (int k = 0; k < 7; k++) {
+                fp[1] = cp[ck + 1];               // cp[2]
+                                                  // FIX 3b: C runs this loop 6 times, not 7.
+                for (int k = 0; k < 6; k++) {
                     InlineArray2<UInt64> a = default; a[0] = fp[0]; a[1] = fp[1];
                     InlineArray2<UInt64> b = default; b[0] = t2[3]; b[1] = t2[4];
                     InlineArray2<UInt64> r;
@@ -497,8 +500,9 @@ namespace UltimateOrb.Numerics {
                     fp[0] = r[0]; fp[1] = r[1];
                     ck += 2;
                 }
+                // ck == 13
 
-                fp[2] = cp[ck + 2];
+                fp[2] = cp[ck + 2];               // cp[15]
                 for (int k = 0; k < 5; k++) {
                     InlineArray3<UInt64> a = default; a[0] = fp[0]; a[1] = fp[1]; a[2] = fp[2];
                     InlineArray3<UInt64> b = default; b[0] = t2[2]; b[1] = t2[3]; b[2] = t2[4];
@@ -509,22 +513,26 @@ namespace UltimateOrb.Numerics {
                     fp[0] = r[0]; fp[1] = r[1]; fp[2] = r[2];
                     ck += 3;
                 }
+                // ck == 28
 
-                fp[3] = cp[ck + 3];
+                fp[3] = cp[ck + 3];               // cp[31]
                 for (int k = 0; k < 6; k++) {
                     InlineArray4<UInt64> a = default; a[0] = fp[0]; a[1] = fp[1]; a[2] = fp[2]; a[3] = fp[3];
                     InlineArray4<UInt64> b = default; b[0] = t2[1]; b[1] = t2[2]; b[2] = t2[3]; b[3] = t2[4];
                     InlineArray4<UInt64> r;
                     MultiplyHighUnsignedApproximate(out r, in a, in b);
-                    InlineArray4<UInt64> c = default; c[0] = cp[ck + 4]; c[1] = cp[ck + 5]; c[2] = cp[ck + 6]; c[3] = cp[ck + 7];
+                    InlineArray4<UInt64> c = default;
+                    c[0] = cp[ck + 4]; c[1] = cp[ck + 5]; c[2] = cp[ck + 6]; c[3] = cp[ck + 7];
                     AddUnchecked(out r, in c, in r);
                     fp[0] = r[0]; fp[1] = r[1]; fp[2] = r[2]; fp[3] = r[3];
                     ck += 4;
                 }
+                // ck == 52
 
-                fp[4] = cp[ck + 4];
+                fp[4] = cp[ck + 4];               // cp[56]
                 for (int k = 0; k < 5; k++) {
-                    InlineArray5<UInt64> a = default; a[0] = fp[0]; a[1] = fp[1]; a[2] = fp[2]; a[3] = fp[3]; a[4] = fp[4];
+                    InlineArray5<UInt64> a = default;
+                    a[0] = fp[0]; a[1] = fp[1]; a[2] = fp[2]; a[3] = fp[3]; a[4] = fp[4];
                     InlineArray5<UInt64> r;
                     MultiplyHighUnsignedApproximate(out r, in a, in t2);
                     InlineArray5<UInt64> c = default;
@@ -533,6 +541,7 @@ namespace UltimateOrb.Numerics {
                     fp[0] = r[0]; fp[1] = r[1]; fp[2] = r[2]; fp[3] = r[3]; fp[4] = r[4];
                     ck += 5;
                 }
+                // ck == 77, last read cp[81]
 
                 f = fp;
             }
@@ -565,7 +574,7 @@ namespace UltimateOrb.Numerics {
                     bool underflowFlag = false;
                     if (xHi < (1UL << 48)) underflowFlag = true;
 
-                    X += (UInt64)(((rm != MidpointRounding.ToEven) ? 1 : 0)
+                    X += (UInt64)((!IsNearest(rm) ? 1 : 0)
                         * ((xsgn == 0 ? 1 : 0) * (rm == MidpointRounding.ToPositiveInfinity ? 1 : 0)
                          + (xsgn != 0 ? 1 : 0) * (rm == MidpointRounding.ToNegativeInfinity ? 1 : 0)));
 
@@ -580,9 +589,8 @@ namespace UltimateOrb.Numerics {
                 // ---- Special cases: |x| >= 1, Inf, NaN ----
                 if (Misc.Unlikely(xn >= 0x3FFF)) {
                     if (xLo == 0 && xHi == (UInt64)0x3FFF << 48) {
-                        // |x| = 1  ->  ±pi/2
                         UInt128 pi2 = ((UInt128)PiOverTwoBits[1] << 64) | PiOverTwoBits[0];
-                        pi2 += (UInt64)(((rm != MidpointRounding.ToEven) ? 1 : 0)
+                        pi2 += (UInt64)((!IsNearest(rm) ? 1 : 0)
                             * ((xsgn == 0 ? 1 : 0) * (rm == MidpointRounding.ToPositiveInfinity ? 1 : 0)
                              + (xsgn != 0 ? 1 : 0) * (rm == MidpointRounding.ToNegativeInfinity ? 1 : 0)));
                         UInt64 outHi = (UInt64)(pi2 >> 64) | xsgn;
@@ -606,12 +614,14 @@ namespace UltimateOrb.Numerics {
                 // ---- Range reduction ----
                 UInt64 j = AsinJget(xHi);
 
+                // FIX 1: full 128-bit left shift by 15 (previously truncated in UInt64).
                 xHi |= 1UL << 48;
-                UInt128 Xa2 = ((UInt128)xHi << 64) | (xLo << 15);
+                UInt128 Xa2 = ((UInt128)xHi << 64) | xLo;
+                Xa2 <<= 15;
                 xHi = (UInt64)(Xa2 >> 64);
                 xLo = (UInt64)Xa2;
 
-                UInt128 t = Xa2;
+                UInt128 t = Xa2;                 // C: u128 t = X.a;
                 int nz = 0x3FFF - xn;
                 InlineArray3<UInt64> xc = default;
 
@@ -656,20 +666,20 @@ namespace UltimateOrb.Numerics {
 
                     // (mhu3u2u3) xc = xb * cth[j][2..4]
                     InlineArray3<UInt64> cth_hi = default;
-                    cth_hi[0] = AsinCth[(int)j][2]; cth_hi[1] = AsinCth[(int)j][3]; cth_hi[2] = AsinCth[(int)j][4];
-                    xLo = (UInt64)((UInt128)xLo >> (nz & 63)) | (UInt64)(((UInt128)(xHi & ~((1UL << 48) - 1)) >> (nz & 63)) << 0); // approximated via combined shift
-                    // Simpler: rebuild the top-128 and shift it.
-                    UInt128 Xshift = ((UInt128)xHi << 64) | xLo; // contains the pre-shift value if we saved it
-                    // (Direct port follows; see the equivalent reconstruction below.)
-                    // For clarity, redo the shift:
-                    UInt64 saveHi = xHi, saveLo = xLo;
-                    // The C code: X.a >>= nz&63;  -- 128-bit logical right shift by nz&63.
-                    // We must operate on the true u128 X.a. Rebuild it:
-                    UInt128 Xa = ((UInt128)saveHi << 64) | saveLo;
-                    Xa >>= (nz & 63);
-                    xHi = (UInt64)(Xa >> 64);
-                    xLo = (UInt64)Xa;
-                    xb[0] = xLo; xb[1] = xHi;
+                    cth_hi[0] = AsinCth[(int)j][2];
+                    cth_hi[1] = AsinCth[(int)j][3];
+                    cth_hi[2] = AsinCth[(int)j][4];
+
+                    // FIX 2: the C code performs "X.a >>= nz & 63" on the whole 128-bit
+                    // register, then uses X.b[0..1] as a u2x64.  Rebuild the 128-bit
+                    // value cleanly instead of the garbled partial shift.
+                    {
+                        UInt128 Xa = ((UInt128)xHi << 64) | xLo;
+                        Xa >>= (nz & 63);
+                        xHi = (UInt64)(Xa >> 64);
+                        xLo = (UInt64)Xa;
+                        xb[0] = xLo; xb[1] = xHi;
+                    }
 
                     MultiplyHighUnsignedApproximate(out xc, in xb, in cth_hi);
 
@@ -751,7 +761,7 @@ namespace UltimateOrb.Numerics {
                     xn = 0x3FFE - k;
 
                     UInt64 Eps = (3 * nz - 6 > 57) ? 64UL : ((1UL << 63) >> (3 * nz - 6));
-                    UInt128 msk = ~(UInt128)0 >> (k + 0x31 + (rm == MidpointRounding.ToEven ? 1 : 0));
+                    UInt128 msk = ~(UInt128)0 >> (k + 0x31 + (IsNearest(rm) ? 1 : 0));
                     UInt128 tl = ((UInt128)xc[1] << 64) | xc[0];
                     tl += Eps;
                     tl &= msk;
@@ -759,7 +769,7 @@ namespace UltimateOrb.Numerics {
 
                     UInt64 vHi = (xc[1] >> (15 - k)) | (xc[2] << (49 + k));
                     UInt64 vLo = xc[2] >> (15 - k);
-                    v = ((UInt128)vLo << 64) | vHi;   // low word first, matching b128 layout
+                    v = ((UInt128)vLo << 64) | vHi;
                 } else {
                     int sf = 2 * nz + 1;
                     InlineArray4<UInt64> f4 = default;
@@ -786,7 +796,6 @@ namespace UltimateOrb.Numerics {
                         f4[3] = f4[2] = f4[1] = f4[0] = 0;
                     }
 
-                    // x is halved and added into f4's top two words
                     UInt128 xa = ((UInt128)xHi << 64) | xLo;
                     xa >>= 1;
                     f4[2] = AddWithCarry((UInt64)xa, f4[2], 0, out var cr);
@@ -813,7 +822,7 @@ namespace UltimateOrb.Numerics {
                     if (T < Eps) return AsinAccurate(x, rm);
                 }
 
-                if (Misc.Unlikely(rm != MidpointRounding.ToEven)) {
+                if (Misc.Unlikely(!IsNearest(rm))) {
                     rnd = (UInt64)(((xsgn == 0 ? 1 : 0) * (rm == MidpointRounding.ToPositiveInfinity ? 1 : 0)
                                    + (xsgn != 0 ? 1 : 0) * (rm == MidpointRounding.ToNegativeInfinity ? 1 : 0)));
                 }
@@ -839,8 +848,11 @@ namespace UltimateOrb.Numerics {
                 int xn = (int)(xHi >> 48);
 
                 UInt64 j = AsinJget(xHi);
+
+                // FIX 1: full 128-bit left shift by 15.
                 xHi |= 1UL << 48;
-                UInt128 Xa2 = ((UInt128)xHi << 64) | (xLo << 15);
+                UInt128 Xa2 = ((UInt128)xHi << 64) | xLo;
+                Xa2 <<= 15;
                 xHi = (UInt64)(Xa2 >> 64);
                 xLo = (UInt64)Xa2;
 
@@ -855,7 +867,7 @@ namespace UltimateOrb.Numerics {
                     InlineArray5<UInt64> sq;
                     int e = AsinGetCos(out sq, nz, in xb);
 
-                    // X.a >>= nz & 63
+                    // X.a >>= nz & 63  (already correct here)
                     UInt128 Xa = ((UInt128)xHi << 64) | xLo;
                     Xa >>= (nz & 63);
                     xHi = (UInt64)(Xa >> 64);
@@ -927,7 +939,7 @@ namespace UltimateOrb.Numerics {
                     v = ((UInt128)vHi << 64) | vLo;
                 }
 
-                if (Misc.Unlikely(rm != MidpointRounding.ToEven)) {
+                if (Misc.Unlikely(!IsNearest(rm))) {
                     rnd = (UInt64)(((xsgn == 0 ? 1 : 0) * (rm == MidpointRounding.ToPositiveInfinity ? 1 : 0)
                                    + (xsgn != 0 ? 1 : 0) * (rm == MidpointRounding.ToNegativeInfinity ? 1 : 0)));
                 }
@@ -940,6 +952,7 @@ namespace UltimateOrb.Numerics {
             }
         }
     }
+
     partial class Binary128Arithmetic {
 
         public static UInt128 Asin(UInt128 x, MidpointRounding mode) => AsinCore(x, mode);

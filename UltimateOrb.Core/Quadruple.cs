@@ -1777,46 +1777,48 @@ namespace UltimateOrb {
             unchecked {
                 UInt64 hi = nan._Hi64Bits;
                 UInt64 lo = nan._Lo64Bits;
+
                 if (Quadruple.IsNaN(nan)) {
-                    // Extract the 48-bit fracHigh (quiet bit already excluded by mask)
+                    // NaN payload is the 111 bits excluding the quiet/signaling bit.
                     UInt64 fracHigh = hi & PayloadFracHighMask;
 
-                    // Combine into a 128-bit integer: payload = (fracHigh << 64) | lo
+                    // payload = (fracHigh << 64) | lo
                     System.UInt128 payload = ((System.UInt128)fracHigh << 64) | lo;
 
-                    // If payload is zero -> return +0
-                    if (payload == 0) {
+                    // Zero payload -> +0
+                    if (payload == 0)
                         return default;
-                    }
 
-                    // Count leading zeros in the 128-bit payload
-                    int lzc = (int)System.UInt128.LeadingZeroCount(payload); // 0..128
-                    int msbIndex = 127 - lzc; // index of most-significant-set-bit (0 = LSB)
+                    // Find the highest set bit.
+                    int lzc = (int)System.UInt128.LeadingZeroCount(payload);
+                    int msbIndex = 127 - lzc;
 
-                    // Unbiased exponent for normalized representation is msbIndex
-                    int unbiasedExp = msbIndex;
+                    // Represent the payload exactly as a positive integer:
+                    //
+                    // payload = 1.xxx * 2^msbIndex
+                    System.UInt128 payloadWithoutLeading =
+                        payload - (System.UInt128.One << msbIndex);
 
-                    // Remove the leading 1 (2^msbIndex) to get the fractional remainder
-                    System.UInt128 oneAtMsb = (System.UInt128)1 << msbIndex;
-                    System.UInt128 payloadWithoutLeading = payload - oneAtMsb;
+                    // Binary128 has 112 fraction bits.
+                    int shiftLeft = FractionBits - msbIndex;
+                    System.UInt128 fracField = payloadWithoutLeading << shiftLeft;
 
-                    // Shift left to align fractional bits into the 112-bit fraction field
-                    int shiftLeft = FractionBits - msbIndex; // >= 1
-                    System.UInt128 fracField = payloadWithoutLeading << shiftLeft; // fits in 112 bits
-
-                    // Split fracField into hi/lo parts
                     UInt64 fracLo = (UInt64)fracField;
-                    UInt64 fracHi = (UInt64)(fracField >> 64); // upper bits; quiet bit position must remain 0
+                    UInt64 fracHi = (UInt64)(fracField >> 64);
 
-                    // Ensure quiet bit is cleared in fracHi (we already masked earlier, but be explicit)
-                    fracHi &= PayloadFracHighMask;
+                    // IMPORTANT:
+                    // Do NOT apply PayloadFracHighMask here.
+                    //
+                    // The former NaN quiet/signaling bit is now just an ordinary
+                    // fraction bit of this finite integer representation.
 
-                    // Compose exponent bits (15 bits) into hi word: exponent occupies bits 48..62 of hi
-                    UInt64 hiBits = ((UInt64)((uint)(ExponentBias + unbiasedExp) & ExponentAllOnes) << 48) | fracHi; // sign = 0 (positive)
+                    UInt64 hiBits =
+                        ((UInt64)(ExponentBias + msbIndex) & ExponentAllOnes) << 48
+                        | fracHi;
 
                     return new Quadruple(fracLo, hiBits);
                 }
-                // Not NaN/Inf -> no payload
+
                 return default; // +0
             }
         }
@@ -2472,13 +2474,13 @@ namespace UltimateOrb {
         }
 
         public static Quadruple Asin(Quadruple x) {
-            var lo = Binary128Arithmetic.Asin(x._Lo64Bits, x._Hi64Bits, MidpointRounding.ToEven, out var hi);
-            return new Quadruple(lo, hi);
+            var bits = Binary128Arithmetic.Asin(x._UInt128Bits, MidpointRounding.ToEven);
+            return BitConverter.UInt128BitsToQuadruple(bits);
         }
 
         public static Quadruple Asin(Quadruple x, MidpointRounding mode) {
-            var lo = Binary128Arithmetic.Asin(x._Lo64Bits, x._Hi64Bits, mode, out var hi);
-            return new Quadruple(lo, hi);
+            var bits = Binary128Arithmetic.Asin(x._UInt128Bits, mode);
+            return BitConverter.UInt128BitsToQuadruple(bits);
         }
 
         public static Quadruple Asinh(Quadruple x) {
