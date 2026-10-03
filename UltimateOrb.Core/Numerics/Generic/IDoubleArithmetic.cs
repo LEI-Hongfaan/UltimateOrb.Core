@@ -185,13 +185,13 @@ namespace UltimateOrb.Numerics.Generic {
             result_hi_hi = hhh;
             /*
 
-            TSelf.BigMul(out var lll, out var llh, first_lo, second_lo);
-            TSelf.BigMul(out var hhl, out var hhh, first_hi, second_hi);
+            TSelf.BigMulUnsigned(out var lll, out var llh, first_lo, second_lo);
+            TSelf.BigMulUnsigned(out var hhl, out var hhh, first_hi, second_hi);
             var fc = CheckUInt1(TSelf.AddUnsignedNoThrow(out var fm, first_hi, first_lo));
             var sc = CheckUInt1(TSelf.AddUnsignedNoThrow(out var sm, second_hi, second_lo));
             TSelf.AddUnchecked(out var tl, out var th, hhl, hhh, lll, llh);
             var dh = unchecked((uint)fc + (uint)sc);
-            TSelf.BigMul(out var mml, out var mmh, fm, sm);
+            TSelf.BigMulUnsigned(out var mml, out var mmh, fm, sm);
             if (0 != fc) {
                 TSelf.AddUnchecked(out mmh, mmh, sm);
             }
@@ -532,7 +532,7 @@ namespace UltimateOrb.Numerics.Generic {
                                 (divisor_lo >> (BitSize_Checked - cc)) | t);
                         }
                         t = q_lo * divisor_hi;
-                        product_lo = MathEx.BigMul(q_lo, divisor_lo, out product_hi);
+                        product_lo = MathEx.BigMulUnsigned(q_lo, divisor_lo, out product_hi);
                         product_hi += t;
                         if (t > product_hi || product_hi > dividend_hi) {
                             goto L_0001;

@@ -106,16 +106,6 @@ namespace UltimateOrb.Numerics {
                 return xy1 + (xy0 >> 64);
             }
         }
-
-        // C: mUU(u128, u128, u128 *t) — full 128x128 product.
-        //     Returns the high 128 bits, stores the low 128 bits in `low`.
-        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        internal static UInt128 BigMul(UInt128 a, UInt128 b, out UInt128 low) {
-            unchecked {
-                low = DoubleArithmetic.BigMul(a, b, out var hi);
-                return hi;
-            }
-        }
     }
 
     public static partial class Binary128Arithmetic {
@@ -212,9 +202,9 @@ namespace UltimateOrb.Numerics {
                     UInt128 c = ((sx1 + ((UInt128)1 << 14)) >> 15) | ((UInt128)1 << 113);
 
                     UInt128 R2l;
-                    UInt128 R2h = BigMul(c, c, out R2l);
+                    UInt128 R2h = Math.BigMul(c, c, out R2l);
                     UInt128 R30;
-                    UInt128 R31 = BigMul(R2l, c, out R30) + R2h * c;
+                    UInt128 R31 = Math.BigMul(R2l, c, out R30) + R2h * c;
                     R31 -= x << 86;
 
                     sx1 = c << 15;

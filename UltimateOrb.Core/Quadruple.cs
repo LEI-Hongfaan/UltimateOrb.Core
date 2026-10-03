@@ -19,6 +19,8 @@ using static UltimateOrb.Internal.System.Extensions;
 using UltimateOrb.Mathematics;
 using UltimateOrb.Numerics;
 using UltimateOrb.Utilities;
+using System.ComponentModel;
+using UltimateOrb.Internal.System;
 using Number = UltimateOrb.Internal.System.Number;
 
 
@@ -26,7 +28,6 @@ using Number = UltimateOrb.Internal.System.Number;
 using static UltimateOrb.Numerics.Binary128Arithmetic;
 #pragma warning restore UoWIP // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
 using Binary128Arithmetic = UltimateOrb.Numerics.Binary128Arithmetic;
-using UltimateOrb.Internal.System;
 
 namespace UltimateOrb {
 
@@ -175,6 +176,497 @@ namespace UltimateOrb {
         public static Quadruple Ieee754Remainder(Quadruple first, Quadruple second, [ConstantExpected] FloatingPointRounding rounding) {
             return new Quadruple(Binary128Arithmetic.IEEERemainder(first._Lo64Bits, first._Hi64Bits, second._Lo64Bits, second._Hi64Bits, rounding, out var t), t);
         }
+
+        #region Augmented Arithmetic
+        /// <summary>
+        ///     The IEEE Std 754-2019 <c>augmentedAddition</c>.
+        ///     Returns <c>(roundTiesTowardZero(x + y), (x + y) - roundTiesTowardZero(x + y))</c>.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        public static (Quadruple Rounded, Quadruple Delta) AddAugmented(Quadruple x, Quadruple y) {
+            // NaN propagation: same quiet NaN to both outputs.
+            if (IsNaN(x) || IsNaN(y)) {
+                var nan = PropagateNaN(x, y);
+                return (nan, nan);
+            }
+
+            // Round the sum using roundTiesTowardZero.
+            var rounded_lo = Binary128Arithmetic.Add(
+                x._Lo64Bits, x._Hi64Bits, y._Lo64Bits, y._Hi64Bits,
+                FloatingPointRounding.ToNearestWithMidpointTowardZero, out var rounded_hi);
+            var rounded = new Quadruple(lo64Bits: rounded_lo, rounded_hi);
+
+            // Overflow / infinity / invalid: both outputs are the (infinite or NaN) result.
+            // (e.g. +inf + -inf produces the canonical quiet NaN for both outputs).
+            if (!IsFinite(rounded)) {
+                return (rounded, rounded);
+            }
+
+            // Choose the larger-magnitude operand as reference.  With |big| >= |small|,
+            // Sterbenz's lemma guarantees that (rounded - big) is exact, because
+            // rounded lies between big and big+small, so |big|/2 <= |rounded| <= 2|big|.
+            Quadruple big, small;
+            if (IsLessThanIEEETotalOrderMagnitude(x, y)) { big = y; small = x; } else { big = x; small = y; }
+
+            var z_lo = Binary128Arithmetic.Subtract(
+                rounded._Lo64Bits, rounded._Hi64Bits, big._Lo64Bits, big._Hi64Bits,
+                FloatingPointRounding.ToNearestWithMidpointTowardZero, out var z_hi);
+
+            // delta = small - z = (x + y) - rounded, exact and representable
+            // (a classical result for IEEE 754 binary formats: the error of a rounded
+            // sum is representable in the source format).
+            var delta_lo = Binary128Arithmetic.Subtract(
+                small._Lo64Bits, small._Hi64Bits, z_lo, z_hi,
+                FloatingPointRounding.ToNearestWithMidpointTowardZero, out var delta_hi);
+            var delta = new Quadruple(lo64Bits: delta_lo, delta_hi);
+
+            // If delta is exactly zero, it carries the sign of the rounded result.
+            if (IsZero(delta)) {
+                delta = IsNegative(rounded) ? NegativeZero : PositiveZero;
+            }
+
+            return (rounded, delta);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static Quadruple PropagateNaN(Quadruple x, Quadruple y) {
+            return BitConverter.UInt128BitsToQuadruple(Binary128Arithmetic.GetNaN(x._UInt128Bits, y._UInt128Bits));
+        }
+
+        /// <summary>
+        ///     The IEEE Std 754-2019 <c>augmentedSubtraction</c>.
+        ///     Returns <c>(roundTiesTowardZero(x - y), (x - y) - roundTiesTowardZero(x - y))</c>.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        public static (Quadruple Rounded, Quadruple Delta) SubtractAugmented(Quadruple x, Quadruple y) {
+            if (IsNaN(x) || IsNaN(y)) {
+                var nan = PropagateNaN(x, y);
+                return (nan, nan);
+            }
+
+            var rounded_lo = Binary128Arithmetic.Subtract(
+                x._Lo64Bits, x._Hi64Bits, y._Lo64Bits, y._Hi64Bits,
+                FloatingPointRounding.ToNearestWithMidpointTowardZero, out var rounded_hi);
+            var rounded = new Quadruple(lo64Bits: rounded_lo, rounded_hi);
+
+            if (!IsFinite(rounded)) {
+                return (rounded, rounded);
+            }
+
+            // Treat x - y as x + (-y); pick the larger-magnitude operand of {x, -y}.
+            Quadruple negY = -y;
+            Quadruple big, small;
+            if (IsLessThanIEEETotalOrderMagnitude(x, negY)) { big = negY; small = x; } else { big = x; small = negY; }
+
+            var z_lo = Binary128Arithmetic.Subtract(
+                rounded._Lo64Bits, rounded._Hi64Bits, big._Lo64Bits, big._Hi64Bits,
+                FloatingPointRounding.ToNearestWithMidpointTowardZero, out var z_hi);
+
+            var delta_lo = Binary128Arithmetic.Subtract(
+                small._Lo64Bits, small._Hi64Bits, z_lo, z_hi,
+                FloatingPointRounding.ToNearestWithMidpointTowardZero, out var delta_hi);
+            var delta = new Quadruple(lo64Bits: delta_lo, delta_hi);
+
+            if (IsZero(delta)) {
+                delta = IsNegative(rounded) ? NegativeZero : PositiveZero;
+            }
+
+            return (rounded, delta);
+        }
+
+        /// <summary>
+        ///     The IEEE Std 754-2019 <c>augmentedMultiplication</c>.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        public static (Quadruple Rounded, Quadruple Delta) MultiplyAugmented(Quadruple x, Quadruple y)
+            => RttzMul(x, y);
+
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        static (Quadruple Rounded, Quadruple Delta) RttzMul(Quadruple x, Quadruple y) {
+            unchecked {
+                // ---------- sign / special operands ----------
+                bool signXY = IsNegative(x) ^ IsNegative(y);
+
+                if (IsNaN(x) || IsNaN(y)) { var nan = PropagateNaN(x, y); return (nan, nan); }
+                if (IsInfinity(x) || IsInfinity(y)) {
+                    if (IsZero(x) || IsZero(y)) { var nan = PropagateNaN(x, y); return (nan, nan); }
+                    var inf = signXY ? NegativeInfinity : PositiveInfinity;
+                    return (inf, inf);
+                }
+                if (IsZero(x) || IsZero(y)) {
+                    var z = signXY ? NegativeZero : PositiveZero;
+                    return (z, z);
+                }
+
+                // ---------- decompose once ----------
+                var mx = SignificandU128(x); int ex = LsbExp(x);
+                var my = SignificandU128(y); int ey = LsbExp(y);
+                int E = ex + ey;
+
+                var Mhi = System.Math.BigMul(mx, my, out var Mlo);
+
+                int bitlen = (Mhi != System.UInt128.Zero)
+                    ? 256 - (int)System.UInt128.LeadingZeroCount(Mhi)
+                    : 128 - (int)System.UInt128.LeadingZeroCount(Mlo);
+
+                int ve = E + bitlen - 1;
+                int er = ve < -16382 ? -16494 : ve - 112;
+
+                if (er > 16271) {
+                    var inf = signXY ? NegativeInfinity : PositiveInfinity;
+                    return (inf, inf);
+                }
+
+                int k = er - E;
+
+                // ---------- round significand with RTTZ ----------
+                System.UInt128 ms;
+                System.UInt128 disc_lo = System.UInt128.Zero, disc_hi = System.UInt128.Zero;
+                bool incremented = false;
+
+                if (k <= 0) {
+                    // Exact: bitlen(M) + (−k) ≤ 113 ⇒ Mhi == 0 in this branch.
+                    ms = Mlo << (-k);
+                } else {
+                    (ms, disc_lo, disc_hi, bool roundBit, bool sticky) =
+                        ShiftRight256Extract(Mhi, Mlo, k);
+                    if (roundBit && sticky) {          // RTTZ: increment unless exact tie
+                        incremented = true;
+                        ms += System.UInt128.One;
+                        if ((ms >> 113) != System.UInt128.Zero) {
+                            ms >>= 1;
+                            er += 1;
+                            if (er > 16271) {
+                                var inf = signXY ? NegativeInfinity : PositiveInfinity;
+                                return (inf, inf);
+                            }
+                        }
+                    }
+                }
+
+                Quadruple roundedQ = PackBinary128(signXY ? 1 : 0, ms, er);
+
+                // ---------- delta ----------
+                if (k <= 0) return (roundedQ, signXY ? NegativeZero : PositiveZero);
+
+                System.UInt128 a_lo, a_hi;
+                if (!incremented) {
+                    a_lo = disc_lo; a_hi = disc_hi;
+                } else {
+                    // a = 2^k − discarded
+                    System.UInt128 powk_lo, powk_hi;
+                    if (k < 128) { powk_lo = System.UInt128.One << k; powk_hi = System.UInt128.Zero; } else { powk_lo = System.UInt128.Zero; powk_hi = System.UInt128.One << (k - 128); }
+                    System.UInt128 borrow = powk_lo < disc_lo ? System.UInt128.One : System.UInt128.Zero;
+                    a_lo = powk_lo - disc_lo;
+                    a_hi = powk_hi - disc_hi - borrow;
+                }
+
+                if (a_lo == System.UInt128.Zero && a_hi == System.UInt128.Zero)
+                    return (roundedQ, signXY ? NegativeZero : PositiveZero);   // exact product
+
+                bool signDelta = signXY ^ incremented;
+
+                var (deltaSig, deltaLSB) = RoundMagnitudeToBinary128(a_hi, a_lo, E);
+                if (deltaSig == System.UInt128.Zero)
+                    return (roundedQ, signDelta ? NegativeZero : PositiveZero);
+
+                return (roundedQ, PackBinary128(signDelta ? 1 : 0, deltaSig, deltaLSB));
+            }
+        }
+
+        /// <summary>M >> k with jam-extraction of the discarded bits (1 ≤ k ≤ 255).</summary>
+        /// <summary>
+        ///     M >> k with jam-extraction of the discarded bits (1 ≤ k ≤ 255 normally,
+        ///     but k ≥ 256 is also handled — this happens when the exact product lies
+        ///     far below the subnormal range and the significance would be negative).
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static (System.UInt128 shifted, System.UInt128 disc_lo, System.UInt128 disc_hi, bool roundBit, bool sticky)
+            ShiftRight256Extract(System.UInt128 Mhi, System.UInt128 Mlo, int k) {
+            unchecked {
+                // Caller guarantees k >= 1.
+                if (k >= 256) {
+                    // All 256 bits of M fall into the discarded window; the round bit
+                    // position k−1 is above bit 255, so it is 0 for any M < 2^256.
+                    // Sticky is (M != 0) = true.
+                    return (System.UInt128.Zero, Mlo, Mhi, false, true);
+                }
+                if (k < 128) {
+                    System.UInt128 shifted = (Mlo >> k) | (Mhi << (128 - k));
+                    System.UInt128 disc_lo = Mlo & ((System.UInt128.One << k) - 1);
+                    bool roundBit = ((Mlo >> (k - 1)) & System.UInt128.One) != System.UInt128.Zero;
+                    System.UInt128 mask = k >= 2 ? ((System.UInt128.One << (k - 1)) - 1) : System.UInt128.Zero;
+                    bool sticky = (disc_lo & mask) != System.UInt128.Zero;
+                    return (shifted, disc_lo, System.UInt128.Zero, roundBit, sticky);
+                }
+                {
+                    int kk = k - 128;                       // 0..127
+                    if (kk == 0) {
+                        bool roundBit = (Mlo >> 127) != System.UInt128.Zero;
+                        bool sticky = (Mlo & ((System.UInt128.One << 127) - 1)) != System.UInt128.Zero;
+                        return (Mhi, Mlo, System.UInt128.Zero, roundBit, sticky);
+                    }
+                    System.UInt128 shifted = Mhi >> kk;
+                    System.UInt128 disc_lo = Mlo;
+                    System.UInt128 disc_hi = Mhi & ((System.UInt128.One << kk) - 1);
+                    bool rb = ((Mhi >> (kk - 1)) & System.UInt128.One) != System.UInt128.Zero;
+                    System.UInt128 mask2 = kk >= 2 ? ((System.UInt128.One << (kk - 1)) - 1) : System.UInt128.Zero;
+                    bool st = ((Mhi & mask2) | Mlo) != System.UInt128.Zero;
+                    return (shifted, disc_lo, disc_hi, rb, st);
+                }
+            }
+        }
+
+        /// <summary>
+        ///     Pack a binary128 from a normalized significand and LSB exponent <paramref name="er"/>.
+        ///     <c>er == −16494</c> with <c>ms &lt; 2^112</c> → subnormal; otherwise normal.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static Quadruple PackBinary128(int sign, System.UInt128 ms, int er) {
+            unchecked {
+                int biased;
+                System.UInt128 frac;
+                if (er == -16494 && ms < ((System.UInt128)1 << 112)) {
+                    biased = 0;
+                    frac = ms;
+                } else {
+                    biased = er + 16495;
+                    frac = ms & (((System.UInt128)1 << 112) - 1);
+                }
+                UInt64 lo64 = (UInt64)frac;
+                UInt64 hi64 = ((UInt64)sign << 63)
+                    | ((UInt64)biased << 48)
+                    | ((UInt64)(frac >> 64) & 0x0000_FFFF_FFFF_FFFFUL);
+                return new Quadruple(lo64Bits: lo64, hi64Bits: hi64);
+            }
+        }
+
+        /// <summary>
+        ///     Rounds <c>a · 2^E</c> (a = <paramref name="a_hi"/>:<paramref name="a_lo"/>,
+        ///     256-bit unsigned) to binary128 using roundTiesTowardZero.
+        ///     Returns <c>(sig, LSBexp)</c> — caller packs with
+        ///     <see cref="PackBinary128(int, System.UInt128, int)"/>.  <c>sig == 0</c> means the
+        ///     rounded value is zero (sign applied by caller).
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        static (System.UInt128 sig, int LSBexp) RoundMagnitudeToBinary128(
+                System.UInt128 a_hi, System.UInt128 a_lo, int E) {
+            unchecked {
+                if (a_hi == System.UInt128.Zero && a_lo == System.UInt128.Zero)
+                    return (System.UInt128.Zero, -16494);
+
+                int da = (a_hi != System.UInt128.Zero)
+                    ? 256 - (int)System.UInt128.LeadingZeroCount(a_hi)
+                    : 128 - (int)System.UInt128.LeadingZeroCount(a_lo);
+                int top = E + da - 1;
+
+                // Below half of the smallest subnormal → 0.
+                if (top < -16495) return (System.UInt128.Zero, -16494);
+
+                int er = top < -16382 ? -16494 : top - 112;
+                int shift = er - E;
+
+                if (shift <= 0) {
+                    // Exact on the target grid.
+                    int ns = -shift;
+                    System.UInt128 m;
+                    if (ns == 0) m = a_lo;
+                    else if (ns < 128) m = a_lo << ns;
+                    else m = System.UInt128.Zero;   // cannot occur here
+                    return (m, er);
+                }
+
+                System.UInt128 m_lo, roundBit, sticky;
+                if (shift < 128) {
+                    m_lo = (a_lo >> shift) | (a_hi << (128 - shift));
+                    roundBit = (a_lo >> (shift - 1)) & System.UInt128.One;
+                    System.UInt128 mask = shift >= 2 ? ((System.UInt128.One << (shift - 1)) - 1)
+                                                     : System.UInt128.Zero;
+                    sticky = (a_lo & mask) != System.UInt128.Zero
+                        ? System.UInt128.One : System.UInt128.Zero;
+                } else if (shift == 128) {
+                    m_lo = a_hi;
+                    roundBit = a_lo >> 127;
+                    System.UInt128 mask = (System.UInt128.One << 127) - 1;
+                    sticky = (a_lo & mask) != System.UInt128.Zero
+                        ? System.UInt128.One : System.UInt128.Zero;
+                } else {
+                    int kk = shift - 128;
+                    m_lo = a_hi >> kk;
+                    roundBit = (a_hi >> (kk - 1)) & System.UInt128.One;
+                    System.UInt128 mask = kk >= 2 ? ((System.UInt128.One << (kk - 1)) - 1)
+                                                  : System.UInt128.Zero;
+                    sticky = (((a_hi & mask) | a_lo) != System.UInt128.Zero)
+                        ? System.UInt128.One : System.UInt128.Zero;
+                }
+
+                if (roundBit != System.UInt128.Zero && sticky != System.UInt128.Zero) {
+                    m_lo += System.UInt128.One;
+                    if ((m_lo >> 113) != System.UInt128.Zero) {
+                        m_lo >>= 1;
+                        er += 1;
+                    }
+                }
+                return (m_lo, er);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        static (Quadruple Rounded, Quadruple Delta) RttzMul_A_1(Quadruple x, Quadruple y) {
+            bool signXY = IsNegative(x) ^ IsNegative(y);
+
+            // Infinity: (±0) · (±inf) is invalid; other ±inf · finite-nonzero = ±inf.
+            if (IsInfinity(x) || IsInfinity(y)) {
+                if (IsZero(x) || IsZero(y)) {
+                    var nan = PropagateNaN(x, y);
+                    return (nan, nan);
+                }
+                var inf = signXY
+                    ? new Quadruple(lo64Bits: 0UL, hi64Bits: 0xFFFF000000000000UL)
+                    : new Quadruple(lo64Bits: 0UL, hi64Bits: 0x7FFF000000000000UL);
+                return (inf, inf);
+            }
+            // Zero: product is ±0 and delta is the same ±0 (exact).
+            if (IsZero(x) || IsZero(y)) {
+                var z = signXY
+                    ? new Quadruple(lo64Bits: 0UL, hi64Bits: 0x8000000000000000UL)
+                    : new Quadruple(lo64Bits: 0UL, hi64Bits: 0UL);
+                return (z, z);
+            }
+
+            var re_lo = Binary128Arithmetic.Multiply(
+                x._Lo64Bits, x._Hi64Bits, y._Lo64Bits, y._Hi64Bits,
+                FloatingPointRounding.ToNearestWithMidpointTowardZero, out var re_hi);
+            var re = new Quadruple(lo64Bits: re_lo, hi64Bits: re_hi);
+            if (!IsFinite(re)) return (re, re);
+
+            Quadruple rounded = re;
+
+            // §9.5 delta.  The FMA is exact when the delta is representable, and
+            // otherwise rounds the exact delta — which is exactly what the standard
+            // prescribes.  RTE is used because the delta is not on a tie except in
+            // the subnormal-underflow case, where the sign is preserved anyway.
+            var delta_lo = Binary128Arithmetic.FusedMultiplyAddOrSubtract(
+                x._Lo64Bits, x._Hi64Bits,
+                y._Lo64Bits, y._Hi64Bits,
+                rounded._Lo64Bits, rounded._Hi64Bits ^ 0x8000000000000000UL,     // -rounded
+                Binary128Arithmetic.FusedMultiplyAddOrSubtractOperationKind.FusedMultiplyAdd,
+                FloatingPointRounding.ToNearestWithMidpointTowardZero, out var delta_hi);
+            var delta = new Quadruple(lo64Bits: delta_lo, hi64Bits: delta_hi);
+
+            // §9.5 zero-delta rule: only when the exact product equals `rounded`
+            // does the delta carry the sign of `rounded`.  Otherwise (a tiny nonzero
+            // exact delta that underflowed to ±0) the FMA's sign is authoritative.
+            if (IsZero(delta) && ProductIsExact(x, y, rounded)) {
+                delta = signXY
+                    ? new Quadruple(lo64Bits: 0UL, hi64Bits: 0x8000000000000000UL)
+                    : new Quadruple(lo64Bits: 0UL, hi64Bits: 0UL);
+            }
+
+            return (rounded, delta);
+        }
+
+        /// <summary>
+        ///     True iff <c>x * y == rounded</c> exactly (all three finite).
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static bool ProductIsExact(Quadruple x, Quadruple y, Quadruple rounded) {
+            if (IsZero(x) || IsZero(y)) return IsZero(rounded);   // 0·finite == ±0, exact
+            if (IsZero(rounded)) return false;             // x,y nonzero -> underflowed to 0
+
+            System.UInt128 mx = SignificandU128(x);
+            System.UInt128 my = SignificandU128(y);
+            System.UInt128 mr = SignificandU128(rounded);
+
+            int ex = LsbExp(x), ey = LsbExp(y), er = LsbExp(rounded);
+
+            // Exact 226-bit product of the significands.
+            System.UInt128 mp_lo = System.Math.BigMul(mx, my, out System.UInt128 mp_hi);
+
+            // Need  mx·my == mr · 2^shift   with  shift = er - (ex + ey).
+            int shift = er - (ex + ey);
+
+            if (shift >= 0) {
+                System.UInt128 want_lo, want_hi;
+                if (shift < 128) {
+                    want_lo = mr << shift;
+                    want_hi = (shift == 0) ? System.UInt128.Zero : (mr >> (128 - shift));
+                } else {
+                    int r = shift - 128;
+                    if (r >= 128) return false;
+                    if (r > 0 && (mr >> (128 - r)) != System.UInt128.Zero) return false;
+                    want_lo = System.UInt128.Zero;
+                    want_hi = (r == 0) ? mr : (mr << r);
+                }
+                return mp_lo == want_lo && mp_hi == want_hi;
+            } else {
+                int rshift = -shift;
+                if (rshift >= 256) return false;
+                System.UInt128 quot_lo, quot_hi, rem;
+                if (rshift < 128) {
+                    quot_lo = (mp_lo >> rshift) | (mp_hi << (128 - rshift));
+                    quot_hi = mp_hi >> rshift;
+                    rem = mp_lo & ((System.UInt128.One << rshift) - 1);
+                } else {
+                    int r = rshift - 128;
+                    quot_lo = (r == 0) ? mp_hi : (mp_hi >> r);
+                    quot_hi = System.UInt128.Zero;
+                    System.UInt128 high_rem = (r == 0) ? System.UInt128.Zero : (mp_hi & ((System.UInt128.One << r) - 1));
+                    rem = (high_rem != System.UInt128.Zero || mp_lo != System.UInt128.Zero)
+                        ? System.UInt128.One : System.UInt128.Zero;
+                }
+                return rem == System.UInt128.Zero
+                    && quot_lo == mr && quot_hi == System.UInt128.Zero;
+            }
+        }
+        /// <summary>
+        ///     Exact test: is <c>x*y == (re + rz) / 2</c> (the midpoint between the
+        ///     two adjacent bracketing floats)?
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        static bool IsMidpointTie(Quadruple x, Quadruple y, Quadruple re, Quadruple rz) {
+            // 2*x*y == re + rz  (as exact rationals == as integers with common scale)
+            BigInteger mx = SignificandU128(x);
+            BigInteger my = SignificandU128(y);
+            int ex = LsbExp(x), ey = LsbExp(y);
+
+            BigInteger lhsM = 2 * mx * my;
+            int lhsE = ex + ey;
+
+            int erRe = LsbExp(re);          // zero handled by caller's early returns
+            int erRz = LsbExp(rz);
+            BigInteger mre = IsZero(re) ? BigInteger.Zero : SignificandU128(re);
+            BigInteger mrz = IsZero(rz) ? BigInteger.Zero : SignificandU128(rz);
+
+            // re and rz are adjacent, so their LSB exponents differ by at most 1.
+            int rhsE = System.Math.Min(erRe, erRz);
+            BigInteger rhsM = (mre << (erRe - rhsE)) + (mrz << (erRz - rhsE));
+
+            // Compare  lhsM * 2^lhsE  with  rhsM * 2^rhsE.
+            return lhsE >= rhsE
+                ? (lhsM << (lhsE - rhsE)) == rhsM
+                : lhsM == (rhsM << (rhsE - lhsE));
+        }
+
+        // 113-bit significand as UInt128: normal -> 2^112 + frac; subnormal -> frac.
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static System.UInt128 SignificandU128(Quadruple q) {
+            System.UInt128 frac =
+                ((System.UInt128)(q._Hi64Bits & 0x0000_FFFF_FFFF_FFFFUL) << 64) | q._Lo64Bits;
+            int biased = (int)((q._Hi64Bits >> 48) & 0x7FFF);
+            return (biased == 0) ? frac : (frac | ((System.UInt128)1 << 112));
+        }
+
+        // Exponent of the LSB of the significand.
+        //   normal    with biased exponent E : E - 16383 - 112
+        //   subnormal                        : -16382 - 112
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static int LsbExp(Quadruple q) {
+            int biased = (int)((q._Hi64Bits >> 48) & 0x7FFF);
+            return (biased == 0) ? -16494 : (biased - 16495);
+        }
+
+        #endregion
 
         #region Non-computational Operations
         #region IEEE Std 754
@@ -1265,6 +1757,133 @@ namespace UltimateOrb {
             return fractionIsZero;
         }
 
+        [EditorBrowsable(EditorBrowsableState.Advanced)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsNegativeZero(Quadruple x) {
+            return NegativeZero._UInt128Bits == x._UInt128Bits;
+        }
+
+        // Masks and constants for binary128 layout
+        private const UInt64 PayloadFracHighMask = 0x0000_7FFF_FFFF_FFFFUL; // low 47 bits of hi
+        private const uint ExponentAllOnes = 0x7FFFu;
+        private const int QuietBitIndexInFracHigh = 47; // MSB of the 48-bit fracHigh
+        private const UInt64 QuietBitMask = 1UL << QuietBitIndexInFracHigh;
+
+        private const int ExponentBias = 16383; // binary128 bias
+
+        private const int FractionBits = 112;   // stored fraction bits for binary128
+
+        public static Quadruple GetPayload(Quadruple nan) {
+            unchecked {
+                UInt64 hi = nan._Hi64Bits;
+                UInt64 lo = nan._Lo64Bits;
+                if (Quadruple.IsNaN(nan)) {
+                    // Extract the 48-bit fracHigh (quiet bit already excluded by mask)
+                    UInt64 fracHigh = hi & PayloadFracHighMask;
+
+                    // Combine into a 128-bit integer: payload = (fracHigh << 64) | lo
+                    System.UInt128 payload = ((System.UInt128)fracHigh << 64) | lo;
+
+                    // If payload is zero -> return +0
+                    if (payload == 0) {
+                        return default;
+                    }
+
+                    // Count leading zeros in the 128-bit payload
+                    int lzc = (int)System.UInt128.LeadingZeroCount(payload); // 0..128
+                    int msbIndex = 127 - lzc; // index of most-significant-set-bit (0 = LSB)
+
+                    // Unbiased exponent for normalized representation is msbIndex
+                    int unbiasedExp = msbIndex;
+
+                    // Remove the leading 1 (2^msbIndex) to get the fractional remainder
+                    System.UInt128 oneAtMsb = (System.UInt128)1 << msbIndex;
+                    System.UInt128 payloadWithoutLeading = payload - oneAtMsb;
+
+                    // Shift left to align fractional bits into the 112-bit fraction field
+                    int shiftLeft = FractionBits - msbIndex; // >= 1
+                    System.UInt128 fracField = payloadWithoutLeading << shiftLeft; // fits in 112 bits
+
+                    // Split fracField into hi/lo parts
+                    UInt64 fracLo = (UInt64)fracField;
+                    UInt64 fracHi = (UInt64)(fracField >> 64); // upper bits; quiet bit position must remain 0
+
+                    // Ensure quiet bit is cleared in fracHi (we already masked earlier, but be explicit)
+                    fracHi &= PayloadFracHighMask;
+
+                    // Compose exponent bits (15 bits) into hi word: exponent occupies bits 48..62 of hi
+                    UInt64 hiBits = ((UInt64)((uint)(ExponentBias + unbiasedExp) & ExponentAllOnes) << 48) | fracHi; // sign = 0 (positive)
+
+                    return new Quadruple(fracLo, hiBits);
+                }
+                // Not NaN/Inf -> no payload
+                return default; // +0
+            }
+        }
+
+        public static Quadruple GetQuietNaNWithPayload(Quadruple payload) {
+            unchecked {
+                // payload must be a non-negative integer in [0, 2^111 - 1] ( -0 treated as 0 )
+                if (IsNegativeZero(payload) || (IsInteger(payload) &&
+                    !IsNegative(payload) &&
+                    payload._UInt128Bits <= ((Quadruple)(((UInt128)1 << 111) - 1))._UInt128Bits)) {
+                    UInt64 hi = payload._Hi64Bits;
+                    UInt64 lo = payload._Lo64Bits;
+
+                    // Recover the integer value the Quadruple encodes.
+                    UInt128 intValue;
+                    if ((hi & 0x7FFF_FFFF_FFFF_FFFFUL) == 0 && lo == 0) {
+                        // +0 / -0  -> canonical quiet NaN (only the quiet bit set)
+                        intValue = 0;
+                    } else {
+                        int e = (int)((hi >> 48) & 0x7FFF) - 16383;        // unbiased exponent
+                        UInt128 F = ((UInt128)(hi & 0x0000_FFFF_FFFF_FFFFUL) << 64) | lo;
+                        UInt128 S = ((UInt128)1 << 112) | F;               // 113-bit significand
+                        intValue = S >> (112 - e);                        // exact integer payload
+                    }
+
+                    // Split payload into the two 64-bit words.  PayloadFracHighMask already
+                    // excludes the quiet bit position (bit 47 of hi).
+                    UInt64 nanFracHi = (UInt64)(intValue >> 64) & PayloadFracHighMask;
+                    UInt64 nanFracLo = (UInt64)intValue;
+
+                    // exp = all ones, sign = 0, quiet bit set.
+                    UInt64 nanHi = ((UInt64)ExponentAllOnes << 48)
+                                 | (1UL << 47)                             // quiet bit
+                                 | nanFracHi;
+
+                    return new Quadruple(nanFracLo, nanHi);
+                }
+                return default; // +0
+            }
+        }
+
+        public static Quadruple GetSignalingNaNWithPayload(Quadruple payload) {
+            unchecked {
+                // payload must be an integer in [1, 2^111 - 1]
+                if (IsInteger(payload) &&
+                    One._UInt128Bits <= payload._UInt128Bits &&
+                    payload._UInt128Bits <= ((Quadruple)(((UInt128)1 << 111) - 1))._UInt128Bits) {
+                    UInt64 hi = payload._Hi64Bits;
+                    UInt64 lo = payload._Lo64Bits;
+
+                    int e = (int)((hi >> 48) & 0x7FFF) - 16383;
+                    UInt128 F = ((UInt128)(hi & 0x0000_FFFF_FFFF_FFFFUL) << 64) | lo;
+                    UInt128 S = ((UInt128)1 << 112) | F;
+                    UInt128 intValue = S >> (112 - e);                     // nonzero by guard
+
+                    UInt64 nanFracHi = (UInt64)(intValue >> 64) & PayloadFracHighMask;
+                    UInt64 nanFracLo = (UInt64)intValue;
+
+                    // exp = all ones, sign = 0, quiet bit CLEAR (signaling).
+                    UInt64 nanHi = ((UInt64)ExponentAllOnes << 48) | nanFracHi;
+
+                    return new Quadruple(nanFracLo, nanHi);
+                }
+                return default; // +0
+            }
+        }
+
         public static Quadruple Exp(Quadruple x) {
             var lo = Binary128Arithmetic.Exp(x._Lo64Bits, x._Hi64Bits, out var hi);
             return new Quadruple(lo, hi);
@@ -1842,28 +2461,31 @@ namespace UltimateOrb {
         public static Quadruple Acosh(Quadruple x) {
             // TODO: Provide a correct impl
             // acosh(x) = ln(x + sqrt(x-1)*sqrt(x+1))
-            var t = Sqrt(x - One) * Sqrt(x + One);
+            var t = Sqrt(FusedMultiplyAdd(x, x, NegativeOne));
             return Log(x + t);
         }
 
         public static Quadruple AcosPi(Quadruple x) {
             // TODO: Provide a correct impl
             // acos_pi(x) = acos(x) / π
-            var y = Sqrt(One - x * x);
-            return Atan2(y, x) / Pi;
+            return Acos(x) / Pi;
         }
 
         public static Quadruple Asin(Quadruple x) {
-            // TODO: Provide a correct impl
-            // asin(x) = atan(x / sqrt(1 - x^2))
-            var t = x / Sqrt(One - x * x);
-            return Atan(t);
+            var lo = Binary128Arithmetic.Asin(x._Lo64Bits, x._Hi64Bits, MidpointRounding.ToEven, out var hi);
+            return new Quadruple(lo, hi);
+        }
+
+        public static Quadruple Asin(Quadruple x, MidpointRounding mode) {
+            var lo = Binary128Arithmetic.Asin(x._Lo64Bits, x._Hi64Bits, mode, out var hi);
+            return new Quadruple(lo, hi);
         }
 
         public static Quadruple Asinh(Quadruple x) {
             // TODO: Provide a correct impl
             // asinh(x) = ln(x + sqrt(x^2 + 1))
-            return Log(x + Sqrt(x * x + One));
+            var t = Sqrt(FusedMultiplyAdd(x, x, One));
+            return Log(x + t);
         }
 
         public static Quadruple AsinPi(Quadruple x) {
@@ -1972,10 +2594,11 @@ namespace UltimateOrb {
             return new Quadruple(lo, hi);
         }
 
-        public static Quadruple Cos(Quadruple x) => System.BitConverter.UInt128BitsToQuadruple(Binary128Arithmetic.Cos(System.BitConverter.QuadrupleToUInt128Bits(x)));
+        public static Quadruple Cos(Quadruple x) =>
+            System.BitConverter.UInt128BitsToQuadruple(Binary128Arithmetic.Cos(System.BitConverter.QuadrupleToUInt128Bits(x)));
 
-        public static Quadruple Cos(Quadruple x, MidpointRounding mode) => System.BitConverter.UInt128BitsToQuadruple(Binary128Arithmetic.Cos(System.BitConverter.QuadrupleToUInt128Bits(x), mode));
-
+        public static Quadruple Cos(Quadruple x, MidpointRounding mode) =>
+            System.BitConverter.UInt128BitsToQuadruple(Binary128Arithmetic.Cos(System.BitConverter.QuadrupleToUInt128Bits(x), mode));
 
         public static Quadruple Cosh(Quadruple x) {
             // TODO: Provide a correct impl.
@@ -2052,7 +2675,6 @@ namespace UltimateOrb {
         }
 
         public static Quadruple Log(Quadruple x) {
-            //return System.Math.Log((double)x);
             var lo = Binary128Arithmetic.Log(x._Lo64Bits, x._Hi64Bits, MidpointRounding.ToEven, out var hi);
             return new Quadruple(lo, hi);
         }
@@ -2208,7 +2830,7 @@ namespace UltimateOrb {
 
         public static Quadruple Compound(Quadruple x, int n) {
             // TODO: Provide a correct-rounding impl
-            
+
             // (1 + x)^n with full IEEE‑754 semantics
 
             //  Classification
@@ -2220,7 +2842,7 @@ namespace UltimateOrb {
             if (x._UInt128Bits == Quadruple.NegativeOne._UInt128Bits) return n < 0 ? Quadruple.PositiveInfinity/*divideByZero*/ : Quadruple.PositiveZero;
             if (IsQuietNaN(x)) return x;
             if (n == 1) return Quadruple.One + x;
-            
+
             return Exp(LogP1(x) * n);
         }
 
@@ -2272,7 +2894,7 @@ namespace UltimateOrb {
 
         public static Quadruple RootN(Quadruple x, int n) {
             // TODO: Provide a correct-rounding impl
-       
+
             // Classification
             if (IsNaN(x)) return CanonicalizeAndResetSignalingNaN(x);
             if (n == 0) return Quadruple.NaN; // invalid
@@ -2355,9 +2977,11 @@ namespace UltimateOrb {
             return new Quadruple(lo, hi);
         }
 
-        public static Quadruple Sin(Quadruple x) => System.BitConverter.UInt128BitsToQuadruple(Binary128Arithmetic.Sin(System.BitConverter.QuadrupleToUInt128Bits(x)));
+        public static Quadruple Sin(Quadruple x) =>
+            System.BitConverter.UInt128BitsToQuadruple(Binary128Arithmetic.Sin(System.BitConverter.QuadrupleToUInt128Bits(x)));
 
-        public static Quadruple Sin(Quadruple x, MidpointRounding mode) => System.BitConverter.UInt128BitsToQuadruple(Binary128Arithmetic.Sin(System.BitConverter.QuadrupleToUInt128Bits(x), mode));
+        public static Quadruple Sin(Quadruple x, MidpointRounding mode) =>
+            System.BitConverter.UInt128BitsToQuadruple(Binary128Arithmetic.Sin(System.BitConverter.QuadrupleToUInt128Bits(x), mode));
 
         public static (Quadruple Sin, Quadruple Cos) SinCos(Quadruple x) {
             var (s, c) = Binary128Arithmetic.SinCos(System.BitConverter.QuadrupleToUInt128Bits(x));
@@ -2467,7 +3091,7 @@ namespace UltimateOrb {
             Quadruple ax = Quadruple.Abs(x);
 
             // Large x → tanh(x) ≈ ±1
-            if (ax > (Quadruple)20)
+            if (ax > (Quadruple)40)
                 return Quadruple.CopySign(Quadruple.One, x);
 
             Quadruple e2x = Quadruple.Exp(x + x);
@@ -6057,8 +6681,6 @@ namespace UltimateOrb.Internal.System {
     using Globalization;
 
     static partial class Extensions {
-
-
 
         extension(NumberFormatInfo) {
 

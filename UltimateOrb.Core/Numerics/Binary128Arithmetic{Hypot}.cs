@@ -43,7 +43,7 @@ namespace UltimateOrb.Numerics {
         
         /*
         // approximate high 128 bits of a 128-bit square; at most 2 units short
-        static UInt128 SquareHighUnsignedApproximate(UInt128 a) {
+        static UInt128 SquareHighApproximate(UInt128 a) {
             unchecked {
                 UInt64 al = (UInt64)a, ah = (UInt64)(a >> 64);
                 UInt128 a10 = (UInt128)al * ah;

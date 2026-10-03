@@ -14,7 +14,10 @@ namespace UltimateOrb.Numerics.Specialized {
     }
 }
 */
+using System.Numerics;
+using System.Runtime.InteropServices;
 using UltimateOrb;
+using UltimateOrb.Ex0003;
 using UltimateOrb.Numerics;
 using UltimateOrb.Numerics.Extensions;
 
@@ -983,6 +986,12 @@ public readonly struct TotalOrderIeee754Comparer<T> :
 
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private static int Main(string[] args) {
+            {
+                return AugmentedArithmeticTests.Main0933(args);
+            }
+            {
+                return UltimateOrb.Numerics.Test.Program.Main1();
+            }
             {
                 var sdfa = Quadruple.RootN(-0.0, -2);
                 Console.WriteLine($"? = {sdfa:G36}");
@@ -3813,4 +3822,628 @@ namespace UltimateOrb {
 }
 
 
+namespace UltimateOrb.Numerics.Test {
+
+    // 24-byte TStorage: hits the AddUncheckedNaive tier (sizeof > sizeof(UInt128)).
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct S192 {
+        public ulong A, B, C;
+    }
+
+    internal static class Program {
+
+        static int _passed;
+        static int _failed;
+
+        static void CheckEquals(BigInteger actual, BigInteger expected, string name) {
+            if (actual == expected) { _passed++; } else {
+                _failed++;
+                Console.WriteLine($"  FAIL: {name} -- expected {expected}, got {actual}");
+            }
+        }
+
+        static void CheckThrowsOverflow(Action action, string name) {
+            try {
+                action();
+                _failed++;
+                Console.WriteLine($"  FAIL: {name} -- expected OverflowException, none thrown");
+            } catch (OverflowException) {
+                _passed++;
+            } catch (Exception ex) {
+                _failed++;
+                Console.WriteLine($"  FAIL: {name} -- expected OverflowException, got {ex.GetType().Name}: {ex.Message}");
+            }
+        }
+
+        public static int Main1() {
+            Console.WriteLine("=== UIntN + operator ===");
+            RunUIntAddTests<byte>("UIntN<byte>");
+            RunUIntAddTests<ushort>("UIntN<ushort>");
+            RunUIntAddTests<uint>("UIntN<uint>");
+            RunUIntAddTests<ulong>("UIntN<ulong>");
+            RunUIntAddTests<System.UInt128>("UIntN<UInt128>");
+            RunUIntAddTests<S192>("UIntN<S192>");       // 24-byte TStorage -> naive tier
+
+            Console.WriteLine("=== IntN + operator ===");
+            RunIntAddTests<sbyte>("IntN<sbyte>");
+            RunIntAddTests<short>("IntN<short>");
+            RunIntAddTests<int>("IntN<int>");
+            RunIntAddTests<long>("IntN<long>");
+            RunIntAddTests<System.Int128>("IntN<Int128>");
+
+            Console.WriteLine("=== UIntN <-> IntN conversions ===");
+            RunCrossConversionTests();
+
+            Console.WriteLine("=== BigInteger conversions ===");
+            RunBigIntegerConversionTests();
+
+            Console.WriteLine();
+            Console.WriteLine($"Passed: {_passed}, Failed: {_failed}");
+            return _failed == 0 ? 0 : 1;
+        }
+
+        // ---------------------------------------------------------------------
+        // Unsigned addition
+        // ---------------------------------------------------------------------
+
+        static void RunUIntAddTests<TStorage>(string label) where TStorage : unmanaged {
+            int bits = sizeof(TStorage) * 8;
+            BigInteger umax = (BigInteger.One << bits) - 1;
+
+            var zero = (UIntN<TStorage>)BigInteger.Zero;
+            var one = (UIntN<TStorage>)BigInteger.One;
+            var max = (UIntN<TStorage>)umax;
+            var maxMinus1 = (UIntN<TStorage>)(umax - 1);
+
+            // --- unchecked, in-range ---
+            CheckEquals((BigInteger)(one + one), 2, $"{label}: 1 + 1 = 2");
+            CheckEquals((BigInteger)(zero + zero), 0, $"{label}: 0 + 0 = 0");
+            CheckEquals((BigInteger)(max + zero), umax, $"{label}: max + 0 = max");
+            CheckEquals((BigInteger)(zero + max), umax, $"{label}: 0 + max = max");
+            CheckEquals((BigInteger)(maxMinus1 + one), umax, $"{label}: (max-1) + 1 = max");
+
+            // --- unchecked, wrapping ---
+            CheckEquals((BigInteger)(max + one), 0, $"{label}: max + 1 wraps to 0");
+            CheckEquals((BigInteger)(max + max), (BigInteger.One << bits) - 2,
+                                                                    $"{label}: max + max = max - 1 (mod 2^n)");
+
+            // --- checked, in-range ---
+            CheckEquals((BigInteger)checked(one + one), 2, $"{label}: checked 1 + 1 = 2");
+            CheckEquals((BigInteger)checked(max + zero), umax, $"{label}: checked max + 0 = max");
+            CheckEquals((BigInteger)checked(maxMinus1 + one), umax, $"{label}: checked (max-1) + 1 = max");
+
+            // --- checked, overflow ---
+            CheckThrowsOverflow(() => { _ = checked(max + one); },
+                                                                    $"{label}: checked max + 1 throws");
+        }
+
+        // ---------------------------------------------------------------------
+        // Signed addition
+        // ---------------------------------------------------------------------
+
+        static void RunIntAddTests<TStorage>(string label) where TStorage : unmanaged {
+            int bits = sizeof(TStorage) * 8;
+            BigInteger smax = (BigInteger.One << (bits - 1)) - 1;
+            BigInteger smin = -(BigInteger.One << (bits - 1));
+
+            var zero = (IntN<TStorage>)BigInteger.Zero;
+            var one = (IntN<TStorage>)BigInteger.One;
+            var minusOne = (IntN<TStorage>)BigInteger.MinusOne;
+            var max = (IntN<TStorage>)smax;
+            var min = (IntN<TStorage>)smin;
+
+            // --- unchecked, in-range ---
+            CheckEquals((BigInteger)(one + minusOne), 0, $"{label}: 1 + (-1) = 0");
+            CheckEquals((BigInteger)(one + one), 2, $"{label}: 1 + 1 = 2");
+            CheckEquals((BigInteger)(minusOne + minusOne), -2, $"{label}: (-1) + (-1) = -2");
+            CheckEquals((BigInteger)(max + zero), smax, $"{label}: max + 0 = max");
+            CheckEquals((BigInteger)(min + zero), smin, $"{label}: min + 0 = min");
+            CheckEquals((BigInteger)(max + minusOne), smax - 1, $"{label}: max + (-1) = max-1");
+            CheckEquals((BigInteger)(min + one), smin + 1, $"{label}: min + 1 = min+1");
+
+            // --- unchecked, wrapping ---
+            CheckEquals((BigInteger)(max + one), smin, $"{label}: max + 1 wraps to min");
+            CheckEquals((BigInteger)(min + minusOne), smax, $"{label}: min + (-1) wraps to max");
+
+            // --- checked, in-range ---
+            CheckEquals((BigInteger)checked(one + one), 2, $"{label}: checked 1 + 1 = 2");
+            CheckEquals((BigInteger)checked(max + minusOne), smax - 1,
+                                                                    $"{label}: checked max + (-1) = max-1");
+            CheckEquals((BigInteger)checked(min + one), smin + 1, $"{label}: checked min + 1 = min+1");
+
+            // --- checked, overflow ---
+            CheckThrowsOverflow(() => { _ = checked(max + one); },
+                                                                    $"{label}: checked max + 1 throws");
+            CheckThrowsOverflow(() => { _ = checked(min + minusOne); },
+                                                                    $"{label}: checked min + (-1) throws");
+        }
+
+        // ---------------------------------------------------------------------
+        // UIntN <-> IntN conversions
+        // ---------------------------------------------------------------------
+
+        static void RunCrossConversionTests() {
+            // UIntN -> IntN, unchecked (bit-cast semantics)
+            {
+                var u200 = (UIntN<byte>)(BigInteger)200;
+                var i = (IntN<byte>)u200;       // unchecked explicit
+                CheckEquals((BigInteger)i, -56, "UIntN<byte> 200 -> IntN<byte> unchecked = -56");
+
+                var u100 = (UIntN<byte>)(BigInteger)100;
+                CheckEquals((BigInteger)(IntN<byte>)u100, 100,
+                                                    "UIntN<byte> 100 -> IntN<byte> unchecked = 100");
+            }
+
+            // UIntN -> IntN, checked
+            {
+                var u100 = (UIntN<byte>)(BigInteger)100;
+                CheckEquals((BigInteger)checked((IntN<byte>)u100), 100,
+                                                    "UIntN<byte> 100 -> IntN<byte> checked OK");
+
+                var u200 = (UIntN<byte>)(BigInteger)200;
+                CheckThrowsOverflow(() => { _ = checked((IntN<byte>)u200); },
+                                                    "UIntN<byte> 200 -> IntN<byte> checked throws");
+            }
+
+            // IntN -> UIntN, unchecked
+            {
+                var neg = (IntN<byte>)BigInteger.MinusOne;
+                CheckEquals((BigInteger)(UIntN<byte>)neg, 255,
+                                                    "IntN<byte> -1 -> UIntN<byte> unchecked = 255");
+
+                var pos = (IntN<byte>)BigInteger.CreateChecked(42);
+                CheckEquals((BigInteger)(UIntN<byte>)pos, 42,
+                                                    "IntN<byte> 42 -> UIntN<byte> unchecked = 42");
+            }
+
+            // IntN -> UIntN, checked
+            {
+                var pos = (IntN<byte>)BigInteger.CreateChecked(42);
+                CheckEquals((BigInteger)checked((UIntN<byte>)pos), 42,
+                                                    "IntN<byte> 42 -> UIntN<byte> checked OK");
+
+                var neg = (IntN<byte>)BigInteger.MinusOne;
+                CheckThrowsOverflow(() => { _ = checked((UIntN<byte>)neg); },
+                                                    "IntN<byte> -1 -> UIntN<byte> checked throws");
+
+                var neg32 = (IntN<uint>)BigInteger.MinusOne;
+                CheckThrowsOverflow(() => { _ = checked((UIntN<uint>)neg32); },
+                                                    "IntN<uint> -1 -> UIntN<uint> checked throws");
+            }
+
+            // Boundary: UIntN<ulong> values around signed max
+            {
+                var justBelow = (UIntN<ulong>)((BigInteger.One << 63) - 1);
+                var atBoundary = (UIntN<ulong>)(BigInteger.One << 63);
+
+                CheckEquals((BigInteger)checked((IntN<ulong>)justBelow), (BigInteger.One << 63) - 1,
+                                                    "UIntN<ulong> 2^63 - 1 -> IntN<ulong> checked OK");
+                CheckThrowsOverflow(() => { _ = checked((IntN<ulong>)atBoundary); },
+                                                    "UIntN<ulong> 2^63 -> IntN<ulong> checked throws");
+            }
+        }
+
+        // ---------------------------------------------------------------------
+        // BigInteger conversions
+        // ---------------------------------------------------------------------
+
+        static void RunBigIntegerConversionTests() {
+            // implicit out
+            {
+                BigInteger b = (UIntN<uint>)(BigInteger)0xDEADBEEFu;
+                CheckEquals(b, 0xDEADBEEFu, "UIntN<uint> implicit -> BigInteger");
+
+                BigInteger sb = (IntN<int>)(BigInteger)(-123456);
+                CheckEquals(sb, -123456, "IntN<int> implicit -> BigInteger");
+            }
+
+            // UIntN explicit-checked boundaries
+            {
+                CheckEquals((BigInteger)checked((UIntN<byte>)(BigInteger)0), 0, "checked UIntN<byte> 0");
+                CheckEquals((BigInteger)checked((UIntN<byte>)(BigInteger)255), 255,
+                                                                                  "checked UIntN<byte> 255");
+                CheckThrowsOverflow(() => { _ = checked((UIntN<byte>)(BigInteger)256); },
+                                                                                  "checked UIntN<byte> 256 throws");
+                CheckThrowsOverflow(() => { _ = checked((UIntN<byte>)(BigInteger)(-1)); },
+                                                                                  "checked UIntN<byte> -1 throws");
+            }
+
+            // IntN explicit-checked boundaries
+            {
+                CheckEquals((BigInteger)checked((IntN<sbyte>)(BigInteger)127), 127,
+                                                                                  "checked IntN<sbyte> 127");
+                CheckEquals((BigInteger)checked((IntN<sbyte>)(BigInteger)(-128)), -128,
+                                                                                  "checked IntN<sbyte> -128");
+                CheckThrowsOverflow(() => { _ = checked((IntN<sbyte>)(BigInteger)128); },
+                                                                                  "checked IntN<sbyte> 128 throws");
+                CheckThrowsOverflow(() => { _ = checked((IntN<sbyte>)(BigInteger)(-129)); },
+                                                                                  "checked IntN<sbyte> -129 throws");
+            }
+
+            // Unchecked wraparound
+            {
+                CheckEquals((BigInteger)(UIntN<byte>)(BigInteger)256, 0, "unchecked UIntN<byte> 256 -> 0");
+                CheckEquals((BigInteger)(UIntN<byte>)(BigInteger)(-1), 255, "unchecked UIntN<byte> -1 -> 255");
+
+                CheckEquals((BigInteger)(IntN<sbyte>)(BigInteger)128, -128, "unchecked IntN<sbyte> 128 -> -128");
+                CheckEquals((BigInteger)(IntN<sbyte>)(BigInteger)(-129), 127, "unchecked IntN<sbyte> -129 -> 127");
+
+                CheckEquals((BigInteger)(IntN<uint>)(BigInteger)BigInteger.MinusOne, -1,
+                                                                                  "unchecked IntN<uint> -1");
+                CheckEquals((BigInteger)(IntN<uint>)(BigInteger)((BigInteger.One << 32) - 1), -1,
+                                                                                  "unchecked IntN<uint> 2^32-1 -> -1");
+                CheckEquals((BigInteger)(UIntN<ulong>)(BigInteger)((BigInteger.One << 64) - 1),
+                            (BigInteger.One << 64) - 1,
+                                                                                  "unchecked UIntN<ulong> 2^64-1");
+            }
+
+            // Wide (naive tier) roundtrip
+            {
+                BigInteger wideVal = (BigInteger.One << 100) + 0x1234;
+                var w = (UIntN<S192>)wideVal;
+                CheckEquals((BigInteger)w, wideVal, "UIntN<S192> 100-bit roundtrip");
+
+                var wNeg = (IntN<S192>)(-wideVal);
+                CheckEquals((BigInteger)wNeg, -wideVal, "IntN<S192> 100-bit negative roundtrip");
+            }
+        }
+    }
+}
+
+
+public static class AugmentedArithmeticTests {
+    static int _passed, _failed;
+
+    // -------------------- Constants & helpers --------------------
+    static Quadruple Q(UInt64 lo, UInt64 hi) =>
+        BitConverter.UInt128BitsToQuadruple(lo | ((System.UInt128)hi << 64));
+
+    static readonly Quadruple PosZero = Q(0UL, 0x0000000000000000UL);
+    static readonly Quadruple NegZero = Q(0UL, 0x8000000000000000UL);
+    static readonly Quadruple PosInf = Q(0UL, 0x7FFF000000000000UL);
+    static readonly Quadruple NegInf = Q(0UL, 0xFFFF000000000000UL);
+    static readonly Quadruple MinPosSub = Q(1UL, 0UL);
+
+    // Positive quiet NaN — matches the canonical QNaN produced by the
+    // arithmetic layer.
+    static readonly Quadruple NaN = Q(0UL, 0x7FFF800000000000UL);
+
+    static Quadruple FromInt(int v) => (Quadruple)v;
+    static Quadruple FromRat(BigRational r) =>
+        BigRational.ToQuadruple(r, FloatingPointRounding.ToNearestWithMidpointTowardZero);
+
+    static bool BitsEq(Quadruple a, Quadruple b) {
+        if (Quadruple.IsNaN(a) && Quadruple.IsNaN(b))
+            return Quadruple.IsSignalingNaN(a) == Quadruple.IsSignalingNaN(b);
+        return BitConverter.QuadrupleToUInt128Bits(a)
+            == BitConverter.QuadrupleToUInt128Bits(b);
+    }
+
+    static string Fmt(Quadruple q) =>
+        $"0x{BitConverter.QuadrupleToUInt128Bits(q):X32}";
+
+    static void Check(string name, (Quadruple R, Quadruple D) got,
+                                 (Quadruple R, Quadruple D) want) {
+        bool okR = BitsEq(got.R, want.R);
+        bool okD = BitsEq(got.D, want.D);
+        if (okR && okD) { _passed++; return; }
+        _failed++;
+        Console.WriteLine($"FAIL {name}");
+        if (!okR) Console.WriteLine($"  Rounded: got {Fmt(got.R)}  want {Fmt(want.R)}");
+        if (!okD) Console.WriteLine($"  Delta  : got {Fmt(got.D)}  want {Fmt(want.D)}");
+    }
+
+    // -------------------- Reference (spec oracle) --------------------
+
+    // IEEE-754 rule for the sign of a zero sum/difference whose exact value is
+    // zero: same-signed operands -> that sign; opposite-signed -> +0.
+    // (`y` already includes any negation needed for subtraction.)
+    static Quadruple ZeroSumSign(Quadruple x, Quadruple y) {
+        bool xNeg = Quadruple.IsNegative(x);
+        bool yNeg = Quadruple.IsNegative(y);
+        return (xNeg && yNeg) ? NegZero : PosZero;
+    }
+
+    // Sign of a zero that is the RTTZ rounding of a *nonzero* exact value.
+    static Quadruple ZeroFromExactSign(BigRational exact) =>
+        exact.Sign < 0 ? NegZero : PosZero;
+
+    static (Quadruple R, Quadruple D) RefAdd(Quadruple x, Quadruple y) {
+        if (Quadruple.IsNaN(x) || Quadruple.IsNaN(y)) return (NaN, NaN);
+        if (Quadruple.IsInfinity(x) || Quadruple.IsInfinity(y)) {
+            if (Quadruple.IsInfinity(x) && Quadruple.IsInfinity(y)
+                && Quadruple.IsNegative(x) != Quadruple.IsNegative(y))
+                return (NaN, NaN);
+            var inf = Quadruple.IsInfinity(x) ? x : y;
+            return (inf, inf);
+        }
+
+        var exact = (BigRational)x + (BigRational)y;
+
+        Quadruple rounded;
+        if (exact.Sign == 0) {
+            // BigRational has no signed zero; recover the sign from the
+            // original operands using IEEE-754's zero-sum rule.
+            rounded = ZeroSumSign(x, y);
+        } else {
+            rounded = FromRat(exact);
+            if (Quadruple.IsZero(rounded))
+                rounded = ZeroFromExactSign(exact);   // tiny nonzero rounding to zero
+        }
+
+        if (!Quadruple.IsFinite(rounded)) return (rounded, rounded);
+
+        var exactDelta = exact - (BigRational)rounded;
+        Quadruple delta;
+        if (exactDelta.Sign == 0) {
+            // Spec: "...returned with the sign of roundTiesTowardZero(x+y)".
+            delta = Quadruple.IsNegative(rounded) ? NegZero : PosZero;
+        } else {
+            delta = FromRat(exactDelta);
+            if (Quadruple.IsZero(delta))
+                delta = ZeroFromExactSign(exactDelta);
+        }
+        return (rounded, delta);
+    }
+
+    static (Quadruple R, Quadruple D) RefSub(Quadruple x, Quadruple y) =>
+        RefAdd(x, -y);
+
+    static (Quadruple R, Quadruple D) RefMul(Quadruple x, Quadruple y) {
+        if (Quadruple.IsNaN(x) || Quadruple.IsNaN(y)) return (NaN, NaN);
+        if (Quadruple.IsInfinity(x) || Quadruple.IsInfinity(y)) {
+            if (Quadruple.IsZero(x) || Quadruple.IsZero(y)) return (NaN, NaN);
+            bool sign = Quadruple.IsNegative(x) ^ Quadruple.IsNegative(y);
+            return sign ? (NegInf, NegInf) : (PosInf, PosInf);
+        }
+
+        bool signOfProduct = Quadruple.IsNegative(x) ^ Quadruple.IsNegative(y);
+        var exact = (BigRational)x * (BigRational)y;
+
+        Quadruple rounded;
+        if (exact.Sign == 0) {
+            // At least one operand is zero: sign is XOR of operand signs.
+            rounded = signOfProduct ? NegZero : PosZero;
+        } else {
+            rounded = FromRat(exact);
+            if (Quadruple.IsZero(rounded))
+                rounded = ZeroFromExactSign(exact);
+        }
+
+        if (!Quadruple.IsFinite(rounded)) return (rounded, rounded);
+
+        var exactDelta = exact - (BigRational)rounded;
+        Quadruple delta;
+        if (exactDelta.Sign == 0) {
+            delta = Quadruple.IsNegative(rounded) ? NegZero : PosZero;
+        } else {
+            delta = FromRat(exactDelta);
+            if (Quadruple.IsZero(delta))
+                delta = ZeroFromExactSign(exactDelta);
+        }
+        return (rounded, delta);
+    }
+
+    // -------------------- Explicit cases --------------------
+
+    static void RunExplicitAddTests() {
+        Check("add 1+2", Quadruple.AddAugmented(FromInt(1), FromInt(2)),
+                        (FromInt(3), PosZero));
+
+        Check("add x + (-x)", Quadruple.AddAugmented(FromInt(7), FromInt(-7)),
+                              (PosZero, PosZero));
+
+        var eps1 = FromRat(BigRational.Exp2(-113));   // ULP below 1
+        var eps2 = FromRat(BigRational.Exp2(-114));   // half-ULP below 1
+
+        Check("add 1 + 2^-113 (tie, RTTZ -> 1)",
+              Quadruple.AddAugmented(FromInt(1), eps1),
+              (FromInt(1), eps1));
+
+        var roundedBelow = FromRat(BigRational.One - BigRational.Exp2(-113));
+        Check("add 1 - 2^-114 (tie, RTTZ -> 1 - 2^-113)",
+              Quadruple.AddAugmented(FromInt(1), -eps2),
+              (roundedBelow, eps2));
+
+        Check("add +0 + +0", Quadruple.AddAugmented(PosZero, PosZero), (PosZero, PosZero));
+        Check("add -0 + -0", Quadruple.AddAugmented(NegZero, NegZero), (NegZero, NegZero));
+        Check("add +0 + -0", Quadruple.AddAugmented(PosZero, NegZero), (PosZero, PosZero));
+        Check("add -0 + +0", Quadruple.AddAugmented(NegZero, PosZero), (PosZero, PosZero));
+
+        Check("add +inf + 5", Quadruple.AddAugmented(PosInf, FromInt(5)), (PosInf, PosInf));
+        Check("add -inf + 5", Quadruple.AddAugmented(NegInf, FromInt(5)), (NegInf, NegInf));
+        Check("add +inf + -inf (invalid)", Quadruple.AddAugmented(PosInf, NegInf), (NaN, NaN));
+
+        Check("add 2*minSub",
+              Quadruple.AddAugmented(MinPosSub, MinPosSub),
+              (FromRat(BigRational.Exp2(-16493)), PosZero));
+
+        var big = FromRat(BigRational.One + BigRational.Exp2(-112));
+        Check("add (1+2^-112) + (-1)",
+              Quadruple.AddAugmented(big, FromInt(-1)),
+              (FromRat(BigRational.Exp2(-112)), PosZero));
+
+        // RTTZ at the overflow midpoint.  Midpoint = 2^16384 − 2^16270;
+        // max finite = 2^16384 − 2^16271.  Spec: an infinitely precise result
+        // exactly equal to the midpoint rounds to max finite (not to infinity).
+        var maxF = FromRat(BigRational.Exp2(16384) - BigRational.Exp2(16271));
+        var delta = FromRat(BigRational.Exp2(16270));   // = midpoint − maxF
+        Check("add overflow tie at midpoint",
+              Quadruple.AddAugmented(maxF, delta),
+              (maxF, delta));
+
+        // Just above the midpoint → +Inf.  NB: 2^16270 + 1 is NOT representable
+        // in binary128 (ULP at 2^16270 is 2^16158), so we must pick a value
+        // that survives FromRat unchanged.  maxF + (2^16270 + 2^16158) is
+        // the smallest representable value strictly above the midpoint.
+        var justAbove = FromRat(BigRational.Exp2(16270) + BigRational.Exp2(16158));
+        Check("add overflow just above midpoint",
+              Quadruple.AddAugmented(maxF, justAbove),
+              (PosInf, PosInf));
+    }
+
+    static void RunExplicitSubTests() {
+        Check("sub 1-2", Quadruple.SubtractAugmented(FromInt(1), FromInt(2)),
+                        (FromInt(-1), NegZero));
+
+        Check("sub x-x", Quadruple.SubtractAugmented(FromInt(42), FromInt(42)),
+                        (PosZero, PosZero));
+
+        Check("sub +inf - +inf (invalid)",
+              Quadruple.SubtractAugmented(PosInf, PosInf), (NaN, NaN));
+
+        Check("sub -0 - -0", Quadruple.SubtractAugmented(NegZero, NegZero),
+                             (PosZero, PosZero));
+
+        // NEW: sign-of-zero coverage for subtraction.
+        Check("sub -0 - +0", Quadruple.SubtractAugmented(NegZero, PosZero),
+                             (NegZero, NegZero));
+        Check("sub +0 - -0", Quadruple.SubtractAugmented(PosZero, NegZero),
+                             (PosZero, PosZero));
+        Check("sub +0 - +0", Quadruple.SubtractAugmented(PosZero, PosZero),
+                             (PosZero, PosZero));
+
+        var y = FromRat(BigRational.One - BigRational.Exp2(-112));
+        Check("sub 1 - (1-2^-112)",
+              Quadruple.SubtractAugmented(FromInt(1), y),
+              (FromRat(BigRational.Exp2(-112)), PosZero));
+    }
+
+    static void RunExplicitMulTests() {
+        Check("mul 2*3", Quadruple.MultiplyAugmented(FromInt(2), FromInt(3)),
+                        (FromInt(6), PosZero));
+
+        Check("mul 0*inf (invalid)",
+              Quadruple.MultiplyAugmented(PosZero, PosInf), (NaN, NaN));
+
+        Check("mul inf*inf", Quadruple.MultiplyAugmented(PosInf, PosInf), (PosInf, PosInf));
+        Check("mul inf*-inf", Quadruple.MultiplyAugmented(PosInf, NegInf), (NegInf, NegInf));
+
+        Check("mul (+0)*(-1)", Quadruple.MultiplyAugmented(PosZero, FromInt(-1)),
+                               (NegZero, NegZero));
+        Check("mul (-0)*(-1)", Quadruple.MultiplyAugmented(NegZero, FromInt(-1)),
+                               (PosZero, PosZero));
+
+        // NEW: zero * zero sign-of-zero coverage.
+        Check("mul (+0)*(+0)", Quadruple.MultiplyAugmented(PosZero, PosZero),
+                               (PosZero, PosZero));
+        Check("mul (+0)*(-0)", Quadruple.MultiplyAugmented(PosZero, NegZero),
+                               (NegZero, NegZero));
+        Check("mul (-0)*(+0)", Quadruple.MultiplyAugmented(NegZero, PosZero),
+                               (NegZero, NegZero));
+        Check("mul (-0)*(-0)", Quadruple.MultiplyAugmented(NegZero, NegZero),
+                               (PosZero, PosZero));
+
+        var s = FromRat(BigRational.One + BigRational.Exp2(-112));
+        Check("mul (1+2^-112)^2",
+              Quadruple.MultiplyAugmented(s, s),
+              (FromRat(BigRational.One + BigRational.Exp2(-111)),
+               FromRat(BigRational.Exp2(-224))));
+
+        Check("mul 2^500 * 2^-500",
+              Quadruple.MultiplyAugmented(FromRat(BigRational.Exp2(500)),
+                                          FromRat(BigRational.Exp2(-500))),
+              (FromInt(1), PosZero));
+
+        var maxF = FromRat(BigRational.Exp2(16384) - BigRational.Exp2(16271));
+        Check("mul overflow",
+              Quadruple.MultiplyAugmented(maxF, FromInt(4)), (PosInf, PosInf));
+    }
+
+    // ---------- tests targeting sign-of-zero and subnormal δ ----------
+
+    static void RunUnderflowSignTests() {
+        var halfUlp = FromRat(BigRational.Exp2(-113));
+        var smallNorm = FromRat(BigRational.Exp2(-16382));
+
+        Check("mul underflow tie, positive",
+              Quadruple.MultiplyAugmented(smallNorm, halfUlp), (PosZero, PosZero));
+
+        Check("mul underflow tie, negative",
+              Quadruple.MultiplyAugmented(-smallNorm, halfUlp), (NegZero, NegZero));
+
+        // x = 2^-16494, y = 1 - 2^-112
+        //   x*y = 2^-16494 - 2^-16606
+        //   rounded = 2^-16494 (min subnormal), exact delta = -2^-16606
+        //   (below smallest subnormal; RTTZ -> -0).
+        var y = FromRat(BigRational.One - BigRational.Exp2(-112));
+        Check("mul tiny negative delta below subnormal min",
+              Quadruple.MultiplyAugmented(MinPosSub, y),
+              (MinPosSub, NegZero));
+
+        Check("mul tiny negative delta, reversed operands",
+              Quadruple.MultiplyAugmented(y, MinPosSub),
+              (MinPosSub, NegZero));
+    }
+
+    // -------------------- Fuzz --------------------
+
+    // Full-range 64-bit draws.  Random.Next() returns only 31 bits, so the
+    // old shim silently zeroed bit 31 and bit 63 of every Quadruple produced
+    // by RandBits (making the "finite" fuzz leg all-positive).
+    static ulong NextUInt64(Random r) {
+        var buf = new byte[8];
+        r.NextBytes(buf);
+        return BitConverter.ToUInt64(buf, 0);
+    }
+
+    static Quadruple RandBits(Random r) => Q(NextUInt64(r), NextUInt64(r));
+
+    static Quadruple RandFinite(Random r) {
+        for (int i = 0; i < 8; i++) {
+            var q = RandBits(r);
+            if (Quadruple.IsFinite(q)) return q;
+        }
+        return FromInt(1);
+    }
+
+    static Quadruple RandSmallExp(Random r) {
+        ulong lo = NextUInt64(r);
+        ulong hi = NextUInt64(r);
+        int exp = r.Next(80);
+        hi = (hi & 0x8000FFFFFFFFFFFFUL) | ((ulong)exp << 48);
+        return Q(lo, hi);
+    }
+
+    static Quadruple RandBigExp(Random r) {
+        ulong lo = NextUInt64(r);
+        ulong hi = NextUInt64(r);
+        int exp = 0x7FFE - r.Next(80);
+        hi = (hi & 0x8000FFFFFFFFFFFFUL) | ((ulong)exp << 48);
+        return Q(lo, hi);
+    }
+
+    static void RunFuzzTests(int iters) {
+        var rng = new Random(0xC0FFEE);
+        for (int i = 0; i < iters; i++) {
+            Quadruple x, y;
+            switch (i % 3) {
+            case 0: x = RandFinite(rng); y = RandFinite(rng); break;
+            case 1: x = RandSmallExp(rng); y = RandSmallExp(rng); break;
+            default: x = RandBigExp(rng); y = RandBigExp(rng); break;
+            }
+
+            Check($"fuzz add [{i}] x={Fmt(x)} y={Fmt(y)}",
+                  Quadruple.AddAugmented(x, y), RefAdd(x, y));
+            Check($"fuzz sub [{i}] x={Fmt(x)} y={Fmt(y)}",
+                  Quadruple.SubtractAugmented(x, y), RefSub(x, y));
+            Check($"fuzz mul [{i}] x={Fmt(x)} y={Fmt(y)}",
+                  Quadruple.MultiplyAugmented(x, y), RefMul(x, y));
+        }
+    }
+
+    // -------------------- Entry point --------------------
+
+    public static int Main0933(string[] args) {
+        RunExplicitAddTests();
+        RunExplicitSubTests();
+        RunExplicitMulTests();
+        RunUnderflowSignTests();
+        RunFuzzTests(2000);
+        Console.WriteLine($"\n{_passed} passed, {_failed} failed");
+        return _failed == 0 ? 0 : 1;
+    }
+}
+
 #pragma warning restore UoWIP // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+

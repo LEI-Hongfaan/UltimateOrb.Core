@@ -100,7 +100,7 @@ namespace UltimateOrb.Numerics {
 
                 UInt128 mVal = ((UInt128)mHi << 64) | mLo;
                 // (u128)r01 * r23 : promote both to u128 before multiply.
-                UInt128 rh = BigMulFull(mVal, (UInt128)r01 * (UInt128)r23, out UInt128 rl);
+                UInt128 rh = Math.BigMul(mVal, (UInt128)r01 * (UInt128)r23, out UInt128 rl);
                 UInt64 rhh = (UInt64)(rh >> 64), rhl = (UInt64)rh;
                 UInt64 rlh = (UInt64)(rl >> 64);
                 mHi = (rhh << 40) | (rhl >> 24);
@@ -467,10 +467,10 @@ namespace UltimateOrb.Numerics {
         // ═══════════════════════════════════════════════════════════════════
         // Local helpers
         // ═══════════════════════════════════════════════════════════════════
-
+        /*
         // mUUp : 128×128 → (lo128, hi128)
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static UInt128 BigMulFull(UInt128 a, UInt128 b, out UInt128 lo) {
+        internal static UInt128 BigMulUnsigned(UInt128 a, UInt128 b, out UInt128 lo) {
             unchecked {
                 UInt64 a0 = (UInt64)a, a1 = (UInt64)(a >> 64);
                 UInt64 b0 = (UInt64)b, b1 = (UInt64)(b >> 64);
@@ -496,6 +496,7 @@ namespace UltimateOrb.Numerics {
                 return ((UInt128)word3 << 64) | word2;
             }
         }
+        */
 
         // rlshft (C) : logical right shift of a 3-word value by s ≥ 0.
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

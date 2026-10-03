@@ -1364,15 +1364,6 @@
                 </para>
             </summary>
         </member>
-        <member name="T:UltimateOrb.RowShiftCount`1">
-            <summary>
-            A strongly typed shift count for row shifts. This generic struct leverages
-            generic math (via INumber{TBase}) and allows for implicit conversion from the numeric type.
-            </summary>
-        </member>
-        <member name="M:UltimateOrb.RowShiftCount`1.ToString">
-            <inheritdoc/>
-        </member>
         <member name="T:UltimateOrb.Collections.Generic.ReferenceTypes.LinkedTree`1.PreorderNodeModifiableEnumerator">
             <summary>
             modifiable:
@@ -9789,6 +9780,57 @@
             A typed null. Use this field when you pass null/nullptr.
             </summary>
         </member>
+        <member name="M:UltimateOrb.Quadruple.AddAugmented(UltimateOrb.Quadruple,UltimateOrb.Quadruple)">
+            <summary>
+                The IEEE Std 754-2019 <c>augmentedAddition</c>.
+                Returns <c>(roundTiesTowardZero(x + y), (x + y) - roundTiesTowardZero(x + y))</c>.
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.Quadruple.SubtractAugmented(UltimateOrb.Quadruple,UltimateOrb.Quadruple)">
+            <summary>
+                The IEEE Std 754-2019 <c>augmentedSubtraction</c>.
+                Returns <c>(roundTiesTowardZero(x - y), (x - y) - roundTiesTowardZero(x - y))</c>.
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.Quadruple.MultiplyAugmented(UltimateOrb.Quadruple,UltimateOrb.Quadruple)">
+            <summary>
+                The IEEE Std 754-2019 <c>augmentedMultiplication</c>.
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.Quadruple.ShiftRight256Extract(System.UInt128,System.UInt128,System.Int32)">
+            <summary>M >> k with jam-extraction of the discarded bits (1 ≤ k ≤ 255).</summary>
+            <summary>
+                M >> k with jam-extraction of the discarded bits (1 ≤ k ≤ 255 normally,
+                but k ≥ 256 is also handled — this happens when the exact product lies
+                far below the subnormal range and the significance would be negative).
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.Quadruple.PackBinary128(System.Int32,System.UInt128,System.Int32)">
+            <summary>
+                Pack a binary128 from a normalized significand and LSB exponent <paramref name="er"/>.
+                <c>er == −16494</c> with <c>ms &lt; 2^112</c> → subnormal; otherwise normal.
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.Quadruple.RoundMagnitudeToBinary128(System.UInt128,System.UInt128,System.Int32)">
+            <summary>
+                Rounds <c>a · 2^E</c> (a = <paramref name="a_hi"/>:<paramref name="a_lo"/>,
+                256-bit unsigned) to binary128 using roundTiesTowardZero.
+                Returns <c>(sig, LSBexp)</c> — caller packs with
+                <see cref="M:UltimateOrb.Quadruple.PackBinary128(System.Int32,System.UInt128,System.Int32)"/>.  <c>sig == 0</c> means the
+                rounded value is zero (sign applied by caller).
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.Quadruple.ProductIsExact(UltimateOrb.Quadruple,UltimateOrb.Quadruple,UltimateOrb.Quadruple)">
+            <summary>
+                True iff <c>x * y == rounded</c> exactly (all three finite).
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.Quadruple.IsMidpointTie(UltimateOrb.Quadruple,UltimateOrb.Quadruple,UltimateOrb.Quadruple,UltimateOrb.Quadruple)">
+            <summary>
+                Exact test: is <c>x*y == (re + rz) / 2</c> (the midpoint between the
+                two adjacent bracketing floats)?
+            </summary>
+        </member>
         <member name="M:UltimateOrb.Quadruple.GetFloatingPointClass(UltimateOrb.Quadruple)">
             <summary>
             The IEEE Std 754 <c>class</c>.
@@ -10269,6 +10311,15 @@
             <typeparam name="TArg">The type of the additional argument.</typeparam>
             <param name="byRef">The value to be passed by reference.</param>
             <param name="arg">The additional argument.</param>
+        </member>
+        <member name="T:UltimateOrb.RowShiftCount`1">
+            <summary>
+            A strongly typed shift count for row shifts. This generic struct leverages
+            generic math (via INumber{TBase}) and allows for implicit conversion from the numeric type.
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.RowShiftCount`1.ToString">
+            <inheritdoc/>
         </member>
         <member name="T:UltimateOrb.StandardFuncWrapper">
             <summary>

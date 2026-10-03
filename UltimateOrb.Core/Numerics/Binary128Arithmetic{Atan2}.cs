@@ -479,7 +479,7 @@ namespace UltimateOrb.Numerics {
         }
 
         // mu5u2u3 :  5 = 2 + 3.  first = b[0..1], second = a[0..2].
-        internal static void MultiplyUnsigned(
+        internal static void BigMulUnsigned(
             out InlineArray5<UInt64> result,
             in InlineArray2<UInt64> first,
             in InlineArray3<UInt64> second) {
@@ -531,7 +531,7 @@ namespace UltimateOrb.Numerics {
         }
 
         // mu7u5u2 :  7 = 5 + 2.  first = b[0..4], second = a[0..1].
-        internal static void MultiplyUnsigned(
+        internal static void BigMulUnsigned(
             out InlineArray7<UInt64> result,
             in InlineArray5<UInt64> first,
             in InlineArray2<UInt64> second) {
@@ -1624,7 +1624,7 @@ namespace UltimateOrb.Numerics {
                 InlineArray2<UInt64> rTop = default;
                 rTop[0] = r[4]; rTop[1] = r[5];
                 InlineArray5<UInt64> H;
-                MultiplyUnsigned(out H, in rTop, in kd);
+                BigMulUnsigned(out H, in rTop, in kd);
 
                 // sH = H >> 58 (top 3 words)
                 InlineArray3<UInt64> sH = default;
@@ -1648,7 +1648,7 @@ namespace UltimateOrb.Numerics {
 
                 // dR = mu7u5u2(H, r[4..5])
                 InlineArray7<UInt64> dR = default;
-                MultiplyUnsigned(out dR, in H, in rTop);
+                BigMulUnsigned(out dR, in H, in rTop);
 
                 if ((H[4] >> 63) != 0) {
                     dR[5] = SubtractWithBorrow(dR[5], r[4], 0, out cc);
@@ -2334,7 +2334,7 @@ namespace UltimateOrb.Numerics {
                 InlineArray2<UInt64> rTop = default;
                 rTop[0] = r[4]; rTop[1] = r[5];
                 InlineArray5<UInt64> H;
-                MultiplyUnsigned(out H, in rTop, in kd);
+                BigMulUnsigned(out H, in rTop, in kd);
 
                 InlineArray3<UInt64> sH = default;
                 sH[0] = (H[0] >> 58) | (H[1] << 6);
@@ -2354,7 +2354,7 @@ namespace UltimateOrb.Numerics {
                 H[4] = SubtractWithBorrow(H[4], 0, cc, out cc);
 
                 InlineArray7<UInt64> dR = default;
-                MultiplyUnsigned(out dR, in H, in rTop);
+                BigMulUnsigned(out dR, in H, in rTop);
 
                 if ((H[4] >> 63) != 0) {
                     dR[5] = SubtractWithBorrow(dR[5], r[4], 0, out cc);

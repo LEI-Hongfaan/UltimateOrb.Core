@@ -8,10 +8,15 @@ using static UltimateOrb.Utilities.BooleanIntegerModule;
 using static UltimateOrb.Utilities.ThrowHelper;
 
 namespace UltimateOrb.Numerics {
-
-#if NET8_0_OR_GREATER
-    [Experimental("UoWIP")]
+#if !NET8_0_OR_GREATER
+    using UInt128 = UltimateOrb.UInt128;
+    using Int128 = UltimateOrb.Int128;
+#else
+    using UInt128 = System.UInt128;
+    using Int128 = System.Int128;
 #endif
+
+    [Experimental("UoWIP")]
     public static partial class Binary128Arithmetic {
 
         public const int FractionBitCount = 112;
@@ -252,10 +257,141 @@ namespace UltimateOrb.Numerics {
 
             return result;
         }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static UInt64 GetBitsFromRawPartsWithRounding(
+            UInt64 fraction_cy, UInt64 fraction_lo, UInt64 fraction_hi,
+            int exponent, int sign,
+            [ConstantExpected] FloatingPointRounding rounding,
+            out UInt64 result_hi) {
 
+            // ------ Underflow pre-shift ------
+            // When the (biased − 1) exponent is below the smallest normal, force it to 0
+            // and shift the significand right, jamming the discarded bits into the round/sticky.
+            if (unchecked((uint)exponent) >= 0x7FFD && exponent < 0) {
+                fraction_cy = ShiftRightWithJamming(fraction_cy, fraction_lo, fraction_hi,
+                                                    -exponent, out fraction_lo, out fraction_hi);
+                exponent = 0;
+            }
+
+            // ------ Extract round bit and sticky ------
+            // fraction_cy's MSB is the guard/round bit; the remaining bits are the sticky (jam).
+            bool roundBit = 0 != (fraction_cy & 0x8000000000000000UL);
+            bool sticky = 0 != (fraction_cy & 0x7FFFFFFFFFFFFFFFUL);
+            bool inexact = roundBit || sticky;
+
+            // ------ Decide whether to increment the significand ------
+            // Semantics: increment means "+1 ULP of magnitude" (the significand is
+            // unsigned, so adding 1 increases |value|).
+            bool increment = false;
+            bool forceOdd = false;      // used by ToOdd (round-toward-zero, then set LSB)
+            if (inexact) {
+                bool lsbOdd = 0 != (fraction_lo & 1);
+                switch (rounding) {
+                case FloatingPointRounding.ToNearestWithMidpointToEven:
+                    // Half-up unless tie: on tie, keep LSB even.
+                    increment = roundBit && (sticky || lsbOdd);
+                    break;
+                case FloatingPointRounding.ToNearestWithMidpointAwayFromZero:
+                    // Half-up always (magnitude increases on tie).
+                    increment = roundBit;
+                    break;
+                case FloatingPointRounding.ToNearestWithMidpointTowardZero:
+                    // Half-down always (magnitude unchanged on tie).
+                    increment = roundBit && sticky;
+                    break;
+                case FloatingPointRounding.ToNearestWithMidpointUpward:
+                    // Half-up on tie iff sign == 0.
+                    increment = roundBit && (sticky || 0 == sign);
+                    break;
+                case FloatingPointRounding.ToNearestWithMidpointDownward:
+                    // Half-up on tie iff sign != 0.
+                    increment = roundBit && (sticky || 0 != sign);
+                    break;
+                case FloatingPointRounding.ToNearestWithMidpointToOdd:
+                    // Half-up on tie iff LSB is even (to make the result odd).
+                    increment = roundBit && (sticky || !lsbOdd);
+                    break;
+                case FloatingPointRounding.Upward:
+                    increment = 0 == sign;
+                    break;
+                case FloatingPointRounding.Downward:
+                    increment = 0 != sign;
+                    break;
+                case FloatingPointRounding.TowardZero:
+                    // Truncate; no change.
+                    break;
+                case FloatingPointRounding.TowardInfinity:
+                    // Away from zero: increment whenever inexact.
+                    increment = true;
+                    break;
+                case FloatingPointRounding.ToOdd:
+                    // Preserve inexactness by forcing odd.  If the LSB is already odd,
+                    // the significand already satisfies round-to-odd.
+                    forceOdd = !lsbOdd;
+                    break;
+                default:
+                    Debug.Assert(false);
+                    break;
+                }
+            }
+
+            // ------ Overflow check ------
+            // Reached when (internal) exponent ≥ 0x7FFD, meaning the biased result would
+            // be ≥ 0x7FFE.  Overflow happens if:
+            //   * exponent > 0x7FFD (the significand cannot pull it back), or
+            //   * exponent == 0x7FFD and the significand is at max and we are about to
+            //     increment (the carry propagates out of the significand field).
+            if (unchecked((uint)exponent) >= 0x7FFD) {
+                bool significandAtMax =
+                    fraction_lo == 0xFFFFFFFFFFFFFFFFUL &&
+                    fraction_hi == 0x0001FFFFFFFFFFFFUL;
+
+                if (0x7FFD < exponent || (exponent == 0x7FFD && significandAtMax && increment)) {
+                    bool toInfinity = rounding switch {
+                        // All "nearest" modes: §7.4 and §9.5 say all overflows carry to ±∞.
+                        FloatingPointRounding.ToNearestWithMidpointToEven => true,
+                        FloatingPointRounding.ToNearestWithMidpointAwayFromZero => true,
+                        FloatingPointRounding.ToNearestWithMidpointTowardZero => true,   // §9.5
+                        FloatingPointRounding.ToNearestWithMidpointUpward => true,
+                        FloatingPointRounding.ToNearestWithMidpointDownward => true,
+                        FloatingPointRounding.ToNearestWithMidpointToOdd => true,
+                        // Directed away-from-zero also carries to ±∞.
+                        FloatingPointRounding.TowardInfinity => true,
+                        // Directed by sign.
+                        FloatingPointRounding.Upward => 0 == sign,
+                        FloatingPointRounding.Downward => 0 != sign,
+                        // Toward-zero clamps to ±MaxValue.
+                        FloatingPointRounding.TowardZero => false,
+                        // ToOdd clamps to ±MaxValue (no representable odd "one past max").
+                        FloatingPointRounding.ToOdd => false,
+                        _ => false
+                    };
+                    if (toInfinity) {
+                        result_hi = 0x7FFF000000000000UL | ((UInt64)sign << 63);
+                        return 0;
+                    }
+                    result_hi = 0x7FFEFFFFFFFFFFFFUL | ((UInt64)sign << 63);
+                    return 0xFFFFFFFFFFFFFFFFUL;
+                }
+            }
+
+            // ------ Apply rounding ------
+            if (increment) {
+                fraction_lo = DoubleArithmetic.IncreaseUnchecked(fraction_lo, fraction_hi, out fraction_hi);
+            } else if (forceOdd) {
+                fraction_lo |= 1;
+            } else if (0 == (fraction_hi | fraction_lo)) {
+                // Significand collapsed to zero (only reachable after an underflow-shift).
+                exponent = 0;
+            }
+
+            // ------ Pack ------
+            result_hi = GetHi64BitsFromRawParts(sign, exponent, fraction_hi);
+            return fraction_lo;
+        }
 
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static UInt64 GetBitsFromRawPartsWithRounding(UInt64 fraction_cy, UInt64 fraction_lo, UInt64 fraction_hi, int exponent, int sign, [ConstantExpected] FloatingPointRounding rounding, out UInt64 result_hi) {
+        public static UInt64 GetBitsFromRawPartsWithRounding_L_1(UInt64 fraction_cy, UInt64 fraction_lo, UInt64 fraction_hi, int exponent, int sign, [ConstantExpected] FloatingPointRounding rounding, out UInt64 result_hi) {
             var roundTiesToEven = (rounding == FloatingPointRounding.ToNearestWithMidpointToEven);
             var cy = (0 > unchecked((Int64)fraction_cy));
             if (!roundTiesToEven && (rounding != FloatingPointRounding.ToNearestWithMidpointAwayFromZero)) {

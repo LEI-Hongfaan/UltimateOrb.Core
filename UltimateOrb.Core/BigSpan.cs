@@ -657,7 +657,9 @@ namespace UltimateOrb {
         }
 
         private static unsafe void* memset(void* dest, int value, nuint len) {
-            NativeMemory.Fill(dest, len, unchecked((byte)value));
+            var p = unchecked((byte)value);
+            Utilities.ThrowHelper.ThrowOnNotEqual(unchecked((int)((uint)p * 0x01010101u)), value);
+            NativeMemory.Fill(dest, len, p);
             return dest;
         }
     }
@@ -996,7 +998,7 @@ namespace UltimateOrb {
                             toLength = checked((int)toLengthUInt64);
                         } else {
                             /*
-                            ulong high = Math.BigMul((ulong)fromLength, (ulong)fromSize, out ulong low);
+                            ulong high = Math.BigMulUnsigned((ulong)fromLength, (ulong)fromSize, out ulong low);
                             ulong toLengthUInt64;
                             Utilities.ThrowHelper.ThrowOnLessThanOrEqual((ulong)toSize, high);
                             toLengthUInt64 = DoubleArithmetic.BigDivInternal(low, high, (ulong)toSize);
@@ -1047,7 +1049,7 @@ namespace UltimateOrb {
                             toLength = checked((int)toLengthUInt64);
                         } else {
                             /*
-                            ulong high = Math.BigMul((ulong)fromLength, (ulong)fromSize, out ulong low);
+                            ulong high = Math.BigMulUnsigned((ulong)fromLength, (ulong)fromSize, out ulong low);
                             ulong toLengthUInt64;
                             Utilities.ThrowHelper.ThrowOnLessThanOrEqual((ulong)toSize, high);
                             toLengthUInt64 = DoubleArithmetic.BigDivInternal(low, high, (ulong)toSize);

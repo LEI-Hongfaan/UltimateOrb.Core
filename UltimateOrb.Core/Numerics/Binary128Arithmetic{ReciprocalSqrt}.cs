@@ -79,7 +79,7 @@ namespace UltimateOrb.Numerics {
                     }
 
                     UInt64 rx = hi, r = Rsqrt9(rx);
-                    UInt128 r2 = Math.BigMul(r, rsqrt2_64[(int)i]);
+                    UInt128 r2 = Math.BigMul(r, Rsqrt2Table[(int)i]);
                     nuint shft = 4 - i;
 
                     // Shift the 128-bit input right by shft

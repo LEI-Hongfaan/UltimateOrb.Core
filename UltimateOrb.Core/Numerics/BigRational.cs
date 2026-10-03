@@ -512,15 +512,16 @@ namespace UltimateOrb.Numerics {
             exponent = exponent < ExponentMinValue ? ExponentMinValue : exponent;
 
             var e = unchecked((int)(exponent - (long)SignificandBitLength));
-            bool h = default;
+            bool h = false;
+            bool lowBitsNonzero = false;
             var f = unchecked(e - 1);
             if (e > 0) {
+                lowBitsNonzero = !(absDividend & ((BigInteger.One << e) - 1)).IsZero;
                 h = !((BigInteger.One << f) & absDividend).IsZero;
                 absDividend >>= e;
             } else {
                 absDividend <<= unchecked(-e);
             }
-
             var (q, rem) = BigInteger.DivRem(absDividend, absDivisor);
 
             // Validate rounding mode and decide whether tie detection is required.
@@ -539,15 +540,12 @@ namespace UltimateOrb.Numerics {
                 var r = rem;
                 r <<= 1;
                 if (e > 0) {
-                    if (h) {
-                        ++r;
-                    }
-
+                    if (h) ++r;
                     w = (o == f) ? 0 : 1;
                 }
                 w |= r.CompareTo(absDivisor);
             } else {
-                w = rem != BigInteger.Zero ? 1 : 0;
+                w = (rem != BigInteger.Zero || lowBitsNonzero) ? 1 : 0;
             }
 
             bool incrementSignificand = false;

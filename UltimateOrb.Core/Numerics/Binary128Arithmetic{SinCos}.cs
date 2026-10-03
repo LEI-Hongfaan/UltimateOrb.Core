@@ -528,7 +528,7 @@ namespace UltimateOrb.Numerics {
         }
 
         // full 128x128-bit product
-        //static inline void wmul(u128 x, u128 y, u128* high, u128* low); // BigMul(Unsigbed)
+        //static inline void wmul(u128 x, u128 y, u128* high, u128* low); // BigMulUnsigned(Unsigbed)
 
         /* approximate high half of a 128x128-bit product from three 64-bit products:
            up to two units short of the exact high half, never over */

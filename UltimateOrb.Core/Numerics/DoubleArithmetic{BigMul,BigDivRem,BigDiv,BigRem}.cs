@@ -414,7 +414,7 @@ namespace UltimateOrb.Numerics {
 #endif
         }
 
-        [ObsoleteAttribute("Use BigMul instead.")]
+        [ObsoleteAttribute("Use BigMulUnsigned instead.")]
         [System.CLSCompliantAttribute(false)]
         [System.Runtime.CompilerServices.MethodImplAttribute(
             System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining |
@@ -466,7 +466,7 @@ namespace UltimateOrb.Numerics {
             }
         }
 
-        [ObsoleteAttribute("Use BigMul instead.")]
+        [ObsoleteAttribute("Use BigMulUnsigned instead.")]
         [System.CLSCompliantAttribute(false)]
         [System.Runtime.CompilerServices.MethodImplAttribute(
             System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining |
@@ -781,7 +781,7 @@ namespace UltimateOrb.Numerics {
                         p_hi += divisor_lo_;
                     }
                     /*
-                    p_lo = BigMul(DivRem(dividend_hi_lo_, dividend_hi_hi_, divisor_hi_, 0, out dividend_hi_lo_, out var ignored0, out var q_hi), divisor_lo_, out p_hi);
+                    p_lo = BigMulUnsigned(DivRem(dividend_hi_lo_, dividend_hi_hi_, divisor_hi_, 0, out dividend_hi_lo_, out var ignored0, out var q_hi), divisor_lo_, out p_hi);
                     if (1 == q_hi) {
                         p_hi += divisor_lo_;
                     }
@@ -804,7 +804,7 @@ namespace UltimateOrb.Numerics {
                         p_hi += divisor_lo_;
                     }
                     /*
-                    p_lo = BigMul(DivRem(dividend_lo_hi_, dividend_hi_lo_, divisor_hi_, 0, out dividend_lo_hi_, out var ignored1, out var q_lo), divisor_lo_, out p_hi);
+                    p_lo = BigMulUnsigned(DivRem(dividend_lo_hi_, dividend_hi_lo_, divisor_hi_, 0, out dividend_lo_hi_, out var ignored1, out var q_lo), divisor_lo_, out p_hi);
                     if (1 == q_lo) {
                         p_hi += divisor_lo_;
                     }
@@ -882,7 +882,7 @@ namespace UltimateOrb.Numerics {
                 {
                     // 2017Nov18
                     // 2020Dec10
-                    //   Change BigMul to BigSquare
+                    //   Change BigMulUnsigned to BigSquare
                     var fl = value_lo;
                     var fh = value_hi;
                     var lll = BigSquare(fl, out ULong llh); // 2020Dec10
@@ -1664,7 +1664,7 @@ namespace UltimateOrb.Numerics {
             return q;
         }
 
-        [ObsoleteAttribute("Use BigMul instead.")]
+        [ObsoleteAttribute("Use BigMulUnsigned instead.")]
         [System.CLSCompliantAttribute(false)]
         [System.Runtime.CompilerServices.MethodImplAttribute(
             System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining |
@@ -1716,7 +1716,7 @@ namespace UltimateOrb.Numerics {
             }
         }
 
-        [ObsoleteAttribute("Use BigMul instead.")]
+        [ObsoleteAttribute("Use BigMulUnsigned instead.")]
         [System.CLSCompliantAttribute(false)]
         [System.Runtime.CompilerServices.MethodImplAttribute(
             System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining |
@@ -2007,7 +2007,7 @@ namespace UltimateOrb.Numerics {
                         p_hi += divisor_lo_;
                     }
                     /*
-                    p_lo = BigMul(DivRem(dividend_hi_lo_, dividend_hi_hi_, divisor_hi_, 0, out dividend_hi_lo_, out var ignored0, out var q_hi), divisor_lo_, out p_hi);
+                    p_lo = BigMulUnsigned(DivRem(dividend_hi_lo_, dividend_hi_hi_, divisor_hi_, 0, out dividend_hi_lo_, out var ignored0, out var q_hi), divisor_lo_, out p_hi);
                     if (1 == q_hi) {
                         p_hi += divisor_lo_;
                     }
@@ -2030,7 +2030,7 @@ namespace UltimateOrb.Numerics {
                         p_hi += divisor_lo_;
                     }
                     /*
-                    p_lo = BigMul(DivRem(dividend_lo_hi_, dividend_hi_lo_, divisor_hi_, 0, out dividend_lo_hi_, out var ignored1, out var q_lo), divisor_lo_, out p_hi);
+                    p_lo = BigMulUnsigned(DivRem(dividend_lo_hi_, dividend_hi_lo_, divisor_hi_, 0, out dividend_lo_hi_, out var ignored1, out var q_lo), divisor_lo_, out p_hi);
                     if (1 == q_lo) {
                         p_hi += divisor_lo_;
                     }
@@ -2100,7 +2100,7 @@ namespace UltimateOrb.Numerics {
                 {
                     // 2017Nov18
                     // 2020Dec10
-                    //   Change BigMul to BigSquare
+                    //   Change BigMulUnsigned to BigSquare
                     var fl = value_lo;
                     var fh = value_hi;
                     var lll = BigSquare(fl, out ULong llh); // 2020Dec10
@@ -2848,7 +2848,7 @@ namespace UltimateOrb.Numerics {
             return q;
         }
 
-        [ObsoleteAttribute("Use BigMul instead.")]
+        [ObsoleteAttribute("Use BigMulUnsigned instead.")]
         [System.CLSCompliantAttribute(false)]
         [System.Runtime.CompilerServices.MethodImplAttribute(
             System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining |
@@ -2900,7 +2900,7 @@ namespace UltimateOrb.Numerics {
             }
         }
 
-        [ObsoleteAttribute("Use BigMul instead.")]
+        [ObsoleteAttribute("Use BigMulUnsigned instead.")]
         [System.CLSCompliantAttribute(false)]
         [System.Runtime.CompilerServices.MethodImplAttribute(
             System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining |
@@ -3191,7 +3191,7 @@ namespace UltimateOrb.Numerics {
                         p_hi += divisor_lo_;
                     }
                     /*
-                    p_lo = BigMul(DivRem(dividend_hi_lo_, dividend_hi_hi_, divisor_hi_, 0, out dividend_hi_lo_, out var ignored0, out var q_hi), divisor_lo_, out p_hi);
+                    p_lo = BigMulUnsigned(DivRem(dividend_hi_lo_, dividend_hi_hi_, divisor_hi_, 0, out dividend_hi_lo_, out var ignored0, out var q_hi), divisor_lo_, out p_hi);
                     if (1 == q_hi) {
                         p_hi += divisor_lo_;
                     }
@@ -3214,7 +3214,7 @@ namespace UltimateOrb.Numerics {
                         p_hi += divisor_lo_;
                     }
                     /*
-                    p_lo = BigMul(DivRem(dividend_lo_hi_, dividend_hi_lo_, divisor_hi_, 0, out dividend_lo_hi_, out var ignored1, out var q_lo), divisor_lo_, out p_hi);
+                    p_lo = BigMulUnsigned(DivRem(dividend_lo_hi_, dividend_hi_lo_, divisor_hi_, 0, out dividend_lo_hi_, out var ignored1, out var q_lo), divisor_lo_, out p_hi);
                     if (1 == q_lo) {
                         p_hi += divisor_lo_;
                     }
@@ -3284,7 +3284,7 @@ namespace UltimateOrb.Numerics {
                 {
                     // 2017Nov18
                     // 2020Dec10
-                    //   Change BigMul to BigSquare
+                    //   Change BigMulUnsigned to BigSquare
                     var fl = value_lo;
                     var fh = value_hi;
                     var lll = BigSquare(fl, out ULong llh); // 2020Dec10

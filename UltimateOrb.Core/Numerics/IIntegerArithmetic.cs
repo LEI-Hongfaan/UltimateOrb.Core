@@ -236,7 +236,7 @@ namespace UltimateOrb.Numerics {
 
     //    TBase SubtractUnsigned(TBase first, TBase second);
 
-    //    TBase MultiplyUnsigned(TBase first, TBase second);
+    //    TBase BigMulUnsigned(TBase first, TBase second);
 
     //    TBase DivideUnsigned(TBase first, TBase second);
 

@@ -111,6 +111,7 @@ namespace UltimateOrb.Numerics {
             // -------------------------------------------------------------
             nint precision = result.PrecisionInternal;
             if (precision == RawPrecisionAuto) precision = context.Precision;
+            if (precision == RawPrecisionAuto) precision = Math.Min(first.PrecisionInternal, second.PrecisionInternal);
             Debug.Assert(precision > 0);
             int p = checked((int)precision);
 
@@ -236,6 +237,7 @@ namespace UltimateOrb.Numerics {
             // -------------------------------------------------------------
             // 6. Canonicalize; handles rounding overflow automatically.
             // -------------------------------------------------------------
+            // TODO: Use BigInteger.TrailingZeroCount(i)
             while (!mag.IsZero && mag.IsEven) {
                 mag >>= 1;
                 exp += 1;
