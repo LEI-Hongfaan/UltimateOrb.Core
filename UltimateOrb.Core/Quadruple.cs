@@ -1897,8 +1897,13 @@ namespace UltimateOrb {
         }
 
         public static Quadruple ExpM1(Quadruple x) {
-            // TODO: provide a correct impl
-            return Exp(x) - One;
+            var lo = Binary128Arithmetic.ExpM1(x._Lo64Bits, x._Hi64Bits, out var hi);
+            return new Quadruple(lo, hi);
+        }
+
+        public static Quadruple ExpM1(Quadruple x, MidpointRounding mode) {
+            var lo = Binary128Arithmetic.ExpM1(x._Lo64Bits, x._Hi64Bits, mode, out var hi);
+            return new Quadruple(lo, hi);
         }
 
         internal static Quadruple PiOverTwo {
