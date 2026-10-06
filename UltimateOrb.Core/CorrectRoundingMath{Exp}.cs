@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
@@ -15,6 +16,20 @@ using Misc = UltimateOrb.Miscellaneous;
 namespace UltimateOrb {
 
     public static partial class CorrectRoundingMath {
+
+        public static double ExpM1(double x) {
+            return BitConverter.UInt64BitsToDouble(Binary64Arithmetic.ExpM1(
+                BitConverter.DoubleToUInt64Bits(x)));
+        }
+
+        public static double ExpM1(double x, MidpointRounding mode) {
+            return BitConverter.UInt64BitsToDouble(Binary64Arithmetic.ExpM1(
+                BitConverter.DoubleToUInt64Bits(x), mode));
+        }
+    }
+
+
+    static partial class CorrectRoundingMath1 {
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -298,7 +313,7 @@ namespace UltimateOrb {
         }
 
         [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.AggressiveOptimization)]
-        static double AsExpM1Accurate(double x) {
+        static double AsExpM1Accurate(double x, MidpointRounding mode) {
             unchecked {
                 if (Misc.Unlikely(double.Abs(x) < 0.25)) {
                     var cl = ExpM1AccurateCL;
@@ -359,98 +374,965 @@ namespace UltimateOrb {
                 }
             }
         }
+        
+        //public static double ExpM1(double x)  => ExpM1(x, MidpointRounding.ToEven);
 
-        public static double ExpM1(double x) {
-            unchecked {
-                UInt64 ix = BitConverter.DoubleToUInt64Bits(x);
-                UInt64 aix = ix & (~(UInt64)0 >> 1);
-                if (Misc.Likely(aix < 0x3fd0000000000000UL)) { // |x| < 0.25
-                    if (Misc.Unlikely(aix < 0x3ca0000000000000UL)) { // |x| < 2^-53
-                        if (aix == 0) return x;
-                        double res = double.FusedMultiplyAdd(5.5511151231257827E-17, double.Abs(x), x);
-                        /* we have underflow for |x| < 2^-1022 and for x=-2.2250738585072014E-308 and
-                           rounding towards zero */
-                        if (aix < 0x10000000000000UL || double.Abs(res) < 2.2250738585072014E-308)
-                            RaiseFloatingPointExceptionFlagsDummy(FloatingPointExceptionFlags.Underflow);
-                        return res;
-                    }
-                    double sx = 128 * x, fx = RoundPartial(sx), z = sx - fx, z2 = z * z;
-                    int i = (int)(Int64)fx;
-                    var tz = ExpM1TZ;
-                    double th = tz[i + 32][1], tl = tz[i + 32][0];
-                    double fh = z * 0.0078125;
-                    double fl = z2 * ((3.0517578125E-05 + z * 7.9472859700508441E-08)
-                                      + z2 * (1.5522042910260805E-10
-                                              + z * (2.4253205264225237E-13
-                                                     + z * 3.1579677127348593E-16)));
-                    double e0 = 4.4045713257223618E-20, eps = z2 * e0 + 4.9303806576313238E-32;
-                    double rl;
-                    double rh = BigAddDDPartial(th, fh, out rl);
-                    rl += tl + fl;
-                    fh = MultiplyDD(th, tl, fh, fl, out fl);
-                    fh = AddDDPartial(rh, rl, fh, fl, out fl);
-                    double ub = fh + (fl + eps), lb = fh + (fl - eps);
-                    if (Misc.Unlikely(ub != lb)) return AsExpM1Accurate(x);
-                    return lb;
-                } else { // |x| >= 0.25
-                    if (Misc.Unlikely(aix >= 0x40862e42fefa39f0UL)) {
-                        // |x| >= 709.78271289338409
-                        if (aix > 0x7ff0000000000000UL) return x + x; // nan
-                        if (aix == 0x7ff0000000000000UL) { // +/-inf
-                            if ((ix >> 63) != 0) // -inf
-                                return -1.0;
-                            else
-                                return x; // +inf
-                        }
-                        if ((ix >> 63) == 0) { // x >= 709.78271289338409
-                            RaiseFloatingPointExceptionFlagsDummy(FloatingPointExceptionFlags.Overflow);
-                            double z = 8.9884656743115795E+307;
-                            return z * z;
-                        }
-                    }
-                    if (Misc.Unlikely(ix >= 0xc0425e4f7b2737faUL)) {
-                        // x <= -36.736800569677101
-                        if (ix >= 0xc042b708872320e2UL) // x <= -37.429947750237048
-                            return -1.0 + 2.7755575615628914E-17;
-                        return (36.736800569677101 + x + 6.7398329902596056E-16) * 8.0085662595372941E-17
-                               - 0.99999999999999989;
-                    }
+        //public static double ExpM1(double x, MidpointRounding mode) {
+        //    unchecked {
+        //        UInt64 ix = BitConverter.DoubleToUInt64Bits(x);
+        //        UInt64 aix = ix & (~(UInt64)0 >> 1);
+        //        if (Misc.Likely(aix < 0x3fd0000000000000UL)) { // |x| < 0.25
+        //            if (Misc.Unlikely(aix < 0x3ca0000000000000UL)) { // |x| < 2^-53
+        //                if (aix == 0) return x;
+        //                double res = double.FusedMultiplyAdd(5.5511151231257827E-17, double.Abs(x), x);
+        //                /* we have underflow for |x| < 2^-1022 and for x=-2.2250738585072014E-308 and
+        //                   rounding towards zero */
+        //                if (aix < 0x10000000000000UL || double.Abs(res) < 2.2250738585072014E-308)
+        //                    RaiseFloatingPointExceptionFlagsDummy(FloatingPointExceptionFlags.Underflow);
+        //                return res;
+        //            }
+        //            double sx = 128 * x, fx = RoundPartial0(sx), z = sx - fx, z2 = z * z;
+        //            int i = (int)(Int64)fx;
+        //            var tz = ExpM1TZ;
+        //            double th = tz[i + 32][1], tl = tz[i + 32][0];
+        //            double fh = z * 0.0078125;
+        //            double fl = z2 * ((3.0517578125E-05 + z * 7.9472859700508441E-08)
+        //                              + z2 * (1.5522042910260805E-10
+        //                                      + z * (2.4253205264225237E-13
+        //                                             + z * 3.1579677127348593E-16)));
+        //            double e0 = 4.4045713257223618E-20, eps = z2 * e0 + 4.9303806576313238E-32;
+        //            double rl;
+        //            double rh = BigAddDDPartial(th, fh, out rl);
+        //            rl += tl + fl;
+        //            fh = MultiplyDD(th, tl, fh, fl, out fl);
+        //            fh = AddDDPartial(rh, rl, fh, fl, out fl);
+        //            double ub = fh + (fl + eps), lb = fh + (fl - eps);
+        //            if (Misc.Unlikely(ub != lb)) return AsExpM1Accurate(x);
+        //            return lb;
+        //        } else { // |x| >= 0.25
+        //            if (Misc.Unlikely(aix >= 0x40862e42fefa39f0UL)) {
+        //                // |x| >= 709.78271289338409
+        //                if (aix > 0x7ff0000000000000UL) return x + x; // nan
+        //                if (aix == 0x7ff0000000000000UL) { // +/-inf
+        //                    if ((ix >> 63) != 0) // -inf
+        //                        return -1.0;
+        //                    else
+        //                        return x; // +inf
+        //                }
+        //                if ((ix >> 63) == 0) { // x >= 709.78271289338409
+        //                    RaiseFloatingPointExceptionFlagsDummy(FloatingPointExceptionFlags.Overflow);
+        //                    double z = 8.9884656743115795E+307;
+        //                    return z * z;
+        //                }
+        //            }
+        //            if (Misc.Unlikely(ix >= 0xc0425e4f7b2737faUL)) {
+        //                // x <= -36.736800569677101
+        //                if (ix >= 0xc042b708872320e2UL) // x <= -37.429947750237048
+        //                    return -1.0 + 2.7755575615628914E-17;
+        //                return (36.736800569677101 + x + 6.7398329902596056E-16) * 8.0085662595372941E-17
+        //                       - 0.99999999999999989;
+        //            }
 
-                    const double s = 5909.278887481194; // s approximates 2^12/log(2)
-                    double t = RoundPartial(x * s);
-                    Int64 jt = (Int64)t;
-                    int i0 = ((int)(jt >> 6)) & 0x3f;
-                    int i1 = ((int)jt) & 0x3f;
-                    Int64 ie = jt >> 12;
-                    var t0s = ExpM1T0;
-                    var t1s = ExpM1T1;
-                    double t0h = t0s[i0][1], t0l = t0s[i0][0];
-                    double t1h = t1s[i1][1], t1l = t1s[i1][0];
-                    double tl;
-                    double th = MultiplyDD(t0h, t0l, t1h, t1l, out tl);
-                    const double l2h = 0.00016922538588914904, l2l = 1.0256140314162804E-14;
-                    double dx = (x - l2h * t) + l2l * t, dx2 = dx * dx;
-                    double p = (1 + dx * 0.5) + dx2 * (0.16666666674124284 + dx * 0.041666666654270573);
-                    double fh = th, tx = th * dx, fl = tl + tx * p;
-                    double eps = 1.64e-19 * th;
-                    double off = BitConverter.UInt64BitsToDouble((UInt64)(2048 + 1023 - ie) << 52);
-                    double e;
-                    if (Misc.Likely(ie < 53)) {
-                        fh = BigAddDDPartial(off, fh, out e);
-                    } else if (ie < 75) {
-                        fh = BigAddDDPartial(fh, off, out e);
-                    } else {
-                        e = 0;
-                    }
-                    fl += e;
-                    double ub = fh + (fl + eps), lb = fh + (fl - eps);
-                    if (Misc.Unlikely(ub != lb)) return AsExpM1Accurate(x);
-                    return AsExpLD(lb, ie);
-                }
+        //            const double s = 5909.278887481194; // s approximates 2^12/log(2)
+        //            double t = RoundPartial0(x * s);
+        //            Int64 jt = (Int64)t;
+        //            int i0 = ((int)(jt >> 6)) & 0x3f;
+        //            int i1 = ((int)jt) & 0x3f;
+        //            Int64 ie = jt >> 12;
+        //            var t0s = ExpM1T0;
+        //            var t1s = ExpM1T1;
+        //            double t0h = t0s[i0][1], t0l = t0s[i0][0];
+        //            double t1h = t1s[i1][1], t1l = t1s[i1][0];
+        //            double tl;
+        //            double th = MultiplyDD(t0h, t0l, t1h, t1l, out tl);
+        //            const double l2h = 0.00016922538588914904, l2l = 1.0256140314162804E-14;
+        //            double dx = (x - l2h * t) + l2l * t, dx2 = dx * dx;
+        //            double p = (1 + dx * 0.5) + dx2 * (0.16666666674124284 + dx * 0.041666666654270573);
+        //            double fh = th, tx = th * dx, fl = tl + tx * p;
+        //            double eps = 1.64e-19 * th;
+        //            double off = BitConverter.UInt64BitsToDouble((UInt64)(2048 + 1023 - ie) << 52);
+        //            double e;
+        //            if (Misc.Likely(ie < 53)) {
+        //                fh = BigAddDDPartial(off, fh, out e);
+        //            } else if (ie < 75) {
+        //                fh = BigAddDDPartial(fh, off, out e);
+        //            } else {
+        //                e = 0;
+        //            }
+        //            fl += e;
+        //            double ub = fh + (fl + eps), lb = fh + (fl - eps);
+        //            if (Misc.Unlikely(ub != lb)) return AsExpM1Accurate(x);
+        //            return AsExpLD(lb, ie);
+        //        }
+        //    }
+        //}
+        private static void RaiseFloatingPointExceptionFlagsDummy(FloatingPointExceptionFlags flags) {
+        }
+    }
+}
+
+
+
+namespace UltimateOrb.Numerics {
+#if NET8_0_OR_GREATER
+    using UInt128 = System.UInt128;
+    using Int128 = System.Int128;
+#endif
+#pragma warning disable UoWIP // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+    using static Binary128Arithmetic;
+#pragma warning restore UoWIP // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+
+    partial class Binary64Arithmetic {
+
+        public static double RoundPartial0(double lo, double hi, MidpointRounding mode) {
+            Debug.Assert(double.Abs(lo) <= double.Abs(hi));
+            Debug.Assert(double.Abs(lo) < 1e100);
+            Debug.Assert(double.Abs(hi) < 1e100);
+            // Nearest-even rounded sum (default IEEE rounding mode in .NET)
+            double s = lo + hi;
+
+            // Exact error e such that v = s + e
+            double bb = s - lo;
+            double e = (lo - (s - bb)) + (hi - bb);
+
+            // Exact value is already a double
+            if (e == 0.0)
+                return s;
+
+            // ToEven: s is already the correctly rounded result (nearest-even)
+            // Special rule: in this method MidpointRounding.AwayFromZero is considered to be the same as MidpointRounding.ToEven.
+            // This is because this helper works with transcendental functions,
+            // which are not expected to produces ties in the first place, and
+            // if they do, it means that double double precision is not enough and
+            // we just try our best to return the nearest-even result.
+            if (IsNearest(mode))
+                return s;
+
+            // Next representable double in the direction of the error
+            double next = e > 0.0 ? Math.BitIncrement(s) : Math.BitDecrement(s);
+
+            switch (mode) {
+            /*
+            case MidpointRounding.AwayFromZero:
+                double ulp = Math.Abs(next - s);
+                double halfUlp = 0.5 * ulp;
+                double absE = Math.Abs(e);
+                if (absE < halfUlp) return s;
+                if (absE > halfUlp) return next;
+                // Tie: return the one with larger magnitude
+                return Math.Abs(next) > Math.Abs(s) ? next : s;
+            */
+            case MidpointRounding.ToPositiveInfinity:
+                return e > 0.0 ? next : s;
+
+            case MidpointRounding.ToNegativeInfinity:
+                return e > 0.0 ? s : next;
+
+            case MidpointRounding.ToZero:
+            default:
+                if (s > 0.0)
+                    return e > 0.0 ? s : next;   // positive: floor
+                else if (s < 0.0)
+                    return e > 0.0 ? next : s;   // negative: ceiling
+                else
+                    return e;                    // s == 0, v = e
             }
         }
 
-        private static void RaiseFloatingPointExceptionFlagsDummy(FloatingPointExceptionFlags flags) {
+        public static UInt64 ExpM1(UInt64 x)
+            => ExpM1(x, MidpointRounding.ToEven);
+
+        public static UInt64 ExpM1(UInt64 x, MidpointRounding mode) {
+            unchecked {
+                bool isNearest = IsNearest(mode);
+                bool isUp = mode == MidpointRounding.ToPositiveInfinity;
+                bool isDown = mode == MidpointRounding.ToNegativeInfinity;
+
+                UInt64 sign = x >> 63;
+                UInt64 b1 = x & 0x7FFF_FFFF_FFFF_FFFFUL;
+
+
+                if (Misc.Unlikely(b1 >= 0x7FF0_0000_0000_0000UL)) {                     // ±Inf, NaN
+                    if (b1 == 0x7FF0_0000_0000_0000UL) {
+                        if (sign == 0) return x;                         // expm1(+∞) = +∞
+                        return (isUp || mode == MidpointRounding.ToZero)
+                            ? 0xBFEF_FFFF_FFFF_FFFFUL                     // -1 + ulp
+                            : 0xBFF0_0000_0000_0000UL;                    // -1
+                    }
+                    RaiseExceptionFlagsDummy(FloatingPointExceptionFlags.Invalid);
+                    return x | 0x0008_0000_0000_0000UL;                  // quiet NaN
+                }
+
+
+                if (Misc.Unlikely(b1 < 0x3ca0000000000000UL)) { // |x| < 2^-53
+                    if (b1 == 0) return x;                                   // ±0
+                    var xf = BitConverter.UInt64BitsToDouble(x);
+                    var res = BitConverter.DoubleToUInt64Bits(RoundPartial0(5.5511151231257827E-17 * xf, xf, mode));
+                    if (b1 < 0x10000000000000UL || (res & 0x7FFF_FFFF_FFFF_FFFFUL) <= 0x000F_FFFF_FFFF_FFFF /* subnormal */) {
+                        RaiseExceptionFlagsDummy(FloatingPointExceptionFlags.Underflow);
+                    }
+                    return res;
+                }
+
+                // Positive overflow: x ≥ log(DBL_MAX) ≈ 709.78
+                if (sign == 0 && b1 >= 0x4086_2E42_FEFA_39EFUL) {
+                    RaiseExceptionFlagsDummy(FloatingPointExceptionFlags.Overflow
+                                           | FloatingPointExceptionFlags.Inexact);
+                    return (isNearest || isUp) ? 0x7FF0_0000_0000_0000UL
+                                               : 0x7FEF_FFFF_FFFF_FFFFUL;
+                }
+
+                if (Misc.Unlikely(x >= 0xc0425e4f7b2737faUL)) {
+                    // x.(double) <= -36.736800569677101
+                    if (x >= 0xc042b708872320e2UL) {
+                        // x.(double) <= -37.429947750237048
+                        return BitConverter.DoubleToUInt64Bits(RoundPartial0(+2.7755575615628914E-17, -1.0, mode));
+                    }
+                    var xf = BitConverter.UInt64BitsToDouble(x);
+                    return BitConverter.DoubleToUInt64Bits(RoundPartial0((36.736800569677101 + xf + 6.7398329902596056E-16) * 8.0085662595372941E-17, -0.99999999999999989, mode));
+                }
+
+                // Exact b64 → b128 embedding.
+                int exp64 = (int)((b1 >> 52) & 0x7FF);
+                UInt64 frac64 = b1 & 0x000F_FFFF_FFFF_FFFFUL;
+                UInt64 lo = frac64 << 60;
+                UInt64 hi = (sign << 63) | ((UInt64)(exp64 + 15360) << 48) | (frac64 >> 4);
+                UInt64 b1b = hi & 0x7FFF_FFFF_FFFF_FFFFUL;
+                UInt128 x128 = ((UInt128)hi << 64) | lo;
+
+                if (b1b < 0x3FFE_0000_0000_0000UL)
+                    return ExpM1_B64_LtHalf(lo, hi, x128, mode, sign, isNearest, isUp, isDown);
+                else
+                    return ExpM1_B64_GeHalf(lo, hi, x128, mode, sign, isNearest, isUp, isDown);
+            }
+        }
+
+        // ════════════════════════════════════════════════════════════════════
+        //  |x| < 0.5   (b128 encoding:  b1b < 0x3FFE_0000_0000_0000)
+        //
+        //  NOTE: like b128, sm is UInt64 (0 or 1) in this branch.
+        // ════════════════════════════════════════════════════════════════════
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        static UInt64 ExpM1_B64_LtHalf(UInt64 lo, UInt64 hi, UInt128 x128,
+                                       MidpointRounding mode, UInt64 sign,
+                                       bool isNearest, bool isUp, bool isDown) {
+            unchecked {
+                UInt64 sm = hi >> 63;                                   // 0 or 1
+                UInt64 mHi = (hi & 0x0000_FFFF_FFFF_FFFFUL) | (1UL << 48);
+                UInt64 mLo = lo;
+                int e = (int)(((hi >> 48) & 0x7FFF)) - 16383;
+                int sj = 37 - e;
+                int eout;
+                UInt128 res;
+
+                if (sj < 49) {
+                    int smIdx = (int)sm;
+                    UInt64 j = mHi >> sj;
+                    int j0 = (int)(j >> 5);
+                    int j1 = (int)(j & 31);
+                    int e0 = ExpM1E0Z[smIdx * 32 + j0];
+                    int e1 = ExpM1E1Z[smIdx * 32 + j1];
+                    int el = (j0 != 0) ? e0 : e1;
+                    int sp = e1;
+                    int st = (j0 != 0) ? (e1 - el) : 0;
+                    eout = -el - 1;
+
+                    UInt128 r0v = ((UInt128)ExpM1R0Z_flat[(smIdx * 32 + j0) * 2 + 1] << 64)
+                                | ExpM1R0Z_flat[(smIdx * 32 + j0) * 2 + 0];
+                    UInt128 r1v = ((UInt128)ExpM1R1Z_flat[(smIdx * 32 + j1) * 2 + 1] << 64)
+                                | ExpM1R1Z_flat[(smIdx * 32 + j1) * 2 + 0];
+                    res = r0v;
+
+                    UInt128 pp = MultiplyHighApproximate(r0v, r1v);
+                    if (sp != 0) pp >>= sp;
+
+                    UInt128 tt = r1v;
+                    if (st != 0) {
+                        UInt64 ttLo = (UInt64)tt, ttHi = (UInt64)(tt >> 64);
+                        tt = ((UInt128)(ttHi >> st) << 64)
+                           | ((ttLo >> st) | ((ttHi << 1) << ((~st) & 63)));
+                    }
+
+                    int sh = e + 27;
+                    UInt64 oldMLo = mLo;
+                    mHi = (mHi << sh) | (oldMLo >> (64 - sh));
+                    mLo = oldMLo << sh;
+
+                    int cbBase = smIdx * 9 * 2;
+                    if (sm != 0) {
+                        res += tt - pp;
+                        UInt64 inner8 = MultiplyHigh(ExpM1CbBig_flat[cbBase + 16], mHi);
+                        UInt64 inner7 = MultiplyHigh(ExpM1CbBig_flat[cbBase + 14] - inner8, mHi);
+                        UInt64 inner6 = MultiplyHigh(ExpM1CbBig_flat[cbBase + 12] - inner7, mHi);
+                        UInt64 inner5 = MultiplyHigh(ExpM1CbBig_flat[cbBase + 10] - inner6, mHi);
+                        UInt128 f = ((UInt128)ExpM1CbBig_flat[cbBase + 9] << 64)
+                                  | ExpM1CbBig_flat[cbBase + 8];
+                        f -= inner5;
+                        for (int i = 4; i > 0;) {
+                            i--;
+                            UInt128 ci = ((UInt128)ExpM1CbBig_flat[cbBase + i * 2 + 1] << 64)
+                                       | ExpM1CbBig_flat[cbBase + i * 2 + 0];
+                            f = ci - MultiplyHigh(mHi, f);
+                        }
+                        f = MultiplyHigh(mHi, f);
+                        UInt64 hl = MultiplyHigh(mLo, (UInt64)(f >> 64));
+                        f += (mLo >> 1) - (hl >> 11);
+                        res += (f >> (10 - el)) - (MultiplyHighApproximate(res, f) >> 10);
+                    } else {
+                        res += tt + pp;
+                        UInt64 f0 = ExpM1CbBig_flat[cbBase + 8]
+                            + MultiplyHigh(ExpM1CbBig_flat[cbBase + 10]
+                              + MultiplyHigh(ExpM1CbBig_flat[cbBase + 12]
+                                + MultiplyHigh(ExpM1CbBig_flat[cbBase + 14]
+                                  + MultiplyHigh(ExpM1CbBig_flat[cbBase + 16], mHi), mHi), mHi), mHi);
+                        UInt128 f = ((UInt128)ExpM1CbBig_flat[cbBase + 9] << 64) | f0;
+                        for (int i = 4; i > 0;) {
+                            i--;
+                            UInt128 ci = ((UInt128)ExpM1CbBig_flat[cbBase + i * 2 + 1] << 64)
+                                       | ExpM1CbBig_flat[cbBase + i * 2 + 0];
+                            f = ci + MultiplyHigh(mHi, f);
+                        }
+                        f = MultiplyHigh(mHi, f);
+                        UInt64 hl = MultiplyHigh(mLo, (UInt64)(f >> 64));
+                        f += (mLo >> 1) + (hl >> 11);
+                        res += (f >> (10 - el)) + (MultiplyHighApproximate(res, f) >> 10);
+                    }
+                } else {
+                    int smIdx = (int)sm;
+                    eout = e;
+                    UInt128 mVal = ((UInt128)mHi << 64) | mLo;
+                    UInt128 m0Val = mVal << 15;
+                    UInt128 m2 = SquareHigh(m0Val);
+                    mVal = m0Val >> (-(e + 12));
+                    mHi = (UInt64)(mVal >> 64);
+                    mLo = (UInt64)mVal;
+
+                    int cbBase = smIdx * 8 * 2;
+                    if (sm != 0) {
+                        UInt64 f0 = ExpM1CbSmall_flat[cbBase + 8]
+                            - MultiplyHigh(ExpM1CbSmall_flat[cbBase + 10]
+                              - MultiplyHigh(ExpM1CbSmall_flat[cbBase + 12]
+                                - MultiplyHigh(ExpM1CbSmall_flat[cbBase + 14], mHi), mHi), mHi);
+                        UInt128 f = ((UInt128)ExpM1CbSmall_flat[cbBase + 9] << 64) | f0;
+                        for (int i = 4; i > 0;) {
+                            i--;
+                            UInt128 ci = ((UInt128)ExpM1CbSmall_flat[cbBase + i * 2 + 1] << 64)
+                                       | ExpM1CbSmall_flat[cbBase + i * 2 + 0];
+                            f = ci - MultiplyHighApproximate(mVal, f);
+                        }
+                        f = MultiplyHighApproximate(m2, f);
+                        f >>= (-e - 1);
+                        res = m0Val - f;
+                    } else {
+                        UInt64 f0 = ExpM1CbSmall_flat[cbBase + 8]
+                            + MultiplyHigh(ExpM1CbSmall_flat[cbBase + 10]
+                              + MultiplyHigh(ExpM1CbSmall_flat[cbBase + 12]
+                                + MultiplyHigh(ExpM1CbSmall_flat[cbBase + 14], mHi), mHi), mHi);
+                        UInt128 f = ((UInt128)ExpM1CbSmall_flat[cbBase + 9] << 64) | f0;
+                        for (int i = 4; i > 0;) {
+                            i--;
+                            UInt128 ci = ((UInt128)ExpM1CbSmall_flat[cbBase + i * 2 + 1] << 64)
+                                       | ExpM1CbSmall_flat[cbBase + i * 2 + 0];
+                            f = ci + MultiplyHighApproximate(mVal, f);
+                        }
+                        f = MultiplyHighApproximate(m2, f);
+                        f >>= (-e - 1);
+                        UInt64 fh = (UInt64)(f >> 64), fl = (UInt64)f;
+                        fl = AddWithCarry(fl, (UInt64)m0Val, 0, out var k);
+                        fh = AddWithCarry(fh, (UInt64)(m0Val >> 64), k, out k);
+                        if (k != 0) {
+                            res = ((UInt128)((1UL << 63) | (fh >> 1)) << 64)
+                                | ((fh << 63) | (fl >> 1));
+                            eout++;
+                        } else {
+                            res = ((UInt128)fh << 64) | fl;
+                        }
+                    }
+                }
+
+                // ── b64 rounding (was 15-bit in b128) ──
+                int off = (sm != 0) ? 3 : 4;
+                UInt64 rnd;
+
+                if ((UInt64)(res >> 127) != 0) {
+                    // MSB at 127: shift 75, round bit 74
+                    UInt128 rb = (UInt128)(isNearest ? 1UL : 0UL) << 74;
+                    UInt128 t0 = res + rb + (UInt64)off;
+                    UInt128 mask = ((UInt128)1 << 75) - 1;
+                    if (Misc.Unlikely((t0 & mask) <= 6))
+                        return RoundAccB64(lo, hi, x128, mode, sign, isNearest, isUp, isDown);
+                    rnd = (UInt64)((res >> 74) & 1);
+                    res >>= 75;
+                } else {
+                    // MSB at 126: shift 74, round bit 73
+                    eout -= 1;
+                    UInt128 rb = (UInt128)(isNearest ? 1UL : 0UL) << 73;
+                    UInt128 t0 = res + rb + (UInt64)off;
+                    UInt128 mask = ((UInt128)1 << 74) - 1;
+                    if (Misc.Unlikely((t0 & mask) <= 6))
+                        return RoundAccB64(lo, hi, x128, mode, sign, isNearest, isUp, isDown);
+                    rnd = (UInt64)((res >> 73) & 1);
+                    res >>= 74;
+                }
+
+                if (!isNearest) {
+                    rnd = (sm & ((mode == MidpointRounding.ToNegativeInfinity) ? 1UL : 0UL))
+                        | (~sm & ((mode == MidpointRounding.ToPositiveInfinity) ? 1UL : 0UL));
+                }
+                UInt64 res64 = (UInt64)res;
+                UInt64 dres = (sm << 63) | ((UInt64)(1022 + eout) << 52);
+                RaiseExceptionFlagsDummy(FloatingPointExceptionFlags.Inexact);
+                return res64 + rnd + dres;
+            }
+        }
+
+        // ════════════════════════════════════════════════════════════════════
+        //  |x| ≥ 0.5
+        //
+        //  NOTE: like b128, sm is Int64 (0 or -1) in this branch.
+        //        Bit-mask        : (UInt64)sm         = 0 or ~0
+        //        Sign-extended    : (UInt128)(Int128)sm = 0 or ~0
+        // ════════════════════════════════════════════════════════════════════
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        static UInt64 ExpM1_B64_GeHalf(UInt64 lo, UInt64 hi, UInt128 x128,
+                                       MidpointRounding mode, UInt64 sign,
+                                       bool isNearest, bool isUp, bool isDown) {
+            unchecked {
+                Int64 sm = unchecked((Int64)hi >> 63);          // 0 or -1
+                UInt64 smMask = unchecked((UInt64)sm);               // 0 or ~0
+                UInt64 smSign = smMask & 0x8000_0000_0000_0000UL;    // 0 or sign bit
+
+                UInt64 mHi = (hi & 0x0000_FFFF_FFFF_FFFFUL) | (1UL << 48);
+                UInt64 mLo = lo;
+                UInt128 mVal = ((UInt128)mHi << 64) | mLo;
+
+                // Range reduction (identical to b128).
+                InlineArray3<UInt64> iln2Top3 = default;
+                iln2Top3[0] = ExpIlN2[4];
+                iln2Top3[1] = ExpIlN2[5];
+                iln2Top3[2] = ExpIlN2[6];
+                MultiplyHigh(out InlineArray3<UInt64> fs, in iln2Top3, mVal);
+                fs[0] ^= smMask; fs[1] ^= smMask; fs[2] ^= smMask;
+                ShiftRightArithmetic(ref fs, 0x401A - (int)((hi >> 48) & 0x7FFF));
+
+                Int64 fs2 = unchecked((Int64)fs[2]);
+                int el = (int)(fs2 >> 20);
+                int i0 = (int)((fs2 >> 15) & 31);
+                int i1 = (int)((fs2 >> 10) & 31);
+                int i2 = (int)((fs2 >> 5) & 31);
+                int i3 = (int)(fs2 & 31);
+
+                UInt64 z = fs[1];
+                UInt64 f0 = MultiplyHigh(z, ExpC[6] + MultiplyHigh(z,
+                            ExpC[8] + MultiplyHigh(z, ExpC[10])));
+                UInt128 res = EvalPoly2(z, f0, ExpCAsUInt128[..3]);
+
+                UInt128 t0v = ((UInt128)ExpR0[i0 * 2 + 1] << 64) | ExpR0[i0 * 2 + 0];
+                UInt128 t1v = ((UInt128)ExpR1[i1 * 2 + 1] << 64) | ExpR1[i1 * 2 + 0];
+                UInt128 t2v = ((UInt128)ExpR2[i2 * 2 + 1] << 64) | ExpR2[i2 * 2 + 0];
+                UInt128 t3v = ((UInt128)ExpR3[i3 * 2 + 1] << 64) | ExpR3[i3 * 2 + 0];
+                UInt128 mBig = MultiplyHighApproximate(
+                                   MultiplyHighApproximate(t0v, t1v),
+                                   MultiplyHighApproximate(t2v, t3v));
+
+                UInt64 k = (UInt64)(((UInt128)0xB17217F7D1CF79ACUL * fs[0]) >> 64);
+                mBig += ((UInt128)(UInt64)(mBig >> 64) * (UInt128)k) >> 84;
+                res = MultiplyHighApproximate(res, mBig);
+
+                int s = -5 - el;
+                UInt64 rnd;
+
+                if (s < 0) {
+                    // ── x ≥ ~ -2.77   (result not tiny) ──
+                    if ((uint)(123 - el) < 128)
+                        res -= (UInt128)1 << (123 - el);
+
+                    // Negate via two's complement, using smMask (0 or ~0):
+                    // XOR-with-mask  then subtract sign-extended sm (0 or -1)
+                    res = ((UInt128)((UInt64)(res >> 64) ^ smMask) << 64)
+                        | ((UInt64)res ^ smMask);
+                    res -= (UInt128)(Int128)sm;                       // 0 or add-1
+
+                    UInt64 resHi2 = (UInt64)(res >> 64);
+                    int nz = (int)UInt64.LeadingZeroCount(resHi2);
+                    nz = nz <= 14 ? nz : 14;
+
+                    // b64 rounding: shift by (75-nz), round bit at (74-nz)
+                    UInt128 z0 = res + ((UInt128)(isNearest ? 1UL : 0UL) << (74 - nz))
+                                     + (UInt64)(6 & ~smMask);          // 6 (sm=0) or 0 (sm=-1)
+                    UInt128 mask = ((UInt128)1 << (75 - nz)) - 1;
+                    if (Misc.Unlikely((z0 & mask) <= 6))
+                        return RoundAccB64(lo, hi, x128, mode, sign, isNearest, isUp, isDown);
+
+                    rnd = (UInt64)((res >> (74 - nz)) & 1);
+                    res >>= (75 - nz);
+                    el -= nz - 4;
+                    el += 1022;
+                } else {
+                    // ── x < ~-2.77   (result close to -1) ──
+                    res = 0 - res;
+                    el = -1;
+
+                    UInt128 rb, mask;
+                    if (74 + s > 127) { rb = 0; mask = ~(UInt128)0; } else {
+                        rb = (UInt128)(isNearest ? 1UL : 0UL) << (74 + s);
+                        mask = ((UInt128)1 << (75 + s)) - 1;
+                    }
+                    UInt128 z0 = res + rb;
+                    if (Misc.Unlikely((z0 & mask) <= 6))
+                        return RoundAccB64(lo, hi, x128, mode, sign, isNearest, isUp, isDown);
+
+                    if (s < 128) {
+                        Int128 sres = unchecked((Int128)res) >> s;
+                        res = unchecked((UInt128)sres);
+                    } else {
+                        res = ~(UInt128)0;
+                    }
+                    rnd = (UInt64)((res >> 74) & 1);
+                    res >>= 75;
+                    el += 1022;
+                }
+
+                if (!isNearest) {
+                    // sm = 0 (positive x)  → rnd from ToPositiveInfinity
+                    // sm = -1 (negative x) → rnd from ToNegativeInfinity
+                    rnd = (UInt64)((sm & ((mode == MidpointRounding.ToNegativeInfinity) ? 1 : 0))
+                                 | (~sm & ((mode == MidpointRounding.ToPositiveInfinity) ? 1 : 0)));
+                }
+
+                UInt64 res64 = (UInt64)res;
+                UInt64 dres = smSign | ((UInt64)el << 52);
+                RaiseExceptionFlagsDummy(FloatingPointExceptionFlags.Inexact);
+                return res64 + rnd + dres;
+            }
+        }
+
+        // ════════════════════════════════════════════════════════════════════
+        //  Accurate fallback: AsExpM1qAccurate returns a b128 significand
+        //  with MSB at bit 127 (el128 + 16382 = biased b128 exponent).
+        //  Round down to 53 bits (shift 75, round bit 74).
+        // ════════════════════════════════════════════════════════════════════
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        static UInt64 RoundAccB64(UInt64 lo, UInt64 hi, UInt128 x128,
+                                  MidpointRounding mode, UInt64 sign,
+                                  bool isNearest, bool isUp, bool isDown) {
+            unchecked {
+                AsExpM1qAccurate(out nint el128, out UInt64 mLo, out UInt64 mHi, x128);
+                UInt128 m = ((UInt128)mHi << 64) | mLo;              // MSB at bit 127
+
+                UInt64 rnd = (UInt64)((m >> 74) & 1);
+                bool sticky = (m & (((UInt128)1 << 74) - 1)) != 0;
+                UInt64 sig53 = (UInt64)(m >> 75);
+
+                UInt64 incr = 0;
+                if (isNearest) {
+                    if (rnd == 1 && (sticky || (sig53 & 1) == 1)) incr = 1;
+                } else if (isUp && sign == 0) {
+                    if (rnd == 1 || sticky) incr = 1;
+                } else if (isDown && sign == 1) {
+                    if (rnd == 1 || sticky) incr = 1;
+                }
+                sig53 += incr;
+
+                // el128 + 16382 = biased b128 exp = unbiased + 16383
+                //               → unbiased = el128 - 1
+                //   biased b64 = unbiased + 1023 = el128 + 1022
+                int e64 = (int)el128 + 1022;
+                if (sig53 >= (1UL << 53)) { sig53 >>= 1; e64++; }
+
+                UInt64 dres = (sign << 63) | ((UInt64)e64 << 52);
+                RaiseExceptionFlagsDummy(FloatingPointExceptionFlags.Inexact);
+                return sig53 + dres;
+            }
+        }
+
+        private static void RaiseExceptionFlagsDummy(FloatingPointExceptionFlags flags) {
+        }
+    }
+
+    partial class Binary64Arithmetic2 {
+
+        public static UInt64 ExpM1(UInt64 x)
+            => ExpM1(x, MidpointRounding.ToEven);
+
+        public static UInt64 ExpM1(UInt64 x, MidpointRounding mode) {
+            unchecked {
+                bool isNearest = IsNearest(mode);
+                bool isUp = mode == MidpointRounding.ToPositiveInfinity;
+                bool isDown = mode == MidpointRounding.ToNegativeInfinity;
+
+                UInt64 sign = x >> 63;
+                UInt64 b1 = x & 0x7FFF_FFFF_FFFF_FFFFUL;
+
+                if (b1 == 0) return x;                                   // ±0
+
+                if (b1 >= 0x7FF0_0000_0000_0000UL) {                     // ±Inf / NaN
+                    if (b1 == 0x7FF0_0000_0000_0000UL) {
+                        if (sign == 0) return x;
+                        return (isUp || mode == MidpointRounding.ToZero)
+                            ? 0xBFEF_FFFF_FFFF_FFFFUL : 0xBFF0_0000_0000_0000UL;
+                    }
+                    RaiseExceptionFlagsDummy(FloatingPointExceptionFlags.Invalid);
+                    return x | 0x0008_0000_0000_0000UL;
+                }
+
+                // |x| < 2^-54: expm1(x) rounds to x (RN); directed trivially adjusted
+                if (b1 < 0x3C90_0000_0000_0000UL) {
+                    if (isNearest) return x;
+                    if (sign == 0) { if (isUp) return x + 1; } else { if (isDown) return x - 1; }
+                    return x;
+                }
+
+                // Overflow: x ≥ log(DBL_MAX) ≈ 709.78
+                if (sign == 0 && b1 >= 0x4086_2E42_FEFA_39EFUL) {
+                    RaiseExceptionFlagsDummy(FloatingPointExceptionFlags.Overflow
+                                           | FloatingPointExceptionFlags.Inexact);
+                    return (isNearest || isUp) ? 0x7FF0_0000_0000_0000UL
+                                               : 0x7FEF_FFFF_FFFF_FFFFUL;
+                }
+                // Huge negative: |x| ≥ 37.25 → expm1(x) = -1 (with directed adj)
+                if (sign == 1 && b1 >= 0x4042_A000_0000_0000UL) {
+                    RaiseExceptionFlagsDummy(FloatingPointExceptionFlags.Inexact);
+                    return (isUp || mode == MidpointRounding.ToZero)
+                        ? 0xBFEF_FFFF_FFFF_FFFFUL : 0xBFF0_0000_0000_0000UL;
+                }
+
+                // Exact b64 → b128 embedding
+                int exp64 = (int)((b1 >> 52) & 0x7FF);
+                UInt64 frac64 = b1 & 0x000F_FFFF_FFFF_FFFFUL;
+                UInt64 lo = frac64 << 60;
+                UInt64 hi = (sign << 63) | ((UInt64)(exp64 + 15360) << 48) | (frac64 >> 4);
+                UInt64 b1b = hi & 0x7FFF_FFFF_FFFF_FFFFUL;
+                UInt128 x128 = ((UInt128)hi << 64) | lo;
+
+                if (b1b < 0x3FFE_0000_0000_0000UL)
+                    return ExpM1_B64_LtHalf(lo, hi, x128, mode, sign, isNearest, isUp, isDown);
+                else
+                    return ExpM1_B64_GeHalf(lo, hi, x128, mode, sign, isNearest, isUp, isDown);
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════════════
+        //  |x| < 0.5  (b128 encoding: b1b < 0x3FFE_0000_0000_0000)
+        // ═══════════════════════════════════════════════════════════════════
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        static UInt64 ExpM1_B64_LtHalf(UInt64 lo, UInt64 hi, UInt128 x128,
+                                       MidpointRounding mode, UInt64 sign,
+                                       bool isNearest, bool isUp, bool isDown) {
+            unchecked {
+                UInt64 sm = hi >> 63;
+                UInt64 mHi = (hi & 0x0000_FFFF_FFFF_FFFFUL) | (1UL << 48);
+                UInt64 mLo = lo;
+                int e = (int)(hi >> 48 & 0x7FFF) - 16383;
+                int sj = 37 - e;
+                int eout;
+                UInt128 res;
+
+                if (sj < 49) {
+                    // ── e > -12 : main sub-branch (cb_big) ────────────────────
+                    int smIdx = (int)sm;
+                    UInt64 j = mHi >> sj;
+                    int j0 = (int)(j >> 5);
+                    int j1 = (int)(j & 31);
+                    int e0 = ExpM1E0Z[smIdx * 32 + j0];
+                    int e1 = ExpM1E1Z[smIdx * 32 + j1];
+                    int el = (j0 != 0) ? e0 : e1;
+                    int sp = e1;
+                    int st = (j0 != 0) ? (e1 - el) : 0;
+                    eout = -el - 1;
+
+                    UInt128 r0v = ((UInt128)ExpM1R0Z_flat[(smIdx * 32 + j0) * 2 + 1] << 64)
+                                | ExpM1R0Z_flat[(smIdx * 32 + j0) * 2 + 0];
+                    UInt128 r1v = ((UInt128)ExpM1R1Z_flat[(smIdx * 32 + j1) * 2 + 1] << 64)
+                                | ExpM1R1Z_flat[(smIdx * 32 + j1) * 2 + 0];
+                    res = r0v;
+
+                    UInt128 pp = MultiplyHighApproximate(r0v, r1v);
+                    if (sp != 0) pp >>= sp;
+
+                    UInt128 tt = r1v;
+                    if (st != 0) {
+                        UInt64 ttLo = (UInt64)tt, ttHi = (UInt64)(tt >> 64);
+                        tt = ((UInt128)(ttHi >> st) << 64)
+                           | ((ttLo >> st) | ((ttHi << 1) << ((~st) & 63)));
+                    }
+
+                    int sh = e + 27;
+                    UInt64 oldMLo = mLo;
+                    mHi = (mHi << sh) | (oldMLo >> (64 - sh));
+                    mLo = oldMLo << sh;
+
+                    int cbBase = smIdx * 9 * 2;
+                    if (sm != 0) {
+                        res += tt - pp;
+                        UInt64 inner8 = MultiplyHigh(ExpM1CbBig_flat[cbBase + 16], mHi);
+                        UInt64 inner7 = MultiplyHigh(ExpM1CbBig_flat[cbBase + 14] - inner8, mHi);
+                        UInt64 inner6 = MultiplyHigh(ExpM1CbBig_flat[cbBase + 12] - inner7, mHi);
+                        UInt64 inner5 = MultiplyHigh(ExpM1CbBig_flat[cbBase + 10] - inner6, mHi);
+                        UInt128 f = ((UInt128)ExpM1CbBig_flat[cbBase + 9] << 64)
+                                  | ExpM1CbBig_flat[cbBase + 8];
+                        f -= inner5;
+                        for (int i = 4; i > 0;) {
+                            i--;
+                            UInt128 ci = ((UInt128)ExpM1CbBig_flat[cbBase + i * 2 + 1] << 64)
+                                       | ExpM1CbBig_flat[cbBase + i * 2 + 0];
+                            f = ci - MultiplyHigh(mHi, f);
+                        }
+                        f = MultiplyHigh(mHi, f);
+                        UInt64 hl = MultiplyHigh(mLo, (UInt64)(f >> 64));
+                        f += (mLo >> 1) - (hl >> 11);
+                        res += (f >> (10 - el)) - (MultiplyHighApproximate(res, f) >> 10);
+                    } else {
+                        res += tt + pp;
+                        UInt64 f0 = ExpM1CbBig_flat[cbBase + 8]
+                            + MultiplyHigh(ExpM1CbBig_flat[cbBase + 10]
+                              + MultiplyHigh(ExpM1CbBig_flat[cbBase + 12]
+                                + MultiplyHigh(ExpM1CbBig_flat[cbBase + 14]
+                                  + MultiplyHigh(ExpM1CbBig_flat[cbBase + 16], mHi), mHi), mHi), mHi);
+                        UInt128 f = ((UInt128)ExpM1CbBig_flat[cbBase + 9] << 64) | f0;
+                        for (int i = 4; i > 0;) {
+                            i--;
+                            UInt128 ci = ((UInt128)ExpM1CbBig_flat[cbBase + i * 2 + 1] << 64)
+                                       | ExpM1CbBig_flat[cbBase + i * 2 + 0];
+                            f = ci + MultiplyHigh(mHi, f);
+                        }
+                        f = MultiplyHigh(mHi, f);
+                        UInt64 hl = MultiplyHigh(mLo, (UInt64)(f >> 64));
+                        f += (mLo >> 1) + (hl >> 11);
+                        res += (f >> (10 - el)) + (MultiplyHighApproximate(res, f) >> 10);
+                    }
+                } else {
+                    // ── e ≤ -12 : sub-branch (cb_small) ────────────────────────
+                    int smIdx = (int)sm;
+                    eout = e;
+                    UInt128 mVal = ((UInt128)mHi << 64) | mLo;
+                    UInt128 m0Val = mVal << 15;
+                    UInt128 m2 = SquareHigh(m0Val);
+                    mVal = m0Val >> (-(e + 12));
+                    mHi = (UInt64)(mVal >> 64);
+                    mLo = (UInt64)mVal;
+
+                    int cbBase = smIdx * 8 * 2;
+                    if (sm != 0) {
+                        UInt64 f0 = ExpM1CbSmall_flat[cbBase + 8]
+                            - MultiplyHigh(ExpM1CbSmall_flat[cbBase + 10]
+                              - MultiplyHigh(ExpM1CbSmall_flat[cbBase + 12]
+                                - MultiplyHigh(ExpM1CbSmall_flat[cbBase + 14], mHi), mHi), mHi);
+                        UInt128 f = ((UInt128)ExpM1CbSmall_flat[cbBase + 9] << 64) | f0;
+                        for (int i = 4; i > 0;) {
+                            i--;
+                            UInt128 ci = ((UInt128)ExpM1CbSmall_flat[cbBase + i * 2 + 1] << 64)
+                                       | ExpM1CbSmall_flat[cbBase + i * 2 + 0];
+                            f = ci - MultiplyHighApproximate(mVal, f);
+                        }
+                        f = MultiplyHighApproximate(m2, f);
+                        f >>= (-e - 1);
+                        res = m0Val - f;
+                    } else {
+                        UInt64 f0 = ExpM1CbSmall_flat[cbBase + 8]
+                            + MultiplyHigh(ExpM1CbSmall_flat[cbBase + 10]
+                              + MultiplyHigh(ExpM1CbSmall_flat[cbBase + 12]
+                                + MultiplyHigh(ExpM1CbSmall_flat[cbBase + 14], mHi), mHi), mHi);
+                        UInt128 f = ((UInt128)ExpM1CbSmall_flat[cbBase + 9] << 64) | f0;
+                        for (int i = 4; i > 0;) {
+                            i--;
+                            UInt128 ci = ((UInt128)ExpM1CbSmall_flat[cbBase + i * 2 + 1] << 64)
+                                       | ExpM1CbSmall_flat[cbBase + i * 2 + 0];
+                            f = ci + MultiplyHighApproximate(mVal, f);
+                        }
+                        f = MultiplyHighApproximate(m2, f);
+                        f >>= (-e - 1);
+                        UInt64 fh = (UInt64)(f >> 64), fl = (UInt64)f;
+                        fl = AddWithCarry(fl, (UInt64)m0Val, 0, out var k);
+                        fh = AddWithCarry(fh, (UInt64)(m0Val >> 64), k, out k);
+                        if (k != 0) {
+                            res = ((UInt128)((1UL << 63) | (fh >> 1)) << 64)
+                                | ((fh << 63) | (fl >> 1));
+                            eout++;
+                        } else {
+                            res = ((UInt128)fh << 64) | fl;
+                        }
+                    }
+                }
+
+                // ═══════ b64 ROUNDING (was 15-bit shift in b128) ═══════
+                int off = (sm != 0) ? 3 : 4;
+                UInt64 rnd;
+
+                if ((UInt64)(res >> 127) != 0) {
+                    // MSB at 127 → shift 75, round bit at 74
+                    UInt128 rb = (UInt128)(isNearest ? 1UL : 0UL) << 74;
+                    UInt128 t0 = res + rb + (UInt64)off;
+                    UInt128 mask = ((UInt128)1 << 75) - 1;
+                    if (Misc.Unlikely((t0 & mask) <= 6))
+                        return RoundAccB64(lo, hi, x128, mode, sign, isNearest, isUp, isDown);
+                    rnd = (UInt64)((res >> 74) & 1);
+                    res >>= 75;
+                } else {
+                    // MSB at 126 → shift 74, round bit at 73
+                    eout -= 1;
+                    UInt128 rb = (UInt128)(isNearest ? 1UL : 0UL) << 73;
+                    UInt128 t0 = res + rb + (UInt64)off;
+                    UInt128 mask = ((UInt128)1 << 74) - 1;
+                    if (Misc.Unlikely((t0 & mask) <= 6))
+                        return RoundAccB64(lo, hi, x128, mode, sign, isNearest, isUp, isDown);
+                    rnd = (UInt64)((res >> 73) & 1);
+                    res >>= 74;
+                }
+
+                if (!isNearest) {
+                    rnd = (UInt64)((sm & (mode == MidpointRounding.ToNegativeInfinity ? 1UL : 0UL))
+                                 | (~sm & (mode == MidpointRounding.ToPositiveInfinity ? 1UL : 0UL)));
+                }
+                // res now has 53-bit significand, MSB at bit 52
+                UInt64 res64 = (UInt64)res;
+                UInt64 dres = (sm << 63) | ((UInt64)(1022 + eout) << 52);
+                RaiseExceptionFlagsDummy(FloatingPointExceptionFlags.Inexact);
+                return res64 + rnd + dres;
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════════════
+        //  |x| ≥ 0.5 — same algorithm, b64 rounding
+        // ═══════════════════════════════════════════════════════════════════
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        static UInt64 ExpM1_B64_GeHalf(UInt64 lo, UInt64 hi, UInt128 x128,
+                                       MidpointRounding mode, UInt64 sign,
+                                       bool isNearest, bool isUp, bool isDown) {
+            unchecked {
+                UInt64 sm = hi >> 63;                     // 0 or 1
+                UInt64 mHi = (hi & 0x0000_FFFF_FFFF_FFFFUL) | (1UL << 48);
+                UInt64 mLo = lo;
+                UInt128 mVal = ((UInt128)mHi << 64) | mLo;
+
+                // Range reduction (identical to b128)
+                InlineArray3<UInt64> iln2Top3 = default;
+                iln2Top3[0] = ExpIlN2[4];
+                iln2Top3[1] = ExpIlN2[5];
+                iln2Top3[2] = ExpIlN2[6];
+                MultiplyHigh(out InlineArray3<UInt64> fs, in iln2Top3, mVal);
+                fs[0] ^= sm; fs[1] ^= sm; fs[2] ^= sm;
+                ShiftRightArithmetic(ref fs, 0x401A - (int)((hi >> 48) & 0x7FFF));
+
+                Int64 fs2 = unchecked((Int64)fs[2]);
+                int el = (int)(fs2 >> 20);
+                int i0 = (int)((fs2 >> 15) & 31);
+                int i1 = (int)((fs2 >> 10) & 31);
+                int i2 = (int)((fs2 >> 5) & 31);
+                int i3 = (int)(fs2 & 31);
+
+                UInt64 z = fs[1];
+                UInt64 f0 = MultiplyHigh(z, ExpC[6] + MultiplyHigh(z,
+                            ExpC[8] + MultiplyHigh(z, ExpC[10])));
+                UInt128 res = EvalPoly2(z, f0, ExpCAsUInt128[..3]);
+
+                UInt128 t0v = ((UInt128)ExpR0[i0 * 2 + 1] << 64) | ExpR0[i0 * 2 + 0];
+                UInt128 t1v = ((UInt128)ExpR1[i1 * 2 + 1] << 64) | ExpR1[i1 * 2 + 0];
+                UInt128 t2v = ((UInt128)ExpR2[i2 * 2 + 1] << 64) | ExpR2[i2 * 2 + 0];
+                UInt128 t3v = ((UInt128)ExpR3[i3 * 2 + 1] << 64) | ExpR3[i3 * 2 + 0];
+                UInt128 mBig = MultiplyHighApproximate(
+                                   MultiplyHighApproximate(t0v, t1v),
+                                   MultiplyHighApproximate(t2v, t3v));
+
+                UInt64 k = (UInt64)(((UInt128)0xB17217F7D1CF79ACUL * fs[0]) >> 64);
+                mBig += ((UInt128)(UInt64)(mBig >> 64) * (UInt128)k) >> 84;
+                res = MultiplyHighApproximate(res, mBig);
+
+                int s = -5 - el;
+                UInt64 rnd;
+
+                if (s < 0) {
+                    if ((uint)(123 - el) < 128)
+                        res -= (UInt128)1 << (123 - el);
+                    UInt64 smMask = unchecked((UInt64)((Int64)sm * -1));  // 0 or ~0
+                    UInt128 rXor = ((UInt128)((UInt64)(res >> 64) ^ smMask) << 64)
+                                 | ((UInt64)res ^ smMask);
+                    res = rXor - (UInt128)sm;   // subtract sign-extended sm (0 or -1)
+
+                    UInt64 resHi2 = (UInt64)(res >> 64);
+                    int nz = (int)UInt64.LeadingZeroCount(resHi2);
+                    nz = nz <= 14 ? nz : 14;
+
+                    // b64 rounding: shift by (75-nz), round bit at (74-nz)
+                    UInt128 z0 = res + ((UInt128)(isNearest ? 1UL : 0UL) << (74 - nz))
+                                     + (UInt64)(6 & ~sm);
+                    UInt128 mask = ((UInt128)1 << (75 - nz)) - 1;
+                    if (Misc.Unlikely((z0 & mask) <= 6))
+                        return RoundAccB64(lo, hi, x128, mode, sign, isNearest, isUp, isDown);
+
+                    rnd = (UInt64)((res >> (74 - nz)) & 1);
+                    res >>= (75 - nz);
+                    el -= nz - 4;
+                    el += 1022;
+                } else {
+                    // x < -2.77 (exp(x) < 1/16)
+                    res = 0 - res;
+                    el = -1;
+                    UInt128 rb, mask;
+                    if (74 + s > 127) { rb = 0; mask = ~(UInt128)0; } else {
+                        rb = (UInt128)(isNearest ? 1UL : 0UL) << (74 + s);
+                        mask = ((UInt128)1 << (75 + s)) - 1;
+                    }
+                    UInt128 z0 = res + rb;
+                    if (Misc.Unlikely((z0 & mask) <= 6))
+                        return RoundAccB64(lo, hi, x128, mode, sign, isNearest, isUp, isDown);
+                    if (s < 128) {
+                        Int128 sres = unchecked((Int128)res) >> s;
+                        res = unchecked((UInt128)sres);
+                    } else res = ~(UInt128)0;
+                    rnd = (UInt64)((res >> 74) & 1);
+                    res >>= 75;
+                    el += 1022;
+                }
+
+                if (!isNearest) {
+                    rnd = (UInt64)((sm & (mode == MidpointRounding.ToNegativeInfinity ? 1UL : 0UL))
+                                 | (~sm & (mode == MidpointRounding.ToPositiveInfinity ? 1UL : 0UL)));
+                }
+
+                UInt64 res64 = (UInt64)res;
+                UInt64 dres = (sm << 63) | ((UInt64)(ulong)el << 52);
+                RaiseExceptionFlagsDummy(FloatingPointExceptionFlags.Inexact);
+                return res64 + rnd + dres;
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════════════
+        //  Accurate fallback: AsExpM1qAccurate returns a 128-bit significand
+        //  with MSB at bit 127.  Round directly to b64 (shift 75, rbit 74).
+        // ═══════════════════════════════════════════════════════════════════
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        static UInt64 RoundAccB64(UInt64 lo, UInt64 hi, UInt128 x128,
+                                  MidpointRounding mode, UInt64 sign,
+                                  bool isNearest, bool isUp, bool isDown) {
+            unchecked {
+                AsExpM1qAccurate(out nint el128, out UInt64 mLo, out UInt64 mHi, x128);
+                UInt128 m = ((UInt128)mHi << 64) | mLo;
+
+                UInt64 rnd = (UInt64)((m >> 74) & 1);
+                bool sticky = (m & (((UInt128)1 << 74) - 1)) != 0;
+                UInt64 sig53 = (UInt64)(m >> 75);
+
+                UInt64 incr = 0;
+                if (isNearest) {
+                    if (rnd == 1 && (sticky || (sig53 & 1) == 1)) incr = 1;
+                } else if (isUp && sign == 0) {
+                    if (rnd == 1 || sticky) incr = 1;
+                } else if (isDown && sign == 1) {
+                    if (rnd == 1 || sticky) incr = 1;
+                }
+                sig53 += incr;
+
+                int e64 = (int)el128 + 1022;
+                if (sig53 >= (1UL << 53)) { sig53 >>= 1; e64++; }
+
+                UInt64 dres = (sign << 63) | ((UInt64)e64 << 52);
+                RaiseExceptionFlagsDummy(FloatingPointExceptionFlags.Inexact);
+                return sig53 + dres;
+            }
+        }
+
+        private static void RaiseExceptionFlagsDummy(FloatingPointExceptionFlags flags) {
         }
     }
 }

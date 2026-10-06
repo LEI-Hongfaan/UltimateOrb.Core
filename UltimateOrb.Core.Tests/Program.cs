@@ -986,10 +986,63 @@ public readonly struct TotalOrderIeee754Comparer<T> :
 
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private static int Main(string[] args) {
+
+
+            {
+                {
+                    var b = CorrectRoundingMath.ExpM1(4.000555584256948, MidpointRounding.ToZero);
+                    Console.WriteLine($"? = {b:G17}");
+                    
+                }
+                {
+                    var b = CorrectRoundingMath.ExpM1(-35.232723172900819, MidpointRounding.ToEven);
+                    Console.WriteLine($"? = {b:G17}");
+
+                }
+
+
+                {
+                    var b = CorrectRoundingMath.ExpM1(9.1343813236002528E-17, MidpointRounding.ToEven);
+                    Console.WriteLine($"? = {b:G17}");
+                   
+                }
+                {
+                    var b = CorrectRoundingMath.ExpM1(-37.429947750237034, MidpointRounding.ToEven);
+                    Console.WriteLine($"? = {b:G17}");
+                }
+                {
+                    var b = CorrectRoundingMath.ExpM1(-20.00000000000003, MidpointRounding.ToEven);
+                    Console.WriteLine($"? = {b:G17}");
+
+                }
+                {
+                    var b = CorrectRoundingMath.ExpM1(20.00000000000003, MidpointRounding.ToEven);
+                    Console.WriteLine($"? = {b:G17}");
+                    
+                }
+                {
+                    var b = Binary64Arithmetic.ExpM1(BitConverter.DoubleToUInt64Bits(0), MidpointRounding.ToNegativeInfinity);
+                    Console.WriteLine($"? = {BitConverter.UInt64BitsToDouble(b):G17}");
+                }
+                {
+                    var b = Binary64Arithmetic.ExpM1(BitConverter.DoubleToUInt64Bits(1), MidpointRounding.ToNegativeInfinity);
+                    Console.WriteLine($"? = {BitConverter.UInt64BitsToDouble(b):G17}");
+                }
+                {
+                    var b = Binary64Arithmetic.ExpM1(BitConverter.DoubleToUInt64Bits(4.0005555842569480), MidpointRounding.ToNegativeInfinity);
+                    Console.WriteLine($"? = {BitConverter.UInt64BitsToDouble(b):G17}");
+                }
+                return 0;
+
+            }
+            {
+                //var sdfa = CorrectRoundingMath.ExpM1(4.0005555842569480, MidpointRounding.ToNegativeInfinity);
+                //Console.WriteLine($"? = {sdfa:G17}");
+            }
             {
                 var sdfasdsads = Quadruple.Parse("-0x1.dbd74e2fbf7b7ed3cbc1130508eap+2", NumberStyles.HexFloat | NumberStyles.AllowHexSpecifier);
                 sdfasdsads = Quadruple.Parse("0xb.e65e3ef737762584e61de488a0b8p-4", NumberStyles.HexFloat | NumberStyles.AllowHexSpecifier);
-                
+
                 var sdfa = Quadruple.ExpM1(sdfasdsads, MidpointRounding.ToNegativeInfinity);
                 Console.WriteLine($"? = {sdfa:G36}");
 
@@ -1041,7 +1094,7 @@ public readonly struct TotalOrderIeee754Comparer<T> :
 
             }
             {
-                
+
                 VerifyAgainstMathematica(
                     "Hypot(0X1P-16494Q, 0X1P-16494Q)",
                     Quadruple.Hypot(Quadruple.Parse("0X1P-16494", NumberStyles.HexFloat | NumberStyles.AllowHexSpecifier),
@@ -1062,7 +1115,7 @@ public readonly struct TotalOrderIeee754Comparer<T> :
 
             {
                 var dsfa = Rational64.Inverse(Rational64.FromFraction(3, -2));
-               Console.WriteLine($"? = {dsfa}");
+                Console.WriteLine($"? = {dsfa}");
             }
             {
                 var dsfa = Rational64.Hypot(Rational64.FromFraction(3, -2), Rational64.FromFraction(4, -2));

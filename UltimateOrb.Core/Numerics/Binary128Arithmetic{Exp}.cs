@@ -469,7 +469,7 @@ namespace UltimateOrb.Numerics {
 
         // pol : f = c[0] + c[1]*x + ... + c[n-1]*x^(n-1) + f0*x^n, 128-bit coeffs.
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static UInt128 EvalPoly2(UInt64 x, UInt128 f0, ReadOnlySpan<UInt128> c) {
+        internal static UInt128 EvalPoly2(UInt64 x, UInt128 f0, ReadOnlySpan<UInt128> c) {
             unchecked {
                 var n = c.Length;
                 UInt128 f = c[n - 1] + f0;
@@ -670,7 +670,7 @@ namespace UltimateOrb.Numerics {
 
 
         // as_expq_accurate — 3-word fast path used when the main result is near a tie.
-        [MethodImpl(MethodImplOptions.NoInlining)]
+        [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.AggressiveOptimization)]
         static void AsExpqAccurate(out nint el, out UInt64 mLo, out UInt64 mHi, UInt128 x0) {
             // Tables ExpTbl0, ExpTbl1, ExpCAcc (all int[][3] → flat spans, row-major).
             // (Full literal tables omitted here for brevity — copy verbatim from the C source;
@@ -731,7 +731,7 @@ namespace UltimateOrb.Numerics {
         }
 
         // as_expq_superaccurate — same shape, uses the 7-word iln2 and the 6-word tables.
-        [MethodImpl(MethodImplOptions.NoInlining)]
+        [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.AggressiveOptimization)]
         static void AsExpqSuperaccurate(out nint el, out UInt64 mLo, out UInt64 mHi, UInt128 x0) {
             // Uses ExpTblSupAccFlat (16×6), ExpC6Flat (28×6), ExpIlN2 (7 words).
             unchecked {
@@ -775,7 +775,7 @@ namespace UltimateOrb.Numerics {
 
 
         // iln2 (7 words, from the C source):
-        static ReadOnlySpan<UInt64> ExpIlN2 => [
+        internal static ReadOnlySpan<UInt64> ExpIlN2 => [
             0xea90b9e60c4a90a0, 0x24d92f75c16be0b3, 0xde1c43f755176cd6, 0x8b25166cd1a13247,
             0xeb577aa8dd695a58, 0xbe87fed0691d3e88, 0xb8aa3b295c17f0bb
         ];
@@ -783,7 +783,7 @@ namespace UltimateOrb.Numerics {
         static ref readonly InlineArray7<UInt64> ExpIlN2_7 => ref UltimateOrb.Runtime.CompilerServices.Unsafe.As<UInt64, InlineArray7<UInt64>>(ref MemoryMarshal.GetReference(ExpIlN2));
 
         // r0..r3 (32 rows × 2 words each). Copy verbatim from the C source.
-        static ReadOnlySpan<UInt64> ExpR0 => [
+        internal static ReadOnlySpan<UInt64> ExpR0 => [
                                0, 0x8000000000000000, 0x3e2a475b46520bff, 0x82cd8698ac2ba1d7,
  0xc5c95b8c2154c1b2, 0x85aac367cc487b14,  0x5df8d76c98c67563, 0x88980e8092da8527,
  0xfbe4628758a53c90, 0x8b95c1e3ea8bd6e6,  0x2dc0144c8783d4c6, 0x8ea4398b45cd53c0,
@@ -803,7 +803,7 @@ namespace UltimateOrb.Numerics {
 
 
         ];
-        static ReadOnlySpan<UInt64> ExpR1 => [
+        internal static ReadOnlySpan<UInt64> ExpR1 => [
                              0, 0x8000000000000000,  0x3690dfe44d11d008, 0x8016302f17467628,
  0xff8ce94a6797b3ce, 0x802c6436d0e04f50,  0x49fc841afba9c3c6, 0x80429c17d77c18ed,
  0x94d589f608ee4aa2, 0x8058d7d2d5e5f6b0,  0xe54ec5f966eb1872, 0x806f17687707a7af,
@@ -822,7 +822,7 @@ namespace UltimateOrb.Numerics {
  0x6a3b68fcc424ff9f, 0x82a0393fe0bb0ca8,  0xc87433776c8b975c, 0x82b6ddf5dbc35906,
 
         ];
-        static ReadOnlySpan<UInt64> ExpR2 => [
+        internal static ReadOnlySpan<UInt64> ExpR2 => [
                                 0, 0x8000000000000000,  0xaa22beacca949013, 0x8000b17292f702a3,
  0xe84c2e1a463473da, 0x800162e61bed4a48,  0xe9b3d4c106428682, 0x8002145a9ae42bf6,
  0xb6566a58c048be1f, 0x8002c5d00fdcfcb6,  0x2ef8674028829792, 0x800377467ad91193,
@@ -841,7 +841,7 @@ namespace UltimateOrb.Numerics {
  0x4aeb2a187632347d, 0x8014cd0f4ed5d485,  0x72a28cd4d1f3bae9, 0x80157e9eb7fa85d8,
 
         ];
-        static ReadOnlySpan<UInt64> ExpR3 => [
+        internal static ReadOnlySpan<UInt64> ExpR3 => [
 
                                0, 0x8000000000000000,  0xecfc487503488bb2, 0x8000058b90de7e4c,
  0x8307016c1cd4e8b7, 0x80000b1721fa7c18,  0x6c292b5fbf0c0ab5, 0x800010a2b353f965,
@@ -863,7 +863,7 @@ namespace UltimateOrb.Numerics {
         ];
 
         // c (6 rows × 2 words each).
-        static ReadOnlySpan<UInt64> ExpC => [
+        internal static ReadOnlySpan<UInt64> ExpC => [
             0xFFFF_FFFF_FFFF_FFFF, 0x7FFF_FFFF_FFFF_FFFF,
             0x7BCD_5E4F_1D9C_C01F, 0x0000_058B_90BF_BE8E,
             0xFF82_C58E_A86F_16B0, 0x0000_0000_001E_BFBD,
@@ -881,7 +881,7 @@ namespace UltimateOrb.Numerics {
             U128(0x0000_0000_0000_0000, 0x0000_0000_0002_BB10),
         ];
 
-        static ReadOnlySpan<UInt128> ExpCAsUInt128 => ExpCAsUInt128_;
+        internal static ReadOnlySpan<UInt128> ExpCAsUInt128 => ExpCAsUInt128_;
 
 
         // 6-word tables used by AsExpqSuperaccurate (16×6 and 28×6).
@@ -1060,7 +1060,7 @@ namespace UltimateOrb.Numerics {
         static readonly UInt128 ExpM1XMax = ((UInt128)0x400c62e42fefa39eUL << 64) | 0xf35793c7673007e6UL;
         // r0z[2][32], r1z[2][32]:  [sm][j] → binary128 (lo, hi).
         // Flatten as:  idx = (sm * 32 + j) * 2, then +0 = lo, +1 = hi.
-        static ReadOnlySpan<UInt64> ExpM1R0Z_flat => [
+        internal static ReadOnlySpan<UInt64> ExpM1R0Z_flat => [
             0, 0, 0x864b3e9044e6b457, 0x4080ab55de3917ab,
             0xbd083aba80c97a6b, 0x8205601127ec98e0, 0x67f31eb2594af50f, 0x62491b414f45e149,
             0x8d00cf112e4d4a8e, 0x8415abbe9a76bead, 0xf50ce3713ce2f053, 0xa66a7e4c4e6b22aa,
@@ -1097,7 +1097,7 @@ namespace UltimateOrb.Numerics {
         ];
 
 
-        static ReadOnlySpan<UInt64> ExpM1R1Z_flat => [
+        internal static ReadOnlySpan<UInt64> ExpM1R1Z_flat => [
             0, 0, 0xb60c30c64c705563, 0x4004002aac000888,
             0x1cd9d0dd24ef54a9, 0x801001556aabbbc7, 0x9d1272ce89353c8c, 0x6012024036040d0d,
             0x41d5bd72f4c8f39c, 0x802005560011127d, 0xa449c83a3f0239b, 0xa0320a6c4b897018,
@@ -1135,19 +1135,19 @@ namespace UltimateOrb.Numerics {
 
         // e0z[2][32], e1z[2][32]:  byte offsets.
         // Flatten as:  idx = sm * 32 + j.
-        static ReadOnlySpan<Byte> ExpM1E0Z => [
+        internal static ReadOnlySpan<Byte> ExpM1E0Z => [
             0, 4, 4, 3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0,
             0, 5, 4, 4, 3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
         ];
 
-        static ReadOnlySpan<Byte> ExpM1E1Z => [
+        internal static ReadOnlySpan<Byte> ExpM1E1Z => [
             0, 9, 9, 8, 8, 8, 8, 7, 7, 7, 7, 7, 7, 7, 7, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 5,
             0, 10, 9, 9, 8, 8, 8, 8, 7, 7, 7, 7, 7, 7, 7, 7, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
         ];
 
         // cb[2][9][2] — main path coefficient table.
         // Flatten:  idx = sm * 18 + j * 2 + k  (k=0 lo, k=1 hi).
-        static ReadOnlySpan<UInt64> ExpM1CbBig_flat => [
+        internal static ReadOnlySpan<UInt64> ExpM1CbBig_flat => [
             0x0000000000000000UL, 0x8000000000000000UL, 0x0000000000000000UL, 0x0008000000000000UL,
             0x5555555555555558UL, 0x0000005555555555UL, 0xaaaaaaaaaaaaaa92UL, 0x0000000002aaaaaaUL,
             0x1111111111111192UL, 0x0000000000001111UL, 0x5b05b05b05b05992UL, 0x0000000000000000UL,
@@ -1163,7 +1163,7 @@ namespace UltimateOrb.Numerics {
 
         // cb[2][8][2] — the SECOND `cb` in C; different data.  Kept separate.
         // Flatten:  idx = sm * 16 + j * 2 + k.
-        static ReadOnlySpan<UInt64> ExpM1CbSmall_flat => [
+        internal static ReadOnlySpan<UInt64> ExpM1CbSmall_flat => [
             0xfffffffffffffe89UL, 0x7fffffffffffffffUL, 0x5555555555557c59UL, 0x0005555555555555UL,
             0xaaaaaaaaaaa91a1cUL, 0x0000002aaaaaaaaaUL, 0x1111111111191d15UL, 0x0000000001111111UL,
             0x5b05b05b05991bd6UL, 0x00000000000005b0UL, 0x1a01a01a01c78cf6UL, 0x0000000000000000UL,
@@ -1181,7 +1181,7 @@ namespace UltimateOrb.Numerics {
         // Port of `as_expm1q_accurate`.  Reuses the SAME tables as AsExpqAccurate
         // (ExpTbl0Flat, ExpTbl1Flat, ExpCAccFlat).
         [MethodImpl(MethodImplOptions.NoInlining)]
-        static void AsExpM1qAccurate(out nint el, out UInt64 mLo, out UInt64 mHi, UInt128 x0) {
+        internal static void AsExpM1qAccurate(out nint el, out UInt64 mLo, out UInt64 mHi, UInt128 x0) {
             unchecked {
                 Int64 sm = unchecked((Int64)(x0 >> 64) >> 63);   // 0 or -1
                 UInt128 t = (x0 & (((UInt128)1 << 112) - 1)) | ((UInt128)1 << 112);

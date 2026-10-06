@@ -1568,81 +1568,6 @@
                returns the raw data stored in this bit vector...
             </devdoc>
         </member>
-        <member name="M:UltimateOrb.IInterfaceDerivedSelfBaseFriend`2.FromBase(`1)">
-            <summary>
-            Converts the specified value to <typeparamref name="TSelf"/>.
-            </summary>
-        </member>
-        <member name="M:UltimateOrb.IInterfaceDerivedSelfBaseFriend`2.ToBase(`0)">
-            <summary>
-            Converts the specified value to <typeparamref name="TBase"/>.
-            </summary>
-        </member>
-        <member name="M:UltimateOrb.IInterfaceDerivedTaggedSelfBaseFriend`3.FromBase(`2)">
-            <summary>
-            Converts the specified value to <typeparamref name="TSelf"/>.
-            </summary>
-        </member>
-        <member name="M:UltimateOrb.IInterfaceDerivedTaggedSelfBaseFriend`3.ToBase(`0)">
-            <summary>
-            Converts the specified value to <typeparamref name="TBase"/>.
-            </summary>
-        </member>
-        <member name="M:UltimateOrb.IInterfaceDerivedBaseFriend`4.FromBase(`3)">
-            <summary>
-            Converts the specified value to <typeparamref name="TSelf"/>.
-            </summary>
-        </member>
-        <member name="M:UltimateOrb.IInterfaceDerivedBaseFriend`4.ToBase(`2)">
-            <summary>
-            Converts the specified value to <typeparamref name="TBase"/>.
-            </summary>
-        </member>
-        <member name="M:UltimateOrb.IInterfaceDerivedSelfBaseFriend`3.FromBase(`1,`2)">
-            <summary>
-            Converts the specified value to <typeparamref name="TSelf"/>.
-            </summary>
-        </member>
-        <member name="M:UltimateOrb.IInterfaceDerivedSelfBaseFriend`3.ToBase1(`0)">
-            <summary>
-            Converts the specified value to <typeparamref name="TBase1"/>.
-            </summary>
-        </member>
-        <member name="M:UltimateOrb.IInterfaceDerivedSelfBaseFriend`3.ToBase2(`0)">
-            <summary>
-            Converts the specified value to <typeparamref name="TBase2"/>.
-            </summary>
-        </member>
-        <member name="M:UltimateOrb.IInterfaceDerivedTaggedSelfBaseFriend`4.FromBase(`2,`3)">
-            <summary>
-            Converts the specified value to <typeparamref name="TSelf"/>.
-            </summary>
-        </member>
-        <member name="M:UltimateOrb.IInterfaceDerivedTaggedSelfBaseFriend`4.ToBase1(`0)">
-            <summary>
-            Converts the specified value to <typeparamref name="TBase1"/>.
-            </summary>
-        </member>
-        <member name="M:UltimateOrb.IInterfaceDerivedTaggedSelfBaseFriend`4.ToBase2(`0)">
-            <summary>
-            Converts the specified value to <typeparamref name="TBase2"/>.
-            </summary>
-        </member>
-        <member name="M:UltimateOrb.IInterfaceDerivedBaseFriend`5.FromBase(`3,`4)">
-            <summary>
-            Converts the specified value to <typeparamref name="TSelf"/>.
-            </summary>
-        </member>
-        <member name="M:UltimateOrb.IInterfaceDerivedBaseFriend`5.ToBase1(`2)">
-            <summary>
-            Converts the specified value to <typeparamref name="TBase1"/>.
-            </summary>
-        </member>
-        <member name="M:UltimateOrb.IInterfaceDerivedBaseFriend`5.ToBase2(`2)">
-            <summary>
-            Converts the specified value to <typeparamref name="TBase2"/>.
-            </summary>
-        </member>
         <member name="T:UltimateOrb.Numerics.IFloatingPointConstantsDerivedTagged`3">
             <inheritdoc cref="T:System.Numerics.IFloatingPointConstants`1"/>
             <typeparam name="TBase">
@@ -8560,6 +8485,81 @@
             Returns a string representation of the 16×16 bit array.
             </summary>
         </member>
+        <member name="M:UltimateOrb.IInterfaceDerivedSelfBaseFriend`2.FromBase(`1)">
+            <summary>
+            Converts the specified value to <typeparamref name="TSelf"/>.
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.IInterfaceDerivedSelfBaseFriend`2.ToBase(`0)">
+            <summary>
+            Converts the specified value to <typeparamref name="TBase"/>.
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.IInterfaceDerivedTaggedSelfBaseFriend`3.FromBase(`2)">
+            <summary>
+            Converts the specified value to <typeparamref name="TSelf"/>.
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.IInterfaceDerivedTaggedSelfBaseFriend`3.ToBase(`0)">
+            <summary>
+            Converts the specified value to <typeparamref name="TBase"/>.
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.IInterfaceDerivedBaseFriend`4.FromBase(`3)">
+            <summary>
+            Converts the specified value to <typeparamref name="TSelf"/>.
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.IInterfaceDerivedBaseFriend`4.ToBase(`2)">
+            <summary>
+            Converts the specified value to <typeparamref name="TBase"/>.
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.IInterfaceDerivedSelfBaseFriend`3.FromBase(`1,`2)">
+            <summary>
+            Converts the specified value to <typeparamref name="TSelf"/>.
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.IInterfaceDerivedSelfBaseFriend`3.ToBase1(`0)">
+            <summary>
+            Converts the specified value to <typeparamref name="TBase1"/>.
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.IInterfaceDerivedSelfBaseFriend`3.ToBase2(`0)">
+            <summary>
+            Converts the specified value to <typeparamref name="TBase2"/>.
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.IInterfaceDerivedTaggedSelfBaseFriend`4.FromBase(`2,`3)">
+            <summary>
+            Converts the specified value to <typeparamref name="TSelf"/>.
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.IInterfaceDerivedTaggedSelfBaseFriend`4.ToBase1(`0)">
+            <summary>
+            Converts the specified value to <typeparamref name="TBase1"/>.
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.IInterfaceDerivedTaggedSelfBaseFriend`4.ToBase2(`0)">
+            <summary>
+            Converts the specified value to <typeparamref name="TBase2"/>.
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.IInterfaceDerivedBaseFriend`5.FromBase(`3,`4)">
+            <summary>
+            Converts the specified value to <typeparamref name="TSelf"/>.
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.IInterfaceDerivedBaseFriend`5.ToBase1(`2)">
+            <summary>
+            Converts the specified value to <typeparamref name="TBase1"/>.
+            </summary>
+        </member>
+        <member name="M:UltimateOrb.IInterfaceDerivedBaseFriend`5.ToBase2(`2)">
+            <summary>
+            Converts the specified value to <typeparamref name="TBase2"/>.
+            </summary>
+        </member>
         <!-- Badly formed XML comment ignored for member "P:UltimateOrb.Decimal128Dpd.RawBiasedExponent" -->
         <member name="T:UltimateOrb.IDecimalFloatingPointIeee754`1">
             <summary>Defines an IEEE 754 floating-point type that is represented in a base-10 format.</summary>
@@ -11084,5 +11084,8 @@
         <member name="F:System.Text.RegularExpressions.Generated.Utilities.s_asciiHexDigits">
             <summary>Supports searching for characters in or not in "0123456789ABCDEFabcdef".</summary>
         </member>
+    </members>
+</doc>
+r>
     </members>
 </doc>

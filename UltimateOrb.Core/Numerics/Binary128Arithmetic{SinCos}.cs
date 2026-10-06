@@ -1074,7 +1074,7 @@ namespace UltimateOrb.Numerics {
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static bool IsNearest(MidpointRounding mode) {
+        internal static bool IsNearest(MidpointRounding mode) {
             return mode == MidpointRounding.ToEven || mode == MidpointRounding.AwayFromZero;
         }
 
