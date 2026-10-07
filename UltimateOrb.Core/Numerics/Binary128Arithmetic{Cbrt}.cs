@@ -233,7 +233,7 @@ namespace UltimateOrb.Numerics {
         }
 
         [Conditional("DEBUG")]
-        private static void RaiseExceptionFlagsDummy(FloatingPointExceptionFlags flags) {
+        internal static void RaiseExceptionFlagsDummy(FloatingPointExceptionFlags flags) {
         }
 
 

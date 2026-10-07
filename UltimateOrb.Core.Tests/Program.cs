@@ -990,6 +990,69 @@ public readonly struct TotalOrderIeee754Comparer<T> :
 
             {
                 {
+                    var b = CorrectRoundingMath.ExpM1(11.715807839696332, MidpointRounding.ToPositiveInfinity);
+                    Console.WriteLine($"? = {b:G17}");
+                }
+
+                {
+                    var b = CorrectRoundingMath.ExpM1(0.98969266186776228, MidpointRounding.ToPositiveInfinity);
+                    Console.WriteLine($"? = {b:G17}");
+
+                }
+                {
+                    var b = CorrectRoundingMath.ExpM1(11.715807839696332, MidpointRounding.ToNegativeInfinity);
+                    Console.WriteLine($"? = {b:G17}");
+                }
+                {
+                    var b = CorrectRoundingMath.ExpM1(-0.0, MidpointRounding.ToNegativeInfinity);
+                    Console.WriteLine($"? = {b:G17}");
+
+                }
+                {
+                    var b = CorrectRoundingMath.ExpM1(-2.2250738585072009E-308, MidpointRounding.ToZero);
+                    Console.WriteLine($"? = {b:G17}");
+                    
+                }
+                {
+                    var b = CorrectRoundingMath.ExpM1(-0.93001836374961722, MidpointRounding.ToZero);
+                    Console.WriteLine($"? = {b:G17}"); 
+
+
+                }
+                {
+                    var b = CorrectRoundingMath.ExpM1(1.4928873716680081E+181, MidpointRounding.ToZero);
+                    Console.WriteLine($"? = {b:G17}");
+                }
+                {
+                    var b = CorrectRoundingMath.ExpM1(-1.0403571407112755, MidpointRounding.ToZero);
+                    Console.WriteLine($"? = {b:G17}");
+                    
+                }
+                {
+                    var b = CorrectRoundingMath.ExpM1(36.184789079846887, MidpointRounding.ToZero);
+                    Console.WriteLine($"? = {b:G17}");
+                    
+
+                }
+                {
+
+                    var b = CorrectRoundingMath.ExpM1(1.7976931348623157E+308, MidpointRounding.AwayFromZero);
+                    Console.WriteLine($"? = {b:G17}");
+                    
+
+
+                }
+
+                {
+                    var b = CorrectRoundingMath.ExpM1(0.053889835785768385, MidpointRounding.ToEven);
+                    Console.WriteLine($"? = {b:G17}");
+                    
+                }
+                {
+                    var b = CorrectRoundingMath.ExpM1(-37.429947750237034, MidpointRounding.ToEven);
+                    Console.WriteLine($"? = {b:G17}");
+                }
+                {
                     var b = CorrectRoundingMath.ExpM1(4.000555584256948, MidpointRounding.ToZero);
                     Console.WriteLine($"? = {b:G17}");
                     
@@ -1005,10 +1068,6 @@ public readonly struct TotalOrderIeee754Comparer<T> :
                     var b = CorrectRoundingMath.ExpM1(9.1343813236002528E-17, MidpointRounding.ToEven);
                     Console.WriteLine($"? = {b:G17}");
                    
-                }
-                {
-                    var b = CorrectRoundingMath.ExpM1(-37.429947750237034, MidpointRounding.ToEven);
-                    Console.WriteLine($"? = {b:G17}");
                 }
                 {
                     var b = CorrectRoundingMath.ExpM1(-20.00000000000003, MidpointRounding.ToEven);

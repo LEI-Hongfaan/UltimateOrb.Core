@@ -7,6 +7,7 @@ using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Intrinsics;
+using System.Runtime.Intrinsics.X86;
 using System.Text;
 using System.Threading.Tasks;
 using UltimateOrb.Numerics;
@@ -15,8 +16,20 @@ using Misc = UltimateOrb.Miscellaneous;
 
 namespace UltimateOrb {
 
+#pragma warning disable UoWIP // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+    using static Numerics.Binary128Arithmetic;
+#pragma warning restore UoWIP // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+
     public static partial class CorrectRoundingMath {
 
+        public static double ExpM1(double x) {
+            return CorrectRoundingMath1.ExpM1(x);
+        }
+
+        public static double ExpM1(double x, MidpointRounding mode) {
+            return CorrectRoundingMath1.ExpM1(x, mode);
+        }
+        /*
         public static double ExpM1(double x) {
             return BitConverter.UInt64BitsToDouble(Binary64Arithmetic.ExpM1(
                 BitConverter.DoubleToUInt64Bits(x)));
@@ -26,6 +39,7 @@ namespace UltimateOrb {
             return BitConverter.UInt64BitsToDouble(Binary64Arithmetic.ExpM1(
                 BitConverter.DoubleToUInt64Bits(x), mode));
         }
+        */
     }
 
 
@@ -40,8 +54,16 @@ namespace UltimateOrb {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static double BigAddDDPartial(double x, double y, out double e) {
-            e = DoubleArithmeticF.BigAddPartial(x, y, out var r);
-            return r;
+            double s = x + y, z = s - x;
+            e = y - z;
+            return s;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static double BigAddDDPartial0(double x, double y, MidpointRounding mode, out double e) {
+            double s = RoundPartial0(y, x, mode), z = s - x;
+            e = y - z;
+            return s;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -80,12 +102,12 @@ namespace UltimateOrb {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static double EvalPolyOddDD(double x, int n, ReadOnlyManagedPtr<InlineArray2<double>> c, out double l) {
+        static double EvalPolyOddDD(double x, int n, ReadOnlyManagedPtr<InlineArray2<double>> c, ref double l) {
             unchecked {
                 int i = n - 1;
-                double ch = RoundPartial(c[i][0]), cl = RoundPartial(c[i][1]);
+                double ch = BigAddDDPartial(c[i][0], l, out l), cl = c[i][1] + l;
                 while (--i >= 0) {
-                    ch = MultiplyDD(x, 0, ch, cl, out cl);
+                    ch = MultiplyHighDD(ch, cl, x, out cl);
                     ch = AddDDPartial(c[i][0], c[i][1], ch, cl, out cl);
                 }
                 l = cl;
@@ -96,11 +118,14 @@ namespace UltimateOrb {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static double AsExpLD(double x, Int64 i) {
             unchecked {
+                /*
                 if (Vector128.IsHardwareAccelerated) {
                     Vector128<Int64> sb = Vector128.CreateScalarUnsafe(i << 52);
                     Vector128<double> r = Vector128.CreateScalarUnsafe(x);
                     return (sb + r.AsInt64()).AsDouble()[0];
-                } else {
+                }
+                */
+                {
                     Int64 bits = BitConverter.DoubleToInt64Bits(x);
                     bits += (Int64)i << 52;
                     return BitConverter.Int64BitsToDouble(bits);
@@ -125,8 +150,237 @@ namespace UltimateOrb {
             0x76f58b0d65bd5553UL, 0xc06UL,
         ];
 
+        internal static double RoundPartial0(double lo, double hi, MidpointRounding mode) {
+            Debug.Assert(double.Abs(lo) <= double.Abs(hi));
+            Debug.Assert(double.Abs(lo) < 1e100);
+            Debug.Assert(double.Abs(hi) < 1e100);
+            // Nearest-even rounded sum (default IEEE rounding mode in .NET)
+            double s = lo + hi;
+
+            // Exact error e such that v = s + e
+            double bb = s - lo;
+            double e = (lo - (s - bb)) + (hi - bb);
+
+            // Exact value is already a double
+            if (e == 0.0)
+                return s;
+
+            // ToEven: s is already the correctly rounded result (nearest-even)
+            // Special rule: in this method MidpointRounding.AwayFromZero is considered to be the same as MidpointRounding.ToEven.
+            // This is because this helper works with transcendental functions,
+            // which are not expected to produces ties in the first place, and
+            // if they do, it means that double double precision is not enough and
+            // we just try our best to return the nearest-even result.
+            if (IsNearest(mode))
+                return s;
+
+            // Next representable double in the direction of the error
+            double next = e > 0.0 ? Math.BitIncrement(s) : Math.BitDecrement(s);
+
+            switch (mode) {
+            /*
+            case MidpointRounding.AwayFromZero:
+                double ulp = Math.Abs(next - s);
+                double halfUlp = 0.5 * ulp;
+                double absE = Math.Abs(e);
+                if (absE < halfUlp) return s;
+                if (absE > halfUlp) return next;
+                // Tie: return the one with larger magnitude
+                return Math.Abs(next) > Math.Abs(s) ? next : s;
+            */
+            case MidpointRounding.ToPositiveInfinity:
+                return e > 0.0 ? next : s;
+
+            case MidpointRounding.ToNegativeInfinity:
+                return e > 0.0 ? s : next;
+
+            case MidpointRounding.ToZero:
+            default:
+                if (s > 0.0)
+                    return e > 0.0 ? s : next;   // positive: floor
+                else if (s < 0.0)
+                    return e > 0.0 ? next : s;   // negative: ceiling
+                else
+                    return e;                    // s == 0, v = e
+            }
+        }
+
+#pragma warning disable UoWIP // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+        /// <summary>
+        /// Rounds a quadruple‑precision floating‑point value to the nearest double,
+        /// using the specified midpoint rounding mode.
+        /// </summary>
+        internal static double RoundQuadrupleToDouble(Quadruple x, MidpointRounding mode) {
+            unchecked {
+                System.UInt128 bits = BitConverter.QuadrupleToUInt128Bits(x);
+
+                bool sign = (bits >> 127) != 0;
+                int exp = (int)((bits >> 112) & 0x7FFF);
+                System.UInt128 frac = bits & ((System.UInt128.One << 112) - 1);
+
+                // NaN / Infinity
+                if (exp == 0x7FFF) {
+                    if (frac == 0)
+                        return sign ? double.NegativeInfinity : double.PositiveInfinity;
+                    return double.NaN;
+                }
+
+                // ±0
+                if (exp == 0 && frac == 0)
+                    return sign ? -0.0 : 0.0;
+
+                // Decode mantissa and exponent
+                UInt128 mantissa;
+                int exp2;
+                if (exp == 0) {
+                    // Subnormal quadruple
+                    mantissa = frac;
+                    exp2 = -16494;
+                } else {
+                    // Normal quadruple
+                    mantissa = (System.UInt128.One << 112) | frac;
+                    exp2 = exp - 16495;
+                }
+
+                int bitLen = 128 - (int)System.UInt128.LeadingZeroCount(mantissa);
+                int e_lead = exp2 + bitLen - 1;   // unbiased exponent of the MSB
+
+                // Overflow
+                if (e_lead > 1023)
+                    return OverflowResult(sign, mode);
+
+                // Underflow: too small to be represented even as a subnormal double
+                if (e_lead < -1075) {
+                    if (sign)
+                        return mode == MidpointRounding.ToNegativeInfinity ? -double.Epsilon : -0.0;
+                    else
+                        return mode == MidpointRounding.ToPositiveInfinity ? double.Epsilon : 0.0;
+                }
+
+                // Determine the LSB exponent of the target double
+                int E = e_lead >= -1022 ? e_lead - 52 : -1074;
+                int shift = E - exp2;
+
+                UInt128 q;
+                UInt128 rem;
+                if (shift > 0) {
+                    if (shift > 113) {
+                        q = 0;
+                        rem = mantissa;
+                    } else {
+                        q = mantissa >> shift;
+                        rem = mantissa & ((UInt128.One << shift) - 1);
+                    }
+                } else {
+                    q = mantissa << (-shift);
+                    rem = 0;
+                }
+
+                bool roundUp = false;
+                if (rem != 0) {
+                    switch (mode) {
+                    case MidpointRounding.ToEven:
+                        if (shift > 0 && shift <= 113) {
+                            UInt128 half = UInt128.One << (shift - 1);
+                            if (rem > half || (rem == half && (q & 1) == 1))
+                                roundUp = true;
+                        }
+                        break;
+
+                    case MidpointRounding.AwayFromZero:
+                        if (shift > 0 && shift <= 113) {
+                            UInt128 half = UInt128.One << (shift - 1);
+                            if (rem >= half)
+                                roundUp = true;
+                        }
+                        break;
+
+                    case MidpointRounding.ToZero:
+                        break;
+
+                    case MidpointRounding.ToPositiveInfinity:
+                        if (!sign) roundUp = true;
+                        break;
+
+                    case MidpointRounding.ToNegativeInfinity:
+                        if (sign) roundUp = true;
+                        break;
+                    }
+                }
+
+                System.UInt128 N = q + (roundUp ? 1u : 0u);
+
+                // Normalize if rounding up caused a carry into the next power of two
+                if (N == (System.UInt128.One << 53)) {
+                    N >>= 1;
+                    E += 1;
+                }
+
+                if (N == 0)
+                    return sign ? -0.0 : 0.0;
+
+                // Recompute exponent after potential normalization
+                bitLen = 128 - (int)System.UInt128.LeadingZeroCount(N);
+                e_lead = E + bitLen - 1;
+
+                // Check overflow after rounding
+                if (e_lead > 1023)
+                    return OverflowResult(sign, mode);
+
+                if (e_lead >= -1022) {
+                    // Normal double
+                    while (bitLen > 53) {
+                        N >>= 1;
+                        E++;
+                        bitLen--;
+                    }
+
+                    int biasedExp = e_lead + 1023;
+                    UInt64 fraction = (UInt64)(N & ((System.UInt128.One << 52) - 1));
+                    UInt64 doubleBits = ((UInt64)(sign ? 1 : 0) << 63)
+                                      | ((UInt64)biasedExp << 52)
+                                      | fraction;
+                    return BitConverter.UInt64BitsToDouble(doubleBits);
+                } else {
+                    // Subnormal double
+                    if (N >= (System.UInt128.One << 52)) {
+                        // Rounded up to the minimum normal double
+                        int biasedExp = 1;
+                        UInt64 fraction = (UInt64)(N - (System.UInt128.One << 52));
+                        UInt64 doubleBits = ((UInt64)(sign ? 1 : 0) << 63)
+                                          | ((UInt64)biasedExp << 52)
+                                          | fraction;
+                        return BitConverter.UInt64BitsToDouble(doubleBits);
+                    } else {
+                        int biasedExp = 0;
+                        UInt64 fraction = (UInt64)N;
+                        UInt64 doubleBits = ((UInt64)(sign ? 1 : 0) << 63)
+                                          | ((UInt64)biasedExp << 52)
+                                          | fraction;
+                        return BitConverter.UInt64BitsToDouble(doubleBits);
+                    }
+                }
+            }
+        }
+#pragma warning restore UoWIP // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+
+        private static double OverflowResult(bool sign, MidpointRounding mode) {
+            if (sign) {
+                return mode switch {
+                    MidpointRounding.ToNegativeInfinity => double.NegativeInfinity,
+                    MidpointRounding.ToZero or MidpointRounding.ToPositiveInfinity => -double.MaxValue,
+                    _ => double.NegativeInfinity,
+                };
+            } else {
+                return mode switch {
+                    MidpointRounding.ToPositiveInfinity => double.PositiveInfinity,
+                    MidpointRounding.ToZero or MidpointRounding.ToNegativeInfinity => double.MaxValue,
+                    _ => double.PositiveInfinity,
+                };
+            }
+        }
         [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.AggressiveOptimization)]
-        static double AsExpM1Db(double x, double f) {
+        static double AsExpM1Db(double x, double f, MidpointRounding mode) {
             unchecked {
                 int a = 0, b = ExpM1Db.Length - 1, m = (a + b) / 2;
                 var c = ExpM1Db;
@@ -139,13 +393,43 @@ namespace UltimateOrb {
                         UInt64 t = (ExpM1DbS2[m >> 5] >> ((m << 1) & 63)) & 3;
                         for (Int64 k = -1; k <= 1; k++) {
                             var r = BitConverter.DoubleToUInt64Bits(f) + (UInt64)k;
-                            if ((r & 3) == t) return BitConverter.UInt64BitsToDouble(r) + dr;
+                            if ((r & 3) == t) return RoundPartial0(hi: BitConverter.UInt64BitsToDouble(r), lo: dr, mode: mode);
                         }
                         break;
                     } else {
                         b = m - 1;
                     }
                     m = (a + b) >> 1;
+                }
+                return f;
+            }
+        }
+        [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.AggressiveOptimization)]
+        static double AsExpM1Db(double x, double f, long ie, MidpointRounding mode) {
+            unchecked {
+                int a = 0, b = ExpM1Db.Length - 1, m = (a + b) / 2;
+                var c = ExpM1Db;
+                while (a <= b) {
+                    if (BitConverter.DoubleToUInt64Bits(c[m]) < BitConverter.DoubleToUInt64Bits(x)) {
+                        a = m + 1;
+                    } else if (Misc.Unlikely(BitConverter.DoubleToUInt64Bits(c[m]) == BitConverter.DoubleToUInt64Bits(x))) {
+                        const UInt64 s = 0X300e81651cUL;
+                        var dr = BitConverter.UInt64BitsToDouble(((s >> m) << 63) | (((BitConverter.DoubleToUInt64Bits(f) >> 52) & 0x7ff) - 54) << 52);
+                        UInt64 t = (ExpM1DbS2[m >> 5] >> ((m << 1) & 63)) & 3;
+                        for (Int64 k = -1; k <= 1; k++) {
+                            var r = BitConverter.DoubleToUInt64Bits(f) + (UInt64)k;
+                            if ((r & 3) == t) return RoundPartial0(hi: BitConverter.UInt64BitsToDouble(r), lo: dr, mode: mode);
+                        }
+                        break;
+                    } else {
+                        b = m - 1;
+                    }
+                    m = (a + b) >> 1;
+                }
+                if (!IsNearest(mode)) {
+#pragma warning disable UoWIP // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+                    return RoundQuadrupleToDouble(Quadruple.ScaleB(Quadruple.ExpM1(x, mode), -(int)ie), mode);
+#pragma warning restore UoWIP // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
                 }
                 return f;
             }
@@ -320,7 +604,7 @@ namespace UltimateOrb {
                     var ch = ExpM1AccurateCHa;
 
                     double fl = x * (cl[0] + x * (cl[1] + x * (cl[2] + x * (cl[3] + x * (cl[4] + x * (cl[5]))))));
-                    double fh = EvalPolyOddDD(x, 11, new(ref MemoryMarshal.GetReference(ch)), out fl);
+                    double fh = EvalPolyOddDD(x, 11, new(ref MemoryMarshal.GetReference(ch)), ref fl);
                     fh = MultiplyHighDD(fh, fl, x, out fl);
                     fh = MultiplyHighDD(fh, fl, x, out fl);
                     fh = MultiplyHighDD(fh, fl, x, out fl);
@@ -331,12 +615,12 @@ namespace UltimateOrb {
                     v1 = BigAddDDPartial(v1, v2, out v2);
                     UInt64 ix = BitConverter.DoubleToUInt64Bits(v1);
                     if ((ix & (~(UInt64)0 >> 12)) == 0) {
-                        if (0 == (ix << 1)) return AsExpM1Db(x, v0);
+                        if (0 == (ix << 1)) return AsExpM1Db(x, v0, mode);
                         Int64 d = ((((Int64)ix >> 63) ^ (BitConverter.DoubleToInt64Bits(v2) >> 63)) << 1) + 1;
                         ix += (UInt64)d;
                         v1 = BitConverter.UInt64BitsToDouble(ix);
                     }
-                    return v0 + v1;
+                    return RoundPartial0(hi: v0, lo: v1, mode: mode);
                 } else {
                     var ch = ExpM1AccurateCHb;
                     const double s = 5909.278887481194;
@@ -358,114 +642,141 @@ namespace UltimateOrb {
                     var off = BitConverter.UInt64BitsToDouble((UInt64)(2048 + 1023 - ie) << 52);
                     double e;
                     if (Misc.Likely(ie < 53))
-                        fh = BigAddDDPartial(off, fh, out e);
+                        fh = BigAddDDPartial0(off, fh, mode, out e);
                     else {
                         if (ie < 104)
-                            fh = BigAddDDPartial(fh, off, out e);
+                            fh = BigAddDDPartial0(fh, off, mode, out e);
                         else
                             e = 0;
                     }
                     fl += e;
-                    fh = BigAddDDPartial(fh, fl, out fl);
+                    fh = BigAddDDPartial0(fh, fl, mode, out fl);
                     UInt64 d = (BitConverter.DoubleToUInt64Bits(fl) + 8) & (~(UInt64)0 >> 12);
-                    if (Misc.Unlikely(d <= 8)) fh = AsExpM1Db(x, fh);
+                    if (Misc.Unlikely(d <= 8)) fh = AsExpM1Db(x, fh, ie, mode);
                     fh = AsExpLD(fh, ie);
                     return fh;
                 }
             }
         }
-        
-        //public static double ExpM1(double x)  => ExpM1(x, MidpointRounding.ToEven);
 
-        //public static double ExpM1(double x, MidpointRounding mode) {
-        //    unchecked {
-        //        UInt64 ix = BitConverter.DoubleToUInt64Bits(x);
-        //        UInt64 aix = ix & (~(UInt64)0 >> 1);
-        //        if (Misc.Likely(aix < 0x3fd0000000000000UL)) { // |x| < 0.25
-        //            if (Misc.Unlikely(aix < 0x3ca0000000000000UL)) { // |x| < 2^-53
-        //                if (aix == 0) return x;
-        //                double res = double.FusedMultiplyAdd(5.5511151231257827E-17, double.Abs(x), x);
-        //                /* we have underflow for |x| < 2^-1022 and for x=-2.2250738585072014E-308 and
-        //                   rounding towards zero */
-        //                if (aix < 0x10000000000000UL || double.Abs(res) < 2.2250738585072014E-308)
-        //                    RaiseFloatingPointExceptionFlagsDummy(FloatingPointExceptionFlags.Underflow);
-        //                return res;
-        //            }
-        //            double sx = 128 * x, fx = RoundPartial0(sx), z = sx - fx, z2 = z * z;
-        //            int i = (int)(Int64)fx;
-        //            var tz = ExpM1TZ;
-        //            double th = tz[i + 32][1], tl = tz[i + 32][0];
-        //            double fh = z * 0.0078125;
-        //            double fl = z2 * ((3.0517578125E-05 + z * 7.9472859700508441E-08)
-        //                              + z2 * (1.5522042910260805E-10
-        //                                      + z * (2.4253205264225237E-13
-        //                                             + z * 3.1579677127348593E-16)));
-        //            double e0 = 4.4045713257223618E-20, eps = z2 * e0 + 4.9303806576313238E-32;
-        //            double rl;
-        //            double rh = BigAddDDPartial(th, fh, out rl);
-        //            rl += tl + fl;
-        //            fh = MultiplyDD(th, tl, fh, fl, out fl);
-        //            fh = AddDDPartial(rh, rl, fh, fl, out fl);
-        //            double ub = fh + (fl + eps), lb = fh + (fl - eps);
-        //            if (Misc.Unlikely(ub != lb)) return AsExpM1Accurate(x);
-        //            return lb;
-        //        } else { // |x| >= 0.25
-        //            if (Misc.Unlikely(aix >= 0x40862e42fefa39f0UL)) {
-        //                // |x| >= 709.78271289338409
-        //                if (aix > 0x7ff0000000000000UL) return x + x; // nan
-        //                if (aix == 0x7ff0000000000000UL) { // +/-inf
-        //                    if ((ix >> 63) != 0) // -inf
-        //                        return -1.0;
-        //                    else
-        //                        return x; // +inf
-        //                }
-        //                if ((ix >> 63) == 0) { // x >= 709.78271289338409
-        //                    RaiseFloatingPointExceptionFlagsDummy(FloatingPointExceptionFlags.Overflow);
-        //                    double z = 8.9884656743115795E+307;
-        //                    return z * z;
-        //                }
-        //            }
-        //            if (Misc.Unlikely(ix >= 0xc0425e4f7b2737faUL)) {
-        //                // x <= -36.736800569677101
-        //                if (ix >= 0xc042b708872320e2UL) // x <= -37.429947750237048
-        //                    return -1.0 + 2.7755575615628914E-17;
-        //                return (36.736800569677101 + x + 6.7398329902596056E-16) * 8.0085662595372941E-17
-        //                       - 0.99999999999999989;
-        //            }
+        public static double ExpM1(double x) => ExpM1(x, MidpointRounding.ToEven);
 
-        //            const double s = 5909.278887481194; // s approximates 2^12/log(2)
-        //            double t = RoundPartial0(x * s);
-        //            Int64 jt = (Int64)t;
-        //            int i0 = ((int)(jt >> 6)) & 0x3f;
-        //            int i1 = ((int)jt) & 0x3f;
-        //            Int64 ie = jt >> 12;
-        //            var t0s = ExpM1T0;
-        //            var t1s = ExpM1T1;
-        //            double t0h = t0s[i0][1], t0l = t0s[i0][0];
-        //            double t1h = t1s[i1][1], t1l = t1s[i1][0];
-        //            double tl;
-        //            double th = MultiplyDD(t0h, t0l, t1h, t1l, out tl);
-        //            const double l2h = 0.00016922538588914904, l2l = 1.0256140314162804E-14;
-        //            double dx = (x - l2h * t) + l2l * t, dx2 = dx * dx;
-        //            double p = (1 + dx * 0.5) + dx2 * (0.16666666674124284 + dx * 0.041666666654270573);
-        //            double fh = th, tx = th * dx, fl = tl + tx * p;
-        //            double eps = 1.64e-19 * th;
-        //            double off = BitConverter.UInt64BitsToDouble((UInt64)(2048 + 1023 - ie) << 52);
-        //            double e;
-        //            if (Misc.Likely(ie < 53)) {
-        //                fh = BigAddDDPartial(off, fh, out e);
-        //            } else if (ie < 75) {
-        //                fh = BigAddDDPartial(fh, off, out e);
-        //            } else {
-        //                e = 0;
-        //            }
-        //            fl += e;
-        //            double ub = fh + (fl + eps), lb = fh + (fl - eps);
-        //            if (Misc.Unlikely(ub != lb)) return AsExpM1Accurate(x);
-        //            return AsExpLD(lb, ie);
-        //        }
-        //    }
-        //}
+        public static double ExpM1(double x, MidpointRounding mode) {
+            unchecked {
+                UInt64 ix = BitConverter.DoubleToUInt64Bits(x);
+                UInt64 aix = ix & (~(UInt64)0 >> 1);
+                if (Misc.Likely(aix < 0x3fd0000000000000UL)) {
+                    // |x| < 0.25
+                    if (Misc.Unlikely(aix < 0x3ca0000000000000UL)) {
+                        // |x| < 2^-53
+                        if (aix == 0) return x; // ±0
+                        double res = BitConverter.UInt64BitsToDouble(ix + ((nuint)((Int64)ix >> 63) | 1u) * ((mode == MidpointRounding.ToPositiveInfinity || (mode == MidpointRounding.ToZero && 0 != (ix >> 63))) ? 1u : 0u));
+#if false
+                        double res;
+                        if (aix < 0x3c90000000000000UL) {
+                            // Since t == 0, the exact expm1(x) = x + x²/2 + … is strictly greater than x
+                            // but still lies strictly between x and the middle to the next representable double.
+                            // Therefore:
+                            //   ToNegativeInfinity → x
+                            //   ToZero             → x if x > 0, else next above x (towards zero)
+                            //   ToPositiveInfinity → next above x
+                            //res = mode switch {
+                            //    MidpointRounding.ToNegativeInfinity => x,
+                            //    MidpointRounding.ToZero => x > 0 ? x : Math.BitIncrement(x),
+                            //    MidpointRounding.ToPositiveInfinity => Math.BitIncrement(x),
+                            //    _ => x   // ToEven, AwayFromZero (not reached here)
+                            //};
+                            res = BitConverter.UInt64BitsToDouble(ix + ((nuint)((Int64)ix >> 63) | 1u) * ((mode == MidpointRounding.ToPositiveInfinity || (mode == MidpointRounding.ToZero && 0 != (ix >> 63))) ? 1u : 0u));
+                        } else {
+                            var t = 5.5511151231257827E-17 * double.Abs(x);
+                            res = RoundPartial0(t, x, mode);
+                        }
+#endif
+                        if (aix < 0x10000000000000UL || (BitConverter.DoubleToUInt64Bits(res) & 0x7FFF_FFFF_FFFF_FFFFUL) <= 0x000F_FFFF_FFFF_FFFF /* subnormal */) {
+                            RaiseExceptionFlagsDummy(FloatingPointExceptionFlags.Underflow);
+                        }
+                        return res;
+                    }
+
+                    double sx = 128 * x, fx = RoundPartial(sx), z = sx - fx, z2 = z * z;
+                    int i = (int)(Int64)fx;
+                    var tz = ExpM1TZ;
+                    double th = tz[i + 32][1], tl = tz[i + 32][0];
+                    double fh = z * 0.0078125;
+                    double fl = z2 * ((3.0517578125E-05 + z * 7.9472859700508441E-08)
+                                      + z2 * (1.5522042910260805E-10
+                                              + z * (2.4253205264225237E-13
+                                                     + z * 3.1579677127348593E-16)));
+                    double e0 = 4.4045713257223618E-20, eps = z2 * e0 + 4.9303806576313238E-32;
+                    double rl;
+                    double rh = BigAddDDPartial(th, fh, out rl);
+                    rl += tl + fl;
+                    fh = MultiplyDD(th, tl, fh, fl, out fl);
+                    fh = AddDDPartial(rh, rl, fh, fl, out fl);
+                    double ub = RoundPartial0(hi: fh, lo: (fl + eps), mode: mode), lb = RoundPartial0(hi: fh, lo: (fl - eps), mode: mode);
+                    if (Misc.Unlikely(ub != lb)) return AsExpM1Accurate(x, mode);
+                    return lb;
+                } else {
+
+                    // |x| >= 0.25
+                    if (Misc.Unlikely(aix >= 0x40862e42fefa39f0UL)) {
+                        // |x| >= 709.78271289338409D
+                        if (aix > 0x7ff0000000000000UL) return x + x; // nan
+                        if (aix == 0x7ff0000000000000UL) { // +/-inf
+                            if (0 != (ix >> 63)) // -inf
+                                return -1.0;
+                            else
+                                return x; // +inf
+                        }
+                        if (0 == (ix >> 63)) { // x >= 709.78271289338409D
+                            RaiseExceptionFlagsDummy(FloatingPointExceptionFlags.Overflow);
+                            return (!IsNearest(mode) && mode != MidpointRounding.ToPositiveInfinity) ? double.MaxValue : double.PositiveInfinity;
+                        }
+                    }
+                    if (Misc.Unlikely(ix >= 0xc0425e4f7b2737faUL)) {
+                        // x.(double) <= -36.736800569677101D
+                        if (ix >= 0xc042b708872320e2UL) {
+                            // x.(double) <= -37.429947750237048D
+                            return RoundPartial0(+2.7755575615628914E-17, -1.0, mode);
+                        }
+                        return RoundPartial0((36.736800569677101 + x + 6.7398329902596056E-16) * 8.0085662595372941E-17, -0.99999999999999989, mode);
+                    }
+
+
+                    const double s = 5909.278887481194; // s approximates 2^12/log(2)
+                    double t = RoundPartial(x * s);
+                    Int64 jt = (Int64)t;
+                    int i0 = ((int)(jt >> 6)) & 0x3f;
+                    int i1 = ((int)jt) & 0x3f;
+                    Int64 ie = jt >> 12;
+                    var t0s = ExpM1T0;
+                    var t1s = ExpM1T1;
+                    double t0h = t0s[i0][1], t0l = t0s[i0][0];
+                    double t1h = t1s[i1][1], t1l = t1s[i1][0];
+                    double tl;
+                    double th = MultiplyDD(t0h, t0l, t1h, t1l, out tl);
+                    const double l2h = 0.00016922538588914904, l2l = 1.0256140314162804E-14;
+                    double dx = (x - l2h * t) + l2l * t, dx2 = dx * dx;
+                    double p = (1 + dx * 0.5) + dx2 * (0.16666666674124284 + dx * 0.041666666654270573);
+                    double fh = th, tx = th * dx, fl = tl + tx * p;
+                    double eps = 1.64e-19 * th;
+                    double off = BitConverter.UInt64BitsToDouble((UInt64)(2048 + 1023 - ie) << 52);
+                    double e;
+                    if (Misc.Likely(ie < 53)) {
+                        fh = BigAddDDPartial(off, fh, out e);
+                    } else if (ie < 75) {
+                        fh = BigAddDDPartial(fh, off, out e);
+                    } else {
+                        e = 0;
+                    }
+                    //fl = RoundPartial0(e, fl, mode);
+                    fl += e;
+                    double ub = RoundPartial0(hi: fh, lo: (fl + eps), mode: mode), lb = RoundPartial0(hi: fh, lo: (fl - eps), mode: mode);
+                    if (Misc.Unlikely(ub != lb)) return AsExpM1Accurate(x, mode);
+                    return AsExpLD(lb, ie);
+                }
+            }
+        }
         private static void RaiseFloatingPointExceptionFlagsDummy(FloatingPointExceptionFlags flags) {
         }
     }
@@ -484,7 +795,7 @@ namespace UltimateOrb.Numerics {
 
     partial class Binary64Arithmetic {
 
-        public static double RoundPartial0(double lo, double hi, MidpointRounding mode) {
+        internal static double RoundPartial0(double lo, double hi, MidpointRounding mode) {
             Debug.Assert(double.Abs(lo) <= double.Abs(hi));
             Debug.Assert(double.Abs(lo) < 1e100);
             Debug.Assert(double.Abs(hi) < 1e100);
@@ -550,46 +861,49 @@ namespace UltimateOrb.Numerics {
 
                 UInt64 sign = x >> 63;
                 UInt64 b1 = x & 0x7FFF_FFFF_FFFF_FFFFUL;
-
-
-                if (Misc.Unlikely(b1 >= 0x7FF0_0000_0000_0000UL)) {                     // ±Inf, NaN
-                    if (b1 == 0x7FF0_0000_0000_0000UL) {
-                        if (sign == 0) return x;                         // expm1(+∞) = +∞
-                        return (isUp || mode == MidpointRounding.ToZero)
-                            ? 0xBFEF_FFFF_FFFF_FFFFUL                     // -1 + ulp
-                            : 0xBFF0_0000_0000_0000UL;                    // -1
+                if (Misc.Likely(b1 < 0x3fd0000000000000UL)) {
+                    // |x| < 0.25
+                    if (Misc.Unlikely(b1 < 0x3ca0000000000000UL)) {
+                        // |x| < 2^-53
+                        if (b1 == 0) return x;                                   // ±0
+                        var xf = BitConverter.UInt64BitsToDouble(x);
+                        var res = BitConverter.DoubleToUInt64Bits(RoundPartial0(5.5511151231257827E-17 * xf, xf, mode));
+                        if (b1 < 0x10000000000000UL || (res & 0x7FFF_FFFF_FFFF_FFFFUL) <= 0x000F_FFFF_FFFF_FFFF /* subnormal */) {
+                            RaiseExceptionFlagsDummy(FloatingPointExceptionFlags.Underflow);
+                        }
+                        return res;
                     }
-                    RaiseExceptionFlagsDummy(FloatingPointExceptionFlags.Invalid);
-                    return x | 0x0008_0000_0000_0000UL;                  // quiet NaN
-                }
 
 
-                if (Misc.Unlikely(b1 < 0x3ca0000000000000UL)) { // |x| < 2^-53
-                    if (b1 == 0) return x;                                   // ±0
-                    var xf = BitConverter.UInt64BitsToDouble(x);
-                    var res = BitConverter.DoubleToUInt64Bits(RoundPartial0(5.5511151231257827E-17 * xf, xf, mode));
-                    if (b1 < 0x10000000000000UL || (res & 0x7FFF_FFFF_FFFF_FFFFUL) <= 0x000F_FFFF_FFFF_FFFF /* subnormal */) {
-                        RaiseExceptionFlagsDummy(FloatingPointExceptionFlags.Underflow);
+
+                } else {
+                    // |x| >= 0.25
+                    if (Misc.Unlikely(b1 >= 0x40862e42fefa39f0UL)) {
+                        // |x| >= 709.78271289338409D
+                        if (b1 > 0x7ff0000000000000UL) return x + x; // nan
+                        if (b1 == 0x7ff0000000000000UL) { // +/-inf
+                            if (0 != (x >> 63)) // -inf
+                                return BitConverter.DoubleToUInt64Bits(-1.0);
+                            else
+                                return x; // +inf
+                        }
+                        if (0 == (x >> 63)) { // x >= 709.78271289338409D
+                            RaiseExceptionFlagsDummy(FloatingPointExceptionFlags.Overflow);
+                            return  BitConverter.DoubleToUInt64Bits((!isNearest && !isUp) ? double.MaxValue : double.PositiveInfinity);
+                        }
                     }
-                    return res;
-                }
-
-                // Positive overflow: x ≥ log(DBL_MAX) ≈ 709.78
-                if (sign == 0 && b1 >= 0x4086_2E42_FEFA_39EFUL) {
-                    RaiseExceptionFlagsDummy(FloatingPointExceptionFlags.Overflow
-                                           | FloatingPointExceptionFlags.Inexact);
-                    return (isNearest || isUp) ? 0x7FF0_0000_0000_0000UL
-                                               : 0x7FEF_FFFF_FFFF_FFFFUL;
-                }
-
-                if (Misc.Unlikely(x >= 0xc0425e4f7b2737faUL)) {
-                    // x.(double) <= -36.736800569677101
-                    if (x >= 0xc042b708872320e2UL) {
-                        // x.(double) <= -37.429947750237048
-                        return BitConverter.DoubleToUInt64Bits(RoundPartial0(+2.7755575615628914E-17, -1.0, mode));
+                    if (Misc.Unlikely(x >= 0xc0425e4f7b2737faUL)) {
+                        // x.(double) <= -36.736800569677101D
+                        if (x >= 0xc042b708872320e2UL) {
+                            // x.(double) <= -37.429947750237048D
+                            return BitConverter.DoubleToUInt64Bits(RoundPartial0(+2.7755575615628914E-17, -1.0, mode));
+                        }
+                        var xf = BitConverter.UInt64BitsToDouble(x);
+                        return BitConverter.DoubleToUInt64Bits(RoundPartial0((36.736800569677101 + xf + 6.7398329902596056E-16) * 8.0085662595372941E-17, -0.99999999999999989, mode));
                     }
-                    var xf = BitConverter.UInt64BitsToDouble(x);
-                    return BitConverter.DoubleToUInt64Bits(RoundPartial0((36.736800569677101 + xf + 6.7398329902596056E-16) * 8.0085662595372941E-17, -0.99999999999999989, mode));
+
+
+
                 }
 
                 // Exact b64 → b128 embedding.
