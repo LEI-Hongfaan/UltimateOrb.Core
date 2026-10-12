@@ -1030,6 +1030,14 @@ namespace UltimateOrb {
 
         #region Conversions
 
+#if NET11_0_OR_GREATER
+        internal static Quadruple FromIeee754InterchangeDecimal<TFloat, TFloatUIntBits>(TFloat value)
+            where TFloat : unmanaged, System.Numerics.IDecimalFloatingPointIeee754<TFloat>, IMinMaxValue<TFloat>
+            where TFloatUIntBits : unmanaged, IUnsignedNumber<TFloatUIntBits>, IBinaryInteger<TFloatUIntBits>, IMinMaxValue<TFloatUIntBits> {
+            throw new NotImplementedException();
+        }
+#endif
+
         /*
         <b>Infinity via the exponent field.</b> When rounding carries into the
         significand's hidden bit and the exponent is already at <c>emax</c>,
@@ -1555,10 +1563,164 @@ namespace UltimateOrb {
             }
         }
 
+        public static explicit operator /*unchecked*/ ushort(Quadruple value) {
+            return unchecked((ushort)(uint)value);
+        }
+
+        public static explicit operator checked ushort(Quadruple value) {
+            return checked((ushort)(uint)value);
+        }
+
+        public static explicit operator /*unchecked*/ byte(Quadruple value) {
+            return unchecked((byte)(uint)value);
+        }
+
+        public static explicit operator checked byte(Quadruple value) {
+            return checked((byte)(uint)value);
+        }
+
+        public static explicit operator /*unchecked*/ char(Quadruple value) {
+            return unchecked((char)(uint)value);
+        }
+
+        public static explicit operator checked char(Quadruple value) {
+            return checked((char)(uint)value);
+        }
+
+        public static explicit operator /*unchecked*/ System.UInt128(Quadruple value) {
+            return ConvertToPlainIntegerUnchecked<System.UInt128>(value);
+        }
+
+        public static explicit operator /*unchecked*/ UltimateOrb.UInt128(Quadruple value) {
+            return ConvertToPlainIntegerUnchecked<System.UInt128>(value);
+        }
+
+        public static explicit operator checked System.UInt128(Quadruple value) {
+            return ConvertToPlainIntegerUnsigned<System.UInt128>(value);
+        }
+
+        public static explicit operator checked UltimateOrb.UInt128(Quadruple value) {
+            return ConvertToPlainIntegerUnsigned<System.UInt128>(value);
+        }
+
+        public static explicit operator /*unchecked*/ System.Int128(Quadruple value) {
+            return ConvertToPlainIntegerUnchecked<System.Int128>(value);
+        }
+
+        public static explicit operator /*unchecked*/ UltimateOrb.Int128(Quadruple value) {
+            return ConvertToPlainIntegerUnchecked<System.Int128>(value);
+        }
+
+        public static explicit operator checked System.Int128(Quadruple value) {
+            return ConvertToPlainIntegerSigned<System.Int128>(value);
+        }
+
+        public static explicit operator checked UltimateOrb.Int128(Quadruple value) {
+            return ConvertToPlainIntegerSigned<System.Int128>(value);
+        }
+
+        private static Int32 ToInt32UncheckedStrict(Quadruple value) {
+            var bits = value._Hi64Bits;
+            var exponentField = (Int32)((bits >> 48) & 0x7FFFUL);
+
+            // NaN and infinities do not represent finite integers.
+            if (exponentField == 0x7FFF) {
+                throw new OverflowException();
+            }
+
+            // Zero, subnormal values and normal values below 1.
+            if (exponentField == 0) {
+                return 0;
+            }
+
+            var exponent = exponentField - ExponentBias;
+
+            if (exponent < 0) {
+                return 0;
+            }
+
+            var significandHigh =
+                (bits & Hi64BitsFractionMask) | ((UInt64)1 << 48);
+
+            UInt32 magnitudeLow;
+
+            if (exponent <= 48) {
+                // The high significand contains all relevant integer bits.
+                magnitudeLow = unchecked(
+                    (UInt32)(significandHigh >> (48 - exponent)));
+            } else if (exponent <= 111) {
+                // Right-shift the 113-bit significand, retaining its low 32 bits.
+                var shift = 112 - exponent;
+
+                magnitudeLow = unchecked(
+                    (UInt32)(
+                        (significandHigh << (64 - shift)) |
+                        (value._Lo64Bits >> shift)));
+            } else if (exponent == 112) {
+                magnitudeLow = unchecked((UInt32)value._Lo64Bits);
+            } else if (exponent < 144) {
+                // Only 1..31 low-order shift positions remain relevant.
+                magnitudeLow = unchecked(
+                    (UInt32)value._Lo64Bits << (exponent - 112));
+            } else {
+                // The integer is divisible by 2^32.
+                magnitudeLow = 0;
+            }
+
+            if ((bits >> 63) != 0) {
+                magnitudeLow = unchecked(0U - magnitudeLow);
+            }
+
+            return unchecked((Int32)magnitudeLow);
+        }
+
+        private static Int32 ToInt32Saturating(Quadruple value) {
+            var bits = value._Hi64Bits;
+            var exponentField = (Int32)((bits >> 48) & 0x7FFFUL);
+            var negative = (bits >> 63) != 0;
+
+            if (exponentField == 0x7FFF) {
+                var isNaN =
+                    (bits & Hi64BitsFractionMask) != 0 ||
+                    value._Lo64Bits != 0;
+
+                if (isNaN) {
+                    return 0;
+                }
+
+                return negative ? Int32.MinValue : Int32.MaxValue;
+            }
+
+            if (exponentField == 0) {
+                return 0;
+            }
+
+            var exponent = exponentField - ExponentBias;
+
+            if (exponent < 0) {
+                return 0;
+            }
+
+            if (exponent >= 31) {
+                return negative ? Int32.MinValue : Int32.MaxValue;
+            }
+
+            var significandHigh =
+                (bits & Hi64BitsFractionMask) | ((UInt64)1 << 48);
+
+            var magnitude = (Int32)(significandHigh >> (48 - exponent));
+
+            return negative ? -magnitude : magnitude;
+        }
+
         [System.Runtime.TargetedPatchingOptOutAttribute("")]
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         [System.Diagnostics.Contracts.PureAttribute()]
-        public static explicit operator Int32(Quadruple value) {
+        public static explicit operator /* unchecked */ Int32(Quadruple value) {
+            return ToInt32Saturating(value);
+        }
+
+        public static explicit operator checked Int32(Quadruple value) {
             var e = 0x7FFF & unchecked((int)(value._Hi64Bits >> (FractionBitCount - 64)));
             var hi = (Hi64BitsFractionMask & value._Hi64Bits) | (0 == value._Lo64Bits ? 0u : 1u);
             var count = unchecked(0x402F - e);
@@ -1585,7 +1747,11 @@ namespace UltimateOrb {
         [System.Runtime.TargetedPatchingOptOutAttribute("")]
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         [System.Diagnostics.Contracts.PureAttribute()]
-        public static explicit operator Int64(Quadruple value) {
+        public static explicit operator /* unchecked */ Int64(Quadruple value) {
+            return ConvertToPlainIntegerUnchecked<System.Int64>(value);
+        }
+
+        public static explicit operator checked Int64(Quadruple value) {
             var e = 0x7FFF & unchecked((int)(value._Hi64Bits >> (FractionBitCount - 64)));
             var hi = (Hi64BitsFractionMask & value._Hi64Bits) | (0 == value._Lo64Bits ? 0u : 1u);
             var sign = value._Hi64Bits >> 63;
@@ -1611,7 +1777,6 @@ namespace UltimateOrb {
             }
             return (0 != sign) ? unchecked(-fa) : fa;
         }
-
 
         [System.Runtime.TargetedPatchingOptOutAttribute("")]
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -3140,7 +3305,23 @@ namespace UltimateOrb {
                 char actualValue = (char)(object)value;
                 result = actualValue;
                 return true;
-            } else if (typeof(TOther) == typeof(decimal)) {
+            }
+#if NET11_0_OR_GREATER
+            else if (typeof(TOther) == typeof(System.Numerics.Decimal128)) {
+                var actualValue = (System.Numerics.Decimal128)(object)value;
+                result = FromIeee754InterchangeDecimal<System.Numerics.Decimal128, System.UInt128>(actualValue);
+                return true;
+            } else if (typeof(TOther) == typeof(System.Numerics.Decimal64)) {
+                var actualValue = (System.Numerics.Decimal64)(object)value;
+                result = FromIeee754InterchangeDecimal<System.Numerics.Decimal64, System.UInt64>(actualValue);
+                return true;
+            } else if (typeof(TOther) == typeof(System.Numerics.Decimal32)) {
+                var actualValue = (System.Numerics.Decimal32)(object)value;
+                result = FromIeee754InterchangeDecimal<System.Numerics.Decimal32, System.UInt32>(actualValue);
+                return true;
+            }
+#endif
+            else if (typeof(TOther) == typeof(decimal)) {
                 decimal actualValue = (decimal)(object)value;
                 result = (Quadruple)actualValue;
                 return true;
@@ -3231,7 +3412,156 @@ namespace UltimateOrb {
         }
 
         public static bool TryConvertToChecked<TOther>(Quadruple value, [MaybeNullWhen(false)] out TOther result) where TOther : INumberBase<TOther> {
-            throw new NotImplementedException();
+            checked {
+                if (typeof(TOther) == typeof(byte)) {
+                    byte actualResult = checked((byte)value);
+                    result = (TOther)(object)actualResult;
+                    return true;
+                } else if (typeof(TOther) == typeof(sbyte)) {
+                    sbyte actualResult = checked((sbyte)value);
+                    result = (TOther)(object)actualResult;
+                    return true;
+                } else if (typeof(TOther) == typeof(char)) {
+                    char actualResult = checked((char)value);
+                    result = (TOther)(object)actualResult;
+                    return true;
+                } else if (typeof(TOther) == typeof(short)) {
+                    short actualResult = checked((short)value);
+                    result = (TOther)(object)actualResult;
+                    return true;
+                } else if (typeof(TOther) == typeof(ushort)) {
+                    ushort actualResult = checked((ushort)value);
+                    result = (TOther)(object)actualResult;
+                    return true;
+                } else if (typeof(TOther) == typeof(int)) {
+                    int actualResult = checked((int)value);
+                    result = (TOther)(object)actualResult;
+                    return true;
+                } else if (typeof(TOther) == typeof(uint)) {
+                    uint actualResult = checked((uint)value);
+                    result = (TOther)(object)actualResult;
+                    return true;
+                } else if (typeof(TOther) == typeof(long)) {
+                    long actualResult = checked((long)value);
+                    result = (TOther)(object)actualResult;
+                    return true;
+                } else if (typeof(TOther) == typeof(ulong)) {
+                    ulong actualResult = checked((ulong)value);
+                    result = (TOther)(object)actualResult;
+                    return true;
+                } else if (typeof(TOther) == typeof(UltimateOrb.Int128)) {
+                    var actualResult = checked((UltimateOrb.Int128)value);
+                    result = (TOther)(object)actualResult;
+                    return true;
+                } else if (typeof(TOther) == typeof(UltimateOrb.UInt128)) {
+                    var actualResult = checked((UltimateOrb.UInt128)value);
+                    result = (TOther)(object)actualResult;
+                    return true;
+                }
+#if NET7_0_OR_GREATER
+                else if (typeof(TOther) == typeof(System.Int128)) {
+                    var actualResult = checked((System.Int128)value);
+                    result = (TOther)(object)actualResult;
+                    return true;
+                } else if (typeof(TOther) == typeof(System.UInt128)) {
+                    var actualResult = checked((System.UInt128)value);
+                    result = (TOther)(object)actualResult;
+                    return true;
+                }
+#endif
+                else if (typeof(TOther) == typeof(nint)) {
+                    nint actualResult = checked((nint)value);
+                    result = (TOther)(object)actualResult;
+                    return true;
+                } else if (typeof(TOther) == typeof(nuint)) {
+                    nuint actualResult = checked((nuint)value);
+                    result = (TOther)(object)actualResult;
+                    return true;
+                } else if (typeof(TOther) == typeof(Half)) {
+                    result = (TOther)(object)(Half)value;
+                    return true;
+                } else if (typeof(TOther) == typeof(float)) {
+                    result = (TOther)(object)(float)value;
+                    return true;
+                } else if (typeof(TOther) == typeof(double)) {
+                    result = (TOther)(object)(double)value;
+                    return true;
+                } else if (typeof(TOther) == typeof(decimal)) {
+                    result = (TOther)(object)(decimal)value;
+                    return true;
+                }
+#if NET11_0_OR_GREATER
+                else if (typeof(TOther) == typeof(System.Numerics.Decimal32)) {
+                    result = (TOther)(object)(System.Numerics.Decimal32)value;
+                    return true;
+                } else if (typeof(TOther) == typeof(System.Numerics.Decimal64)) {
+                    result = (TOther)(object)(System.Numerics.Decimal64)value;
+                    return true;
+                } else if (typeof(TOther) == typeof(System.Numerics.Decimal128)) {
+                    result = (TOther)(object)(System.Numerics.Decimal128)value;
+                    return true;
+                }
+#endif
+                else if (typeof(TOther) == typeof(BigInteger)) {
+                    result = (TOther)(object)(BigInteger)value;
+                    return true;
+                } else {
+                    result = default;
+                    return false;
+                }
+            }
+        }
+
+        internal static BigInteger ToBigIntegerPartial(Quadruple value) {
+            Debug.Assert(Quadruple.IsFinite(value));
+
+            // Reinterpret the 128-bit IEEE 754 binary128 float as a 128-bit unsigned integer.
+            // Layout:
+            //   bit 127      : sign
+            //   bits 112-126 : exponent (15 bits)
+            //   bits 0-111   : fraction (112 bits)
+            System.UInt128 bits = value._UInt128Bits;
+
+            int exponent = (int)((bits >> 112) & 0x7FFF);
+
+            // Zero or subnormal: magnitude is strictly less than 1, so truncation yields zero.
+            if (exponent == 0) {
+                return BigInteger.Zero;
+            }
+
+            uint sign = (uint)(bits >> 127);
+            System.UInt128 fraction = bits & (((System.UInt128)1 << 112) - 1);
+            System.UInt128 mantissa = fraction | ((System.UInt128)1 << 112); // set implicit leading 1
+            int shift = exponent - 16495; // biased exponent - 16383 (bias) - 112 (fraction bits)
+
+            // Convert the 113-bit mantissa to a positive BigInteger.
+            BigInteger result = new BigInteger(MemoryMarshal.AsBytes(new ReadOnlySpan<System.UInt128>(in bits)), isUnsigned: true, isBigEndian: !System.BitConverter.IsLittleEndian);
+
+            // Apply the exponent shift.
+            if (shift > 0) {
+                result <<= shift;
+            } else if (shift < 0) {
+                result >>= -shift; // arithmetic right shift on positive BigInteger truncates toward zero
+            }
+
+            // Apply sign.
+            if (sign != 0) {
+                result = -result;
+            }
+
+            return result;
+        }
+
+        public static explicit operator /* unchecked */ BigInteger(Quadruple value) {
+            if (Quadruple.IsFinite(value)) {
+                return ToBigIntegerPartial(value);
+            }
+            return BigInteger.Zero;
+        }
+
+        public static explicit operator checked BigInteger(Quadruple value) {
+            UltimateOrb.Utilities.ThrowHelper.ThrowOnFalse(Quadruple.IsFinite(value));
+            return ToBigIntegerPartial(value);
         }
 
         public static bool TryConvertToSaturating<TOther>(Quadruple value, [MaybeNullWhen(false)] out TOther result) where TOther : INumberBase<TOther> {
@@ -3241,7 +3571,6 @@ namespace UltimateOrb {
         public static bool TryConvertToTruncating<TOther>(Quadruple value, [MaybeNullWhen(false)] out TOther result) where TOther : INumberBase<TOther> {
             throw new NotImplementedException();
         }
-
 
         public static bool TryParse([NotNullWhen(true)] string? s, out Quadruple result) => TryParse(s, NumberStyles.Float | NumberStyles.AllowThousands, provider: null, out result);
 
@@ -3465,6 +3794,35 @@ namespace UltimateOrb {
             negative = sign != 0;
             return true;
         }
+
+        internal static TInt ConvertToPlainIntegerUnchecked<TInt>(Quadruple value)
+            where TInt : unmanaged, IBinaryInteger<TInt>, IMinMaxValue<TInt> {
+            TInt result;
+            if (TInt.MinValue < TInt.Zero) {
+                if (TryConvertToPlainIntegerSigned<TInt>(value, out result)) {
+                    return result;
+                }
+                if (!Quadruple.IsNaN(value)) {
+                    return Quadruple.IsNegative(value) ? TInt.MinValue : TInt.MaxValue;
+                }
+                return TInt.Zero;
+            } else {
+                if (TryConvertToPlainIntegerUnsigned<TInt>(value, out result)) {
+                    return result;
+                }
+                if (!Quadruple.IsNaN(value)) {
+                    return value._UInt128Bits >= NegativeOne._UInt128Bits ? TInt.MinValue : TInt.MaxValue;
+                }
+                return TInt.Zero;
+            }
+        }
+
+        internal static TInt ConvertToPlainIntegerSigned<TInt>(Quadruple value)
+            where TInt : unmanaged, IBinaryInteger<TInt>, IMinMaxValue<TInt> {
+            UltimateOrb.Utilities.ThrowHelper.ThrowOnFalse(TryConvertToPlainIntegerSigned<TInt>(value, out var result));
+            return result;
+        }
+
         internal static bool TryConvertToPlainIntegerSigned<TInt>(Quadruple value, out TInt result)
             where TInt : unmanaged, IBinaryInteger<TInt>, IMinMaxValue<TInt> {
             result = default;
@@ -3541,8 +3899,15 @@ namespace UltimateOrb {
             result = unchecked(TInt.Zero - magT);
             return true;
         }
+
+        internal static TInt ConvertToPlainIntegerUnsigned<TInt>(Quadruple value)
+            where TInt : unmanaged, IBinaryInteger<TInt>, IMinMaxValue<TInt> {
+            UltimateOrb.Utilities.ThrowHelper.ThrowOnFalse(TryConvertToPlainIntegerUnsigned<TInt>(value, out var result));
+            return result;
+        }
+
         internal static bool TryConvertToPlainIntegerUnsigned<TInt>(Quadruple value, out TInt result)
-    where TInt : unmanaged, IBinaryInteger<TInt>, IMinMaxValue<TInt> {
+            where TInt : unmanaged, IBinaryInteger<TInt>, IMinMaxValue<TInt> {
             result = default;
 
             if (!TryExtractComponents(value, out bool negative, out UInt128 M, out int e)) {
@@ -6838,6 +7203,39 @@ namespace UltimateOrb {
             return null!;
 #pragma warning restore CS8763 // A method marked [DoesNotReturn] should not return.
         }
+
+#if NET11_0_OR_GREATER
+        public static explicit operator Quadruple(System.Numerics.Decimal128 value) {
+            return FloatingPointIeee754ArithmeticInternal.ConvertIeee754DecimalToBinary<
+                System.Numerics.Decimal128, System.UInt128, Quadruple>(value);
+        }
+
+        public static explicit operator Quadruple(System.Numerics.Decimal64 value) {
+            return FloatingPointIeee754ArithmeticInternal.ConvertIeee754DecimalToBinary<
+                System.Numerics.Decimal64, System.UInt64, Quadruple>(value);
+        }
+
+        public static explicit operator Quadruple(System.Numerics.Decimal32 value) {
+            return FloatingPointIeee754ArithmeticInternal.ConvertIeee754DecimalToBinary<
+                System.Numerics.Decimal32, System.UInt32, Quadruple>(value);
+        }
+
+        public static explicit operator System.Numerics.Decimal128(Quadruple value) {
+            return FloatingPointIeee754ArithmeticInternal.ConvertIeee754BinaryToDecimal<
+                Quadruple, System.UInt128, System.Numerics.Decimal128>(value);
+        }
+
+        public static explicit operator System.Numerics.Decimal64(Quadruple value) {
+            return FloatingPointIeee754ArithmeticInternal.ConvertIeee754BinaryToDecimal<
+                Quadruple, System.UInt128, System.Numerics.Decimal64>(value);
+        }
+
+        public static explicit operator System.Numerics.Decimal32(Quadruple value) {
+            return FloatingPointIeee754ArithmeticInternal.ConvertIeee754BinaryToDecimal<
+                Quadruple, System.UInt128, System.Numerics.Decimal32>(value);
+        }
+#endif
+
 
 #if NET7_0_OR_GREATER
 

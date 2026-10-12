@@ -1638,7 +1638,7 @@
             <typeparam name="TBase">The source/base type supplying data or behavior that <typeparamref name="TSelf"/> adapts or forwards.</typeparam>
         </member>
         <member name="T:UltimateOrb.Numerics.IDecimalFloatingPointIeee754DerivedTagged`3">
-            <inheritdoc cref="T:UltimateOrb.IDecimalFloatingPointIeee754`1"/>
+            <inheritdoc cref="T:UltimateOrb.Numerics.IDecimalFloatingPointIeee754`1"/>
             <typeparam name="TBase">The source/base type supplying data or behavior that <typeparamref name="TSelf"/> adapts or forwards.</typeparam>
         </member>
         <member name="T:UltimateOrb.Numerics.Accelerated.QuaternionD">
@@ -8144,6 +8144,10 @@
         <member name="M:UltimateOrb.Numerics.Extensions.BinaryNumberExtensions.&lt;G&gt;$BFFAF386DCBEA71032CABD4F220B4749`1.op_OnesComplement(`0)">
             <inheritdoc cref="M:System.Numerics.IBitwiseOperators`3.op_OnesComplement(`0)"/>
         </member>
+        <member name="F:UltimateOrb.Numerics.FloatingPointIeee754ArithmeticInternal.ToBinaryTypeTraits`3.MaxExactDecimalExponent">
+            <summary>Largest exponent such that 10^exponent is exactly representable in <typeparamref name="TBinary"/>.</summary>
+        </member>
+        <!-- Badly formed XML comment ignored for member "F:UltimateOrb.Numerics.FloatingPointIeee754ArithmeticInternal.ToBinaryTypeTraits`3.MaxFormattedLength" -->
         <member name="T:UltimateOrb.Numerics.FloatingPointIeee754InterchageTypeTraits`1">
             <summary>
             Provides compile-time (static) metadata describing the IEEE 754 interchange
@@ -8296,6 +8300,108 @@
             See <see cref="P:UltimateOrb.Numerics.FloatingPointIeee754InterchageTypeTraits`1.IsSupported"/>.
             </exception>
         </member>
+        <member name="T:UltimateOrb.Numerics.FloatingPointIeee754TypeTraitsBasic`1">
+            <summary>
+            Provides basic IEEE-754 floating-point traits and derived values for a floating-point type <typeparamref name="T"/>.
+            </summary>
+            <typeparam name="T">A floating-point type implementing <see cref="T:System.Numerics.IFloatingPointIeee754`1"/>.</typeparam>
+        </member>
+        <member name="P:UltimateOrb.Numerics.FloatingPointIeee754TypeTraitsBasic`1.Epsilon">
+            <summary>
+            Gets the smallest positive value greater than zero.
+            </summary>
+            <remarks>
+            Computed as the bit increment of a signed zero with the sign of one:
+            <c>T.BitIncrement(T.CopySign(T.Zero, T.One))</c>.
+            </remarks>
+        </member>
+        <member name="P:UltimateOrb.Numerics.FloatingPointIeee754TypeTraitsBasic`1.Precision">
+            <summary>
+            Gets the precision of the floating-point type expressed in units of the type.
+            </summary>
+            <remarks>
+            For binary radix this is computed using base-2 logarithm; for decimal radix base-10 is used;
+            otherwise a generic logarithm with the type radix is used.
+            </remarks>
+        </member>
+        <member name="P:UltimateOrb.Numerics.FloatingPointIeee754TypeTraitsBasic`1.MinValue">
+            <summary>
+            Gets the smallest representable finite value (the minimum finite value).
+            </summary>
+            <remarks>
+            Computed as the bit increment of negative infinity to obtain the most negative finite value.
+            </remarks>
+        </member>
+        <member name="P:UltimateOrb.Numerics.FloatingPointIeee754TypeTraitsBasic`1.MaxValue">
+            <summary>
+            Gets the largest representable finite value (the maximum finite value).
+            </summary>
+            <remarks>
+            Computed as the bit decrement of positive infinity to obtain the largest finite value.
+            </remarks>
+        </member>
+        <member name="P:UltimateOrb.Numerics.FloatingPointIeee754TypeTraitsBasic`1.MinExponent">
+            <summary>
+            Gets the minimum exponent (as a value of type <typeparamref name="T"/>) for normalized numbers.
+            </summary>
+            <remarks>
+            This value is determined by finding the smallest normal value and taking its logarithm
+            in the appropriate radix, rounded to the nearest representable value.
+            </remarks>
+        </member>
+        <member name="P:UltimateOrb.Numerics.FloatingPointIeee754TypeTraitsBasic`1.MaxExponent">
+            <summary>
+            Gets the maximum exponent (as a value of type <typeparamref name="T"/>) for normalized numbers.
+            </summary>
+            <remarks>
+            Computed from <see cref="P:UltimateOrb.Numerics.FloatingPointIeee754TypeTraitsBasic`1.MaxValue"/> by taking the rounded logarithm in the appropriate radix and subtracting one.
+            </remarks>
+        </member>
+        <member name="T:UltimateOrb.Numerics.FloatingPointIeee754TypeTraitsBasic`1.As`1">
+            <summary>
+            Provides conversions of the floating-point traits into an unsigned integer type <typeparamref name="TInt"/>.
+            </summary>
+            <typeparam name="TInt">An unsigned integer type implementing <see cref="T:System.Numerics.INumberBase`1"/>.</typeparam>
+        </member>
+        <member name="P:UltimateOrb.Numerics.FloatingPointIeee754TypeTraitsBasic`1.As`1.Precision">
+            <summary>
+            Gets the precision converted to <typeparamref name="TInt"/>.
+            </summary>
+            <remarks>
+            Uses <see cref="M:System.Numerics.INumberBase`1.CreateChecked``1(``0)"/> to convert the <see cref="P:UltimateOrb.Numerics.FloatingPointIeee754TypeTraitsBasic`1.As`1.Precision"/> value.
+            </remarks>
+        </member>
+        <member name="P:UltimateOrb.Numerics.FloatingPointIeee754TypeTraitsBasic`1.As`1.MinExponent">
+            <summary>
+            Gets the minimum exponent converted to <typeparamref name="TInt"/>.
+            </summary>
+            <remarks>
+            Uses <see cref="M:System.Numerics.INumberBase`1.CreateChecked``1(``0)"/> to convert the <see cref="P:UltimateOrb.Numerics.FloatingPointIeee754TypeTraitsBasic`1.As`1.MinExponent"/> value.
+            </remarks>
+        </member>
+        <member name="P:UltimateOrb.Numerics.FloatingPointIeee754TypeTraitsBasic`1.As`1.MaxExponent">
+            <summary>
+            Gets the maximum exponent converted to <typeparamref name="TInt"/>.
+            </summary>
+            <remarks>
+            Uses <see cref="M:System.Numerics.INumberBase`1.CreateChecked``1(``0)"/> to convert the <see cref="P:UltimateOrb.Numerics.FloatingPointIeee754TypeTraitsBasic`1.As`1.MaxExponent"/> value.
+            </remarks>
+        </member>
+        <member name="T:UltimateOrb.Numerics.IDecimalFloatingPointIeee754`1">
+            <summary>Defines an IEEE 754 floating-point type that is represented in a base-10 format.</summary>
+            <typeparam name="TSelf">The type that implements the interface.</typeparam>
+        </member>
+        <member name="M:UltimateOrb.Numerics.IDecimalFloatingPointIeee754`1.ILog10(`0)">
+            <summary>Computes the integer logarithm (base 10) of a value.</summary>
+            <param name="x">The value whose integer logarithm is to be computed.</param>
+            <returns>The integer logarithm (base 10) of <paramref name="x" />.</returns>
+        </member>
+        <member name="M:UltimateOrb.Numerics.IDecimalFloatingPointIeee754`1.Scale10(`0,System.Int32)">
+            <summary>Computes the product of a value and 10 raised to the specified power.</summary>
+            <param name="x">The value which 10 raised to the power of <paramref name="n" /> multiplies.</param>
+            <param name="n">The value to which 10 is raised before multipliying <paramref name="x" />.</param>
+            <returns>The product of <paramref name="x" /> and 10 raised to the power of <paramref name="n" />.</returns>
+        </member>
         <member name="T:UltimateOrb.Numerics.IDoubleArithmeticBigDivRemFunctions`1">
             <summary>
             Defines methods for performing division and remainder operations on types that support double-width arithmetic.
@@ -8388,13 +8494,13 @@
         <member name="M:UltimateOrb.Numerics.NumberLiteralRegexFactory.NumberLiteralRegex">
             <remarks>
             Pattern:<br/>
-            <code>^(?&lt;sign&gt;[+\\-])?(?:(?&lt;hex&gt;0[Xx](?&lt;hexSignificand&gt;(?:\\.[0-9A-Fa-f]+|[0-9A-Fa-f]+(?:\\.(?:[0-9A-Fa-f]+|))?))(?:P|p)(?&lt;hexExpSign&gt;[+\\-]?)(?&lt;hexExp&gt;[0-9]+))|(?&lt;dec&gt;(?&lt;decSignificand&gt;(?:\\.[0-9]+|[0-9]+(?:\\.(?:[0-9]+|))?))(?:[Ee](?&lt;decExpSign&gt;[+\\-]?)(?&lt;decExp&gt;[0-9]+))?)|(?&lt;nan&gt;(?&lt;nanPrefix&gt;[SsQq]?)(?&lt;nanWord&gt;(?:[Nn][Aa][Nn]))(?:\\((?&lt;nanPayload&gt;(?:0[Xx][0-9A-Fa-f]+|[0-9]+))\\))?)|(?&lt;inf&gt;∞|(?:[Ii][Nn][Ff](?:[Ii][Nn][Ii][Tt][Yy])?)))$</code><br/>
+            <code>^(?&lt;sign&gt;[+\-])?(?:(?&lt;hex&gt;0[Xx](?&lt;hexSignificand&gt;(?:\.[0-9A-Fa-f]+|[0-9A-Fa-f]+(?:\.(?:[0-9A-Fa-f]+|))?))(?:P|p)(?&lt;hexExpSign&gt;[+\-]?)(?&lt;hexExp&gt;[0-9]+))|(?&lt;dec&gt;(?&lt;decSignificand&gt;(?:\.[0-9]+|[0-9]+(?:\.(?:[0-9]+|))?))(?:[Ee](?&lt;decExpSign&gt;[+\-]?)(?&lt;decExp&gt;[0-9]+))?)|(?&lt;nan&gt;(?&lt;nanPrefix&gt;[SsQq]?)(?&lt;nanWord&gt;(?:[Nn][Aa][Nn]))(?:\((?&lt;nanPayload&gt;(?:0[Xx][0-9A-Fa-f]+|[0-9]+))\))?)|(?&lt;inf&gt;∞|(?:[Ii][Nn][Ff](?:[Ii][Nn][Ii][Tt][Yy])?)))$</code><br/>
             Explanation:<br/>
             <code>
             ○ Match if at the beginning of the string.<br/>
             ○ Optional (greedy).<br/>
                 ○ "sign" capture group.<br/>
-                    ○ Match a character in the set [+-].<br/>
+                    ○ Match a character in the set [+\-].<br/>
             ○ Match with 4 alternative expressions.<br/>
                 ○ "hex" capture group.<br/>
                     ○ Match '0'.<br/>
@@ -8403,17 +8509,15 @@
                         ○ Match with 2 alternative expressions.<br/>
                             ○ Match a sequence of expressions.<br/>
                                 ○ Match '.'.<br/>
-                                ○ Match a character in the set [0-9A-Fa-f] atomically at least once.<br/>
+                                ○ Match a hexadecimal digit atomically at least once.<br/>
                             ○ Match a sequence of expressions.<br/>
-                                ○ Match a character in the set [0-9A-Fa-f] greedily at least once.<br/>
+                                ○ Match a hexadecimal digit greedily at least once.<br/>
                                 ○ Optional (greedy).<br/>
                                     ○ Match '.'.<br/>
-                                    ○ Match with 2 alternative expressions.<br/>
-                                        ○ Match a character in the set [0-9A-Fa-f] greedily at least once.<br/>
-                                        ○ Match an empty string.<br/>
+                                    ○ Match a hexadecimal digit atomically any number of times.<br/>
                     ○ Match a character in the set [Pp].<br/>
                     ○ "hexExpSign" capture group.<br/>
-                        ○ Match a character in the set [+-] atomically, optionally.<br/>
+                        ○ Match a character in the set [+\-] atomically, optionally.<br/>
                     ○ "hexExp" capture group.<br/>
                         ○ Match a character in the set [0-9] atomically at least once.<br/>
                 ○ "dec" capture group.<br/>
@@ -8426,15 +8530,13 @@
                                 ○ Match a character in the set [0-9] greedily at least once.<br/>
                                 ○ Optional (greedy).<br/>
                                     ○ Match '.'.<br/>
-                                    ○ Match with 2 alternative expressions.<br/>
-                                        ○ Match a character in the set [0-9] greedily at least once.<br/>
-                                        ○ Match an empty string.<br/>
+                                    ○ Match a character in the set [0-9] greedily any number of times.<br/>
                     ○ Optional (greedy).<br/>
                         ○ Match a character in the set [Ee].<br/>
                         ○ "decExpSign" capture group.<br/>
-                            ○ Match a character in the set [+-] atomically, optionally.<br/>
+                            ○ Match a character in the set [+\-] atomically, optionally.<br/>
                         ○ "decExp" capture group.<br/>
-                            ○ Match a character in the set [0-9] greedily at least once.<br/>
+                            ○ Match a character in the set [0-9] atomically at least once.<br/>
                 ○ "nan" capture group.<br/>
                     ○ "nanPrefix" capture group.<br/>
                         ○ Match a character in the set [QSqs] atomically, optionally.<br/>
@@ -8449,7 +8551,7 @@
                                 ○ Match a sequence of expressions.<br/>
                                     ○ Match '0'.<br/>
                                     ○ Match a character in the set [Xx].<br/>
-                                    ○ Match a character in the set [0-9A-Fa-f] atomically at least once.<br/>
+                                    ○ Match a hexadecimal digit atomically at least once.<br/>
                                 ○ Match a character in the set [0-9] atomically at least once.<br/>
                         ○ Match ')'.<br/>
                 ○ "inf" capture group.<br/>
@@ -8467,6 +8569,43 @@
                                 ○ Match a character in the set [Yy].<br/>
             ○ Match if at the end of the string or if before an ending newline.<br/>
             </code>
+            </remarks>
+        </member>
+        <member name="M:UltimateOrb.Numerics.SpecialFunctions.BringRadical(System.Double)">
+            <summary>
+            Computes the Bring radical (ultraradical) of a real number <paramref name="a"/>.
+            </summary>
+            <param name="a">The value whose Bring radical is to be computed.</param>
+            <returns>
+            The Bring radical of <paramref name="a"/>, accurate to within 2 ULP (units in the last place)
+            of the correctly-rounded value.
+            </returns>
+            <remarks>
+            <para>
+            The Bring radical is a special function that gives the unique real root of the Bring–Jerrard
+            quintic <c>x⁵ + x + a = 0</c>.
+            </para>
+            <para>
+            Formally, for a real number <paramref name="a"/>, the Bring radical <c>BR(a)</c> is defined as
+            the unique real solution <c>x</c> of the equation <c>x⁵ + x + a = 0</c>.
+            For complex arguments, the Bring radical is multi-valued (any of the five roots of the
+            polynomial), but the function implemented here returns the principal real-valued branch for
+            real inputs.
+            </para>
+            <para>
+            Special input handling:
+            </para>
+            <list type="bullet">
+              <item><description>
+                If <paramref name="a"/> is <see cref="F:System.Double.NaN"/>, the result is a quiet NaN.
+              </description></item>
+              <item><description>
+                If <paramref name="a"/> is infinite, the result is an infinity with the opposite sign.
+              </description></item>
+              <item><description>
+                If <paramref name="a"/> is zero, the result is zero with the opposite sign.
+              </description></item>
+            </list>
             </remarks>
         </member>
         <member name="M:UltimateOrb.Numerics.Specialized.BitMatrix16x16.#ctor(System.Runtime.Intrinsics.Vector256{System.UInt16})">
@@ -8571,26 +8710,11 @@
             </summary>
         </member>
         <!-- Badly formed XML comment ignored for member "P:UltimateOrb.Decimal128Dpd.RawBiasedExponent" -->
-        <member name="T:UltimateOrb.IDecimalFloatingPointIeee754`1">
-            <summary>Defines an IEEE 754 floating-point type that is represented in a base-10 format.</summary>
-            <typeparam name="TSelf">The type that implements the interface.</typeparam>
-        </member>
-        <member name="M:UltimateOrb.IDecimalFloatingPointIeee754`1.ILog10(`0)">
-            <summary>Computes the integer logarithm (base 10) of a value.</summary>
-            <param name="x">The value whose integer logarithm is to be computed.</param>
-            <returns>The integer logarithm (base 10) of <paramref name="x" />.</returns>
-        </member>
-        <member name="M:UltimateOrb.IDecimalFloatingPointIeee754`1.Scale10(`0,System.Int32)">
-            <summary>Computes the product of a value and 10 raised to the specified power.</summary>
-            <param name="x">The value which 10 raised to the power of <paramref name="n" /> multiplies.</param>
-            <param name="n">The value to which 10 is raised before multipliying <paramref name="x" />.</param>
-            <returns>The product of <paramref name="x" /> and 10 raised to the power of <paramref name="n" />.</returns>
-        </member>
         <member name="P:UltimateOrb.Decimal128Bid.Tau">
             <inheritdoc cref="P:System.Numerics.IFloatingPointConstants`1.Tau"/>
         </member>
         <member name="M:UltimateOrb.Decimal128Bid.ILog10(UltimateOrb.Decimal128Bid)">
-            <inheritdoc cref="M:UltimateOrb.IDecimalFloatingPointIeee754`1.ILog10(`0)"/>
+            <inheritdoc cref="!:IDecimalFloatingPointIeee754&lt;Decimal128Bid&gt;.ILog10(Decimal128Bid)"/>
         </member>
         <member name="M:UltimateOrb.Decimal128Bid.ILogB(UltimateOrb.Decimal128Bid)">
             <inheritdoc cref="M:System.Numerics.IFloatingPointIeee754`1.ILogB(`0)"/>
@@ -10061,13 +10185,13 @@
             <returns><c>true</c> if <paramref name="utf8Text" /> was converted successfully; otherwise, false.</returns>
         </member>
         <member name="M:UltimateOrb.Quadruple.TryParsePartial(System.String,System.Globalization.NumberStyles,System.IFormatProvider,UltimateOrb.Quadruple@,System.Int32@)">
-            <inheritdoc cref="!:INumberBase&lt;TSelf&gt;.TryParsePartial(string, NumberStyles, IFormatProvider?, out TSelf, out int)" />
+            <inheritdoc cref="M:System.Numerics.INumberBase`1.TryParsePartial(System.String,System.Globalization.NumberStyles,System.IFormatProvider,`0@,System.Int32@)" />
         </member>
         <member name="M:UltimateOrb.Quadruple.TryParsePartial(System.ReadOnlySpan{System.Char},System.Globalization.NumberStyles,System.IFormatProvider,UltimateOrb.Quadruple@,System.Int32@)">
-            <inheritdoc cref="!:INumberBase&lt;TSelf&gt;.TryParsePartial(ReadOnlySpan&lt;char&gt;, NumberStyles, IFormatProvider?, out TSelf, out int)" />
+            <inheritdoc cref="M:System.Numerics.INumberBase`1.TryParsePartial(System.ReadOnlySpan{System.Char},System.Globalization.NumberStyles,System.IFormatProvider,`0@,System.Int32@)" />
         </member>
         <member name="M:UltimateOrb.Quadruple.TryParsePartial(System.ReadOnlySpan{System.Byte},System.Globalization.NumberStyles,System.IFormatProvider,UltimateOrb.Quadruple@,System.Int32@)">
-            <inheritdoc cref="!:INumberBase&lt;TSelf&gt;.TryParsePartial(ReadOnlySpan&lt;byte&gt;, NumberStyles, IFormatProvider?, out TSelf, out int)" />
+            <inheritdoc cref="M:System.Numerics.INumberBase`1.TryParsePartial(System.ReadOnlySpan{System.Byte},System.Globalization.NumberStyles,System.IFormatProvider,`0@,System.Int32@)" />
         </member>
         <member name="M:UltimateOrb.Quadruple.TryParse(System.String,System.IFormatProvider,UltimateOrb.Quadruple@)">
             <inheritdoc cref="M:System.IParsable`1.TryParse(System.String,System.IFormatProvider,`0@)" />

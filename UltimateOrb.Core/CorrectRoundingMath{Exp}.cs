@@ -671,27 +671,6 @@ namespace UltimateOrb {
                         // |x| < 2^-53
                         if (aix == 0) return x; // ±0
                         double res = BitConverter.UInt64BitsToDouble(ix + ((nuint)((Int64)ix >> 63) | 1u) * ((mode == MidpointRounding.ToPositiveInfinity || (mode == MidpointRounding.ToZero && 0 != (ix >> 63))) ? 1u : 0u));
-#if false
-                        double res;
-                        if (aix < 0x3c90000000000000UL) {
-                            // Since t == 0, the exact expm1(x) = x + x²/2 + … is strictly greater than x
-                            // but still lies strictly between x and the middle to the next representable double.
-                            // Therefore:
-                            //   ToNegativeInfinity → x
-                            //   ToZero             → x if x > 0, else next above x (towards zero)
-                            //   ToPositiveInfinity → next above x
-                            //res = mode switch {
-                            //    MidpointRounding.ToNegativeInfinity => x,
-                            //    MidpointRounding.ToZero => x > 0 ? x : Math.BitIncrement(x),
-                            //    MidpointRounding.ToPositiveInfinity => Math.BitIncrement(x),
-                            //    _ => x   // ToEven, AwayFromZero (not reached here)
-                            //};
-                            res = BitConverter.UInt64BitsToDouble(ix + ((nuint)((Int64)ix >> 63) | 1u) * ((mode == MidpointRounding.ToPositiveInfinity || (mode == MidpointRounding.ToZero && 0 != (ix >> 63))) ? 1u : 0u));
-                        } else {
-                            var t = 5.5511151231257827E-17 * double.Abs(x);
-                            res = RoundPartial0(t, x, mode);
-                        }
-#endif
                         if (aix < 0x10000000000000UL || (BitConverter.DoubleToUInt64Bits(res) & 0x7FFF_FFFF_FFFF_FFFFUL) <= 0x000F_FFFF_FFFF_FFFF /* subnormal */) {
                             RaiseExceptionFlagsDummy(FloatingPointExceptionFlags.Underflow);
                         }

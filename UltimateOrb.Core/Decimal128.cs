@@ -1522,7 +1522,7 @@ namespace UltimateOrb {
         IConvertible, IConvertibleNongenericDerived<Decimal128, Decimal128Bid>,
         IComparable<Decimal128>, IComparableDerived<Decimal128, Decimal128Bid>,
         IEquatable<Decimal128>, IEquatableDerived<Decimal128, Decimal128Bid>,
-        IDecimalFloatingPointIeee754<Decimal128>, IDecimalFloatingPointIeee754Derived<Decimal128, Decimal128Bid>,
+        UltimateOrb.Numerics.IDecimalFloatingPointIeee754<Decimal128>, IDecimalFloatingPointIeee754Derived<Decimal128, Decimal128Bid>,
         IMinMaxValue<Decimal128>, IMinMaxValueDerivedInitOnly<Decimal128, Decimal128Bid>,
         IUtf8SpanFormattable {
 
@@ -1815,7 +1815,7 @@ namespace UltimateOrb {
         IConvertible, IConvertibleNongenericDerived<Decimal128Dpd, Decimal128Bid>,
         IComparable<Decimal128Dpd>, IComparableDerived<Decimal128Dpd, Decimal128Bid>,
         IEquatable<Decimal128Dpd>, IEquatableDerived<Decimal128Dpd, Decimal128Bid>,
-        IDecimalFloatingPointIeee754<Decimal128Dpd>, IDecimalFloatingPointIeee754Derived<Decimal128Dpd, Decimal128Bid>,
+        UltimateOrb.Numerics.IDecimalFloatingPointIeee754<Decimal128Dpd>, IDecimalFloatingPointIeee754Derived<Decimal128Dpd, Decimal128Bid>,
         IMinMaxValue<Decimal128Dpd>, IMinMaxValueDerivedInitOnly<Decimal128Dpd, Decimal128Bid>,
         IUtf8SpanFormattable {
 
@@ -1965,28 +1965,6 @@ namespace UltimateOrb {
         }
     }
 
-    /// <summary>Defines an IEEE 754 floating-point type that is represented in a base-10 format.</summary>
-    /// <typeparam name="TSelf">The type that implements the interface.</typeparam>
-    public interface IDecimalFloatingPointIeee754<TSelf> : IFloatingPointIeee754<TSelf>
-        where TSelf : IDecimalFloatingPointIeee754<TSelf>? {
-
-        static int INumberBase<TSelf>.Radix {
-
-            get => 10;
-        }
-
-        /// <summary>Computes the integer logarithm (base 10) of a value.</summary>
-        /// <param name="x">The value whose integer logarithm is to be computed.</param>
-        /// <returns>The integer logarithm (base 10) of <paramref name="x" />.</returns>
-        public static virtual int ILog10(TSelf x) => TSelf.Radix != 10 ? throw new NotImplementedException() : TSelf.ILogB(x);
-
-        /// <summary>Computes the product of a value and 10 raised to the specified power.</summary>
-        /// <param name="x">The value which 10 raised to the power of <paramref name="n" /> multiplies.</param>
-        /// <param name="n">The value to which 10 is raised before multipliying <paramref name="x" />.</param>
-        /// <returns>The product of <paramref name="x" /> and 10 raised to the power of <paramref name="n" />.</returns>
-        public static virtual TSelf Scale10(TSelf x, int n) => TSelf.Radix != 10 ? throw new NotImplementedException() : TSelf.Scale10(x, n);
-    }
-
     [Experimental("UoWIP")]
     public readonly partial struct Decimal128Bid :
         ISpanFormattable,
@@ -1995,7 +1973,7 @@ namespace UltimateOrb {
         IComparable<Decimal128Bid>,
         IEquatable<Decimal128Bid>,
         IFloatingPointIeee754<Decimal128Bid>,
-        IDecimalFloatingPointIeee754<Decimal128Bid>,
+        UltimateOrb.Numerics.IDecimalFloatingPointIeee754<Decimal128Bid>,
         IMinMaxValue<Decimal128Bid>,
         IUtf8SpanFormattable {
 

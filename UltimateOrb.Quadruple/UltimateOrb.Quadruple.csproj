@@ -32,7 +32,7 @@
 
   <PropertyGroup>
     <!-- Sync with UltimateOrb.Core -->
-	<Version>3.7.17-beta.9</Version>
+	<Version>3.7.18-beta.1</Version>
   </PropertyGroup>
 	
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -152,6 +152,10 @@
 	<Compile Include="..\UltimateOrb.Core\Numerics\NumberBaseExtensions.cs" Link="Numerics\NumberBaseExtensions.cs" />
 	<Compile Include="..\UltimateOrb.Core\Numerics\BinaryIntegerTypeTraits.cs" Link="Numerics\BinaryIntegerTypeTraits.cs" />
 	<Compile Include="..\UltimateOrb.Core\Numerics\BinaryFloatingPointIeee754TypeTraitsInternal.cs" Link="Numerics\BinaryFloatingPointIeee754TypeTraitsInternal.cs" />
+	<Compile Include="..\UltimateOrb.Core\Numerics\FloatingPointIeee754ArithmeticInternal.cs" Link="Numerics\FloatingPointIeee754ArithmeticInternal.cs" />
+	<Compile Include="..\UltimateOrb.Core\Numerics\IDecimalFloatingPointIeee754.cs" Link="Numerics\IDecimalFloatingPointIeee754.cs" />
+	<Compile Include="..\UltimateOrb.Core\Numerics\FloatingPointIeee754TypeTraitsBasic.cs" Link="Numerics\FloatingPointIeee754TypeTraitsBasic.cs" />
+
 	<Compile Include="..\UltimateOrb.Core\System\Diagnostics\CodeAnalysis\ConstantExpectedAttribute.cs" Link="System\Diagnostics\CodeAnalysis\ConstantExpectedAttribute.cs" />
 	<Compile Include="..\UltimateOrb.Core\System\Diagnostics\CodeAnalysis\ExperimentalAttribute.cs" Link="System\Diagnostics\CodeAnalysis\ExperimentalAttribute.cs" />
   </ItemGroup>
