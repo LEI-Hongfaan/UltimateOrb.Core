@@ -1522,7 +1522,9 @@ namespace UltimateOrb {
         IConvertible, IConvertibleNongenericDerived<Decimal128, Decimal128Bid>,
         IComparable<Decimal128>, IComparableDerived<Decimal128, Decimal128Bid>,
         IEquatable<Decimal128>, IEquatableDerived<Decimal128, Decimal128Bid>,
+#pragma warning disable CS0618 // Type or member is obsolete
         UltimateOrb.Numerics.IDecimalFloatingPointIeee754<Decimal128>, IDecimalFloatingPointIeee754Derived<Decimal128, Decimal128Bid>,
+#pragma warning restore CS0618 // Type or member is obsolete
         IMinMaxValue<Decimal128>, IMinMaxValueDerivedInitOnly<Decimal128, Decimal128Bid>,
         IUtf8SpanFormattable {
 
@@ -1973,7 +1975,12 @@ namespace UltimateOrb {
         IComparable<Decimal128Bid>,
         IEquatable<Decimal128Bid>,
         IFloatingPointIeee754<Decimal128Bid>,
+#pragma warning disable CS0618 // Type or member is obsolete
         UltimateOrb.Numerics.IDecimalFloatingPointIeee754<Decimal128Bid>,
+#pragma warning restore CS0618 // Type or member is obsolete
+#if NET11_0_OR_GREATER
+        System.Numerics.IDecimalFloatingPointIeee754<Decimal128Bid>,
+#endif
         IMinMaxValue<Decimal128Bid>,
         IUtf8SpanFormattable {
 
@@ -2056,20 +2063,110 @@ namespace UltimateOrb {
             return unchecked((int)value.ExtractRawBiasedExponentAndRawSignificand(out _) - EXP_BIAS);
         }
 
+        [Obsolete("Use HaveSameQuantum(Decimal128Bid, Decimal128Bid) instead.")]
         public static bool SameQuantum(Decimal128Bid first, Decimal128Bid second) {
-            Debug.Assert(ILogSpecialResults.ILogNaN != ILogSpecialResults.ILogInfinity);
-            return ILogBQuantum(first) == ILogBQuantum(second);
+            return HaveSameQuantum(first, second);
         }
 
+        [Obsolete("Use GetQuantum(Decimal128Bid) instead.")]
         public static Decimal128Bid Quantum(Decimal128Bid value) {
-            if (IsNaN(value)) {
-                return value;
+            return GetQuantum(value);
+        }
+
+        public static Decimal128Bid Quantize(Decimal128Bid x, Decimal128Bid y) {
+            // NaN propagation: x before y
+            if (IsNaN(x)) return x;
+            if (IsNaN(y)) return y;
+
+            // Infinity handling
+            if (IsInfinity(x)) {
+                if (IsInfinity(y)) return x; // both infinite → canonical ∞ with sign of x
+                return NaN;                  // one infinite, one finite → invalid
             }
-            if (IsInfinity(value)) {
+            if (IsInfinity(y)) {
+                return NaN;                  // x finite, y infinite → invalid
+            }
+
+            // Extract raw biased exponents and significands (finite operands only)
+            uint expX = x.ExtractRawBiasedExponentAndRawSignificand(out UInt128 sigX);
+            uint expY = y.ExtractRawBiasedExponentAndRawSignificand(out _);
+
+            // If quanta already match, return x unchanged
+            if (expX == expY) {
+                return x;
+            }
+
+            // Preserve sign of x
+            ulong sign = (x.bits.HiInt64Bits < 0) ? (1UL << 63) : 0UL;
+
+            if (expX < expY) {
+                // Exponent must be increased → divide by 10^(expY - expX), round to nearest even
+                uint diff = expY - expX;
+
+                // For diff > 38, sigX < 10^34, so 10^diff > 10^38 and half > 10^37 > sigX → result 0
+                if (diff > 38) {
+                    return new Decimal128Bid(0u, expY, sign, CtorFromPartsCanonical);
+                }
+
+                UInt128 divisor = 1;
+                for (int i = 0; i < diff; i++) divisor *= 10;
+
+                UInt128 quotient = sigX / divisor;
+                UInt128 remainder = sigX % divisor;
+                UInt128 half = divisor / 2;
+
+                // Round half to even
+                if (remainder > half || (remainder == half && (quotient & 1) == 1)) {
+                    quotient++;
+                }
+
+                return new Decimal128Bid(quotient, expY, sign, CtorFromPartsCanonical);
+            } else {
+                // Exponent must be decreased → multiply by 10^(expX - expY)
+                uint diff = expX - expY;
+
+                // Zero stays zero regardless of exponent change
+                if (sigX == 0) {
+                    return new Decimal128Bid(0u, expY, sign, CtorFromPartsCanonical);
+                }
+
+                // If diff >= 34, even 1 * 10^34 exceeds max coefficient (10^34 - 1)
+                if (diff > 33) {
+                    return NaN;
+                }
+
+                UInt128 multiplier = 1;
+                for (int i = 0; i < diff; i++) multiplier *= 10;
+
+                // maxCoefficient = 10^34 - 1
+                UInt128 maxCoefficient = 1;
+                for (int i = 0; i < 34; i++) maxCoefficient *= 10;
+                maxCoefficient--;
+
+                // Check that sigX * multiplier <= maxCoefficient without overflow
+                if (sigX > maxCoefficient / multiplier) {
+                    return NaN;
+                }
+
+                UInt128 newSig = sigX * multiplier;
+                return new Decimal128Bid(newSig, expY, sign, CtorFromPartsCanonical);
+            }
+        }
+
+        public static Decimal128Bid GetQuantum(Decimal128Bid x) {
+            if (IsNaN(x)) {
+                return x;
+            }
+            if (IsInfinity(x)) {
                 return PositiveInfinity;
             }
-            var exp = unchecked((uint)value.RawBiasedExponent);
+            var exp = unchecked((uint)x.RawBiasedExponent);
             return new(1u, exp, 0u, CtorFromPartsCanonical);
+        }
+
+        public static bool HaveSameQuantum(Decimal128Bid x, Decimal128Bid y) {
+            Debug.Assert(ILogSpecialResults.ILogNaN != ILogSpecialResults.ILogInfinity);
+            return ILogBQuantum(x) == ILogBQuantum(y);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -2997,7 +3094,8 @@ namespace UltimateOrb {
         }
 
         public static bool IsNormal(Decimal128Bid value) {
-            throw new NotImplementedException();
+            var absValue = Abs(value);
+            return IsFinite(absValue) && absValue > SubnormalMaxValue;
         }
 
         public static bool IsOddInteger(Decimal128Bid value) {
@@ -3049,20 +3147,32 @@ namespace UltimateOrb {
             return e <= MaxBiasedExponent && (m.IsZero || m > MaxSignificandAsUInt128);
         }
 
+        public static explicit operator Decimal128Bid(Quadruple x) {
+            return Decimal128Bid.Parse(x.ToString("G1000", CultureInfo.InvariantCulture), CultureInfo.InvariantCulture);
+        }
+
+        public static explicit operator Quadruple(Decimal128Bid x) {
+            return Quadruple.Parse(x.ToString("G34", CultureInfo.InvariantCulture), CultureInfo.InvariantCulture);
+        }
+
         public static Decimal128Bid Log(Decimal128Bid x) {
-            throw new NotImplementedException();
+            return (Decimal128Bid)Quadruple.Log((Quadruple)x);
         }
 
         public static Decimal128Bid Log(Decimal128Bid x, Decimal128Bid newBase) {
-            throw new NotImplementedException();
+            return (Decimal128Bid)Quadruple.Log((Quadruple)x, (Quadruple)newBase);
         }
 
         public static Decimal128Bid Log10(Decimal128Bid x) {
-            throw new NotImplementedException();
+            if (IsNaN(x)) return x;
+            if (IsZero(x)) return NegativeInfinity;
+            if (IsNegative(x)) return NaN;
+            var e = ILogB(x);
+            return (Decimal128Bid)(Quadruple.Log10((Quadruple)ScaleB(x, -e)) + e);
         }
 
         public static Decimal128Bid Log2(Decimal128Bid x) {
-            throw new NotImplementedException();
+            return (Decimal128Bid)Quadruple.Log2((Quadruple)x);
         }
 
         public static Decimal128Bid MaxMagnitude(Decimal128Bid x, Decimal128Bid y) {
@@ -3439,21 +3549,25 @@ namespace UltimateOrb {
             }
         }
 
-
-
-
-
-
         public static bool TryConvertToChecked<TOther>(Decimal128Bid value, [MaybeNullWhen(false)] out TOther result) where TOther : INumberBase<TOther> {
-            throw new NotImplementedException();
+            if (IsFinite(value)) {
+                return NumberBaseInternal<TOther>.TryCreateChecked((BigRational)value, out result);
+            }
+            return NumberBaseInternal<TOther>.TryCreateChecked((double)value, out result);
         }
 
         public static bool TryConvertToSaturating<TOther>(Decimal128Bid value, [MaybeNullWhen(false)] out TOther result) where TOther : INumberBase<TOther> {
-            throw new NotImplementedException();
+            if (IsFinite(value)) {
+                return NumberBaseInternal<TOther>.TryCreateChecked((BigRational)value, out result);
+            }
+            return NumberBaseInternal<TOther>.TryCreateChecked((double)value, out result);
         }
 
         public static bool TryConvertToTruncating<TOther>(Decimal128Bid value, [MaybeNullWhen(false)] out TOther result) where TOther : INumberBase<TOther> {
-            throw new NotImplementedException();
+            if (IsFinite(value)) {
+                return NumberBaseInternal<TOther>.TryCreateChecked((BigRational)value, out result);
+            }
+            return NumberBaseInternal< TOther>.TryCreateChecked((double)value, out result);
         }
 
         public static bool TryParse(ReadOnlySpan<char> s, NumberStyles style, IFormatProvider? provider, [MaybeNullWhen(false)] out Decimal128Bid result) {
@@ -4118,7 +4232,7 @@ namespace UltimateOrb {
                     Debug.Assert(Decimal128Bid.IsInfinity(left) || Decimal128Bid.IsInfinity(right));
                     return new(PositiveNaN.bits | (~(UInt128.MaxValue >>> 1) & (left.bits ^ right.bits)), CtorFromBits);
                 }
-                Debug.Assert(Decimal128Bid.IsInfinity(left) && Decimal128Bid.IsInfinity(right));
+                Debug.Assert(Decimal128Bid.IsInfinity(left) || Decimal128Bid.IsInfinity(right));
                 return new(PositiveInfinity.bits | (~(UInt128.MaxValue >>> 1) & (left.bits ^ right.bits)), CtorFromBits);
             }
             Debug.Assert(Decimal128Bid.IsFinite(left));

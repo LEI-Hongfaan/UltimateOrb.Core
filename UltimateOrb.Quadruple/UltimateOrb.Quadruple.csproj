@@ -32,7 +32,7 @@
 
   <PropertyGroup>
     <!-- Sync with UltimateOrb.Core -->
-	<Version>3.7.18-beta.1</Version>
+	<Version>3.7.18-beta.14</Version>
   </PropertyGroup>
 	
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -119,7 +119,7 @@
     <Compile Include="..\UltimateOrb.Core\Void.cs" Link="Void.cs" />
     <Compile Include="..\UltimateOrb.Core\XInt128Helpers.cs" Link="XInt128Helpers.cs" />
 	<Compile Include="..\UltimateOrb.Core\Quadruple.cs" Link="Quadruple.cs" />
-	<Compile Include="..\UltimateOrb.Core\INumberBaseFriendInternal.cs" Link="INumberBaseFriendInternal.cs" />
+	<Compile Include="..\UltimateOrb.Core\Numerics\INumberBaseFriendInternal.cs" Link="Numerics\INumberBaseFriendInternal.cs" />
 	<Compile Include="..\UltimateOrb.Core\FloatingPointRounding.cs" Link="FloatingPointRounding.cs" />  
 	<Compile Include="..\UltimateOrb.Core\FloatingPointClass.cs" Link="FloatingPointClass.cs" />
 	<Compile Include="..\UltimateOrb.Core\Numerics\FloatingPointExceptionFlags.cs" Link="Numerics\FloatingPointExceptionFlags.cs" />

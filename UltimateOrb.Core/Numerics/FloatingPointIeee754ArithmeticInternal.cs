@@ -127,7 +127,7 @@ namespace UltimateOrb.Numerics {
             // TUInt may be a larger type that does not have direct conversion from/to TDecimal at current stage.
             // For example UInt256 and Decimal128
             if (ToDecimalFromIntegerUnsignedTypeTraits<TDecimal, TUInt>.IsDirectConversionSupported) {
-                return TDecimal.CreateChecked(TUInt.MaxValue);
+                return TDecimal.CreateChecked(significand);
             }
             {
                 TDecimal result = TDecimal.Zero;
@@ -212,12 +212,11 @@ namespace UltimateOrb.Numerics {
                     precision * Math.Log10(2d)
                     - minSubnormalExponent * Math.Log10(5d));
 
-                // E's precision is the number of digits after the decimal point.
-                var result = significantDigits - 1;
+                var result = significantDigits;
                 return result + 1; // +1 for safe margin
             }
 
-            public static string ExactFormat { get; } = $"E{GetExactFormatPrecision()}";
+            public static string ExactFormat { get; } = $"G{GetExactFormatPrecision()}";
 
             private static int GetExponentDigitCount(TBinary value) {
                 var formatted = value.ToString("E0", CultureInfo.InvariantCulture);
@@ -287,10 +286,7 @@ namespace UltimateOrb.Numerics {
                 ? (rented = ArrayPool<char>.Shared.Rent(capacity)).AsSpan(0, capacity)
                 : stackalloc char[capacity];
 #endif
-            // First format: E{P-1}.  Buffer and format specifier are the only
-            // non-UTF-8-typed argument, and the specifier is a cached string.
-
-
+            
             var s = value.TryFormat(buffer, out var written, ToDecimalTypeTraits<TDecimal>.DefaultFormat, CultureInfo.InvariantCulture);
             Debug.Assert(s);
             var E = ReadDecimalExponentFromUtf8(buffer.Slice(0, written));
@@ -298,8 +294,8 @@ namespace UltimateOrb.Numerics {
                 var p = FloatingPointIeee754TypeTraitsBasic<TDecimal>.As<int>.Precision - 1 - (FloatingPointIeee754TypeTraitsBasic<TDecimal>.As<int>.MinExponent - E);
                 Span<char> aa = stackalloc char[16];
                 aa[0] = 'E';
-                p.TryFormat(aa, out var charsWritten, "G", CultureInfo.InvariantCulture);
-                s = value.TryFormat(buffer, out written, aa, CultureInfo.InvariantCulture);
+                p.TryFormat(aa[1..], out var charsWritten, "G", CultureInfo.InvariantCulture);
+                s = value.TryFormat(buffer, out written, aa[..(1 + charsWritten)], CultureInfo.InvariantCulture);
                 Debug.Assert(s);
                 if (E != ReadDecimalExponentFromUtf8(buffer.Slice(0, written))) {
                     // extreme rare
@@ -404,7 +400,8 @@ namespace UltimateOrb.Numerics {
             byte[]? sigBytesArray = null;
             Span<byte> sigBytes = sigByteCount > 64 ? (sigBytesArray = ArrayPool<byte>.Shared.Rent(sigByteCount)).AsSpan(0, sigByteCount) : stackalloc byte[sigByteCount];
             var ccc = !System.BitConverter.IsLittleEndian ? value.WriteSignificandBigEndian(sigBytes) : value.WriteSignificandLittleEndian(sigBytes);
-            significand = !System.BitConverter.IsLittleEndian ? TUIntBits.ReadBigEndian(sigBytes, isUnsigned: true) : TUIntBits.ReadLittleEndian(sigBytes, isUnsigned: true);
+            var sigBytes1 = sigBytes[..sigByteCount];
+            significand = !System.BitConverter.IsLittleEndian ? TUIntBits.ReadBigEndian(sigBytes1, isUnsigned: true) : TUIntBits.ReadLittleEndian(sigBytes1, isUnsigned: true);
             if (sigBytesArray != null) {
                 ArrayPool<byte>.Shared.Return(sigBytesArray);
             }

@@ -2333,7 +2333,7 @@ namespace UltimateOrb.Numerics {
                 return true;
             }
 #if NET11_0_OR_GREATER
-            else if (typeof(BFloat16) == typeof(BFloat16)) {
+            else if (typeof(TOther) == typeof(BFloat16)) {
                 BFloat16 actualResult = (BFloat16)value;
                 result = (TOther)(object)actualResult;
                 return true;

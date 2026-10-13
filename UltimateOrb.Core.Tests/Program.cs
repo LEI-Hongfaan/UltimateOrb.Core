@@ -25,6 +25,7 @@ using UltimateOrb.Numerics.Extensions;
 
 namespace UltimateOrb.Core.Tests {
     using NUnit.Framework;
+    using System.Diagnostics;
     using System.Diagnostics.CodeAnalysis;
     using System.Globalization;
     using System.Numerics;
@@ -63,18 +64,6 @@ namespace UltimateOrb.Core.Tests {
 
             return WhitespaceRegex().Replace(input, "");
         }
-    }
-
-    internal static class Win32DecimalHelpers {
-
-        [UnsafeAccessor(UnsafeAccessorKind.Field, Name = "_flags")]
-        internal static extern ref readonly Int32 GetFlagsInternal(this in decimal dec);
-
-        [UnsafeAccessor(UnsafeAccessorKind.Field, Name = "_hi32")]
-        internal static extern ref readonly UInt32 GetHigh32Internal(this in decimal dec);
-
-        [UnsafeAccessor(UnsafeAccessorKind.Field, Name = "_lo64")]
-        internal static extern ref readonly UInt64 GetLow64Internal(this in decimal dec);
     }
 
     [UltimateOrb.Numerics.Specialized.GenerateFixedDecimal32(3)]
@@ -983,11 +972,238 @@ public readonly struct TotalOrderIeee754Comparer<T> :
             }
         }
 
+        partial class DecimalIeee754ParseAndFormatInfo<TDecimal, TValue>
+            where TDecimal : System.Numerics.IDecimalFloatingPointIeee754<TDecimal>
+            where TValue : IBinaryInteger<TValue> {
+            public static TValue G0G1Mask { get; } = (TValue.AllBitsSet >>> 1) ^ (TValue.AllBitsSet >>> 3);
+            public static TValue GwPlus4SignificandMask { get; } = (TValue.One << ((FloatingPointIeee754TypeTraitsBasic<TDecimal>.As<int>.Precision - 1) / 3 * 10 + 1)) - TValue.One;
+            public static TValue MostSignificantBitOfSignificandMask { get; } = TValue.One << ((FloatingPointIeee754TypeTraitsBasic<TDecimal>.As<int>.Precision - 1) / 3 * 10 + 3);
+            public static TValue GwPlus2ToGwPlus4SignificandMask { get; } = GwPlus4SignificandMask | (GwPlus4SignificandMask << 2);
+            public static TValue MaxSignificand { get; } = NumberBaseExtensions.Pow(TValue.CreateChecked(TDecimal.Radix), (uint)FloatingPointIeee754TypeTraitsBasic<TDecimal>.As<int>.Precision - 1) - TValue.One;
+
+
+
+        }
+
+        public interface IFloatingPointIeee754NaNPayloadOperations1<TSelf> {
+
+            static abstract TSelf GetNaNPayload(TSelf nan);
+
+            static abstract TSelf GetQuietNaNWithPayload(TSelf payload);
+
+            static abstract TSelf GetSignalingNaNWithPayload(TSelf payload);
+        }
+
+
+        public interface IFloatingPointIeee754NaNPayloadOperations<TSelf>
+            where TSelf : IFloatingPointIeee754NaNPayloadOperations<TSelf> {
+            
+            static abstract TSelf GetPayload(TSelf nan);
+            
+            static abstract TSelf GetQuietNaN(TSelf payloadValue);
+            static abstract TSelf GetSignalingNaN(TSelf payloadValue);
+        }
+
+        static void Foo<T>() where T : IFloatingPointIeee754<T>,
+            IFloatingPointIeee754NaNPayloadOperations<T> {
+            Debug.Assert(T.IsNaN(T.GetQuietNaN(T.GetPayload(T.NaN))));
+        }
+
+        internal static TValue GetDecimalIeee754Significand<TDecimal, TValue>(TValue decimalBits)
+            where TDecimal : unmanaged, System.Numerics.IDecimalFloatingPointIeee754<TDecimal>
+            where TValue : unmanaged, IBinaryInteger<TValue> {
+            TValue significand;
+
+            if ((decimalBits & DecimalIeee754ParseAndFormatInfo<TDecimal, TValue>.G0G1Mask) == DecimalIeee754ParseAndFormatInfo<TDecimal, TValue>.G0G1Mask) {
+                significand = (decimalBits & DecimalIeee754ParseAndFormatInfo<TDecimal, TValue>.GwPlus4SignificandMask) | DecimalIeee754ParseAndFormatInfo<TDecimal, TValue>.MostSignificantBitOfSignificandMask;
+            } else {
+                significand = decimalBits & DecimalIeee754ParseAndFormatInfo<TDecimal, TValue>.GwPlus2ToGwPlus4SignificandMask;
+            }
+
+            // A finite encoding whose significand exceeds the maximum representable coefficient is
+            // non-canonical and is treated as zero. This matches the non-canonical handling in
+            // `unpack_BID32`, `unpack_BID64`, and `unpack_BID128` from the Intel Decimal
+            // Floating-Point Math Library and keeps all downstream arithmetic and comparison
+            // logic robust for every finite bit pattern.
+            if (significand > DecimalIeee754ParseAndFormatInfo<TDecimal, TValue>.MaxSignificand) {
+                significand = TValue.Zero;
+            }
+
+            return significand;
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private static int Main(string[] args) {
 
 
+            {
+                var sdfasd = Quadruple.Parse("0x1.fffffffffffe0p-1", NumberStyles.HexFloat | NumberStyles.AllowHexSpecifier);
+                sdfasd = Quadruple.Parse("0x1.0000000000013p+0", NumberStyles.HexFloat | NumberStyles.AllowHexSpecifier);
+                
+                var sdfasdsads = Quadruple.Log10(sdfasd);
+
+                Console.WriteLine($"? = {sdfasdsads:G36}");
+                
+            }
+            {
+                var sdf = UltimateOrb.Quadruple.Log10(UltimateOrb.Quadruple.Parse("10"));
+                Console.WriteLine($"?  = {sdf}");
+                return 0;
+
+            }
+            {
+
+                for (int i = 1; i < 50; i++) {
+                    var sdfads = BigInteger.Pow(10, i);
+                    var q = (Quadruple)sdfads;
+                    if ((BigInteger)q != sdfads) {
+                        break;
+                    }
+                    Console.WriteLine(i);
+                    Console.WriteLine($"({Quadruple.ILogB(q)}, {BitConverter.QuadrupleToUInt128Bits(q) >> 64:x16}, {BitConverter.QuadrupleToUInt128Bits(q):x32})");
+                }
+
+
+            }
+            {
+                var sdf = UltimateOrb.Quadruple.Log10P1(UltimateOrb.Quadruple.Parse("0.00003"));
+                Console.WriteLine($"?  = {sdf}");
+
+
+            }
+            {
+                var sdf = UltimateOrb.Quadruple.Log10P1(UltimateOrb.Quadruple.NegativeOne);
+                Console.WriteLine($"?  = {sdf}");
+
+
+            }
+            {
+                var sdf = UltimateOrb.Quadruple.Log10P1(UltimateOrb.Quadruple.MaxValue);
+                Console.WriteLine($"?  = {sdf}");
+
+
+            }
+            {
+                var sdf = UltimateOrb.Quadruple.Log10P1(UltimateOrb.Quadruple.BitIncrement(UltimateOrb.Quadruple.NegativeOne));
+                Console.WriteLine($"?  = {sdf}");
+
+
+            }
+            {
+                var sdfa = FloatingPointIeee754Internal<UltimateOrb.Quadruple>.GetNaNPayload(
+                    FloatingPointIeee754Internal<UltimateOrb.Quadruple>.GetSignalingNaNWithPayload(
+                        UltimateOrb.Quadruple.Parse("3333")));
+                Console.WriteLine($"?  = {sdfa}");
+
+                Console.WriteLine($"?  = {FloatingPointIeee754Internal<UltimateOrb.Quadruple>.GetNaNPayload(
+                    UltimateOrb.Quadruple.Parse("NaN(S111222333)"))}");
+            }
+
+            {
+                var sdasd = FloatingPointIeee754Internal<System.Numerics.Decimal128>.GetSignalingNaNWithPayload(
+                        System.Numerics.Decimal128.Parse("3333"));
+                var sdfas = GetDecimalIeee754Significand<System.Numerics.Decimal128, System.UInt128>(Unsafe.BitCast<System.Numerics.Decimal128, System.UInt128>(sdasd));
+                Console.WriteLine($"?  = {sdfas}");
+                var sdfa = FloatingPointIeee754Internal<System.Numerics.Decimal128>.GetNaNPayload(sdasd);
+                Console.WriteLine($"?  = {sdfa}");
+
+
+            }
+            {
+                var sdasd = FloatingPointIeee754Internal<System.Numerics.Decimal128>.GetQuietNaNWithPayload(
+                        System.Numerics.Decimal128.Parse("3333"));
+                var sdfa = FloatingPointIeee754Internal<System.Numerics.Decimal128>.GetNaNPayload(sdasd);
+                Console.WriteLine($"?  = {sdfa}");
+
+
+            }
+            {
+
+                Console.WriteLine($"?  = {(BigInteger)UltimateOrb.Quadruple.Parse("9.99999999999999999")}");
+
+
+            }
+            {
+                var sdfasdsads = FloatingPointIeee754TypeTraitsBasic<UltimateOrb.Quadruple>.MaxSignificandF;
+                Console.WriteLine($"?  = {sdfasdsads:G36}_F128");
+
+                sdfasdsads = FloatingPointIeee754TypeTraitsBasic<UltimateOrb.Quadruple>.RadixAsT;
+                Console.WriteLine($"?  = {sdfasdsads:G36}_F128");
+
+                sdfasdsads = FloatingPointIeee754TypeTraitsBasic<UltimateOrb.Quadruple>.MaxNaNPayloadF;
+                Console.WriteLine($"?  = {sdfasdsads:G36}_F128");
+
+                var sdfasdsads1 = FloatingPointIeee754TypeTraitsBasic<UltimateOrb.Quadruple>.GetMaxNaNPayloadAsBigInteger();
+                Console.WriteLine($"?  = {sdfasdsads1}");
+
+                bool s = sdfasdsads1 == ((((BigInteger.One << (FloatingPointIeee754TypeTraitsBasic<UltimateOrb.Quadruple>.As<int>.Precision - 3)) - 1) << 1) | 1);
+                Console.WriteLine($"?  = {s}");
+                Console.WriteLine($"?  = {(BigInteger)UltimateOrb.Quadruple.ScaleB(FloatingPointIeee754TypeTraitsBasic<UltimateOrb.Quadruple>.MaxSignificandF, FloatingPointIeee754TypeTraitsBasic<UltimateOrb.Quadruple>.As<int>.Precision - 1)}");
+                Console.WriteLine($"?  = {(BigInteger)UltimateOrb.Quadruple.ScaleB(FloatingPointIeee754TypeTraitsBasic<UltimateOrb.Quadruple>.MaxNaNPayloadF, FloatingPointIeee754TypeTraitsBasic<UltimateOrb.Quadruple>.As<int>.Precision - 1)}");
+                Console.WriteLine($"?  = {(BigInteger)(BigRational)UltimateOrb.Quadruple.ScaleB(FloatingPointIeee754TypeTraitsBasic<UltimateOrb.Quadruple>.MaxSignificandF, FloatingPointIeee754TypeTraitsBasic<UltimateOrb.Quadruple>.As<int>.Precision - 1)}");
+                Console.WriteLine($"?  = {(BigInteger)(BigRational)UltimateOrb.Quadruple.ScaleB(FloatingPointIeee754TypeTraitsBasic<UltimateOrb.Quadruple>.MaxNaNPayloadF, FloatingPointIeee754TypeTraitsBasic<UltimateOrb.Quadruple>.As<int>.Precision - 1)}");
+                Console.WriteLine($"?  = {UltimateOrb.Quadruple.ScaleB(FloatingPointIeee754TypeTraitsBasic<UltimateOrb.Quadruple>.MaxSignificandF, FloatingPointIeee754TypeTraitsBasic<UltimateOrb.Quadruple>.As<int>.Precision - 1)}");
+                Console.WriteLine($"?  = {UltimateOrb.Quadruple.ScaleB(FloatingPointIeee754TypeTraitsBasic<UltimateOrb.Quadruple>.MaxNaNPayloadF, FloatingPointIeee754TypeTraitsBasic<UltimateOrb.Quadruple>.As<int>.Precision - 1)}");
+                Console.WriteLine($"?  = {(BigInteger)UltimateOrb.Quadruple.ScaleB(FloatingPointIeee754TypeTraitsBasic<UltimateOrb.Quadruple>.MaxSignificandF, FloatingPointIeee754TypeTraitsBasic<UltimateOrb.Quadruple>.As<int>.Precision - 1) == FloatingPointIeee754TypeTraitsBasic<UltimateOrb.Quadruple>.GetMaxSignificandAsBigInteger()}");
+                Console.WriteLine($"?  = {(BigInteger)UltimateOrb.Quadruple.ScaleB(FloatingPointIeee754TypeTraitsBasic<UltimateOrb.Quadruple>.MaxNaNPayloadF, FloatingPointIeee754TypeTraitsBasic<UltimateOrb.Quadruple>.As<int>.Precision - 1) == FloatingPointIeee754TypeTraitsBasic<UltimateOrb.Quadruple>.GetMaxNaNPayloadAsBigInteger()}");
+            }
+            {
+                var sdfasdsads = FloatingPointIeee754TypeTraitsBasic<System.Numerics.Decimal128>.MaxSignificandF;
+                Console.WriteLine($"?  = {sdfasdsads:G34}_M128");
+
+                sdfasdsads = FloatingPointIeee754TypeTraitsBasic<System.Numerics.Decimal128>.RadixAsT;
+                Console.WriteLine($"?  = {sdfasdsads:G34}_M128");
+
+                sdfasdsads = FloatingPointIeee754TypeTraitsBasic<System.Numerics.Decimal128>.MaxNaNPayloadF;
+                Console.WriteLine($"?  = {sdfasdsads:G34}_M128");
+
+                var sdfasdsads1 = FloatingPointIeee754TypeTraitsBasic<System.Numerics.Decimal128>.GetMaxNaNPayloadAsBigInteger();
+                Console.WriteLine($"?  = {sdfasdsads1}");
+
+                bool s = sdfasdsads1 == ((BigInteger.Pow(10, FloatingPointIeee754TypeTraitsBasic<System.Numerics.Decimal128>.As<int>.Precision - 2) - 1) * 10) + (10 - 1);
+                Console.WriteLine($"?  = {s}");
+                Console.WriteLine($"?  = {BigInteger.Parse($"{System.Numerics.Decimal128.ScaleB(FloatingPointIeee754TypeTraitsBasic<System.Numerics.Decimal128>.MaxSignificandF, FloatingPointIeee754TypeTraitsBasic<System.Numerics.Decimal128>.As<int>.Precision - 1)}") == FloatingPointIeee754TypeTraitsBasic<System.Numerics.Decimal128>.GetMaxSignificandAsBigInteger()}");
+                Console.WriteLine($"?  = {BigInteger.Parse($"{System.Numerics.Decimal128.ScaleB(FloatingPointIeee754TypeTraitsBasic<System.Numerics.Decimal128>.MaxNaNPayloadF, FloatingPointIeee754TypeTraitsBasic<System.Numerics.Decimal128>.As<int>.Precision - 1)}") == FloatingPointIeee754TypeTraitsBasic<System.Numerics.Decimal128>.GetMaxNaNPayloadAsBigInteger()}");
+
+
+            }
+            {
+                var sdfa = (BFloat16)Quadruple.Tau;
+                Console.WriteLine($"? = {sdfa:G4}");
+
+                return 0;
+            }
+            {
+                var sdfasdsads = double.Parse("123456.789");
+                Console.WriteLine($"@in  = {sdfasdsads:G17}_F64");
+                var sdfa = FloatingPointIeee754ArithmeticInternal.ConvertIeee754BinaryToDecimal<
+                    double, UInt64, System.Numerics.Decimal128>(sdfasdsads);
+                Console.WriteLine($"@out = {sdfa:G34}_M128");
+
+            }
+            {
+                var sdfasdsads = double.Parse("123456.789");
+                Console.WriteLine($"@in  = {sdfasdsads:G17}_F64");
+                var sdfa = FloatingPointIeee754ArithmeticInternal.ConvertIeee754BinaryToDecimal<
+                    double, UInt64, System.Numerics.Decimal64>(sdfasdsads);
+                Console.WriteLine($"@out = {sdfa:G16}_M64");
+            }
+            {
+                var sdfasdsads = Quadruple.Parse("123456.789");
+                Console.WriteLine($"@in  = {sdfasdsads:G36}_F128");
+                var sdfa = FloatingPointIeee754ArithmeticInternal.ConvertIeee754BinaryToDecimal<
+                    Quadruple, System.UInt128, UltimateOrb.Decimal128Bid>(sdfasdsads);
+                Console.WriteLine($"@out = {sdfa:G34}_M128");
+
+            }
+            {
+                var sdfasdsads = Quadruple.Parse("123456.789");
+                Console.WriteLine($"@in  = {sdfasdsads:G36}_F128");
+                var sdfa = (System.Numerics.Decimal128)sdfasdsads;
+                Console.WriteLine($"@out = {sdfa:G34}_M128");
+
+                return 0;
+            }
             {
                 {
                     var b = CorrectRoundingMath.ExpM1(11.715807839696332, MidpointRounding.ToPositiveInfinity);
@@ -1011,11 +1227,11 @@ public readonly struct TotalOrderIeee754Comparer<T> :
                 {
                     var b = CorrectRoundingMath.ExpM1(-2.2250738585072009E-308, MidpointRounding.ToZero);
                     Console.WriteLine($"? = {b:G17}");
-                    
+
                 }
                 {
                     var b = CorrectRoundingMath.ExpM1(-0.93001836374961722, MidpointRounding.ToZero);
-                    Console.WriteLine($"? = {b:G17}"); 
+                    Console.WriteLine($"? = {b:G17}");
 
 
                 }
@@ -1026,19 +1242,19 @@ public readonly struct TotalOrderIeee754Comparer<T> :
                 {
                     var b = CorrectRoundingMath.ExpM1(-1.0403571407112755, MidpointRounding.ToZero);
                     Console.WriteLine($"? = {b:G17}");
-                    
+
                 }
                 {
                     var b = CorrectRoundingMath.ExpM1(36.184789079846887, MidpointRounding.ToZero);
                     Console.WriteLine($"? = {b:G17}");
-                    
+
 
                 }
                 {
 
                     var b = CorrectRoundingMath.ExpM1(1.7976931348623157E+308, MidpointRounding.AwayFromZero);
                     Console.WriteLine($"? = {b:G17}");
-                    
+
 
 
                 }
@@ -1046,7 +1262,7 @@ public readonly struct TotalOrderIeee754Comparer<T> :
                 {
                     var b = CorrectRoundingMath.ExpM1(0.053889835785768385, MidpointRounding.ToEven);
                     Console.WriteLine($"? = {b:G17}");
-                    
+
                 }
                 {
                     var b = CorrectRoundingMath.ExpM1(-37.429947750237034, MidpointRounding.ToEven);
@@ -1055,7 +1271,7 @@ public readonly struct TotalOrderIeee754Comparer<T> :
                 {
                     var b = CorrectRoundingMath.ExpM1(4.000555584256948, MidpointRounding.ToZero);
                     Console.WriteLine($"? = {b:G17}");
-                    
+
                 }
                 {
                     var b = CorrectRoundingMath.ExpM1(-35.232723172900819, MidpointRounding.ToEven);
@@ -1067,7 +1283,7 @@ public readonly struct TotalOrderIeee754Comparer<T> :
                 {
                     var b = CorrectRoundingMath.ExpM1(9.1343813236002528E-17, MidpointRounding.ToEven);
                     Console.WriteLine($"? = {b:G17}");
-                   
+
                 }
                 {
                     var b = CorrectRoundingMath.ExpM1(-20.00000000000003, MidpointRounding.ToEven);
@@ -1077,7 +1293,7 @@ public readonly struct TotalOrderIeee754Comparer<T> :
                 {
                     var b = CorrectRoundingMath.ExpM1(20.00000000000003, MidpointRounding.ToEven);
                     Console.WriteLine($"? = {b:G17}");
-                    
+
                 }
                 {
                     var b = Binary64Arithmetic.ExpM1(BitConverter.DoubleToUInt64Bits(0), MidpointRounding.ToNegativeInfinity);

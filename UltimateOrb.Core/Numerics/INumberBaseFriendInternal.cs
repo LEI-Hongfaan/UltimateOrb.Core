@@ -1,7 +1,53 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 
-namespace UltimateOrb {
+namespace UltimateOrb.Numerics {
+
+    internal static partial class NumberBaseInternal<TSelf> where TSelf : INumberBase<TSelf>? {
+
+        public static bool TryCreateChecked<TOther>(TOther value, [MaybeNullWhen(false)] out TSelf result) where TOther : INumberBase<TOther> {
+            if (typeof(TOther) == typeof(TSelf)) {
+                result = (TSelf)(object)value;
+            } else if (!INumberBaseFriendInternal<TSelf>.TryConvertFromChecked(value, out result) && !INumberBaseFriendInternal<TOther>.TryConvertToChecked(value, out result)) {
+                return false;
+            }
+            return true;
+        }
+
+        public static bool TryCreateSaturating<TOther>(TOther value, [MaybeNullWhen(false)] out TSelf result) where TOther : INumberBase<TOther> {
+            if (typeof(TOther) == typeof(TSelf)) {
+                result = (TSelf)(object)value;
+            } else if (!INumberBaseFriendInternal<TSelf>.TryConvertFromSaturating(value, out result) && !INumberBaseFriendInternal<TOther>.TryConvertToSaturating(value, out result)) {
+                return false;
+            }
+            return true;
+        }
+
+        public static bool TryCreateTruncating<TOther>(TOther value, [MaybeNullWhen(false)] out TSelf result) where TOther : INumberBase<TOther> {
+            if (typeof(TOther) == typeof(TSelf)) {
+                result = (TSelf)(object)value;
+            } else if (!INumberBaseFriendInternal<TSelf>.TryConvertFromTruncating(value, out result) && !INumberBaseFriendInternal<TOther>.TryConvertToTruncating(value, out result)) {
+                return false;
+            }
+            return true;
+        }
+    }
+
+    internal static partial class NumberBaseExtensions {
+
+        extension<TSelf>(TSelf) where TSelf : INumberBase<TSelf>? {
+
+            public static bool TryCreateChecked<TOther>(TOther value, [MaybeNullWhen(false)] out TSelf result) where TOther : INumberBase<TOther>
+                => NumberBaseInternal<TSelf>.TryCreateChecked(value, out result);
+
+            public static bool TryCreateSaturating<TOther>(TOther value, [MaybeNullWhen(false)] out TSelf result) where TOther : INumberBase<TOther>
+                => NumberBaseInternal<TSelf>.TryCreateSaturating(value, out result);
+
+            public static bool TryCreateTruncating<TOther>(TOther value, [MaybeNullWhen(false)] out TSelf result) where TOther : INumberBase<TOther>
+                => NumberBaseInternal<TSelf>.TryCreateTruncating(value, out result);
+        }
+    }
+
     interface INumberBaseFriendInternal<TSelf> : INumberBase<TSelf>
         where TSelf : INumberBase<TSelf> {
 

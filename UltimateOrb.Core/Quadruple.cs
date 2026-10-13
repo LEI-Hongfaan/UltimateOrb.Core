@@ -227,6 +227,11 @@ namespace UltimateOrb {
 
             return (rounded, delta);
         }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static Quadruple PropagateNaN(Quadruple x) {
+            return BitConverter.UInt128BitsToQuadruple(Binary128Arithmetic.GetNaN(x._UInt128Bits));
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static Quadruple PropagateNaN(Quadruple x, Quadruple y) {
@@ -2695,7 +2700,7 @@ namespace UltimateOrb {
         public static Quadruple Atanh(Quadruple x) {
             // TODO: Provide a correct impl
             // atanh(x) = 1/2 * ln((1+x)/(1-x))
-            return OneHalf * Log((One + x) / (One - x));
+            return ScaleB(Log((One + x) / (One - x)), -1);
         }
 
         public static Quadruple AtanPi(Quadruple x) {
@@ -2858,22 +2863,100 @@ namespace UltimateOrb {
 
         public static Quadruple Log(Quadruple x, Quadruple newBase) {
             // TODO: Provide a correct impl.
-            return Log(x) / Log(newBase);
+            if (IsNaN(x) || IsNaN(newBase)) return x + newBase;
+            if (IsZero(x)) {
+                if (IsZero(newBase)) {
+                    return NaN;
+                }
+                if (IsNegative(newBase)) {
+                    return NaN;
+                }
+                Debug.Assert(newBase > 0);
+                if (IsInfinity(newBase)) {
+                    return NaN;
+                }
+                return IsNegative(newBase - One) ? PositiveInfinity : NegativeInfinity;
+            }
+            if (IsNegative(x)) {
+                return NaN;
+            }
+            Debug.Assert(x > 0);
+            {
+                if (IsZero(newBase)) {
+                    return IsNegative(x - One) ? PositiveZero : NegativeZero;
+                }
+                if (IsNegative(newBase)) {
+                    return NaN;
+                }
+                Debug.Assert(newBase > 0);
+                return Log(x) / Log(newBase);
+            }
         }
 
         public static Quadruple Log10(Quadruple x) {
+#if false
             // TODO: Provide a correct impl.
-            return Log(x) * Log10OfE;
+            var t = Log(x) * Log10OfE;
+            if (!IsInfinity(t)) {
+                return t;
+            }
+            return Log(Cbrt(x)) * Log10OfE * 3;
+#else
+            var lo = Binary128Arithmetic.Log10(x._Lo64Bits, x._Hi64Bits, MidpointRounding.ToEven, out var hi);
+            return new Quadruple(lo, hi);
+#endif
+        }
+
+        public static Quadruple Log10(Quadruple x, MidpointRounding mode) {
+            var lo = Binary128Arithmetic.Log10(x._Lo64Bits, x._Hi64Bits, mode, out var hi);
+            return new Quadruple(lo, hi);
         }
 
         public static Quadruple Log2(Quadruple x) {
-            // TODO: Provide a correct impl.
-            return Log(x) * Log2OfE;
+            // return Log(x) * Log2OfE;
+            var lo = Binary128Arithmetic.Log2(x._Lo64Bits, x._Hi64Bits, MidpointRounding.ToEven, out var hi);
+            return new Quadruple(lo, hi);
+        }
+
+        public static Quadruple Log2(Quadruple x, MidpointRounding mode) {
+            var lo = Binary128Arithmetic.Log2(x._Lo64Bits, x._Hi64Bits, mode, out var hi);
+            return new Quadruple(lo, hi);
         }
 
         public static Quadruple LogP1(Quadruple x) {
             // TODO: Provide a correct impl.
+            if (Abs(x) < 0.0001220703125) {
+                if (Abs(x) < 1.9259299443872358530559779425849e-34) {
+                    return x;
+                }
+                var x2 = x * x;
+                var x3 = x * x2;
+                var x4 = x2 * x2;
+                var x5 = x2 * x3;
+                var x6 = x3 * x3;
+                var x7 = x3 * x4;
+                var x8 = x4 * x4;
+                return
+                    -ScaleB(x8, -3) +
+                    x7 / 7 -
+                    x6 / 6 +
+                    x5 / 5 -
+                    ScaleB(x4, -2) +
+                    x3 / 3 -
+                    ScaleB(x2, -1) +
+                    x;
+            }
             return Log(One + x);
+        }
+
+        public static Quadruple Log10P1(Quadruple x) {
+            // TODO: Provide a correct impl.
+            return LogP1(x) * Log10OfE;
+        }
+
+        public static Quadruple Log2P1(Quadruple x) {
+            // TODO: Provide a correct impl.
+            return LogP1(x) * Log2OfE;
         }
 
         public static Quadruple MaxMagnitude(Quadruple x, Quadruple y) {
@@ -3512,39 +3595,36 @@ namespace UltimateOrb {
             }
         }
 
-        internal static BigInteger ToBigIntegerPartial(Quadruple value) {
+        internal static BigInteger ToBigIntegerTruncatingPartial(Quadruple value) {
             Debug.Assert(Quadruple.IsFinite(value));
 
-            // Reinterpret the 128-bit IEEE 754 binary128 float as a 128-bit unsigned integer.
-            // Layout:
-            //   bit 127      : sign
-            //   bits 112-126 : exponent (15 bits)
-            //   bits 0-111   : fraction (112 bits)
             System.UInt128 bits = value._UInt128Bits;
 
             int exponent = (int)((bits >> 112) & 0x7FFF);
 
-            // Zero or subnormal: magnitude is strictly less than 1, so truncation yields zero.
+            // Zero or subnormal: magnitude is strictly less than 1.
             if (exponent == 0) {
                 return BigInteger.Zero;
             }
 
             uint sign = (uint)(bits >> 127);
             System.UInt128 fraction = bits & (((System.UInt128)1 << 112) - 1);
-            System.UInt128 mantissa = fraction | ((System.UInt128)1 << 112); // set implicit leading 1
-            int shift = exponent - 16495; // biased exponent - 16383 (bias) - 112 (fraction bits)
+            System.UInt128 mantissa = fraction | ((System.UInt128)1 << 112); // implicit leading 1
+
+            int shift = exponent - 16495; // biased exponent - 16383 - 112
 
             // Convert the 113-bit mantissa to a positive BigInteger.
-            BigInteger result = new BigInteger(MemoryMarshal.AsBytes(new ReadOnlySpan<System.UInt128>(in bits)), isUnsigned: true, isBigEndian: !System.BitConverter.IsLittleEndian);
+            BigInteger result = new BigInteger(
+                MemoryMarshal.AsBytes(new ReadOnlySpan<System.UInt128>(in mantissa)),
+                isUnsigned: true,
+                isBigEndian: !System.BitConverter.IsLittleEndian);
 
-            // Apply the exponent shift.
             if (shift > 0) {
                 result <<= shift;
             } else if (shift < 0) {
-                result >>= -shift; // arithmetic right shift on positive BigInteger truncates toward zero
+                result >>= -shift;
             }
 
-            // Apply sign.
             if (sign != 0) {
                 result = -result;
             }
@@ -3554,22 +3634,206 @@ namespace UltimateOrb {
 
         public static explicit operator /* unchecked */ BigInteger(Quadruple value) {
             if (Quadruple.IsFinite(value)) {
-                return ToBigIntegerPartial(value);
+                return ToBigIntegerTruncatingPartial(value);
             }
             return BigInteger.Zero;
         }
 
         public static explicit operator checked BigInteger(Quadruple value) {
             UltimateOrb.Utilities.ThrowHelper.ThrowOnFalse(Quadruple.IsFinite(value));
-            return ToBigIntegerPartial(value);
+            return ToBigIntegerTruncatingPartial(value);
         }
 
         public static bool TryConvertToSaturating<TOther>(Quadruple value, [MaybeNullWhen(false)] out TOther result) where TOther : INumberBase<TOther> {
-            throw new NotImplementedException();
+            unchecked {
+                if (typeof(TOther) == typeof(byte)) {
+                    result = (TOther)(object)(byte)value;
+                    return true;
+                } else if (typeof(TOther) == typeof(sbyte)) {
+                    result = (TOther)(object)(sbyte)value;
+                    return true;
+                } else if (typeof(TOther) == typeof(char)) {
+                    result = (TOther)(object)(char)value;
+                    return true;
+                } else if (typeof(TOther) == typeof(short)) {
+                    result = (TOther)(object)(short)value;
+                    return true;
+                } else if (typeof(TOther) == typeof(ushort)) {
+                    result = (TOther)(object)(ushort)value;
+                    return true;
+                } else if (typeof(TOther) == typeof(int)) {
+                    result = (TOther)(object)(int)value;
+                    return true;
+                } else if (typeof(TOther) == typeof(uint)) {
+                    result = (TOther)(object)(uint)value;
+                    return true;
+                } else if (typeof(TOther) == typeof(long)) {
+                    result = (TOther)(object)(long)value;
+                    return true;
+                } else if (typeof(TOther) == typeof(ulong)) {
+                    result = (TOther)(object)(ulong)value;
+                    return true;
+                }
+#if NET7_0_OR_GREATER
+                else if (typeof(TOther) == typeof(System.Int128)) {
+                    result = (TOther)(object)(System.Int128)value;
+                    return true;
+                } else if (typeof(TOther) == typeof(System.UInt128)) {
+                    result = (TOther)(object)(System.UInt128)value;
+                    return true;
+                }
+#endif
+                else if (typeof(TOther) == typeof(UltimateOrb.Int128)) {
+                    result = (TOther)(object)(UltimateOrb.Int128)value;
+                    return true;
+                } else if (typeof(TOther) == typeof(UltimateOrb.UInt128)) {
+                    result = (TOther)(object)(UltimateOrb.UInt128)value;
+                    return true;
+                } else if (typeof(TOther) == typeof(nint)) {
+                    result = (TOther)(object)(nint)value;
+                    return true;
+                } else if (typeof(TOther) == typeof(nuint)) {
+                    result = (TOther)(object)(nuint)value;
+                    return true;
+                } else if (typeof(TOther) == typeof(Half)) {
+                    result = (TOther)(object)(Half)value;
+                    return true;
+                }
+#if NET11_0_OR_GREATER
+                else if (typeof(TOther) == typeof(BFloat16)) {
+                    result = (TOther)(object)(BFloat16)value;
+                    return true;
+                }
+#endif
+                else if (typeof(TOther) == typeof(float)) {
+                    result = (TOther)(object)(float)value;
+                    return true;
+                } else if (typeof(TOther) == typeof(double)) {
+                    result = (TOther)(object)(double)value;
+                    return true;
+                } else if (typeof(TOther) == typeof(decimal)) {
+                    decimal actualResult = (value >= (Quadruple)decimal.MaxValue) ? decimal.MaxValue :
+                                           (value <= (Quadruple)decimal.MinValue) ? decimal.MinValue :
+                                           IsNaN(value) ? 0.0m : (decimal)value;
+                    result = (TOther)(object)actualResult;
+                    return true;
+                }
+#if NET11_0_OR_GREATER
+                else if (typeof(TOther) == typeof(System.Numerics.Decimal32)) {
+                    result = (TOther)(object)(System.Numerics.Decimal32)value;
+                    return true;
+                } else if (typeof(TOther) == typeof(System.Numerics.Decimal64)) {
+                    result = (TOther)(object)(System.Numerics.Decimal64)value;
+                    return true;
+                } else if (typeof(TOther) == typeof(System.Numerics.Decimal128)) {
+                    result = (TOther)(object)(System.Numerics.Decimal128)value;
+                    return true;
+                }
+#endif
+                else if (typeof(TOther) == typeof(BigInteger)) {
+                    result = (TOther)(object)(BigInteger)value;
+                    return true;
+                } else {
+                    result = default;
+                    return false;
+                }
+            }
         }
 
         public static bool TryConvertToTruncating<TOther>(Quadruple value, [MaybeNullWhen(false)] out TOther result) where TOther : INumberBase<TOther> {
-            throw new NotImplementedException();
+            unchecked {
+                if (typeof(TOther) == typeof(byte)) {
+                    result = (TOther)(object)(byte)value;
+                    return true;
+                } else if (typeof(TOther) == typeof(sbyte)) {
+                    result = (TOther)(object)(sbyte)value;
+                    return true;
+                } else if (typeof(TOther) == typeof(char)) {
+                    result = (TOther)(object)(char)value;
+                    return true;
+                } else if (typeof(TOther) == typeof(short)) {
+                    result = (TOther)(object)(short)value;
+                    return true;
+                } else if (typeof(TOther) == typeof(ushort)) {
+                    result = (TOther)(object)(ushort)value;
+                    return true;
+                } else if (typeof(TOther) == typeof(int)) {
+                    result = (TOther)(object)(int)value;
+                    return true;
+                } else if (typeof(TOther) == typeof(uint)) {
+                    result = (TOther)(object)(uint)value;
+                    return true;
+                } else if (typeof(TOther) == typeof(long)) {
+                    result = (TOther)(object)(long)value;
+                    return true;
+                } else if (typeof(TOther) == typeof(ulong)) {
+                    result = (TOther)(object)(ulong)value;
+                    return true;
+                }
+#if NET7_0_OR_GREATER
+                else if (typeof(TOther) == typeof(System.Int128)) {
+                    result = (TOther)(object)(System.Int128)value;
+                    return true;
+                } else if (typeof(TOther) == typeof(System.UInt128)) {
+                    result = (TOther)(object)(System.UInt128)value;
+                    return true;
+                }
+#endif
+                else if (typeof(TOther) == typeof(UltimateOrb.Int128)) {
+                    result = (TOther)(object)(UltimateOrb.Int128)value;
+                    return true;
+                } else if (typeof(TOther) == typeof(UltimateOrb.UInt128)) {
+                    result = (TOther)(object)(UltimateOrb.UInt128)value;
+                    return true;
+                } else if (typeof(TOther) == typeof(nint)) {
+                    result = (TOther)(object)(nint)value;
+                    return true;
+                } else if (typeof(TOther) == typeof(nuint)) {
+                    result = (TOther)(object)(nuint)value;
+                    return true;
+                } else if (typeof(TOther) == typeof(Half)) {
+                    result = (TOther)(object)(Half)value;
+                    return true;
+                }
+#if NET11_0_OR_GREATER
+                else if (typeof(TOther) == typeof(BFloat16)) {
+                    result = (TOther)(object)(BFloat16)value;
+                    return true;
+                }
+#endif
+                else if (typeof(TOther) == typeof(float)) {
+                    result = (TOther)(object)(float)value;
+                    return true;
+                } else if (typeof(TOther) == typeof(double)) {
+                    result = (TOther)(object)(double)value;
+                    return true;
+                } else if (typeof(TOther) == typeof(decimal)) {
+                    decimal actualResult = (value >= (Quadruple)decimal.MaxValue) ? decimal.MaxValue :
+                                           (value <= (Quadruple)decimal.MinValue) ? decimal.MinValue :
+                                           IsNaN(value) ? 0.0m : (decimal)value;
+                    result = (TOther)(object)actualResult;
+                    return true;
+                }
+#if NET11_0_OR_GREATER
+                else if (typeof(TOther) == typeof(System.Numerics.Decimal32)) {
+                    result = (TOther)(object)(System.Numerics.Decimal32)value;
+                    return true;
+                } else if (typeof(TOther) == typeof(System.Numerics.Decimal64)) {
+                    result = (TOther)(object)(System.Numerics.Decimal64)value;
+                    return true;
+                } else if (typeof(TOther) == typeof(System.Numerics.Decimal128)) {
+                    result = (TOther)(object)(System.Numerics.Decimal128)value;
+                    return true;
+                }
+#endif
+                else if (typeof(TOther) == typeof(BigInteger)) {
+                    result = (TOther)(object)(BigInteger)value;
+                    return true;
+                } else {
+                    result = default;
+                    return false;
+                }
+            }
         }
 
         public static bool TryParse([NotNullWhen(true)] string? s, out Quadruple result) => TryParse(s, NumberStyles.Float | NumberStyles.AllowThousands, provider: null, out result);
@@ -3767,7 +4031,7 @@ namespace UltimateOrb {
         // value = (-1)^negative * M * 2^e,  M ∈ [2^112, 2^113) for normals.
         // For ±0 and subnormals: M = 0, e = 0, negative = false (they round to +0).
         private static bool TryExtractComponents(
-            Quadruple value, out bool negative, out UInt128 M, out int e) {
+            Quadruple value, out bool negative, out System.UInt128 M, out int e) {
             negative = false;
             M = UInt128.Zero;
             e = 0;
@@ -3827,11 +4091,11 @@ namespace UltimateOrb {
             where TInt : unmanaged, IBinaryInteger<TInt>, IMinMaxValue<TInt> {
             result = default;
 
-            if (!TryExtractComponents(value, out bool negative, out UInt128 M, out int e)) {
+            if (!TryExtractComponents(value, out bool negative, out var M, out int e)) {
                 return false;
             }
 
-            if (M == UInt128.Zero) { result = TInt.Zero; return true; }
+            if (M == System.UInt128.Zero) { result = TInt.Zero; return true; }
 
             int bitWidth = 8 * Unsafe.SizeOf<TInt>();
 
@@ -3888,7 +4152,7 @@ namespace UltimateOrb {
                     return false;
                 }
 
-                if (113 + e == bitWidth && M != ((UInt128)1 << 112)) {
+                if (113 + e == bitWidth && M != ((System.UInt128)1 << 112)) {
                     return false;
                 }
             }
@@ -3910,11 +4174,11 @@ namespace UltimateOrb {
             where TInt : unmanaged, IBinaryInteger<TInt>, IMinMaxValue<TInt> {
             result = default;
 
-            if (!TryExtractComponents(value, out bool negative, out UInt128 M, out int e)) {
+            if (!TryExtractComponents(value, out bool negative, out var M, out int e)) {
                 return false;
             }
 
-            if (M == UInt128.Zero) { result = TInt.Zero; return true; }
+            if (M == System.UInt128.Zero) { result = TInt.Zero; return true; }
             if (negative) {
                 return false;
             }
@@ -3925,8 +4189,8 @@ namespace UltimateOrb {
                 // Truncate: |v| = M >> (-e).  Result < 2^113, always fits in UInt128.
                 int s = -e;
                 if (s >= 113) { result = TInt.Zero; return true; }
-                UInt128 m = M >> s;
-                UInt128 maxVal = bitWidth >= 128 ? UInt128.MaxValue : (((UInt128)1 << bitWidth) - 1);
+                System.UInt128 m = M >> s;
+                System.UInt128 maxVal = bitWidth >= 128 ? UInt128.MaxValue : (((UInt128)1 << bitWidth) - 1);
                 if (m > maxVal) {
                     return false;
                 }
@@ -3942,7 +4206,7 @@ namespace UltimateOrb {
 
             if (113 + e <= 128) {
                 // Fits in UInt128; m < 2^(113+e) <= 2^bitWidth, so CreateTruncating is exact.
-                UInt128 m = M << e;
+                System.UInt128 m = M << e;
                 result = TInt.CreateTruncating(m);
                 return true;
             }
@@ -3957,11 +4221,11 @@ namespace UltimateOrb {
             where TInt : unmanaged, IBinaryInteger<TInt>, IMinMaxValue<TInt> {
             result = default;
 
-            if (!TryExtractComponents(value, out bool negative, out UInt128 M, out int e)) {
+            if (!TryExtractComponents(value, out bool negative, out var M, out int e)) {
                 return false;
             }
 
-            if (M == UInt128.Zero) { result = TInt.Zero; return true; }
+            if (M == System.UInt128.Zero) { result = TInt.Zero; return true; }
 
             int bitWidth = 8 * Unsafe.SizeOf<TInt>();
 
@@ -3972,7 +4236,7 @@ namespace UltimateOrb {
             if (e <= -113) {
                 // e == -113 : |v| ∈ [0.5, 1);  exactly 0.5 iff M == 2^112.
                 // e <  -113 : |v| < 0.5.
-                if (e < -113 || M == ((UInt128)1 << 112)) {
+                if (e < -113 || M == ((System.UInt128)1 << 112)) {
                     result = TInt.Zero;
                     return true;
                 }
@@ -3985,14 +4249,14 @@ namespace UltimateOrb {
             // ---- e ∈ [-112, ∞).  Compute the rounded integer part. ----
             // Two subpaths: UInt128 (when it fits) or wide (uses TInt's own width).
 
-            UInt128 mag128 = UInt128.Zero;
+            System.UInt128 mag128 = UInt128.Zero;
             bool widePath;
 
             if (e < 0) {
                 // Right shift with round-half-to-even; s ∈ [1, 112].
                 int s = -e;
                 UInt128 intPart = M >> s;
-                UInt128 mask = ((UInt128)1 << s) - 1;
+                System.UInt128 mask = ((UInt128)1 << s) - 1;
                 UInt128 rem = M & mask;
                 UInt128 half = (UInt128)1 << (s - 1);
                 if (rem > half || (rem == half && (intPart & UInt128.One) != UInt128.Zero)) {
@@ -4011,7 +4275,7 @@ namespace UltimateOrb {
             }
 
             if (!widePath) {
-                UInt128 maxPos, maxNeg;
+                System.UInt128 maxPos, maxNeg;
                 if (bitWidth >= 129) {
                     // Every UInt128 magnitude fits (bitWidth > 128).
                     maxPos = UInt128.MaxValue;
@@ -4035,7 +4299,7 @@ namespace UltimateOrb {
                     return false;
                 }
 
-                if (mag128 == UInt128.Zero) { result = TInt.Zero; return true; }
+                if (mag128 == System.UInt128.Zero) { result = TInt.Zero; return true; }
 
                 TInt mT = TInt.CreateTruncating(mag128);
                 result = unchecked(TInt.Zero - mT);
@@ -4060,7 +4324,7 @@ namespace UltimateOrb {
                     return false;
                 }
 
-                if (113 + e == bitWidth && M != ((UInt128)1 << 112)) {
+                if (113 + e == bitWidth && M != ((System.UInt128)1 << 112)) {
                     return false;
                 }
             }
@@ -4076,17 +4340,17 @@ namespace UltimateOrb {
             where TInt : unmanaged, IBinaryInteger<TInt>, IMinMaxValue<TInt> {
             result = default;
 
-            if (!TryExtractComponents(value, out bool negative, out UInt128 M, out int e)) {
+            if (!TryExtractComponents(value, out bool negative, out var M, out int e)) {
                 return false;
             }
 
-            if (M == UInt128.Zero) { result = TInt.Zero; return true; }
+            if (M == System.UInt128.Zero) { result = TInt.Zero; return true; }
 
             int bitWidth = 8 * Unsafe.SizeOf<TInt>();
 
             // ---- Sub-unity: |v| < 1, rounds to 0 or ±1. ----
             if (e <= -113) {
-                if (e < -113 || M == ((UInt128)1 << 112)) {
+                if (e < -113 || M == ((System.UInt128)1 << 112)) {
                     result = TInt.Zero;
                     return true;
                 }
@@ -4106,7 +4370,7 @@ namespace UltimateOrb {
             if (e < 0) {
                 int s = -e;                     // 1 .. 112
                 UInt128 intPart = M >> s;
-                UInt128 mask = ((UInt128)1 << s) - 1;
+                System.UInt128 mask = ((UInt128)1 << s) - 1;
                 UInt128 rem = M & mask;
                 UInt128 half = (UInt128)1 << (s - 1);
                 if (rem > half || (rem == half && (intPart & UInt128.One) != UInt128.Zero)) {
@@ -4313,7 +4577,7 @@ namespace UltimateOrb {
                         lo: BinaryPrimitives.ReverseEndianness(significand.GetHighPart()));
 #endif
                 }
-                double a;
+
                 Unsafe.WriteUnaligned(ref MemoryMarshal.GetReference(destination), significand);
 
                 bytesWritten = Unsafe.SizeOf<UInt128>();
@@ -4340,6 +4604,20 @@ namespace UltimateOrb {
 
     }
 }
+
+namespace UltimateOrb.Numerics {
+
+    static partial class BinaryIntegerExtensions {
+
+        extension<T>(T @this) where T: IBinaryInteger<T>? {
+
+            public bool TryWriteLittleEndian(Span<byte> destination, out int bytesWritten) => @this.TryWriteLittleEndian(destination, out bytesWritten);
+
+            public bool TryWriteBigEndian(Span<byte> destination, out int bytesWritten) => @this.TryWriteBigEndian(destination, out bytesWritten);
+        }
+    }
+}
+
 namespace UltimateOrb {
 
     public static partial class QuadrupleExtensions {
@@ -4365,70 +4643,72 @@ namespace UltimateOrb {
         }
 
         public static explicit operator Quadruple(System.UInt128 value) {
-            if (value == System.UInt128.Zero) {
-                // +0.0
-                return new Quadruple(0UL, 0UL);
-            }
-
-            // Bit length, 1..128.
-            int n = 128 - BinaryNumerals.CountLeadingZeros(value);
-
-            UInt64 lo = unchecked((UInt64)value);
-            UInt64 hi = unchecked((UInt64)(value >> 64));
-
-            // Unbiased exponent = n - 1; biased = n - 1 + 16383 = n + 16382.
-            int exp = n + 16382;
-
-            // 113-bit significand with the implicit 1 parked at bit 112.
-            // Layout: bits 0..63 in sigLo, bits 64..112 in the low 49 bits of sigHi.
-            UInt64 sigLo, sigHi;
-
-            if (n <= 113) {
-                // Exact: shift the value left so its MSB lands at bit 112.
-                int sh = 113 - n;                 // 0..112
-                if (sh == 0) {
-                    sigHi = hi;
-                    sigLo = lo;
-                } else if (sh < 64) {
-                    sigHi = (hi << sh) | (lo >> (64 - sh));
-                    sigLo = lo << sh;
-                } else {
-                    sigHi = lo << (sh - 64);
-                    sigLo = 0UL;
+            unchecked {
+                if (value == System.UInt128.Zero) {
+                    // +0.0
+                    return new Quadruple(0UL, 0UL);
                 }
-            } else {
-                // n > 113: drop sh = n - 113 bits (1..15) with round-half-to-even.
-                int sh = n - 113;
 
-                UInt64 discarded = lo & ((1UL << sh) - 1);
-                sigLo = (lo >> sh) | (hi << (64 - sh));
-                sigHi = hi >> sh;
+                // Bit length, 1..128.
+                int n = 128 - BinaryNumerals.CountLeadingZeros(value);
 
-                UInt64 half = 1UL << (sh - 1);
-                if (discarded > half || (discarded == half && (sigLo & 1UL) != 0)) {
-                    sigLo++;
-                    if (sigLo == 0) {
-                        sigHi++;
+                UInt64 lo = unchecked((UInt64)value);
+                UInt64 hi = unchecked((UInt64)(value >> 64));
+
+                // Unbiased exponent = n - 1; biased = n - 1 + 16383 = n + 16382.
+                int exp = n + 16382;
+
+                // 113-bit significand with the implicit 1 parked at bit 112.
+                // Layout: bits 0..63 in sigLo, bits 64..112 in the low 49 bits of sigHi.
+                UInt64 sigLo, sigHi;
+
+                if (n <= 113) {
+                    // Exact: shift the value left so its MSB lands at bit 112.
+                    int sh = 113 - n;                 // 0..112
+                    if (sh == 0) {
+                        sigHi = hi;
+                        sigLo = lo;
+                    } else if (sh < 64) {
+                        sigHi = (hi << sh) | (lo >> (64 - sh));
+                        sigLo = lo << sh;
+                    } else {
+                        sigHi = lo << (sh - 64);
+                        sigLo = 0UL;
+                    }
+                } else {
+                    // n > 113: drop sh = n - 113 bits (1..15) with round-half-to-even.
+                    int sh = n - 113;
+
+                    UInt64 discarded = lo & ((1UL << sh) - 1);
+                    sigLo = (lo >> sh) | (hi << (64 - sh));
+                    sigHi = hi >> sh;
+
+                    UInt64 half = 1UL << (sh - 1);
+                    if (discarded > half || (discarded == half && (sigLo & 1UL) != 0)) {
+                        sigLo++;
+                        if (sigLo == 0) {
+                            sigHi++;
+                        }
+                    }
+
+                    // Rounding may have carried into bit 113. Renormalize if so.
+                    if ((sigHi >> 49) != 0) {
+                        sigLo = (sigLo >> 1) | (sigHi << 63);
+                        sigHi >>= 1;
+                        exp++;
                     }
                 }
 
-                // Rounding may have carried into bit 113. Renormalize if so.
-                if ((sigHi >> 49) != 0) {
-                    sigLo = (sigLo >> 1) | (sigHi << 63);
-                    sigHi >>= 1;
-                    exp++;
-                }
+                // Strip the implicit leading 1 (bit 112 == bit 48 of sigHi).
+                UInt64 mantLo = sigLo;
+                UInt64 mantHi = sigHi & 0x0000_FFFF_FFFF_FFFFUL;
+
+                // Pack: [sign:1 | exp:15 | mantissa hi:48] : [mantissa lo:64]
+                UInt64 resultHi = ((UInt64)exp << 48) | mantHi;
+                UInt64 resultLo = mantLo;
+
+                return new Quadruple(resultLo, resultHi);
             }
-
-            // Strip the implicit leading 1 (bit 112 == bit 48 of sigHi).
-            UInt64 mantLo = sigLo;
-            UInt64 mantHi = sigHi & 0x0000_FFFF_FFFF_FFFFUL;
-
-            // Pack: [sign:1 | exp:15 | mantissa hi:48] : [mantissa lo:64]
-            UInt64 resultHi = ((UInt64)exp << 48) | mantHi;
-            UInt64 resultLo = mantLo;
-
-            return new Quadruple(resultLo, resultHi);
         }
 
         public static explicit operator Quadruple(System.Int128 value) {
@@ -4573,90 +4853,92 @@ namespace UltimateOrb {
             const int QuadBias = 16383;
             const int QuadExpMax = 0x7FFF;
 
-            if (value.IsZero) {
-                return new Quadruple(0UL, 0UL);
-            }
+            unchecked {
+                if (value.IsZero) {
+                    return new Quadruple(0UL, 0UL);
+                }
 
-            bool negative = value.Sign < 0;
-            BigInteger mag = BigInteger.Abs(value);
+                bool negative = value.Sign < 0;
+                BigInteger mag = BigInteger.Abs(value);
 
-            UInt64 signHi = negative ? (1UL << 63) : 0UL;
-            UInt64 infNanHi = signHi | ((UInt64)QuadExpMax << 48);
+                UInt64 signHi = negative ? (1UL << 63) : 0UL;
+                UInt64 infNanHi = signHi | ((UInt64)QuadExpMax << 48);
 
-            long nLong = mag.GetBitLength();
-            Debug.Assert(nLong >= 1);
+                long nLong = mag.GetBitLength();
+                Debug.Assert(nLong >= 1);
 
-            // magnitudes with n >= 16385 always overflow binary128.
-            // n == 16384 may still overflow if rounding carries; that path is
-            // handled by the biased-exponent check below.
-            if (nLong > 16384) {
-                return new Quadruple(0UL, infNanHi);
-            }
+                // magnitudes with n >= 16385 always overflow binary128.
+                // n == 16384 may still overflow if rounding carries; that path is
+                // handled by the biased-exponent check below.
+                if (nLong > 16384) {
+                    return new Quadruple(0UL, infNanHi);
+                }
 
-            int n = (int)nLong;
+                int n = (int)nLong;
 
-            UInt128 sig113;    // 113-bit significand, MSB at bit 112
-            int unbiased;      // value = sig113 * 2^(unbiased - 112)
+                UInt128 sig113;    // 113-bit significand, MSB at bit 112
+                int unbiased;      // value = sig113 * 2^(unbiased - 112)
 
-            if (n <= QuadFracBits + 1) {
-                // ---- Exact: 113 bits or fewer, no rounding needed. ----
-                // Left-shift so the magnitude's MSB lands at bit 112.
-                int shift = (QuadFracBits + 1) - n;    // 0..112
-                sig113 = ToUInt128(mag) << shift;
-                unbiased = n - 1;
-            } else {
-                // ---- Rounding: drop (n - 113) low bits, half-to-even. ----
-                int drop = n - (QuadFracBits + 1);
+                if (n <= QuadFracBits + 1) {
+                    // ---- Exact: 113 bits or fewer, no rounding needed. ----
+                    // Left-shift so the magnitude's MSB lands at bit 112.
+                    int shift = (QuadFracBits + 1) - n;    // 0..112
+                    sig113 = ToUInt128(mag) << shift;
+                    unbiased = n - 1;
+                } else {
+                    // ---- Rounding: drop (n - 113) low bits, half-to-even. ----
+                    int drop = n - (QuadFracBits + 1);
 
-                BigInteger topBig = mag >> drop;                       // 113 bits
-                BigInteger dropped = mag & ((BigInteger.One << drop) - 1);
+                    BigInteger topBig = mag >> drop;                       // 113 bits
+                    BigInteger dropped = mag & ((BigInteger.One << drop) - 1);
 
-                UInt128 top = ToUInt128(topBig);
+                    UInt128 top = ToUInt128(topBig);
 
-                BigInteger half = BigInteger.One << (drop - 1);
-                if (dropped > half ||
-                    (dropped == half && (top & (UInt128)1) != UInt128.Zero)) {
-                    top++;
-                    if (top == ((UInt128)1 << (QuadFracBits + 1))) {
-                        // Carry out of the 113-bit significand: renormalize.
-                        // (When the exponent is at emax, the resulting biased
-                        // exponent becomes 0x7FFF and is caught below.)
-                        top >>= 1;
-                        unbiased = n;      // bumped from n - 1
+                    BigInteger half = BigInteger.One << (drop - 1);
+                    if (dropped > half ||
+                        (dropped == half && (top & (UInt128)1) != UInt128.Zero)) {
+                        top++;
+                        if (top == ((UInt128)1 << (QuadFracBits + 1))) {
+                            // Carry out of the 113-bit significand: renormalize.
+                            // (When the exponent is at emax, the resulting biased
+                            // exponent becomes 0x7FFF and is caught below.)
+                            top >>= 1;
+                            unbiased = n;      // bumped from n - 1
+                        } else {
+                            unbiased = n - 1;
+                        }
                     } else {
                         unbiased = n - 1;
                     }
-                } else {
-                    unbiased = n - 1;
+
+                    sig113 = top;
                 }
 
-                sig113 = top;
-            }
+                int biased = unbiased + QuadBias;
 
-            int biased = unbiased + QuadBias;
+                // Overflow → ±Infinity.
+                if (biased >= QuadExpMax) {
+                    return new Quadruple(0UL, infNanHi);
+                }
 
-            // Overflow → ±Infinity.
-            if (biased >= QuadExpMax) {
-                return new Quadruple(0UL, infNanHi);
-            }
+                Debug.Assert(biased > 0);   // n >= 1 ⇒ unbiased >= 0 ⇒ biased >= 16383
 
-            Debug.Assert(biased > 0);   // n >= 1 ⇒ unbiased >= 0 ⇒ biased >= 16383
+                // Strip the implicit leading 1 (bit 112).
+                UInt128 frac = sig113 & (((UInt128)1 << QuadFracBits) - 1);
 
-            // Strip the implicit leading 1 (bit 112).
-            UInt128 frac = sig113 & (((UInt128)1 << QuadFracBits) - 1);
+                UInt64 fracLo = (UInt64)frac;
+                UInt64 fracHi = (UInt64)(frac >> 64) & 0x0000_FFFF_FFFF_FFFFUL;
 
-            UInt64 fracLo = (UInt64)frac;
-            UInt64 fracHi = (UInt64)(frac >> 64) & 0x0000_FFFF_FFFF_FFFFUL;
+                UInt64 hi = signHi | ((UInt64)biased << 48) | fracHi;
+                UInt64 lo = fracLo;
 
-            UInt64 hi = signHi | ((UInt64)biased << 48) | fracHi;
-            UInt64 lo = fracLo;
+                return new Quadruple(lo, hi);
 
-            return new Quadruple(lo, hi);
-
-            static UInt128 ToUInt128(BigInteger v) {
-                Debug.Assert(!BigInteger.IsNegative(v));
-                Debug.Assert(v.GetBitLength() <= 128);
-                return unchecked((UltimateOrb.UInt128)v);
+                static UInt128 ToUInt128(BigInteger v) {
+                    Debug.Assert(!BigInteger.IsNegative(v));
+                    Debug.Assert(v.GetBitLength() <= 128);
+                    return unchecked((UltimateOrb.UInt128)v);
+                }
             }
         }
     }
@@ -7116,7 +7398,7 @@ namespace UltimateOrb {
         /// </remarks>
         public static explicit operator decimal(Quadruple value) {
             // NaN / ±∞ → OverflowException.  Matches (decimal)double.NaN and (decimal)double.±∞.
-            if (!TryExtractComponents(value, out _, out UInt128 M, out int e)) {
+            if (!TryExtractComponents(value, out _, out var M, out int e)) {
                 throw ThrowOverflowExceptionWin32Decimal();
             }
 
@@ -7126,7 +7408,7 @@ namespace UltimateOrb {
 
             // ±0 and every subnormal.  Smallest subnormal is 2^-16494 ≈ 10^-4965,
             // far below decimal's smallest positive (1e-28): all round to zero.
-            if (M == UInt128.Zero) {
+            if (M == System.UInt128.Zero) {
                 return negative ? new decimal(0, 0, 0, true, 0) : 0m;
             }
 
@@ -7485,7 +7767,7 @@ namespace UltimateOrb {
             // Target normal
             // =================================================================
             {
-                UInt128 frac = sigDst & (((UInt128)1 << dstFracBits) - 1);
+                System.UInt128 frac = sigDst & (((UInt128)1 << dstFracBits) - 1);
                 TFloatUIntBits expField = TFloatUIntBits.CreateTruncating(biased) & dstExpMask;
                 TFloatUIntBits fracField = TFloatUIntBits.CreateTruncating(frac) & dstFracMask;
                 return UltimateOrb.Runtime.CompilerServices.Unsafe.BitCast<TFloatUIntBits, TFloat>(
@@ -7510,6 +7792,11 @@ namespace UltimateOrb {
         }
 #endif
 
+#if NET11_0_OR_GREATER
+        public static explicit operator BFloat16(Quadruple value) {
+            return ToIeee754InterchangeBinaryNarrowing<BFloat16, UInt16>(value);
+        }
+#endif
     }
 }
 

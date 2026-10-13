@@ -1,37 +1,107 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
-
-using Misc = UltimateOrb.Miscellaneous;
 using UltimateOrb.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
+using Misc = UltimateOrb.Miscellaneous;
+using Unsafe = System.Runtime.CompilerServices.Unsafe;
 
 namespace UltimateOrb.Numerics {
+
 #if NET8_0_OR_GREATER
-    using UInt128 = System.UInt128;
     using Int128 = System.Int128;
+    using UInt128 = System.UInt128;
 #endif
 
     public static partial class Binary128Arithmetic {
         // ═══════════════════════════════════════════════════════════════════
         // Public API
         // ═══════════════════════════════════════════════════════════════════
-
+        // ═════════════════════════════════════════════════════════════════════
+        //  Public API
+        // ═════════════════════════════════════════════════════════════════════
         public static UInt64 Log(UInt64 lo, UInt64 hi, out UInt64 result_hi)
             => Log(lo, hi, MidpointRounding.ToEven, out result_hi);
+        public static UInt64 Log2(UInt64 lo, UInt64 hi, out UInt64 result_hi)
+            => Log2(lo, hi, MidpointRounding.ToEven, out result_hi);
+        public static UInt64 Log10(UInt64 lo, UInt64 hi, out UInt64 result_hi)
+            => Log10(lo, hi, MidpointRounding.ToEven, out result_hi);
 
-        public static UInt64 Log(UInt64 lo, UInt64 hi, MidpointRounding mode, out UInt64 result_hi) {
+        public static UInt64 Log(UInt64 lo, UInt64 hi, MidpointRounding mode, out UInt64 result_hi)
+            => LogCore(lo, hi, mode, LogScale.Ln, out result_hi);
+        public static UInt64 Log2(UInt64 lo, UInt64 hi, MidpointRounding mode, out UInt64 result_hi)
+            => LogCore(lo, hi, mode, LogScale.Log2, out result_hi);
+        public static UInt64 Log10(UInt64 lo, UInt64 hi, MidpointRounding mode, out UInt64 result_hi)
+            => LogCore(lo, hi, mode, LogScale.Log10, out result_hi);
+
+        enum LogScale { Ln, Log2, Log10 }
+
+        // ═════════════════════════════════════════════════════════════════════
+        //  Base-conversion multipliers, encoded as log_base(e) · 2^192.
+        //
+        //  Represented as 6 UInt64 words.  MultiplyHigh(a, c) then computes
+        //      (a · c) >> 384
+        //  for a 6-word a; if a is placed in the HIGH 3 words (i.e. a = v·2^192
+        //  for a 3-word v), this reduces to v · c / 2^192 = v · log_base(e).
+        // ═════════════════════════════════════════════════════════════════════
+
+        static ReadOnlySpan<UInt64> Log2E192_Flat => [
+            0xd6aef551bad2b4b1UL,   // w0
+            0x7d0ffda0d23a7d11UL,   // w1
+            0x71547652b82fe177UL,   // w2
+            0x0000000000000001UL,   // w3  = 1 (implicit MSB of log2(e))
+            0x0000000000000000UL,   // w4
+            0x0000000000000000UL,   // w5
+        ];
+
+        static ReadOnlySpan<UInt64> Log10E192_Flat => [
+            0x1f71a30122e4d101UL,   // w0  (LSW)
+            0x9aadd557d699ee19UL,   // w1  (needs verification)
+            0x6f2dec549b9438caUL,   // w2  (needs verification)
+            0x0000000000000000UL,   // w3
+            0x0000000000000000UL,   // w4
+            0x0000000000000000UL,   // w5
+        ];
+
+        static ref readonly InlineArray6<UInt64> Log2E192_6 =>
+            ref Unsafe.As<UInt64, InlineArray6<UInt64>>(
+                ref MemoryMarshal.GetReference(Log2E192_Flat));
+
+        static ref readonly InlineArray6<UInt64> Log10E192_6 =>
+            ref Unsafe.As<UInt64, InlineArray6<UInt64>>(
+                ref MemoryMarshal.GetReference(Log10E192_Flat));
+
+        // ─────────────────────────────────────────────────────────────────────
+        //  PackB128Int64 — encode any integer |n| < 2^15 as binary128.  Exact.
+        // ─────────────────────────────────────────────────────────────────────
+        static UInt64 PackB128Int64(int n, out UInt64 result_hi) {
             unchecked {
-                // GAP: _MM_ROUND_* → MidpointRounding.  AwayFromZero is decided at the
-                // rounding step where the result's sign is known.
+                if (n == 0) { result_hi = 0; return 0; }
+                UInt64 sign = n < 0 ? 1UL : 0UL;
+                UInt64 absN = (UInt64)(n < 0 ? -n : n);
+                int msb = 63 - (int)UInt64.LeadingZeroCount(absN);
+                UInt128 frac112 = ((UInt128)(absN - (1UL << msb))) << (112 - msb);
+                UInt64 expField = (UInt64)(msb + 16383);
+                result_hi = (sign << 63) | (expField << 48) | (UInt64)(frac112 >> 64);
+                return (UInt64)frac112;
+            }
+        }
+
+        // ═════════════════════════════════════════════════════════════════════
+        //  Main entry
+        // ═════════════════════════════════════════════════════════════════════
+        static UInt64 LogCore(UInt64 lo, UInt64 hi, MidpointRounding mode,
+            [ConstantExpected] LogScale scale, out UInt64 result_hi) {
+            unchecked {
                 bool isNearest = IsNearest(mode);
                 bool isUp = mode == MidpointRounding.ToPositiveInfinity;
                 bool isDown = mode == MidpointRounding.ToNegativeInfinity;
 
-                // ── Specials ──────────────────────────────────────────────────
+                // ── Specials ────────────────────────────────────────────────
                 if (Misc.Unlikely(hi >= ((UInt64)0x7FFF << 48))) {
                     UInt64 b1 = hi & 0x7FFF_FFFF_FFFF_FFFFUL;
                     if (b1 > ((UInt64)0x7FFF << 48) ||
@@ -55,19 +125,45 @@ namespace UltimateOrb.Numerics {
                     return 11;
                 }
 
-                // ── Near one ──────────────────────────────────────────────────
+                // ── Near one ────────────────────────────────────────────────
                 if ((UInt64)0x3FFE_FFFF_F000_0040UL <= hi &&
-                    hi <= 0x3FFF_0000_0800_0020UL) {
-                    return LogNearOne(lo, hi, mode, out result_hi);
+                       hi <= 0x3FFF_0000_0800_0020UL) {
+                    return LogNearOne(lo, hi, mode, scale, out result_hi);
                 }
 
-                // ── Main path (cr_logq) ───────────────────────────────────────
+                // Log2 exact shortcut
+                if (scale == LogScale.Log2) {
+                    UInt64 expField = (hi >> 48) & 0x7FFF;
+                    UInt64 fracField = hi & 0x0000_FFFF_FFFF_FFFFUL;
+
+                    if (expField != 0 && expField != 0x7FFF) {
+                        // Normal:  x = 2^n  iff the entire 112-bit fraction is zero.
+                        if (Misc.Unlikely(fracField == 0 && lo == 0)) {
+                            int n = (int)expField - 16383;
+                            return PackB128Int64(n, out result_hi);
+                        }
+                    } else if (Misc.Unlikely(expField == 0)) {
+                        // Subnormal:  x = 2^n  iff the 112-bit fraction is a single power of 2.
+                        UInt128 frac112 = ((UInt128)fracField << 64) | lo;
+                        if (frac112 != 0 && (frac112 & (frac112 - 1)) == 0) {
+                            int p = 127 - (int)System.UInt128.LeadingZeroCount(frac112); // ∈ [0, 111]
+                            int n = p - 16494;                                     // ∈ [-16494, -16383]
+                            return PackB128Int64(n, out result_hi);
+                        }
+                    }
+                } else if (scale == LogScale.Log10) {
+                    var n = Log10_GetValue(hi, lo);
+                    if (Misc.Unlikely(n != 0)) {
+                        return PackB128Int64(n, out result_hi);
+                    }
+                }
+
+                // ── Main path ───────────────────────────────────────────────
                 UInt64 mLo = lo, mHi = hi;
                 UInt64 e = hi & ((UInt64)0xFFFF << 48);
 
                 if (Misc.Unlikely(e == 0)) {
                     if (mLo == 0 && mHi == 0) {
-                        // +0 (the −0 case is already handled by the specials guard)
                         RaiseExceptionFlagsDummy(FloatingPointExceptionFlags.DivideByZero);
                         result_hi = 0xFFFFUL << 48;
                         return 0;
@@ -92,40 +188,27 @@ namespace UltimateOrb.Numerics {
                 UInt64 r0 = LogRt0[j0], r1 = LogRt1[j1];
                 UInt64 r2 = LogRt2[j2], r3 = LogRt3[j3];
 
-                // FIX L1: r0..r3 are u64 in the C, so r1*r0 is a 64-bit multiply.
-                // The previous revision truncated to 32 bits, which zeroed the
-                // identity case (all j = 0).
                 UInt64 r01 = r0 * r1;
                 UInt64 r23 = r2 * r3;
 
                 UInt128 mVal = ((UInt128)mHi << 64) | mLo;
-                // (u128)r01 * r23 : promote both to u128 before multiply.
                 UInt128 rh = Math.BigMul(mVal, (UInt128)r01 * (UInt128)r23, out UInt128 rl);
                 UInt64 rhh = (UInt64)(rh >> 64), rhl = (UInt64)rh;
                 UInt64 rlh = (UInt64)(rl >> 64);
                 mHi = (rhh << 40) | (rhl >> 24);
                 mLo = (rhl << 40) | (rlh >> 24);
-                mVal = ((UInt128)mHi << 64) | mLo; // refresh mVal to post-reduction m
+                mVal = ((UInt128)mHi << 64) | mLo;
 
-                // ── fs = e·ln2a + offa;  += lt0..lt3 ──────────────────────────
-                InlineArray3<UInt64> ln2a = default, offa = default, fs;
-                for (int j = 0; j < 3; j++) { ln2a[j] = LogLn2A[j]; offa[j] = LogOffA[j]; }
+                // ── fs = e·ln2a + offa   +   Σ chunks·ln2 ───────────────────
+                InlineArray3<UInt64> fs;
+                MultiplyAddHigh(out fs, e, in Load3(LogLn2A, 0), in Load3(LogOffA, 0));
 
-                MultiplyAddHigh(out fs, e, in ln2a, in offa);
+                Add(ref fs, in fs, in Load3(LogLt0A, j0));
+                Add(ref fs, in fs, in Load3(LogLt1A, j1));
+                Add(ref fs, in fs, in Load3(LogLt2A, j2));
+                Add(ref fs, in fs, in Load3(LogLt3A, j3));
 
-                InlineArray3<UInt64> tmp3 = default;
-                for (int j = 0; j < 3; j++) tmp3[j] = LogLt0A[j0 * 3 + j];
-                Add(ref fs, in fs, in tmp3);
-                for (int j = 0; j < 3; j++) tmp3[j] = LogLt1A[j1 * 3 + j];
-                Add(ref fs, in fs, in tmp3);
-                for (int j = 0; j < 3; j++) tmp3[j] = LogLt2A[j2 * 3 + j];
-                Add(ref fs, in fs, in tmp3);
-                for (int j = 0; j < 3; j++) tmp3[j] = LogLt3A[j3 * 3 + j];
-                Add(ref fs, in fs, in tmp3);
-
-                // ── Corrections ───────────────────────────────────────────────
-                // f = c[3] − mhuu(m.b1, c[4] − mhuu(m.b1, c[5]))   (64-bit chain)
-                // then f = c[i] − mhUU(m.a, f) for i = 2,1,0  (128-bit chain)
+                // ── ln(1 + u) series ────────────────────────────────────────
                 UInt64 t5 = MultiplyHigh(mHi, LogC[5 * 2 + 0]);
                 UInt64 t4 = LogC[4 * 2 + 0] - t5;
                 UInt64 t3lo = LogC[3 * 2 + 0] - MultiplyHigh(mHi, t4);
@@ -143,7 +226,18 @@ namespace UltimateOrb.Numerics {
                 d3[2] = 0;
                 Add(ref fs, in fs, in d3);
 
-                // ── Normalize ─────────────────────────────────────────────────
+                // ═════════════════════════════════════════════════════════════
+                //  BASE CONVERSION:  multiply fs by log_base(e).
+                //  fs stays in the same implicit scale, so the normalization
+                //  and rounding below are unaffected — only the numerical
+                //  value of fs is rescaled.
+                // ═════════════════════════════════════════════════════════════
+                switch (scale) {
+                case LogScale.Log2: ScaleByConstant(ref fs, in Log2E192_6); break;
+                case LogScale.Log10: ScaleByConstant(ref fs, in Log10E192_6); break;
+                }
+
+                // ── Normalize ────────────────────────────────────────────────
                 Int64 msk = unchecked((Int64)fs[2]) >> 63;
                 UInt64 mskU = unchecked((UInt64)msk);
                 fs[0] ^= mskU; fs[1] ^= mskU; fs[2] ^= mskU;
@@ -155,20 +249,17 @@ namespace UltimateOrb.Numerics {
 
                 UInt64 t = fs[0];
                 UInt64 tm = ~0UL >> ns;
-                UInt64 trBit = isNearest ? 1UL : 0UL;
                 UInt64 rnd = (fs[0] >> (63 - ns)) & 1;
 
                 Int64 el = unchecked((Int64)(
                     ((UInt64)0x4029 - (UInt64)nz) | (mskU << 15)));
 
                 UInt64 rLo, rHi;
-                if (Misc.Unlikely(((t + (trBit << (63 - ns)) + 12) & tm) <= 24)) {
+                if (Misc.Unlikely(((t + ((isNearest ? 1UL : 0UL) << (63 - ns)) + 12) & tm) <= 24)) {
                     int ls = nz - 14, rs = (-ls) & 63;
                     rHi = (fs[2] << ls) | (fs[1] >> rs);
                     rLo = (fs[1] << ls) | (fs[0] >> rs);
 
-                    // FIX L5: the C's `res.a += (fs[0]>>(63-ls))&1` is a 128-bit add.
-                    // Must propagate carry from the low word into the high word.
                     rLo = AddWithCarry(rLo, (fs[0] >> (63 - ls)) & 1, 0, out var carryBit);
                     rHi = AddWithCarry(rHi, 0, carryBit, out _);
 
@@ -179,13 +270,9 @@ namespace UltimateOrb.Numerics {
                 }
 
                 if (Misc.Unlikely(!isNearest)) {
-                    // C: rnd = (rm==UP)*!msk + (rm==DOWN)*!!msk;
-                    if (isUp)    // toward +∞
-                        rnd = (msk == 0) ? 1UL : 0UL;
-                    else if (isDown)  // toward −∞
-                        rnd = (msk != 0) ? 1UL : 0UL;
-                    else              // ToZero
-                        rnd = 0;
+                    if (isUp) rnd = (msk == 0) ? 1UL : 0UL;
+                    else if (isDown) rnd = (msk != 0) ? 1UL : 0UL;
+                    else rnd = 0;
                 }
 
                 UInt64 elShifted = unchecked((UInt64)(el << 48));
@@ -198,11 +285,11 @@ namespace UltimateOrb.Numerics {
             }
         }
 
-        // ═══════════════════════════════════════════════════════════════════
-        // as_logq_nearone
-        // ═══════════════════════════════════════════════════════════════════
-
-        static UInt64 LogNearOne(UInt64 xLo, UInt64 xHi, MidpointRounding rm, out UInt64 result_hi) {
+        // ═════════════════════════════════════════════════════════════════════
+        //  LogNearOne — scale-aware
+        // ═════════════════════════════════════════════════════════════════════
+        static UInt64 LogNearOne(UInt64 xLo, UInt64 xHi, MidpointRounding rm,
+            [ConstantExpected] LogScale scale, out UInt64 result_hi) {
             unchecked {
                 const UInt64 OneHi = (UInt64)0x3FFF << 48;
 
@@ -215,21 +302,18 @@ namespace UltimateOrb.Numerics {
                 int e;
 
                 if (xHi >= OneHi) {
-                    // x >= 1
                     neg = 0;
                     uHi = xHi - OneHi;
                     uLo = xLo;
-                    if (uHi == 0 && uLo == 0) { result_hi = 0; return 0; } // x == 1
+                    if (uHi == 0 && uLo == 0) { result_hi = 0; return 0; }
 
                     int nz0 = uHi != 0
                         ? (int)UInt64.LeadingZeroCount(uHi)
                         : (int)UInt64.LeadingZeroCount(uLo) + 64;
                     UInt128 sh = (((UInt128)uHi << 64) | uLo) << nz0;
-                    uLo = (UInt64)sh;
-                    uHi = (UInt64)(sh >> 64);
+                    uLo = (UInt64)sh; uHi = (UInt64)(sh >> 64);
                     e = nz0 - 16;
                 } else {
-                    // x < 1  (inside the near-one window)
                     neg = 1;
                     uLo = SubtractWithBorrow(0, xLo, 0, out var borrow);
                     uHi = SubtractWithBorrow(OneHi, xHi, borrow, out _);
@@ -238,42 +322,29 @@ namespace UltimateOrb.Numerics {
                         ? (int)UInt64.LeadingZeroCount(uHi)
                         : (int)UInt64.LeadingZeroCount(uLo) + 64;
                     UInt128 sh = (((UInt128)uHi << 64) | uLo) << nz0;
-                    uLo = (UInt64)sh;
-                    uHi = (UInt64)(sh >> 64);
+                    uLo = (UInt64)sh; uHi = (UInt64)(sh >> 64);
                     e = nz0 - 16;
                 }
 
                 UInt128 uVal = ((UInt128)uHi << 64) | uLo;
                 UInt128 u2 = MultiplyHighApproximate(uVal, uVal);
 
-                // m.a >>= e - 20   ⇒   m = u · 2^(20 − e)
                 int mShift = e - 20;
                 UInt128 mVal = mShift >= 0 ? (uVal >> mShift) : (uVal << (-mShift));
                 UInt64 mB1 = (UInt64)(mVal >> 64);
 
-                // ── polynomial f (result lands back into m.a) ────────────────
                 if (neg == 0) {
-                    // cp chain: inner u64 mhuu against mB1, then u128 mhUU against m.a
-                    //   f = (cp[3].b1 << 64) | (cp[3].b0 − mhuu(mB1, cp[4].b0 − mhuu(mB1, cp[5].b0)))
-                    //   then: for i = 2,1,0:  f = cp[i].a − mhUU(m.a, f)
-                    //   then: m.a = mhUU(u2, f)
                     UInt64 t5 = MultiplyHigh(mB1, LogCp[5 * 2 + 0]);
                     UInt64 t4 = LogCp[4 * 2 + 0] - t5;
                     UInt64 t3 = LogCp[3 * 2 + 0] - MultiplyHigh(mB1, t4);
 
                     UInt128 f = ((UInt128)LogCp[3 * 2 + 1] << 64) | t3;
-                    for (int i = 2; i >= 0; i--)   // matches  while(--i >= 0)  with  i0 = 3
-                    {
+                    for (int i = 2; i >= 0; i--) {
                         UInt128 ci = ((UInt128)LogCp[i * 2 + 1] << 64) | LogCp[i * 2 + 0];
                         f = ci - MultiplyHighApproximate(mVal, f);
                     }
-                    mVal = MultiplyHighApproximate(u2, f);   // ← was `f = ...` in prior C# (bug)
+                    mVal = MultiplyHighApproximate(u2, f);
                 } else {
-                    // inner = mhuu(mB1, cn[5].b0);  inner += cn[4].b0;
-                    // inner = mhuu(mB1, inner);     inner += cn[3].b0;
-                    // f     = cn[2].a + mhuu(mB1, inner);
-                    // then: for i = 1,0:  f = cn[i].a + mhUU(m.a, f)
-                    // then: m.a = mhUU(u2, f)
                     UInt64 inner = MultiplyHigh(mB1, LogCn[5 * 2 + 0]);
                     inner += LogCn[4 * 2 + 0];
                     inner = MultiplyHigh(mB1, inner);
@@ -282,15 +353,13 @@ namespace UltimateOrb.Numerics {
                     UInt128 f0 = ((UInt128)LogCn[2 * 2 + 1] << 64) | LogCn[2 * 2 + 0];
                     f0 += (UInt128)MultiplyHigh(mB1, inner);
 
-                    for (int i = 1; i >= 0; i--)   // matches  while(--i >= 0)  with  i0 = 2
-                    {
+                    for (int i = 1; i >= 0; i--) {
                         UInt128 ci = ((UInt128)LogCn[i * 2 + 1] << 64) | LogCn[i * 2 + 0];
                         f0 = ci + MultiplyHighApproximate(mVal, f0);
                     }
-                    mVal = MultiplyHighApproximate(u2, f0);  // ← was `f = ...` in prior C# (bug)
+                    mVal = MultiplyHighApproximate(u2, f0);
                 }
 
-                // ── z, t ─────────────────────────────────────────────────────
                 InlineArray3<UInt64> z = default, tArr = default;
                 tArr[0] = 0;
                 tArr[1] = (UInt64)mVal;
@@ -301,7 +370,7 @@ namespace UltimateOrb.Numerics {
                     Rlshft3(ref tArr, e);
                     Subtract(ref z, in z, in tArr);
                 } else {
-                    UInt128 uHalf = uVal >> 1;               // u.a >>= 1
+                    UInt128 uHalf = uVal >> 1;
                     z[0] = 0;
                     z[1] = (UInt64)uHalf;
                     z[2] = (UInt64)(uHalf >> 64);
@@ -309,11 +378,20 @@ namespace UltimateOrb.Numerics {
                     Add(ref z, in z, in tArr);
                 }
 
-                // ── rounding test ────────────────────────────────────────────
+                // ═════════════════════════════════════════════════════════════
+                //  BASE CONVERSION:  z is ln(1 ± u) in implicit scale; multiply
+                //  by log_base(e) before the rounding test.
+                // ═════════════════════════════════════════════════════════════
+                switch (scale) {
+                case LogScale.Log2: ScaleByConstantUnsigned(ref z, in Log2E192_6); break;
+                case LogScale.Log10: ScaleByConstantUnsigned(ref z, in Log10E192_6); break;
+                }
+
+                // ── Rounding test ────────────────────────────────────────────
                 UInt64 eps = 12;
-                UInt64 signZ2 = z[2] >> 63;                  // 0 or 1
+                UInt64 signZ2 = z[2] >> 63;
                 UInt128 tl = ((UInt128)z[1] << 64) | z[0];
-                UInt128 mskR = UInt128.MaxValue;            // (u128)-1
+                UInt128 mskR = UInt128.MaxValue;
                 UInt128 nrnd = (UInt128)(isNearest ? 1UL : 0UL) << (int)(13 + signZ2);
                 mskR >>= (int)(50 - signZ2);
 
@@ -342,18 +420,28 @@ namespace UltimateOrb.Numerics {
                     crnd = tl <= 2 * eps;
                 }
 
-                // ── normalize ────────────────────────────────────────────────
+                // ── Normalize ────────────────────────────────────────────────
                 UInt128 res = ((UInt128)z[2] << 64) | z[1];
 
-                if ((z[2] >> 63) == 0)                       // (res.b[1] >> 63) == 0
-                {
-                    res <<= 1;
-                    e++;
+                if (scale == LogScale.Log10) {
+                    if (Misc.Unlikely(z[2] >> 61 == 0)) {
+                        res <<= 3;
+                        e += 3;
+                    } else if (Misc.Unlikely((z[2] >> 62) == 0)) {
+                        res <<= 2;
+                        e += 2;
+                    } else if ((z[2] >> 63) == 0) {
+                        res <<= 1;
+                        e += 1;
+                    }
+                } else {
+                    if ((z[2] >> 63) == 0) {
+                        res <<= 1;
+                        e++;
+                    }
                 }
 
-                // (res.b[0] >> 14) & 1   — LOW word, bit 14
                 UInt64 rnd = ((UInt64)res >> 14) & 1;
-
                 e = 16381 - e;
 
                 if (crnd) {
@@ -383,10 +471,10 @@ namespace UltimateOrb.Numerics {
             }
         }
 
-        // ═══════════════════════════════════════════════════════════════════
-        // as_logq_refine
-        // ═══════════════════════════════════════════════════════════════════
-
+        // ═════════════════════════════════════════════════════════════════════
+        //  LogRefine — unchanged.  It operates on the mantissa's bits, so its
+        //  behavior is independent of the implicit scale.
+        // ═════════════════════════════════════════════════════════════════════
         static UInt64 LogRefine(Int64 el, ref UInt64 mLo, ref UInt64 mHi,
                                 UInt64 xLo, UInt64 xHi) {
             unchecked {
@@ -395,7 +483,6 @@ namespace UltimateOrb.Numerics {
 
                 UInt128 mVal = ((UInt128)mHi << 64) | mLo;
 
-                // mhu7xu2(x, iln2, m)
                 InlineArray7<UInt64> x = default;
                 MultiplyHigh(out x, in ExpIlN2_7, mVal);
 
@@ -412,16 +499,17 @@ namespace UltimateOrb.Numerics {
 
                 EvalPoly6(out f, x[5], LogC37);
                 EvalPoly6Reduced(out f1, x[4], LogC37);
-                InlineArray6<UInt64> x6 = default;
-                for (int j = 0; j < 6; j++) x6[j] = x[j];
+
+                // Simplify: InlineArray7 → InlineArray6 reinterprets the first
+                // 6 words as a value copy.  No manual for-loop needed.
+                InlineArray6<UInt64> x6 =
+                    Unsafe.As<InlineArray7<UInt64>, InlineArray6<UInt64>>(ref x);
                 EvalPoly6ReducedReduced(out f2, ref x6, LogC37);
 
                 MultiplyHigh(out ft, in f, in f1);
                 MultiplyHigh(out ft, in ft, in f2);
 
-                InlineArray6<UInt64> tblRow = default;
-                for (int j = 0; j < 6; j++) tblRow[j] = LogTbl6Flat[jt * 6 + j];
-                MultiplyHigh(out ft, in ft, in tblRow);
+                MultiplyHigh(out ft, in ft, in Load6(LogTbl6Flat, jt));
 
                 UInt64 sticky = (ft[0] | ft[1] | ft[2] | ft[3]) != 0 ? 1UL : 0UL;
                 ft[4] |= sticky;
@@ -430,9 +518,6 @@ namespace UltimateOrb.Numerics {
                 d = d >= 0 ? 1 : -1;
                 if (sm != 0) d = -d;
 
-                // FIX L3: C promotes d (i64) to u128 by sign extension before
-                // subtracting from M.  The prior revision zero-extended, which
-                // turned `M − (−1)` into `M − (2^64 − 1)` instead of `M + 1`.
                 UInt128 dExt = unchecked((UInt128)(Int128)d);
 
                 UInt128 M = ((UInt128)mHi << 64) | mLo;
@@ -442,6 +527,89 @@ namespace UltimateOrb.Numerics {
                 mHi = (UInt64)(M >> 66);
                 return (UInt64)((M >> 1) & 1);
             }
+        }
+
+        // ═════════════════════════════════════════════════════════════════════
+        //  ScaleByConstant
+        //
+        //  v := |v| · c / 2^192, then restore sign.
+        //
+        //  Implementation: place |v| in the HIGH 3 words of a 6-word value
+        //  (i.e. as |v|·2^192), then MultiplyHigh against the 6-word constant
+        //  c whose value is `constant · 2^192`.  The product's top 6 words are
+        //
+        //      (|v|·2^192 · c) >> 384 = |v| · c / 2^192 = |v| · constant
+        //
+        //  which is what we want.  No manual word-by-word multiply needed.
+        // ═════════════════════════════════════════════════════════════════════
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static void ScaleByConstant(ref InlineArray3<UInt64> v, in InlineArray6<UInt64> c) {
+            unchecked {
+                // Sign-extract |v|.
+                Int64 sign = unchecked((Int64)v[2]) >> 63;
+                UInt64 sMask = unchecked((UInt64)sign);
+
+                UInt64 a0 = v[0] ^ sMask;
+                UInt64 a1 = v[1] ^ sMask;
+                UInt64 a2 = v[2] ^ sMask;
+                UInt64 carry = unchecked((UInt64)(sign & 1));
+                a0 = AddWithCarry(a0, carry, 0, out nuint c0);
+                a1 = AddWithCarry(a1, 0, c0, out c0);
+                a2 = AddWithCarry(a2, 0, c0, out _);
+
+                // Place |v| in HIGH 3 words.
+                InlineArray6<UInt64> a6 = default;
+                a6[3] = a0; a6[4] = a1; a6[5] = a2;
+
+                InlineArray6<UInt64> o6 = default;
+                MultiplyHigh(out o6, in a6, in c);
+
+                UInt64 r0 = o6[0], r1 = o6[1], r2 = o6[2];
+
+                // Re-apply sign (two's-complement negate).
+                if (sMask != 0) {
+                    r0 = ~r0; r1 = ~r1; r2 = ~r2;
+                    r0 = AddWithCarry(r0, 1, 0, out c0);
+                    r1 = AddWithCarry(r1, 0, c0, out c0);
+                    r2 = AddWithCarry(r2, 0, c0, out _);
+                }
+
+                v[0] = r0; v[1] = r1; v[2] = r2;
+            }
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static void ScaleByConstantUnsigned(ref InlineArray3<UInt64> v, in InlineArray6<UInt64> c) {
+            unchecked {
+                // Place v in HIGH 3 words.
+                InlineArray6<UInt64> a6 = default;
+                a6[3] = v[0]; a6[4] = v[1]; a6[5] = v[2];
+
+                InlineArray6<UInt64> o6 = default;
+                MultiplyHigh(out o6, in a6, in c);
+
+                UInt64 r0 = o6[0], r1 = o6[1], r2 = o6[2];
+
+                v[0] = r0; v[1] = r1; v[2] = r2;
+            }
+        }
+
+        // ═════════════════════════════════════════════════════════════════════
+        //  Load3 / Load6 — reinterpret a ReadOnlySpan slice as an InlineArray.
+        //
+        //  InlineArrayN<UInt64> has exactly the layout of UInt64[N], so
+        //  Unsafe.As on the span's first-element ref gives us a value copy
+        //  without a manual element-by-element loop.
+        // ═════════════════════════════════════════════════════════════════════
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static ref readonly InlineArray3<UInt64> Load3(ReadOnlySpan<UInt64> s, int wordOffset) {
+            return ref Unsafe.As<UInt64, InlineArray3<UInt64>>(
+                ref Unsafe.Add(ref MemoryMarshal.GetReference(s), wordOffset * 3));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static ref readonly InlineArray6<UInt64> Load6(ReadOnlySpan<UInt64> s, int wordOffset) {
+            return ref Unsafe.As<UInt64, InlineArray6<UInt64>>(
+                ref Unsafe.Add(ref MemoryMarshal.GetReference(s), wordOffset * 6));
         }
 
         // ═══════════════════════════════════════════════════════════════════
@@ -517,6 +685,205 @@ namespace UltimateOrb.Numerics {
                 }
             }
         }
+
+        public static int Log10_GetValue(UInt64 hi, UInt64 lo) {
+            if (Misc.Unlikely(lo == 0)) {
+                return Log10_GetValue_Shift48_n32(hi);
+            } else {
+                return Log10_GetValue_S48_4_N32(hi, lo);
+            }
+        }
+
+        // h(x) = x >> 48,  n = 32  (byte table)
+        public static int Log10_GetValue_Shift48_n32(UInt64 x) {
+            int r = (int)((x >> 48) % 32);
+            if (Log10_K_Shift48_n32[r] != x) return 0;
+            return Log10_B_Shift48_n32[r];
+        }
+
+        static ReadOnlySpan<UInt64> Log10_K_Shift48_n32 => [
+            0x40202A05F2000000UL,
+            0x40415AF1D78B58C4UL,
+            0x4002400000000000UL,
+            0x402374876E800000UL,
+            0x4044B1AE4D6E2EF5UL,
+            0x4005900000000000UL,
+            0x4026D1A94A200000UL,
+            0xFFFFFFFFFFFFFFFFUL,
+            0x4008F40000000000UL,
+            0xFFFFFFFFFFFFFFFFUL,
+            0x402A2309CE540000UL,
+            0xFFFFFFFFFFFFFFFFUL,
+            0x400C388000000000UL,
+            0x402D6BCC41E90000UL,
+            0xFFFFFFFFFFFFFFFFUL,
+            0x400F86A000000000UL,
+            0x4030C6BF52634000UL,
+            0xFFFFFFFFFFFFFFFFUL,
+            0x4012E84800000000UL,
+            0xFFFFFFFFFFFFFFFFUL,
+            0x40341C37937E0800UL,
+            0xFFFFFFFFFFFFFFFFUL,
+            0x4016312D00000000UL,
+            0x40376345785D8A00UL,
+            0xFFFFFFFFFFFFFFFFUL,
+            0x40197D7840000000UL,
+            0x403ABC16D674EC80UL,
+            0xFFFFFFFFFFFFFFFFUL,
+            0x401CDCD650000000UL,
+            0xFFFFFFFFFFFFFFFFUL,
+            0x403E158E460913D0UL,
+            0xFFFFFFFFFFFFFFFFUL,
+        ];
+
+        static ReadOnlySpan<byte> Log10_B_Shift48_n32 => [
+            10,
+            20,
+            1,
+            11,
+            21,
+            2,
+            12,
+            0,
+            3,
+            0,
+            13,
+            0,
+            4,
+            14,
+            0,
+            5,
+            15,
+            0,
+            6,
+            0,
+            16,
+            0,
+            7,
+            17,
+            0,
+            8,
+            18,
+            0,
+            9,
+            0,
+            19,
+            0,
+        ];
+
+        // Log10 exact hash tables
+        // h(k1, k2) = ((k1 >> 48) + (k2 >> 4)) % 32
+        private static int Log10_GetValue_S48_4_N32(UInt64 key1, UInt64 key2) {
+            int r = (int)(unchecked((key1 >> 48) + (key2 >> 4)) % 32UL);
+            if (Log10_K1_S48_4_N32[r] != key1 || Log10_K2_S48_4_N32[r] != key2) return 0;
+            return Log10_B_S48_4_N32[r];
+        }
+
+        static ReadOnlySpan<UInt64> Log10_K1_S48_4_N32 => [
+            0x408078287F49C4A1UL,
+            0x409B18427B3B4A05UL,
+            0x406293E5939A08CEUL,
+            0x4083D6329F1C35CAUL,
+            0x409466BB7F0435C9UL,
+            0x4065F8DEF8808B02UL,
+            0x409E5E531A0A1C87UL,
+            0x408725DFA371A19EUL,
+            0x40480F0CF064DD59UL,
+            0x40693B8B5B5056E1UL,
+            0x408A6F578C4E0A06UL,
+            0x404B52D02C7E14AFUL,
+            0x406C8A6E32246C99UL,
+            0x408DCB2D6F618C87UL,
+            0x404EA784379D99DBUL,
+            0x406FED09BEAD87C0UL,
+            0xFFFFFFFFFFFFFFFFUL,
+            0x40911EFC659CF7D4UL,
+            0x405208B2A2C28029UL,
+            0x40733426172C74D8UL,
+            0xFFFFFFFFFFFFFFFFUL,
+            0x40554ADF4B732033UL,
+            0x4076812F9CF7920EUL,
+            0xFFFFFFFFFFFFFFFFUL,
+            0x40589D971E4FE840UL,
+            0x4079E17B84357691UL,
+            0xFFFFFFFFFFFFFFFFUL,
+            0x4097C06A5EC5433CUL,
+            0x405C027E72F1F128UL,
+            0x407D2CED32A16A1BUL,
+            0xFFFFFFFFFFFFFFFFUL,
+            0x405F431E0FAE6D72UL,
+        ];
+
+        static ReadOnlySpan<UInt64> Log10_K2_S48_4_N32 => [
+            0xD6622FB2AB400000UL,
+            0xBC8A8A4DE8459868UL,
+            0x9DBD480000000000UL,
+            0x4BFABB9F56100000UL,
+            0xE717BB4500591500UL,
+            0x452C9A0000000000UL,
+            0x2BAD2CE16256FE82UL,
+            0x6F7CB54395CA0000UL,
+            0x2000000000000000UL,
+            0x6B3BE04000000000UL,
+            0x0B5BE2947B3C8000UL,
+            0x6800000000000000UL,
+            0xC60AD85000000000UL,
+            0x8E32DB399A0BA000UL,
+            0x4200000000000000UL,
+            0x378D8E6400000000UL,
+            0xFFFFFFFFFFFFFFFFUL,
+            0xB8DFC90400474400UL,
+            0x0940000000000000UL,
+            0x22B878FE80000000UL,
+            0xFFFFFFFFFFFFFFFFUL,
+            0x4B90000000000000UL,
+            0x2B66973E20000000UL,
+            0xFFFFFFFFFFFFFFFFUL,
+            0x1E74000000000000UL,
+            0xB6403D0DA8000000UL,
+            0xFFFFFFFFFFFFFFFFUL,
+            0x60DDAA16406F5A40UL,
+            0x1308800000000000UL,
+            0x11E8262889000000UL,
+            0xFFFFFFFFFFFFFFFFUL,
+            0x17CAA00000000000UL,
+        ];
+
+        static ReadOnlySpan<byte> Log10_B_S48_4_N32 => [
+            39,
+            47,
+            30,
+            40,
+            45,
+            31,
+            48,
+            41,
+            22,
+            32,
+            42,
+            23,
+            33,
+            43,
+            24,
+            34,
+            0,
+            44,
+            25,
+            35,
+            0,
+            26,
+            36,
+            0,
+            27,
+            37,
+            0,
+            46,
+            28,
+            38,
+            0,
+            29,
+        ];
+
 
         // ═══════════════════════════════════════════════════════════════════
         // Data tables — transcribed verbatim from the C reference
