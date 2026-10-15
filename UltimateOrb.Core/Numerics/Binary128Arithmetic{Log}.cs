@@ -126,8 +126,8 @@ namespace UltimateOrb.Numerics {
                 }
 
                 // ── Near one ────────────────────────────────────────────────
-                if ((UInt64)0x3FFE_FFFF_F000_0040UL <= hi &&
-                       hi <= 0x3FFF_0000_0800_0020UL) {
+                if ((UInt64)0X3ffe_ffff_f000_0040UL <= hi &&
+                       hi <= 0X3fff_0000_0800_0020UL) {
                     return LogNearOne(lo, hi, mode, scale, out result_hi);
                 }
 
@@ -263,7 +263,7 @@ namespace UltimateOrb.Numerics {
                     rLo = AddWithCarry(rLo, (fs[0] >> (63 - ls)) & 1, 0, out var carryBit);
                     rHi = AddWithCarry(rHi, 0, carryBit, out _);
 
-                    rnd = LogRefine(el, ref rLo, ref rHi, lo, hi);
+                    rnd = LogRefine(el, ref rLo, ref rHi, lo, hi, scale);
                 } else {
                     rHi = (fs[2] << ns) | (fs[1] >> ((-ns) & 63));
                     rLo = (fs[1] << ns) | (fs[0] >> ((-ns) & 63));
@@ -383,7 +383,7 @@ namespace UltimateOrb.Numerics {
                 //  by log_base(e) before the rounding test.
                 // ═════════════════════════════════════════════════════════════
                 switch (scale) {
-                case LogScale.Log2: ScaleByConstantUnsigned(ref z, in Log2E192_6); break;
+                case LogScale.Log2: e -=ScaleByConstantUnsignedWithCarry(ref z, in Log2E192_6); break;
                 case LogScale.Log10: ScaleByConstantUnsigned(ref z, in Log10E192_6); break;
                 }
 
@@ -449,7 +449,7 @@ namespace UltimateOrb.Numerics {
                     UInt64 rLo = (UInt64)res;
                     UInt64 rHi = (UInt64)(res >> 64);
                     Int64 el = unchecked((Int64)((UInt64)e | ((UInt64)neg << 15)));
-                    rnd = LogRefine(el, ref rLo, ref rHi, xLo, xHi);
+                    rnd = LogRefine(el, ref rLo, ref rHi, xLo, xHi, scale);
                     res = ((UInt128)rHi << 64) | rLo;
                 } else {
                     res >>= 15;
@@ -471,25 +471,57 @@ namespace UltimateOrb.Numerics {
             }
         }
 
+        static ReadOnlySpan<UInt64> Iln2Log2Of10Half_Flat => [
+            0x1435ee480565ca55UL,   // w0  (LSB)
+            0x3e24beab63ad0bd6UL,   // w1
+            0x06650fde9dd51f3aUL,   // w2
+            0x91b6ac8082e7859dUL,   // w3
+            0xd96c55fe37b3ad4eUL,   // w4
+            0x492bf6ff4dafdb4cUL,   // w5
+            0xd49a784bcd1b8afeUL,   // w6  (MSB, bit 447 = 1)
+        ];
+
+        static ref readonly InlineArray7<UInt64> Iln2Log2Of10Half_7 =>
+            ref Unsafe.As<UInt64, InlineArray7<UInt64>>(
+                ref MemoryMarshal.GetReference(Iln2Log2Of10Half_Flat));
+
         // ═════════════════════════════════════════════════════════════════════
         //  LogRefine — unchanged.  It operates on the mantissa's bits, so its
         //  behavior is independent of the implicit scale.
         // ═════════════════════════════════════════════════════════════════════
         static UInt64 LogRefine(Int64 el, ref UInt64 mLo, ref UInt64 mHi,
-                                UInt64 xLo, UInt64 xHi) {
+                        UInt64 xLo, UInt64 xHi,
+                        [ConstantExpected] LogScale scale) {
             unchecked {
                 Int64 sm = -((el >> 15) & 1);
                 UInt64 smU = unchecked((UInt64)sm);
-
                 UInt128 mVal = ((UInt128)mHi << 64) | mLo;
 
                 InlineArray7<UInt64> x = default;
-                MultiplyHigh(out x, in ExpIlN2_7, mVal);
+                int baseShiftAdjust;
+                switch (scale) {
+                case LogScale.Log2:
+                    // Multiplier is 1 = 1·2^447 (word6 = 1UL << 63, others 0).
+                    // MultiplyHigh(identity, mVal) = (2^447 · mVal) >> 128 = mVal · 2^319.
+                    x[4] = (UInt64)(mVal & 1) << 63;   // mVal[0]       → x bit 319
+                    x[5] = (UInt64)(mVal >> 1);        // mVal[1..64]   → x bits 320..383
+                    x[6] = (UInt64)(mVal >> 65);       // mVal[65..127] → x bits 384..446
+                    baseShiftAdjust = 0;
+                    break;
+                case LogScale.Log10:
+                    MultiplyHigh(out x, in Iln2Log2Of10Half_7, mVal);
+                    baseShiftAdjust = -1;
+                    break;
+                default: // Ln
+                    MultiplyHigh(out x, in ExpIlN2_7, mVal);
+                    baseShiftAdjust = 0;
+                    break;
+                }
 
                 x[0] ^= smU; x[1] ^= smU; x[2] ^= smU; x[3] ^= smU;
                 x[4] ^= smU; x[5] ^= smU; x[6] ^= smU;
 
-                int shift = unchecked((int)(0x402E - (el & 0x7FFF)));
+                int shift = unchecked((int)((0x402E + baseShiftAdjust) - (el & 0x7FFF)));
                 ShiftRightArithmetic(ref x, shift);
 
                 int jt = (int)(x[5] >> 60);
@@ -592,7 +624,33 @@ namespace UltimateOrb.Numerics {
                 v[0] = r0; v[1] = r1; v[2] = r2;
             }
         }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static int ScaleByConstantUnsignedWithCarry(ref InlineArray3<UInt64> v, in InlineArray6<UInt64> c) {
+            unchecked {
+                // Place v in HIGH 3 words → a6 = v·2^192.
+                InlineArray6<UInt64> a6 = default;
+                a6[3] = v[0]; a6[4] = v[1]; a6[5] = v[2];
 
+                InlineArray6<UInt64> o6 = default;
+                MultiplyHigh(out o6, in a6, in c);
+
+                if (Misc.Unlikely(o6[3] != 0)) {
+                    // Overflow into bit 192: v·log_base(e) ≥ 2^192.
+                    // Halve it (arithmetic-free logical shift right by 1) and
+                    // compensate by bumping the exponent so that the final
+                    // biased exponent (16381 - e) increases by 1.
+                    v[0] = (o6[0] >> 1) | (o6[1] << 63);
+                    v[1] = (o6[1] >> 1) | (o6[2] << 63);
+                    v[2] = (o6[2] >> 1) | (o6[3] << 63);
+                    return 1;
+                } else {
+                    v[0] = o6[0];
+                    v[1] = o6[1];
+                    v[2] = o6[2];
+                    return 0;
+                }
+            }
+        }
         // ═════════════════════════════════════════════════════════════════════
         //  Load3 / Load6 — reinterpret a ReadOnlySpan slice as an InlineArray.
         //

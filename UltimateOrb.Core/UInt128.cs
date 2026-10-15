@@ -3174,7 +3174,7 @@ namespace UltimateOrb {
 
 namespace UltimateOrb {
 
-#if NET8_0_OR_GREATER
+#if NET8_0_OR_GREATER && SYSTEM_XInt128_USE_UNSAFE_ACCESSOR
     [Discardable]
     static class SystemInt128UnsafeAccessors {
 
@@ -3201,7 +3201,7 @@ namespace UltimateOrb {
             internal UInt64 LoUInt64Bits {
 
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#if NET8_0_OR_GREATER
+#if NET8_0_OR_GREATER && SYSTEM_XInt128_USE_UNSAFE_ACCESSOR
                 get => SystemInt128UnsafeAccessors.GetLowerUInt64Ref(in @this);
 #else
                 get => unchecked((UInt64)@this);
@@ -3211,7 +3211,7 @@ namespace UltimateOrb {
             internal UInt64 HiUInt64Bits {
 
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#if NET8_0_OR_GREATER
+#if NET8_0_OR_GREATER && SYSTEM_XInt128_USE_UNSAFE_ACCESSOR
                 get => SystemInt128UnsafeAccessors.GetUpperUInt64Ref(in @this);
 #else
                 get => unchecked((UInt64)(@this >>> 64));
@@ -3221,7 +3221,7 @@ namespace UltimateOrb {
             internal Int64 LoInt64Bits {
 
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#if NET8_0_OR_GREATER
+#if NET8_0_OR_GREATER && SYSTEM_XInt128_USE_UNSAFE_ACCESSOR
                 get => unchecked((Int64)SystemInt128UnsafeAccessors.GetLowerUInt64Ref(in @this));
 #else
                 get => unchecked((Int64)@this);
@@ -3231,7 +3231,7 @@ namespace UltimateOrb {
             internal Int64 HiInt64Bits {
 
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#if NET8_0_OR_GREATER
+#if NET8_0_OR_GREATER && SYSTEM_XInt128_USE_UNSAFE_ACCESSOR
                 get => unchecked((Int64)SystemInt128UnsafeAccessors.GetUpperUInt64Ref(in @this));
 #else
                 get => unchecked((Int64)(@this >>> 64));
@@ -3244,7 +3244,7 @@ namespace UltimateOrb {
             internal UInt64 LoUInt64Bits {
 
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#if NET8_0_OR_GREATER
+#if NET8_0_OR_GREATER && SYSTEM_XInt128_USE_UNSAFE_ACCESSOR
                 get => SystemInt128UnsafeAccessors.GetLowerUInt64Ref(in @this);
 #else
                 get => unchecked((UInt64)@this);
@@ -3254,7 +3254,7 @@ namespace UltimateOrb {
             internal UInt64 HiUInt64Bits {
 
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#if NET8_0_OR_GREATER
+#if NET8_0_OR_GREATER && SYSTEM_XInt128_USE_UNSAFE_ACCESSOR
                 get => SystemInt128UnsafeAccessors.GetUpperUInt64Ref(in @this);
 #else
                 get => unchecked((UInt64)(@this >>> 64));
@@ -3264,7 +3264,7 @@ namespace UltimateOrb {
             internal Int64 LoInt64Bits {
 
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#if NET8_0_OR_GREATER
+#if NET8_0_OR_GREATER && SYSTEM_XInt128_USE_UNSAFE_ACCESSOR
                 get => unchecked((Int64)SystemInt128UnsafeAccessors.GetLowerUInt64Ref(in @this));
 #else
                 get => unchecked((Int64)@this);
@@ -3274,7 +3274,7 @@ namespace UltimateOrb {
             internal Int64 HiInt64Bits {
 
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#if NET8_0_OR_GREATER
+#if NET8_0_OR_GREATER && SYSTEM_XInt128_USE_UNSAFE_ACCESSOR
                 get => unchecked((Int64)SystemInt128UnsafeAccessors.GetUpperUInt64Ref(in @this));
 #else
                 get => unchecked((Int64)(@this >>> 64));
@@ -3282,7 +3282,7 @@ namespace UltimateOrb {
             }
         }
 
-#if NET8_0_OR_GREATER
+#if NET8_0_OR_GREATER && SYSTEM_XInt128_USE_UNSAFE_ACCESSOR
 #else
         readonly struct SystemInt128Layout {
             internal readonly UInt64 d0;
@@ -3296,7 +3296,7 @@ namespace UltimateOrb {
             internal ref readonly UInt64 lo {
 
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#if NET8_0_OR_GREATER
+#if NET8_0_OR_GREATER && SYSTEM_XInt128_USE_UNSAFE_ACCESSOR
                 get => ref SystemInt128UnsafeAccessors.GetLowerUInt64Ref(in @this);
 #else
                 get {
@@ -3309,7 +3309,7 @@ namespace UltimateOrb {
             internal ref readonly Int64 hi {
 
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#if NET8_0_OR_GREATER
+#if NET8_0_OR_GREATER && SYSTEM_XInt128_USE_UNSAFE_ACCESSOR
                 get => ref Unsafe.As<UInt64, Int64>(ref Unsafe.AsRef(in SystemInt128UnsafeAccessors.GetUpperUInt64Ref(in @this)));
 #else
                 get {
@@ -3326,7 +3326,7 @@ namespace UltimateOrb {
             internal ref readonly UInt64 lo {
 
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#if NET8_0_OR_GREATER
+#if NET8_0_OR_GREATER && SYSTEM_XInt128_USE_UNSAFE_ACCESSOR
                 get => ref SystemInt128UnsafeAccessors.GetLowerUInt64Ref(in @this);
 #else
                 get {
@@ -3339,7 +3339,7 @@ namespace UltimateOrb {
             internal ref readonly UInt64 hi {
 
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#if NET8_0_OR_GREATER
+#if NET8_0_OR_GREATER && SYSTEM_XInt128_USE_UNSAFE_ACCESSOR
                 get => ref SystemInt128UnsafeAccessors.GetUpperUInt64Ref(in @this);
 #else
                 get {

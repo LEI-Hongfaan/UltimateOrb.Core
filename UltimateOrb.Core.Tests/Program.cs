@@ -1035,11 +1035,19 @@ public readonly struct TotalOrderIeee754Comparer<T> :
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private static int Main(string[] args) {
 
+            {
+                var sdfasd = Quadruple.Parse("1.00000000000000001127570259384924611");
 
+                var sdfasdsads = Quadruple.Log2(sdfasd);
+
+                Console.WriteLine($"? = {sdfasdsads:G36}");
+                
+            }
             {
                 var sdfasd = Quadruple.Parse("0x1.fffffffffffe0p-1", NumberStyles.HexFloat | NumberStyles.AllowHexSpecifier);
                 sdfasd = Quadruple.Parse("0x1.0000000000013p+0", NumberStyles.HexFloat | NumberStyles.AllowHexSpecifier);
-                
+                sdfasd = Quadruple.Parse("0.999999523162841796820789891375724682");
+
                 var sdfasdsads = Quadruple.Log10(sdfasd);
 
                 Console.WriteLine($"? = {sdfasdsads:G36}");
