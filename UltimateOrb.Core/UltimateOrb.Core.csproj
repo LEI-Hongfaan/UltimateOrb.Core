@@ -7,7 +7,7 @@
     <!--<EnablePreviewFeatures>true</EnablePreviewFeatures>-->
     <FileVersion>1.3.0.0</FileVersion>
     <AssemblyVersion>1.3.0.0</AssemblyVersion>
-	<Version>3.7.20-beta.0</Version>
+	<Version>3.7.20-beta.2</Version>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Authors>LEI Hongfaan</Authors>
     <Product>UltimateOrb Libraries</Product>
@@ -25,14 +25,14 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DefineConstants>TRACE;FEATURE_STANDARD_LIBRARY_INTEROPERABILITY_FORMATTING_AND_CONVERSION;FEATURE_WIN32_DECIMAL_INTEROPERABILITY;USE_UNSAFE_ACCESS_TO_STD_BIGINTEGER</DefineConstants>
+    <DefineConstants>TRACE;FEATURE_STANDARD_LIBRARY_INTEROPERABILITY_FORMATTING_AND_CONVERSION;FEATURE_WIN32_DECIMAL_INTEROPERABILITY;USE_UNSAFE_ACCESS_TO_STD_BIGINTEGER;ILGPU_V1_X_COMPATIBILITY</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
     <DocumentationFile>UltimateOrb.Core.xml</DocumentationFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DefineConstants>TRACE;FEATURE_STANDARD_LIBRARY_INTEROPERABILITY_FORMATTING_AND_CONVERSION;FEATURE_WIN32_DECIMAL_INTEROPERABILITY;USE_UNSAFE_ACCESS_TO_STD_BIGINTEGER</DefineConstants>
+    <DefineConstants>TRACE;FEATURE_STANDARD_LIBRARY_INTEROPERABILITY_FORMATTING_AND_CONVERSION;FEATURE_WIN32_DECIMAL_INTEROPERABILITY;USE_UNSAFE_ACCESS_TO_STD_BIGINTEGER;ILGPU_V1_X_COMPATIBILITY</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
     <DocumentationFile>UltimateOrb.Core.xml</DocumentationFile>
@@ -135,6 +135,11 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>IBinaryIntegerOperationProvider{Core}.tt</DependentUpon>
     </Compile>
+    <Compile Update="Runtime\CompilerServices\InlineArray.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>InlineArray.tt</DependentUpon>
+    </Compile>
     <Compile Update="StandardFuncWrapperCatch{Core}.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -144,6 +149,11 @@
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>StandardFuncWrapper{Core}.tt</DependentUpon>
+    </Compile>
+    <Compile Update="System\Runtime\CompilerServices\InlineArray.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>InlineArray.tt</DependentUpon>
     </Compile>
     <Compile Update="Utilities\BooleanIntegerModule{Compare}.cs">
       <DesignTime>True</DesignTime>
@@ -216,6 +226,10 @@
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>IBinaryIntegerOperationProvider{Core}.cs</LastGenOutput>
     </None>
+    <None Update="Runtime\CompilerServices\InlineArray.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>InlineArray.cs</LastGenOutput>
+    </None>
     <None Update="StandardFuncWrapperCatch{Core}.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>StandardFuncWrapperCatch{Core}.cs</LastGenOutput>
@@ -226,6 +240,10 @@
     </None>
     <None Update="CanonicalIntegerBooleanModule{Compare}.tt">
       <LastGenOutput>CanonicalIntegerBooleanModule{Compare}.cs</LastGenOutput>
+      <Generator>TextTemplatingFileGenerator</Generator>
+    </None>
+    <None Update="System\Runtime\CompilerServices\InlineArray.tt">
+      <LastGenOutput>InlineArray.cs</LastGenOutput>
       <Generator>TextTemplatingFileGenerator</Generator>
     </None>
     <None Update="Utilities\BooleanIntegerModule{Compare}.tt">

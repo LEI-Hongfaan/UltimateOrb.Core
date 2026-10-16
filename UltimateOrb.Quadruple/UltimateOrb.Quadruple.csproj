@@ -32,7 +32,7 @@
 
   <PropertyGroup>
     <!-- Sync with UltimateOrb.Core -->
-	<Version>3.7.19-beta.0</Version>
+	<Version>3.7.20-beta.1</Version>
   </PropertyGroup>
 	
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -90,9 +90,19 @@
       <DependentUpon>DoubleArithmetic{Shift}.tt</DependentUpon>
     </Compile>
     <Compile Include="..\UltimateOrb.Core\Numerics\DoubleArithmetic{Sqrt}.cs" Link="Numerics\DoubleArithmetic{Sqrt}.cs" />
+    <Compile Include="..\UltimateOrb.Core\Runtime\CompilerServices\InlineArray.cs" Link="Runtime\CompilerServices\InlineArray.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>InlineArray.tt</DependentUpon>
+    </Compile>
     <Compile Include="..\UltimateOrb.Core\Runtime\CompilerServices\Unsafe.cs" Link="Runtime\CompilerServices\Unsafe.cs" />
     <Compile Include="..\UltimateOrb.Core\System\Runtime\CompilerServices\IgnoresAccessChecksToAttribute.cs" Link="System\Runtiem\CompilerServices\IgnoresAccessChecksToAttribute.cs" />
-    <Compile Include="..\UltimateOrb.Core\System\Runtime\CompilerServices\InlineArray.cs" Link="System\Runtiem\CompilerServices\InlineArray.cs" />
+	<Compile Include="..\UltimateOrb.Core\Runtime\CompilerServices\InlineArrayBlock.cs" Link="Runtime\CompilerServices\InlineArrayBlock.cs" />
+	<Compile Include="..\UltimateOrb.Core\System\Runtime\CompilerServices\InlineArray.cs" Link="System\Runtiem\CompilerServices\InlineArray.cs">
+	  <DesignTime>True</DesignTime>
+	  <AutoGen>True</AutoGen>
+	  <DependentUpon>InlineArray.tt</DependentUpon>
+	</Compile>
     <Compile Include="..\UltimateOrb.Core\UInt128.cs" Link="UInt128.cs" />
     <Compile Include="..\UltimateOrb.Core\Utilities\BooleanIntegerModule.cs" Link="Utilities\BooleanIntegerModule.cs" />
     <Compile Include="..\UltimateOrb.Core\Utilities\BooleanIntegerModule{Compare}.cs" Link="Utilities\BooleanIntegerModule{Compare}.cs">
@@ -181,6 +191,14 @@
     <None Include="..\UltimateOrb.Core\Numerics\DoubleArithmetic{Compare}.tt" Link="Numerics\DoubleArithmetic{Compare}.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>DoubleArithmetic{Compare}.cs</LastGenOutput>
+    </None>
+    <None Include="..\UltimateOrb.Core\Runtime\CompilerServices\InlineArray.tt" Link="Runtime\CompilerServices\InlineArray.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>InlineArray.cs</LastGenOutput>
+    </None>
+    <None Include="..\UltimateOrb.Core\System\Runtime\CompilerServices\InlineArray.tt" Link="System\Runtiem\CompilerServices\InlineArray.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>InlineArray.cs</LastGenOutput>
     </None>
     <None Include="..\UltimateOrb.Core\Numerics\DoubleArithmetic{Core}.tt" Link="Numerics\DoubleArithmetic{Core}.tt">
       <Generator>TextTemplatingFileGenerator</Generator>

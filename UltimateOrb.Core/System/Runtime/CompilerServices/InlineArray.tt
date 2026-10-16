@@ -1,0 +1,28 @@
+﻿<#@ template hostspecific="false" language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#
+var NamespaceFullName = "System.Runtime.CompilerServices";
+var LengthLowerBoundInclusive = 1;
+var LengthUpperBoundInclusive = 16;
+#>
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Text;
+using System.Threading.Tasks;
+using UltimateOrb.Utilities;
+using UltimateOrb.Runtime.CompilerServices;
+
+// polyfill
+#if !NET10_0_OR_GREATER
+namespace <#= NamespaceFullName #> {
+<#@ include file="../../../../T4Includes/InlineArray.ttinclude" #>
+}
+#endif

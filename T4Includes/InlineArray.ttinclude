@@ -1,0 +1,84 @@
+﻿<#
+for (int length = LengthLowerBoundInclusive; length <= LengthUpperBoundInclusive; ++length) {
+#>
+
+    public struct InlineArray<#= length #><T> {
+
+<#
+    int offset = 0;
+    int remaining = length;
+    while (remaining > 0) {
+        int block = 1 << 30;
+        while (block > remaining) {
+            block >>= 1;
+        }
+#>
+        InlineArrayBlock<#= block #><T> _data<#= offset #>;
+<#
+        offset += block;
+        remaining -= block;
+    }
+#>
+
+        public int Length {
+
+            get => <#= length #>;
+        }
+
+        [UnscopedRef]
+        public ref T this[int index] {
+
+            get {
+                Debug.Assert(index.ToUnsignedUnchecked() < Length.ToUnsignedUnchecked());
+                return ref Unsafe.Add(ref Unsafe.As<InlineArray<#= length #><T>, T>(ref this), (nint)index); // The (nint) conversion works around an ILGPU compiler bug; we can remove it once they provide a fix.
+            }
+        }
+
+        [UnscopedRef]
+        public ref T this[uint index] {
+
+            get {
+                Debug.Assert(index.ToUnsignedUnchecked() < Length.ToUnsignedUnchecked());
+                return ref Unsafe.Add(ref Unsafe.As<InlineArray<#= length #><T>, T>(ref this), (nuint)index);
+            }
+        }
+
+        [UnscopedRef]
+        public ref T this[nint index] {
+
+            get {
+                Debug.Assert(index.ToUnsignedUnchecked() < Length.ToUnsignedUnchecked());
+                return ref Unsafe.Add(ref Unsafe.As<InlineArray<#= length #><T>, T>(ref this), index);
+            }
+        }
+
+        [UnscopedRef]
+        public ref T this[nuint index] {
+
+            get {
+                Debug.Assert(index.ToUnsignedUnchecked() < Length.ToUnsignedUnchecked());
+                return ref Unsafe.Add(ref Unsafe.As<InlineArray<#= length #><T>, T>(ref this), index);
+            }
+        }
+
+        [UnscopedRef]
+        public ref T this[long index] {
+
+            get {
+                Debug.Assert(index.ToUnsignedUnchecked() < Length.ToUnsignedUnchecked());
+                return ref Unsafe.Add(ref Unsafe.As<InlineArray<#= length #><T>, T>(ref this), unchecked((nint)index));
+            }
+        }
+
+        [UnscopedRef]
+        public ref T this[ulong index] {
+
+            get {
+                Debug.Assert(index.ToUnsignedUnchecked() < Length.ToUnsignedUnchecked());
+                return ref Unsafe.Add(ref Unsafe.As<InlineArray<#= length #><T>, T>(ref this), unchecked((nuint)index));
+            }
+        }
+    }
+<#
+}
+#>

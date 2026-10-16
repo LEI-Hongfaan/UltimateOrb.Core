@@ -10,18 +10,22 @@ using UltimateOrb.Utilities.Extensions;
 using static UltimateOrb.Utilities.BooleanIntegerModule;
 using static UltimateOrb.Utilities.ThrowHelper;
 using Misc = UltimateOrb.Miscellaneous;
+
+using InlineArrayNS = UltimateOrb.Runtime.CompilerServices;
+
 namespace UltimateOrb.Numerics {
+
 #if NET8_0_OR_GREATER
     using Int128 = System.Int128;
     using UInt128 = System.UInt128;
 #endif
 
 #if NET8_0_OR_GREATER
-    using U256 = InlineArray2<System.UInt128>;
-    using U384 = InlineArray3<System.UInt128>;
-#else 
-    using U256 = InlineArray2<UInt128>;
-    using U384 = InlineArray3<UInt128>;
+    using U256 = InlineArrayNS.InlineArray2<System.UInt128>;
+    using U384 = InlineArrayNS.InlineArray3<System.UInt128>;
+#else
+    using U256 = InlineArrayNS.InlineArray2<UInt128>;
+    using U384 = InlineArrayNS.InlineArray3<UInt128>;
 #endif
 
     partial class Binary128Arithmetic {
@@ -509,7 +513,7 @@ namespace UltimateOrb.Numerics {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static int LeadingZeroCount<TUInt>(in InlineArray2<TUInt> x)
+        static int LeadingZeroCount<TUInt>(in InlineArrayNS.InlineArray2<TUInt> x)
           where TUInt : IUnsignedNumber<TUInt>?, IBinaryInteger<TUInt>, IMinMaxValue<TUInt>? {
             unchecked {
                 if (!TUInt.IsZero(x[1])) return int.CreateTruncating(TUInt.LeadingZeroCount(x[1]));
@@ -546,10 +550,10 @@ namespace UltimateOrb.Numerics {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static InlineArray2<TUInt> AddUnchecked<TUInt>(InlineArray2<TUInt> a, InlineArray2<TUInt> b)
+        static InlineArrayNS.InlineArray2<TUInt> AddUnchecked<TUInt>(InlineArrayNS.InlineArray2<TUInt> a, InlineArrayNS.InlineArray2<TUInt> b)
             where TUInt : IAdditionOperators<TUInt, TUInt, TUInt>?, IComparisonOperators<TUInt, TUInt, bool>?, IUnsignedNumber<TUInt>? {
             unchecked {
-                InlineArray2<TUInt> r = default;
+                InlineArrayNS.InlineArray2<TUInt> r = default;
                 var c = AddNoThrow(a[0], b[0], out r[0]);
                 r[1] = a[1] + b[1] + TUInt.CreateTruncating(c);
                 return r;
@@ -557,7 +561,7 @@ namespace UltimateOrb.Numerics {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static void AddUnchecked<TUInt>(out InlineArray2<TUInt> result, in InlineArray2<TUInt> a, in InlineArray2<TUInt> b)
+        static void AddUnchecked<TUInt>(out InlineArrayNS.InlineArray2<TUInt> result, in InlineArrayNS.InlineArray2<TUInt> a, in InlineArrayNS.InlineArray2<TUInt> b)
             where TUInt : IAdditionOperators<TUInt, TUInt, TUInt>?, IComparisonOperators<TUInt, TUInt, bool>?, IUnsignedNumber<TUInt>? {
             result = AddUnchecked(a, b);
         }
@@ -572,10 +576,10 @@ namespace UltimateOrb.Numerics {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static InlineArray2<TUInt> SubtractUnchecked<TUInt>(InlineArray2<TUInt> a, InlineArray2<TUInt> b)
+        static InlineArrayNS.InlineArray2<TUInt> SubtractUnchecked<TUInt>(InlineArrayNS.InlineArray2<TUInt> a, InlineArrayNS.InlineArray2<TUInt> b)
            where TUInt : ISubtractionOperators<TUInt, TUInt, TUInt>?, IComparisonOperators<TUInt, TUInt, bool>?, IUnsignedNumber<TUInt>? {
             unchecked {
-                InlineArray2<TUInt> r = default;
+                InlineArrayNS.InlineArray2<TUInt> r = default;
                 var c = SubtractNoThrow(a[0], b[0], out r[0]);
                 r[1] = a[1] - b[1] - TUInt.CreateTruncating(c);
                 return r;
@@ -583,24 +587,24 @@ namespace UltimateOrb.Numerics {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static void SubtractUnchecked<TUInt>(out InlineArray2<TUInt> result, in InlineArray2<TUInt> a, in InlineArray2<TUInt> b)
+        static void SubtractUnchecked<TUInt>(out InlineArrayNS.InlineArray2<TUInt> result, in InlineArrayNS.InlineArray2<TUInt> a, in InlineArrayNS.InlineArray2<TUInt> b)
             where TUInt : ISubtractionOperators<TUInt, TUInt, TUInt>?, IComparisonOperators<TUInt, TUInt, bool>?, IUnsignedNumber<TUInt>? {
             result = SubtractUnchecked(a, b);
         }
 
         // a + b or a - b without a data-dependent branch
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static InlineArray2<TUInt> AddOrSubtractUnchecked<TUInt>(InlineArray2<TUInt> a, InlineArray2<TUInt> b, nint subtract)
+        static InlineArrayNS.InlineArray2<TUInt> AddOrSubtractUnchecked<TUInt>(InlineArrayNS.InlineArray2<TUInt> a, InlineArrayNS.InlineArray2<TUInt> b, nint subtract)
             where TUInt : IAdditionOperators<TUInt, TUInt, TUInt>?, ISubtractionOperators<TUInt, TUInt, TUInt>?,
                 IBitwiseOperators<TUInt, TUInt, TUInt>?,
                 IComparisonOperators<TUInt, TUInt, bool>?, IUnsignedNumber<TUInt>? {
             unchecked {
                 var s = TUInt.CreateTruncating(subtract);
                 var mask = -s;
-                InlineArray2<TUInt> nb = default;
+                InlineArrayNS.InlineArray2<TUInt> nb = default;
                 nb[0] = b[0] ^ mask;
                 nb[1] = b[1] ^ mask;
-                InlineArray2<TUInt> one = default;
+                InlineArrayNS.InlineArray2<TUInt> one = default;
                 one[0] = s;
                 return AddUnchecked(a, AddUnchecked(nb, one));
             }
@@ -634,10 +638,10 @@ namespace UltimateOrb.Numerics {
 
         // f << shift in the 2n-bit frame, for shift < n
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static InlineArray2<TUInt> BigShiftLeft<TUInt>(TUInt f, int shift)
+        static InlineArrayNS.InlineArray2<TUInt> BigShiftLeft<TUInt>(TUInt f, int shift)
             where TUInt : IShiftOperators<TUInt, int, TUInt>?, IUnsignedNumber<TUInt>?, IBinaryInteger<TUInt>, IMinMaxValue<TUInt>? {
             unchecked {
-                InlineArray2<TUInt> r = default;
+                InlineArrayNS.InlineArray2<TUInt> r = default;
                 r[0] = f << shift;
                 r[1] = (f >> 1) >> (IntTypeTraits<TUInt>.BitWidthMinusOne - shift);
                 return r;
@@ -646,7 +650,7 @@ namespace UltimateOrb.Numerics {
 
         // the top n bits of s << shift, for shift < n/2
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static TUInt ShiftLeftHighPartial<TUInt>(InlineArray2<TUInt> s, int shift)
+        static TUInt ShiftLeftHighPartial<TUInt>(InlineArrayNS.InlineArray2<TUInt> s, int shift)
             where TUInt : IShiftOperators<TUInt, int, TUInt>?, IUnsignedNumber<TUInt>?, IBinaryInteger<TUInt>, IMinMaxValue<TUInt>? {
             unchecked {
                 Debug.Assert((IntTypeTraits<TUInt>.BitWidthMinusOne & shift) < IntTypeTraits<TUInt>.BitWidth / 2);
@@ -664,11 +668,11 @@ namespace UltimateOrb.Numerics {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static InlineArray3<TUInt> AddUnchecked<TUInt>(in InlineArray3<TUInt> a, in InlineArray3<TUInt> b)
+        static InlineArrayNS.InlineArray3<TUInt> AddUnchecked<TUInt>(in InlineArrayNS.InlineArray3<TUInt> a, in InlineArrayNS.InlineArray3<TUInt> b)
             where TUInt : IAdditionOperators<TUInt, TUInt, TUInt>?, IComparisonOperators<TUInt, TUInt, bool>?, IUnsignedNumber<TUInt>? {
             unchecked {
                 Debug.Assert(TUInt.CreateTruncating(2) == checked(TUInt.One + TUInt.One));
-                InlineArray3<TUInt> r = default;
+                InlineArrayNS.InlineArray3<TUInt> r = default;
                 var c0 = AddNoThrow(a[0], b[0], out r[0]);
                 var c1 = AddNoThrow(a[1], b[1], out r[1]);
                 var c2 = AddNoThrow(r[1], TUInt.CreateTruncating(c0), out r[1]);
@@ -678,11 +682,11 @@ namespace UltimateOrb.Numerics {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static InlineArray3<TUInt> SubtractUnchecked<TUInt>(in InlineArray3<TUInt> a, in InlineArray3<TUInt> b)
+        static InlineArrayNS.InlineArray3<TUInt> SubtractUnchecked<TUInt>(in InlineArrayNS.InlineArray3<TUInt> a, in InlineArrayNS.InlineArray3<TUInt> b)
             where TUInt : ISubtractionOperators<TUInt, TUInt, TUInt>?, IComparisonOperators<TUInt, TUInt, bool>?, IUnsignedNumber<TUInt>? {
             unchecked {
                 Debug.Assert(TUInt.CreateTruncating(2) == checked(TUInt.One + TUInt.One));
-                InlineArray3<TUInt> r = default;
+                InlineArrayNS.InlineArray3<TUInt> r = default;
                 var c0 = SubtractNoThrow(a[0], b[0], out r[0]);
                 var c1 = SubtractNoThrow(a[1], b[1], out r[1]);
                 var c2 = SubtractNoThrow(r[1], TUInt.CreateTruncating(c0), out r[1]);
@@ -694,14 +698,14 @@ namespace UltimateOrb.Numerics {
         // x << shift, discarding whatever leaves the window, for shift < 384
         // ~Core: shift amount must be normalized.
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static InlineArray3<TUInt> ShiftLeftCore<TUInt>(in InlineArray3<TUInt> x, int shift)
+        static InlineArrayNS.InlineArray3<TUInt> ShiftLeftCore<TUInt>(in InlineArrayNS.InlineArray3<TUInt> x, int shift)
             where TUInt : IShiftOperators<TUInt, int, TUInt>?, IUnsignedNumber<TUInt>?, IBinaryInteger<TUInt>, IMinMaxValue<TUInt>? {
             Debug.Assert(0 <= shift);
             Debug.Assert(shift < checked(3 * IntTypeTraits<TUInt>.BitWidth));
             unchecked {
                 uint word = shift.ToUnsignedUnchecked() / IntTypeTraits<TUInt>.BitWidth.ToUnsignedUnchecked();
                 uint bits = shift.ToUnsignedUnchecked() % IntTypeTraits<TUInt>.BitWidth.ToUnsignedUnchecked();
-                InlineArray3<TUInt> r = default;
+                InlineArrayNS.InlineArray3<TUInt> r = default;
                 for (uint i = word; i < 3; i++) {
                     TUInt carry = (bits == 0 || i == word) ? TUInt.Zero : x[(int)(i - word - 1)] >> (128 - (int)bits);
                     r[(int)i] = (x[(int)(i - word)] << (int)bits) | carry;
@@ -713,10 +717,10 @@ namespace UltimateOrb.Numerics {
         // x >> shift, saturating to zero past the window
         // ~Full: handles full ranged shift amount
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static InlineArray3<TUInt> ShiftRightUnsignedFull<TUInt>(in InlineArray3<TUInt> x, int shift)
+        static InlineArrayNS.InlineArray3<TUInt> ShiftRightUnsignedFull<TUInt>(in InlineArrayNS.InlineArray3<TUInt> x, int shift)
             where TUInt : IShiftOperators<TUInt, int, TUInt>?, IUnsignedNumber<TUInt>?, IBinaryInteger<TUInt>, IMinMaxValue<TUInt>? {
             unchecked {
-                InlineArray3<TUInt> r = default;
+                InlineArrayNS.InlineArray3<TUInt> r = default;
                 if (shift >= checked(3 * IntTypeTraits<TUInt>.BitWidth)) return default;
                 uint word = shift.ToUnsignedUnchecked() / IntTypeTraits<TUInt>.BitWidth.ToUnsignedUnchecked();
                 uint bits = shift.ToUnsignedUnchecked() % IntTypeTraits<TUInt>.BitWidth.ToUnsignedUnchecked();
@@ -730,7 +734,7 @@ namespace UltimateOrb.Numerics {
 
         // leading zeros of a 384-bit value, 384 when it is zero
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static int LeadingZeroCount<TUInt>(in InlineArray3<TUInt> x)
+        static int LeadingZeroCount<TUInt>(in InlineArrayNS.InlineArray3<TUInt> x)
             where TUInt : IUnsignedNumber<TUInt>?, IBinaryInteger<TUInt>, IMinMaxValue<TUInt>? {
             unchecked {
                 if (!TUInt.IsZero(x[2])) return int.CreateTruncating(TUInt.LeadingZeroCount(x[2]));
@@ -743,7 +747,7 @@ namespace UltimateOrb.Numerics {
            four units short of the exact value, never over */
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static InlineArray3<TUInt> MultiplyHighUnsignedApproximate<TUInt>(InlineArray3<TUInt> a, InlineArray3<TUInt> b)
+        static InlineArrayNS.InlineArray3<TUInt> MultiplyHighUnsignedApproximate<TUInt>(InlineArrayNS.InlineArray3<TUInt> a, InlineArrayNS.InlineArray3<TUInt> b)
             where TUInt : IUnsignedNumber<TUInt>?, IBinaryInteger<TUInt>, IMinMaxValue<TUInt>? {
             Debug.Assert(TUInt.CreateTruncating(3) == checked(TUInt.One + TUInt.One + TUInt.One));
             unchecked {
@@ -762,22 +766,22 @@ namespace UltimateOrb.Numerics {
                 var first = AddNoThrow(h02, h11, out diagonal);
                 var second = AddNoThrow(diagonal, h20, out diagonal);
                 var third = AddNoThrow(diagonal, TUInt.CreateTruncating(carry_low + carry_high), out diagonal);
-                InlineArray3<TUInt> t1 = default;
+                InlineArrayNS.InlineArray3<TUInt> t1 = default;
                 t1[0] = l12;
                 t1[1] = h12;
                 t1[2] = TUInt.Zero;
 
-                InlineArray3<TUInt> t2 = default;
+                InlineArrayNS.InlineArray3<TUInt> t2 = default;
                 t2[0] = l21;
                 t2[1] = h21;
                 t2[2] = TUInt.Zero;
 
-                InlineArray3<TUInt> t3 = default;
+                InlineArrayNS.InlineArray3<TUInt> t3 = default;
                 t3[0] = TUInt.Zero;
                 t3[1] = l22;
                 t3[2] = h22;
 
-                InlineArray3<TUInt> t4 = default;
+                InlineArrayNS.InlineArray3<TUInt> t4 = default;
                 t4[0] = diagonal;
                 t4[1] = TUInt.CreateTruncating(first + second + third);
                 t4[2] = TUInt.Zero;
@@ -787,7 +791,7 @@ namespace UltimateOrb.Numerics {
 
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static void BigMul<TUInt>(out InlineArray2<TUInt> result, TUInt a, TUInt b)
+        static void BigMul<TUInt>(out InlineArrayNS.InlineArray2<TUInt> result, TUInt a, TUInt b)
             where TUInt : IUnsignedNumber<TUInt>?, IBinaryInteger<TUInt>, IMinMaxValue<TUInt>? {
             Unsafe.SkipInit(out result);
             StandardGenericMathArithmeticProvider<TUInt>.BigMulUnsigned(out result[0], out result[1], a, b);
@@ -824,7 +828,7 @@ namespace UltimateOrb.Numerics {
         /* high 256 bits of a 256x256-bit product: the dropped tail leaves it up to
            one unit short of the exact value, never over */
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static InlineArray2<TUInt> MultiplyHighUnsignedApproximate<TUInt>(InlineArray2<TUInt> a, InlineArray2<TUInt> b)
+        static InlineArrayNS.InlineArray2<TUInt> MultiplyHighUnsignedApproximate<TUInt>(InlineArrayNS.InlineArray2<TUInt> a, InlineArrayNS.InlineArray2<TUInt> b)
             where TUInt : IUnsignedNumber<TUInt>?, IBinaryInteger<TUInt>, IMinMaxValue<TUInt>? {
             Debug.Assert(TUInt.CreateTruncating(4) == checked(TUInt.One + TUInt.One + TUInt.One + TUInt.One));
             unchecked {
@@ -840,7 +844,7 @@ namespace UltimateOrb.Numerics {
                 var overflow = AddNoThrow(cross_high, other_high, out middle);
                 var spill = AddNoThrow(middle, TUInt.CreateTruncating(carry + tail_carry), out middle);
                 var final_carry = AddNoThrow(low, middle, out low);
-                InlineArray2<TUInt> r = default;
+                InlineArrayNS.InlineArray2<TUInt> r = default;
                 r[0] = low;
                 r[1] = high + TUInt.CreateTruncating(overflow + spill + final_carry);
                 return r;
@@ -1129,7 +1133,7 @@ namespace UltimateOrb.Numerics {
                    keeps over 300 of its 448 bits (lz < 140); ten limbs leave the tail of
                    2/pi under 2^-462 of the units bit, so all 448 are meaningful. */
                 uint word = (uint)lz / 64, wbits = (uint)lz % 64;
-                InlineArray7<UInt64> s = default;
+                InlineArrayNS.InlineArray7<UInt64> s = default;
                 for (uint k = word; k < 7; k++) {
                     UInt64 c = (wbits == 0 || k == word) ? 0 : f[(int)(k - word - 1)] >> (64 - (int)wbits);
                     s[(int)k] = (f[(int)(k - word)] << (int)wbits) | c;

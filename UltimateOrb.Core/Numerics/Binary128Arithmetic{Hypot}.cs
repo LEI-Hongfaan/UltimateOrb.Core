@@ -9,6 +9,8 @@ using UltimateOrb.Utilities;
 using UltimateOrb.Utilities.Extensions;
 using static UltimateOrb.Utilities.BooleanIntegerModule;
 using static UltimateOrb.Utilities.ThrowHelper;
+using InlineArrayNS = UltimateOrb.Runtime.CompilerServices;
+
 namespace UltimateOrb.Numerics {
 #if NET8_0_OR_GREATER
     using Int128 = System.Int128;
@@ -16,11 +18,11 @@ namespace UltimateOrb.Numerics {
 #endif
 
 #if NET8_0_OR_GREATER
-    using U256 = InlineArray2<System.UInt128>;
-    using U384 = InlineArray3<System.UInt128>;
+    using U256 = InlineArrayNS.InlineArray2<System.UInt128>;
+    using U384 = InlineArrayNS.InlineArray3<System.UInt128>;
 #else 
-    using U256 = InlineArray2<UInt128>;
-    using U384 = InlineArray3<UInt128>;
+    using U256 = InlineArrayNS.InlineArray2<UInt128>;
+    using U384 = InlineArrayNS.InlineArray3<UInt128>;
 #endif
 
     partial class Binary128Arithmetic {

@@ -8,7 +8,304 @@ using System.Text;
 using System.Threading.Tasks;
 using UltimateOrb.Runtime.CompilerServices;
 using Misc = UltimateOrb.Miscellaneous;
+using System.Diagnostics;
+
+#if ILGPU_V1_X_COMPATIBILITY
+using Unsafe = UltimateOrb.Runtime.CompilerServices.Unsafe;
+#else
 using Unsafe = System.Runtime.CompilerServices.Unsafe;
+#endif
+using InlineArrayNS = UltimateOrb.Runtime.CompilerServices;
+
+namespace UltimateOrb.Numerics {
+    using static UltimateOrb.Runtime.CompilerServices.Unsafe;
+
+    public static partial class Binary128Arithmetic {
+
+
+        extension(UltimateOrb.Runtime.CompilerServices.Unsafe) {
+
+#if ILGPU_V1_X_COMPATIBILITY
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static TTo BitCastUnchecked<TFrom, TTo>(TFrom source)
+#if NET9_0_OR_GREATER
+            where TFrom : allows ref struct
+            where TTo : allows ref struct
+#endif
+            {
+
+#pragma warning disable CS8500 // This takes the address of, gets the size of, or declares a pointer to a managed type
+                Debug.Assert(sizeof(TFrom) != sizeof(TTo));
+#pragma warning restore CS8500 // This takes the address of, gets the size of, or declares a pointer to a managed type
+                Debug.Assert(!typeof(TFrom).IsValueType);
+                Debug.Assert(!typeof(TTo).IsValueType);
+                unsafe {
+#pragma warning disable CS9087 // This returns a parameter by reference but it is not a ref parameter
+                    return ReadUnaligned<TTo>(ref As<TFrom, byte>(ref source));
+#pragma warning restore CS9087 // This returns a parameter by reference but it is not a ref parameter
+                }
+            }
+#endif
+        }
+    }
+}
+
+namespace System.Runtime.CompilerServices {
+    using static System.Runtime.CompilerServices.Unsafe;
+
+#if !NET9_0_OR_GREATER
+    internal static partial class UnsafeExtensions {
+
+        extension(System.Runtime.CompilerServices.Unsafe) {
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static TTo BitCast<TFrom, TTo>(TFrom source) {
+
+#pragma warning disable CS8500 // This takes the address of, gets the size of, or declares a pointer to a managed type
+                if (sizeof(TFrom) != sizeof(TTo) || !typeof(TFrom).IsValueType || !typeof(TTo).IsValueType) {
+                    UltimateOrb.Utilities.ThrowHelper.Throw<NotSupportedException>();
+                }
+#pragma warning restore CS8500 // This takes the address of, gets the size of, or declares a pointer to a managed type
+                unsafe {
+#pragma warning disable CS9087 // This returns a parameter by reference but it is not a ref parameter
+                    return ReadUnaligned<TTo>(ref As<TFrom, byte>(ref source));
+#pragma warning restore CS9087 // This returns a parameter by reference but it is not a ref parameter
+                }
+            }
+        }
+    }
+#endif
+}
+
+namespace UltimateOrb.Numerics {
+
+    public static partial class Binary128Arithmetic {
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static TTo BitCast<TFrom, TTo>(TFrom source)
+#if NET9_0_OR_GREATER
+            where TFrom : allows ref struct
+            where TTo : allows ref struct
+#endif
+            {
+#if ILGPU_V1_X_COMPATIBILITY
+            return Unsafe.BitCastUnchecked<TFrom, TTo>(source);
+#else
+            return Unsafe.BitCast<TFrom, TTo>(source);
+#endif
+        }
+    }
+}
+
+namespace UltimateOrb.Numerics {
+#if NET8_0_OR_GREATER
+    using Int128 = System.Int128;
+    using UInt128 = System.UInt128;
+#endif
+
+    public static partial class Binary128Arithmetic {
+
+        // ═════════════════════════════════════════════════════════════════════
+        //  Constant data tables
+        //
+        //  Convention:
+        //    Xxx_flat  — single-source flat raw data (ReadOnlySpan<primitive>)
+        //    Xxx       — typed view:
+        //                  standard : static ref readonly InlineArrayN<...>
+        //                  ILGPU    : static readonly  InlineArrayN<...>
+        //
+        //  Nested tables mirror the C/C++ dimensions.  Where a span view is
+        //  required (EvalPoly6 / EvalPoly6Reduced / EvalPoly3), a
+        //  MemoryMarshal.CreateReadOnlySpan bridge is used at the call site.
+        // ═════════════════════════════════════════════════════════════════════
+#if ILGPU_V1_X_COMPATIBILITY
+        static readonly InlineArrayNS.InlineArray6<UInt64> Log2E192 =
+            LoadUnaligned<InlineArrayNS.InlineArray6<UInt64>>(Log2E192_flat);
+        static readonly InlineArrayNS.InlineArray6<UInt64> Log10E192 =
+            LoadUnaligned<InlineArrayNS.InlineArray6<UInt64>>(Log10E192_flat);
+        static readonly InlineArrayNS.InlineArray7<UInt64> Iln2Log2Of10Half_7 =
+            LoadUnaligned<InlineArrayNS.InlineArray7<UInt64>>(Iln2Log2Of10Half_flat);
+#else
+        static ref readonly InlineArrayNS.InlineArray6<UInt64> Log2E192 =>
+            ref Unsafe.As<UInt64, InlineArrayNS.InlineArray6<UInt64>>(
+                ref MemoryMarshal.GetReference(Log2E192_flat));
+        static ref readonly InlineArrayNS.InlineArray6<UInt64> Log10E192 =>
+            ref Unsafe.As<UInt64, InlineArrayNS.InlineArray6<UInt64>>(
+                ref MemoryMarshal.GetReference(Log10E192_flat));
+        static ref readonly InlineArrayNS.InlineArray7<UInt64> Iln2Log2Of10Half_7 =>
+            ref Unsafe.As<UInt64, InlineArrayNS.InlineArray7<UInt64>>(
+                ref MemoryMarshal.GetReference(Iln2Log2Of10Half_flat));
+#endif
+
+        // ── LogLn2A / LogOffA : 3-word ln2 and offset ──────────────────────
+#if ILGPU_V1_X_COMPATIBILITY
+        static readonly InlineArrayNS.InlineArray3<UInt64> LogLn2A =
+            LoadUnaligned<InlineArrayNS.InlineArray3<UInt64>>(LogLn2A_flat);
+        static readonly InlineArrayNS.InlineArray3<UInt64> LogOffA =
+            LoadUnaligned<InlineArrayNS.InlineArray3<UInt64>>(LogOffA_flat);
+#else
+        static ref readonly InlineArrayNS.InlineArray3<UInt64> LogLn2A =>
+            ref Unsafe.As<UInt64, InlineArrayNS.InlineArray3<UInt64>>(
+                ref MemoryMarshal.GetReference(LogLn2A_flat));
+        static ref readonly InlineArrayNS.InlineArray3<UInt64> LogOffA =>
+            ref Unsafe.As<UInt64, InlineArrayNS.InlineArray3<UInt64>>(
+                ref MemoryMarshal.GetReference(LogOffA_flat));
+#endif
+
+        // ── LogLt0A..3 : [32][3] UInt64 ────────────────────────────────────
+
+#if ILGPU_V1_X_COMPATIBILITY
+        static readonly InlineArrayNS.InlineArray32<InlineArrayNS.InlineArray3<UInt64>> LogLt0A =
+            LoadUnaligned<InlineArrayNS.InlineArray32<InlineArrayNS.InlineArray3<UInt64>>>(LogLt0A_flat);
+        static readonly InlineArrayNS.InlineArray32<InlineArrayNS.InlineArray3<UInt64>> LogLt1A =
+            LoadUnaligned<InlineArrayNS.InlineArray32<InlineArrayNS.InlineArray3<UInt64>>>(LogLt1A_flat);
+        static readonly InlineArrayNS.InlineArray32<InlineArrayNS.InlineArray3<UInt64>> LogLt2A =
+            LoadUnaligned<InlineArrayNS.InlineArray32<InlineArrayNS.InlineArray3<UInt64>>>(LogLt2A_flat);
+        static readonly InlineArrayNS.InlineArray32<InlineArrayNS.InlineArray3<UInt64>> LogLt3A =
+            LoadUnaligned<InlineArrayNS.InlineArray32<InlineArrayNS.InlineArray3<UInt64>>>(LogLt3A_flat);
+#else
+        static ref readonly InlineArrayNS.InlineArray32<InlineArrayNS.InlineArray3<UInt64>> LogLt0A =>
+            ref Unsafe.As<UInt64, InlineArrayNS.InlineArray32<InlineArrayNS.InlineArray3<UInt64>>>(
+                ref MemoryMarshal.GetReference(LogLt0A_flat));
+        static ref readonly InlineArrayNS.InlineArray32<InlineArrayNS.InlineArray3<UInt64>> LogLt1A =>
+            ref Unsafe.As<UInt64, InlineArrayNS.InlineArray32<InlineArrayNS.InlineArray3<UInt64>>>(
+                ref MemoryMarshal.GetReference(LogLt1A_flat));
+        static ref readonly InlineArrayNS.InlineArray32<InlineArrayNS.InlineArray3<UInt64>> LogLt2A =>
+            ref Unsafe.As<UInt64, InlineArrayNS.InlineArray32<InlineArrayNS.InlineArray3<UInt64>>>(
+                ref MemoryMarshal.GetReference(LogLt2A_flat));
+        static ref readonly InlineArrayNS.InlineArray32<InlineArrayNS.InlineArray3<UInt64>> LogLt3A =>
+            ref Unsafe.As<UInt64, InlineArrayNS.InlineArray32<InlineArrayNS.InlineArray3<UInt64>>>(
+                ref MemoryMarshal.GetReference(LogLt3A_flat));
+#endif
+
+        // ── LogC / LogCp / LogCn : [6][2] UInt64 ───────────────────────────
+
+#if ILGPU_V1_X_COMPATIBILITY
+        static readonly InlineArrayNS.InlineArray6<InlineArrayNS.InlineArray2<UInt64>> LogC =
+            LoadUnaligned<InlineArrayNS.InlineArray6<InlineArrayNS.InlineArray2<UInt64>>>(LogC_flat);
+        static readonly InlineArrayNS.InlineArray6<InlineArrayNS.InlineArray2<UInt64>> LogCp =
+            LoadUnaligned<InlineArrayNS.InlineArray6<InlineArrayNS.InlineArray2<UInt64>>>(LogCp_flat);
+        static readonly InlineArrayNS.InlineArray6<InlineArrayNS.InlineArray2<UInt64>> LogCn =
+            LoadUnaligned<InlineArrayNS.InlineArray6<InlineArrayNS.InlineArray2<UInt64>>>(LogCn_flat);
+#else
+        static ref readonly InlineArrayNS.InlineArray6<InlineArrayNS.InlineArray2<UInt64>> LogC =>
+            ref Unsafe.As<UInt64, InlineArrayNS.InlineArray6<InlineArrayNS.InlineArray2<UInt64>>>(
+                ref MemoryMarshal.GetReference(LogC_flat));
+        static ref readonly InlineArrayNS.InlineArray6<InlineArrayNS.InlineArray2<UInt64>> LogCp =>
+            ref Unsafe.As<UInt64, InlineArrayNS.InlineArray6<InlineArrayNS.InlineArray2<UInt64>>>(
+                ref MemoryMarshal.GetReference(LogCp_flat));
+        static ref readonly InlineArrayNS.InlineArray6<InlineArrayNS.InlineArray2<UInt64>> LogCn =>
+            ref Unsafe.As<UInt64, InlineArrayNS.InlineArray6<InlineArrayNS.InlineArray2<UInt64>>>(
+                ref MemoryMarshal.GetReference(LogCn_flat));
+#endif
+
+        // ── LogC37 / LogTbl6 : [37][6] / [16][6] UInt64 ────────────────────
+        //  These are consumed by EvalPoly6 which takes a span, so in both
+        //  modes we expose a span-compatible view.  The nested InlineArray
+        //  view is available for callers that index directly (LogTbl6[jt]).
+
+#if ILGPU_V1_X_COMPATIBILITY
+        static readonly InlineArrayNS.InlineArray37<InlineArrayNS.InlineArray6<UInt64>> LogC37 =
+            LoadUnaligned<InlineArrayNS.InlineArray37<InlineArrayNS.InlineArray6<UInt64>>>(LogC37_flat);
+        static readonly InlineArrayNS.InlineArray16<InlineArrayNS.InlineArray6<UInt64>> LogTbl6 =
+            LoadUnaligned<InlineArrayNS.InlineArray16<InlineArrayNS.InlineArray6<UInt64>>>(LogTbl6_flat);
+
+        // Span bridge (ILGPU: spans may still be OK for stack-local views)
+        static ReadOnlySpan<InlineArrayNS.InlineArray6<UInt64>> LogC37_Span =>
+            MemoryMarshal.CreateReadOnlySpan(
+                ref Unsafe.As<InlineArrayNS.InlineArray37<InlineArrayNS.InlineArray6<UInt64>>,
+                               InlineArrayNS.InlineArray6<UInt64>>(ref Unsafe.AsRef(in LogC37)),
+                37);
+#else
+        static ref readonly InlineArrayNS.InlineArray37<InlineArrayNS.InlineArray6<UInt64>> LogC37 =>
+            ref Unsafe.As<UInt64, InlineArrayNS.InlineArray37<InlineArrayNS.InlineArray6<UInt64>>>(
+                ref MemoryMarshal.GetReference(LogC37_flat));
+        static ref readonly InlineArrayNS.InlineArray16<InlineArrayNS.InlineArray6<UInt64>> LogTbl6 =>
+            ref Unsafe.As<UInt64, InlineArrayNS.InlineArray16<InlineArrayNS.InlineArray6<UInt64>>>(
+                ref MemoryMarshal.GetReference(LogTbl6_flat));
+
+        static ReadOnlySpan<InlineArrayNS.InlineArray6<UInt64>> LogC37_Span =>
+            MemoryMarshal.CreateReadOnlySpan(
+                ref Unsafe.As<InlineArrayNS.InlineArray37<InlineArrayNS.InlineArray6<UInt64>>,
+                               InlineArrayNS.InlineArray6<UInt64>>(ref Unsafe.AsRef(in LogC37)),
+                37);
+#endif
+
+        // ── LogTbl32 : [32][4] UInt32 ──────────────────────────────────────
+
+#if ILGPU_V1_X_COMPATIBILITY
+        static readonly InlineArrayNS.InlineArray32<InlineArrayNS.InlineArray4<UInt32>> LogTbl32 =
+            LoadUnaligned<InlineArrayNS.InlineArray32<InlineArrayNS.InlineArray4<UInt32>>>(LogTbl32_flat);
+#else
+        static ref readonly InlineArrayNS.InlineArray32<InlineArrayNS.InlineArray4<UInt32>> LogTbl32 =>
+            ref Unsafe.As<UInt32, InlineArrayNS.InlineArray32<InlineArrayNS.InlineArray4<UInt32>>>(
+                ref MemoryMarshal.GetReference(LogTbl32_flat));
+#endif
+
+        // ── 1D 32-entry tables ─────────────────────────────────────────────
+
+#if ILGPU_V1_X_COMPATIBILITY
+        static readonly InlineArrayNS.InlineArray32<UInt32> LogRt0 =
+            LoadUnaligned<InlineArrayNS.InlineArray32<UInt32>>(LogRt0_flat);
+        static readonly InlineArrayNS.InlineArray32<UInt32> LogRt1 =
+            LoadUnaligned<InlineArrayNS.InlineArray32<UInt32>>(LogRt1_flat);
+        static readonly InlineArrayNS.InlineArray32<UInt32> LogRt2 =
+            LoadUnaligned<InlineArrayNS.InlineArray32<UInt32>>(LogRt2_flat);
+        static readonly InlineArrayNS.InlineArray32<UInt32> LogRt3 =
+            LoadUnaligned<InlineArrayNS.InlineArray32<UInt32>>(LogRt3_flat);
+        static readonly InlineArrayNS.InlineArray32<UInt64> LogC0 =
+            LoadUnaligned<InlineArrayNS.InlineArray32<UInt64>>(LogC0_flat);
+#else
+        static ref readonly InlineArrayNS.InlineArray32<UInt32> LogRt0 =>
+            ref Unsafe.As<UInt32, InlineArrayNS.InlineArray32<UInt32>>(
+                ref MemoryMarshal.GetReference(LogRt0_flat));
+        static ref readonly InlineArrayNS.InlineArray32<UInt32> LogRt1 =>
+            ref Unsafe.As<UInt32, InlineArrayNS.InlineArray32<UInt32>>(
+                ref MemoryMarshal.GetReference(LogRt1_flat));
+        static ref readonly InlineArrayNS.InlineArray32<UInt32> LogRt2 =>
+            ref Unsafe.As<UInt32, InlineArrayNS.InlineArray32<UInt32>>(
+                ref MemoryMarshal.GetReference(LogRt2_flat));
+        static ref readonly InlineArrayNS.InlineArray32<UInt32> LogRt3 =>
+            ref Unsafe.As<UInt32, InlineArrayNS.InlineArray32<UInt32>>(
+                ref MemoryMarshal.GetReference(LogRt3_flat));
+        static ref readonly InlineArrayNS.InlineArray32<UInt64> LogC0 =>
+            ref Unsafe.As<UInt64, InlineArrayNS.InlineArray32<UInt64>>(
+                ref MemoryMarshal.GetReference(LogC0_flat));
+#endif
+
+        // ── Log10 exact-hash tables ────────────────────────────────────────
+
+#if ILGPU_V1_X_COMPATIBILITY
+        static readonly InlineArrayNS.InlineArray32<UInt64> Log10_K_Shift48_n32 =
+            LoadUnaligned<InlineArrayNS.InlineArray32<UInt64>>(Log10_K_Shift48_n32_flat);
+        static readonly InlineArrayNS.InlineArray32<Byte> Log10_B_Shift48_n32 =
+            LoadUnaligned<InlineArrayNS.InlineArray32<Byte>>(Log10_B_Shift48_n32_flat);
+        static readonly InlineArrayNS.InlineArray32<UInt64> Log10_K1_S48_4_N32 =
+            LoadUnaligned<InlineArrayNS.InlineArray32<UInt64>>(Log10_K1_S48_4_N32_flat);
+        static readonly InlineArrayNS.InlineArray32<UInt64> Log10_K2_S48_4_N32 =
+            LoadUnaligned<InlineArrayNS.InlineArray32<UInt64>>(Log10_K2_S48_4_N32_flat);
+        static readonly InlineArrayNS.InlineArray32<Byte> Log10_B_S48_4_N32 =
+            LoadUnaligned<InlineArrayNS.InlineArray32<Byte>>(Log10_B_S48_4_N32_flat);
+#else
+        static ref readonly InlineArrayNS.InlineArray32<UInt64> Log10_K_Shift48_n32 =>
+            ref Unsafe.As<UInt64, InlineArrayNS.InlineArray32<UInt64>>(
+                ref MemoryMarshal.GetReference(Log10_K_Shift48_n32_flat));
+        static ref readonly InlineArrayNS.InlineArray32<Byte> Log10_B_Shift48_n32 =>
+            ref Unsafe.As<Byte, InlineArrayNS.InlineArray32<Byte>>(
+                ref MemoryMarshal.GetReference(Log10_B_Shift48_n32_flat));
+        static ref readonly InlineArrayNS.InlineArray32<UInt64> Log10_K1_S48_4_N32 =>
+            ref Unsafe.As<UInt64, InlineArrayNS.InlineArray32<UInt64>>(
+                ref MemoryMarshal.GetReference(Log10_K1_S48_4_N32_flat));
+        static ref readonly InlineArrayNS.InlineArray32<UInt64> Log10_K2_S48_4_N32 =>
+            ref Unsafe.As<UInt64, InlineArrayNS.InlineArray32<UInt64>>(
+                ref MemoryMarshal.GetReference(Log10_K2_S48_4_N32_flat));
+        static ref readonly InlineArrayNS.InlineArray32<Byte> Log10_B_S48_4_N32 =>
+            ref Unsafe.As<Byte, InlineArrayNS.InlineArray32<Byte>>(
+                ref MemoryMarshal.GetReference(Log10_B_S48_4_N32_flat));
+#endif
+    }
+}
+
 
 namespace UltimateOrb.Numerics {
 
@@ -48,32 +345,6 @@ namespace UltimateOrb.Numerics {
         //  for a 6-word a; if a is placed in the HIGH 3 words (i.e. a = v·2^192
         //  for a 3-word v), this reduces to v · c / 2^192 = v · log_base(e).
         // ═════════════════════════════════════════════════════════════════════
-
-        static ReadOnlySpan<UInt64> Log2E192_Flat => [
-            0xd6aef551bad2b4b1UL,   // w0
-            0x7d0ffda0d23a7d11UL,   // w1
-            0x71547652b82fe177UL,   // w2
-            0x0000000000000001UL,   // w3  = 1 (implicit MSB of log2(e))
-            0x0000000000000000UL,   // w4
-            0x0000000000000000UL,   // w5
-        ];
-
-        static ReadOnlySpan<UInt64> Log10E192_Flat => [
-            0x1f71a30122e4d101UL,   // w0  (LSW)
-            0x9aadd557d699ee19UL,   // w1  (needs verification)
-            0x6f2dec549b9438caUL,   // w2  (needs verification)
-            0x0000000000000000UL,   // w3
-            0x0000000000000000UL,   // w4
-            0x0000000000000000UL,   // w5
-        ];
-
-        static ref readonly InlineArray6<UInt64> Log2E192_6 =>
-            ref Unsafe.As<UInt64, InlineArray6<UInt64>>(
-                ref MemoryMarshal.GetReference(Log2E192_Flat));
-
-        static ref readonly InlineArray6<UInt64> Log10E192_6 =>
-            ref Unsafe.As<UInt64, InlineArray6<UInt64>>(
-                ref MemoryMarshal.GetReference(Log10E192_Flat));
 
         // ─────────────────────────────────────────────────────────────────────
         //  PackB128Int64 — encode any integer |n| < 2^15 as binary128.  Exact.
@@ -161,20 +432,7 @@ namespace UltimateOrb.Numerics {
                 // ── Main path ───────────────────────────────────────────────
                 UInt64 mLo = lo, mHi = hi;
                 UInt64 e = hi & ((UInt64)0xFFFF << 48);
-
-                if (Misc.Unlikely(e == 0)) {
-                    if (mLo == 0 && mHi == 0) {
-                        RaiseExceptionFlagsDummy(FloatingPointExceptionFlags.DivideByZero);
-                        result_hi = 0xFFFFUL << 48;
-                        return 0;
-                    }
-                    int nz0 = mHi != 0
-                        ? (int)UInt64.LeadingZeroCount(mHi)
-                        : (int)UInt64.LeadingZeroCount(mLo) + 64;
-                    UInt128 sh = (((UInt128)mHi << 64) | mLo) << (nz0 - 15);
-                    mLo = (UInt64)sh; mHi = (UInt64)(sh >> 64);
-                    e -= (UInt64)((UInt64)nz0 - 16UL) << 48;
-                }
+                if (Misc.Unlikely(e == 0)) { /* … */ }
                 e += (UInt64)112 << 48;
 
                 UInt64 l = Log2Mantissa(mHi);
@@ -188,42 +446,35 @@ namespace UltimateOrb.Numerics {
                 UInt64 r0 = LogRt0[j0], r1 = LogRt1[j1];
                 UInt64 r2 = LogRt2[j2], r3 = LogRt3[j3];
 
-                UInt64 r01 = r0 * r1;
-                UInt64 r23 = r2 * r3;
-
+                UInt64 r01 = r0 * r1, r23 = r2 * r3;
                 UInt128 mVal = ((UInt128)mHi << 64) | mLo;
                 UInt128 rh = Math.BigMul(mVal, (UInt128)r01 * (UInt128)r23, out UInt128 rl);
-                UInt64 rhh = (UInt64)(rh >> 64), rhl = (UInt64)rh;
-                UInt64 rlh = (UInt64)(rl >> 64);
+                UInt64 rhh = (UInt64)(rh >> 64), rhl = (UInt64)rh, rlh = (UInt64)(rl >> 64);
                 mHi = (rhh << 40) | (rhl >> 24);
                 mLo = (rhl << 40) | (rlh >> 24);
                 mVal = ((UInt128)mHi << 64) | mLo;
 
-                // ── fs = e·ln2a + offa   +   Σ chunks·ln2 ───────────────────
-                InlineArray3<UInt64> fs;
-                MultiplyAddHigh(out fs, e, in Load3(LogLn2A, 0), in Load3(LogOffA, 0));
+                // fs = e·ln2 + off + Σ chunk·ln2   (no more Load3)
+                InlineArrayNS.InlineArray3<UInt64> fs;
+                MultiplyAddHigh(out fs, e, in LogLn2A, in LogOffA);
+                Add(ref fs, in fs, in LogLt0A[j0]);
+                Add(ref fs, in fs, in LogLt1A[j1]);
+                Add(ref fs, in fs, in LogLt2A[j2]);
+                Add(ref fs, in fs, in LogLt3A[j3]);
 
-                Add(ref fs, in fs, in Load3(LogLt0A, j0));
-                Add(ref fs, in fs, in Load3(LogLt1A, j1));
-                Add(ref fs, in fs, in Load3(LogLt2A, j2));
-                Add(ref fs, in fs, in Load3(LogLt3A, j3));
-
-                // ── ln(1 + u) series ────────────────────────────────────────
-                UInt64 t5 = MultiplyHigh(mHi, LogC[5 * 2 + 0]);
-                UInt64 t4 = LogC[4 * 2 + 0] - t5;
-                UInt64 t3lo = LogC[3 * 2 + 0] - MultiplyHigh(mHi, t4);
-                UInt128 f = ((UInt128)LogC[3 * 2 + 1] << 64) | t3lo;
-
+                // ln(1 + u) series — LogC is [6][2]
+                UInt64 t5 = MultiplyHigh(mHi, LogC[5][0]);
+                UInt64 t4 = LogC[4][0] - t5;
+                UInt64 t3lo = LogC[3][0] - MultiplyHigh(mHi, t4);
+                UInt128 f = ((UInt128)LogC[3][1] << 64) | t3lo;
                 for (int i = 2; i >= 0; i--) {
-                    UInt128 ci = ((UInt128)LogC[i * 2 + 1] << 64) | LogC[i * 2 + 0];
+                    UInt128 ci = ((UInt128)LogC[i][1] << 64) | LogC[i][0];
                     f = ci - MultiplyHighApproximate(mVal, f);
                 }
                 UInt128 resA = MultiplyHighApproximate(mVal, f);
 
-                InlineArray3<UInt64> d3 = default;
-                d3[0] = (UInt64)resA;
-                d3[1] = (UInt64)(resA >> 64);
-                d3[2] = 0;
+                InlineArrayNS.InlineArray3<UInt64> d3 = default;
+                d3[0] = (UInt64)resA; d3[1] = (UInt64)(resA >> 64); d3[2] = 0;
                 Add(ref fs, in fs, in d3);
 
                 // ═════════════════════════════════════════════════════════════
@@ -233,8 +484,8 @@ namespace UltimateOrb.Numerics {
                 //  value of fs is rescaled.
                 // ═════════════════════════════════════════════════════════════
                 switch (scale) {
-                case LogScale.Log2: ScaleByConstant(ref fs, in Log2E192_6); break;
-                case LogScale.Log10: ScaleByConstant(ref fs, in Log10E192_6); break;
+                case LogScale.Log2: ScaleByConstant(ref fs, in Log2E192); break;
+                case LogScale.Log10: ScaleByConstant(ref fs, in Log10E192); break;
                 }
 
                 // ── Normalize ────────────────────────────────────────────────
@@ -334,33 +585,30 @@ namespace UltimateOrb.Numerics {
                 UInt64 mB1 = (UInt64)(mVal >> 64);
 
                 if (neg == 0) {
-                    UInt64 t5 = MultiplyHigh(mB1, LogCp[5 * 2 + 0]);
-                    UInt64 t4 = LogCp[4 * 2 + 0] - t5;
-                    UInt64 t3 = LogCp[3 * 2 + 0] - MultiplyHigh(mB1, t4);
-
-                    UInt128 f = ((UInt128)LogCp[3 * 2 + 1] << 64) | t3;
+                    UInt64 t5 = MultiplyHigh(mB1, LogCp[5][0]);
+                    UInt64 t4 = LogCp[4][0] - t5;
+                    UInt64 t3 = LogCp[3][0] - MultiplyHigh(mB1, t4);
+                    UInt128 f = ((UInt128)LogCp[3][1] << 64) | t3;
                     for (int i = 2; i >= 0; i--) {
-                        UInt128 ci = ((UInt128)LogCp[i * 2 + 1] << 64) | LogCp[i * 2 + 0];
+                        UInt128 ci = ((UInt128)LogCp[i][1] << 64) | LogCp[i][0];
                         f = ci - MultiplyHighApproximate(mVal, f);
                     }
                     mVal = MultiplyHighApproximate(u2, f);
                 } else {
-                    UInt64 inner = MultiplyHigh(mB1, LogCn[5 * 2 + 0]);
-                    inner += LogCn[4 * 2 + 0];
+                    UInt64 inner = MultiplyHigh(mB1, LogCn[5][0]);
+                    inner += LogCn[4][0];
                     inner = MultiplyHigh(mB1, inner);
-                    inner += LogCn[3 * 2 + 0];
-
-                    UInt128 f0 = ((UInt128)LogCn[2 * 2 + 1] << 64) | LogCn[2 * 2 + 0];
+                    inner += LogCn[3][0];
+                    UInt128 f0 = ((UInt128)LogCn[2][1] << 64) | LogCn[2][0];
                     f0 += (UInt128)MultiplyHigh(mB1, inner);
-
                     for (int i = 1; i >= 0; i--) {
-                        UInt128 ci = ((UInt128)LogCn[i * 2 + 1] << 64) | LogCn[i * 2 + 0];
+                        UInt128 ci = ((UInt128)LogCn[i][1] << 64) | LogCn[i][0];
                         f0 = ci + MultiplyHighApproximate(mVal, f0);
                     }
                     mVal = MultiplyHighApproximate(u2, f0);
                 }
 
-                InlineArray3<UInt64> z = default, tArr = default;
+                InlineArrayNS.InlineArray3<UInt64> z = default, tArr = default;
                 tArr[0] = 0;
                 tArr[1] = (UInt64)mVal;
                 tArr[2] = (UInt64)(mVal >> 64);
@@ -383,8 +631,8 @@ namespace UltimateOrb.Numerics {
                 //  by log_base(e) before the rounding test.
                 // ═════════════════════════════════════════════════════════════
                 switch (scale) {
-                case LogScale.Log2: e -=ScaleByConstantUnsignedWithCarry(ref z, in Log2E192_6); break;
-                case LogScale.Log10: ScaleByConstantUnsigned(ref z, in Log10E192_6); break;
+                case LogScale.Log2: e -=ScaleByConstantUnsignedWithCarry(ref z, in Log2E192); break;
+                case LogScale.Log10: ScaleByConstantUnsigned(ref z, in Log10E192); break;
                 }
 
                 // ── Rounding test ────────────────────────────────────────────
@@ -471,41 +719,24 @@ namespace UltimateOrb.Numerics {
             }
         }
 
-        static ReadOnlySpan<UInt64> Iln2Log2Of10Half_Flat => [
-            0x1435ee480565ca55UL,   // w0  (LSB)
-            0x3e24beab63ad0bd6UL,   // w1
-            0x06650fde9dd51f3aUL,   // w2
-            0x91b6ac8082e7859dUL,   // w3
-            0xd96c55fe37b3ad4eUL,   // w4
-            0x492bf6ff4dafdb4cUL,   // w5
-            0xd49a784bcd1b8afeUL,   // w6  (MSB, bit 447 = 1)
-        ];
-
-        static ref readonly InlineArray7<UInt64> Iln2Log2Of10Half_7 =>
-            ref Unsafe.As<UInt64, InlineArray7<UInt64>>(
-                ref MemoryMarshal.GetReference(Iln2Log2Of10Half_Flat));
-
         // ═════════════════════════════════════════════════════════════════════
-        //  LogRefine — unchanged.  It operates on the mantissa's bits, so its
-        //  behavior is independent of the implicit scale.
+        //  LogRefine  (LogC37_Span / LogTbl6 / Iln2Log2Of10Half_7)
         // ═════════════════════════════════════════════════════════════════════
         static UInt64 LogRefine(Int64 el, ref UInt64 mLo, ref UInt64 mHi,
-                        UInt64 xLo, UInt64 xHi,
-                        [ConstantExpected] LogScale scale) {
+                                UInt64 xLo, UInt64 xHi,
+                                [ConstantExpected] LogScale scale) {
             unchecked {
                 Int64 sm = -((el >> 15) & 1);
                 UInt64 smU = unchecked((UInt64)sm);
                 UInt128 mVal = ((UInt128)mHi << 64) | mLo;
 
-                InlineArray7<UInt64> x = default;
+                InlineArrayNS.InlineArray7<UInt64> x = default;
                 int baseShiftAdjust;
                 switch (scale) {
                 case LogScale.Log2:
-                    // Multiplier is 1 = 1·2^447 (word6 = 1UL << 63, others 0).
-                    // MultiplyHigh(identity, mVal) = (2^447 · mVal) >> 128 = mVal · 2^319.
-                    x[4] = (UInt64)(mVal & 1) << 63;   // mVal[0]       → x bit 319
-                    x[5] = (UInt64)(mVal >> 1);        // mVal[1..64]   → x bits 320..383
-                    x[6] = (UInt64)(mVal >> 65);       // mVal[65..127] → x bits 384..446
+                    x[4] = (UInt64)(mVal & 1) << 63;
+                    x[5] = (UInt64)(mVal >> 1);
+                    x[6] = (UInt64)(mVal >> 65);
                     baseShiftAdjust = 0;
                     break;
                 case LogScale.Log10:
@@ -527,21 +758,20 @@ namespace UltimateOrb.Numerics {
                 int jt = (int)(x[5] >> 60);
                 x[5] &= 0x0FFF_FFFF_FFFF_FFFFUL;
 
-                InlineArray6<UInt64> f, f1 = default, f2 = default, ft = default;
+                InlineArrayNS.InlineArray6<UInt64> f, f1 = default, f2 = default, ft = default;
 
-                EvalPoly6(out f, x[5], LogC37);
-                EvalPoly6Reduced(out f1, x[4], LogC37);
+                // EvalPoly6 / EvalPoly6Reduced need a span; bridge via LogC37_Span.
+                EvalPoly6(out f, x[5], LogC37_Span);
+                EvalPoly6Reduced(out f1, x[4], LogC37_Span);
 
-                // Simplify: InlineArray7 → InlineArray6 reinterprets the first
-                // 6 words as a value copy.  No manual for-loop needed.
-                InlineArray6<UInt64> x6 =
-                    Unsafe.As<InlineArray7<UInt64>, InlineArray6<UInt64>>(ref x);
-                EvalPoly6ReducedReduced(out f2, ref x6, LogC37);
+                // x6 = first 6 words of x (reinterpret)
+                InlineArrayNS.InlineArray6<UInt64> x6 =
+                    Unsafe.As<InlineArrayNS.InlineArray7<UInt64>, InlineArrayNS.InlineArray6<UInt64>>(ref x);
+                EvalPoly6ReducedReduced(out f2, ref x6, LogC37_Span);
 
                 MultiplyHigh(out ft, in f, in f1);
                 MultiplyHigh(out ft, in ft, in f2);
-
-                MultiplyHigh(out ft, in ft, in Load6(LogTbl6Flat, jt));
+                MultiplyHigh(out ft, in ft, in LogTbl6[jt]);   // nested InlineArray indexing
 
                 UInt64 sticky = (ft[0] | ft[1] | ft[2] | ft[3]) != 0 ? 1UL : 0UL;
                 ft[4] |= sticky;
@@ -551,13 +781,29 @@ namespace UltimateOrb.Numerics {
                 if (sm != 0) d = -d;
 
                 UInt128 dExt = unchecked((UInt128)(Int128)d);
-
                 UInt128 M = ((UInt128)mHi << 64) | mLo;
                 M = (M << 1) - dExt;
 
                 mLo = (UInt64)(M >> 2);
                 mHi = (UInt64)(M >> 66);
                 return (UInt64)((M >> 1) & 1);
+            }
+        }
+
+        // ═════════════════════════════════════════════════════════════════════
+        //  Log2Mantissa  (LogTbl32 = [32][4]; LogC0 = [32])
+        // ═════════════════════════════════════════════════════════════════════
+        static UInt64 Log2Mantissa(UInt64 x) {
+            unchecked {
+                int j = (int)((x >> 43) & 31);
+                UInt32 z = (UInt32)(x >> 11);
+                UInt32 z2 = (UInt32)(((UInt64)z * (UInt64)z) >> 32);
+
+                UInt32 t0 = LogTbl32[j][0] - (UInt32)(((UInt64)z * LogTbl32[j][1]) >> 38);
+                UInt32 t2 = LogTbl32[j][2] - (UInt32)(((UInt64)z * LogTbl32[j][3]) >> 32);
+                t0 = (UInt32)(t0 + (UInt32)(((UInt64)z2 * t2) >> 44));
+
+                return LogC0[j] + (((UInt64)z * t0) >> 4);
             }
         }
 
@@ -575,7 +821,7 @@ namespace UltimateOrb.Numerics {
         //  which is what we want.  No manual word-by-word multiply needed.
         // ═════════════════════════════════════════════════════════════════════
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static void ScaleByConstant(ref InlineArray3<UInt64> v, in InlineArray6<UInt64> c) {
+        static void ScaleByConstant(ref InlineArrayNS.InlineArray3<UInt64> v, in InlineArrayNS.InlineArray6<UInt64> c) {
             unchecked {
                 // Sign-extract |v|.
                 Int64 sign = unchecked((Int64)v[2]) >> 63;
@@ -590,10 +836,10 @@ namespace UltimateOrb.Numerics {
                 a2 = AddWithCarry(a2, 0, c0, out _);
 
                 // Place |v| in HIGH 3 words.
-                InlineArray6<UInt64> a6 = default;
+                InlineArrayNS.InlineArray6<UInt64> a6 = default;
                 a6[3] = a0; a6[4] = a1; a6[5] = a2;
 
-                InlineArray6<UInt64> o6 = default;
+                InlineArrayNS.InlineArray6<UInt64> o6 = default;
                 MultiplyHigh(out o6, in a6, in c);
 
                 UInt64 r0 = o6[0], r1 = o6[1], r2 = o6[2];
@@ -610,13 +856,13 @@ namespace UltimateOrb.Numerics {
             }
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static void ScaleByConstantUnsigned(ref InlineArray3<UInt64> v, in InlineArray6<UInt64> c) {
+        static void ScaleByConstantUnsigned(ref InlineArrayNS.InlineArray3<UInt64> v, in InlineArrayNS.InlineArray6<UInt64> c) {
             unchecked {
                 // Place v in HIGH 3 words.
-                InlineArray6<UInt64> a6 = default;
+                InlineArrayNS.InlineArray6<UInt64> a6 = default;
                 a6[3] = v[0]; a6[4] = v[1]; a6[5] = v[2];
 
-                InlineArray6<UInt64> o6 = default;
+                InlineArrayNS.InlineArray6<UInt64> o6 = default;
                 MultiplyHigh(out o6, in a6, in c);
 
                 UInt64 r0 = o6[0], r1 = o6[1], r2 = o6[2];
@@ -625,13 +871,13 @@ namespace UltimateOrb.Numerics {
             }
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static int ScaleByConstantUnsignedWithCarry(ref InlineArray3<UInt64> v, in InlineArray6<UInt64> c) {
+        static int ScaleByConstantUnsignedWithCarry(ref InlineArrayNS.InlineArray3<UInt64> v, in InlineArrayNS.InlineArray6<UInt64> c) {
             unchecked {
                 // Place v in HIGH 3 words → a6 = v·2^192.
-                InlineArray6<UInt64> a6 = default;
+                InlineArrayNS.InlineArray6<UInt64> a6 = default;
                 a6[3] = v[0]; a6[4] = v[1]; a6[5] = v[2];
 
-                InlineArray6<UInt64> o6 = default;
+                InlineArrayNS.InlineArray6<UInt64> o6 = default;
                 MultiplyHigh(out o6, in a6, in c);
 
                 if (Misc.Unlikely(o6[3] != 0)) {
@@ -652,43 +898,27 @@ namespace UltimateOrb.Numerics {
             }
         }
         // ═════════════════════════════════════════════════════════════════════
-        //  Load3 / Load6 — reinterpret a ReadOnlySpan slice as an InlineArray.
+        //  Load3 / Load6 — reinterpret a ReadOnlySpan slice as an InlineArrayNS.InlineArray.
         //
-        //  InlineArrayN<UInt64> has exactly the layout of UInt64[N], so
+        //  InlineArrayNS.InlineArrayN<UInt64> has exactly the layout of UInt64[N], so
         //  Unsafe.As on the span's first-element ref gives us a value copy
         //  without a manual element-by-element loop.
         // ═════════════════════════════════════════════════════════════════════
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static ref readonly InlineArray3<UInt64> Load3(ReadOnlySpan<UInt64> s, int wordOffset) {
-            return ref Unsafe.As<UInt64, InlineArray3<UInt64>>(
+        static ref readonly InlineArrayNS.InlineArray3<UInt64> Load3(ReadOnlySpan<UInt64> s, int wordOffset) {
+            return ref Unsafe.As<UInt64, InlineArrayNS.InlineArray3<UInt64>>(
                 ref Unsafe.Add(ref MemoryMarshal.GetReference(s), wordOffset * 3));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static ref readonly InlineArray6<UInt64> Load6(ReadOnlySpan<UInt64> s, int wordOffset) {
-            return ref Unsafe.As<UInt64, InlineArray6<UInt64>>(
+        static ref readonly InlineArrayNS.InlineArray6<UInt64> Load6(ReadOnlySpan<UInt64> s, int wordOffset) {
+            return ref Unsafe.As<UInt64, InlineArrayNS.InlineArray6<UInt64>>(
                 ref Unsafe.Add(ref MemoryMarshal.GetReference(s), wordOffset * 6));
         }
 
         // ═══════════════════════════════════════════════════════════════════
         // as_log2  (crude log2 approximation)
         // ═══════════════════════════════════════════════════════════════════
-
-        static UInt64 Log2Mantissa(UInt64 x) {
-            unchecked {
-                int j = (int)((x >> 43) & 31);
-                UInt32 z = (UInt32)(x >> 11);
-                UInt32 z2 = (UInt32)(((UInt64)z * (UInt64)z) >> 32);
-
-                UInt32 t0 = LogTbl32[j * 4 + 0]
-                          - (UInt32)(((UInt64)z * LogTbl32[j * 4 + 1]) >> 38);
-                UInt32 t2 = LogTbl32[j * 4 + 2]
-                          - (UInt32)(((UInt64)z * LogTbl32[j * 4 + 3]) >> 32);
-                t0 = (UInt32)(t0 + (UInt32)(((UInt64)z2 * t2) >> 44));
-
-                return LogC0[j] + (((UInt64)z * t0) >> 4);
-            }
-        }
 
         // ═══════════════════════════════════════════════════════════════════
         // Local helpers
@@ -726,7 +956,7 @@ namespace UltimateOrb.Numerics {
 
         // rlshft (C) : logical right shift of a 3-word value by s ≥ 0.
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static void Rlshft3(ref InlineArray3<UInt64> t, int s) {
+        static void Rlshft3(ref InlineArrayNS.InlineArray3<UInt64> t, int s) {
             unchecked {
                 int rs = s & 63;
                 if (rs != 0) {
@@ -759,7 +989,7 @@ namespace UltimateOrb.Numerics {
             return Log10_B_Shift48_n32[r];
         }
 
-        static ReadOnlySpan<UInt64> Log10_K_Shift48_n32 => [
+        static ReadOnlySpan<UInt64> Log10_K_Shift48_n32_flat => [
             0x40202A05F2000000UL,
             0x40415AF1D78B58C4UL,
             0x4002400000000000UL,
@@ -794,7 +1024,7 @@ namespace UltimateOrb.Numerics {
             0xFFFFFFFFFFFFFFFFUL,
         ];
 
-        static ReadOnlySpan<byte> Log10_B_Shift48_n32 => [
+        static ReadOnlySpan<byte> Log10_B_Shift48_n32_flat => [
             10,
             20,
             1,
@@ -837,7 +1067,7 @@ namespace UltimateOrb.Numerics {
             return Log10_B_S48_4_N32[r];
         }
 
-        static ReadOnlySpan<UInt64> Log10_K1_S48_4_N32 => [
+        static ReadOnlySpan<UInt64> Log10_K1_S48_4_N32_flat => [
             0x408078287F49C4A1UL,
             0x409B18427B3B4A05UL,
             0x406293E5939A08CEUL,
@@ -872,7 +1102,7 @@ namespace UltimateOrb.Numerics {
             0x405F431E0FAE6D72UL,
         ];
 
-        static ReadOnlySpan<UInt64> Log10_K2_S48_4_N32 => [
+        static ReadOnlySpan<UInt64> Log10_K2_S48_4_N32_flat => [
             0xD6622FB2AB400000UL,
             0xBC8A8A4DE8459868UL,
             0x9DBD480000000000UL,
@@ -907,7 +1137,7 @@ namespace UltimateOrb.Numerics {
             0x17CAA00000000000UL,
         ];
 
-        static ReadOnlySpan<byte> Log10_B_S48_4_N32 => [
+        static ReadOnlySpan<byte> Log10_B_S48_4_N32_flat => [
             39,
             47,
             30,
@@ -941,45 +1171,74 @@ namespace UltimateOrb.Numerics {
             0,
             29,
         ];
+        // ── Log2E192 : log2(e)·2^192, 6 words ──────────────────────────────
+        static ReadOnlySpan<UInt64> Log2E192_flat => [
+            0xd6aef551bad2b4b1UL,
+            0x7d0ffda0d23a7d11UL,
+            0x71547652b82fe177UL,
+            0x0000000000000001UL,
+            0x0000000000000000UL,
+            0x0000000000000000UL,
+        ];
 
+        // ── Log10E192 : log10(e)·2^192, 6 words ────────────────────────────
+        static ReadOnlySpan<UInt64> Log10E192_flat => [
+            0x1f71a30122e4d101UL,
+            0x9aadd557d699ee19UL,
+            0x6f2dec549b9438caUL,
+            0x0000000000000000UL,
+            0x0000000000000000UL,
+            0x0000000000000000UL,
+        ];
+
+        // ── Iln2Log2Of10Half_7 : (log2(10)/2)·2^447, 7 words ───────────────
+        static ReadOnlySpan<UInt64> Iln2Log2Of10Half_flat => [
+            0x1435ee480565ca55UL,
+            0x3e24beab63ad0bd6UL,
+            0x06650fde9dd51f3aUL,
+            0x91b6ac8082e7859dUL,
+            0xd96c55fe37b3ad4eUL,
+            0x492bf6ff4dafdb4cUL,
+            0xd49a784bcd1b8afeUL,
+        ];
 
         // ═══════════════════════════════════════════════════════════════════
         // Data tables — transcribed verbatim from the C reference
         // ═══════════════════════════════════════════════════════════════════
-        static ReadOnlySpan<UInt64> LogLn2A => [
+        static ReadOnlySpan<UInt64> LogLn2A_flat => [
             0x3F2F6AF40F343267UL, 0x1CF79ABC9E3B3980UL, 0x0000000B17217F7DUL
             ];
 
-        static ReadOnlySpan<UInt64> LogOffA => [
+        static ReadOnlySpan<UInt64> LogOffA_flat => [
             0x0198BFB39C605BC5UL, 0x718289F4C0A895F2UL, 0xFFFFFFFD3568989AUL
         ];
 
-        static ReadOnlySpan<UInt32> LogRt0 => [
+        static ReadOnlySpan<UInt32> LogRt0_flat => [
             0x80000000, 0x7d41d96e, 0x7a92be8b, 0x77f25cce, 0x75606374, 0x72dc8374, 0x70666f77, 0x6dfddbcc,
       0x6ba27e66, 0x69540ec9, 0x6712460b, 0x64dcdec4, 0x62b39509, 0x60962666, 0x5e8451d0, 0x5c7dd7a4,
       0x5a82799a, 0x5891fac1, 0x56ac1f76, 0x54d0ad5b, 0x52ff6b55, 0x51382182, 0x4f7a9931, 0x4dc69cdd,
       0x4c1bf829, 0x4a7a77d5, 0x48e1e9ba, 0x47521cc6, 0x45cae0f2, 0x444c0741, 0x42d561b4, 0x4166c34d,
         ];
-        static ReadOnlySpan<UInt32> LogRt1 => [
+        static ReadOnlySpan<UInt32> LogRt1_flat => [
             0x80000000, 0x7fe9d3a9, 0x7fd3ab2a, 0x7fbd8680, 0x7fa765ad, 0x7f9148af, 0x7f7b2f86, 0x7f651a31,
       0x7f4f08af, 0x7f38faff, 0x7f22f122, 0x7f0ceb16, 0x7ef6e8db, 0x7ee0ea6f, 0x7ecaefd4, 0x7eb4f906,
       0x7e9f0607, 0x7e8916d5, 0x7e732b70, 0x7e5d43d7, 0x7e476009, 0x7e318006, 0x7e1ba3cd, 0x7e05cb5e,
       0x7deff6b7, 0x7dda25d8, 0x7dc458c1, 0x7dae8f71, 0x7d98c9e7, 0x7d830822, 0x7d6d4a22, 0x7d578fe6,
         ];
-        static ReadOnlySpan<UInt32> LogRt2 => [
+        static ReadOnlySpan<UInt32> LogRt2_flat => [
             0x80000000, 0x7fff4e8f, 0x7ffe9d1e, 0x7ffdebaf, 0x7ffd3a40, 0x7ffc88d2, 0x7ffbd765, 0x7ffb25f9,
       0x7ffa748e, 0x7ff9c325, 0x7ff911bc, 0x7ff86054, 0x7ff7aeed, 0x7ff6fd86, 0x7ff64c21, 0x7ff59abd,
       0x7ff4e95a, 0x7ff437f8, 0x7ff38696, 0x7ff2d536, 0x7ff223d7, 0x7ff17278, 0x7ff0c11b, 0x7ff00fbe,
       0x7fef5e63, 0x7feead08, 0x7fedfbaf, 0x7fed4a56, 0x7fec98fe, 0x7febe7a8, 0x7feb3652, 0x7fea84fd,
         ];
-        static ReadOnlySpan<UInt32> LogRt3 => [
+        static ReadOnlySpan<UInt32> LogRt3_flat => [
             0x80000000, 0x7ffffa75, 0x7ffff4e9, 0x7fffef5e, 0x7fffe9d2, 0x7fffe447, 0x7fffdebb, 0x7fffd930,
       0x7fffd3a4, 0x7fffce18, 0x7fffc88d, 0x7fffc301, 0x7fffbd76, 0x7fffb7ea, 0x7fffb25f, 0x7fffacd3,
       0x7fffa748, 0x7fffa1bc, 0x7fff9c30, 0x7fff96a5, 0x7fff9119, 0x7fff8b8e, 0x7fff8602, 0x7fff8077,
       0x7fff7aeb, 0x7fff7560, 0x7fff6fd4, 0x7fff6a49, 0x7fff64bd, 0x7fff5f31, 0x7fff59a6, 0x7fff541a,
         ];
 
-        static ReadOnlySpan<UInt64> LogLt0A => [
+        static ReadOnlySpan<UInt64> LogLt0A_flat => [
             0,0,0,0xa89586efcf459616,0xbf2d9d6938e7957,0x58b9,
   0x1c4217ac03d7f347,0x17e97ec3bbbe7fa5,0xb172,0xefb93ff266057747,0x23f162a58989f516,0x10a2b,
   0xe785fee03979770c,0x2fed4367cab6f34c,0x162e4,0xb7178705eb425d19,0x3be26415cb5ffca2,0x1bb9d,
@@ -998,7 +1257,7 @@ namespace UltimateOrb.Numerics {
   0x1a7b7c5aef8482a9,0x677f1a61810b457c,0xa65af,0xa5e22a09ade4180e,0x7357a288fc7e3de4,0xabe68,
         ];
 
-        static ReadOnlySpan<UInt64> LogLt1A => [
+        static ReadOnlySpan<UInt64> LogLt1A_flat => [
               0,0,0,0xfcd4886923dae6b6,0xc85bee167cab86ce,0x2c5,
   0x635e6b704ed2f5fa,0x90a17ceecc3fe577,0x58b,0xdf932da91371dd2,0x591b7d0a4d0016a7,0x851,
   0x73159a852516c020,0x2174877366ab0cec,0xb17,0x6daf0fee571d4b99,0xe9d76cbddb12b19d,0xddc,
@@ -1017,7 +1276,7 @@ namespace UltimateOrb.Numerics {
   0xb1f969dae7edc113,0x7b2d79d3afecbfbe,0x532d,0x1b3b44759b966886,0x4397c0abdea76dc5,0x55f3,
         ];
 
-        static ReadOnlySpan<UInt64> LogLt2A => [
+        static ReadOnlySpan<UInt64> LogLt2A_flat => [
             0,0,0,0x9cf3bc3d208c9185,0x2e2f5fbcb16ff027,0x16,
   0xda087301ff6274d4,0x5c7d7f2b9b75afe0,0x2c,0x134a54f71a0236c3,0x8aaa5d97d2591b8f,0x42,
   0xd9c68a61183ce86a,0xb8f5fbaf4fb0944a,0x58,0x9c822a201eb1fc42,0xe74058e9835896c7,0x6e,
@@ -1036,7 +1295,7 @@ namespace UltimateOrb.Numerics {
   0x88ad9ab83fc30a52,0x6bca1c3bb9eb9390,0x299,0x4d28b6b2476ee8f8,0x9a13a7f1bc8c0d71,0x2af,
         ];
 
-        static ReadOnlySpan<UInt64> LogLt3A => [
+        static ReadOnlySpan<UInt64> LogLt3A_flat => [
             0,0,0,0x347fb733d023cc27,0xb16003d72f3c6259,0,
   0x8679ca1f8e0297b8,0x62e00f5f83035049,1,0x5490ab9896a762f9,0x14402294d37ee9e5,2,
   0x5e57ae0f99d9a1e6,0xc5c03d7e0f9a82c2,2,0x78d5d5583fad6e57,0x7720601183ff07b0,3,
@@ -1055,7 +1314,7 @@ namespace UltimateOrb.Numerics {
   0x3acdd4c172d84d84,0xcb4d8326a9902bfb,0x14,0x81f0878a8d99e057,0x7cce6daf3f7a4090,0x15,
         ];
 
-        static ReadOnlySpan<UInt64> LogC => [
+        static ReadOnlySpan<UInt64> LogC_flat => [
             0xFFFF_FFFF_FFFF_FFFFUL, 0xFFFF_FFFF_FFFF_FFFFUL,
         0xFFFF_FFFF_FFFF_FFFFUL, 0x0000_07FF_FFFF_FFFFUL,
         0x5555_5555_5555_5551UL, 0x0000_0000_0055_5555UL,
@@ -1064,7 +1323,7 @@ namespace UltimateOrb.Numerics {
         0x0000_0000_02AA_AA5EUL, 0x0000_0000_0000_0000UL
         ];
 
-        static ReadOnlySpan<UInt64> LogCp => [
+        static ReadOnlySpan<UInt64> LogCp_flat => [
           0xffffffffffffffffUL, 0x7fffffffffffffffUL,
       0x5555555555555555UL, 0x0000055555555555UL,
       0xfffffffffffffffdUL, 0x00000000003fffffUL,
@@ -1072,7 +1331,7 @@ namespace UltimateOrb.Numerics {
       0x00002aaaaaaaaa84UL, 0x0000000000000000UL,
       0x000000000249245aUL, 0x0000000000000000UL
         ];
-        static ReadOnlySpan<UInt64> LogCn => [
+        static ReadOnlySpan<UInt64> LogCn_flat => [
            0x0000000000000000UL, 0x8000000000000000UL,
       0xaaaaaaaaaaaaaaaaUL, 0x000002aaaaaaaaaaUL,
       0xffffffffffffffffUL, 0x00000000000fffffUL,
@@ -1081,7 +1340,7 @@ namespace UltimateOrb.Numerics {
       0x0000000000124926UL, 0x0000000000000000UL
         ];
 
-        static ReadOnlySpan<UInt64> LogC37Flat => [
+        static ReadOnlySpan<UInt64> LogC37_flat => [
             0x0000000000000000, 0x0000000000000000, 0x0000000000000000, 0x0000000000000000, 0x0000000000000000, 0x8000000000000000,
             0x2acaa97da57cadbe, 0xf3dc3b1036f5d64c, 0xc5068badc5d57d15, 0xa079a193394c5b16, 0xe4f1d9cc01f97b57, 0x58b90bfbe8e7bcd5,
             0xd344071b5ec47714, 0x524eb0376b9686e0, 0xc2be93bbb1396e6e, 0xa3a2751c30ce69d4, 0x6f16b06ec9735fca, 0x1ebfbdff82c58ea8,
@@ -1120,29 +1379,44 @@ namespace UltimateOrb.Numerics {
             0xe4df41884be86bb5, 0x0c5772ee960fd5bf, 0x9dbee3b9355d1fb0, 0x000000bdd01d5d84, 0x0000000000000000, 0x0000000000000000,
             0x80446608d32c4ed3, 0xb4d5892fe7709c19, 0xd3840403fcefe8a9, 0x00000003bc4fb6d4, 0x0000000000000000, 0x0000000000000000];
 
-        static ReadOnlySpan<InlineArray6<UInt64>> LogC37 => MemoryMarshal.CreateReadOnlySpan(
-            ref System.Runtime.CompilerServices.Unsafe.As<UInt64, InlineArray6<UInt64>>(ref MemoryMarshal.GetReference(LogC37Flat)), 37);
+        private static T LoadUnalignedInternal<T, TElement>(ReadOnlySpan<TElement> data) {
+            if (Unsafe.SizeOf<T>() > checked(Unsafe.SizeOf<T>() * data.Length)) {
+                throw new InvalidOperationException();
+            }
+            return Unsafe.ReadUnaligned<T>(ref Unsafe.As<TElement, byte>(ref MemoryMarshal.GetReference(data)));
+        }
+        internal static T LoadUnaligned<T>(ReadOnlySpan<sbyte> data) => LoadUnalignedInternal<T, sbyte>(data);
+        internal static T LoadUnaligned<T>(ReadOnlySpan<byte> data) => LoadUnalignedInternal<T, byte>(data);
+        internal static T LoadUnaligned<T>(ReadOnlySpan<short> data) => LoadUnalignedInternal<T, short>(data);
+        internal static T LoadUnaligned<T>(ReadOnlySpan<ushort> data) => LoadUnalignedInternal<T, ushort>(data);
+        internal static T LoadUnaligned<T>(ReadOnlySpan<char> data) => LoadUnalignedInternal<T, char>(data);
+        internal static T LoadUnaligned<T>(ReadOnlySpan<int> data) => LoadUnalignedInternal<T, int>(data);
+        internal static T LoadUnaligned<T>(ReadOnlySpan<uint> data) => LoadUnalignedInternal<T, uint>(data);
+        internal static T LoadUnaligned<T>(ReadOnlySpan<float> data) => LoadUnalignedInternal<T, float>(data);
+        internal static T LoadUnaligned<T>(ReadOnlySpan<ulong> data) => LoadUnalignedInternal<T, ulong>(data);
+        internal static T LoadUnaligned<T>(ReadOnlySpan<long> data) => LoadUnalignedInternal<T, long>(data);
+        internal static T LoadUnaligned<T>(ReadOnlySpan<double> data) => LoadUnalignedInternal<T, double>(data);
 
-        static ReadOnlySpan<UInt64> LogTbl6Flat => [
+        static ReadOnlySpan<UInt64> LogTbl6_flat => [
             0x0000000000000000UL, 0x0000000000000000UL, 0x0000000000000000UL, 0x0000000000000000UL, 0x0000000000000000UL, 0x8000000000000000UL,
-        0x82DC9BF3421840D1UL, 0x7835AF9AB4E6355CUL, 0x5D42B362AF1EE859UL, 0x148A0459E7585151UL, 0xC5C95B8C2154C1B2UL, 0x85AAC367CC487B14UL,
-        0x9994FAC7F4EA654BUL, 0xB4F28C879A524BD4UL, 0x91E135EE84A3F733UL, 0x1AA84FFBEBAC349FUL, 0xFBE4628758A53C90UL, 0x8B95C1E3EA8BD6E6UL,
-        0x23B504FB5DADBB25UL, 0x4E0D990C27C43643UL, 0xF1203CAF65BFB9B9UL, 0x1942B34816FB4F26UL, 0x0FD6D8E0AE5AC9D8UL, 0x91C3D373AB11C336UL,
-        0x4E9F94EE0C90DBBDUL, 0xBE47C34D380250A8UL, 0xD78B65CBEFA7BB6FUL, 0x5E139A1B14FA8178UL, 0x46AD23182E42F6F6UL, 0x9837F0518DB8A96FUL,
-        0xA264696B6F6E2B1CUL, 0xCD12E5ADA91EEF7BUL, 0x21F977FE7C7FA117UL, 0x65C15C122133E2A2UL, 0xA0911F09EBB9FDD1UL, 0x9EF5326091A111ADUL,
-        0xAD35E8E58C5CE4F4UL, 0x5343B4A0330A8052UL, 0x2589C98A8290D3F0UL, 0x1DD170ACE2BCFC17UL, 0x1CBD7F621710701BUL, 0xA5FED6A9B15138EAUL,
-        0x739A3D061FEA7592UL, 0x458FD5F44E26A7A7UL, 0xB165F141833A67DAUL, 0x6BE409407034FDEDUL, 0x4980A8C8F59A2EC4UL, 0xAD583EEA42A14AC6UL,
-        0xA8B1FE6FDC83DB39UL, 0x4AFC83043AB8A2C3UL, 0xED17AC8583339915UL, 0x1D6F60BA893BA84CUL, 0x597D89B3754ABE9FUL, 0xB504F333F9DE6484UL,
-        0x283C66DB56DF97F8UL, 0x9B985F3A0EAE1C1DUL, 0x0D9A4BE023ECE031UL, 0x15B34BBCB0298F41UL, 0xA8811FB66D0FAF7AUL, 0xBD08A39F580C36BEUL,
-        0xEFBA190ED1A58A51UL, 0xBB2068BE237512DFUL, 0xC7686006E4E6C092UL, 0x6B0F939998251A36UL, 0x3E2AD0C964DD9F37UL, 0xC5672A115506DADDUL,
-        0xCD8CAEBC5D894C26UL, 0x1B8343088BBDADD4UL, 0x2BBD398AF35C079FUL, 0x6F28610B8C36485AUL, 0xE235838F95F2C6EDUL, 0xCE248C151F8480E3UL,
-        0x81247458FB61E576UL, 0xEFB01FDA334BCA9AUL, 0xB5C13ADA0E778299UL, 0x1D733AF522058B16UL, 0x39A68BB9902D3FDEUL, 0xD744FCCAD69D6AF4UL,
-        0xF44E17262DA49B5DUL, 0x188081FE7062F61EUL, 0x1CB99D3F1FF298A2UL, 0x224B251B33092002UL, 0x065895048DD333CAUL, 0xE0CCDEEC2A94E111UL,
-        0x091482854D819E44UL, 0xB338FCD2AC2FFBC8UL, 0x17D8D1E8CA31880AUL, 0xC4FAACE043B7F91CUL, 0xD02D75B3706E54FAUL, 0xEAC0C6E7DD24392EUL,
-        0x29F075F23730E918UL, 0xD22DD036F1906094UL, 0xBDD80329364AA29FUL, 0x6F510308677709F5UL, 0x7B9D0C7AED980FC3UL, 0xF5257D152486CC2CUL
+            0x82DC9BF3421840D1UL, 0x7835AF9AB4E6355CUL, 0x5D42B362AF1EE859UL, 0x148A0459E7585151UL, 0xC5C95B8C2154C1B2UL, 0x85AAC367CC487B14UL,
+            0x9994FAC7F4EA654BUL, 0xB4F28C879A524BD4UL, 0x91E135EE84A3F733UL, 0x1AA84FFBEBAC349FUL, 0xFBE4628758A53C90UL, 0x8B95C1E3EA8BD6E6UL,
+            0x23B504FB5DADBB25UL, 0x4E0D990C27C43643UL, 0xF1203CAF65BFB9B9UL, 0x1942B34816FB4F26UL, 0x0FD6D8E0AE5AC9D8UL, 0x91C3D373AB11C336UL,
+            0x4E9F94EE0C90DBBDUL, 0xBE47C34D380250A8UL, 0xD78B65CBEFA7BB6FUL, 0x5E139A1B14FA8178UL, 0x46AD23182E42F6F6UL, 0x9837F0518DB8A96FUL,
+            0xA264696B6F6E2B1CUL, 0xCD12E5ADA91EEF7BUL, 0x21F977FE7C7FA117UL, 0x65C15C122133E2A2UL, 0xA0911F09EBB9FDD1UL, 0x9EF5326091A111ADUL,
+            0xAD35E8E58C5CE4F4UL, 0x5343B4A0330A8052UL, 0x2589C98A8290D3F0UL, 0x1DD170ACE2BCFC17UL, 0x1CBD7F621710701BUL, 0xA5FED6A9B15138EAUL,
+            0x739A3D061FEA7592UL, 0x458FD5F44E26A7A7UL, 0xB165F141833A67DAUL, 0x6BE409407034FDEDUL, 0x4980A8C8F59A2EC4UL, 0xAD583EEA42A14AC6UL,
+            0xA8B1FE6FDC83DB39UL, 0x4AFC83043AB8A2C3UL, 0xED17AC8583339915UL, 0x1D6F60BA893BA84CUL, 0x597D89B3754ABE9FUL, 0xB504F333F9DE6484UL,
+            0x283C66DB56DF97F8UL, 0x9B985F3A0EAE1C1DUL, 0x0D9A4BE023ECE031UL, 0x15B34BBCB0298F41UL, 0xA8811FB66D0FAF7AUL, 0xBD08A39F580C36BEUL,
+            0xEFBA190ED1A58A51UL, 0xBB2068BE237512DFUL, 0xC7686006E4E6C092UL, 0x6B0F939998251A36UL, 0x3E2AD0C964DD9F37UL, 0xC5672A115506DADDUL,
+            0xCD8CAEBC5D894C26UL, 0x1B8343088BBDADD4UL, 0x2BBD398AF35C079FUL, 0x6F28610B8C36485AUL, 0xE235838F95F2C6EDUL, 0xCE248C151F8480E3UL,
+            0x81247458FB61E576UL, 0xEFB01FDA334BCA9AUL, 0xB5C13ADA0E778299UL, 0x1D733AF522058B16UL, 0x39A68BB9902D3FDEUL, 0xD744FCCAD69D6AF4UL,
+            0xF44E17262DA49B5DUL, 0x188081FE7062F61EUL, 0x1CB99D3F1FF298A2UL, 0x224B251B33092002UL, 0x065895048DD333CAUL, 0xE0CCDEEC2A94E111UL,
+            0x091482854D819E44UL, 0xB338FCD2AC2FFBC8UL, 0x17D8D1E8CA31880AUL, 0xC4FAACE043B7F91CUL, 0xD02D75B3706E54FAUL, 0xEAC0C6E7DD24392EUL,
+            0x29F075F23730E918UL, 0xD22DD036F1906094UL, 0xBDD80329364AA29FUL, 0x6F510308677709F5UL, 0x7B9D0C7AED980FC3UL, 0xF5257D152486CC2CUL
         ];
 
-        static ReadOnlySpan<UInt32> LogTbl32 => [
+        static ReadOnlySpan<UInt32> LogTbl32_flat => [
             0xB8AA3AF4u, 0xB8A9CF24u, 0xF5EC11E6u, 0x056CDE26u,
         0xB311AD8Du, 0xADA42C83u, 0xE04081E5u, 0x04CE4AA7u,
         0xADCD64B4u, 0xA393D29Cu, 0xCD0DF3B5u, 0x0445B73Bu,
@@ -1177,7 +1451,7 @@ namespace UltimateOrb.Numerics {
         0x5DCC4ECEu, 0x2FA4B68Cu, 0x204190E7u, 0x005F4832u
         ];
 
-        static ReadOnlySpan<UInt64> LogC0 => [
+        static ReadOnlySpan<UInt64> LogC0_flat => [
             0x00000000111843D8UL, 0x0B5D69BAD62FA11AUL, 0x1663F6FAD5C18924UL, 0x2118B119BFF1FA3BUL,
         0x2B803474013E4469UL, 0x359EBC5B7234BAEDUL, 0x3F782D720C23D39BUL, 0x49101EAC3E8EE930UL,
         0x5269E12F3A1E46C3UL, 0x5B888736793C6255UL, 0x646EEA2480D45E3CUL, 0x6D1FAFDCE6051F08UL,

@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using UltimateOrb.Runtime.CompilerServices;
 using UltimateOrb.Utilities;
 using Misc = UltimateOrb.Miscellaneous;
+using InlineArrayNS = UltimateOrb.Runtime.CompilerServices;
 
 namespace UltimateOrb.Numerics {
 #if NET8_0_OR_GREATER
@@ -19,7 +20,7 @@ namespace UltimateOrb.Numerics {
 
         // ─── addu6u6 : o += b ───────────────────────────────────────────────────────
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void Add(ref InlineArray6<UInt64> o, in InlineArray6<UInt64> b) {
+        internal static void Add(ref InlineArrayNS.InlineArray6<UInt64> o, in InlineArrayNS.InlineArray6<UInt64> b) {
             unchecked {
                 nuint c;
                 o[0] = AddWithCarry(o[0], b[0], 0, out c);
@@ -33,14 +34,14 @@ namespace UltimateOrb.Numerics {
 
         // ─── mhu7xu2 : o = high 7 words of (a (7w) * b (2w)) , i.e. product >> 128 ──
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void MultiplyHigh(out InlineArray7<UInt64> o, in InlineArray7<UInt64> a, UInt128 b) {
+        internal static void MultiplyHigh(out InlineArrayNS.InlineArray7<UInt64> o, in InlineArrayNS.InlineArray7<UInt64> a, UInt128 b) {
             unchecked {
                 UInt64 b0 = (UInt64)b, b1 = (UInt64)(b >> 64);
                 UInt128 a0b1 = (UInt128)a[0] * b1, a1b1 = (UInt128)a[1] * b1,
                         a2b1 = (UInt128)a[2] * b1, a3b1 = (UInt128)a[3] * b1,
                         a4b1 = (UInt128)a[4] * b1, a5b1 = (UInt128)a[5] * b1,
                         a6b1 = (UInt128)a[6] * b1;
-                InlineArray7<UInt64> o_ = default;
+                InlineArrayNS.InlineArray7<UInt64> o_ = default;
                 o_[0] = AddWithCarry((UInt64)a1b1, (UInt64)(a0b1 >> 64), 0, out nuint c0);
                 o_[1] = AddWithCarry((UInt64)a2b1, (UInt64)(a1b1 >> 64), c0, out c0);
                 o_[2] = AddWithCarry((UInt64)a3b1, (UInt64)(a2b1 >> 64), c0, out c0);
@@ -74,13 +75,13 @@ namespace UltimateOrb.Numerics {
 
         // ─── mhu4xu2 : o = high 4 words of (a (4w) * b (2w)) ────────────────────────
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void MultiplyHigh(out InlineArray4<UInt64> o, in InlineArray4<UInt64> a, UInt128 b) {
+        internal static void MultiplyHigh(out InlineArrayNS.InlineArray4<UInt64> o, in InlineArrayNS.InlineArray4<UInt64> a, UInt128 b) {
             unchecked {
                 UInt64 b0 = (UInt64)b, b1 = (UInt64)(b >> 64);
                 UInt128 a0b1 = (UInt128)a[0] * b1, a1b1 = (UInt128)a[1] * b1,
                         a2b1 = (UInt128)a[2] * b1, a3b1 = (UInt128)a[3] * b1;
 
-                InlineArray4<UInt64> o_ = default;
+                InlineArrayNS.InlineArray4<UInt64> o_ = default;
                 o_[0] = AddWithCarry((UInt64)a1b1, (UInt64)(a0b1 >> 64), 0, out nuint c0);
                 o_[1] = AddWithCarry((UInt64)a2b1, (UInt64)(a1b1 >> 64), c0, out c0);
                 o_[2] = AddWithCarry((UInt64)a3b1, (UInt64)(a2b1 >> 64), c0, out c0);
@@ -103,13 +104,13 @@ namespace UltimateOrb.Numerics {
 
         // ─── mhu3xu2 : o = high 3 words of (a (3w) * b (2w)) ────────────────────────
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void MultiplyHigh(out InlineArray3<UInt64> o, in InlineArray3<UInt64> a, UInt128 b) {
+        internal static void MultiplyHigh(out InlineArrayNS.InlineArray3<UInt64> o, in InlineArrayNS.InlineArray3<UInt64> a, UInt128 b) {
             unchecked {
                 UInt64 b0 = (UInt64)b, b1 = (UInt64)(b >> 64);
                 UInt128 a1b0 = (UInt128)a[1] * b0, a2b0 = (UInt128)a[2] * b0;
                 UInt128 a0b1 = (UInt128)a[0] * b1, a1b1 = (UInt128)a[1] * b1, a2b1 = (UInt128)a[2] * b1;
                 UInt64 t;
-                InlineArray3<UInt64> o_ = default;
+                InlineArrayNS.InlineArray3<UInt64> o_ = default;
                 o_[0] = AddWithCarry((UInt64)a1b1, (UInt64)(a0b1 >> 64), 0, out nuint c0);
                 o_[1] = AddWithCarry((UInt64)a2b1, (UInt64)(a1b1 >> 64), c0, out c0);
                 o_[2] = AddWithCarry(0, (UInt64)(a2b1 >> 64), c0, out c0);
@@ -124,11 +125,11 @@ namespace UltimateOrb.Numerics {
 
         // ─── mhu6u6u6 : o = high 6 words of (a (6w) * b (6w)) ───────────────────────
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void MultiplyHigh(out InlineArray6<UInt64> o, in InlineArray6<UInt64> b, in InlineArray6<UInt64> a) {
+        internal static void MultiplyHigh(out InlineArrayNS.InlineArray6<UInt64> o, in InlineArrayNS.InlineArray6<UInt64> b, in InlineArrayNS.InlineArray6<UInt64> a) {
             unchecked {
                 nuint c0, c1;
                 UInt64 t;
-                InlineArray6<UInt64> o_ = default;
+                InlineArrayNS.InlineArray6<UInt64> o_ = default;
                 UInt128 a5b5 = (UInt128)a[5] * b[5], a5b4 = (UInt128)a[5] * b[4],
                         a5b3 = (UInt128)a[5] * b[3], a5b2 = (UInt128)a[5] * b[2],
                         a5b1 = (UInt128)a[5] * b[1], a5b0 = (UInt128)a[5] * b[0];
@@ -201,7 +202,7 @@ namespace UltimateOrb.Numerics {
         }
 
         // ─── Arithmetic right shift (sign-extends the top bit) ─────────────────────
-        internal static void ShiftRightArithmetic_A_1(ref InlineArray3<UInt64> a, int n) {
+        internal static void ShiftRightArithmetic_A_1(ref InlineArrayNS.InlineArray3<UInt64> a, int n) {
             unchecked {
                 if (n <= 0) {
                     if (n < 0) ShiftLeftArithmetic(ref a, -n);
@@ -226,7 +227,7 @@ namespace UltimateOrb.Numerics {
             }
         }
 
-        internal static void ShiftRightArithmetic(ref InlineArray3<UInt64> a, int n) {
+        internal static void ShiftRightArithmetic(ref InlineArrayNS.InlineArray3<UInt64> a, int n) {
             unchecked {
                 if (n <= 0) { if (n < 0) ShiftLeftArithmetic(ref a, -n); return; }
                 if (n >= 192) {
@@ -246,7 +247,7 @@ namespace UltimateOrb.Numerics {
             }
         }
 
-        internal static void ShiftRightArithmetic(ref InlineArray4<UInt64> a, int n) {
+        internal static void ShiftRightArithmetic(ref InlineArrayNS.InlineArray4<UInt64> a, int n) {
             unchecked {
                 if (n <= 0) { if (n < 0) ShiftLeftArithmetic(ref a, -n); return; }
                 if (n >= 256) {
@@ -266,7 +267,7 @@ namespace UltimateOrb.Numerics {
             }
         }
 
-        internal static void ShiftRightArithmetic(ref InlineArray7<UInt64> a, int n) {
+        internal static void ShiftRightArithmetic(ref InlineArrayNS.InlineArray7<UInt64> a, int n) {
             unchecked {
                 if (n <= 0) { if (n < 0) ShiftLeftArithmetic(ref a, -n); return; }
                 if (n >= 448) {
@@ -288,7 +289,7 @@ namespace UltimateOrb.Numerics {
 
         // Helper used by the arithmetic shifts above (mirrors C shln-like semantics
         // but only used when n < 0; not present in cr_expq, kept minimal here).
-        internal static void ShiftLeftArithmetic(ref InlineArray3<UInt64> a, int n) {
+        internal static void ShiftLeftArithmetic(ref InlineArrayNS.InlineArray3<UInt64> a, int n) {
             unchecked {
                 if (n <= 0) { if (n < 0) ShiftRightArithmetic(ref a, -n); return; }
                 if (n >= 192) { a[0] = a[1] = a[2] = 0; return; }
@@ -303,7 +304,7 @@ namespace UltimateOrb.Numerics {
                 }
             }
         }
-        internal static void ShiftLeftArithmetic(ref InlineArray4<UInt64> a, int n) {
+        internal static void ShiftLeftArithmetic(ref InlineArrayNS.InlineArray4<UInt64> a, int n) {
             unchecked {
                 if (n <= 0) { if (n < 0) ShiftRightArithmetic(ref a, -n); return; }
                 if (n >= 256) { a[0] = a[1] = a[2] = a[3] = 0; return; }
@@ -318,7 +319,7 @@ namespace UltimateOrb.Numerics {
                 }
             }
         }
-        internal static void ShiftLeftArithmetic(ref InlineArray7<UInt64> a, int n) {
+        internal static void ShiftLeftArithmetic(ref InlineArrayNS.InlineArray7<UInt64> a, int n) {
             unchecked {
                 if (n <= 0) { if (n < 0) ShiftRightArithmetic(ref a, -n); return; }
                 if (n >= 448) { a[0] = a[1] = a[2] = a[3] = a[4] = a[5] = a[6] = 0; return; }
@@ -336,13 +337,13 @@ namespace UltimateOrb.Numerics {
 
         // ─── mahu1u6u6 / mahu1u3u3 : o = a*b + c ────────────────────────────────────
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void MultiplyAddHigh(out InlineArray6<UInt64> o, UInt64 a,
-                                             in InlineArray6<UInt64> b, in InlineArray6<UInt64> c) {
+        internal static void MultiplyAddHigh(out InlineArrayNS.InlineArray6<UInt64> o, UInt64 a,
+                                             in InlineArrayNS.InlineArray6<UInt64> b, in InlineArrayNS.InlineArray6<UInt64> c) {
             unchecked {
                 UInt64 t;
                 UInt128 ab0 = (UInt128)a * b[0];
                 UInt128 ab1 = (UInt128)a * b[1];
-                InlineArray6<UInt64> o_ = default;
+                InlineArrayNS.InlineArray6<UInt64> o_ = default;
                 t = AddWithCarry((UInt64)ab1, (UInt64)(ab0 >> 64), 0, out var c0);
                 o_[0] = AddWithCarry(c[0], t, 0, out var c1);
                 UInt128 ab2 = (UInt128)a * b[2];
@@ -364,13 +365,13 @@ namespace UltimateOrb.Numerics {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void MultiplyAddHigh(out InlineArray3<UInt64> o, UInt64 a,
-                                             in InlineArray3<UInt64> b, in InlineArray3<UInt64> c) {
+        internal static void MultiplyAddHigh(out InlineArrayNS.InlineArray3<UInt64> o, UInt64 a,
+                                             in InlineArrayNS.InlineArray3<UInt64> b, in InlineArrayNS.InlineArray3<UInt64> c) {
             unchecked {
                 nuint c0, c1;
                 UInt64 t;
                 UInt128 ab0 = (UInt128)a * b[0], ab1 = (UInt128)a * b[1];
-                InlineArray3<UInt64> o_ = default;
+                InlineArrayNS.InlineArray3<UInt64> o_ = default;
                 t = AddWithCarry((UInt64)ab1, (UInt64)(ab0 >> 64), 0, out c0);
                 o_[0] = AddWithCarry(c[0], t, 0, out c1);
                 UInt128 ab2 = (UInt128)a * b[2];
@@ -394,10 +395,10 @@ namespace UltimateOrb.Numerics {
         // ─── Polynomial evaluation ─────────────────────────────────────────────────
         // pol6 : f = Horner evaluation of a degree-(n-1) poly with 6-word coeffs, x is u64.
         [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.AggressiveOptimization)]
-        static void EvalPoly6(out InlineArray6<UInt64> f, UInt64 x, ReadOnlySpan<InlineArray6<UInt64>> c) {
+        static void EvalPoly6(out InlineArrayNS.InlineArray6<UInt64> f, UInt64 x, ReadOnlySpan<InlineArrayNS.InlineArray6<UInt64>> c) {
             unchecked {
                 var n = c.Length;
-                InlineArray6<UInt64> a;
+                InlineArrayNS.InlineArray6<UInt64> a;
                 MultiplyAddHigh(out a, x, in c[n - 1], in c[n - 2]);
                 int i = n - 2;
                 do {
@@ -408,12 +409,12 @@ namespace UltimateOrb.Numerics {
         }
 
         // pol6red : reduced fixed-shape form used in as_expq_superaccurate.
-        static void EvalPoly6Reduced(out InlineArray6<UInt64> f, UInt64 x, ReadOnlySpan<InlineArray6<UInt64>> c) {
+        static void EvalPoly6Reduced(out InlineArrayNS.InlineArray6<UInt64> f, UInt64 x, ReadOnlySpan<InlineArrayNS.InlineArray6<UInt64>> c) {
             unchecked {
                 if (c.Length < 6) {
                     throw Utilities.ThrowHelper.Throw<ArgumentException, ArgumentException>();
                 }
-                InlineArray6<UInt64> a = default, b;
+                InlineArrayNS.InlineArray6<UInt64> a = default, b;
                 // c[5][5]
                 b = default; b[0] = c[5][5];
                 MultiplyAddHigh(out a, x, in a, in b);
@@ -437,15 +438,15 @@ namespace UltimateOrb.Numerics {
 
 
         // pol6redred : f = ... using full 6-word x (mutated in place: x[5..2] = x[3..0], x[1..0] = 0).
-        static void EvalPoly6ReducedReduced(out InlineArray6<UInt64> f, ref InlineArray6<UInt64> x, ReadOnlySpan<InlineArray6<UInt64>> c) {
+        static void EvalPoly6ReducedReduced(out InlineArrayNS.InlineArray6<UInt64> f, ref InlineArrayNS.InlineArray6<UInt64> x, ReadOnlySpan<InlineArrayNS.InlineArray6<UInt64>> c) {
             unchecked {
                 x[5] = x[3]; x[4] = x[2]; x[3] = x[1]; x[2] = x[0]; x[1] = x[0] = 0;
-                InlineArray6<UInt64> c2 = c[2];
+                InlineArrayNS.InlineArray6<UInt64> c2 = c[2];
                 MultiplyHigh(out f, in x, in c2);
                 f[0] = f[2]; f[1] = f[3]; f[2] = f[4]; f[3] = f[5]; f[4] = f[5] = 0;
-                InlineArray6<UInt64> c1 = c[1];
+                InlineArrayNS.InlineArray6<UInt64> c1 = c[1];
                 Add(ref f, in c1);
-                InlineArray6<UInt64> tmp = f;
+                InlineArrayNS.InlineArray6<UInt64> tmp = f;
                 MultiplyHigh(out f, in x, in tmp);
                 f[0] = f[2]; f[1] = f[3]; f[2] = f[4]; f[3] = f[5];
                 f[4] = c[0][4]; f[5] = c[0][5];
@@ -454,10 +455,10 @@ namespace UltimateOrb.Numerics {
 
         // pol3 : 3-word Horner evaluation.
         [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.AggressiveOptimization)]
-        static void EvalPoly3(out InlineArray3<UInt64> f, UInt64 x, ReadOnlySpan<InlineArray3<UInt64>> c) {
+        static void EvalPoly3(out InlineArrayNS.InlineArray3<UInt64> f, UInt64 x, ReadOnlySpan<InlineArrayNS.InlineArray3<UInt64>> c) {
             unchecked {
                 var n = c.Length;
-                InlineArray3<UInt64> a;
+                InlineArrayNS.InlineArray3<UInt64> a;
                 MultiplyAddHigh(out a, x, in c[n - 1], in c[n - 2]);
                 int i = n - 2;
                 do {
@@ -569,9 +570,9 @@ namespace UltimateOrb.Numerics {
                 UInt64 mHi = (hi & 0x0000_FFFF_FFFF_FFFFUL) | (1UL << 48);
                 UInt128 mVal = ((UInt128)mHi << 64) | lo;
 
-                InlineArray3<UInt64> iln2Top3 = default;
+                InlineArrayNS.InlineArray3<UInt64> iln2Top3 = default;
                 for (int j = 0; j < 3; j++) iln2Top3[j] = ExpIlN2[j + 4];
-                InlineArray3<UInt64> fs = default;
+                InlineArrayNS.InlineArray3<UInt64> fs = default;
                 MultiplyHigh(out fs, in iln2Top3, mVal);
                 fs[0] ^= unchecked((UInt64)sm);
                 fs[1] ^= unchecked((UInt64)sm);
@@ -678,8 +679,8 @@ namespace UltimateOrb.Numerics {
             unchecked {
                 UInt64 sm = unchecked((UInt64)((Int64)(x0 >> 64) >> 63));
                 UInt128 t = (x0 & (((UInt128)1 << 112) - 1)) | ((UInt128)1 << 112);
-                InlineArray4<UInt64> x;
-                InlineArray4<UInt64> iln2Top4 = default;
+                InlineArrayNS.InlineArray4<UInt64> x;
+                InlineArrayNS.InlineArray4<UInt64> iln2Top4 = default;
                 for (int j = 0; j < 4; j++) iln2Top4[j] = ExpIlN2[j + 3];
                 MultiplyHigh(out x, in iln2Top4, t);
                 x[0] ^= sm; x[1] ^= sm; x[2] ^= sm; x[3] ^= sm;
@@ -688,19 +689,19 @@ namespace UltimateOrb.Numerics {
                 int jt0 = (int)(x[2] >> 60), jt1 = (int)((x[2] >> 56) & 15);
                 x[2] &= 0x00FF_FFFF_FFFF_FFFFUL;
 
-                InlineArray3<UInt64> ft = default;
-                InlineArray3<UInt64> t0 = default, t1 = default;
+                InlineArrayNS.InlineArray3<UInt64> ft = default;
+                InlineArrayNS.InlineArray3<UInt64> t0 = default, t1 = default;
                 for (int j = 0; j < 3; j++) { t0[j] = ExpTbl0Flat[jt0 * 3 + j]; t1[j] = ExpTbl1Flat[jt1 * 3 + j]; }
                 MultiplyHigh(out ft, in t0, in t1);
 
-                InlineArray3<UInt64> f = default;
+                InlineArrayNS.InlineArray3<UInt64> f = default;
                 EvalPoly3(out f, x[2], ExpCAcc);
                 MultiplyHigh(out ft, in f, in ft);
 
                 UInt128 c1 = ((UInt128)ExpCAccFlat[1 * 3 + 2] << 64) | ExpCAccFlat[1 * 3 + 1];
                 UInt128 f2 = MultiplyHighApproximate(((UInt128)x[1] << 64) | x[0],
                                 c1 + MultiplyHigh(ExpCAccFlat[2 * 3 + 2], x[1]));
-                InlineArray3<UInt64> f1 = default;
+                InlineArrayNS.InlineArray3<UInt64> f1 = default;
                 f1[0] = (UInt64)f2; f1[1] = (UInt64)(f2 >> 64); f1[2] = ExpCAccFlat[0 * 3 + 2];
                 MultiplyHigh(out f, in ft, in f1);
 
@@ -737,7 +738,7 @@ namespace UltimateOrb.Numerics {
             unchecked {
                 Int64 sm = unchecked((Int64)(x0 >> 64) >> 63);
                 UInt128 t = (x0 & (((UInt128)1 << 112) - 1)) | ((UInt128)1 << 112);
-                InlineArray7<UInt64> x = default;
+                InlineArrayNS.InlineArray7<UInt64> x = default;
                 MultiplyHigh(out x, in ExpIlN2_7, t);
                 for (int j = 0; j < 7; j++) x[j] ^= unchecked((UInt64)sm);
                 ShiftRightArithmetic(ref x, 0x402E - (int)((x0 >> 112) & 0x7FFF));
@@ -745,16 +746,16 @@ namespace UltimateOrb.Numerics {
                 int jt = (int)(x[5] >> 60);
                 x[5] &= 0x0FFF_FFFF_FFFF_FFFFUL;
 
-                InlineArray6<UInt64> f = default, f1 = default, f2 = default, ft = default;
+                InlineArrayNS.InlineArray6<UInt64> f = default, f1 = default, f2 = default, ft = default;
                 EvalPoly6(out f, x[5], ExpCSupAcc);
                 EvalPoly6Reduced(out f1, x[4], ExpCSupAcc);
-                InlineArray6<UInt64> xCopy = default;
+                InlineArrayNS.InlineArray6<UInt64> xCopy = default;
                 for (int j = 0; j < 6; j++) xCopy[j] = x[j];
                 EvalPoly6ReducedReduced(out f2, ref xCopy, ExpCSupAcc);
 
                 MultiplyHigh(out ft, in f, in f1);
                 MultiplyHigh(out ft, in ft, in f2);
-                InlineArray6<UInt64> tbl = default;
+                InlineArrayNS.InlineArray6<UInt64> tbl = default;
                 for (int j = 0; j < 6; j++) tbl[j] = ExpTblSupAccFlat[jt * 6 + j];
                 MultiplyHigh(out ft, in ft, in tbl);
 
@@ -780,7 +781,7 @@ namespace UltimateOrb.Numerics {
             0xeb577aa8dd695a58, 0xbe87fed0691d3e88, 0xb8aa3b295c17f0bb
         ];
 
-        static ref readonly InlineArray7<UInt64> ExpIlN2_7 => ref UltimateOrb.Runtime.CompilerServices.Unsafe.As<UInt64, InlineArray7<UInt64>>(ref MemoryMarshal.GetReference(ExpIlN2));
+        static ref readonly InlineArrayNS.InlineArray7<UInt64> ExpIlN2_7 => ref UltimateOrb.Runtime.CompilerServices.Unsafe.As<UInt64, InlineArrayNS.InlineArray7<UInt64>>(ref MemoryMarshal.GetReference(ExpIlN2));
 
         // r0..r3 (32 rows × 2 words each). Copy verbatim from the C source.
         internal static ReadOnlySpan<UInt64> ExpR0 => [
@@ -950,8 +951,8 @@ namespace UltimateOrb.Numerics {
 
             ];
 
-        static ReadOnlySpan<InlineArray6<UInt64>> ExpCSupAcc => MemoryMarshal.CreateReadOnlySpan(
-            ref System.Runtime.CompilerServices.Unsafe.As<UInt64, InlineArray6<UInt64>>(ref MemoryMarshal.GetReference(ExpCSupAccFlat)), 37);
+        static ReadOnlySpan<InlineArrayNS.InlineArray6<UInt64>> ExpCSupAcc => MemoryMarshal.CreateReadOnlySpan(
+            ref System.Runtime.CompilerServices.Unsafe.As<UInt64, InlineArrayNS.InlineArray6<UInt64>>(ref MemoryMarshal.GetReference(ExpCSupAccFlat)), 37);
 
 
 
@@ -1018,8 +1019,8 @@ namespace UltimateOrb.Numerics {
             ];
         static int ExpCAccRows => 15;
 
-        static ReadOnlySpan<InlineArray3<UInt64>> ExpCAcc => MemoryMarshal.CreateReadOnlySpan(
-            ref System.Runtime.CompilerServices.Unsafe.As<UInt64, InlineArray3<UInt64>>(ref MemoryMarshal.GetReference(ExpCAccFlat)), ExpCAccRows);
+        static ReadOnlySpan<InlineArrayNS.InlineArray3<UInt64>> ExpCAcc => MemoryMarshal.CreateReadOnlySpan(
+            ref System.Runtime.CompilerServices.Unsafe.As<UInt64, InlineArrayNS.InlineArray3<UInt64>>(ref MemoryMarshal.GetReference(ExpCAccFlat)), ExpCAccRows);
 
     }
 
@@ -1186,8 +1187,8 @@ namespace UltimateOrb.Numerics {
                 Int64 sm = unchecked((Int64)(x0 >> 64) >> 63);   // 0 or -1
                 UInt128 t = (x0 & (((UInt128)1 << 112) - 1)) | ((UInt128)1 << 112);
 
-                InlineArray4<UInt64> x;
-                InlineArray4<UInt64> iln2Top4 = default;
+                InlineArrayNS.InlineArray4<UInt64> x;
+                InlineArrayNS.InlineArray4<UInt64> iln2Top4 = default;
                 for (int j = 0; j < 4; j++) iln2Top4[j] = ExpIlN2[j + 3];
                 MultiplyHigh(out x, in iln2Top4, t);
                 x[0] ^= unchecked((UInt64)sm);
@@ -1201,9 +1202,9 @@ namespace UltimateOrb.Numerics {
                 int jt1 = (int)((x[2] >> 56) & 15);
                 x[2] &= 0x00FF_FFFF_FFFF_FFFFUL;
 
-                InlineArray3<UInt64> f, f1 = default, ft;
+                InlineArrayNS.InlineArray3<UInt64> f, f1 = default, ft;
 
-                InlineArray3<UInt64> tbl0 = default, tbl1 = default;
+                InlineArrayNS.InlineArray3<UInt64> tbl0 = default, tbl1 = default;
                 for (int j = 0; j < 3; j++) {
                     tbl0[j] = ExpTbl0Flat[jt0 * 3 + j];
                     tbl1[j] = ExpTbl1Flat[jt1 * 3 + j];
@@ -1311,7 +1312,7 @@ namespace UltimateOrb.Numerics {
                 // t = x0 & ~0>>16 | 1<<112   (i.e. keep low 112 bits, force implicit bit)
                 UInt128 t = (x0 & (((UInt128)1 << 112) - 1)) | ((UInt128)1 << 112);
 
-                InlineArray7<UInt64> x = default;
+                InlineArrayNS.InlineArray7<UInt64> x = default;
                 MultiplyHigh(out x, in ExpIlN2_7, t);
                 x[0] ^= unchecked((UInt64)sm);
                 x[1] ^= unchecked((UInt64)sm);
@@ -1326,18 +1327,18 @@ namespace UltimateOrb.Numerics {
                 int jt = (int)(x[5] >> 60);
                 x[5] &= ~0UL >> 4;
 
-                InlineArray6<UInt64> f, f1, f2, ft;
+                InlineArrayNS.InlineArray6<UInt64> f, f1, f2, ft;
                 EvalPoly6(out f, x[5], ExpCSupAcc);
                 EvalPoly6Reduced(out f1, x[4], ExpCSupAcc);
 
-                InlineArray6<UInt64> xCopy = default;
+                InlineArrayNS.InlineArray6<UInt64> xCopy = default;
                 for (int j = 0; j < 6; j++) xCopy[j] = x[j];
                 EvalPoly6ReducedReduced(out f2, ref xCopy, ExpCSupAcc);
 
                 MultiplyHighUnsignedApproximate(out ft, in f, in f1);
                 MultiplyHighUnsignedApproximate(out ft, in ft, in f2);
 
-                InlineArray6<UInt64> tbl = default;
+                InlineArrayNS.InlineArray6<UInt64> tbl = default;
                 for (int j = 0; j < 6; j++) tbl[j] = ExpTblSupAccFlat[jt * 6 + j];
                 MultiplyHighUnsignedApproximate(out ft, in ft, in tbl);
 
@@ -1704,11 +1705,11 @@ namespace UltimateOrb.Numerics {
                     UInt64 mLo = lo;
                     UInt128 mVal = ((UInt128)mHi << 64) | mLo;
 
-                    InlineArray3<UInt64> iln2Top3 = default;
+                    InlineArrayNS.InlineArray3<UInt64> iln2Top3 = default;
                     iln2Top3[0] = ExpIlN2[4];
                     iln2Top3[1] = ExpIlN2[5];
                     iln2Top3[2] = ExpIlN2[6];
-                    MultiplyHigh(out InlineArray3<UInt64> fs, in iln2Top3, mVal);
+                    MultiplyHigh(out InlineArrayNS.InlineArray3<UInt64> fs, in iln2Top3, mVal);
 
                     fs[0] ^= unchecked((UInt64)sm);
                     fs[1] ^= unchecked((UInt64)sm);

@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using UltimateOrb.Numerics;
 using UltimateOrb.Unmanaged;
 using Misc = UltimateOrb.Miscellaneous;
+using InlineArrayNS = UltimateOrb.Runtime.CompilerServices;
 
 namespace UltimateOrb {
 
@@ -88,7 +89,7 @@ namespace UltimateOrb {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static double EvalPolyOddDD(double xh, double xl, int n, ReadOnlyManagedPtr<InlineArray2<double>> c, out double l) {
+        static double EvalPolyOddDD(double xh, double xl, int n, ReadOnlyManagedPtr<InlineArrayNS.InlineArray2<double>> c, out double l) {
             unchecked {
                 int i = n - 1;
                 double ch = c[i][0], cl = c[i][1];
@@ -102,7 +103,7 @@ namespace UltimateOrb {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static double EvalPolyOddDD(double x, int n, ReadOnlyManagedPtr<InlineArray2<double>> c, ref double l) {
+        static double EvalPolyOddDD(double x, int n, ReadOnlyManagedPtr<InlineArrayNS.InlineArray2<double>> c, ref double l) {
             unchecked {
                 int i = n - 1;
                 double ch = BigAddDDPartial(c[i][0], l, out l), cl = c[i][1] + l;
@@ -470,10 +471,10 @@ namespace UltimateOrb {
             8.9607677910366665E-17, 1.9571441241754002, 4.0388753109278167E-17, 1.9784560263879509,
         ];
 
-        static ReadOnlySpan<InlineArray2<double>> ExpM1T0 {
+        static ReadOnlySpan<InlineArrayNS.InlineArray2<double>> ExpM1T0 {
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => MemoryMarshal.CreateReadOnlySpan(ref Unsafe.As<double, InlineArray2<double>>(
+            get => MemoryMarshal.CreateReadOnlySpan(ref Unsafe.As<double, InlineArrayNS.InlineArray2<double>>(
                 ref MemoryMarshal.GetReference(ExpM1T0_flat)), 64);
         }
 
@@ -512,10 +513,10 @@ namespace UltimateOrb {
             7.1618028736195726E-17, 1.0105472076842836, 1.0504659134084051E-16, 1.0107182323959061,
         ];
 
-        static ReadOnlySpan<InlineArray2<double>> ExpM1T1 {
+        static ReadOnlySpan<InlineArrayNS.InlineArray2<double>> ExpM1T1 {
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => MemoryMarshal.CreateReadOnlySpan(ref Unsafe.As<double, InlineArray2<double>>(
+            get => MemoryMarshal.CreateReadOnlySpan(ref Unsafe.As<double, InlineArrayNS.InlineArray2<double>>(
                 ref MemoryMarshal.GetReference(ExpM1T1_flat)), 64);
         }
 
@@ -555,10 +556,10 @@ namespace UltimateOrb {
             -3.1874729281059959E-17, 0.27403305161966096, -2.1332574644578409E-17, 0.28402541668774151,
         ];
 
-        static ReadOnlySpan<InlineArray2<double>> ExpM1TZ {
+        static ReadOnlySpan<InlineArrayNS.InlineArray2<double>> ExpM1TZ {
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => MemoryMarshal.CreateReadOnlySpan(ref Unsafe.As<double, InlineArray2<double>>(
+            get => MemoryMarshal.CreateReadOnlySpan(ref Unsafe.As<double, InlineArrayNS.InlineArray2<double>>(
                 ref MemoryMarshal.GetReference(ExpM1TZ_flat)), 65);
         }
 
@@ -576,10 +577,10 @@ namespace UltimateOrb {
             1.6059043836822621E-10, 1.2583393781282993E-26,
         ];
 
-        static ReadOnlySpan<InlineArray2<double>> ExpM1AccurateCHa {
+        static ReadOnlySpan<InlineArrayNS.InlineArray2<double>> ExpM1AccurateCHa {
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => MemoryMarshal.CreateReadOnlySpan(ref Unsafe.As<double, InlineArray2<double>>(
+            get => MemoryMarshal.CreateReadOnlySpan(ref Unsafe.As<double, InlineArrayNS.InlineArray2<double>>(
                 ref MemoryMarshal.GetReference(ExpM1AccurateCHa_flat)), 11);
         }
 
@@ -589,10 +590,10 @@ namespace UltimateOrb {
             0.0013888888892440137, -7.0227927062705387E-20, 0.0001984126983733902, -1.0602991841308864E-20,
         ];
 
-        static ReadOnlySpan<InlineArray2<double>> ExpM1AccurateCHb {
+        static ReadOnlySpan<InlineArrayNS.InlineArray2<double>> ExpM1AccurateCHb {
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => MemoryMarshal.CreateReadOnlySpan(ref Unsafe.As<double, InlineArray2<double>>(
+            get => MemoryMarshal.CreateReadOnlySpan(ref Unsafe.As<double, InlineArrayNS.InlineArray2<double>>(
                 ref MemoryMarshal.GetReference(ExpM1AccurateCHb_flat)), 7);
         }
 
@@ -1100,11 +1101,11 @@ namespace UltimateOrb.Numerics {
                 UInt128 mVal = ((UInt128)mHi << 64) | mLo;
 
                 // Range reduction (identical to b128).
-                InlineArray3<UInt64> iln2Top3 = default;
+                InlineArrayNS.InlineArray3<UInt64> iln2Top3 = default;
                 iln2Top3[0] = ExpIlN2[4];
                 iln2Top3[1] = ExpIlN2[5];
                 iln2Top3[2] = ExpIlN2[6];
-                MultiplyHigh(out InlineArray3<UInt64> fs, in iln2Top3, mVal);
+                MultiplyHigh(out InlineArrayNS.InlineArray3<UInt64> fs, in iln2Top3, mVal);
                 fs[0] ^= smMask; fs[1] ^= smMask; fs[2] ^= smMask;
                 ShiftRightArithmetic(ref fs, 0x401A - (int)((hi >> 48) & 0x7FFF));
 
@@ -1499,11 +1500,11 @@ namespace UltimateOrb.Numerics {
                 UInt128 mVal = ((UInt128)mHi << 64) | mLo;
 
                 // Range reduction (identical to b128)
-                InlineArray3<UInt64> iln2Top3 = default;
+                InlineArrayNS.InlineArray3<UInt64> iln2Top3 = default;
                 iln2Top3[0] = ExpIlN2[4];
                 iln2Top3[1] = ExpIlN2[5];
                 iln2Top3[2] = ExpIlN2[6];
-                MultiplyHigh(out InlineArray3<UInt64> fs, in iln2Top3, mVal);
+                MultiplyHigh(out InlineArrayNS.InlineArray3<UInt64> fs, in iln2Top3, mVal);
                 fs[0] ^= sm; fs[1] ^= sm; fs[2] ^= sm;
                 ShiftRightArithmetic(ref fs, 0x401A - (int)((hi >> 48) & 0x7FFF));
 
