@@ -744,7 +744,7 @@ namespace UltimateOrb.Numerics {
                     baseShiftAdjust = -1;
                     break;
                 default: // Ln
-                    MultiplyHigh(out x, in ExpIlN2_7, mVal);
+                    MultiplyHigh(out x, in ILn2, mVal);
                     baseShiftAdjust = 0;
                     break;
                 }

@@ -1034,7 +1034,113 @@ public readonly struct TotalOrderIeee754Comparer<T> :
 
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private static int Main(string[] args) {
+            {
 
+                {
+                    var b = CorrectRoundingMath.ExpM1(4.000555584256948, MidpointRounding.ToZero);
+                    Console.WriteLine($"? = {b:G17}");
+
+                }
+                {
+                    var b = CorrectRoundingMath.ExpM1(11.715807839696332, MidpointRounding.ToPositiveInfinity);
+                    Console.WriteLine($"? = {b:G17}");
+                }
+
+                {
+                    var b = CorrectRoundingMath.ExpM1(0.98969266186776228, MidpointRounding.ToPositiveInfinity);
+                    Console.WriteLine($"? = {b:G17}");
+
+                }
+                {
+                    var b = CorrectRoundingMath.ExpM1(11.715807839696332, MidpointRounding.ToNegativeInfinity);
+                    Console.WriteLine($"? = {b:G17}");
+                }
+                {
+                    var b = CorrectRoundingMath.ExpM1(-0.0, MidpointRounding.ToNegativeInfinity);
+                    Console.WriteLine($"? = {b:G17}");
+
+                }
+                {
+                    var b = CorrectRoundingMath.ExpM1(-2.2250738585072009E-308, MidpointRounding.ToZero);
+                    Console.WriteLine($"? = {b:G17}");
+
+                }
+                {
+                    var b = CorrectRoundingMath.ExpM1(-0.93001836374961722, MidpointRounding.ToZero);
+                    Console.WriteLine($"? = {b:G17}");
+
+
+                }
+                {
+                    var b = CorrectRoundingMath.ExpM1(1.4928873716680081E+181, MidpointRounding.ToZero);
+                    Console.WriteLine($"? = {b:G17}");
+                }
+                {
+                    var b = CorrectRoundingMath.ExpM1(-1.0403571407112755, MidpointRounding.ToZero);
+                    Console.WriteLine($"? = {b:G17}");
+
+                }
+                {
+                    var b = CorrectRoundingMath.ExpM1(36.184789079846887, MidpointRounding.ToZero);
+                    Console.WriteLine($"? = {b:G17}");
+
+
+                }
+                {
+
+                    var b = CorrectRoundingMath.ExpM1(1.7976931348623157E+308, MidpointRounding.AwayFromZero);
+                    Console.WriteLine($"? = {b:G17}");
+
+
+
+                }
+
+                {
+                    var b = CorrectRoundingMath.ExpM1(0.053889835785768385, MidpointRounding.ToEven);
+                    Console.WriteLine($"? = {b:G17}");
+
+                }
+                {
+                    var b = CorrectRoundingMath.ExpM1(-37.429947750237034, MidpointRounding.ToEven);
+                    Console.WriteLine($"? = {b:G17}");
+                }
+                {
+                    var b = CorrectRoundingMath.ExpM1(-35.232723172900819, MidpointRounding.ToEven);
+                    Console.WriteLine($"? = {b:G17}");
+
+                }
+
+
+                {
+                    var b = CorrectRoundingMath.ExpM1(9.1343813236002528E-17, MidpointRounding.ToEven);
+                    Console.WriteLine($"? = {b:G17}");
+
+                }
+                {
+                    var b = CorrectRoundingMath.ExpM1(-20.00000000000003, MidpointRounding.ToEven);
+                    Console.WriteLine($"? = {b:G17}");
+
+                }
+                {
+                    var b = CorrectRoundingMath.ExpM1(20.00000000000003, MidpointRounding.ToEven);
+                    Console.WriteLine($"? = {b:G17}");
+
+                }
+                {
+                    var b = Binary64Arithmetic.ExpM1(BitConverter.DoubleToUInt64Bits(0), MidpointRounding.ToNegativeInfinity);
+                    Console.WriteLine($"? = {BitConverter.UInt64BitsToDouble(b):G17}");
+                }
+                {
+                    var b = Binary64Arithmetic.ExpM1(BitConverter.DoubleToUInt64Bits(1), MidpointRounding.ToNegativeInfinity);
+                    Console.WriteLine($"? = {BitConverter.UInt64BitsToDouble(b):G17}");
+                }
+                {
+                    var b = Binary64Arithmetic.ExpM1(BitConverter.DoubleToUInt64Bits(4.0005555842569480), MidpointRounding.ToNegativeInfinity);
+                    Console.WriteLine($"? = {BitConverter.UInt64BitsToDouble(b):G17}");
+                }
+                return 0;
+
+            }
             {
                 var sdfasd = Quadruple.Parse("1.00000000000000001127570259384924611");
 
@@ -1212,112 +1318,7 @@ public readonly struct TotalOrderIeee754Comparer<T> :
 
                 return 0;
             }
-            {
-                {
-                    var b = CorrectRoundingMath.ExpM1(11.715807839696332, MidpointRounding.ToPositiveInfinity);
-                    Console.WriteLine($"? = {b:G17}");
-                }
-
-                {
-                    var b = CorrectRoundingMath.ExpM1(0.98969266186776228, MidpointRounding.ToPositiveInfinity);
-                    Console.WriteLine($"? = {b:G17}");
-
-                }
-                {
-                    var b = CorrectRoundingMath.ExpM1(11.715807839696332, MidpointRounding.ToNegativeInfinity);
-                    Console.WriteLine($"? = {b:G17}");
-                }
-                {
-                    var b = CorrectRoundingMath.ExpM1(-0.0, MidpointRounding.ToNegativeInfinity);
-                    Console.WriteLine($"? = {b:G17}");
-
-                }
-                {
-                    var b = CorrectRoundingMath.ExpM1(-2.2250738585072009E-308, MidpointRounding.ToZero);
-                    Console.WriteLine($"? = {b:G17}");
-
-                }
-                {
-                    var b = CorrectRoundingMath.ExpM1(-0.93001836374961722, MidpointRounding.ToZero);
-                    Console.WriteLine($"? = {b:G17}");
-
-
-                }
-                {
-                    var b = CorrectRoundingMath.ExpM1(1.4928873716680081E+181, MidpointRounding.ToZero);
-                    Console.WriteLine($"? = {b:G17}");
-                }
-                {
-                    var b = CorrectRoundingMath.ExpM1(-1.0403571407112755, MidpointRounding.ToZero);
-                    Console.WriteLine($"? = {b:G17}");
-
-                }
-                {
-                    var b = CorrectRoundingMath.ExpM1(36.184789079846887, MidpointRounding.ToZero);
-                    Console.WriteLine($"? = {b:G17}");
-
-
-                }
-                {
-
-                    var b = CorrectRoundingMath.ExpM1(1.7976931348623157E+308, MidpointRounding.AwayFromZero);
-                    Console.WriteLine($"? = {b:G17}");
-
-
-
-                }
-
-                {
-                    var b = CorrectRoundingMath.ExpM1(0.053889835785768385, MidpointRounding.ToEven);
-                    Console.WriteLine($"? = {b:G17}");
-
-                }
-                {
-                    var b = CorrectRoundingMath.ExpM1(-37.429947750237034, MidpointRounding.ToEven);
-                    Console.WriteLine($"? = {b:G17}");
-                }
-                {
-                    var b = CorrectRoundingMath.ExpM1(4.000555584256948, MidpointRounding.ToZero);
-                    Console.WriteLine($"? = {b:G17}");
-
-                }
-                {
-                    var b = CorrectRoundingMath.ExpM1(-35.232723172900819, MidpointRounding.ToEven);
-                    Console.WriteLine($"? = {b:G17}");
-
-                }
-
-
-                {
-                    var b = CorrectRoundingMath.ExpM1(9.1343813236002528E-17, MidpointRounding.ToEven);
-                    Console.WriteLine($"? = {b:G17}");
-
-                }
-                {
-                    var b = CorrectRoundingMath.ExpM1(-20.00000000000003, MidpointRounding.ToEven);
-                    Console.WriteLine($"? = {b:G17}");
-
-                }
-                {
-                    var b = CorrectRoundingMath.ExpM1(20.00000000000003, MidpointRounding.ToEven);
-                    Console.WriteLine($"? = {b:G17}");
-
-                }
-                {
-                    var b = Binary64Arithmetic.ExpM1(BitConverter.DoubleToUInt64Bits(0), MidpointRounding.ToNegativeInfinity);
-                    Console.WriteLine($"? = {BitConverter.UInt64BitsToDouble(b):G17}");
-                }
-                {
-                    var b = Binary64Arithmetic.ExpM1(BitConverter.DoubleToUInt64Bits(1), MidpointRounding.ToNegativeInfinity);
-                    Console.WriteLine($"? = {BitConverter.UInt64BitsToDouble(b):G17}");
-                }
-                {
-                    var b = Binary64Arithmetic.ExpM1(BitConverter.DoubleToUInt64Bits(4.0005555842569480), MidpointRounding.ToNegativeInfinity);
-                    Console.WriteLine($"? = {BitConverter.UInt64BitsToDouble(b):G17}");
-                }
-                return 0;
-
-            }
+            
             {
                 //var sdfa = CorrectRoundingMath.ExpM1(4.0005555842569480, MidpointRounding.ToNegativeInfinity);
                 //Console.WriteLine($"? = {sdfa:G17}");
@@ -4212,22 +4213,22 @@ namespace UltimateOrb.Numerics.Test {
         }
 
         public static int Main1() {
-            Console.WriteLine("=== UIntN + operator ===");
-            RunUIntAddTests<byte>("UIntN<byte>");
-            RunUIntAddTests<ushort>("UIntN<ushort>");
-            RunUIntAddTests<uint>("UIntN<uint>");
-            RunUIntAddTests<ulong>("UIntN<ulong>");
-            RunUIntAddTests<System.UInt128>("UIntN<UInt128>");
-            RunUIntAddTests<S192>("UIntN<S192>");       // 24-byte TStorage -> naive tier
+            Console.WriteLine("=== UInt + operator ===");
+            RunUIntAddTests<byte>("UInt<byte>");
+            RunUIntAddTests<ushort>("UInt<ushort>");
+            RunUIntAddTests<uint>("UInt<uint>");
+            RunUIntAddTests<ulong>("UInt<ulong>");
+            RunUIntAddTests<System.UInt128>("UInt<UInt128>");
+            RunUIntAddTests<S192>("UInt<S192>");       // 24-byte TStorage -> naive tier
 
-            Console.WriteLine("=== IntN + operator ===");
-            RunIntAddTests<sbyte>("IntN<sbyte>");
-            RunIntAddTests<short>("IntN<short>");
-            RunIntAddTests<int>("IntN<int>");
-            RunIntAddTests<long>("IntN<long>");
-            RunIntAddTests<System.Int128>("IntN<Int128>");
+            Console.WriteLine("=== Int + operator ===");
+            RunIntAddTests<sbyte>("Int<sbyte>");
+            RunIntAddTests<short>("Int<short>");
+            RunIntAddTests<int>("Int<int>");
+            RunIntAddTests<long>("Int<long>");
+            RunIntAddTests<System.Int128>("Int<Int128>");
 
-            Console.WriteLine("=== UIntN <-> IntN conversions ===");
+            Console.WriteLine("=== UInt <-> Int conversions ===");
             RunCrossConversionTests();
 
             Console.WriteLine("=== BigInteger conversions ===");
@@ -4246,10 +4247,10 @@ namespace UltimateOrb.Numerics.Test {
             int bits = sizeof(TStorage) * 8;
             BigInteger umax = (BigInteger.One << bits) - 1;
 
-            var zero = (UIntN<TStorage>)BigInteger.Zero;
-            var one = (UIntN<TStorage>)BigInteger.One;
-            var max = (UIntN<TStorage>)umax;
-            var maxMinus1 = (UIntN<TStorage>)(umax - 1);
+            var zero = (UInt<TStorage>)BigInteger.Zero;
+            var one = (UInt<TStorage>)BigInteger.One;
+            var max = (UInt<TStorage>)umax;
+            var maxMinus1 = (UInt<TStorage>)(umax - 1);
 
             // --- unchecked, in-range ---
             CheckEquals((BigInteger)(one + one), 2, $"{label}: 1 + 1 = 2");
@@ -4282,11 +4283,11 @@ namespace UltimateOrb.Numerics.Test {
             BigInteger smax = (BigInteger.One << (bits - 1)) - 1;
             BigInteger smin = -(BigInteger.One << (bits - 1));
 
-            var zero = (IntN<TStorage>)BigInteger.Zero;
-            var one = (IntN<TStorage>)BigInteger.One;
-            var minusOne = (IntN<TStorage>)BigInteger.MinusOne;
-            var max = (IntN<TStorage>)smax;
-            var min = (IntN<TStorage>)smin;
+            var zero = (Int<TStorage>)BigInteger.Zero;
+            var one = (Int<TStorage>)BigInteger.One;
+            var minusOne = (Int<TStorage>)BigInteger.MinusOne;
+            var max = (Int<TStorage>)smax;
+            var min = (Int<TStorage>)smin;
 
             // --- unchecked, in-range ---
             CheckEquals((BigInteger)(one + minusOne), 0, $"{label}: 1 + (-1) = 0");
@@ -4315,67 +4316,67 @@ namespace UltimateOrb.Numerics.Test {
         }
 
         // ---------------------------------------------------------------------
-        // UIntN <-> IntN conversions
+        // UInt <-> Int conversions
         // ---------------------------------------------------------------------
 
         static void RunCrossConversionTests() {
-            // UIntN -> IntN, unchecked (bit-cast semantics)
+            // UInt -> Int, unchecked (bit-cast semantics)
             {
-                var u200 = (UIntN<byte>)(BigInteger)200;
-                var i = (IntN<byte>)u200;       // unchecked explicit
-                CheckEquals((BigInteger)i, -56, "UIntN<byte> 200 -> IntN<byte> unchecked = -56");
+                var u200 = (UInt<byte>)(BigInteger)200;
+                var i = (Int<byte>)u200;       // unchecked explicit
+                CheckEquals((BigInteger)i, -56, "UInt<byte> 200 -> Int<byte> unchecked = -56");
 
-                var u100 = (UIntN<byte>)(BigInteger)100;
-                CheckEquals((BigInteger)(IntN<byte>)u100, 100,
-                                                    "UIntN<byte> 100 -> IntN<byte> unchecked = 100");
+                var u100 = (UInt<byte>)(BigInteger)100;
+                CheckEquals((BigInteger)(Int<byte>)u100, 100,
+                                                    "UInt<byte> 100 -> Int<byte> unchecked = 100");
             }
 
-            // UIntN -> IntN, checked
+            // UInt -> Int, checked
             {
-                var u100 = (UIntN<byte>)(BigInteger)100;
-                CheckEquals((BigInteger)checked((IntN<byte>)u100), 100,
-                                                    "UIntN<byte> 100 -> IntN<byte> checked OK");
+                var u100 = (UInt<byte>)(BigInteger)100;
+                CheckEquals((BigInteger)checked((Int<byte>)u100), 100,
+                                                    "UInt<byte> 100 -> Int<byte> checked OK");
 
-                var u200 = (UIntN<byte>)(BigInteger)200;
-                CheckThrowsOverflow(() => { _ = checked((IntN<byte>)u200); },
-                                                    "UIntN<byte> 200 -> IntN<byte> checked throws");
+                var u200 = (UInt<byte>)(BigInteger)200;
+                CheckThrowsOverflow(() => { _ = checked((Int<byte>)u200); },
+                                                    "UInt<byte> 200 -> Int<byte> checked throws");
             }
 
-            // IntN -> UIntN, unchecked
+            // Int -> UInt, unchecked
             {
-                var neg = (IntN<byte>)BigInteger.MinusOne;
-                CheckEquals((BigInteger)(UIntN<byte>)neg, 255,
-                                                    "IntN<byte> -1 -> UIntN<byte> unchecked = 255");
+                var neg = (Int<byte>)BigInteger.MinusOne;
+                CheckEquals((BigInteger)(UInt<byte>)neg, 255,
+                                                    "Int<byte> -1 -> UInt<byte> unchecked = 255");
 
-                var pos = (IntN<byte>)BigInteger.CreateChecked(42);
-                CheckEquals((BigInteger)(UIntN<byte>)pos, 42,
-                                                    "IntN<byte> 42 -> UIntN<byte> unchecked = 42");
+                var pos = (Int<byte>)BigInteger.CreateChecked(42);
+                CheckEquals((BigInteger)(UInt<byte>)pos, 42,
+                                                    "Int<byte> 42 -> UInt<byte> unchecked = 42");
             }
 
-            // IntN -> UIntN, checked
+            // Int -> UInt, checked
             {
-                var pos = (IntN<byte>)BigInteger.CreateChecked(42);
-                CheckEquals((BigInteger)checked((UIntN<byte>)pos), 42,
-                                                    "IntN<byte> 42 -> UIntN<byte> checked OK");
+                var pos = (Int<byte>)BigInteger.CreateChecked(42);
+                CheckEquals((BigInteger)checked((UInt<byte>)pos), 42,
+                                                    "Int<byte> 42 -> UInt<byte> checked OK");
 
-                var neg = (IntN<byte>)BigInteger.MinusOne;
-                CheckThrowsOverflow(() => { _ = checked((UIntN<byte>)neg); },
-                                                    "IntN<byte> -1 -> UIntN<byte> checked throws");
+                var neg = (Int<byte>)BigInteger.MinusOne;
+                CheckThrowsOverflow(() => { _ = checked((UInt<byte>)neg); },
+                                                    "Int<byte> -1 -> UInt<byte> checked throws");
 
-                var neg32 = (IntN<uint>)BigInteger.MinusOne;
-                CheckThrowsOverflow(() => { _ = checked((UIntN<uint>)neg32); },
-                                                    "IntN<uint> -1 -> UIntN<uint> checked throws");
+                var neg32 = (Int<uint>)BigInteger.MinusOne;
+                CheckThrowsOverflow(() => { _ = checked((UInt<uint>)neg32); },
+                                                    "Int<uint> -1 -> UInt<uint> checked throws");
             }
 
-            // Boundary: UIntN<ulong> values around signed max
+            // Boundary: UInt<ulong> values around signed max
             {
-                var justBelow = (UIntN<ulong>)((BigInteger.One << 63) - 1);
-                var atBoundary = (UIntN<ulong>)(BigInteger.One << 63);
+                var justBelow = (UInt<ulong>)((BigInteger.One << 63) - 1);
+                var atBoundary = (UInt<ulong>)(BigInteger.One << 63);
 
-                CheckEquals((BigInteger)checked((IntN<ulong>)justBelow), (BigInteger.One << 63) - 1,
-                                                    "UIntN<ulong> 2^63 - 1 -> IntN<ulong> checked OK");
-                CheckThrowsOverflow(() => { _ = checked((IntN<ulong>)atBoundary); },
-                                                    "UIntN<ulong> 2^63 -> IntN<ulong> checked throws");
+                CheckEquals((BigInteger)checked((Int<ulong>)justBelow), (BigInteger.One << 63) - 1,
+                                                    "UInt<ulong> 2^63 - 1 -> Int<ulong> checked OK");
+                CheckThrowsOverflow(() => { _ = checked((Int<ulong>)atBoundary); },
+                                                    "UInt<ulong> 2^63 -> Int<ulong> checked throws");
             }
         }
 
@@ -4386,61 +4387,61 @@ namespace UltimateOrb.Numerics.Test {
         static void RunBigIntegerConversionTests() {
             // implicit out
             {
-                BigInteger b = (UIntN<uint>)(BigInteger)0xDEADBEEFu;
-                CheckEquals(b, 0xDEADBEEFu, "UIntN<uint> implicit -> BigInteger");
+                BigInteger b = (UInt<uint>)(BigInteger)0xDEADBEEFu;
+                CheckEquals(b, 0xDEADBEEFu, "UInt<uint> implicit -> BigInteger");
 
-                BigInteger sb = (IntN<int>)(BigInteger)(-123456);
-                CheckEquals(sb, -123456, "IntN<int> implicit -> BigInteger");
+                BigInteger sb = (Int<int>)(BigInteger)(-123456);
+                CheckEquals(sb, -123456, "Int<int> implicit -> BigInteger");
             }
 
-            // UIntN explicit-checked boundaries
+            // UInt explicit-checked boundaries
             {
-                CheckEquals((BigInteger)checked((UIntN<byte>)(BigInteger)0), 0, "checked UIntN<byte> 0");
-                CheckEquals((BigInteger)checked((UIntN<byte>)(BigInteger)255), 255,
-                                                                                  "checked UIntN<byte> 255");
-                CheckThrowsOverflow(() => { _ = checked((UIntN<byte>)(BigInteger)256); },
-                                                                                  "checked UIntN<byte> 256 throws");
-                CheckThrowsOverflow(() => { _ = checked((UIntN<byte>)(BigInteger)(-1)); },
-                                                                                  "checked UIntN<byte> -1 throws");
+                CheckEquals((BigInteger)checked((UInt<byte>)(BigInteger)0), 0, "checked UInt<byte> 0");
+                CheckEquals((BigInteger)checked((UInt<byte>)(BigInteger)255), 255,
+                                                                                  "checked UInt<byte> 255");
+                CheckThrowsOverflow(() => { _ = checked((UInt<byte>)(BigInteger)256); },
+                                                                                  "checked UInt<byte> 256 throws");
+                CheckThrowsOverflow(() => { _ = checked((UInt<byte>)(BigInteger)(-1)); },
+                                                                                  "checked UInt<byte> -1 throws");
             }
 
-            // IntN explicit-checked boundaries
+            // Int explicit-checked boundaries
             {
-                CheckEquals((BigInteger)checked((IntN<sbyte>)(BigInteger)127), 127,
-                                                                                  "checked IntN<sbyte> 127");
-                CheckEquals((BigInteger)checked((IntN<sbyte>)(BigInteger)(-128)), -128,
-                                                                                  "checked IntN<sbyte> -128");
-                CheckThrowsOverflow(() => { _ = checked((IntN<sbyte>)(BigInteger)128); },
-                                                                                  "checked IntN<sbyte> 128 throws");
-                CheckThrowsOverflow(() => { _ = checked((IntN<sbyte>)(BigInteger)(-129)); },
-                                                                                  "checked IntN<sbyte> -129 throws");
+                CheckEquals((BigInteger)checked((Int<sbyte>)(BigInteger)127), 127,
+                                                                                  "checked Int<sbyte> 127");
+                CheckEquals((BigInteger)checked((Int<sbyte>)(BigInteger)(-128)), -128,
+                                                                                  "checked Int<sbyte> -128");
+                CheckThrowsOverflow(() => { _ = checked((Int<sbyte>)(BigInteger)128); },
+                                                                                  "checked Int<sbyte> 128 throws");
+                CheckThrowsOverflow(() => { _ = checked((Int<sbyte>)(BigInteger)(-129)); },
+                                                                                  "checked Int<sbyte> -129 throws");
             }
 
             // Unchecked wraparound
             {
-                CheckEquals((BigInteger)(UIntN<byte>)(BigInteger)256, 0, "unchecked UIntN<byte> 256 -> 0");
-                CheckEquals((BigInteger)(UIntN<byte>)(BigInteger)(-1), 255, "unchecked UIntN<byte> -1 -> 255");
+                CheckEquals((BigInteger)(UInt<byte>)(BigInteger)256, 0, "unchecked UInt<byte> 256 -> 0");
+                CheckEquals((BigInteger)(UInt<byte>)(BigInteger)(-1), 255, "unchecked UInt<byte> -1 -> 255");
 
-                CheckEquals((BigInteger)(IntN<sbyte>)(BigInteger)128, -128, "unchecked IntN<sbyte> 128 -> -128");
-                CheckEquals((BigInteger)(IntN<sbyte>)(BigInteger)(-129), 127, "unchecked IntN<sbyte> -129 -> 127");
+                CheckEquals((BigInteger)(Int<sbyte>)(BigInteger)128, -128, "unchecked Int<sbyte> 128 -> -128");
+                CheckEquals((BigInteger)(Int<sbyte>)(BigInteger)(-129), 127, "unchecked Int<sbyte> -129 -> 127");
 
-                CheckEquals((BigInteger)(IntN<uint>)(BigInteger)BigInteger.MinusOne, -1,
-                                                                                  "unchecked IntN<uint> -1");
-                CheckEquals((BigInteger)(IntN<uint>)(BigInteger)((BigInteger.One << 32) - 1), -1,
-                                                                                  "unchecked IntN<uint> 2^32-1 -> -1");
-                CheckEquals((BigInteger)(UIntN<ulong>)(BigInteger)((BigInteger.One << 64) - 1),
+                CheckEquals((BigInteger)(Int<uint>)(BigInteger)BigInteger.MinusOne, -1,
+                                                                                  "unchecked Int<uint> -1");
+                CheckEquals((BigInteger)(Int<uint>)(BigInteger)((BigInteger.One << 32) - 1), -1,
+                                                                                  "unchecked Int<uint> 2^32-1 -> -1");
+                CheckEquals((BigInteger)(UInt<ulong>)(BigInteger)((BigInteger.One << 64) - 1),
                             (BigInteger.One << 64) - 1,
-                                                                                  "unchecked UIntN<ulong> 2^64-1");
+                                                                                  "unchecked UInt<ulong> 2^64-1");
             }
 
             // Wide (naive tier) roundtrip
             {
                 BigInteger wideVal = (BigInteger.One << 100) + 0x1234;
-                var w = (UIntN<S192>)wideVal;
-                CheckEquals((BigInteger)w, wideVal, "UIntN<S192> 100-bit roundtrip");
+                var w = (UInt<S192>)wideVal;
+                CheckEquals((BigInteger)w, wideVal, "UInt<S192> 100-bit roundtrip");
 
-                var wNeg = (IntN<S192>)(-wideVal);
-                CheckEquals((BigInteger)wNeg, -wideVal, "IntN<S192> 100-bit negative roundtrip");
+                var wNeg = (Int<S192>)(-wideVal);
+                CheckEquals((BigInteger)wNeg, -wideVal, "Int<S192> 100-bit negative roundtrip");
             }
         }
     }

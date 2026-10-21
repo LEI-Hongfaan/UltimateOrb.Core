@@ -571,7 +571,7 @@ namespace UltimateOrb.Numerics {
                 UInt128 mVal = ((UInt128)mHi << 64) | lo;
 
                 InlineArrayNS.InlineArray3<UInt64> iln2Top3 = default;
-                for (int j = 0; j < 3; j++) iln2Top3[j] = ExpIlN2[j + 4];
+                for (int j = 0; j < 3; j++) iln2Top3[j] = ILn2_flat[j + 4];
                 InlineArrayNS.InlineArray3<UInt64> fs = default;
                 MultiplyHigh(out fs, in iln2Top3, mVal);
                 fs[0] ^= unchecked((UInt64)sm);
@@ -681,7 +681,7 @@ namespace UltimateOrb.Numerics {
                 UInt128 t = (x0 & (((UInt128)1 << 112) - 1)) | ((UInt128)1 << 112);
                 InlineArrayNS.InlineArray4<UInt64> x;
                 InlineArrayNS.InlineArray4<UInt64> iln2Top4 = default;
-                for (int j = 0; j < 4; j++) iln2Top4[j] = ExpIlN2[j + 3];
+                for (int j = 0; j < 4; j++) iln2Top4[j] = ILn2_flat[j + 3];
                 MultiplyHigh(out x, in iln2Top4, t);
                 x[0] ^= sm; x[1] ^= sm; x[2] ^= sm; x[3] ^= sm;
                 ShiftRightArithmetic(ref x, 0x402E - (int)((x0 >> 112) & 0x7FFF));
@@ -734,12 +734,12 @@ namespace UltimateOrb.Numerics {
         // as_expq_superaccurate — same shape, uses the 7-word iln2 and the 6-word tables.
         [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.AggressiveOptimization)]
         static void AsExpqSuperaccurate(out nint el, out UInt64 mLo, out UInt64 mHi, UInt128 x0) {
-            // Uses ExpTblSupAccFlat (16×6), ExpC6Flat (28×6), ExpIlN2 (7 words).
+            // Uses ExpTblSupAccFlat (16×6), ExpC6Flat (28×6), ILn2_flat (7 words).
             unchecked {
                 Int64 sm = unchecked((Int64)(x0 >> 64) >> 63);
                 UInt128 t = (x0 & (((UInt128)1 << 112) - 1)) | ((UInt128)1 << 112);
                 InlineArrayNS.InlineArray7<UInt64> x = default;
-                MultiplyHigh(out x, in ExpIlN2_7, t);
+                MultiplyHigh(out x, in ILn2, t);
                 for (int j = 0; j < 7; j++) x[j] ^= unchecked((UInt64)sm);
                 ShiftRightArithmetic(ref x, 0x402E - (int)((x0 >> 112) & 0x7FFF));
                 el = (nint)x[6];
@@ -776,91 +776,88 @@ namespace UltimateOrb.Numerics {
 
 
         // iln2 (7 words, from the C source):
-        internal static ReadOnlySpan<UInt64> ExpIlN2 => [
+        private static ReadOnlySpan<UInt64> ILn2_flat => [
             0xea90b9e60c4a90a0, 0x24d92f75c16be0b3, 0xde1c43f755176cd6, 0x8b25166cd1a13247,
             0xeb577aa8dd695a58, 0xbe87fed0691d3e88, 0xb8aa3b295c17f0bb
         ];
 
-        static ref readonly InlineArrayNS.InlineArray7<UInt64> ExpIlN2_7 => ref UltimateOrb.Runtime.CompilerServices.Unsafe.As<UInt64, InlineArrayNS.InlineArray7<UInt64>>(ref MemoryMarshal.GetReference(ExpIlN2));
+        internal static ref readonly InlineArrayNS.InlineArray7<UInt64> ILn2 => ref UltimateOrb.Runtime.CompilerServices.Unsafe.As<UInt64, InlineArrayNS.InlineArray7<UInt64>>(ref MemoryMarshal.GetReference(ILn2_flat));
 
         // r0..r3 (32 rows × 2 words each). Copy verbatim from the C source.
         internal static ReadOnlySpan<UInt64> ExpR0 => [
-                               0, 0x8000000000000000, 0x3e2a475b46520bff, 0x82cd8698ac2ba1d7,
- 0xc5c95b8c2154c1b2, 0x85aac367cc487b14,  0x5df8d76c98c67563, 0x88980e8092da8527,
- 0xfbe4628758a53c90, 0x8b95c1e3ea8bd6e6,  0x2dc0144c8783d4c6, 0x8ea4398b45cd53c0,
- 0x0fd6d8e0ae5ac9d8, 0x91c3d373ab11c336,  0x2e8afad12551de54, 0x94f4efa8fef70961,
- 0x46ad23182e42f6f6, 0x9837f0518db8a96f,  0xa2a817a2a3cc3f1f, 0x9b8d39b9d54e5538,
- 0xa0911f09ebb9fdd1, 0x9ef5326091a111ad,  0x9b7a04ef80cfdea8, 0xa27043030c496818,
- 0x1cbd7f621710701b, 0xa5fed6a9b15138ea,  0x541e24ec3531fa73, 0xa9a15ab4ea7c0ef8,
- 0x4980a8c8f59a2ec4, 0xad583eea42a14ac6,  0x87d037e96d215d8e, 0xb123f581d2ac258f,
- 0x597d89b3754abe9f, 0xb504f333f9de6484,  0x1b879778566b65a2, 0xb8fbaf4762fb9ee9,
- 0xa8811fb66d0faf7a, 0xbd08a39f580c36be,  0x7c457d59a50087b5, 0xc12c4cca66709456,
- 0x3e2ad0c964dd9f37, 0xc5672a115506dadd,  0x80e1f92a0511697e, 0xc9b9bd866e2f27a2,
- 0xe235838f95f2c6ed, 0xce248c151f8480e3,  0x12248e57c3de4028, 0xd2a81d91f12ae45a,
- 0x39a68bb9902d3fde, 0xd744fccad69d6af4,  0x3d840d5a9e29aa64, 0xdbfbb797daf23755,
- 0x065895048dd333ca, 0xe0ccdeec2a94e111,  0x1e5e8f4a4edbb0ed, 0xe5b906e77c8348a8,
- 0xd02d75b3706e54fb, 0xeac0c6e7dd24392e,  0x46561cf6948db913, 0xefe4b99bdcdaf5cb,
- 0x7b9d0c7aed980fc3, 0xf5257d152486cc2c,  0x7c25bb14315d7fcd, 0xfa83b2db722a033a,
-
-
+            0, 0x8000000000000000, 0x3e2a475b46520bff, 0x82cd8698ac2ba1d7,
+            0xc5c95b8c2154c1b2, 0x85aac367cc487b14,  0x5df8d76c98c67563, 0x88980e8092da8527,
+            0xfbe4628758a53c90, 0x8b95c1e3ea8bd6e6,  0x2dc0144c8783d4c6, 0x8ea4398b45cd53c0,
+            0x0fd6d8e0ae5ac9d8, 0x91c3d373ab11c336,  0x2e8afad12551de54, 0x94f4efa8fef70961,
+            0x46ad23182e42f6f6, 0x9837f0518db8a96f,  0xa2a817a2a3cc3f1f, 0x9b8d39b9d54e5538,
+            0xa0911f09ebb9fdd1, 0x9ef5326091a111ad,  0x9b7a04ef80cfdea8, 0xa27043030c496818,
+            0x1cbd7f621710701b, 0xa5fed6a9b15138ea,  0x541e24ec3531fa73, 0xa9a15ab4ea7c0ef8,
+            0x4980a8c8f59a2ec4, 0xad583eea42a14ac6,  0x87d037e96d215d8e, 0xb123f581d2ac258f,
+            0x597d89b3754abe9f, 0xb504f333f9de6484,  0x1b879778566b65a2, 0xb8fbaf4762fb9ee9,
+            0xa8811fb66d0faf7a, 0xbd08a39f580c36be,  0x7c457d59a50087b5, 0xc12c4cca66709456,
+            0x3e2ad0c964dd9f37, 0xc5672a115506dadd,  0x80e1f92a0511697e, 0xc9b9bd866e2f27a2,
+            0xe235838f95f2c6ed, 0xce248c151f8480e3,  0x12248e57c3de4028, 0xd2a81d91f12ae45a,
+            0x39a68bb9902d3fde, 0xd744fccad69d6af4,  0x3d840d5a9e29aa64, 0xdbfbb797daf23755,
+            0x065895048dd333ca, 0xe0ccdeec2a94e111,  0x1e5e8f4a4edbb0ed, 0xe5b906e77c8348a8,
+            0xd02d75b3706e54fb, 0xeac0c6e7dd24392e,  0x46561cf6948db913, 0xefe4b99bdcdaf5cb,
+            0x7b9d0c7aed980fc3, 0xf5257d152486cc2c,  0x7c25bb14315d7fcd, 0xfa83b2db722a033a,
         ];
+
         internal static ReadOnlySpan<UInt64> ExpR1 => [
-                             0, 0x8000000000000000,  0x3690dfe44d11d008, 0x8016302f17467628,
- 0xff8ce94a6797b3ce, 0x802c6436d0e04f50,  0x49fc841afba9c3c6, 0x80429c17d77c18ed,
- 0x94d589f608ee4aa2, 0x8058d7d2d5e5f6b0,  0xe54ec5f966eb1872, 0x806f17687707a7af,
- 0xa0cc0a49c10ea66b, 0x80855ad965e88b83,  0x4a8a4f44bb703db6, 0x809ba2264dada76a,
- 0x25335719b6e6fd20, 0x80b1ed4fd999ab6c,  0xb880575ea03548c1, 0x80c83c56b50cf77f,
- 0x3b13310f5ad57fb1, 0x80de8f3b8b85a0af,  0xe0adc640acaa6b0b, 0x80f4e5ff089f763e,
- 0x0cef03ab14a66550, 0x810b40a1d81406d4,  0x6abd3b0eab9c7048, 0x81219f24a5baa59d,
- 0xe885724f14131287, 0x813801881d886f7b,  0x99775205944eadc4, 0x814e67cceb90502c,
- 0x7be56527bd14def5, 0x8164d1f3bc030773,  0x24f1624278193c37, 0x817b3ffd3b2f2e47,
- 0x51ac3dac02ca5008, 0x8191b1ea15813bfd,  0x5dd1caf33588f2d3, 0x81a827baf7838b78,
- 0xa047bab784691314, 0x81bea1708dde6055,  0xad87c8fb65a6993c, 0x81d51f0b8557ec1c,
- 0x801cf6ea3b3068f3, 0x81eba08c8ad4536f,  0x875bb1f380439fee, 0x820225f44b55b33b,
- 0x9c7cd106d23f3768, 0x8218af4373fc25eb,  0xde4357a774d13d5c, 0x822f3c7ab205c89a,
- 0x7354f57a2d982491, 0x8245cd9ab2cec048,  0x336d3fddc28165ad, 0x825c62a423d13f0c,
- 0x3793aa0d08c818fb, 0x8272fb97b2a5894c,  0x517c473948af9a0c, 0x828998760d01faf3,
- 0x6a3b68fcc424ff9f, 0x82a0393fe0bb0ca8,  0xc87433776c8b975c, 0x82b6ddf5dbc35906,
-
+            0, 0x8000000000000000,  0x3690dfe44d11d008, 0x8016302f17467628,
+            0xff8ce94a6797b3ce, 0x802c6436d0e04f50,  0x49fc841afba9c3c6, 0x80429c17d77c18ed,
+            0x94d589f608ee4aa2, 0x8058d7d2d5e5f6b0,  0xe54ec5f966eb1872, 0x806f17687707a7af,
+            0xa0cc0a49c10ea66b, 0x80855ad965e88b83,  0x4a8a4f44bb703db6, 0x809ba2264dada76a,
+            0x25335719b6e6fd20, 0x80b1ed4fd999ab6c,  0xb880575ea03548c1, 0x80c83c56b50cf77f,
+            0x3b13310f5ad57fb1, 0x80de8f3b8b85a0af,  0xe0adc640acaa6b0b, 0x80f4e5ff089f763e,
+            0x0cef03ab14a66550, 0x810b40a1d81406d4,  0x6abd3b0eab9c7048, 0x81219f24a5baa59d,
+            0xe885724f14131287, 0x813801881d886f7b,  0x99775205944eadc4, 0x814e67cceb90502c,
+            0x7be56527bd14def5, 0x8164d1f3bc030773,  0x24f1624278193c37, 0x817b3ffd3b2f2e47,
+            0x51ac3dac02ca5008, 0x8191b1ea15813bfd,  0x5dd1caf33588f2d3, 0x81a827baf7838b78,
+            0xa047bab784691314, 0x81bea1708dde6055,  0xad87c8fb65a6993c, 0x81d51f0b8557ec1c,
+            0x801cf6ea3b3068f3, 0x81eba08c8ad4536f,  0x875bb1f380439fee, 0x820225f44b55b33b,
+            0x9c7cd106d23f3768, 0x8218af4373fc25eb,  0xde4357a774d13d5c, 0x822f3c7ab205c89a,
+            0x7354f57a2d982491, 0x8245cd9ab2cec048,  0x336d3fddc28165ad, 0x825c62a423d13f0c,
+            0x3793aa0d08c818fb, 0x8272fb97b2a5894c,  0x517c473948af9a0c, 0x828998760d01faf3,
+            0x6a3b68fcc424ff9f, 0x82a0393fe0bb0ca8,  0xc87433776c8b975c, 0x82b6ddf5dbc35906,
         ];
+
         internal static ReadOnlySpan<UInt64> ExpR2 => [
-                                0, 0x8000000000000000,  0xaa22beacca949013, 0x8000b17292f702a3,
- 0xe84c2e1a463473da, 0x800162e61bed4a48,  0xe9b3d4c106428682, 0x8002145a9ae42bf6,
- 0xb6566a58c048be1f, 0x8002c5d00fdcfcb6,  0x2ef8674028829792, 0x800377467ad91193,
- 0x0d2893e85affca64, 0x800428bddbd9bf99,  0xe3429843d1643041, 0x8004da3632e05bd6,
- 0x1c718b38e549cb93, 0x80058baf7fee3b5d,  0xfcb28217df49d908, 0x80063d29c304b33d,
- 0xa0d7201492b1d78a, 0x8006eea4fc25188d,  0xfe8825c385e97278, 0x8007a0212b50c061,
- 0xe448009aa78e39cd, 0x8008519e5088ffd2,  0xf9755a75904a13f7, 0x8009031c6bcf2bf9,
- 0xbe4da91d51695528, 0x8009b49b7d2499f2,  0x8befbdd3d03567f0, 0x800a661b848a9eda,
- 0x945e54e2ae18f2f0, 0x800b179c82028fd0,  0xe282a52dbd92678a, 0x800bc91e758dc1f5,
- 0x5a2eefc903f9e56b, 0x800c7aa15f2d8a6d,  0xb8210f92481f5ed7, 0x800d2c253ee33e5b,
- 0x920508ce2dc5e9b3, 0x800dddaa14b032e7,  0x567798c8de012934, 0x800e8f2fe095bd39,
- 0x4d08c57a3c79bc3e, 0x800f40b6a295327b,  0x963e6d2da99d9c76, 0x800ff23e5aafe7d9,
- 0x2b96d62d51c15a07, 0x8010a3c708e73282,  0xdf8b3e7109372044, 0x80115550ad3c67a4,
- 0x5d926b50b5606f22, 0x801206db47b0dc73,  0x2a23393a42bf75ce, 0x8012b866d845e621,
- 0xa2b72b6b280cfa61, 0x801369f35efcd9e3,  0xfdccfbad7657bafd, 0x80141b80dbd70cf1,
- 0x4aeb2a187632347d, 0x8014cd0f4ed5d485,  0x72a28cd4d1f3bae9, 0x80157e9eb7fa85d8,
-
+            0, 0x8000000000000000,  0xaa22beacca949013, 0x8000b17292f702a3,
+            0xe84c2e1a463473da, 0x800162e61bed4a48,  0xe9b3d4c106428682, 0x8002145a9ae42bf6,
+            0xb6566a58c048be1f, 0x8002c5d00fdcfcb6,  0x2ef8674028829792, 0x800377467ad91193,
+            0x0d2893e85affca64, 0x800428bddbd9bf99,  0xe3429843d1643041, 0x8004da3632e05bd6,
+            0x1c718b38e549cb93, 0x80058baf7fee3b5d,  0xfcb28217df49d908, 0x80063d29c304b33d,
+            0xa0d7201492b1d78a, 0x8006eea4fc25188d,  0xfe8825c385e97278, 0x8007a0212b50c061,
+            0xe448009aa78e39cd, 0x8008519e5088ffd2,  0xf9755a75904a13f7, 0x8009031c6bcf2bf9,
+            0xbe4da91d51695528, 0x8009b49b7d2499f2,  0x8befbdd3d03567f0, 0x800a661b848a9eda,
+            0x945e54e2ae18f2f0, 0x800b179c82028fd0,  0xe282a52dbd92678a, 0x800bc91e758dc1f5,
+            0x5a2eefc903f9e56b, 0x800c7aa15f2d8a6d,  0xb8210f92481f5ed7, 0x800d2c253ee33e5b,
+            0x920508ce2dc5e9b3, 0x800dddaa14b032e7,  0x567798c8de012934, 0x800e8f2fe095bd39,
+            0x4d08c57a3c79bc3e, 0x800f40b6a295327b,  0x963e6d2da99d9c76, 0x800ff23e5aafe7d9,
+            0x2b96d62d51c15a07, 0x8010a3c708e73282,  0xdf8b3e7109372044, 0x80115550ad3c67a4,
+            0x5d926b50b5606f22, 0x801206db47b0dc73,  0x2a23393a42bf75ce, 0x8012b866d845e621,
+            0xa2b72b6b280cfa61, 0x801369f35efcd9e3,  0xfdccfbad7657bafd, 0x80141b80dbd70cf1,
+            0x4aeb2a187632347d, 0x8014cd0f4ed5d485,  0x72a28cd4d1f3bae9, 0x80157e9eb7fa85d8,
         ];
+
         internal static ReadOnlySpan<UInt64> ExpR3 => [
-
-                               0, 0x8000000000000000,  0xecfc487503488bb2, 0x8000058b90de7e4c,
- 0x8307016c1cd4e8b7, 0x80000b1721fa7c18,  0x6c292b5fbf0c0ab5, 0x800010a2b353f965,
- 0x526be456600bdbe5, 0x8000162e44eaf636,  0xdfd867e27af0ecb1, 0x80001bb9d6bf728d,
- 0xbe780f22911e236a, 0x8000214568d16e6e,  0x985450c12b846c01, 0x800026d0fb20e9db,
- 0x1776c0f4dbea67d6, 0x80002c5c8dade4d7,  0xe5e911803e341d94, 0x800031e820785f63,
- 0xadb511b1f9aaa919, 0x80003773b3805984,  0x18e4ae64c243eb6d, 0x80003cff46c5d33c,
- 0xd181f1ff59ea3ac5, 0x8000428ada48cc8c,  0x8197047491c4129c, 0x800048166e094579,
- 0xd32e2b434b7bc3d3, 0x80004da202073e04,  0x7051c9767a8724db, 0x8000532d9642b631,
- 0x030c5fa5256f41fe, 0x800058b92abbae02,  0x35688bf267180da2, 0x80005e44bf722579,
- 0xb1710a0d700810a8, 0x800063d054661c99,  0x2130b33187b01ad5, 0x8000695be9979366,
- 0x2eb27e260db2f346, 0x80006ee77f0689e1,  0x84017f3e7b2d08fa, 0x8000747314b3000d,
- 0xcb28e85a63fc235f, 0x800079feaa9cf5ed,  0xae3408e5780712fb, 0x80007f8a40c46b84,
- 0xd72e4dd784856215, 0x80008515d72960d4,  0xf02341b475470578, 0x80008aa16dcbd5e0,
- 0xa31e8c8c55fc0d3b, 0x8000902d04abcaab,  0x9a2bf3fb537c55a0, 0x800095b89bc93f37,
- 0x7f575b29bd0f37f7, 0x80009b4433243387,  0xfcacc2cc05b33b9c, 0x8000a0cfcabca79d,
- 0xbc384922c565c6f3, 0x8000a65b62929b7d,  0x680629faba6ad083, 0x8000abe6faa60f29,
-
+            0, 0x8000000000000000,  0xecfc487503488bb2, 0x8000058b90de7e4c,
+            0x8307016c1cd4e8b7, 0x80000b1721fa7c18,  0x6c292b5fbf0c0ab5, 0x800010a2b353f965,
+            0x526be456600bdbe5, 0x8000162e44eaf636,  0xdfd867e27af0ecb1, 0x80001bb9d6bf728d,
+            0xbe780f22911e236a, 0x8000214568d16e6e,  0x985450c12b846c01, 0x800026d0fb20e9db,
+            0x1776c0f4dbea67d6, 0x80002c5c8dade4d7,  0xe5e911803e341d94, 0x800031e820785f63,
+            0xadb511b1f9aaa919, 0x80003773b3805984,  0x18e4ae64c243eb6d, 0x80003cff46c5d33c,
+            0xd181f1ff59ea3ac5, 0x8000428ada48cc8c,  0x8197047491c4129c, 0x800048166e094579,
+            0xd32e2b434b7bc3d3, 0x80004da202073e04,  0x7051c9767a8724db, 0x8000532d9642b631,
+            0x030c5fa5256f41fe, 0x800058b92abbae02,  0x35688bf267180da2, 0x80005e44bf722579,
+            0xb1710a0d700810a8, 0x800063d054661c99,  0x2130b33187b01ad5, 0x8000695be9979366,
+            0x2eb27e260db2f346, 0x80006ee77f0689e1,  0x84017f3e7b2d08fa, 0x8000747314b3000d,
+            0xcb28e85a63fc235f, 0x800079feaa9cf5ed,  0xae3408e5780712fb, 0x80007f8a40c46b84,
+            0xd72e4dd784856215, 0x80008515d72960d4,  0xf02341b475470578, 0x80008aa16dcbd5e0,
+            0xa31e8c8c55fc0d3b, 0x8000902d04abcaab,  0x9a2bf3fb537c55a0, 0x800095b89bc93f37,
+            0x7f575b29bd0f37f7, 0x80009b4433243387,  0xfcacc2cc05b33b9c, 0x8000a0cfcabca79d,
+            0xbc384922c565c6f3, 0x8000a65b62929b7d,  0x680629faba6ad083, 0x8000abe6faa60f29,
         ];
 
         // c (6 rows × 2 words each).
@@ -1045,7 +1042,7 @@ namespace UltimateOrb.Numerics {
         //
         // Table-reuse notes:
         //   • r0, r1, r2, r3, c, iln2 in cr_expm1q are IDENTICAL to ExpR0..ExpR3,
-        //     ExpC, ExpIlN2 (already defined).  Do NOT redeclare.
+        //     ExpC, ILn2_flat (already defined).  Do NOT redeclare.
         //   • as_expm1q_accurate's tbl0/tbl1/c are IDENTICAL to ExpTbl0Flat,
         //     ExpTbl1Flat, ExpCAccFlat.
         //   • as_expm1q_superaccurate's tbl/c are IDENTICAL to ExpTblSupAccFlat,
@@ -1189,7 +1186,7 @@ namespace UltimateOrb.Numerics {
 
                 InlineArrayNS.InlineArray4<UInt64> x;
                 InlineArrayNS.InlineArray4<UInt64> iln2Top4 = default;
-                for (int j = 0; j < 4; j++) iln2Top4[j] = ExpIlN2[j + 3];
+                for (int j = 0; j < 4; j++) iln2Top4[j] = ILn2_flat[j + 3];
                 MultiplyHigh(out x, in iln2Top4, t);
                 x[0] ^= unchecked((UInt64)sm);
                 x[1] ^= unchecked((UInt64)sm);
@@ -1313,7 +1310,7 @@ namespace UltimateOrb.Numerics {
                 UInt128 t = (x0 & (((UInt128)1 << 112) - 1)) | ((UInt128)1 << 112);
 
                 InlineArrayNS.InlineArray7<UInt64> x = default;
-                MultiplyHigh(out x, in ExpIlN2_7, t);
+                MultiplyHigh(out x, in ILn2, t);
                 x[0] ^= unchecked((UInt64)sm);
                 x[1] ^= unchecked((UInt64)sm);
                 x[2] ^= unchecked((UInt64)sm);
@@ -1706,9 +1703,9 @@ namespace UltimateOrb.Numerics {
                     UInt128 mVal = ((UInt128)mHi << 64) | mLo;
 
                     InlineArrayNS.InlineArray3<UInt64> iln2Top3 = default;
-                    iln2Top3[0] = ExpIlN2[4];
-                    iln2Top3[1] = ExpIlN2[5];
-                    iln2Top3[2] = ExpIlN2[6];
+                    iln2Top3[0] = ILn2_flat[4];
+                    iln2Top3[1] = ILn2_flat[5];
+                    iln2Top3[2] = ILn2_flat[6];
                     MultiplyHigh(out InlineArrayNS.InlineArray3<UInt64> fs, in iln2Top3, mVal);
 
                     fs[0] ^= unchecked((UInt64)sm);

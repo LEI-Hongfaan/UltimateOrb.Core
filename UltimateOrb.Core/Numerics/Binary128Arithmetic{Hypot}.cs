@@ -42,20 +42,6 @@ namespace UltimateOrb.Numerics {
                 return xy1 + (xy0 >> 64);
             }
         }
-        
-        /*
-        // approximate high 128 bits of a 128-bit square; at most 2 units short
-        static UInt128 SquareHighApproximate(UInt128 a) {
-            unchecked {
-                UInt64 al = (UInt64)a, ah = (UInt64)(a >> 64);
-                UInt128 a10 = (UInt128)al * ah;
-                UInt128 a11 = (UInt128)ah * ah;
-                a11 += a10 >> 64;
-                a11 += a10 >> 64;
-                return a11;
-            }
-        }
-        */
 
         /* full product of a 128-bit square; returns the high 128 bits and writes
            the low 128 through *lo.  The double-add is the C original's two

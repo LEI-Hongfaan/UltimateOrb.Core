@@ -1102,9 +1102,9 @@ namespace UltimateOrb.Numerics {
 
                 // Range reduction (identical to b128).
                 InlineArrayNS.InlineArray3<UInt64> iln2Top3 = default;
-                iln2Top3[0] = ExpIlN2[4];
-                iln2Top3[1] = ExpIlN2[5];
-                iln2Top3[2] = ExpIlN2[6];
+                iln2Top3[0] = ILn2[4];
+                iln2Top3[1] = ILn2[5];
+                iln2Top3[2] = ILn2[6];
                 MultiplyHigh(out InlineArrayNS.InlineArray3<UInt64> fs, in iln2Top3, mVal);
                 fs[0] ^= smMask; fs[1] ^= smMask; fs[2] ^= smMask;
                 ShiftRightArithmetic(ref fs, 0x401A - (int)((hi >> 48) & 0x7FFF));
@@ -1501,9 +1501,9 @@ namespace UltimateOrb.Numerics {
 
                 // Range reduction (identical to b128)
                 InlineArrayNS.InlineArray3<UInt64> iln2Top3 = default;
-                iln2Top3[0] = ExpIlN2[4];
-                iln2Top3[1] = ExpIlN2[5];
-                iln2Top3[2] = ExpIlN2[6];
+                iln2Top3[0] = ILn2[4];
+                iln2Top3[1] = ILn2[5];
+                iln2Top3[2] = ILn2[6];
                 MultiplyHigh(out InlineArrayNS.InlineArray3<UInt64> fs, in iln2Top3, mVal);
                 fs[0] ^= sm; fs[1] ^= sm; fs[2] ^= sm;
                 ShiftRightArithmetic(ref fs, 0x401A - (int)((hi >> 48) & 0x7FFF));

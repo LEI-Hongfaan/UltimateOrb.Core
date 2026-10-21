@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -9,7 +10,8 @@ namespace UltimateOrb.Numerics {
 
     static partial class MultiArithmetic {
 
-        public static UIntN<TStorage> AddUnchecked<TStorage>(UIntN<TStorage> first, UIntN<TStorage> second)
+#pragma warning disable UoWIP // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+        public static UInt<TStorage> AddUnchecked<TStorage>(UInt<TStorage> first, UInt<TStorage> second)
             where TStorage : unmanaged {
             if (sizeof(TStorage) == sizeof(uint)) {
                 return AddUncheckedPrimitive<TStorage, uint>(first, second);
@@ -90,13 +92,13 @@ namespace UltimateOrb.Numerics {
         }
 
 
-        internal static UIntN<TStorage> AddUncheckedNaive<TStorage>(
-            UIntN<TStorage> first, UIntN<TStorage> second)
+        internal static UInt<TStorage> AddUncheckedNaive<TStorage>(
+            UInt<TStorage> first, UInt<TStorage> second)
             where TStorage : unmanaged {
             // Reference implementation routing through AddUnsignedNoThrow<TLimb>.
             //
-            // Tier 1 (fast):  view UIntN storage in place as Span<nuint>.
-            // Tier 2 (fast):  view UIntN storage in place as Span<uint>.
+            // Tier 1 (fast):  view UInt _storage in place as Span<nuint>.
+            // Tier 2 (fast):  view UInt _storage in place as Span<uint>.
             // Tier 3 (slow):  copy into a padded (q+1)-limb nuint buffer, add, copy back.
             //
             // Each tier requires sizeof(TStorage) to be a multiple of sizeof(TLimb) and
@@ -106,7 +108,7 @@ namespace UltimateOrb.Numerics {
             // the cases tier 1 rejects on size or alignment grounds (e.g. 12-byte
             // TStorage on a 64-bit host).
 
-            UIntN<TStorage> result = default;
+            UInt<TStorage> result = default;
             bool isBigEndian = !BitConverter.IsLittleEndian;
 
             uint sizeTStorage = unchecked((uint)sizeof(TStorage));
@@ -121,11 +123,11 @@ namespace UltimateOrb.Numerics {
                 int n = (int)qNuint;
                 AddUnsignedNoThrow(
                     MemoryMarshal.CreateSpan(
-                        ref Unsafe.As<TStorage, nuint>(ref Unsafe.AsRef(in result._bits)), n),
+                        ref Unsafe.As<TStorage, nuint>(ref Unsafe.AsRef(in result._storage)), n),
                     MemoryMarshal.CreateReadOnlySpan(
-                        ref Unsafe.As<TStorage, nuint>(ref Unsafe.AsRef(in first._bits)), n),
+                        ref Unsafe.As<TStorage, nuint>(ref Unsafe.AsRef(in first._storage)), n),
                     MemoryMarshal.CreateReadOnlySpan(
-                        ref Unsafe.As<TStorage, nuint>(ref Unsafe.AsRef(in second._bits)), n),
+                        ref Unsafe.As<TStorage, nuint>(ref Unsafe.AsRef(in second._storage)), n),
                     isBigEndian);
                 return result;
             }
@@ -139,11 +141,11 @@ namespace UltimateOrb.Numerics {
                 int n = (int)qUint;
                 AddUnsignedNoThrow(
                     MemoryMarshal.CreateSpan(
-                        ref Unsafe.As<TStorage, uint>(ref Unsafe.AsRef(in result._bits)), n),
+                        ref Unsafe.As<TStorage, uint>(ref Unsafe.AsRef(in result._storage)), n),
                     MemoryMarshal.CreateReadOnlySpan(
-                        ref Unsafe.As<TStorage, uint>(ref Unsafe.AsRef(in first._bits)), n),
+                        ref Unsafe.As<TStorage, uint>(ref Unsafe.AsRef(in first._storage)), n),
                     MemoryMarshal.CreateReadOnlySpan(
-                        ref Unsafe.As<TStorage, uint>(ref Unsafe.AsRef(in second._bits)), n),
+                        ref Unsafe.As<TStorage, uint>(ref Unsafe.AsRef(in second._storage)), n),
                     isBigEndian);
                 return result;
             }
@@ -172,8 +174,8 @@ namespace UltimateOrb.Numerics {
             Span<byte> paddedSecond = MemoryMarshal.AsBytes(paddedSecondN);
             Span<byte> paddedSum = MemoryMarshal.AsBytes(paddedSumN);
 
-            ref byte pFirst = ref Unsafe.As<TStorage, byte>(ref Unsafe.AsRef(in first._bits));
-            ref byte pSecond = ref Unsafe.As<TStorage, byte>(ref Unsafe.AsRef(in second._bits));
+            ref byte pFirst = ref Unsafe.As<TStorage, byte>(ref Unsafe.AsRef(in first._storage));
+            ref byte pSecond = ref Unsafe.As<TStorage, byte>(ref Unsafe.AsRef(in second._storage));
             for (int i = 0; i < sizeof(TStorage); i++) {
                 paddedFirst[srcOffset + i] = Unsafe.Add(ref pFirst, i);
                 paddedSecond[srcOffset + i] = Unsafe.Add(ref pSecond, i);
@@ -181,7 +183,7 @@ namespace UltimateOrb.Numerics {
 
             AddUnsignedNoThrow(paddedSumN, paddedFirstN, paddedSecondN, isBigEndian);
 
-            ref byte pResult = ref Unsafe.As<TStorage, byte>(ref Unsafe.AsRef(in result._bits));
+            ref byte pResult = ref Unsafe.As<TStorage, byte>(ref Unsafe.AsRef(in result._storage));
             for (int i = 0; i < sizeof(TStorage); i++) {
                 Unsafe.Add(ref pResult, i) = paddedSum[srcOffset + i];
             }
@@ -190,8 +192,8 @@ namespace UltimateOrb.Numerics {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static UIntN<TStorage> AddUncheckedPrimitive<TStorage, TUInt>(
-            UIntN<TStorage> first, UIntN<TStorage> second)
+        internal static UInt<TStorage> AddUncheckedPrimitive<TStorage, TUInt>(
+            UInt<TStorage> first, UInt<TStorage> second)
             where TStorage : unmanaged
             where TUInt : unmanaged, IBinaryInteger<TUInt>, IMinMaxValue<TUInt> {
             Debug.Assert(sizeof(TStorage) == sizeof(TUInt));
@@ -205,23 +207,23 @@ namespace UltimateOrb.Numerics {
             // clause in those helpers are dead. The only remaining correctness
             // concern is whether a TStorage-aligned address can be viewed as TUInt.
 
-            UIntN<TStorage> r = default;
-            ref TStorage dst = ref Unsafe.AsRef(in r._bits);
+            UInt<TStorage> r = default;
+            ref TStorage dst = ref Unsafe.AsRef(in r._storage);
 
             TUInt s;
             if (0u == unchecked((uint)StructLayoutHelpers.AlignOf<TStorage>()) %
                         unchecked((uint)StructLayoutHelpers.AlignOf<TUInt>())) {
                 // TStorage alignment is at least TUInt's: reinterpret in place.
-                TUInt a = Unsafe.As<TStorage, TUInt>(ref Unsafe.AsRef(in first._bits));
-                TUInt b = Unsafe.As<TStorage, TUInt>(ref Unsafe.AsRef(in second._bits));
+                TUInt a = Unsafe.As<TStorage, TUInt>(ref Unsafe.AsRef(in first._storage));
+                TUInt b = Unsafe.As<TStorage, TUInt>(ref Unsafe.AsRef(in second._storage));
                 s = unchecked(a + b);
                 Unsafe.As<TStorage, TUInt>(ref dst) = s;
             } else {
                 // TStorage is more weakly aligned than TUInt: go through unaligned.
                 TUInt a = Unsafe.ReadUnaligned<TUInt>(
-                    ref Unsafe.As<TStorage, byte>(ref Unsafe.AsRef(in first._bits)));
+                    ref Unsafe.As<TStorage, byte>(ref Unsafe.AsRef(in first._storage)));
                 TUInt b = Unsafe.ReadUnaligned<TUInt>(
-                    ref Unsafe.As<TStorage, byte>(ref Unsafe.AsRef(in second._bits)));
+                    ref Unsafe.As<TStorage, byte>(ref Unsafe.AsRef(in second._storage)));
                 s = unchecked(a + b);
                 Unsafe.WriteUnaligned(ref Unsafe.As<TStorage, byte>(ref dst), s);
             }
@@ -230,15 +232,15 @@ namespace UltimateOrb.Numerics {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static UIntN<TStorage> AddUncheckedPrimitiveWidening<TStorage, TUInt>(UIntN<TStorage> first, UIntN<TStorage> second)
+        internal static UInt<TStorage> AddUncheckedPrimitiveWidening<TStorage, TUInt>(UInt<TStorage> first, UInt<TStorage> second)
             where TStorage : unmanaged
             where TUInt : unmanaged, IBinaryInteger<TUInt>, IMinMaxValue<TUInt> {
             Debug.Assert(sizeof(TStorage) <= sizeof(TUInt));
 
             // Zero-extend both operands into TUInt (wider limb), add without overflow,
             // then truncate back down to TStorage.
-            TUInt a = CreateWideningInternal<TStorage, TUInt>(first._bits);
-            TUInt b = CreateWideningInternal<TStorage, TUInt>(second._bits);
+            TUInt a = CreateWideningInternal<TStorage, TUInt>(first._storage);
+            TUInt b = CreateWideningInternal<TStorage, TUInt>(second._storage);
             TUInt s = unchecked(a + b);
 
             return CreateTruncating<TStorage, TUInt>(s);
@@ -264,14 +266,14 @@ namespace UltimateOrb.Numerics {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static UIntN<TStorage> CreateTruncating<TStorage, TUInt>(TUInt value)
+        internal static UInt<TStorage> CreateTruncating<TStorage, TUInt>(TUInt value)
             where TStorage : unmanaged
             where TUInt : unmanaged {
             ref TStorage src = ref (!BitConverter.IsLittleEndian ?
                 ref Unsafe.AddByteOffset(ref Unsafe.As<TUInt, TStorage>(ref value), (nuint)checked(unchecked((uint)sizeof(TUInt)) - unchecked((uint)sizeof(TStorage)))) :
                 ref Unsafe.As<TUInt, TStorage>(ref value));
-            UIntN<TStorage> r = default;
-            ref TStorage dst = ref Unsafe.AsRef(in r._bits);
+            UInt<TStorage> r = default;
+            ref TStorage dst = ref Unsafe.AsRef(in r._storage);
             if (0u == unchecked((uint)StructLayoutHelpers.AlignOf<TUInt>()) % unchecked((uint)StructLayoutHelpers.AlignOf<TStorage>()) &&
               (BitConverter.IsLittleEndian || 0u == checked(unchecked((uint)sizeof(TUInt)) - unchecked((uint)sizeof(TStorage))) % (uint)StructLayoutHelpers.AlignOf<TStorage>())) {
                 dst = src;
@@ -282,13 +284,13 @@ namespace UltimateOrb.Numerics {
             }
         }
 
-        public static BigInteger ToBigInteger<TStorage>(UIntN<TStorage> value)
+        public static BigInteger ToBigInteger<TStorage>(UInt<TStorage> value)
             where TStorage : unmanaged {
             ReadOnlySpan<byte> bytes = MemoryMarshal.CreateSpan(
-                ref Unsafe.As<TStorage, byte>(ref Unsafe.AsRef(in value._bits)),
+                ref Unsafe.As<TStorage, byte>(ref Unsafe.AsRef(in value._storage)),
                 sizeof(TStorage));
 
-            // _bits holds the raw host-endian bit pattern of the unsigned value.
+            // _storage holds the raw host-endian bit pattern of the unsigned value.
             // BigInteger's span ctor wants little-endian bytes, so tell it the host
             // endianness and mark the value unsigned.
             return new BigInteger(bytes,
@@ -296,39 +298,39 @@ namespace UltimateOrb.Numerics {
                 isBigEndian: !BitConverter.IsLittleEndian);
         }
 
-        public static BigInteger ToBigInteger<TStorage>(IntN<TStorage> value)
+        public static BigInteger ToBigInteger<TStorage>(Int<TStorage> value)
             where TStorage : unmanaged {
             ReadOnlySpan<byte> bytes = MemoryMarshal.CreateSpan(
-                ref Unsafe.As<TStorage, byte>(ref Unsafe.AsRef(in value._bits)),
+                ref Unsafe.As<TStorage, byte>(ref Unsafe.AsRef(in value._storage)),
                 sizeof(TStorage));
 
-            // _bits holds the raw two's-complement host-endian bit pattern of the
+            // _storage holds the raw two's-complement host-endian bit pattern of the
             // signed value. BigInteger interprets the bytes as a two's-complement
-            // number of exactly sizeof(TStorage)*8 bits and sign-extends from the
-            // top byte, which is precisely IntN's value.
+            // number of exactly sizeof(TStorage)*8 _storage and sign-extends from the
+            // top byte, which is precisely Int's value.
             return new BigInteger(bytes,
                 isUnsigned: false,
                 isBigEndian: !BitConverter.IsLittleEndian);
         }
 
-        public static IntN<TStorage> ToSignedUnchecked<TStorage>(IntN<TStorage> value)
+        public static Int<TStorage> ToSignedUnchecked<TStorage>(Int<TStorage> value)
             where TStorage : unmanaged {
             return value;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static IntN<TStorage> ToSignedUnchecked<TStorage>(UIntN<TStorage> value)
+        public static Int<TStorage> ToSignedUnchecked<TStorage>(UInt<TStorage> value)
             where TStorage : unmanaged {
-            return Unsafe.BitCast<UIntN<TStorage>, IntN<TStorage>>(value);
+            return Unsafe.BitCast<UInt<TStorage>, Int<TStorage>>(value);
         }
 
-        public static UIntN<TStorage> ToUnsignedUnchecked<TStorage>(IntN<TStorage> value)
+        public static UInt<TStorage> ToUnsignedUnchecked<TStorage>(Int<TStorage> value)
           where TStorage : unmanaged {
-            return Unsafe.BitCast<IntN<TStorage>, UIntN<TStorage>>(value);
+            return Unsafe.BitCast<Int<TStorage>, UInt<TStorage>>(value);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UIntN<TStorage> ToUnsignedUnchecked<TStorage>(UIntN<TStorage> value)
+        public static UInt<TStorage> ToUnsignedUnchecked<TStorage>(UInt<TStorage> value)
             where TStorage : unmanaged {
             return value;
         }
@@ -349,7 +351,7 @@ namespace UltimateOrb.Numerics {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static IntN<TStorage> ToSignedUnchecked<TStorage>(BigInteger value)
+        public static Int<TStorage> ToSignedUnchecked<TStorage>(BigInteger value)
             where TStorage : unmanaged {
             if (TryToSignedChecked<TStorage>(value, out var result)) {
                 return result;
@@ -358,7 +360,7 @@ namespace UltimateOrb.Numerics {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UIntN<TStorage> ToUnsignedUnchecked<TStorage>(BigInteger value)
+        public static UInt<TStorage> ToUnsignedUnchecked<TStorage>(BigInteger value)
             where TStorage : unmanaged {
             if (TryToUnsignedChecked<TStorage>(value, out var result)) {
                 return result;
@@ -367,7 +369,7 @@ namespace UltimateOrb.Numerics {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool TryToSignedChecked<TStorage>(BigInteger value, out IntN<TStorage> result)
+        public static bool TryToSignedChecked<TStorage>(BigInteger value, out Int<TStorage> result)
             where TStorage : unmanaged {
             int size = sizeof(TStorage);
 
@@ -380,12 +382,12 @@ namespace UltimateOrb.Numerics {
                 return false;
             }
 
-            IntN<TStorage> r = default;
+            Int<TStorage> r = default;
             Span<byte> bytes = MemoryMarshal.CreateSpan(
-                ref Unsafe.As<TStorage, byte>(ref Unsafe.AsRef(in r._bits)),
+                ref Unsafe.As<TStorage, byte>(ref Unsafe.AsRef(in r._storage)),
                 size);
 
-            // _bits is stored in host byte order, and TryWriteBytes writes at the start
+            // _storage is stored in host byte order, and TryWriteBytes writes at the start
             // of the destination span:
             //   LE host: LSB of the value goes at bytes[0]  -> write to bytes
             //   BE host: MSB of the value goes at bytes[0], so the LSB (last byte of
@@ -420,7 +422,7 @@ namespace UltimateOrb.Numerics {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool TryToUnsignedChecked<TStorage>(BigInteger value, out UIntN<TStorage> result)
+        public static bool TryToUnsignedChecked<TStorage>(BigInteger value, out UInt<TStorage> result)
             where TStorage : unmanaged {
             if (BigInteger.IsNegative(value)) {
                 result = default;
@@ -434,9 +436,9 @@ namespace UltimateOrb.Numerics {
                 return false;
             }
 
-            UIntN<TStorage> r = default;
+            UInt<TStorage> r = default;
             Span<byte> bytes = MemoryMarshal.CreateSpan(
-                ref Unsafe.As<TStorage, byte>(ref Unsafe.AsRef(in r._bits)),
+                ref Unsafe.As<TStorage, byte>(ref Unsafe.AsRef(in r._storage)),
                 size);
 
             Span<byte> shifted = !BitConverter.IsLittleEndian
@@ -465,7 +467,7 @@ namespace UltimateOrb.Numerics {
         // Checked addition (unsigned)
         // -----------------------------------------------------------------------------
 
-        public static UIntN<TStorage> AddChecked<TStorage>(UIntN<TStorage> first, UIntN<TStorage> second)
+        public static UInt<TStorage> AddChecked<TStorage>(UInt<TStorage> first, UInt<TStorage> second)
             where TStorage : unmanaged {
             if (sizeof(TStorage) == sizeof(uint)) {
                 return AddCheckedPrimitive<TStorage, uint>(first, second);
@@ -503,24 +505,24 @@ namespace UltimateOrb.Numerics {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static UIntN<TStorage> AddCheckedPrimitive<TStorage, TUInt>(UIntN<TStorage> first, UIntN<TStorage> second)
+        internal static UInt<TStorage> AddCheckedPrimitive<TStorage, TUInt>(UInt<TStorage> first, UInt<TStorage> second)
             where TStorage : unmanaged
             where TUInt : unmanaged, IBinaryInteger<TUInt>, IMinMaxValue<TUInt> {
             Debug.Assert(sizeof(TStorage) == sizeof(TUInt));
 
-            UIntN<TStorage> r = default;
-            ref TStorage dst = ref Unsafe.AsRef(in r._bits);
+            UInt<TStorage> r = default;
+            ref TStorage dst = ref Unsafe.AsRef(in r._storage);
 
             TUInt s;
             if (0u == unchecked((uint)StructLayoutHelpers.AlignOf<TStorage>()) %
                         unchecked((uint)StructLayoutHelpers.AlignOf<TUInt>())) {
-                TUInt a = Unsafe.As<TStorage, TUInt>(ref Unsafe.AsRef(in first._bits));
-                TUInt b = Unsafe.As<TStorage, TUInt>(ref Unsafe.AsRef(in second._bits));
+                TUInt a = Unsafe.As<TStorage, TUInt>(ref Unsafe.AsRef(in first._storage));
+                TUInt b = Unsafe.As<TStorage, TUInt>(ref Unsafe.AsRef(in second._storage));
                 s = checked(a + b);                 // <-- throws OverflowException
                 Unsafe.As<TStorage, TUInt>(ref dst) = s;
             } else {
-                TUInt a = Unsafe.ReadUnaligned<TUInt>(ref Unsafe.As<TStorage, byte>(ref Unsafe.AsRef(in first._bits)));
-                TUInt b = Unsafe.ReadUnaligned<TUInt>(ref Unsafe.As<TStorage, byte>(ref Unsafe.AsRef(in second._bits)));
+                TUInt a = Unsafe.ReadUnaligned<TUInt>(ref Unsafe.As<TStorage, byte>(ref Unsafe.AsRef(in first._storage)));
+                TUInt b = Unsafe.ReadUnaligned<TUInt>(ref Unsafe.As<TStorage, byte>(ref Unsafe.AsRef(in second._storage)));
                 s = checked(a + b);
                 Unsafe.WriteUnaligned(ref Unsafe.As<TStorage, byte>(ref dst), s);
             }
@@ -528,19 +530,19 @@ namespace UltimateOrb.Numerics {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static UIntN<TStorage> AddCheckedPrimitiveWidening<TStorage, TUInt>(UIntN<TStorage> first, UIntN<TStorage> second)
+        internal static UInt<TStorage> AddCheckedPrimitiveWidening<TStorage, TUInt>(UInt<TStorage> first, UInt<TStorage> second)
             where TStorage : unmanaged
             where TUInt : unmanaged, IBinaryInteger<TUInt>, IMinMaxValue<TUInt> {
             Debug.Assert(sizeof(TStorage) < sizeof(TUInt));
 
             // The wide add cannot overflow (2 * (2^(8*sizeof(TStorage)) - 1) < 2^(8*sizeof(TUInt))).
-            // The only failure mode is that the truncation back to TStorage loses bits.
-            TUInt a = CreateWideningInternal<TStorage, TUInt>(first._bits);
-            TUInt b = CreateWideningInternal<TStorage, TUInt>(second._bits);
+            // The only failure mode is that the truncation back to TStorage loses _storage.
+            TUInt a = CreateWideningInternal<TStorage, TUInt>(first._storage);
+            TUInt b = CreateWideningInternal<TStorage, TUInt>(second._storage);
             TUInt s = unchecked(a + b);
 
-            UIntN<TStorage> truncated = CreateTruncating<TStorage, TUInt>(s);
-            TUInt roundTrip = CreateWideningInternal<TStorage, TUInt>(truncated._bits);
+            UInt<TStorage> truncated = CreateTruncating<TStorage, TUInt>(s);
+            TUInt roundTrip = CreateWideningInternal<TStorage, TUInt>(truncated._storage);
             if (roundTrip != s) {
                 throw new OverflowException();
             }
@@ -552,16 +554,16 @@ namespace UltimateOrb.Numerics {
         // -----------------------------------------------------------------------------
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static IntN<TStorage> AddUnchecked<TStorage>(IntN<TStorage> first, IntN<TStorage> second)
+        public static Int<TStorage> AddUnchecked<TStorage>(Int<TStorage> first, Int<TStorage> second)
             where TStorage : unmanaged {
             // Two's-complement addition is bit-identical to unsigned addition.
-            return Unsafe.BitCast<UIntN<TStorage>, IntN<TStorage>>(
+            return Unsafe.BitCast<UInt<TStorage>, Int<TStorage>>(
                 AddUnchecked(
-                    Unsafe.BitCast<IntN<TStorage>, UIntN<TStorage>>(first),
-                    Unsafe.BitCast<IntN<TStorage>, UIntN<TStorage>>(second)));
+                    Unsafe.BitCast<Int<TStorage>, UInt<TStorage>>(first),
+                    Unsafe.BitCast<Int<TStorage>, UInt<TStorage>>(second)));
         }
 
-        public static IntN<TStorage> AddChecked<TStorage>(IntN<TStorage> first, IntN<TStorage> second)
+        public static Int<TStorage> AddChecked<TStorage>(Int<TStorage> first, Int<TStorage> second)
             where TStorage : unmanaged {
             // Signed overflow is not detectable from the carry out of an unsigned add.
             // Using BigInteger here is simple and correct; the branch is rare relative
@@ -581,7 +583,7 @@ namespace UltimateOrb.Numerics {
         // -----------------------------------------------------------------------------
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static IntN<TStorage> ToSignedChecked<TStorage>(UIntN<TStorage> value)
+        public static Int<TStorage> ToSignedChecked<TStorage>(UInt<TStorage> value)
             where TStorage : unmanaged {
             if (ToBigInteger(value) > BigIntegerTraits<TStorage>.SignedMaxValue) {
                 throw new OverflowException();
@@ -590,7 +592,7 @@ namespace UltimateOrb.Numerics {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UIntN<TStorage> ToUnsignedChecked<TStorage>(IntN<TStorage> value)
+        public static UInt<TStorage> ToUnsignedChecked<TStorage>(Int<TStorage> value)
             where TStorage : unmanaged {
             if (BigInteger.IsNegative(ToBigInteger(value))) {
                 throw new OverflowException();
@@ -599,7 +601,7 @@ namespace UltimateOrb.Numerics {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static IntN<TStorage> ToSignedChecked<TStorage>(BigInteger value)
+        public static Int<TStorage> ToSignedChecked<TStorage>(BigInteger value)
             where TStorage : unmanaged {
             if (!TryToSignedChecked<TStorage>(value, out var result)) {
                 throw new OverflowException();
@@ -608,13 +610,15 @@ namespace UltimateOrb.Numerics {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UIntN<TStorage> ToUnsignedChecked<TStorage>(BigInteger value)
+        public static UInt<TStorage> ToUnsignedChecked<TStorage>(BigInteger value)
             where TStorage : unmanaged {
             if (!TryToUnsignedChecked<TStorage>(value, out var result)) {
                 throw new OverflowException();
             }
             return result;
         }
+        
+        #pragma warning restore UoWIP // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
     }
 
     public static partial class XIntNExtensions {
@@ -622,71 +626,74 @@ namespace UltimateOrb.Numerics {
 
 
     }
-
-
-
-
-
-
-
-    public readonly struct IntN<TStorage>
+    [Experimental("UoWIP")]
+    public readonly partial struct Int<TStorage>
         where TStorage : unmanaged {
 
-        internal readonly TStorage _bits;
-        // ---- conversions ----
-
-        public static implicit operator BigInteger(IntN<TStorage> value)
-            => MultiArithmetic.ToBigInteger(value);
-
-        public static explicit operator IntN<TStorage>(BigInteger value)
-            => MultiArithmetic.ToSignedUnchecked<TStorage>(value);
-
-        public static explicit operator checked IntN<TStorage>(BigInteger value)
-            => MultiArithmetic.ToSignedChecked<TStorage>(value);
-
-        public static explicit operator UIntN<TStorage>(IntN<TStorage> value)
-            => MultiArithmetic.ToUnsignedUnchecked<TStorage>(value);
-
-        public static explicit operator checked UIntN<TStorage>(IntN<TStorage> value)
-            => MultiArithmetic.ToUnsignedChecked<TStorage>(value);
-
-        // ---- arithmetic ----
-
-        public static IntN<TStorage> operator +(IntN<TStorage> first, IntN<TStorage> second)
-            => MultiArithmetic.AddUnchecked(first, second);
-
-        public static IntN<TStorage> operator checked +(IntN<TStorage> first, IntN<TStorage> second)
-            => MultiArithmetic.AddChecked(first, second);
+        internal readonly TStorage _storage;
     }
 
-    public readonly struct UIntN<TStorage>
+    [Experimental("UoWIP")]
+    public readonly partial struct UInt<TStorage>
         where TStorage : unmanaged {
 
-        internal readonly TStorage _bits;
+        internal readonly TStorage _storage;
+    }
+
+   
+    public readonly partial struct Int<TStorage>
+        where TStorage : unmanaged {
+        // ---- conversions ----
+
+        public static implicit operator BigInteger(Int<TStorage> value)
+            => MultiArithmetic.ToBigInteger(value);
+
+        public static explicit operator Int<TStorage>(BigInteger value)
+            => MultiArithmetic.ToSignedUnchecked<TStorage>(value);
+
+        public static explicit operator checked Int<TStorage>(BigInteger value)
+            => MultiArithmetic.ToSignedChecked<TStorage>(value);
+
+        public static explicit operator UInt<TStorage>(Int<TStorage> value)
+            => MultiArithmetic.ToUnsignedUnchecked<TStorage>(value);
+
+        public static explicit operator checked UInt<TStorage>(Int<TStorage> value)
+            => MultiArithmetic.ToUnsignedChecked<TStorage>(value);
+
+        // ---- arithmetic ----
+
+        public static Int<TStorage> operator +(Int<TStorage> first, Int<TStorage> second)
+            => MultiArithmetic.AddUnchecked(first, second);
+
+        public static Int<TStorage> operator checked +(Int<TStorage> first, Int<TStorage> second)
+            => MultiArithmetic.AddChecked(first, second);
+    }
+    public readonly partial struct UInt<TStorage>
+        where TStorage : unmanaged {
 
         // ---- conversions ----
 
-        public static implicit operator BigInteger(UIntN<TStorage> value)
+        public static implicit operator BigInteger(UInt<TStorage> value)
             => MultiArithmetic.ToBigInteger(value);
 
-        public static explicit operator UIntN<TStorage>(BigInteger value)
+        public static explicit operator UInt<TStorage>(BigInteger value)
             => MultiArithmetic.ToUnsignedUnchecked<TStorage>(value);
 
-        public static explicit operator checked UIntN<TStorage>(BigInteger value)
+        public static explicit operator checked UInt<TStorage>(BigInteger value)
             => MultiArithmetic.ToUnsignedChecked<TStorage>(value);
 
-        public static explicit operator IntN<TStorage>(UIntN<TStorage> value)
+        public static explicit operator Int<TStorage>(UInt<TStorage> value)
             => MultiArithmetic.ToSignedUnchecked<TStorage>(value);
 
-        public static explicit operator checked IntN<TStorage>(UIntN<TStorage> value)
+        public static explicit operator checked Int<TStorage>(UInt<TStorage> value)
             => MultiArithmetic.ToSignedChecked<TStorage>(value);
 
         // ---- arithmetic ----
 
-        public static UIntN<TStorage> operator +(UIntN<TStorage> first, UIntN<TStorage> second)
+        public static UInt<TStorage> operator +(UInt<TStorage> first, UInt<TStorage> second)
             => MultiArithmetic.AddUnchecked(first, second);
 
-        public static UIntN<TStorage> operator checked +(UIntN<TStorage> first, UIntN<TStorage> second)
+        public static UInt<TStorage> operator checked +(UInt<TStorage> first, UInt<TStorage> second)
             => MultiArithmetic.AddChecked(first, second);
     }
 }

@@ -4,7 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using UltimateOrb.Numerics.DataTypes;
+using UltimateOrb.Runtime.CompilerServices.Generic;
 
 namespace UltimateOrb.Runtime.CompilerServices.Generic {
 
@@ -38,31 +38,37 @@ namespace UltimateOrb.Runtime.CompilerServices.Generic {
 }
 
 namespace UltimateOrb.Numerics {
+    // BitWidth in [1, 2^23 − 1]
+    [Experimental("UoWIP")]
+    public readonly partial struct Int<TStorage, BitWidthT>
+        where TStorage : unmanaged
+        where BitWidthT : struct, IConstant<BitWidthT, int> {
+
+        readonly TStorage _storage;
+    }
+
+    // BitWidth in [1, 2^23 − 1]
+    [Experimental("UoWIP")]
+    public readonly partial struct UInt<TStorage, BitWidthT>
+        where TStorage : unmanaged
+        where BitWidthT : struct, IConstant<BitWidthT, int> {
+
+        readonly TStorage _storage;
+    }
+}
+
+namespace UltimateOrb.Numerics {
 
     // BitWidth % (8 * sizeof(nuint)) == 0
     [Experimental("UoWIP")]
-    internal readonly partial struct IntB<TBits> where TBits : unmanaged {
+    internal readonly partial struct IntN<TBits> where TBits : unmanaged {
 
         readonly TBits bits;
     }
 
     // BitWidth % (8 * sizeof(nuint)) == 0
     [Experimental("UoWIP")]
-    internal readonly partial struct UIntB<TBits> where TBits : unmanaged {
-
-        readonly TBits bits;
-    }
-
-    // BitWidth % 8 == 0
-    [Experimental("UoWIP")]
-    public readonly partial struct Int<TBits> where TBits : unmanaged {
-
-        readonly TBits bits;
-    }
-
-    // BitWidth % 8 == 0
-    [Experimental("UoWIP")]
-    public readonly partial struct UInt<TBits> where TBits : unmanaged {
+    internal readonly partial struct UIntN<TBits> where TBits : unmanaged {
 
         readonly TBits bits;
     }
