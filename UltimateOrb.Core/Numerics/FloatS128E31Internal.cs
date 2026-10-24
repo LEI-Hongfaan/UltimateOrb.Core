@@ -21,7 +21,7 @@ namespace UltimateOrb.Numerics {
     // * undefined if output is inf or nan, but it is ok to use Min/MaxValue or Zero (same sign) to replace inf or nan
     // * default context is checked, use check/unchecked block/expr correctly
     internal readonly struct FloatS128E31Internal
-    : IComparable, IComparable<FloatS128E31Internal>, IFloatingPoint<FloatS128E31Internal> {
+        : IComparable, IComparable<FloatS128E31Internal>, IFloatingPoint<FloatS128E31Internal> {
 
         public readonly UInt128 _significand;
         public readonly Int32 _exp;

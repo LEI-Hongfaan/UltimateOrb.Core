@@ -20,9 +20,14 @@ namespace UltimateOrb.Numerics {
                     System.MidpointRounding.ToZero => true,
                     System.MidpointRounding.ToNegativeInfinity => true,
                     System.MidpointRounding.ToPositiveInfinity => true,
-                    _ => throw new NotSupportedException($"The specified {nameof(System.MidpointRounding)} value '{@this}' is not supported."),
+                    _ => throw ThrowNotSupported(@this),
                 };
             }
+        }
+
+        [DoesNotReturn]
+        internal static NotSupportedException ThrowNotSupported(MidpointRounding @this) {
+            throw new NotSupportedException($"The specified {nameof(System.MidpointRounding)} value '{@this}' is not supported.");
         }
 
         internal static bool TryFusedMultiplyAddSpecial<T>(
