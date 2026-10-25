@@ -63,6 +63,21 @@ namespace UltimateOrb.Numerics {
             return g > int.MaxValue ? ILogSpecialResults.ILogNaN : unchecked((int)g);
         }
 
+        public static int ILog2(this BigInteger value) {
+            var s = value.Sign;
+            if (s == 0) return ILogSpecialResults.ILog0;
+            if (s < 0) return ILogSpecialResults.ILogNaN;
+
+            // GetBitLength() is exact: floor(log2(value)) == GetBitLength() - 1.
+            // No Log2(double) approximation + correction step is needed (unlike ILog10).
+            long g = value.GetBitLength() - 1;
+            Debug.Assert(g >= 0);
+            if (g > int.MaxValue) {
+                return ILogSpecialResults.ILogNaN;
+            }
+            return unchecked((int)g);
+        }
+
         internal static int ILog10(BigInteger num, BigInteger den) {
             Debug.Assert(den > 0);
             Debug.Assert(num > 0);
@@ -83,6 +98,35 @@ namespace UltimateOrb.Numerics {
                 // If q is exactly 10^d then log10(t) == d and floor(log10(value)) == -d
                 // otherwise log10(t) in (d, d+1) so floor(log10(value)) == -(d+1)
                 return r.IsZero && BigIntegerSmallExp10Module.Exp10(d) == q ? unchecked(-d) : unchecked(-(d + 1));
+            }
+        }
+
+        // floor(log2(num/den)), requires num > 0, den > 0
+        internal static int ILog2(BigInteger num, BigInteger den) {
+            Debug.Assert(den > 0);
+            Debug.Assert(num > 0);
+            if (num >= den) {
+                // floor(log2(num/den)) == floor(log2(floor(num/den)))
+                // because 2^k is an integer and floor doesn't move num/den across any 2^k boundary.
+                return ILog2(num / den);
+            } else {
+                var (q, r) = BigInteger.DivRem(den, num);
+                // q = floor(den/num), r = den % num
+                // q >= 1 because num < den
+                var d = ILog2(q); // floor(log2(q))
+                if (d == ILogSpecialResults.ILogNaN) {
+                    // overflow
+                    return d;
+                }
+                Debug.Assert(d >= 0);
+                // floor(log2(num/den)) = -ceil(log2(den/num))
+                // r != 0 -> den/num is strictly greater than q (non-integer), so ceil(log2(den/num)) == d+1
+                // r == 0 -> den is divisible by num, t == q is an integer
+                // If q is exactly 2^d then log2(t) == d and floor(log2(value)) == -d
+                // otherwise log2(t) in (d, d+1) so floor(log2(value)) == -(d+1)
+                return r.IsZero && (BigInteger.One << d) == q
+                    ? unchecked(-d)
+                    : unchecked(-(d + 1));
             }
         }
     }

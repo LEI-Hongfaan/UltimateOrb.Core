@@ -1461,6 +1461,21 @@ namespace UltimateOrb.Numerics {
                 return BigIntegerMath.ILog10(num, den);
             }
 
+            public static int ILog2(BigRational value) {
+                var s = value.Sign;
+                if (s < 0) {
+                    return ILogSpecialResults.ILogNaN;
+                }
+                if (s == 0) {
+                    return ILogSpecialResults.ILog0;
+                }
+                var den = value.m_Denominator;
+                var num = value.m_SignedNumerator;
+                Debug.Assert(den > 0);
+                Debug.Assert(num > 0);
+                return BigIntegerMath.ILog2(num, den);
+            }
+
             public static BigRational Floor(BigRational value) {
                 var quotient = BigInteger.DivRem(value.SignedNumerator, value.Denominator, out var remainder);
                 if (BigInteger.IsNegative(remainder)) {

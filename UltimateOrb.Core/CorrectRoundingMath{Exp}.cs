@@ -24,11 +24,11 @@ namespace UltimateOrb {
     public static partial class CorrectRoundingMath {
 
         public static double ExpM1(double x) {
-            return CorrectRoundingMath1.ExpM1(x);
+            return CorrectRoundingMathInternal.ExpM1(x);
         }
 
         public static double ExpM1(double x, MidpointRounding mode) {
-            return CorrectRoundingMath1.ExpM1(x, mode);
+            return CorrectRoundingMathInternal.ExpM1(x, mode);
         }
         /*
         public static double ExpM1(double x) {
@@ -44,8 +44,7 @@ namespace UltimateOrb {
     }
 
 
-    static partial class CorrectRoundingMath1 {
-
+    static partial class CorrectRoundingMathInternal {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static double RoundPartial(double x) {

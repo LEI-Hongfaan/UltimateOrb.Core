@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -20,13 +21,14 @@ namespace UltimateOrb.Numerics {
                     System.MidpointRounding.ToZero => true,
                     System.MidpointRounding.ToNegativeInfinity => true,
                     System.MidpointRounding.ToPositiveInfinity => true,
-                    _ => throw ThrowNotSupported(@this),
+                    _ => ThrowNotSupported<bool>(@this),
                 };
             }
         }
 
         [DoesNotReturn]
-        internal static NotSupportedException ThrowNotSupported(MidpointRounding @this) {
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        internal static TResult ThrowNotSupported<TResult>(MidpointRounding @this) {
             throw new NotSupportedException($"The specified {nameof(System.MidpointRounding)} value '{@this}' is not supported.");
         }
 

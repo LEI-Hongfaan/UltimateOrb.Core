@@ -64,7 +64,7 @@ public static partial class CorrectRoundingMath {
             MidpointRounding.ToNegativeInfinity or
             MidpointRounding.ToPositiveInfinity or
             MidpointRounding.AwayFromZero => AddSoftware(x, y, mode),
-            _ => throw FloatingPointIeee754SpecialInternal.ThrowNotSupported(mode),
+            _ => FloatingPointIeee754SpecialInternal.ThrowNotSupported<double>(mode),
         };
 
 #if NET9_0_OR_GREATER
@@ -144,7 +144,7 @@ public static partial class CorrectRoundingMath {
             MidpointRounding.ToNegativeInfinity => Multiply_Directed(x, y, MidpointRounding.ToNegativeInfinity),
             MidpointRounding.ToPositiveInfinity => Multiply_Directed(x, y, MidpointRounding.ToPositiveInfinity),
             MidpointRounding.AwayFromZero => Multiply_AwayFromZero(x, y),
-            _ => throw FloatingPointIeee754SpecialInternal.ThrowNotSupported(mode),
+            _ => FloatingPointIeee754SpecialInternal.ThrowNotSupported<double>(mode),
         };
 
 #if NET9_0_OR_GREATER
@@ -380,7 +380,7 @@ public static partial class CorrectRoundingMath {
             MidpointRounding.ToPositiveInfinity => FusedMultiplyAdd_Directed(first, second, addend, MidpointRounding.ToPositiveInfinity),
             MidpointRounding.AwayFromZero => FusedMultiplyAdd_AwayFromZero(first, second, addend),
 
-            _ => throw FloatingPointIeee754SpecialInternal.ThrowNotSupported(mode),
+            _ => FloatingPointIeee754SpecialInternal.ThrowNotSupported<double>(mode),
         };
 
 #if NET9_0_OR_GREATER
@@ -403,59 +403,80 @@ public static partial class CorrectRoundingMath {
                mode).ToScalar();
 #endif
 
-    internal static double FusedMultiplyAdd_Directed(double first, double second, double addend,
+    internal static double FusedMultiplyAdd_Directed(
+        double first, double second, double addend,
         [ConstantExpected(Min = MidpointRounding.ToZero, Max = MidpointRounding.ToPositiveInfinity)] MidpointRounding mode) {
         unchecked {
-            if (!double.IsFinite(first) || !double.IsFinite(second) || !double.IsFinite(addend))
-                return double.FusedMultiplyAdd(first, second, addend);
-
             double w = double.FusedMultiplyAdd(first, second, addend);
+            if (!double.IsFinite(first) || !double.IsFinite(second) || !double.IsFinite(addend))
+                return w;
 
-            if (double.IsPositiveInfinity(w))
+            // §7.4 overflow: directed modes step inward from ±∞
+            if (double.IsInfinity(w)) {
+                bool neg = double.IsNegativeInfinity(w);
                 return mode switch {
-                    MidpointRounding.ToZero => double.MaxValue,
-                    MidpointRounding.ToNegativeInfinity => double.MaxValue,
+                    MidpointRounding.ToZero => neg ? -double.MaxValue : double.MaxValue,
+                    MidpointRounding.ToNegativeInfinity => neg ? double.NegativeInfinity : double.MaxValue,
+                    MidpointRounding.ToPositiveInfinity => neg ? -double.MaxValue : double.PositiveInfinity,
                     _ => w,
                 };
-            if (double.IsNegativeInfinity(w))
-                return mode switch {
-                    MidpointRounding.ToZero => -double.MaxValue,
-                    MidpointRounding.ToPositiveInfinity => -double.MaxValue,
-                    _ => w,
-                };
+            }
             if (!double.IsFinite(w)) return w;
-            if (first == 0.0 || second == 0.0) return w;
 
-            double p = first * second;
-            int sign = ResidualSign(first, second, addend, w, p);
-            if (sign == 0) return w;
+            // Sign of E − w, where E = first·second + addend (exact), w = RNE(E).
+            int sign;
+            if (first == 0.0 || second == 0.0) {
+                // E = addend exactly (product is ±0).  If addend ≠ 0 the answer
+                // is exact; otherwise both operands are zero → §6.3 case below.
+                if (addend != 0.0) return w;
+                sign = 0;
+            } else {
+                double p = first * second;
+                // Don't `if (!IsFinite(p)) return w;` — ResidualSign now handles
+                // product overflow by rescaling.
+                sign = ResidualSign(first, second, addend, w, p);
+            }
 
-            UInt64 wBits = BitConverter.DoubleToUInt64Bits(w);
-            bool wNeg = (wBits >> 63) != 0;
+            if (sign == 0) {
+                // E == w exactly.  If also E == 0, §6.3 fixes the zero's sign:
+                // opposite-sign operands → −0 only under ToNegativeInfinity,
+                // +0 under all other rounding-direction attributes.
+                if (w == 0.0) {
+                    ulong fb = BitConverter.DoubleToUInt64Bits(first);
+                    ulong sb = BitConverter.DoubleToUInt64Bits(second);
+                    ulong cb = BitConverter.DoubleToUInt64Bits(addend);
+                    bool prodNeg = ((fb ^ sb) & 0x8000_0000_0000_0000UL) != 0;
+                    bool cNeg = (cb & 0x8000_0000_0000_0000UL) != 0;
+                    if (prodNeg != cNeg)
+                        return mode == MidpointRounding.ToNegativeInfinity ? -0.0 : +0.0;
+                }
+                return w;
+            }
+
+            // E ≠ w: single ULP directed step.  Handles the "E tiny nonzero,
+            // RNE rounded to ±0" case via the wZero branches.
+            ulong wBits = BitConverter.DoubleToUInt64Bits(w);
+            bool wNeg = (wBits & 0x8000_0000_0000_0000UL) != 0;
             bool wZero = (wBits & 0x7FFF_FFFF_FFFF_FFFFUL) == 0;
 
             bool stepUp, stepDown;
             switch (mode) {
             case MidpointRounding.ToPositiveInfinity:
-                stepUp = sign > 0;
-                stepDown = false;
-                break;
+                stepUp = sign > 0; stepDown = false; break;
             case MidpointRounding.ToNegativeInfinity:
-                stepUp = false;
-                stepDown = sign < 0;
-                break;
-            default:
+                stepUp = false; stepDown = sign < 0; break;
+            default: // ToZero
                 stepUp = wNeg && !wZero && sign > 0;
                 stepDown = !wNeg && !wZero && sign < 0;
                 break;
             }
 
             if (stepUp) {
-                if (wZero) return double.Epsilon;
+                if (wZero) return double.Epsilon;                                  // ±0 → +min_subnormal
                 return BitConverter.UInt64BitsToDouble(wNeg ? wBits - 1 : wBits + 1);
             }
             if (stepDown) {
-                if (wZero) return -double.Epsilon;
+                if (wZero) return -double.Epsilon;                                 // ±0 → -min_subnormal
                 return BitConverter.UInt64BitsToDouble(wNeg ? wBits + 1 : wBits - 1);
             }
             return w;
@@ -463,36 +484,28 @@ public static partial class CorrectRoundingMath {
     }
 
     private static int ResidualSign(double a, double b, double c, double w, double p) {
-        // a*b overflowed, but w is finite. Scale everything by 2^-k so that
-        // a2*b2 fits, and recurse. sign(E - w) is unchanged by the scaling.
+        // a*b overflowed but w is finite: rescale everything by 2^-k so that
+        // a2*b2 ≈ 2^1000 fits, then run the standard residual machinery.
+        // sign(E − w) is unchanged by the uniform positive scaling.
         if (!double.IsFinite(p)) {
             int la = Math.ILogB(a);
             int lb = Math.ILogB(b);
-            int k = la + lb - 1022;
+            int k = la + lb - 1000;
             if (k <= 0) return 0;
-
-            int ka = k / 2;
+            int ka = k >> 1;
             int kb = k - ka;
-
-            double a2 = Math.ScaleB(a, -ka);
-            double b2 = Math.ScaleB(b, -kb);
-            double c2 = Math.ScaleB(c, -k);
-            double w2 = Math.ScaleB(w, -k);
-
-            if (!double.IsFinite(a2) || !double.IsFinite(b2) ||
-                a2 == 0.0 || b2 == 0.0 ||
-                !double.IsFinite(c2) || w2 == 0.0)
-                return 0;
-
-            double p2 = a2 * b2;
-            if (!double.IsFinite(p2)) return 0;
-
-            return ResidualSign(a2, b2, c2, w2, p2);
+            a = Math.ScaleB(a, -ka);
+            b = Math.ScaleB(b, -kb);
+            c = Math.ScaleB(c, -k);
+            w = Math.ScaleB(w, -k);
+            if (a == 0.0 || !double.IsFinite(a) ||
+                b == 0.0 || !double.IsFinite(b) ||
+                !double.IsFinite(c) || !double.IsFinite(w)) return 0;
+            p = a * b;
+            if (p == 0.0 || !double.IsFinite(p)) return 0;
         }
 
-        // a*b underflowed to zero (a, b nonzero ⇒ exact a*b ≠ 0, |a*b| ≤ 2^-1075).
-        // Then |a*b| ≤ ulp(c)/2, w − c is exact (Sterbenz), and the sign is either
-        // sign(a)*sign(b) (when w == c) or sign(c − w).
+        // a*b underflowed to zero (a,b nonzero ⇒ |a*b| ≤ 2^-1075).
         if (p == 0.0) {
             double d0 = w - c;
             if (d0 == 0.0) return ((a > 0) == (b > 0)) ? 1 : -1;
@@ -502,7 +515,6 @@ public static partial class CorrectRoundingMath {
         int Na = -Math.ILogB(a);
         int Nb = -Math.ILogB(b);
         int N = Na + Nb;
-
         double as_ = Math.ScaleB(a, Na);
         double bs_ = Math.ScaleB(b, Nb);
         if (as_ == 0.0 || !double.IsFinite(as_) ||
@@ -518,13 +530,13 @@ public static partial class CorrectRoundingMath {
 
         bool csUnderflow = (c != 0.0) && (cs == 0.0);
 
-        double rps = double.FusedMultiplyAdd(as_, bs_, -ps);
+        double rps = double.FusedMultiplyAdd(as_, bs_, -ps);    // exact a2·b2 − p2
         double ss = ps + cs;
         double bps = ss - ps;
-        double es = (ps - (ss - bps)) + (cs - bps);
+        double es = (ps - (ss - bps)) + (cs - bps);            // TwoSum, exact
         double ts = ss - ws;
         double bts = ts - ss;
-        double tes = (ss - (ts - bts)) + (-ws - bts);
+        double tes = (ss - (ts - bts)) + (-ws - bts);           // TwoSum, exact
 
         Exp4 ex = default;
         ex.Add(rps);
@@ -533,10 +545,8 @@ public static partial class CorrectRoundingMath {
         ex.Add(tes);
 
         int sgn = ex.Sign();
-
         if (sgn == 0 && csUnderflow && rps == 0.0 && ts == 0.0 && tes == 0.0)
             sgn = Math.Sign(c);
-
         return sgn;
     }
 
