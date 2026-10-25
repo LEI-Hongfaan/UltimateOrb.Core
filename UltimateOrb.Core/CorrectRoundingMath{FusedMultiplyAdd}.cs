@@ -171,12 +171,12 @@ public static partial class CorrectRoundingMath {
     // Returns  x / 2^ILogB(x)  ∈  (-2, -1] ∪ [1, 2),  for finite x ≠ 0.
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static double FastResetExponent(double x) {
-        ulong bits = BitConverter.DoubleToUInt64Bits(x);
-        ulong sign = bits & 0x8000000000000000UL;
+        UInt64 bits = BitConverter.DoubleToUInt64Bits(x);
+        UInt64 sign = bits & 0x8000000000000000UL;
         int expField = (int)((bits >> 52) & 0x7FF);
         if (expField != 0)                       // normal: just stamp bias 1023
             return BitConverter.UInt64BitsToDouble(sign | (1023UL << 52) | (bits & 0xFFFFFFFFFFFFFUL));
-        ulong frac = bits & 0xFFFFFFFFFFFFFUL;   // subnormal: normalize in place
+        UInt64 frac = bits & 0xFFFFFFFFFFFFFUL;   // subnormal: normalize in place
         int p = 63 - BitOperations.LeadingZeroCount(frac);   // MSB of frac
         return BitConverter.UInt64BitsToDouble(sign | (1023UL << 52) | ((frac << (52 - p)) & 0xFFFFFFFFFFFFFUL));
     }
@@ -196,7 +196,7 @@ public static partial class CorrectRoundingMath {
             if (double.IsInfinity(t)) return HandleOverflow(t < 0, MidpointRounding.AwayFromZero);
             bool positive = !SignsDiffer(x, y);
 
-            ulong tBits = BitConverter.DoubleToUInt64Bits(t);
+            UInt64 tBits = BitConverter.DoubleToUInt64Bits(t);
 
             // ═════════════════════════════════════════════════════════════════
             //  Case A: t normal.
@@ -251,7 +251,7 @@ public static partial class CorrectRoundingMath {
     //  sign(residual) instead of an exact-tie test — no verification FMA.
     // ─────────────────────────────────────────────────────────────────────────
 
-    internal static double Multiply_Directed(double x, double y, [ConstantExpected(Min = MidpointRounding.ToZero, Max = MidpointRounding.ToPositiveInfinity)] MidpointRounding mode) {
+    private static double Multiply_Directed(double x, double y, MidpointRounding mode) {
         unchecked {
             if (!double.IsFinite(x) || !double.IsFinite(y)) return x * y;
             if (x == 0.0 || y == 0.0) return SignsDiffer(x, y) ? -0.0 : +0.0;
@@ -260,9 +260,9 @@ public static partial class CorrectRoundingMath {
             if (double.IsInfinity(t)) return HandleOverflow(t < 0, mode);
             bool positive = !SignsDiffer(x, y);
 
-            ulong tBits = BitConverter.DoubleToUInt64Bits(t);
+            UInt64 tBits = BitConverter.DoubleToUInt64Bits(t);
             int expField = (int)((tBits >> 52) & 0x7FF);
-            ulong mantField = tBits & 0xFFFFFFFFFFFFFUL;
+            UInt64 mantField = tBits & 0xFFFFFFFFFFFFFUL;
 
             double rm;
 
@@ -297,8 +297,9 @@ public static partial class CorrectRoundingMath {
                     rm > 0.0 ? UpByOne(t) : t,
                 MidpointRounding.ToNegativeInfinity =>
                     rm < 0.0 ? DownByOne(t) : t,
-                // MidpointRounding.ToZero
-                _ => (positive ? rm < 0.0 : rm > 0.0) ? TowardZeroByOne(t) : t,
+                MidpointRounding.ToZero =>
+                    (positive ? rm < 0.0 : rm > 0.0) ? TowardZeroByOne(t) : t,
+                _ => throw new ArgumentOutOfRangeException(nameof(mode)),
             };
         }
     }
@@ -306,23 +307,27 @@ public static partial class CorrectRoundingMath {
     // One ulp toward +∞.  t finite, not NaN, not −0.
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static double UpByOne(double t) {
-        ulong bits = BitConverter.DoubleToUInt64Bits(t);
-        bits += (bits >> 63) != 0 ? unchecked((ulong)-1) : 1UL;
+        UInt64 bits = BitConverter.DoubleToUInt64Bits(t);
+        unchecked {
+            bits += (bits >> 63) != 0 ? unchecked((UInt64)(-1)) : 1UL;
+        }
         return BitConverter.UInt64BitsToDouble(bits);
     }
 
     // One ulp toward −∞.  t finite, not NaN, not +0.
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static double DownByOne(double t) {
-        ulong bits = BitConverter.DoubleToUInt64Bits(t);
-        bits += (bits >> 63) != 0 ? 1UL : unchecked((ulong)-1);
+        UInt64 bits = BitConverter.DoubleToUInt64Bits(t);
+        unchecked {
+            bits += (bits >> 63) != 0 ? 1UL : unchecked((UInt64)(-1));
+        }
         return BitConverter.UInt64BitsToDouble(bits);
     }
 
     // One ulp toward zero.  t finite, nonzero.
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static double TowardZeroByOne(double t)
-        => BitConverter.UInt64BitsToDouble(BitConverter.DoubleToUInt64Bits(t) - 1);
+        => t == 0.0 ? t : BitConverter.UInt64BitsToDouble(unchecked(BitConverter.DoubleToUInt64Bits(t) - 1));
 
     // =====================================================================
     //  Shared helpers
@@ -425,7 +430,7 @@ public static partial class CorrectRoundingMath {
             int sign = ResidualSign(first, second, addend, w, p);
             if (sign == 0) return w;
 
-            ulong wBits = BitConverter.DoubleToUInt64Bits(w);
+            UInt64 wBits = BitConverter.DoubleToUInt64Bits(w);
             bool wNeg = (wBits >> 63) != 0;
             bool wZero = (wBits & 0x7FFF_FFFF_FFFF_FFFFUL) == 0;
 
@@ -555,7 +560,7 @@ public static partial class CorrectRoundingMath {
             if (first == 0.0 || second == 0.0)
                 return w;
 
-            ulong wBits = BitConverter.DoubleToUInt64Bits(w);
+            UInt64 wBits = BitConverter.DoubleToUInt64Bits(w);
 
             // A midpoint rounded to even must have an even significand.
             if ((wBits & 1UL) != 0UL)
@@ -604,7 +609,7 @@ public static partial class CorrectRoundingMath {
                 return w;
 
             // For a possible tie, the scaled product is normal.
-            ulong pBits = BitConverter.DoubleToUInt64Bits(p);
+            UInt64 pBits = BitConverter.DoubleToUInt64Bits(p);
             if (((pBits >> 52) & 0x7FFUL) == 0UL)
                 return w;
 
@@ -638,9 +643,9 @@ public static partial class CorrectRoundingMath {
     }
 
     private static int GetExponent(double value) {
-        ulong bits = BitConverter.DoubleToUInt64Bits(value);
+        UInt64 bits = BitConverter.DoubleToUInt64Bits(value);
         int raw = (int)((bits >> 52) & 0x7FFUL);
-        ulong frac = bits & 0x000FFFFFFFFFFFFFUL;
+        UInt64 frac = bits & 0x000FFFFFFFFFFFFFUL;
 
         if (raw == 0) {
             int msb = 63 - BitOperations.LeadingZeroCount(frac);
