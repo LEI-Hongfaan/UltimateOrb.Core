@@ -1446,6 +1446,91 @@ namespace UltimateOrb.Numerics {
 
         public static partial class Math {
 
+            /// <summary>
+            /// Multiplies <paramref name="value"/> by 2^<paramref name="exp"/>.
+            /// </summary>
+            public static BigRational Scale2(BigRational value, long exp) {
+                // Zero stays zero; exp == 0 is identity.
+                if (exp == 0 || value.Denominator.IsZero) {
+                    return value;
+                }
+
+                var num = value.SignedNumerator;
+                var den = value.Denominator;
+                Debug.Assert(den.Sign > 0);
+                Debug.Assert(!num.IsZero);
+
+                if (exp > 0) {
+                    // value = num / den. Multiply numerator by 2^exp, but cancel
+                    // any factors of 2 already present in the denominator so the
+                    // result stays reduced.
+                    var tz = TrailingZeroCountOf(den);
+                    var shift = System.Math.Min(exp, tz);
+                    var newDen = ShiftRightUnsigned(den, shift);
+                    var newNum = ShiftLeft(num, exp - shift);
+                    return new BigRational(newDen, newNum);
+                } else {
+                    // exp < 0: value * 2^exp == num / (den * 2^(-exp)).
+                    // Cancel any factors of 2 in the numerator first.
+                    long negExp = -exp; // exp may be int.MinValue
+                    var tz = TrailingZeroCountOf(BigInteger.Abs(num));
+                    var shift = System.Math.Min(negExp, tz);
+                    var newNum = ShiftRightUnsigned(num, shift);                 // exact: shift <= tz(|num|)
+                    var newDen = ShiftLeft(den, negExp - shift);
+                    return new BigRational(newDen, newNum);
+                }
+            }
+
+            /// <summary>
+            /// Multiplies <paramref name="value"/> by 2^<paramref name="exp"/>.
+            /// </summary>
+            public static BigRational Scale2(BigRational value, int exp) {
+                return Scale2(value, (long)exp);
+            }
+
+            private static long TrailingZeroCountOf(BigInteger value) {
+                Debug.Assert(!value.IsZero);
+                if (value.Sign < 0) {
+                    value = -value;
+                }
+                // value & -value isolates the lowest set bit: 2^tz.
+                var low = value & -value;
+                return low.GetBitLength() - 1;
+            }
+
+            // bitsizeof(nuint): the BigInteger limb width on this platform (32 or 64).
+            private static readonly int LimbBits = IntPtr.Size * 8;
+
+            // Largest int-typed shift that is a multiple of LimbBits.
+            private static readonly int MaxAlignedShift = int.MaxValue - (int.MaxValue % LimbBits);
+
+            private static BigInteger ShiftRightUnsigned(BigInteger value, long count) {
+                Debug.Assert(value >= 0);
+                Debug.Assert(count >= 0);
+                // Chunk huge shifts through multiples of the limb size so each intermediate
+                // `>>>` only prepends whole zero limbs (O(1) array-length bump) instead of
+                // bit-shifting every limb. The final remainder is small and unaligned only
+                // when it's cheap enough that it doesn't matter.
+                while (count > MaxAlignedShift) {
+                    value >>>= MaxAlignedShift;
+                    count -= MaxAlignedShift;
+                }
+                return value >>> (int)count;
+            }
+
+            private static BigInteger ShiftLeft(BigInteger value, long count) {
+                Debug.Assert(count >= 0);
+                // Chunk huge shifts through multiples of the limb size so each intermediate
+                // `<<` only prepends whole zero limbs (O(1) array-length bump) instead of
+                // bit-shifting every limb. The final remainder is small and unaligned only
+                // when it's cheap enough that it doesn't matter.
+                while (count > MaxAlignedShift) {
+                    value <<= MaxAlignedShift;
+                    count -= MaxAlignedShift;
+                }
+                return value << (int)count;
+            }
+
             public static int ILog10(BigRational value) {
                 var s = value.Sign;
                 if (s < 0) {

@@ -57,10 +57,14 @@ namespace UltimateOrb {
                 bool underflow = rm < 0x10000000000000UL;
 
                 if (sb != 0) {
-                    if (mode == MidpointRounding.ToEven) {
+                    if (mode == MidpointRounding.ToEven || mode == MidpointRounding.AwayFromZero) {
+                        // Nearest rounding.  rb == 1 ⟺ true value ≥ rm+0.5 (past halfway);
+                        // add it to round up.  (For AwayFromZero a tie also rounds up —
+                        // consistent with +rb, so no extra branch is needed for positive
+                        // results.)
                         rm += (UInt64)rb;
                         if ((rm >> 52) != 0 && rb2 != 0) underflow = false;
-                    } else if (mode == MidpointRounding.ToPositiveInfinity || mode == MidpointRounding.AwayFromZero) {
+                    } else if (mode == MidpointRounding.ToPositiveInfinity) {
                         rm++;
                         if ((rm >> 52) != 0 && (tm & 1) != 0) underflow = false;
                     }
@@ -135,7 +139,15 @@ namespace UltimateOrb {
                         if (D != 0)
                             rm += (UInt64)(D >> 63);
                         else
-                            rm -= rm & (1UL << (1 - (rm <= (1UL << 53) ? 1 : 0)));
+                            rm -= rm & (1UL << (1 - (rm <= (1UL << 53) ? 1 : 0)));   // tie → even
+                    } else if (mode == MidpointRounding.AwayFromZero) {
+                        // Nearest, but ties go to the away-from-zero side — which for the
+                        // (non-negative) hypot result means keeping the ceiling `rm`.
+                        UInt64 tm = (rm << k) - (1UL << (k - (rm <= (1UL << 53) ? 1 : 0)));
+                        D = (Int64)(m2 - tm * tm);
+                        if (D != 0)
+                            rm += (UInt64)(D >> 63);                                 // >0: keep, <0: rm-1
+                                                                                     // D == 0 (tie) → keep rm
                     } else {
                         bool down = mode == MidpointRounding.ToNegativeInfinity
                                  || mode == MidpointRounding.ToZero;
@@ -215,14 +227,27 @@ namespace UltimateOrb {
                 }
 
                 // ── very disparate magnitudes → just u ──
+                // ── very disparate magnitudes → u, except under round-toward-+∞ ──
                 UInt64 de = xd - yd;
                 if (Misc.Unlikely(de > (27UL << 52))) {
-                    double r = double.FusedMultiplyAdd(7.4505805969238281E-09, v, u);
-                    if (Misc.Unlikely(BitConverter.DoubleToUInt64Bits(r) >= 0x7FF0000000000000UL))
-                        RaiseExceptionFlagsDummy(FloatingPointExceptionFlags.Overflow | FloatingPointExceptionFlags.Inexact);
-                    else
+                    // v is >2^27 orders of magnitude below u; the correction
+                    // δ = √(u²+v²) − u satisfies 0 < δ < 0.5·ULP(u), so the exact
+                    // result lies strictly inside (u, nextUp(u)) — never a tie.
+                    //   ToEven / AwayFromZero / ToZero / ToNegativeInfinity  →  u
+                    //   ToPositiveInfinity                                   →  nextUp(u)
+                    // nextUp(u) overflows to +∞ iff u == MaxValue.
+                    if (mode == MidpointRounding.ToPositiveInfinity) {
+                        UInt64 ru = xd + 1;                         // nextUp(u)
+                        if (Misc.Unlikely(ru >= 0x7FF0000000000000UL)) {
+                            RaiseExceptionFlagsDummy(FloatingPointExceptionFlags.Overflow
+                                                   | FloatingPointExceptionFlags.Inexact);
+                            return double.PositiveInfinity;
+                        }
                         RaiseExceptionFlagsDummy(FloatingPointExceptionFlags.Inexact);
-                    return r;
+                        return BitConverter.UInt64BitsToDouble(ru);
+                    }
+                    RaiseExceptionFlagsDummy(FloatingPointExceptionFlags.Inexact);
+                    return u;
                 }
 
                 // ── scale so that x ∈ [1, 2) ──
@@ -250,9 +275,27 @@ namespace UltimateOrb {
                 UInt64 midm = (aidr - 0x3C80000000000000UL + 16) >> 5;
 
                 if (Misc.Unlikely(mid == 0 || midm == 0
-                                  || aidr < 0x39B0000000000000UL
-                                  || aidr > 0X3c9fffffffffff80UL))
+                  || aidr < 0x39B0000000000000UL
+                  || aidr > 0X3c9fffffffffff80UL)) {
                     thd = BitConverter.DoubleToUInt64Bits(AsHypotHard(x, y, mode));
+                } else {
+                    // Fast path: thd is the correctly-rounded-to-nearest result.
+                    // For directed rounding modes, adjust by one ULP in the residual's
+                    // direction.  |tl| ≤ 0.5 ULP(thd) holds by DD normalization, and the
+                    // exact-tie case has already been diverted to AsHypotHard above, so
+                    // this is always the right correction.  (AwayFromZero == ToEven on the
+                    // fast path because no tie can occur here.)
+                    if (tl != 0
+                        && mode != MidpointRounding.ToEven
+                        && mode != MidpointRounding.AwayFromZero) {
+                        if (tl > 0) {
+                            if (mode == MidpointRounding.ToPositiveInfinity) thd++;
+                        } else {
+                            if (mode == MidpointRounding.ToZero
+                                || mode == MidpointRounding.ToNegativeInfinity) thd--;
+                        }
+                    }
+                }
 
                 thd -= (UInt64)off;
 
