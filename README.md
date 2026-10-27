@@ -129,7 +129,7 @@ Quadruple quiet     = Quadruple.Parse("NaN(Q42)", NumberStyles.Float);
 
 ### Documentation
 
-The detailed Quadruple README lives at [`doc/UltimateOrb.Quadruple/README.md`](doc/UltimateOrb.Quadruple/README.md) and covers the complete correct‑rounding status catalog, augmented‑arithmetic contract, parsing/formatting tables, ILGPU usage, and the four‑oracle testing methodology in detail.
+The detailed Quadruple README lives at [`docs/UltimateOrb.Quadruple/README.md`](docs/UltimateOrb.Quadruple/README.md) and covers the complete correct‑rounding status catalog, augmented‑arithmetic contract, parsing/formatting tables, ILGPU usage, and the four‑oracle testing methodology in detail.
 
 ## UltimateOrb.Int128
 
