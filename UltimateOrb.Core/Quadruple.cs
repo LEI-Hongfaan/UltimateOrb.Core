@@ -3330,12 +3330,14 @@ namespace UltimateOrb {
         }
 
         public static Quadruple Tan(Quadruple x) {
-            // TODO: Provide a correct impl.
-            if (Quadruple.IsNaN(x)) return x;
-            var (s, c) = Quadruple.SinCos(x);
-            return s / c;
+            return System.BitConverter.UInt128BitsToQuadruple(Binary128Arithmetic.Tan(
+                System.BitConverter.QuadrupleToUInt128Bits(x)));
         }
 
+        public static Quadruple Tan(Quadruple x, MidpointRounding mode) {
+            return System.BitConverter.UInt128BitsToQuadruple(Binary128Arithmetic.Tan(
+                System.BitConverter.QuadrupleToUInt128Bits(x), mode));
+        }
 
         public static Quadruple Tanh(Quadruple x) {
 

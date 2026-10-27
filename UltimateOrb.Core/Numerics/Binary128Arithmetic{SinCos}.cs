@@ -1592,5 +1592,326 @@ namespace UltimateOrb.Numerics {
              UInt128 bits, MidpointRounding mode) {
             return trig(bits, mode);
         }
+
+
+        // ---------------------------------------------------------------------------
+        // Tan – public entry points
+        // ---------------------------------------------------------------------------
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static UInt64 Tan(UInt64 lo, UInt64 hi, out UInt64 result_hi) {
+            unchecked {
+                UInt128 r = tan(((UInt128)hi << 64) | lo, MidpointRounding.ToEven);
+                result_hi = (UInt64)(r >> 64);
+                return (UInt64)r;
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static UInt64 Tan(UInt64 lo, UInt64 hi, MidpointRounding mode, out UInt64 result_hi) {
+            unchecked {
+                UInt128 r = tan(((UInt128)hi << 64) | lo, mode);
+                result_hi = (UInt64)(r >> 64);
+                return (UInt64)r;
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static UInt128 Tan(UInt128 bits) {
+            return tan(bits, MidpointRounding.ToEven);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static UInt128 Tan(UInt128 bits, MidpointRounding mode) {
+            return tan(bits, mode);
+        }
+
+        // ---------------------------------------------------------------------------
+        // Tan – driver
+        // ---------------------------------------------------------------------------
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static UInt128 tan(UInt128 x, MidpointRounding rm) {
+            unchecked {
+                UInt128 bits = x, ax = bits & ~SIGN_MASK;
+
+                // Inf / NaN
+                if (Misc.Unlikely(ax >= EXP_MASK)) {
+                    if (ax == EXP_MASK) {                     // ±Inf: domain error
+                        RaiseExceptionFlagsDummy(FloatingPointExceptionFlags.Invalid);
+                        return EXP_MASK | QUIET_BIT | (SIGN_MASK & bits);
+                    }
+                    if (0 == (ax & QUIET_BIT)) {              // signaling NaN
+                        RaiseExceptionFlagsDummy(FloatingPointExceptionFlags.Invalid);
+                    }
+                    return bits;
+                }
+
+                // |x| < 2^-57: tan(x) ≈ x, but tan(x) > x in magnitude.
+                if (Misc.Unlikely(ax < TINY)) {
+                    if (ax == 0) return bits;                 // tan(±0) = ±0
+
+                    UInt128 res = ax;
+                    // Away from zero, tan(x) exceeds x, so the next representable
+                    // value is needed.  Toward zero, x itself is already the
+                    // correctly rounded result because tan(x) > x.
+                    if (!IsNearest(rm) && 1 == round_away(rm, bits & SIGN_MASK)) {
+                        res = ax + 1;                         // nextAfter in magnitude
+                    }
+                    if (res < IMPLICIT_BIT) {                 // subnormal after rounding
+                        RaiseExceptionFlagsDummy(FloatingPointExceptionFlags.Underflow);
+                    }
+                    res |= bits & SIGN_MASK;
+                    RaiseExceptionFlagsDummy(FloatingPointExceptionFlags.Inexact);
+                    return res;
+                }
+
+                UInt128 m = (ax & MANTISSA_MASK) | IMPLICIT_BIT;
+                UInt128 sign = bits & SIGN_MASK;
+                int e = (int)(ax >> 112) - BIAS;
+
+                // The fast path would need a quotient of two 128‑bit frames plus a
+                // Ziv gate.  To keep the first version simple and certainly correct
+                // we always call the 384‑bit accurate path.
+                UInt128 result = tan_accurate(m, e, sign, rm);
+                RaiseExceptionFlagsDummy(FloatingPointExceptionFlags.Inexact);
+                return result;
+            }
+        }
+
+        // ---------------------------------------------------------------------------
+        // Tan – 384‑bit accurate path
+        // ---------------------------------------------------------------------------
+
+        static UInt128 tan_accurate(UInt128 m, int e, UInt128 sign, MidpointRounding rm) {
+            unchecked {
+                int n, et;
+                nint negative;
+                U384 t = default;
+
+                if (e < DIRECT) {
+                    n = 0;
+                    negative = 0;
+                    t[0] = 0;
+                    t[1] = 0;
+                    t[2] = m << 15;
+                    et = e + 1;
+                } else {
+                    reduce_wide(m, e, out n, out negative, out t, out et);
+                }
+
+                // u = θ² as a 384‑bit fraction
+                U384 u = ShiftRightUnsignedFull(
+                    MultiplyHighUnsignedApproximate(t, t),
+                    -2 * et);
+
+                // sin(θ) = θ·(1 - u·Q_sin), normalized
+                U384 s_norm = SubtractUnchecked(
+                    t,
+                    MultiplyHighUnsignedApproximate(
+                        t,
+                        MultiplyHighUnsignedApproximate(u, alternating(u, SIN_COEF))));
+                int lzs = LeadingZeroCount(s_norm);
+                s_norm = ShiftLeftCore(s_norm, lzs);
+                int es = et - lzs;
+
+                // c = 1 - cos(θ)  (cos(θ) = 1 - c·2⁻³⁸⁴)
+                U384 c = MultiplyHighUnsignedApproximate(u, alternating(u, COS_COEF));
+
+                int Q = n >> 7;                     // quadrant index (0..3)
+                UInt128 res;
+
+                if (IsZero(c)) {
+                    // cos(θ) = 1, tan(θ) = sin(θ)
+                    res = round_384(s_norm, es,
+                                    sign ^ (0 != negative ? SIGN_MASK : 0), rm);
+                } else {
+                    // cos(θ) = (2³⁸⁴ - c) / 2³⁸⁴
+                    // tan(θ) = s_norm / (2³⁸⁴ - c) * 2^(es)
+                    U384 divisor = AddUnchecked(
+                        SubtractUnchecked(AllOnes384, c),  // 2³⁸⁴ - 1 - c
+                        One384);                            // + 1 → 2³⁸⁴ - c
+
+                    U384 quotient = Divide(s_norm, divisor); // tan(θ) * 2⁻ᵉˢ
+
+                    int lzq = LeadingZeroCount(quotient);
+                    quotient = ShiftLeftCore(quotient, lzq);
+                    int eq = es - lzq;                       // exponent of the fraction
+
+                    if ((Q & 1) != 0) {
+                        // tan(π/2 + θ) = -cot(θ) = -1 / tan(θ)
+                        // Reciprocal of a normalized 384‑bit fraction.
+                        U384 recip = ReciprocalNormalized(quotient);
+                        // recip is in (1, 2], so it has an implicit leading 1.
+                        // tan = -recip * 2^(-384 - eq)
+                        // Normalize recip to a 384‑bit fraction with exponent -384 - eq.
+                        // The implicit leading 1 means we shift the stored limbs left
+                        // by one bit and subtract one from the exponent.
+                        recip = ShiftLeftCore(recip, 1);      // now in [2³⁸³, 2³⁸⁴)
+                        int eqr = -384 - eq - 1;              // implicit bit accounted for
+                        res = round_384(recip, eqr,
+                                        sign ^ SIGN_MASK,      // negation from cot
+                                        rm);
+                    } else {
+                        // tan = tan(θ) = quotient * 2ᵉᵍ
+                        res = round_384(quotient, eq,
+                                        sign ^ (0 != negative ? SIGN_MASK : 0), rm);
+                    }
+                }
+                return res;
+            }
+        }
+
+        // ---------------------------------------------------------------------------
+        // 384‑bit helpers (comparison, shift, long division)
+        // ---------------------------------------------------------------------------
+
+        static U384 AllOnes384 {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get {
+                U384 r = default;
+                r[0] = ~(UInt128)0;
+                r[1] = ~(UInt128)0;
+                r[2] = ~(UInt128)0;
+                return r;
+            }
+        }
+
+        static U384 One384 {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get {
+                U384 r = default;
+                r[0] = 1;
+                return r;
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static bool IsZero(U384 x) => x[0] == 0 && x[1] == 0 && x[2] == 0;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static int Compare(U384 a, U384 b) {
+            for (int i = 2; i >= 0; i--) {
+                int c = a[i].CompareTo(b[i]);
+                if (c != 0) return c;
+            }
+            return 0;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static U384 ShiftLeftOne(U384 x) {
+            U384 r = default;
+            r[0] = x[0] << 1;
+            r[1] = (x[1] << 1) | (x[0] >> 127);
+            r[2] = (x[2] << 1) | (x[1] >> 127);
+            return r;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static bool GetBit(U384 x, int index) {
+            int limb = index / 128;
+            int bit = index % 128;
+            return ((x[limb] >> bit) & 1) != 0;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static void SetBit(ref U384 x, int index) {
+            int limb = index / 128;
+            int bit = index % 128;
+            x[limb] |= (UInt128)1 << bit;
+        }
+
+        // ---------------------------------------------------------------------------
+        // 2^383 as a U384 (top bit of the integer frame).
+        // ---------------------------------------------------------------------------
+        static U384 PowerOfTwo383 {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get {
+                U384 r = default;
+                r[2] = (UInt128)1 << 127;
+                return r;
+            }
+        }
+
+        // ---------------------------------------------------------------------------
+        // double → floor(r · 2^exponent), assuming the result fits in U384.
+        // Only used for seeds where the result is < 2^384; the edge case r = 1 with
+        // exponent = 384 is clamped to AllBitsSet (should never happen for real θ).
+        // ---------------------------------------------------------------------------
+        static U384 DoubleToU384Scaled(double r, int exponent) {
+            unchecked {
+                long bits = BitConverter.DoubleToInt64Bits(r);
+                int biasedExp = (int)((bits >> 52) & 0x7FF);
+                long mantissa = bits & 0xFFFFFFFFFFFFFL;
+                int exp = biasedExp - 1023;
+                if (biasedExp != 0) mantissa |= 0x10000000000000L;
+                int shift = exp - 52 + exponent;
+                if (shift + 52 >= 384) {
+                    // Would overflow: clamp (only hit when r = 1 exactly).
+                    U384 m = default;
+                    m[0] = ~(UInt128)0;
+                    m[1] = ~(UInt128)0;
+                    m[2] = ~(UInt128)0;
+                    return m;
+                }
+                U384 x = default;
+                x[0] = (ulong)mantissa;
+                return shift >= 0
+                    ? ShiftLeftCore(x, shift)
+                    : ShiftRightUnsignedFull(x, -shift);
+            }
+        }
+
+        // ---------------------------------------------------------------------------
+        // ReciprocalNormalized(x) for x ∈ [2^383, 2^384).
+        //
+        // Returns R with R / 2^384 ≈ 2^384 / x − 1, i.e. R ≈ 2^768 / x − 2^384.
+        // Correct to a handful of ulps at 384‑bit precision (Newton–Raphson converges
+        // quadratically: 53 → 106 → 212 → 424 bits from the double seed).
+        //
+        // Iteration in fixed point, using Z = 2^383 / x ∈ (1/2, 1]:
+        //     Z_{k+1} = Z_k · (2 − x · Z_k / 2^767)
+        // With zs = Z·2^384 and Ts = MH(x, zs) ≈ x·Z_k·2^383,
+        //     zs_{k+1} = 2·zs_k − 2·MH(zs_k, Ts_k)
+        // computed as D = zs_k − MH(zs_k, Ts_k); zs_{k+1} = 2·D to keep every
+        // intermediate inside U384.
+        // ---------------------------------------------------------------------------
+        static U384 ReciprocalNormalized(U384 x) {
+            unchecked {
+                Debug.Assert((x[2] >> 127) != 0); // top bit set
+
+                // Seed: X = x / 2^383 ∈ [1, 2), Z = 1/X ∈ (1/2, 1].
+                double X_d = Math.ScaleB((double)x[2], -127); // ≈ X, ~53-bit accurate
+                double z_d = 1.0 / X_d;                       // ≈ Z
+                U384 zs = DoubleToU384Scaled(z_d, 384);       // ≈ Z · 2^384
+
+                // 3 quadratic Newton–Raphson iterations.
+                for (int i = 0; i < 3; i++) {
+                    U384 Ts = MultiplyHighUnsignedApproximate(x, zs);   // ≈ x·Z_k·2^383
+                    U384 D = SubtractUnchecked(zs, MultiplyHighUnsignedApproximate(zs, Ts));
+                    zs = AddUnchecked(D, D);                             // 2·D
+                }
+
+                // R = 2·Z − 1, R·2^384 = 2·zs − 2^384 = 2·(zs − 2^383)
+                U384 half = SubtractUnchecked(zs, PowerOfTwo383);
+                return AddUnchecked(half, half);
+            }
+        }
+
+        // ---------------------------------------------------------------------------
+        // Divide(a, b) = floor(a·2^384 / b) for a, b ∈ [2^383, 2^384) (b normalized),
+        // assuming the quotient fits in U384 (i.e. a ≤ b, which holds for tan since
+        // 0 < tan(θ) ≤ 1 after the π/4 reduction).
+        //
+        //     a·2^384 / b = a·(R/2^384 + 1) = a + a·R / 2^384
+        // so floor of it is a + MH(a, R).  Accuracy: a few ulps at 384-bit precision
+        // (the caller's round_384 discards 369 of them).
+        // ---------------------------------------------------------------------------
+        static U384 Divide(U384 a, U384 b) {
+            unchecked {
+                U384 R = ReciprocalNormalized(b);
+                return AddUnchecked(a, MultiplyHighUnsignedApproximate(a, R));
+            }
+        }
     }
 }
