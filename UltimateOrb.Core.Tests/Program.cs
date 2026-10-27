@@ -1034,6 +1034,44 @@ public readonly struct TotalOrderIeee754Comparer<T> :
 
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private static int Main(string[] args) {
+
+            {
+                {
+                    var b = Quadruple.Tan(Quadruple.Parse("11.3502968749526598202237437362782657"), MidpointRounding.AwayFromZero);
+                    Console.WriteLine($"? = {b:G36}");
+
+                    
+                }
+                {
+                    var b = Quadruple.Tan(Quadruple.Parse("0x1.d39d78e43357bp+18", NumberStyles.HexFloat | NumberStyles.AllowHexSpecifier), MidpointRounding.ToEven);
+                    Console.WriteLine($"? = {b:G36}");
+
+                }
+
+                
+                {
+                    var b = Quadruple.Tan(Quadruple.Parse("0x1.921fb54442d16p+2", NumberStyles.HexFloat | NumberStyles.AllowHexSpecifier), MidpointRounding.ToEven);
+                    Console.WriteLine($"? = {b:G36}");
+
+                }
+                
+                {
+                    var b = Quadruple.Tan(-1, MidpointRounding.AwayFromZero);
+                    Console.WriteLine($"? = {b:G36}");
+
+                }
+                {
+                    var b = Quadruple.Tan(Quadruple.Parse("0x1.921fb54442d16p+2", NumberStyles.HexFloat | NumberStyles.AllowHexSpecifier) , MidpointRounding.ToZero);
+                    Console.WriteLine($"? = {b:G36}");
+                    
+                }
+                {
+                    var b = Quadruple.Tan(1, MidpointRounding.ToZero);
+                    Console.WriteLine($"? = {b:G36}");
+
+                }
+                return 0;
+            }
             {
 
                 {
