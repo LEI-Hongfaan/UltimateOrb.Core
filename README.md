@@ -125,8 +125,6 @@ Quadruple signaling = Quadruple.Parse("NaN(S1)",  NumberStyles.Float);
 Quadruple quiet     = Quadruple.Parse("NaN(Q42)", NumberStyles.Float);
 ```
 
-> **Constructing a `Hypot` case where `ToEven` and `AwayFromZero` actually differ.** The exact result must land exactly on a midpoint between two adjacent `binary128` values. Since `Hypot(a, b)` is exactly `√(a² + b²)` and both `a` and `b` are dyadic rationals, the exact result is a midpoint only when `a² + b²` is the square of a dyadic odd multiple of half an ulp — a condition on Pythagorean-like triples that is genuinely rare. The library's test suite exercises such cases via `BigRational` + interval arithmetic rather than advertising a specific hand-picked input; the `(3, 4)` example above deliberately does **not** claim a difference, because `hypot(3, 4) = 5` exactly.
-
 ### Documentation
 
 The detailed Quadruple README lives at [`docs/UltimateOrb.Quadruple/README.md`](docs/UltimateOrb.Quadruple/README.md) and covers the complete correct‑rounding status catalog, augmented‑arithmetic contract, parsing/formatting tables, ILGPU usage, and the four‑oracle testing methodology in detail.
